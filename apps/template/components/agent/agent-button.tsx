@@ -6,7 +6,15 @@ import { AgentPanel } from "./client";
 
 export function AgentButton() {
   const [open, setOpen] = useState(false);
+  const [hasOpened, setHasOpened] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setHasOpened(true);
+    }
+    setOpen(nextOpen);
+  };
 
   return (
     <>
@@ -14,16 +22,16 @@ export function AgentButton() {
         ref={triggerRef}
         type="button"
         className="flex items-center gap-1.5 px-2 py-1"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => handleOpenChange(!open)}
         aria-expanded={open}
       >
         <BotMessageSquare className="size-4 text-primary" />
         <span className="text-xs font-medium text-primary">Agent</span>
       </button>
-      {open && (
+      {hasOpened && (
         <AgentPanel
           open={open}
-          onOpenChange={setOpen}
+          onOpenChange={handleOpenChange}
           triggerRef={triggerRef}
         />
       )}

@@ -20,8 +20,24 @@ const CART_TOOL_NAMES = new Set([
 export function CartReconciler({ messages }: { messages: UIMessage[] }) {
   const { setCart, openOverlay } = useCart();
   const processedToolCalls = useRef<Set<string>>(new Set());
+  const initialized = useRef(false);
 
   useEffect(() => {
+    if (!initialized.current) {
+      for (const message of messages) {
+        if (message.role !== "assistant") continue;
+
+        for (const part of message.parts) {
+          if ("toolCallId" in part && "state" in part) {
+            processedToolCalls.current.add(part.toolCallId as string);
+          }
+        }
+      }
+
+      initialized.current = true;
+      return;
+    }
+
     for (const message of messages) {
       if (message.role !== "assistant") continue;
 
