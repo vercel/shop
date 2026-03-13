@@ -1,0 +1,281 @@
+import Image from "next/image";
+import type * as React from "react";
+import { Price } from "@/components/product/price";
+import { DiscountBadge } from "@/components/ui/discount-badge";
+import { cn } from "@/lib/utils";
+
+// =============================================================================
+// ProductCard Root
+// =============================================================================
+
+interface ProductCardProps extends React.ComponentProps<"article"> {
+  variant?: "default" | "featured";
+}
+
+function ProductCard({
+  variant = "default",
+  className,
+  children,
+  ...props
+}: ProductCardProps) {
+  return (
+    <article
+      data-slot="product-card"
+      data-variant={variant}
+      className={cn("flex flex-col h-full group", className)}
+      {...props}
+    >
+      {children}
+    </article>
+  );
+}
+
+// =============================================================================
+// ProductCardBadge
+// =============================================================================
+
+function ProductCardBadge({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div data-slot="product-card-badge" className={cn(className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// ProductCardImageContainer
+// =============================================================================
+
+interface ProductCardImageContainerProps extends React.ComponentProps<"div"> {
+  variant?: "default" | "featured";
+}
+
+function ProductCardImageContainer({
+  variant = "default",
+  className,
+  children,
+  ...props
+}: ProductCardImageContainerProps) {
+  return (
+    <div
+      data-slot="product-card-image-container"
+      data-variant={variant}
+      className={cn(
+        "flex flex-col rounded-lg pt-1.5 px-1.5",
+        "data-[variant=featured]:-mt-px data-[variant=featured]:rounded-tl-none data-[variant=featured]:bg-linear-to-b/oklch data-[variant=featured]:from-primary data-[variant=featured]:from-0% data-[variant=featured]:to-45% data-[variant=featured]:to-primary/10",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// ProductCardImage
+// =============================================================================
+
+interface ProductCardImageProps {
+  src?: string | null;
+  alt: string;
+  sizes?: string;
+  outOfStock?: boolean;
+  outOfStockText?: string;
+  fallbackTitle?: string;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+function ProductCardImage({
+  src,
+  alt,
+  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
+  outOfStock = false,
+  outOfStockText,
+  fallbackTitle,
+  className,
+  children,
+}: ProductCardImageProps) {
+  return (
+    <div
+      data-slot="product-card-image"
+      className={cn(
+        "relative aspect-square rounded-[calc(var(--radius-lg)-0.2rem)] overflow-hidden bg-muted",
+        className,
+      )}
+    >
+      {src ? (
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover scale-105 group-hover:scale-110 transition-transform duration-300 group-data-[variant=featured]:rounded-[calc(var(--radius-lg)-0.2rem)] rounded-lg"
+          sizes={sizes}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-muted-foreground font-medium text-xl p-2 text-center">
+          {fallbackTitle}
+        </div>
+      )}
+      {outOfStock && (
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+          <span className="text-destructive-foreground font-medium text-xs px-2 py-1 bg-destructive rounded">
+            {outOfStockText}
+          </span>
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// ProductCardContent
+// =============================================================================
+
+function ProductCardContent({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="product-card-content"
+      className={cn("flex flex-col flex-1 p-3 gap-1.5", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+// =============================================================================
+// ProductCardTitle
+// =============================================================================
+
+function ProductCardTitle({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<"h3">) {
+  return (
+    <h3
+      data-slot="product-card-title"
+      className={cn(
+        "text-sm sm:text-base font-medium text-main-foreground group-hover:underline line-clamp-2 leading-tight min-h-[2lh]",
+        className,
+      )}
+      {...props}
+    >
+      {children}
+    </h3>
+  );
+}
+
+// =============================================================================
+// ProductCardPrice
+// =============================================================================
+
+interface ProductCardPriceProps {
+  amount: string;
+  currencyCode: string;
+  compareAtAmount?: string;
+  compareAtCurrencyCode?: string;
+  locale: string;
+  discountVariant?: "green" | "blue";
+  className?: string;
+}
+
+function getDiscountPercent(
+  price: number,
+  compareAtPrice: number | undefined,
+): number | null {
+  if (!compareAtPrice || compareAtPrice <= price) return null;
+  return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
+}
+
+function ProductCardPrice({
+  amount,
+  currencyCode,
+  compareAtAmount,
+  compareAtCurrencyCode,
+  locale,
+  discountVariant = "green",
+  className,
+}: ProductCardPriceProps) {
+  const priceNum = parseFloat(amount);
+  const compareAtNum = compareAtAmount
+    ? parseFloat(compareAtAmount)
+    : undefined;
+  const discountPercent = getDiscountPercent(priceNum, compareAtNum);
+
+  return (
+    <div
+      data-slot="product-card-price"
+      className={cn("mt-auto pt-2", className)}
+    >
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <Price
+          amount={amount}
+          currencyCode={currencyCode}
+          locale={locale}
+          className="text-base font-medium text-main-foreground"
+        />
+        {discountPercent && compareAtAmount && compareAtCurrencyCode && (
+          <>
+            <Price
+              amount={compareAtAmount}
+              currencyCode={compareAtCurrencyCode}
+              locale={locale}
+              className="text-sm font-medium text-muted-foreground line-through"
+            />
+            <DiscountBadge
+              percent={discountPercent}
+              variant={discountVariant}
+            />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// ProductCardSkeleton
+// =============================================================================
+
+function ProductCardSkeleton({ className }: { className?: string }) {
+  return (
+    <div
+      data-slot="product-card-skeleton"
+      className={cn(
+        "flex flex-col border rounded-lg overflow-hidden",
+        className,
+      )}
+    >
+      <div className="aspect-square bg-muted animate-pulse" />
+      <div className="p-3 space-y-2">
+        <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-full bg-muted rounded animate-pulse" />
+        <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
+      </div>
+    </div>
+  );
+}
+
+export {
+  ProductCard,
+  ProductCardBadge,
+  ProductCardImageContainer,
+  ProductCardImage,
+  ProductCardContent,
+  ProductCardTitle,
+  ProductCardPrice,
+  ProductCardSkeleton,
+};

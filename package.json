@@ -1,5 +1,16 @@
 {
+	"name": "monorepo",
+	"private": true,
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"start": "turbo run start",
+		"lint": "turbo run lint",
+		"test": "turbo run test",
+		"format": "turbo run format"
+	},
 	"devDependencies": {
 		"turbo": "^2.8.16"
-	}
+	},
+	"packageManager": "pnpm@10.32.1"
 }
