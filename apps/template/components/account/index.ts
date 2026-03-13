@@ -4,31 +4,6 @@ export {
   updateProfileAction,
 } from "./actions";
 export {
-  type CurrencyOption,
-  CurrencySelector,
-  CurrencySelectorComposed,
-  CurrencySelectorDropdown,
-  CurrencySelectorHeader,
-  CurrencySelectorHeading,
-  CurrencySelectorMenu,
-  CurrencySelectorOption,
-  CurrencySelectorSubtitle,
-  CurrencySelectorTitle,
-  defaultCurrencies,
-} from "./currency-selector";
-export {
-  type LanguageOption,
-  LanguageSelector,
-  LanguageSelectorComposed,
-  LanguageSelectorHeader,
-  LanguageSelectorHeading,
-  LanguageSelectorMore,
-  LanguageSelectorOption,
-  LanguageSelectorOptions,
-  LanguageSelectorSubtitle,
-  LanguageSelectorTitle,
-} from "./language-selector";
-export {
   AccountMobileTab,
   AccountMobileTabs,
   AccountMobileTabsComposed,

@@ -337,10 +337,6 @@ declare const messages: {
     "lastNamePlaceholder": "Doe",
     "cancel": "Cancel",
     "saveChanges": "Save changes",
-    "language": "Language",
-    "currency": "Currency",
-    "displayDisclaimer": "For display, final charges might differ",
-    "seeMore": "See {count} more",
     "orders": "Orders",
     "addresses": "Addresses"
   },

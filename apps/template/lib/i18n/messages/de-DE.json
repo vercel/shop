@@ -321,10 +321,6 @@
     "lastNamePlaceholder": "Mustermann",
     "cancel": "Abbrechen",
     "saveChanges": "Änderungen speichern",
-    "language": "Sprache",
-    "currency": "Währung",
-    "displayDisclaimer": "Zur Anzeige, endgültige Kosten können abweichen",
-    "seeMore": "Weitere {count} anzeigen",
     "orders": "Bestellungen",
     "addresses": "Adressen"
   },

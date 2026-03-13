@@ -321,10 +321,6 @@
     "lastNamePlaceholder": "García",
     "cancel": "Cancelar",
     "saveChanges": "Guardar cambios",
-    "language": "Idioma",
-    "currency": "Moneda",
-    "displayDisclaimer": "A título indicativo, los cargos finales pueden diferir",
-    "seeMore": "Ver {count} más",
     "orders": "Pedidos",
     "addresses": "Direcciones"
   },

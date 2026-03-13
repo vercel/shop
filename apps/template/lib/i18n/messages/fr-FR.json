@@ -321,10 +321,6 @@
     "lastNamePlaceholder": "Dupont",
     "cancel": "Annuler",
     "saveChanges": "Enregistrer les modifications",
-    "language": "Langue",
-    "currency": "Devise",
-    "displayDisclaimer": "À titre indicatif, les frais finaux peuvent différer",
-    "seeMore": "Voir {count} de plus",
     "orders": "Commandes",
     "addresses": "Adresses"
   },

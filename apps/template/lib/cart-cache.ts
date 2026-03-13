@@ -1,9 +1,14 @@
 import "server-only";
 
-import { updateTag } from "next/cache";
+import { revalidateTag, updateTag } from "next/cache";
 import { TAGS } from "@/lib/constants";
 
 export function invalidateCartCache(): void {
-  updateTag(TAGS.cart);
-  updateTag("cart-status");
+  try {
+    updateTag(TAGS.cart);
+    updateTag("cart-status");
+  } catch {
+    revalidateTag(TAGS.cart, { expire: 0 });
+    revalidateTag("cart-status", { expire: 0 });
+  }
 }

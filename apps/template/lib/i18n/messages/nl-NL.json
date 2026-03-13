@@ -321,10 +321,6 @@
     "lastNamePlaceholder": "Jansen",
     "cancel": "Annuleren",
     "saveChanges": "Wijzigingen opslaan",
-    "language": "Taal",
-    "currency": "Valuta",
-    "displayDisclaimer": "Ter indicatie, werkelijke kosten kunnen afwijken",
-    "seeMore": "Nog {count} meer bekijken",
     "orders": "Bestellingen",
     "addresses": "Adressen"
   },
