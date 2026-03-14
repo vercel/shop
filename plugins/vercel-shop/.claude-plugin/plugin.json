@@ -1,0 +1,5 @@
+{
+  "name": "vercel-shop",
+  "version": "0.1.0",
+  "description": "Shopify storefront plugin — enable Shopify Markets and verify with Playwright e2e tests"
+}
