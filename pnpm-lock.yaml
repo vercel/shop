@@ -240,9 +240,6 @@ importers:
       shadcn:
         specifier: 4.0.6
         version: 4.0.6(@types/node@25.5.0)(typescript@5.9.3)
-      shiki:
-        specifier: 3.22.0
-        version: 3.22.0
       streamdown:
         specifier: 2.3.0
         version: 2.3.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)

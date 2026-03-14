@@ -19,18 +19,18 @@ This file provides guidance for agents working in the Shopify storefront templat
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and Bun.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm.
 
 The default deployment story is single-locale with clean, unprefixed URLs (`/products/...`). The repo keeps locale catalogs and helpers in place so adding multi-locale routing later is straightforward, but that routing is not enabled by default.
 
 ## Development Commands
 
 ```bash
-bun dev
-bun build
-bun start
-bun lint
-bun format
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm format
 ```
 
 ## Directory Structure
@@ -87,7 +87,7 @@ Reference these local schema snapshots when writing or reviewing GraphQL:
 Refresh them with:
 
 ```bash
-bun run .claude/scripts/fetch-shopify-schemas.ts
+pnpm run .claude/scripts/fetch-shopify-schemas.ts
 ```
 
 ## Configuration
