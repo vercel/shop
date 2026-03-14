@@ -76,6 +76,69 @@ import { CartReconciler } from "./cart-reconciler";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 const AUTO_CLOSE_DELAY = 1000;
+const AGENT_CHAT_STORAGE_KEY = "template-agent-chat:v1";
+
+type PersistedAgentChat = {
+  version: 1;
+  chatId: string;
+  input: string;
+  messages: UIMessage[];
+};
+
+function createEmptyPersistedAgentChat(): PersistedAgentChat {
+  return {
+    version: 1,
+    chatId: nanoid(),
+    input: "",
+    messages: [],
+  };
+}
+
+function readPersistedAgentChat(): PersistedAgentChat {
+  const fallback = createEmptyPersistedAgentChat();
+
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(AGENT_CHAT_STORAGE_KEY);
+    if (!raw) {
+      return fallback;
+    }
+
+    const parsed = JSON.parse(raw) as Partial<PersistedAgentChat>;
+    if (parsed.version !== 1) {
+      return fallback;
+    }
+
+    return {
+      version: 1,
+      chatId:
+        typeof parsed.chatId === "string" && parsed.chatId.length > 0
+          ? parsed.chatId
+          : fallback.chatId,
+      input: typeof parsed.input === "string" ? parsed.input : "",
+      messages: Array.isArray(parsed.messages)
+        ? (parsed.messages as UIMessage[])
+        : [],
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function writePersistedAgentChat(chat: PersistedAgentChat): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(AGENT_CHAT_STORAGE_KEY, JSON.stringify(chat));
+  } catch {
+    // Ignore storage failures such as quota exceeded.
+  }
+}
 
 function getToolNameFromPart(part: UIMessage["parts"][number]): string | null {
   if (part.type === "dynamic-tool" && "toolName" in part) {
@@ -390,9 +453,9 @@ export interface AgentPanelProps {
 
 export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) {
   const t = useTranslations("agent");
-  const [input, setInput] = useState("");
+  const [persistedChat] = useState(readPersistedAgentChat);
+  const [input, setInput] = useState(persistedChat.input);
   const [isDragging, setIsDragging] = useState(false);
-  const [chatId] = useState<string>(() => nanoid());
   const panelRef = useRef<HTMLDivElement>(null);
   const dragCountRef = useRef(0);
 
@@ -407,13 +470,23 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   }, [pathname, onOpenChange]);
 
   const { messages, sendMessage, status, regenerate } = useChat({
-    id: chatId,
+    id: persistedChat.chatId,
     generateId: () => nanoid(),
+    messages: persistedChat.messages,
     transport: new DefaultChatTransport({
       api: "/api/chat",
-      body: { chatId },
+      body: { chatId: persistedChat.chatId },
     }),
   });
+
+  useEffect(() => {
+    writePersistedAgentChat({
+      version: 1,
+      chatId: persistedChat.chatId,
+      input,
+      messages,
+    });
+  }, [persistedChat.chatId, input, messages]);
 
   useEffect(() => {
     if (!open) return;
