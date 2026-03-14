@@ -201,13 +201,13 @@ export function MegamenuClient({ items, children }: Props) {
         <RemoveScroll>
           <div className="pointer-events-none fixed inset-x-0 top-0 h-dvh z-50 transition-opacity duration-200 visible opacity-100">
             <div
-              className="pointer-events-auto absolute inset-x-0 top-[var(--header-height)] bottom-0"
+              className="pointer-events-auto absolute inset-x-0 top-(--header-height) bottom-0"
               onClick={handleClose}
               aria-hidden="true"
             />
 
             <div
-              className="pointer-events-auto absolute inset-x-0 top-[var(--header-height)] bottom-0 bg-background/90 backdrop-blur-md shadow-xl"
+              className="pointer-events-auto absolute inset-x-0 top-(--header-height) bottom-0 bg-background/90 backdrop-blur-md shadow-xl"
               role="dialog"
               aria-modal="true"
               aria-label="Mega menu"
@@ -218,7 +218,7 @@ export function MegamenuClient({ items, children }: Props) {
                 setActiveId(firstId);
               }}
             >
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/35" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-transparent via-transparent to-muted/35" />
 
               <div className="relative h-full px-4 lg:px-8 pt-6 pb-8">
                 <div

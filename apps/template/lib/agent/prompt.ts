@@ -1,5 +1,19 @@
-import dedent from "dedent";
 import { type AgentContext, getAgentContext } from "./context";
+
+/** Strip common leading whitespace from a tagged template literal. */
+function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
+  let raw = strings.reduce(
+    (acc, str, i) => acc + str + (i < values.length ? String(values[i]) : ""),
+    "",
+  );
+  // Remove leading blank line
+  raw = raw.replace(/^\n/, "");
+  const match = raw.match(/^[ \t]+/m);
+  if (match) {
+    raw = raw.replace(new RegExp(`^${match[0]}`, "gm"), "");
+  }
+  return raw.trimEnd();
+}
 import { catalog } from "./ui/catalog";
 
 export const BASE_SYSTEM_PROMPT = dedent`
