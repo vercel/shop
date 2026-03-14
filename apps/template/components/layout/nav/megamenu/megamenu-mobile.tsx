@@ -128,7 +128,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
               aria-modal="true"
               aria-label="Mega menu"
             >
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-muted/35" />
+              <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-transparent via-transparent to-muted/35" />
 
               <div className="relative h-full px-6 pt-6 pb-24">
                 <div className="flex h-full min-h-0 min-w-0 flex-col">
