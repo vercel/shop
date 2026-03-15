@@ -5,10 +5,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// OrderCard Root
-// =============================================================================
-
 interface OrderCardProps extends React.ComponentProps<"article"> {
   highlighted?: boolean;
 }
@@ -34,10 +30,6 @@ function OrderCard({
     </article>
   );
 }
-
-// =============================================================================
-// OrderCardImages
-// =============================================================================
 
 interface OrderCardImagesProps extends React.ComponentProps<"div"> {
   images: Array<{ src: string; alt: string }>;
@@ -95,10 +87,6 @@ function OrderCardImages({
   );
 }
 
-// =============================================================================
-// OrderCardBadge
-// =============================================================================
-
 type OrderStatusVariant =
   | "in-progress"
   | "received"
@@ -138,10 +126,6 @@ function OrderCardBadge({
   );
 }
 
-// =============================================================================
-// OrderCardContent
-// =============================================================================
-
 function OrderCardContent({
   className,
   children,
@@ -157,10 +141,6 @@ function OrderCardContent({
     </div>
   );
 }
-
-// =============================================================================
-// OrderCardHeader
-// =============================================================================
 
 function OrderCardHeader({
   className,
@@ -178,10 +158,6 @@ function OrderCardHeader({
   );
 }
 
-// =============================================================================
-// OrderCardTitle
-// =============================================================================
-
 function OrderCardTitle({
   className,
   children,
@@ -197,10 +173,6 @@ function OrderCardTitle({
     </h3>
   );
 }
-
-// =============================================================================
-// OrderCardItemCount
-// =============================================================================
 
 interface OrderCardItemCountProps extends React.ComponentProps<"span"> {
   count: number;
@@ -222,10 +194,6 @@ function OrderCardItemCount({
     </span>
   );
 }
-
-// =============================================================================
-// OrderCardProductList
-// =============================================================================
 
 interface OrderCardProductListProps extends React.ComponentProps<"div"> {
   products: string[];
@@ -259,10 +227,6 @@ function OrderCardProductList({
   );
 }
 
-// =============================================================================
-// OrderCardDetails
-// =============================================================================
-
 function OrderCardDetails({
   className,
   children,
@@ -278,10 +242,6 @@ function OrderCardDetails({
     </div>
   );
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   OrderCard,

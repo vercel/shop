@@ -7,10 +7,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// AccountMobileTabs Root
-// =============================================================================
-
 function AccountMobileTabs({
   className,
   children,
@@ -29,10 +25,6 @@ function AccountMobileTabs({
     </nav>
   );
 }
-
-// =============================================================================
-// AccountMobileTab
-// =============================================================================
 
 interface AccountMobileTabProps extends React.ComponentProps<typeof Link> {
   icon?: React.ReactNode;
@@ -69,10 +61,6 @@ function AccountMobileTab({
   );
 }
 
-// =============================================================================
-// Navigation Items Configuration (shared with sidebar)
-// =============================================================================
-
 const mobileNavItems = [
   {
     href: "/account/profile",
@@ -93,10 +81,6 @@ const mobileNavItems = [
     matchExact: false,
   },
 ] as const;
-
-// =============================================================================
-// Pre-composed AccountMobileTabs
-// =============================================================================
 
 interface AccountMobileTabsComposedProps extends React.ComponentProps<"nav"> {}
 

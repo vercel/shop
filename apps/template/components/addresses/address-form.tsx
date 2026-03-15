@@ -16,10 +16,6 @@ import {
 } from "@/components/ui/sheet";
 import { COUNTRIES } from "@/lib/countries";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface AddressFormData {
   id?: string;
   firstName: string;
@@ -51,10 +47,6 @@ export interface AddressFormState {
   fieldErrors?: Record<string, string>;
 }
 
-// =============================================================================
-// Form Field Component
-// =============================================================================
-
 function FormField({
   id,
   label,
@@ -78,10 +70,6 @@ function FormField({
     </div>
   );
 }
-
-// =============================================================================
-// Country Select Component
-// =============================================================================
 
 function CountrySelect({
   id,
@@ -123,10 +111,6 @@ function CountrySelect({
     </div>
   );
 }
-
-// =============================================================================
-// AddressForm Component
-// =============================================================================
 
 const initialState: AddressFormState = {
   success: false,

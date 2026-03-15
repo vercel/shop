@@ -4,10 +4,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// AddressCard Root
-// =============================================================================
-
 interface AddressCardProps extends React.ComponentProps<"article"> {
   isDefault?: boolean;
 }
@@ -33,10 +29,6 @@ function AddressCard({
   );
 }
 
-// =============================================================================
-// AddressCardContent
-// =============================================================================
-
 function AddressCardContent({
   className,
   children,
@@ -52,10 +44,6 @@ function AddressCardContent({
     </div>
   );
 }
-
-// =============================================================================
-// AddressCardHeader
-// =============================================================================
 
 function AddressCardHeader({
   className,
@@ -75,10 +63,6 @@ function AddressCardHeader({
     </div>
   );
 }
-
-// =============================================================================
-// AddressCardRecipient
-// =============================================================================
 
 interface AddressCardRecipientProps extends React.ComponentProps<"div"> {
   name: string;
@@ -105,10 +89,6 @@ function AddressCardRecipient({
   );
 }
 
-// =============================================================================
-// AddressCardBadge (Default badge)
-// =============================================================================
-
 function AddressCardBadge({
   className,
   children,
@@ -127,10 +107,6 @@ function AddressCardBadge({
     </span>
   );
 }
-
-// =============================================================================
-// AddressCardAddress
-// =============================================================================
 
 interface AddressCardAddressProps extends React.ComponentProps<"div"> {
   address: string;
@@ -159,10 +135,6 @@ function AddressCardAddress({
   );
 }
 
-// =============================================================================
-// AddressCardActions
-// =============================================================================
-
 function AddressCardActions({
   className,
   children,
@@ -178,10 +150,6 @@ function AddressCardActions({
     </div>
   );
 }
-
-// =============================================================================
-// AddressCardAction
-// =============================================================================
 
 interface AddressCardActionProps extends React.ComponentProps<"button"> {
   variant?: "default" | "danger";
@@ -209,10 +177,6 @@ function AddressCardAction({
     </button>
   );
 }
-
-// =============================================================================
-// AddressCardComposed - Pre-composed variant for quick use
-// =============================================================================
 
 interface AddressCardComposedProps {
   name: string;
@@ -264,10 +228,6 @@ function AddressCardComposed({
     </AddressCard>
   );
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   AddressCard,

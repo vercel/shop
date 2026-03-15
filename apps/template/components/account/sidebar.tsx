@@ -7,10 +7,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// AccountSidebar Root
-// =============================================================================
-
 function AccountSidebar({
   className,
   children,
@@ -30,10 +26,6 @@ function AccountSidebar({
   );
 }
 
-// =============================================================================
-// AccountSidebarNav
-// =============================================================================
-
 function AccountSidebarNav({
   className,
   children,
@@ -49,10 +41,6 @@ function AccountSidebarNav({
     </nav>
   );
 }
-
-// =============================================================================
-// AccountSidebarHeader
-// =============================================================================
 
 interface AccountSidebarHeaderProps extends React.ComponentProps<"div"> {
   title?: string;
@@ -74,10 +62,6 @@ function AccountSidebarHeader({
   );
 }
 
-// =============================================================================
-// AccountSidebarNavList
-// =============================================================================
-
 function AccountSidebarNavList({
   className,
   children,
@@ -93,10 +77,6 @@ function AccountSidebarNavList({
     </div>
   );
 }
-
-// =============================================================================
-// AccountSidebarNavItem
-// =============================================================================
 
 interface AccountSidebarNavItemProps extends React.ComponentProps<typeof Link> {
   icon: React.ReactNode;
@@ -132,10 +112,6 @@ function AccountSidebarNavItem({
   );
 }
 
-// =============================================================================
-// AccountSidebarFooter
-// =============================================================================
-
 function AccountSidebarFooter({
   className,
   children,
@@ -151,10 +127,6 @@ function AccountSidebarFooter({
     </div>
   );
 }
-
-// =============================================================================
-// AccountSidebarHelp
-// =============================================================================
 
 interface AccountSidebarHelpProps extends React.ComponentProps<"div"> {
   label?: string;
@@ -185,10 +157,6 @@ function AccountSidebarHelp({
   );
 }
 
-// =============================================================================
-// Navigation Items Configuration
-// =============================================================================
-
 const accountNavItems = [
   {
     href: "/account/profile",
@@ -209,10 +177,6 @@ const accountNavItems = [
     matchExact: false,
   },
 ] as const;
-
-// =============================================================================
-// Pre-composed AccountSidebar
-// =============================================================================
 
 interface AccountSidebarComposedProps extends React.ComponentProps<"aside"> {}
 

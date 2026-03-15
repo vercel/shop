@@ -1,10 +1,6 @@
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// ProfileSection Compound Components
-// =============================================================================
-
 /**
  * Root container for profile section
  */

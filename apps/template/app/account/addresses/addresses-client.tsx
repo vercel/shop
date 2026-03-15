@@ -17,17 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Address } from "@/lib/shopify/types/customer";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 interface AddressesClientProps {
   addresses: Address[];
 }
-
-// =============================================================================
-// Error Notification Component
-// =============================================================================
 
 function ErrorNotification({
   message,
@@ -49,10 +41,6 @@ function ErrorNotification({
     </div>
   );
 }
-
-// =============================================================================
-// AddressesClient Component
-// =============================================================================
 
 export function AddressesClient({ addresses }: AddressesClientProps) {
   const t = useTranslations("address");
@@ -208,10 +196,6 @@ export function AddressesClient({ addresses }: AddressesClientProps) {
     </>
   );
 }
-
-// =============================================================================
-// Empty State
-// =============================================================================
 
 function EmptyAddressesState({ onAddNew }: { onAddNew: () => void }) {
   const t = useTranslations("address");

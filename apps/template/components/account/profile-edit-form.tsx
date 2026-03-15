@@ -14,10 +14,6 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface ProfileEditFormData {
   firstName: string;
   lastName: string;
@@ -38,10 +34,6 @@ export interface ProfileEditFormState {
   error?: string;
   fieldErrors?: Record<string, string>;
 }
-
-// =============================================================================
-// Form Field Component
-// =============================================================================
 
 function FormField({
   id,
@@ -66,10 +58,6 @@ function FormField({
     </div>
   );
 }
-
-// =============================================================================
-// ProfileEditForm Component
-// =============================================================================
 
 const initialState: ProfileEditFormState = {
   success: false,

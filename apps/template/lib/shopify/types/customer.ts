@@ -3,10 +3,6 @@
  * API Version: 2025-01
  */
 
-// =============================================================================
-// Core Customer Types
-// =============================================================================
-
 export interface Customer {
   id: string;
   email: string;
@@ -17,10 +13,6 @@ export interface Customer {
   defaultAddress?: Address;
   numberOfOrders: number;
 }
-
-// =============================================================================
-// Address Types
-// =============================================================================
 
 export interface Address {
   id: string;
@@ -52,10 +44,6 @@ export interface AddressInput {
   zip?: string;
   phoneNumber?: string;
 }
-
-// =============================================================================
-// Order Types
-// =============================================================================
 
 export type FulfillmentStatus =
   | "UNFULFILLED"
@@ -137,18 +125,10 @@ export interface FulfillmentLineItem {
   quantity: number;
 }
 
-// =============================================================================
-// Money Types
-// =============================================================================
-
 export interface Money {
   amount: string;
   currencyCode: string;
 }
-
-// =============================================================================
-// Pagination Types
-// =============================================================================
 
 export interface PageInfo {
   hasNextPage: boolean;
@@ -167,10 +147,6 @@ export interface Edge<T> {
   cursor: string;
 }
 
-// =============================================================================
-// Query Options Types
-// =============================================================================
-
 export interface GetOrdersOptions {
   first?: number;
   after?: string;
@@ -180,19 +156,11 @@ export interface GetOrdersOptions {
 
 export type OrderSortKey = "PROCESSED_AT" | "TOTAL_PRICE" | "ID";
 
-// =============================================================================
-// Mutation Input Types
-// =============================================================================
-
 export interface CustomerUpdateInput {
   firstName?: string;
   lastName?: string;
   phone?: string;
 }
-
-// =============================================================================
-// API Response Types
-// =============================================================================
 
 export interface CustomerApiError {
   field?: string[];

@@ -29,10 +29,6 @@ export function normalizeSearchParams(
  * into these types.
  */
 
-// =============================================================================
-// Primitives
-// =============================================================================
-
 export interface Money {
   amount: string;
   currencyCode: string;
@@ -56,10 +52,6 @@ export interface SEO {
   title: string;
   description: string;
 }
-
-// =============================================================================
-// Product Types
-// =============================================================================
 
 /**
  * Minimal product data for cards in grids/carousels
@@ -142,19 +134,11 @@ export interface Metafield {
   value: string;
 }
 
-// =============================================================================
-// Category / Taxonomy
-// =============================================================================
-
 export interface Category {
   id: string;
   name: string;
   ancestors: Category[];
 }
-
-// =============================================================================
-// Cart Types
-// =============================================================================
 
 export interface Cart {
   id: string | undefined;
@@ -197,10 +181,6 @@ export interface CartProduct {
   featuredImage: Image;
 }
 
-// =============================================================================
-// Collection Types
-// =============================================================================
-
 export interface Collection {
   handle: string;
   title: string;
@@ -210,10 +190,6 @@ export interface Collection {
   path: string;
   updatedAt: string;
 }
-
-// =============================================================================
-// Filter Types
-// =============================================================================
 
 export type FilterType = "list" | "price" | "boolean";
 
@@ -245,20 +221,12 @@ export interface CategoryNavItem {
   href: string;
 }
 
-// =============================================================================
-// Pagination
-// =============================================================================
-
 export interface PageInfo {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   endCursor: string | null;
   startCursor: string | null;
 }
-
-// =============================================================================
-// Search / Listing Results
-// =============================================================================
 
 export interface ProductListResult {
   products: ProductCard[];
@@ -268,10 +236,6 @@ export interface ProductListResult {
   priceRange?: PriceRange;
   subcategories?: CategoryNavItem[];
 }
-
-// =============================================================================
-// Predictive Search
-// =============================================================================
 
 /**
  * Lightweight product data for predictive search results.
@@ -303,10 +267,6 @@ export interface PredictiveSearchResult {
   collections: PredictiveSearchCollection[];
   queries: SearchSuggestion[];
 }
-
-// =============================================================================
-// CMS Types
-// =============================================================================
 
 export type ContentBlockType =
   | "featured-products"

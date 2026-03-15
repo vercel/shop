@@ -13,10 +13,6 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// Context
-// =============================================================================
-
 interface ScrollCarouselContextValue {
   scrollContainerRef: React.RefObject<HTMLDivElement | null>;
   canScrollLeft: boolean;
@@ -38,10 +34,6 @@ function useScrollCarousel() {
   }
   return ctx;
 }
-
-// =============================================================================
-// ScrollCarousel (root)
-// =============================================================================
 
 function ScrollCarousel({
   className,
@@ -98,10 +90,6 @@ function ScrollCarousel({
   );
 }
 
-// =============================================================================
-// ScrollCarouselHeader
-// =============================================================================
-
 function ScrollCarouselHeader({
   className,
   children,
@@ -117,10 +105,6 @@ function ScrollCarouselHeader({
     </div>
   );
 }
-
-// =============================================================================
-// ScrollCarouselTitle
-// =============================================================================
 
 function ScrollCarouselTitle({
   className,
@@ -140,10 +124,6 @@ function ScrollCarouselTitle({
     </h2>
   );
 }
-
-// =============================================================================
-// ScrollCarouselNav
-// =============================================================================
 
 function ScrollCarouselNav({
   className,
@@ -184,10 +164,6 @@ function ScrollCarouselNav({
   );
 }
 
-// =============================================================================
-// ScrollCarouselContent
-// =============================================================================
-
 interface ScrollCarouselContentProps extends React.ComponentProps<"div"> {
   fullBleed?: boolean;
 }
@@ -219,10 +195,6 @@ function ScrollCarouselContent({
     </div>
   );
 }
-
-// =============================================================================
-// ScrollCarouselItem
-// =============================================================================
 
 function ScrollCarouselItem({
   className,

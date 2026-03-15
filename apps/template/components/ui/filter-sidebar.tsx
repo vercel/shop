@@ -13,10 +13,6 @@ import type * as React from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// FilterSidebar Root
-// =============================================================================
-
 function FilterSidebar({
   className,
   children,
@@ -32,10 +28,6 @@ function FilterSidebar({
     </aside>
   );
 }
-
-// =============================================================================
-// FilterSidebarHeader
-// =============================================================================
 
 interface FilterSidebarHeaderProps extends React.ComponentProps<"header"> {
   title?: string;
@@ -75,10 +67,6 @@ function FilterSidebarHeader({
   );
 }
 
-// =============================================================================
-// FilterSidebarResultsCount
-// =============================================================================
-
 interface FilterSidebarResultsCountProps extends React.ComponentProps<"div"> {
   count: number;
   label?: string;
@@ -107,10 +95,6 @@ function FilterSidebarResultsCount({
   );
 }
 
-// =============================================================================
-// FilterSidebarActiveFilters
-// =============================================================================
-
 function FilterSidebarActiveFilters({
   className,
   children,
@@ -126,10 +110,6 @@ function FilterSidebarActiveFilters({
     </div>
   );
 }
-
-// =============================================================================
-// FilterBadge
-// =============================================================================
 
 interface FilterBadgeProps extends React.ComponentProps<"button"> {
   variant?: "default" | "primary";
@@ -165,10 +145,6 @@ function FilterBadge({
   );
 }
 
-// =============================================================================
-// FilterSection
-// =============================================================================
-
 function FilterSection({
   className,
   children,
@@ -184,10 +160,6 @@ function FilterSection({
     </div>
   );
 }
-
-// =============================================================================
-// FilterSectionHeader
-// =============================================================================
 
 interface FilterSectionHeaderProps {
   title: string;
@@ -213,10 +185,6 @@ function FilterSectionHeader({
   );
 }
 
-// =============================================================================
-// FilterSectionContent
-// =============================================================================
-
 function FilterSectionContent({
   className,
   children,
@@ -233,10 +201,6 @@ function FilterSectionContent({
   );
 }
 
-// =============================================================================
-// FilterOptionList
-// =============================================================================
-
 function FilterOptionList({
   className,
   children,
@@ -252,10 +216,6 @@ function FilterOptionList({
     </div>
   );
 }
-
-// =============================================================================
-// FilterOption
-// =============================================================================
 
 interface FilterOptionProps extends React.ComponentProps<"button"> {
   label: string;
@@ -332,10 +292,6 @@ function FilterOption({
   );
 }
 
-// =============================================================================
-// FilterPriceRange
-// =============================================================================
-
 interface FilterPriceRangeProps extends React.ComponentProps<"div"> {
   minValue?: string;
   maxValue?: string;
@@ -405,10 +361,6 @@ function FilterPriceRange({
   );
 }
 
-// =============================================================================
-// FilterPricePreset
-// =============================================================================
-
 interface FilterPricePresetProps extends React.ComponentProps<"button"> {
   selected?: boolean;
 }
@@ -436,10 +388,6 @@ function FilterPricePreset({
   );
 }
 
-// =============================================================================
-// FilterSidebarCategories
-// =============================================================================
-
 function FilterSidebarCategories({
   className,
   children,
@@ -455,10 +403,6 @@ function FilterSidebarCategories({
     </div>
   );
 }
-
-// =============================================================================
-// FilterSidebarCategoryBack
-// =============================================================================
 
 interface FilterSidebarCategoryBackProps
   extends React.ComponentProps<"button"> {
@@ -491,10 +435,6 @@ function FilterSidebarCategoryBack({
     </button>
   );
 }
-
-// =============================================================================
-// FilterSidebarCategoryItem
-// =============================================================================
 
 interface FilterSidebarCategoryItemProps
   extends React.ComponentProps<"button"> {
@@ -536,10 +476,6 @@ function FilterSidebarCategoryItem({
   );
 }
 
-// =============================================================================
-// FilterSidebarScrollFade
-// =============================================================================
-
 function FilterSidebarScrollFade({
   className,
   ...props
@@ -555,10 +491,6 @@ function FilterSidebarScrollFade({
     />
   );
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   FilterSidebar,

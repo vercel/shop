@@ -16,10 +16,6 @@ import {
   ProfileSectionFieldRow,
 } from "./profile-section";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface ProfileEditInlineData {
   firstName: string;
   lastName: string;
@@ -40,10 +36,6 @@ export interface ProfileEditInlineProps {
   ) => Promise<ProfileEditInlineState>;
   onCancel: () => void;
 }
-
-// =============================================================================
-// ProfileEditInline Component
-// =============================================================================
 
 const initialState: ProfileEditInlineState = {
   success: false,

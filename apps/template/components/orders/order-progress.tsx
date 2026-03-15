@@ -4,20 +4,12 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 type StepStatus = "completed" | "current" | "upcoming";
 
 interface Step {
   label: string;
   status: StepStatus;
 }
-
-// =============================================================================
-// OrderProgress Root
-// =============================================================================
 
 interface OrderProgressProps extends React.ComponentProps<"div"> {
   steps: Step[];
@@ -42,10 +34,6 @@ function OrderProgress({ steps, className, ...props }: OrderProgressProps) {
     </div>
   );
 }
-
-// =============================================================================
-// OrderProgressStep
-// =============================================================================
 
 interface OrderProgressStepProps extends React.ComponentProps<"div"> {
   label: string;
@@ -92,10 +80,6 @@ function OrderProgressStep({
   );
 }
 
-// =============================================================================
-// OrderProgressDot
-// =============================================================================
-
 interface OrderProgressDotProps extends React.ComponentProps<"div"> {
   status: StepStatus;
 }
@@ -123,10 +107,6 @@ function OrderProgressDot({
     />
   );
 }
-
-// =============================================================================
-// OrderProgressLine
-// =============================================================================
 
 interface OrderProgressLineProps extends React.ComponentProps<"div"> {
   status: StepStatus | "completed" | "upcoming";
@@ -158,10 +138,6 @@ function OrderProgressLine({
   );
 }
 
-// =============================================================================
-// OrderProgressLabel
-// =============================================================================
-
 interface OrderProgressLabelProps extends React.ComponentProps<"span"> {
   status: StepStatus;
 }
@@ -191,10 +167,6 @@ function OrderProgressLabel({
     </span>
   );
 }
-
-// =============================================================================
-// Pre-composed OrderProgressComposed
-// =============================================================================
 
 type FulfillmentStatus =
   | "received"
@@ -254,10 +226,6 @@ function OrderProgressComposed({
 
   return <OrderProgress steps={steps} {...props} />;
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   OrderProgress,
