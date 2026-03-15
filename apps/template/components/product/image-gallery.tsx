@@ -1,9 +1,3 @@
-/**
- * Image Gallery Client Component
- *
- * CLIENT COMPONENT - Handles scroll snap gallery with vertical thumbnails
- */
-
 "use client";
 
 import Image from "next/image";
@@ -209,7 +203,7 @@ export function ImageGallery({
           {images.map((image, idx) => (
             <div
               key={image.url}
-              className="relative flex-shrink-0 w-full aspect-[3/4] snap-center snap-always overflow-hidden rounded-lg bg-muted border select-none"
+              className="relative shrink-0 w-full aspect-3/4 snap-center snap-always overflow-hidden rounded-lg bg-muted border select-none"
             >
               <Image
                 src={image.url}
