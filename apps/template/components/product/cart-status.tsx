@@ -1,12 +1,3 @@
-/**
- * Variant Cart Status Component
- *
- * CACHE STRATEGY: Hybrid - Server initial + Client optimistic updates
- * - Server component fetches initial cart state
- * - Client component shows optimistic updates from CartContext
- * - Auto-syncs when server revalidates
- */
-
 import { Suspense } from "react";
 import { getCart } from "@/lib/shopify/operations/cart";
 import type { ProductDetails } from "@/lib/types";

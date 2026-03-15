@@ -1,11 +1,3 @@
-/**
- * Shopify Customer Account API Operations
- * API Version: 2025-01
- *
- * Uses the Customer Account API (separate from Storefront API)
- * Requires customer access token from OAuth flow
- */
-
 import type {
   Address,
   AddressInput,

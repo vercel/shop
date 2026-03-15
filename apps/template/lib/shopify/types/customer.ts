@@ -1,8 +1,3 @@
-/**
- * TypeScript types for Shopify Customer Account API
- * API Version: 2025-01
- */
-
 export interface Customer {
   id: string;
   email: string;
