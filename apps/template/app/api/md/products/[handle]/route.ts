@@ -1,5 +1,5 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
-import { productToMarkdown } from "@/lib/markdown";
+import { productToMarkdown } from "@/lib/markdown/product";
 import { getProduct } from "@/lib/shopify/operations/products";
 
 export async function GET(
