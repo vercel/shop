@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
+  rewrites: async () => [
+    {
+      source: "/products/:handle",
+      has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
+      destination: "/products/:handle/:variantId",
+    },
+  ],
   // Better Auth pulls some adapter modules via internal imports that Turbopack may split
   // into runtime chunks. Keep these packages external and explicitly traced for Vercel.
   serverExternalPackages: ["better-auth"],

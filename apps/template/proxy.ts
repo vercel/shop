@@ -61,26 +61,5 @@ export default async function middleware(request: NextRequest) {
     }
   }
 
-  // Rewrite /products/[handle]?variantId=X → /products/[handle]/[variantId]
-  const url = new URL(request.url);
-  const variantId = url.searchParams.get("variantId");
-
-  if (variantId) {
-    const segments = url.pathname.split("/").filter(Boolean);
-
-    if (segments.length === 2 && segments[0] === "products") {
-      const handle = segments[1];
-      const rewriteUrl = new URL(
-        `/products/${handle}/${variantId}`,
-        request.url,
-      );
-      // Preserve other query params but remove variantId
-      const params = new URLSearchParams(url.searchParams);
-      params.delete("variantId");
-      rewriteUrl.search = params.toString();
-      return NextResponse.rewrite(rewriteUrl);
-    }
-  }
-
   return NextResponse.next();
 }
