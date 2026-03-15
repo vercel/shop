@@ -7,10 +7,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// AccountMobileTabs Root
-// =============================================================================
-
 function AccountMobileTabs({
   className,
   children,
@@ -30,10 +26,6 @@ function AccountMobileTabs({
   );
 }
 
-// =============================================================================
-// AccountMobileTab
-// =============================================================================
-
 interface AccountMobileTabProps extends React.ComponentProps<typeof Link> {
   icon?: React.ReactNode;
   isActive?: boolean;
@@ -52,13 +44,13 @@ function AccountMobileTab({
       data-active={isActive ? "true" : undefined}
       className={cn(
         "flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap",
-        "text-sm font-medium text-[#010101]",
+        "text-sm font-medium text-foreground",
         "border border-transparent",
         // Active state
-        "data-[active=true]:bg-[#e9e9e9]",
-        "data-[active=true]:[&_svg]:text-[#2986ff] data-[active=true]:[&_svg]:opacity-100",
+        "data-[active=true]:bg-muted",
+        "data-[active=true]:[&_svg]:text-primary data-[active=true]:[&_svg]:opacity-100",
         // Inactive state
-        "[&_svg]:opacity-30 [&_svg]:text-[#010101]",
+        "[&_svg]:opacity-30 [&_svg]:text-foreground",
         className,
       )}
       {...props}
@@ -68,10 +60,6 @@ function AccountMobileTab({
     </Link>
   );
 }
-
-// =============================================================================
-// Navigation Items Configuration (shared with sidebar)
-// =============================================================================
 
 const mobileNavItems = [
   {
@@ -93,10 +81,6 @@ const mobileNavItems = [
     matchExact: false,
   },
 ] as const;
-
-// =============================================================================
-// Pre-composed AccountMobileTabs
-// =============================================================================
 
 interface AccountMobileTabsComposedProps extends React.ComponentProps<"nav"> {}
 

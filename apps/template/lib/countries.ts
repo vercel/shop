@@ -1,7 +1,3 @@
-/**
- * ISO 3166-1 alpha-2 country codes with display names.
- * Used for Shopify Customer Account API `territoryCode` field.
- */
 export const COUNTRIES: { code: string; name: string }[] = [
   { code: "AF", name: "Afghanistan" },
   { code: "AX", name: "Aland Islands" },

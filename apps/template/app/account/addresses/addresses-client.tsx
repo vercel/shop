@@ -17,17 +17,9 @@ import {
 import { Button } from "@/components/ui/button";
 import type { Address } from "@/lib/shopify/types/customer";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 interface AddressesClientProps {
   addresses: Address[];
 }
-
-// =============================================================================
-// Error Notification Component
-// =============================================================================
 
 function ErrorNotification({
   message,
@@ -49,10 +41,6 @@ function ErrorNotification({
     </div>
   );
 }
-
-// =============================================================================
-// AddressesClient Component
-// =============================================================================
 
 export function AddressesClient({ addresses }: AddressesClientProps) {
   const t = useTranslations("address");
@@ -167,7 +155,7 @@ export function AddressesClient({ addresses }: AddressesClientProps) {
         <Button
           onClick={handleAddNew}
           variant="secondary"
-          className="gap-2 rounded-[99px] bg-[#e9e9e9]"
+          className="gap-2 rounded-[99px] bg-muted"
         >
           <PlusIcon className="size-4 opacity-80" />
           <span className="text-sm font-semibold">{t("addNew")}</span>
@@ -209,18 +197,14 @@ export function AddressesClient({ addresses }: AddressesClientProps) {
   );
 }
 
-// =============================================================================
-// Empty State
-// =============================================================================
-
 function EmptyAddressesState({ onAddNew }: { onAddNew: () => void }) {
   const t = useTranslations("address");
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-4">
-      <div className="text-lg font-medium text-[#2c2c2c]">
+      <div className="text-lg font-medium text-muted-foreground">
         {t("noAddresses")}
       </div>
-      <p className="text-sm text-[#797979]">{t("noAddressesDescription")}</p>
+      <p className="text-sm text-foreground/50">{t("noAddressesDescription")}</p>
       <Button onClick={onAddNew} className="mt-4">
         <PlusIcon className="size-4" />
         {t("addAddress")}

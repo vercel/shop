@@ -18,7 +18,7 @@ export function OrderProgressSection({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-row items-end justify-between px-4">
-        <span className="text-sm font-medium text-[#797979]">
+        <span className="text-sm font-medium text-foreground/50">
           {statusInfo.label}
         </span>
         <div className="flex flex-row gap-3">
@@ -27,7 +27,7 @@ export function OrderProgressSection({
               href={order.fulfillments[0].trackingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-xs font-normal text-[#020202] hover:underline"
+              className="flex items-center gap-1 text-xs font-normal text-secondary-foreground hover:underline"
             >
               {order.fulfillments[0].trackingCompany
                 ? t("trackingPage", {
@@ -41,15 +41,15 @@ export function OrderProgressSection({
             href={order.statusPageUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs font-normal text-[#020202] hover:underline"
+            className="text-xs font-normal text-secondary-foreground hover:underline"
           >
             {t("needHelp")}
           </Link>
         </div>
       </div>
 
-      <div className="flex flex-row gap-0 rounded-xl border border-[#5a5a5a] bg-white p-1.5">
-        <div className="flex items-center justify-center rounded-md border border-black/5 bg-[#ececec] p-3">
+      <div className="flex flex-row gap-0 rounded-xl border border-ring bg-white p-1.5">
+        <div className="flex items-center justify-center rounded-md border border-black/5 bg-input p-3">
           {order.lineItems[0]?.image && (
             <Image
               src={order.lineItems[0].image.url}
@@ -76,7 +76,7 @@ export function OrderProgressSection({
                 </span>
               </div>
             )}
-            <span className="text-xl font-medium text-[#010101]">
+            <span className="text-xl font-medium text-foreground">
               {statusInfo.dateLabel}
             </span>
           </div>
@@ -102,10 +102,10 @@ export function OrderPackageSection({
   return (
     <div className="flex flex-col gap-8 px-4">
       <div className="flex flex-row items-center gap-6">
-        <span className="text-lg font-medium text-[#2c2c2c]">
+        <span className="text-lg font-medium text-muted-foreground">
           {t("packageContent")}
         </span>
-        <span className="text-base font-medium text-[#2c2c2c] opacity-20">
+        <span className="text-base font-medium text-muted-foreground opacity-20">
           {t("itemCount", { count: itemCount })}
         </span>
       </div>
@@ -128,25 +128,25 @@ export function OrderDeliverySection({
 }) {
   return (
     <div className="flex flex-col gap-8 p-3">
-      <h2 className="text-3xl font-medium text-[#2c2c2c]">
+      <h2 className="text-3xl font-medium text-muted-foreground">
         {t("deliveryInformation")}
       </h2>
 
       <div className="flex flex-col gap-3 opacity-80">
         <div className="flex flex-col gap-1 pb-2">
-          <span className="text-xs font-normal text-[#020202] opacity-40">
+          <span className="text-xs font-normal text-secondary-foreground opacity-40">
             {t("deliverTo")}
           </span>
-          <span className="text-lg font-medium text-[#010101]">
+          <span className="text-lg font-medium text-foreground">
             {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
           </span>
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-xs font-normal text-[#020202] opacity-40">
+          <span className="text-xs font-normal text-secondary-foreground opacity-40">
             {t("address")}
           </span>
-          <span className="text-base font-normal text-[#010101] whitespace-pre-line">
+          <span className="text-base font-normal text-foreground whitespace-pre-line">
             {order.shippingAddress?.formatted?.join("\n") ||
               formatAddress(order.shippingAddress, t)}
           </span>
@@ -154,14 +154,14 @@ export function OrderDeliverySection({
       </div>
 
       <div className="flex flex-row items-center gap-1">
-        <span className="text-xs font-normal text-[#020202] opacity-50">
+        <span className="text-xs font-normal text-secondary-foreground opacity-50">
           {t("updateDeliveryInfo")}
         </span>
         <Link
           href={order.statusPageUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs font-normal text-[#020202] hover:underline"
+          className="text-xs font-normal text-secondary-foreground hover:underline"
         >
           {t("contactSupport")}
         </Link>
@@ -181,7 +181,7 @@ function OrderLineItemCard({
 }) {
   return (
     <div className="flex flex-row gap-3">
-      <div className="flex items-center justify-center rounded-[11px] border bg-[#f3f3f3]">
+      <div className="flex items-center justify-center rounded-[11px] border bg-muted">
         {item.image ? (
           <Image
             src={item.image.url}
@@ -198,7 +198,7 @@ function OrderLineItemCard({
       <div className="flex flex-1 flex-col justify-between gap-6 px-2 py-3">
         <div className="flex flex-row items-baseline justify-between gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-[#010101]">
+            <span className="text-sm font-medium text-foreground">
               {item.title}
             </span>
             {item.variantTitle && (

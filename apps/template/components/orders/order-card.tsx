@@ -5,10 +5,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// OrderCard Root
-// =============================================================================
-
 interface OrderCardProps extends React.ComponentProps<"article"> {
   highlighted?: boolean;
 }
@@ -25,7 +21,7 @@ function OrderCard({
       data-highlighted={highlighted}
       className={cn(
         "flex flex-row gap-6 p-3 rounded-xl border transition-colors",
-        "data-[highlighted=true]:bg-[#e9e9e9]",
+        "data-[highlighted=true]:bg-muted",
         className,
       )}
       {...props}
@@ -34,10 +30,6 @@ function OrderCard({
     </article>
   );
 }
-
-// =============================================================================
-// OrderCardImages
-// =============================================================================
 
 interface OrderCardImagesProps extends React.ComponentProps<"div"> {
   images: Array<{ src: string; alt: string }>;
@@ -62,7 +54,7 @@ function OrderCardImages({
     >
       {/* Large thumbnail */}
       {hasLarge && (
-        <div className="relative size-[72px] rounded-md bg-[#e9e9e9] data-[highlighted=true]:bg-white overflow-hidden">
+        <div className="relative size-[72px] rounded-md bg-muted data-[highlighted=true]:bg-white overflow-hidden">
           <Image
             src={visibleImages[0].src}
             alt={visibleImages[0].alt}
@@ -78,7 +70,7 @@ function OrderCardImages({
           {visibleImages.slice(1, 3).map((img) => (
             <div
               key={`${img.src}-${img.alt}`}
-              className="relative size-[34px] rounded-md bg-[#e9e9e9] data-[highlighted=true]:bg-white overflow-hidden"
+              className="relative size-[34px] rounded-md bg-muted data-[highlighted=true]:bg-white overflow-hidden"
             >
               <Image
                 src={img.src}
@@ -94,10 +86,6 @@ function OrderCardImages({
     </div>
   );
 }
-
-// =============================================================================
-// OrderCardBadge
-// =============================================================================
 
 type OrderStatusVariant =
   | "in-progress"
@@ -122,13 +110,13 @@ function OrderCardBadge({
       className={cn(
         "inline-flex items-center px-[7px] py-0 rounded-[119px] text-sm font-semibold",
         // In progress / Out for delivery - blue
-        "data-[status=in-progress]:bg-[#2986ff] data-[status=in-progress]:text-white",
+        "data-[status=in-progress]:bg-primary data-[status=in-progress]:text-white",
         // Order received - black
-        "data-[status=received]:bg-[#010101] data-[status=received]:text-[#fafafa]",
+        "data-[status=received]:bg-foreground data-[status=received]:text-background",
         // Delivered - green (matching Figma "Fast shipping" badge style)
-        "data-[status=delivered]:bg-[#00ba5a] data-[status=delivered]:text-white",
+        "data-[status=delivered]:bg-positive data-[status=delivered]:text-white",
         // Cancelled - muted
-        "data-[status=cancelled]:bg-[#797979] data-[status=cancelled]:text-white",
+        "data-[status=cancelled]:bg-foreground/50 data-[status=cancelled]:text-white",
         className,
       )}
       {...props}
@@ -137,10 +125,6 @@ function OrderCardBadge({
     </span>
   );
 }
-
-// =============================================================================
-// OrderCardContent
-// =============================================================================
 
 function OrderCardContent({
   className,
@@ -158,10 +142,6 @@ function OrderCardContent({
   );
 }
 
-// =============================================================================
-// OrderCardHeader
-// =============================================================================
-
 function OrderCardHeader({
   className,
   children,
@@ -178,10 +158,6 @@ function OrderCardHeader({
   );
 }
 
-// =============================================================================
-// OrderCardTitle
-// =============================================================================
-
 function OrderCardTitle({
   className,
   children,
@@ -190,17 +166,13 @@ function OrderCardTitle({
   return (
     <h3
       data-slot="order-card-title"
-      className={cn("text-xl font-medium text-[#010101]", className)}
+      className={cn("text-xl font-medium text-foreground", className)}
       {...props}
     >
       {children}
     </h3>
   );
 }
-
-// =============================================================================
-// OrderCardItemCount
-// =============================================================================
 
 interface OrderCardItemCountProps extends React.ComponentProps<"span"> {
   count: number;
@@ -223,10 +195,6 @@ function OrderCardItemCount({
   );
 }
 
-// =============================================================================
-// OrderCardProductList
-// =============================================================================
-
 interface OrderCardProductListProps extends React.ComponentProps<"div"> {
   products: string[];
   maxVisible?: number;
@@ -247,21 +215,17 @@ function OrderCardProductList({
       className={cn("flex flex-row gap-2 items-start", className)}
       {...props}
     >
-      <span className="text-sm font-medium text-[#010101] line-clamp-1">
+      <span className="text-sm font-medium text-foreground line-clamp-1">
         {visibleProducts.join(", ")}
       </span>
       {remaining > 0 && (
-        <span className="text-sm font-medium text-[#010101]/50 shrink-0">
+        <span className="text-sm font-medium text-foreground/50 shrink-0">
           {remaining}+
         </span>
       )}
     </div>
   );
 }
-
-// =============================================================================
-// OrderCardDetails
-// =============================================================================
 
 function OrderCardDetails({
   className,
@@ -278,10 +242,6 @@ function OrderCardDetails({
     </div>
   );
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   OrderCard,

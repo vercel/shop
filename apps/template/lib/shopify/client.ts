@@ -1,8 +1,3 @@
-/**
- * Shopify Storefront API GraphQL Client
- * Optimized for performance with gzip compression
- */
-
 import { createHash } from "node:crypto";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;

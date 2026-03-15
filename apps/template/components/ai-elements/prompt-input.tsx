@@ -72,10 +72,6 @@ import {
 import { defaultLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-// ============================================================================
-// Provider Context & Types
-// ============================================================================
-
 export type AttachmentsContext = {
   files: (FileUIPart & { id: string })[];
   add: (files: File[] | FileList) => void;
@@ -258,10 +254,6 @@ export function PromptInputProvider({
     </PromptInputController.Provider>
   );
 }
-
-// ============================================================================
-// Component Context & Hooks
-// ============================================================================
 
 const LocalAttachmentsContext = createContext<AttachmentsContext | null>(null);
 

@@ -4,20 +4,12 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 type StepStatus = "completed" | "current" | "upcoming";
 
 interface Step {
   label: string;
   status: StepStatus;
 }
-
-// =============================================================================
-// OrderProgress Root
-// =============================================================================
 
 interface OrderProgressProps extends React.ComponentProps<"div"> {
   steps: Step[];
@@ -42,10 +34,6 @@ function OrderProgress({ steps, className, ...props }: OrderProgressProps) {
     </div>
   );
 }
-
-// =============================================================================
-// OrderProgressStep
-// =============================================================================
 
 interface OrderProgressStepProps extends React.ComponentProps<"div"> {
   label: string;
@@ -92,10 +80,6 @@ function OrderProgressStep({
   );
 }
 
-// =============================================================================
-// OrderProgressDot
-// =============================================================================
-
 interface OrderProgressDotProps extends React.ComponentProps<"div"> {
   status: StepStatus;
 }
@@ -112,21 +96,17 @@ function OrderProgressDot({
       className={cn(
         "rounded-full shrink-0",
         // Completed: filled blue dot
-        "data-[status=completed]:size-[9px] data-[status=completed]:bg-[#2986ff]",
+        "data-[status=completed]:size-[9px] data-[status=completed]:bg-primary",
         // Current: filled black dot
-        "data-[status=current]:size-[9px] data-[status=current]:bg-[#010101]",
+        "data-[status=current]:size-[9px] data-[status=current]:bg-foreground",
         // Upcoming: larger gray dot with border effect
-        "data-[status=upcoming]:size-[8px] data-[status=upcoming]:bg-[#cecece]",
+        "data-[status=upcoming]:size-[8px] data-[status=upcoming]:bg-border",
         className,
       )}
       {...props}
     />
   );
 }
-
-// =============================================================================
-// OrderProgressLine
-// =============================================================================
 
 interface OrderProgressLineProps extends React.ComponentProps<"div"> {
   status: StepStatus | "completed" | "upcoming";
@@ -147,20 +127,16 @@ function OrderProgressLine({
       data-status={status}
       className={cn(
         "h-[4px] w-[60px]",
-        isCompleted ? "bg-[#010101]" : "bg-[#e8e8e8]",
+        isCompleted ? "bg-foreground" : "bg-muted",
         // Dashed effect for upcoming using gradient
         !isCompleted &&
-          "bg-[repeating-linear-gradient(90deg,#e8e8e8_0px,#e8e8e8_6px,transparent_6px,transparent_10px)]",
+          "bg-[repeating-linear-gradient(90deg,var(--color-muted)_0px,var(--color-muted)_6px,transparent_6px,transparent_10px)]",
         className,
       )}
       {...props}
     />
   );
 }
-
-// =============================================================================
-// OrderProgressLabel
-// =============================================================================
 
 interface OrderProgressLabelProps extends React.ComponentProps<"span"> {
   status: StepStatus;
@@ -177,7 +153,7 @@ function OrderProgressLabel({
       data-slot="order-progress-label"
       data-status={status}
       className={cn(
-        "text-lg text-[#010101] whitespace-nowrap",
+        "text-lg text-foreground whitespace-nowrap",
         // Completed/current: font-semibold, full opacity
         "data-[status=completed]:font-semibold",
         "data-[status=current]:font-semibold",
@@ -191,10 +167,6 @@ function OrderProgressLabel({
     </span>
   );
 }
-
-// =============================================================================
-// Pre-composed OrderProgressComposed
-// =============================================================================
 
 type FulfillmentStatus =
   | "received"
@@ -254,10 +226,6 @@ function OrderProgressComposed({
 
   return <OrderProgress steps={steps} {...props} />;
 }
-
-// =============================================================================
-// Exports
-// =============================================================================
 
 export {
   OrderProgress,

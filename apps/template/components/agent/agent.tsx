@@ -582,7 +582,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.35, ease: easing }}
-            className="fixed left-1/2 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-[40rem] -translate-x-1/2 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline outline-1 -outline-offset-1 outline-border/35 backdrop-blur-sm"
+            className="fixed left-1/2 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 -translate-x-1/2 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm"
           >
             {/* Drag overlay */}
             {isDragging && (
@@ -644,7 +644,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             {/* Input */}
             <PromptInput
               onSubmit={handleSubmit}
-              className="px-4 py-3 [&_[data-slot=input-group]]:h-auto [&_[data-slot=input-group]]:flex-col [&_[data-slot=input-group]]:rounded-2xl [&_[data-slot=input-group]]:border-0 [&_[data-slot=input-group]]:bg-input [&_[data-slot=input-group]]:shadow-none"
+              className="px-4 py-3 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
               globalDrop
               multiple
             >
@@ -653,6 +653,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 <AttachButton />
                 <PromptInputBody>
                   <PromptInputTextarea
+                    autoFocus
                     className="min-h-0 py-3 text-sm"
                     onChange={(e) => setInput(e.target.value)}
                     value={input}

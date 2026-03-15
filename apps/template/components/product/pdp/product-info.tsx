@@ -11,10 +11,6 @@ import { ProductPrice } from "./product-price";
 import { usePdpVariantState } from "./variant-state";
 import { getNumericShopifyId, resolveSelectedVariant } from "./variants";
 
-// ---------------------------------------------------------------------------
-// ProductInfoHeader
-// ---------------------------------------------------------------------------
-
 interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
   variants: ProductVariant[];
   title: string;
@@ -61,10 +57,6 @@ function ProductInfoHeader({
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// ProductInfoOptions
-// ---------------------------------------------------------------------------
 
 interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
   variants: ProductVariant[];
@@ -169,10 +161,6 @@ function ProductInfoOptions({
   );
 }
 
-// ---------------------------------------------------------------------------
-// ProductInfoDescription
-// ---------------------------------------------------------------------------
-
 interface ProductInfoDescriptionProps extends ComponentPropsWithoutRef<"div"> {
   descriptionHtml: string;
 }
@@ -189,10 +177,6 @@ function ProductInfoDescription({
     </div>
   );
 }
-
-// ---------------------------------------------------------------------------
-// ProductInfo — backwards-compatible wrapper
-// ---------------------------------------------------------------------------
 
 function ProductInfo({
   variants,

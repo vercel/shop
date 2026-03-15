@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useOptimistic, useState, useTransition } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { formatPrice } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { prepareCheckoutAction, updateCartNoteAction } from "./actions";
 import { useCart } from "./context";
 import { useCartRender } from "./context-sync";
@@ -30,7 +30,7 @@ function CheckoutLink({
   if (isUpdatingCart || isCheckingOut) {
     return (
       <span
-        className={`${baseClassName} opacity-50 cursor-not-allowed`}
+        className={cn(baseClassName, "opacity-50 cursor-not-allowed")}
         aria-disabled="true"
       >
         <span className="flex items-center gap-2">
@@ -45,7 +45,7 @@ function CheckoutLink({
   return (
     <button
       type="button"
-      className={`${baseClassName} hover:bg-primary/90 cursor-pointer`}
+      className={cn(baseClassName, "hover:bg-primary/90 cursor-pointer")}
       onClick={async () => {
         setIsCheckingOut(true);
         const { checkoutUrl: url } = await prepareCheckoutAction();

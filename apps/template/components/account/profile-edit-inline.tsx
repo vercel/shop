@@ -16,10 +16,6 @@ import {
   ProfileSectionFieldRow,
 } from "./profile-section";
 
-// =============================================================================
-// Types
-// =============================================================================
-
 export interface ProfileEditInlineData {
   firstName: string;
   lastName: string;
@@ -40,10 +36,6 @@ export interface ProfileEditInlineProps {
   ) => Promise<ProfileEditInlineState>;
   onCancel: () => void;
 }
-
-// =============================================================================
-// ProfileEditInline Component
-// =============================================================================
 
 const initialState: ProfileEditInlineState = {
   success: false,
@@ -76,7 +68,7 @@ export function ProfileEditInline({
                 <ProfileSectionField>
                   <Label
                     htmlFor="firstName"
-                    className="text-sm font-normal text-[#2c2c2c]"
+                    className="text-sm font-normal text-muted-foreground"
                   >
                     {t("firstName")}
                   </Label>
@@ -99,7 +91,7 @@ export function ProfileEditInline({
                 <ProfileSectionField>
                   <Label
                     htmlFor="lastName"
-                    className="text-sm font-normal text-[#2c2c2c]"
+                    className="text-sm font-normal text-muted-foreground"
                   >
                     {t("lastName")}
                   </Label>

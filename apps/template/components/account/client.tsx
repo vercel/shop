@@ -40,9 +40,9 @@ export function ProfileEditToggle({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="flex flex-row items-center gap-2 rounded-[99px] border border-transparent bg-[#e9e9e9] px-3 py-1"
+          className="flex flex-row items-center gap-2 rounded-[99px] border border-transparent bg-muted px-3 py-1"
         >
-          <span className="text-sm font-semibold text-[#020202]">
+          <span className="text-sm font-semibold text-secondary-foreground">
             {t("editProfile")}
           </span>
         </button>

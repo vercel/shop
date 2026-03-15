@@ -86,14 +86,14 @@ export function OrderFiltersSearch({
   const t = useTranslations("orders");
   return (
     <div data-slot="order-filters-search" className="py-3 sm:py-0">
-      <div className="flex flex-row items-center gap-2 rounded-[99px] bg-[#ececec] px-3 py-2">
-        <Search className="h-4 w-4 text-[#010101] opacity-50" />
+      <div className="flex flex-row items-center gap-2 rounded-[99px] bg-input px-3 py-2">
+        <Search className="h-4 w-4 text-foreground opacity-50" />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
           placeholder={placeholder ?? t("searchOrders")}
-          className="w-full bg-transparent text-base font-normal text-[#010101] placeholder:text-[#010101] placeholder:opacity-50 focus:outline-none"
+          className="w-full bg-transparent text-base font-normal text-foreground placeholder:text-foreground placeholder:opacity-50 focus:outline-none"
         />
       </div>
     </div>

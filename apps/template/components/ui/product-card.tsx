@@ -4,10 +4,6 @@ import { Price } from "@/components/product/price";
 import { DiscountBadge } from "@/components/ui/discount-badge";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// ProductCard Root
-// =============================================================================
-
 interface ProductCardProps extends React.ComponentProps<"article"> {
   variant?: "default" | "featured";
 }
@@ -30,10 +26,6 @@ function ProductCard({
   );
 }
 
-// =============================================================================
-// ProductCardBadge
-// =============================================================================
-
 function ProductCardBadge({
   className,
   children,
@@ -45,10 +37,6 @@ function ProductCardBadge({
     </div>
   );
 }
-
-// =============================================================================
-// ProductCardImageContainer
-// =============================================================================
 
 interface ProductCardImageContainerProps extends React.ComponentProps<"div"> {
   variant?: "default" | "featured";
@@ -75,10 +63,6 @@ function ProductCardImageContainer({
     </div>
   );
 }
-
-// =============================================================================
-// ProductCardImage
-// =============================================================================
 
 interface ProductCardImageProps {
   src?: string | null;
@@ -134,10 +118,6 @@ function ProductCardImage({
   );
 }
 
-// =============================================================================
-// ProductCardContent
-// =============================================================================
-
 function ProductCardContent({
   className,
   children,
@@ -153,10 +133,6 @@ function ProductCardContent({
     </div>
   );
 }
-
-// =============================================================================
-// ProductCardTitle
-// =============================================================================
 
 function ProductCardTitle({
   className,
@@ -176,10 +152,6 @@ function ProductCardTitle({
     </h3>
   );
 }
-
-// =============================================================================
-// ProductCardPrice
-// =============================================================================
 
 interface ProductCardPriceProps {
   amount: string;
@@ -244,10 +216,6 @@ function ProductCardPrice({
     </div>
   );
 }
-
-// =============================================================================
-// ProductCardSkeleton
-// =============================================================================
 
 function ProductCardSkeleton({ className }: { className?: string }) {
   return (

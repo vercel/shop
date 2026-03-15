@@ -28,7 +28,7 @@ function AccountProfileContentSkeleton() {
         {[0, 1].map((index) => (
           <div
             key={index}
-            className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl border border-[#c8c8c8] bg-white px-4 py-4 @sm:px-6 @sm:py-5 @lg:px-8"
+            className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl border border-border bg-white px-4 py-4 @sm:px-6 @sm:py-5 @lg:px-8"
           >
             <div className="flex flex-col gap-2">
               <Skeleton className="h-6 w-28" />
@@ -41,7 +41,7 @@ function AccountProfileContentSkeleton() {
 
       <div className="flex flex-col gap-4">
         <Skeleton className="h-7 w-28" />
-        <div className="rounded-xl border border-[#c8c8c8] bg-white px-8 py-5">
+        <div className="rounded-xl border border-border bg-white px-8 py-5">
           <Skeleton className="h-12 w-full rounded-md" />
         </div>
       </div>

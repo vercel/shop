@@ -7,10 +7,6 @@ import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
-// =============================================================================
-// AccountSidebar Root
-// =============================================================================
-
 function AccountSidebar({
   className,
   children,
@@ -30,10 +26,6 @@ function AccountSidebar({
   );
 }
 
-// =============================================================================
-// AccountSidebarNav
-// =============================================================================
-
 function AccountSidebarNav({
   className,
   children,
@@ -50,10 +42,6 @@ function AccountSidebarNav({
   );
 }
 
-// =============================================================================
-// AccountSidebarHeader
-// =============================================================================
-
 interface AccountSidebarHeaderProps extends React.ComponentProps<"div"> {
   title?: string;
 }
@@ -69,14 +57,10 @@ function AccountSidebarHeader({
       className={cn("flex items-center gap-2 px-3", className)}
       {...props}
     >
-      <span className="text-lg font-medium text-[#010101]">{title}</span>
+      <span className="text-lg font-medium text-foreground">{title}</span>
     </div>
   );
 }
-
-// =============================================================================
-// AccountSidebarNavList
-// =============================================================================
 
 function AccountSidebarNavList({
   className,
@@ -93,10 +77,6 @@ function AccountSidebarNavList({
     </div>
   );
 }
-
-// =============================================================================
-// AccountSidebarNavItem
-// =============================================================================
 
 interface AccountSidebarNavItemProps extends React.ComponentProps<typeof Link> {
   icon: React.ReactNode;
@@ -116,12 +96,12 @@ function AccountSidebarNavItem({
       data-active={isActive ? "true" : undefined}
       className={cn(
         "flex w-full items-center gap-3 px-3 py-1.5 rounded border border-transparent",
-        "text-base font-normal text-[#010101]",
+        "text-base font-normal text-foreground",
         // Active state
-        "data-[active=true]:bg-[#e9e9e9] data-[active=true]:font-medium",
-        "data-[active=true]:[&_svg]:text-[#2986ff] data-[active=true]:[&_svg]:opacity-100",
+        "data-[active=true]:bg-muted data-[active=true]:font-medium",
+        "data-[active=true]:[&_svg]:text-primary data-[active=true]:[&_svg]:opacity-100",
         // Inactive state
-        "[&_svg]:opacity-30 [&_svg]:text-[#010101]",
+        "[&_svg]:opacity-30 [&_svg]:text-foreground",
         className,
       )}
       {...props}
@@ -131,10 +111,6 @@ function AccountSidebarNavItem({
     </Link>
   );
 }
-
-// =============================================================================
-// AccountSidebarFooter
-// =============================================================================
 
 function AccountSidebarFooter({
   className,
@@ -151,10 +127,6 @@ function AccountSidebarFooter({
     </div>
   );
 }
-
-// =============================================================================
-// AccountSidebarHelp
-// =============================================================================
 
 interface AccountSidebarHelpProps extends React.ComponentProps<"div"> {
   label?: string;
@@ -175,19 +147,15 @@ function AccountSidebarHelp({
       className={cn("flex flex-col gap-1", className)}
       {...props}
     >
-      <span className="text-xs font-normal text-[#020202] opacity-40">
+      <span className="text-xs font-normal text-secondary-foreground opacity-40">
         {label}
       </span>
-      <Link href={href} className="text-lg font-medium text-[#010101]">
+      <Link href={href} className="text-lg font-medium text-foreground">
         {linkText}
       </Link>
     </div>
   );
 }
-
-// =============================================================================
-// Navigation Items Configuration
-// =============================================================================
 
 const accountNavItems = [
   {
@@ -209,10 +177,6 @@ const accountNavItems = [
     matchExact: false,
   },
 ] as const;
-
-// =============================================================================
-// Pre-composed AccountSidebar
-// =============================================================================
 
 interface AccountSidebarComposedProps extends React.ComponentProps<"aside"> {}
 

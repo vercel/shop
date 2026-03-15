@@ -1,11 +1,3 @@
-/**
- * Shopify Customer Account API Operations
- * API Version: 2025-01
- *
- * Uses the Customer Account API (separate from Storefront API)
- * Requires customer access token from OAuth flow
- */
-
 import type {
   Address,
   AddressInput,
@@ -19,10 +11,6 @@ import type {
   Order,
   OrderLineItem,
 } from "../types/customer";
-
-// =============================================================================
-// Customer Account API Client
-// =============================================================================
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
@@ -316,10 +304,6 @@ export class CustomerApiNotFoundError extends Error {
   }
 }
 
-// =============================================================================
-// GraphQL Fragments
-// =============================================================================
-
 const MONEY_FRAGMENT = `
   fragment MoneyFields on MoneyV2 {
     amount
@@ -444,10 +428,6 @@ const ORDER_FRAGMENT = `
   }
 `;
 
-// =============================================================================
-// Query: Get Customer
-// =============================================================================
-
 const GET_CUSTOMER_QUERY = `
   ${ADDRESS_FRAGMENT}
   query getCustomer {
@@ -563,10 +543,6 @@ export async function getCustomer(
     throw error;
   }
 }
-
-// =============================================================================
-// Query: Get Orders
-// =============================================================================
 
 const GET_ORDERS_QUERY = `
   ${ORDER_FRAGMENT}
@@ -778,10 +754,6 @@ export async function getOrders(
   }
 }
 
-// =============================================================================
-// Query: Get Single Order
-// =============================================================================
-
 const GET_ORDER_QUERY = `
   ${ORDER_FRAGMENT}
   query getOrder($orderId: ID!) {
@@ -828,10 +800,6 @@ export async function getOrder(
     throw error;
   }
 }
-
-// =============================================================================
-// Query: Get Addresses
-// =============================================================================
 
 const GET_ADDRESSES_QUERY = `
   ${ADDRESS_FRAGMENT}
@@ -890,10 +858,6 @@ export async function getAddresses(accessToken: string): Promise<Address[]> {
     throw error;
   }
 }
-
-// =============================================================================
-// Mutation: Update Customer
-// =============================================================================
 
 const UPDATE_CUSTOMER_MUTATION = `
   mutation updateCustomer($input: CustomerUpdateInput!) {
@@ -974,10 +938,6 @@ export async function updateCustomer(
   };
 }
 
-// =============================================================================
-// Mutation: Create Address
-// =============================================================================
-
 const CREATE_ADDRESS_MUTATION = `
   ${ADDRESS_FRAGMENT}
   mutation createAddress($address: CustomerAddressInput!) {
@@ -1035,10 +995,6 @@ export async function createAddress(
     data: customerAddress ? transformAddress(customerAddress) : undefined,
   };
 }
-
-// =============================================================================
-// Mutation: Update Address
-// =============================================================================
 
 const UPDATE_ADDRESS_MUTATION = `
   ${ADDRESS_FRAGMENT}
@@ -1099,10 +1055,6 @@ export async function updateAddress(
   };
 }
 
-// =============================================================================
-// Mutation: Delete Address
-// =============================================================================
-
 const DELETE_ADDRESS_MUTATION = `
   mutation deleteAddress($addressId: ID!) {
     customerAddressDelete(addressId: $addressId) {
@@ -1157,10 +1109,6 @@ export async function deleteAddress(
     data: deletedAddressId ? { deletedAddressId } : undefined,
   };
 }
-
-// =============================================================================
-// Mutation: Set Default Address
-// =============================================================================
 
 const SET_DEFAULT_ADDRESS_MUTATION = `
   mutation setDefaultAddress($addressId: ID!) {

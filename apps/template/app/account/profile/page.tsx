@@ -89,21 +89,21 @@ async function AccountContent() {
         </ProfileEditToggle>
 
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-medium text-[#2c2c2c]">
+          <h2 className="text-lg font-medium text-muted-foreground">
             {t("dangerZone")}
           </h2>
-          <div className="flex flex-col gap-4 rounded-xl border border-[#c8c8c8] bg-white px-8 py-5">
+          <div className="flex flex-col gap-4 rounded-xl border border-border bg-white px-8 py-5">
             <div className="flex flex-col gap-6">
               <div className="relative">
                 <button
                   type="button"
-                  className="flex flex-row items-center justify-between gap-4 rounded-md border border-transparent bg-[#ececec] py-3 pr-3 pl-4 text-left sm:gap-10 sm:pl-6"
+                  className="flex flex-row items-center justify-between gap-4 rounded-md border border-transparent bg-input py-3 pr-3 pl-4 text-left sm:gap-10 sm:pl-6"
                 >
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-                    <span className="text-sm font-semibold text-[#010101]">
+                    <span className="text-sm font-semibold text-foreground">
                       {t("deleteAccount")}
                     </span>
-                    <span className="text-sm font-normal text-[#010101] opacity-50">
+                    <span className="text-sm font-normal text-foreground opacity-50">
                       {t("cannotBeUndone")}
                     </span>
                   </div>

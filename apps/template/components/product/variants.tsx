@@ -1,10 +1,3 @@
-/**
- * Product Variants Component
- *
- * Server component that fetches product and passes to client components
- * Contains inlined client components: VariantSelector and AddToCartSection
- */
-
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLocale } from "@/lib/params";

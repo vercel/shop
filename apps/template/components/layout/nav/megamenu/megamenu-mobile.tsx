@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 import type { MegamenuData } from "@/lib/shopify/types/megamenu";
 
 type MegamenuMobileProps = {
@@ -162,7 +163,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                     className="border-b-0"
                                   >
                                     <AccordionTrigger
-                                      className={`${TOP_LEVEL_ITEM_CLASS} flex items-center py-0.5 hover:no-underline data-[state=open]:text-foreground`}
+                                      className={cn(TOP_LEVEL_ITEM_CLASS, "flex items-center py-0.5 hover:no-underline data-[state=open]:text-foreground")}
                                     >
                                       {label}
                                     </AccordionTrigger>
