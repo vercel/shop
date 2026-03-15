@@ -4,14 +4,16 @@ import { PlusIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useState, useTransition } from "react";
 import {
-  AddressCardComposed,
-  AddressForm,
-  type AddressFormData,
   createAddressAction,
   deleteAddressAction,
   setDefaultAddressAction,
   updateAddressAction,
-} from "@/components/addresses";
+} from "@/components/addresses/actions";
+import { AddressCardComposed } from "@/components/addresses/address-card";
+import {
+  AddressForm,
+  type AddressFormData,
+} from "@/components/addresses/address-form";
 import { Button } from "@/components/ui/button";
 import type { Address } from "@/lib/shopify/types/customer";
 
