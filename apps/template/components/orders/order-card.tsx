@@ -1,11 +1,8 @@
-"use client";
-
 import Image from "next/image";
-import { useTranslations } from "next-intl";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
-interface OrderCardProps extends React.ComponentProps<"article"> {
+interface OrderCardProps extends ComponentProps<"article"> {
   highlighted?: boolean;
 }
 
@@ -31,7 +28,7 @@ function OrderCard({
   );
 }
 
-interface OrderCardImagesProps extends React.ComponentProps<"div"> {
+interface OrderCardImagesProps extends ComponentProps<"div"> {
   images: Array<{ src: string; alt: string }>;
   maxVisible?: number;
 }
@@ -93,7 +90,7 @@ type OrderStatusVariant =
   | "delivered"
   | "cancelled";
 
-interface OrderCardBadgeProps extends React.ComponentProps<"span"> {
+interface OrderCardBadgeProps extends ComponentProps<"span"> {
   variant?: OrderStatusVariant;
 }
 
@@ -130,7 +127,7 @@ function OrderCardContent({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) {
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="order-card-content"
@@ -146,7 +143,7 @@ function OrderCardHeader({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) {
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="order-card-header"
@@ -162,7 +159,7 @@ function OrderCardTitle({
   className,
   children,
   ...props
-}: React.ComponentProps<"h3">) {
+}: ComponentProps<"h3">) {
   return (
     <h3
       data-slot="order-card-title"
@@ -174,28 +171,23 @@ function OrderCardTitle({
   );
 }
 
-interface OrderCardItemCountProps extends React.ComponentProps<"span"> {
-  count: number;
-}
-
 function OrderCardItemCount({
-  count,
   className,
+  children,
   ...props
-}: OrderCardItemCountProps) {
-  const t = useTranslations("orders");
+}: ComponentProps<"span">) {
   return (
     <span
       data-slot="order-card-item-count"
       className={cn("text-sm font-medium text-black/30", className)}
       {...props}
     >
-      {t("itemCount", { count })}
+      {children}
     </span>
   );
 }
 
-interface OrderCardProductListProps extends React.ComponentProps<"div"> {
+interface OrderCardProductListProps extends ComponentProps<"div"> {
   products: string[];
   maxVisible?: number;
 }
@@ -231,7 +223,7 @@ function OrderCardDetails({
   className,
   children,
   ...props
-}: React.ComponentProps<"div">) {
+}: ComponentProps<"div">) {
   return (
     <div
       data-slot="order-card-details"

@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { AccountMobileTabsComposed } from "@/components/account/mobile-tabs";
-import { AccountSidebarComposed } from "@/components/account/sidebar";
+import { AccountMobileTabs } from "@/components/account/mobile-tabs";
+import { AccountMobileTabItems } from "@/components/account/mobile-tabs-client";
+import {
+  AccountSidebar,
+  AccountSidebarFooter,
+  AccountSidebarHeader,
+  AccountSidebarHelp,
+  AccountSidebarNav,
+  AccountSidebarNavList,
+} from "@/components/account/sidebar";
+import { AccountSidebarNavItems } from "@/components/account/sidebar-client";
 
 export const metadata: Metadata = {
   robots: {
@@ -10,7 +20,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function AccountLayout({
+export default function AccountLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -20,21 +30,44 @@ export default async function AccountLayout({
       {/* Desktop Sidebar - hidden on mobile */}
       <div className="hidden md:flex shrink-0 w-[240px]">
         <Suspense>
-          <AccountSidebarComposed />
+          <SidebarContent />
         </Suspense>
       </div>
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 flex flex-col gap-6">
         {/* Mobile Tabs - hidden on desktop */}
-        <Suspense>
-          <AccountMobileTabsComposed />
-        </Suspense>
+        <AccountMobileTabs>
+          <Suspense>
+            <AccountMobileTabItems />
+          </Suspense>
+        </AccountMobileTabs>
         {/* Content Container */}
         <div className="bg-white rounded-t-2xl p-4 sm:p-6 md:p-8 flex-1">
           {children}
         </div>
       </div>
     </div>
+  );
+}
+
+async function SidebarContent() {
+  const t = await getTranslations("account");
+
+  return (
+    <AccountSidebar>
+      <AccountSidebarNav>
+        <AccountSidebarHeader title={t("settings")} />
+        <AccountSidebarNavList>
+          <AccountSidebarNavItems />
+        </AccountSidebarNavList>
+      </AccountSidebarNav>
+      <AccountSidebarFooter>
+        <AccountSidebarHelp
+          label={t("needHelp")}
+          linkText={t("reachOutSupport")}
+        />
+      </AccountSidebarFooter>
+    </AccountSidebar>
   );
 }

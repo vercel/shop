@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Order, OrderLineItem } from "@/lib/shopify/types/customer";
 import type { OrderStatusInfo, TranslationFn } from "@/lib/utils/order";
 import { formatAddress, formatMoney } from "@/lib/utils/order";
-import { OrderProgressComposed } from "./order-progress";
+import { OrderProgressComposed } from "./order-progress-client";
 
 export function OrderProgressSection({
   order,

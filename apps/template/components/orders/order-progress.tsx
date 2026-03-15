@@ -1,7 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 type StepStatus = "completed" | "current" | "upcoming";
@@ -11,7 +8,7 @@ interface Step {
   status: StepStatus;
 }
 
-interface OrderProgressProps extends React.ComponentProps<"div"> {
+interface OrderProgressProps extends ComponentProps<"div"> {
   steps: Step[];
 }
 
@@ -35,7 +32,7 @@ function OrderProgress({ steps, className, ...props }: OrderProgressProps) {
   );
 }
 
-interface OrderProgressStepProps extends React.ComponentProps<"div"> {
+interface OrderProgressStepProps extends ComponentProps<"div"> {
   label: string;
   status: StepStatus;
   isFirst?: boolean;
@@ -80,7 +77,7 @@ function OrderProgressStep({
   );
 }
 
-interface OrderProgressDotProps extends React.ComponentProps<"div"> {
+interface OrderProgressDotProps extends ComponentProps<"div"> {
   status: StepStatus;
 }
 
@@ -108,7 +105,7 @@ function OrderProgressDot({
   );
 }
 
-interface OrderProgressLineProps extends React.ComponentProps<"div"> {
+interface OrderProgressLineProps extends ComponentProps<"div"> {
   status: StepStatus | "completed" | "upcoming";
   position: "leading" | "trailing";
 }
@@ -138,7 +135,7 @@ function OrderProgressLine({
   );
 }
 
-interface OrderProgressLabelProps extends React.ComponentProps<"span"> {
+interface OrderProgressLabelProps extends ComponentProps<"span"> {
   status: StepStatus;
 }
 
@@ -176,64 +173,12 @@ type FulfillmentStatus =
   | "delivered"
   | "cancelled";
 
-interface OrderProgressComposedProps extends Omit<OrderProgressProps, "steps"> {
-  currentStatus: FulfillmentStatus;
-}
-
-const DEFAULT_STEP_KEYS = [
-  { key: "received", labelKey: "received" as const },
-  { key: "shipped", labelKey: "shipped" as const },
-  { key: "out_for_delivery", labelKey: "outForDelivery" as const },
-  { key: "delivered", labelKey: "delivered" as const },
-] as const;
-
-const STATUS_ORDER: Record<FulfillmentStatus, number> = {
-  received: 0,
-  processing: 0, // Maps to same position as received
-  shipped: 1,
-  out_for_delivery: 2,
-  delivered: 3,
-  cancelled: -1, // Special case
-};
-
-function OrderProgressComposed({
-  currentStatus,
-  ...props
-}: OrderProgressComposedProps) {
-  const t = useTranslations("orders.progress");
-  const currentIndex = STATUS_ORDER[currentStatus];
-
-  // Handle cancelled - show all as upcoming
-  if (currentStatus === "cancelled") {
-    const steps: Step[] = DEFAULT_STEP_KEYS.map((step) => ({
-      label: t(step.labelKey),
-      status: "upcoming" as const,
-    }));
-    return <OrderProgress steps={steps} {...props} />;
-  }
-
-  const steps: Step[] = DEFAULT_STEP_KEYS.map((step, index) => {
-    let status: StepStatus;
-    if (index < currentIndex) {
-      status = "completed";
-    } else if (index === currentIndex) {
-      status = "current";
-    } else {
-      status = "upcoming";
-    }
-    return { label: t(step.labelKey), status };
-  });
-
-  return <OrderProgress steps={steps} {...props} />;
-}
-
 export {
   OrderProgress,
   OrderProgressStep,
   OrderProgressDot,
   OrderProgressLine,
   OrderProgressLabel,
-  OrderProgressComposed,
   type Step,
   type StepStatus,
   type FulfillmentStatus,
