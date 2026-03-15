@@ -14,10 +14,8 @@ import {
   OrderCardProductList,
   OrderCardTitle,
 } from "@/components/orders/order-card";
-import {
-  type FilterTab,
-  OrderFiltersComposed,
-} from "@/components/orders/order-filters";
+import type { FilterTab } from "@/components/orders/order-filters";
+import { OrderFiltersComposed } from "@/components/orders/order-filters-client";
 import { requireSession } from "@/lib/auth/server";
 import { getLocale } from "@/lib/params";
 import { getOrders } from "@/lib/shopify/operations/customer";
@@ -182,7 +180,9 @@ async function OrderCardWrapper({
             <OrderCardTitle>{dateLabel}</OrderCardTitle>
           </OrderCardHeader>
           <OrderCardDetails>
-            <OrderCardItemCount count={itemCount} />
+            <OrderCardItemCount>
+              {t("itemCount", { count: itemCount })}
+            </OrderCardItemCount>
             <OrderCardProductList products={productNames} />
           </OrderCardDetails>
         </OrderCardContent>
