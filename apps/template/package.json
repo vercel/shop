@@ -18,8 +18,6 @@
     "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vercel/analytics": "2.0.1",
-    "@vercel/speed-insights": "2.0.0",
     "@xyflow/react": "12.10.1",
     "ai": "6.0.116",
     "babel-plugin-react-compiler": "1.0.0",
