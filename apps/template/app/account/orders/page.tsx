@@ -134,7 +134,7 @@ function OrderSection({
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 p-3">
-        <span className="text-lg font-medium text-[#2c2c2c]">{title}</span>
+        <span className="text-lg font-medium text-muted-foreground">{title}</span>
       </div>
       <div className="flex flex-col gap-4">
         {orders.map((order) => (
@@ -195,10 +195,10 @@ async function EmptyOrdersState() {
   const t = await getTranslations("orders");
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-4">
-      <div className="text-lg font-medium text-[#2c2c2c]">
+      <div className="text-lg font-medium text-muted-foreground">
         {t("noOrdersFound")}
       </div>
-      <p className="text-sm text-[#797979]">{t("noOrdersDescription")}</p>
+      <p className="text-sm text-foreground/50">{t("noOrdersDescription")}</p>
     </div>
   );
 }

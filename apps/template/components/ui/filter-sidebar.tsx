@@ -82,7 +82,7 @@ function FilterSidebarResultsCount({
     <div
       data-slot="filter-sidebar-results-count"
       className={cn(
-        "flex items-center gap-1.5 text-sm tracking-[-0.14px] text-[#797979]",
+        "flex items-center gap-1.5 text-sm tracking-[-0.14px] text-foreground/50",
         className,
       )}
       {...props}
@@ -131,9 +131,9 @@ function FilterBadge({
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold tracking-[-0.12px] transition-colors",
         variant === "default" &&
-          "bg-[rgba(1,1,1,0.6)] text-[#fafafa] hover:bg-[rgba(1,1,1,0.7)]",
+          "bg-foreground/60 text-background hover:bg-foreground/70",
         variant === "primary" &&
-          "bg-[rgba(41,134,255,0.15)] text-[#2986ff] hover:bg-[rgba(41,134,255,0.25)]",
+          "bg-primary/15 text-primary hover:bg-primary/25",
         className,
       )}
       onClick={onRemove ?? props.onClick}
@@ -177,7 +177,7 @@ function FilterSectionHeader({
       data-slot="filter-section-header"
       className={cn("flex items-center justify-between", className)}
     >
-      <span className="text-base font-semibold tracking-[-0.27px] text-[#2c2c2c]">
+      <span className="text-base font-semibold tracking-[-0.27px] text-muted-foreground">
         {title}
       </span>
       {children}
@@ -236,7 +236,7 @@ function FilterOption({
   ...props
 }: FilterOptionProps) {
   const sharedClassName = cn(
-    "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-[#2c2c2c] transition-colors hover:text-foreground",
+    "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
     "data-[selected=true]:font-medium",
     className,
   );
@@ -319,7 +319,7 @@ function FilterPriceRange({
       {...props}
     >
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center rounded-full bg-[#ececec] px-3 h-8">
+        <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
           <span className="text-sm text-muted-foreground">
             {currencySymbol}
           </span>
@@ -334,7 +334,7 @@ function FilterPriceRange({
           />
         </div>
         <span className="text-muted-foreground">–</span>
-        <div className="flex flex-1 items-center rounded-full bg-[#ececec] px-3 h-8">
+        <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
           <span className="text-sm text-muted-foreground">
             {currencySymbol}
           </span>
@@ -377,7 +377,7 @@ function FilterPricePreset({
       data-slot="filter-price-preset"
       data-selected={selected}
       className={cn(
-        "text-left text-sm tracking-[-0.24px] text-[#2c2c2c] transition-colors hover:text-foreground",
+        "text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
         "data-[selected=true]:font-medium",
         className,
       )}
@@ -421,7 +421,7 @@ function FilterSidebarCategoryBack({
       data-slot="filter-sidebar-category-back"
       data-pending={pending}
       className={cn(
-        "flex items-center gap-2 text-left text-sm tracking-[-0.24px] text-[#2c2c2c] transition-colors hover:text-foreground",
+        "flex items-center gap-2 text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
         className,
       )}
       {...props}
@@ -456,7 +456,7 @@ function FilterSidebarCategoryItem({
       data-slot="filter-sidebar-category-item"
       data-pending={pending}
       className={cn(
-        "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-[#2c2c2c] transition-colors hover:text-foreground",
+        "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
         className,
       )}
       {...props}

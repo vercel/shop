@@ -68,7 +68,7 @@ export function ProfileEditInline({
                 <ProfileSectionField>
                   <Label
                     htmlFor="firstName"
-                    className="text-sm font-normal text-[#2c2c2c]"
+                    className="text-sm font-normal text-muted-foreground"
                   >
                     {t("firstName")}
                   </Label>
@@ -91,7 +91,7 @@ export function ProfileEditInline({
                 <ProfileSectionField>
                   <Label
                     htmlFor="lastName"
-                    className="text-sm font-normal text-[#2c2c2c]"
+                    className="text-sm font-normal text-muted-foreground"
                   >
                     {t("lastName")}
                   </Label>

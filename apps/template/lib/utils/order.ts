@@ -108,8 +108,8 @@ export function getOrderStatusInfo(
     return {
       label: t("status.orderCancelled"),
       badgeText: null,
-      badgeColor: "#797979",
-      badgeTextColor: "#ffffff",
+      badgeColor: "var(--ring)",
+      badgeTextColor: "var(--primary-foreground)",
       dateLabel: t("status.cancelledDate", {
         date: formatDate(cancelDate, locale),
       }),
@@ -125,8 +125,8 @@ export function getOrderStatusInfo(
     return {
       label: t("status.orderDelivered"),
       badgeText: null,
-      badgeColor: "#00ba5a",
-      badgeTextColor: "#00ba5a",
+      badgeColor: "var(--positive)",
+      badgeTextColor: "var(--positive)",
       dateLabel: t("status.deliveredDate", {
         date: formatDate(deliveredDate, locale),
       }),
@@ -143,8 +143,8 @@ export function getOrderStatusInfo(
     return {
       label: t("status.orderInProgress"),
       badgeText: t("status.outForDelivery"),
-      badgeColor: "rgba(41, 134, 255, 0.15)",
-      badgeTextColor: "#2986ff",
+      badgeColor: "color-mix(in srgb, var(--primary) 15%, transparent)",
+      badgeTextColor: "var(--primary)",
       dateLabel: estimatedDate
         ? t("status.expectedDate", {
             date: formatDateRange(estimatedDate, locale),
@@ -161,8 +161,8 @@ export function getOrderStatusInfo(
     return {
       label: t("status.orderInProgress"),
       badgeText: t("status.shipped"),
-      badgeColor: "rgba(41, 134, 255, 0.15)",
-      badgeTextColor: "#2986ff",
+      badgeColor: "color-mix(in srgb, var(--primary) 15%, transparent)",
+      badgeTextColor: "var(--primary)",
       dateLabel: estimatedDate
         ? t("status.expectedDate", {
             date: formatDateRange(estimatedDate, locale),
@@ -179,8 +179,8 @@ export function getOrderStatusInfo(
   return {
     label: t("status.orderInProgress"),
     badgeText: t("status.fastShipping"),
-    badgeColor: "#00ba5a",
-    badgeTextColor: "#00ba5a",
+    badgeColor: "var(--positive)",
+    badgeTextColor: "var(--positive)",
     dateLabel: t("status.expectedDate", {
       date: formatDateRange(estimatedDelivery, locale),
     }),

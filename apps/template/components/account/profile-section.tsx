@@ -35,7 +35,7 @@ function ProfileSectionAvatar({
     <div
       data-slot="profile-section-avatar"
       className={cn(
-        "flex size-[100px] shrink-0 items-center justify-center self-center @md:self-start rounded-full border-2 border-[#e9e9e9] bg-[#f5f5f5] text-2xl font-medium text-[#797979]",
+        "flex size-[100px] shrink-0 items-center justify-center self-center @md:self-start rounded-full border-2 border-muted bg-muted text-2xl font-medium text-foreground/50",
         className,
       )}
       {...props}
@@ -151,7 +151,7 @@ function ProfileSectionFieldLabel({
   return (
     <span
       data-slot="profile-section-field-label"
-      className={cn("text-sm font-normal text-[#2c2c2c]", className)}
+      className={cn("text-sm font-normal text-muted-foreground", className)}
       {...props}
     >
       {children}
@@ -170,7 +170,7 @@ function ProfileSectionFieldValue({
   return (
     <span
       data-slot="profile-section-field-value"
-      className={cn("text-lg font-medium text-[#010101]", className)}
+      className={cn("text-lg font-medium text-foreground", className)}
       {...props}
     >
       {children}

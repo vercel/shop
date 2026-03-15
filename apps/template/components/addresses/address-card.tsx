@@ -19,7 +19,7 @@ function AddressCard({
       data-slot="address-card"
       data-default={isDefault}
       className={cn(
-        "flex flex-col gap-6 p-4 bg-[#e9e9e9] rounded-xl border border-[#5a5a5a]",
+        "flex flex-col gap-6 p-4 bg-muted rounded-xl border border-ring",
         className,
       )}
       {...props}
@@ -81,10 +81,10 @@ function AddressCardRecipient({
       className={cn("flex flex-col gap-1", className)}
       {...props}
     >
-      <span className="text-xs font-normal text-[#020202]/40">
+      <span className="text-xs font-normal text-secondary-foreground/40">
         {deliverToLabel}
       </span>
-      <span className="text-lg font-medium text-[#010101]">{name}</span>
+      <span className="text-lg font-medium text-foreground">{name}</span>
     </div>
   );
 }
@@ -98,7 +98,7 @@ function AddressCardBadge({
     <span
       data-slot="address-card-badge"
       className={cn(
-        "inline-flex items-center px-[7px] py-0 bg-[#010101] rounded-[119px] text-sm font-semibold text-[#fafafa]",
+        "inline-flex items-center px-[7px] py-0 bg-foreground rounded-[119px] text-sm font-semibold text-background",
         className,
       )}
       {...props}
@@ -125,10 +125,10 @@ function AddressCardAddress({
       className={cn("flex flex-col gap-1", className)}
       {...props}
     >
-      <span className="text-xs font-normal text-[#020202]/40">
+      <span className="text-xs font-normal text-secondary-foreground/40">
         {addressLabel}
       </span>
-      <span className="text-base font-normal text-[#010101] whitespace-pre-line">
+      <span className="text-base font-normal text-foreground whitespace-pre-line">
         {address}
       </span>
     </div>
@@ -167,7 +167,7 @@ function AddressCardAction({
       data-variant={variant}
       type="button"
       className={cn(
-        "text-xs font-normal text-[#020202] hover:underline cursor-pointer",
+        "text-xs font-normal text-secondary-foreground hover:underline cursor-pointer",
         "data-[variant=danger]:text-red-600",
         className,
       )}

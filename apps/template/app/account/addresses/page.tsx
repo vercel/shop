@@ -46,7 +46,7 @@ function AddressesLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="flex flex-col gap-6 p-4 bg-[#e9e9e9] rounded-xl border border-[#5a5a5a]"
+            className="flex flex-col gap-6 p-4 bg-muted rounded-xl border border-ring"
           >
             <div className="flex flex-col gap-3 opacity-80">
               <div className="flex flex-row gap-1 pb-2 justify-between items-start">
