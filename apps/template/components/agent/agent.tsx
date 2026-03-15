@@ -653,6 +653,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 <AttachButton />
                 <PromptInputBody>
                   <PromptInputTextarea
+                    autoFocus
                     className="min-h-0 py-3 text-sm"
                     onChange={(e) => setInput(e.target.value)}
                     value={input}
