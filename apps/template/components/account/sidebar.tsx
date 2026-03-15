@@ -1,9 +1,5 @@
-"use client";
-
 import { HistoryIcon, PackageIcon, UserPenIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -178,49 +174,6 @@ const accountNavItems = [
   },
 ] as const;
 
-interface AccountSidebarComposedProps extends React.ComponentProps<"aside"> {}
-
-function AccountSidebarComposed({
-  className,
-  ...props
-}: AccountSidebarComposedProps) {
-  const pathname = usePathname();
-  const t = useTranslations("account");
-
-  const isActive = (href: string, matchExact: boolean) => {
-    if (matchExact) {
-      return pathname === href;
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
-  return (
-    <AccountSidebar className={className} {...props}>
-      <AccountSidebarNav>
-        <AccountSidebarHeader title={t("settings")} />
-        <AccountSidebarNavList>
-          {accountNavItems.map((item) => (
-            <AccountSidebarNavItem
-              key={item.labelKey}
-              href={item.href}
-              icon={<item.icon className="size-4" />}
-              isActive={isActive(item.href, item.matchExact)}
-            >
-              {t(item.labelKey)}
-            </AccountSidebarNavItem>
-          ))}
-        </AccountSidebarNavList>
-      </AccountSidebarNav>
-      <AccountSidebarFooter>
-        <AccountSidebarHelp
-          label={t("needHelp")}
-          linkText={t("reachOutSupport")}
-        />
-      </AccountSidebarFooter>
-    </AccountSidebar>
-  );
-}
-
 export {
   AccountSidebar,
   AccountSidebarNav,
@@ -229,6 +182,5 @@ export {
   AccountSidebarNavItem,
   AccountSidebarFooter,
   AccountSidebarHelp,
-  AccountSidebarComposed,
   accountNavItems,
 };

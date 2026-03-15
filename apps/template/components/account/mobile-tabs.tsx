@@ -1,9 +1,5 @@
-"use client";
-
 import { HistoryIcon, PackageIcon, UserPenIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -82,41 +78,8 @@ const mobileNavItems = [
   },
 ] as const;
 
-interface AccountMobileTabsComposedProps extends React.ComponentProps<"nav"> {}
-
-function AccountMobileTabsComposed({
-  className,
-  ...props
-}: AccountMobileTabsComposedProps) {
-  const pathname = usePathname();
-  const t = useTranslations("account");
-
-  const isActive = (href: string, matchExact: boolean) => {
-    if (matchExact) {
-      return pathname === href;
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
-
-  return (
-    <AccountMobileTabs className={className} {...props}>
-      {mobileNavItems.map((item) => (
-        <AccountMobileTab
-          key={item.labelKey}
-          href={item.href}
-          icon={<item.icon className="size-4" />}
-          isActive={isActive(item.href, item.matchExact)}
-        >
-          {t(item.labelKey)}
-        </AccountMobileTab>
-      ))}
-    </AccountMobileTabs>
-  );
-}
-
 export {
   AccountMobileTabs,
   AccountMobileTab,
-  AccountMobileTabsComposed,
   mobileNavItems,
 };
