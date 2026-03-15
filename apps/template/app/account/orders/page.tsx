@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { AccountPageHeader } from "@/components/account/page-header";
 import {
-  type FilterTab,
   OrderCard,
   OrderCardBadge,
   OrderCardContent,
@@ -14,8 +13,11 @@ import {
   OrderCardItemCount,
   OrderCardProductList,
   OrderCardTitle,
+} from "@/components/orders/order-card";
+import {
+  type FilterTab,
   OrderFiltersComposed,
-} from "@/components/orders";
+} from "@/components/orders/order-filters";
 import { requireSession } from "@/lib/auth/server";
 import { getLocale } from "@/lib/params";
 import { getOrders } from "@/lib/shopify/operations/customer";

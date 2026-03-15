@@ -40,7 +40,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { registry } from "@/lib/agent/ui";
+import { registry } from "@/lib/agent/ui/registry";
 import {
   ChainOfThought,
   ChainOfThoughtContent,
