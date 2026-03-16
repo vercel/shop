@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { HomeHero, HomeHeroSkeleton } from "@/components/cms/home-hero";
-import {
-  HomeSections,
-  HomeSectionsSkeleton,
-} from "@/components/cms/home-sections";
+import { MarketingPageRenderer } from "@/components/cms/page-renderer";
 import { Container } from "@/components/layout/container";
 import { getDefaultHomepage } from "@/lib/content/homepage";
 import { getLocale } from "@/lib/params";
@@ -37,16 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const pagePromise = getDefaultHomepage(locale);
+  const page = await getDefaultHomepage(locale);
 
   return (
     <Container>
-      <Suspense fallback={<HomeHeroSkeleton />}>
-        <HomeHero pagePromise={pagePromise} />
-      </Suspense>
-      <Suspense fallback={<HomeSectionsSkeleton />}>
-        <HomeSections pagePromise={pagePromise} />
-      </Suspense>
+      <MarketingPageRenderer page={page} />
     </Container>
   );
 }
