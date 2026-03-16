@@ -1,6 +1,6 @@
 {
   "name": "shop",
-  "version": "0.1.0",
+  "version": "0.20260316.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -27,9 +27,9 @@
     "cmdk": "1.1.1",
     "embla-carousel-react": "8.6.0",
     "lucide-react": "0.577.0",
-    "motion": "12.36.0",
+    "motion": "12.37.0",
     "nanoid": "5.1.6",
-    "next": "16.2.0-canary.98",
+    "next": "16.2.0-canary.100",
     "next-intl": "4.8.3",
     "radix-ui": "1.4.3",
     "react": "19.2.4",

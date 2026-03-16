@@ -56,7 +56,7 @@ export function BottomBar({ children }: BottomBarProps) {
     <motion.div
       layout
       transition={{ duration: 0.35, ease: easing }}
-      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center bg-input/80 backdrop-blur-md h-12 rounded-full shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline outline-1 -outline-offset-1 outline-border/35"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 flex items-center bg-input/80 backdrop-blur-md h-12 rounded-full shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35"
       style={{
         width: searchOpen ? "calc(100vw - 3rem)" : "auto",
         maxWidth: searchOpen ? "40rem" : "none",
