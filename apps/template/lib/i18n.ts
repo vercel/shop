@@ -1,13 +1,4 @@
-// Supported locale catalog for the template. Keep this list broad so adding a
-// market later is a small config change instead of a refactor.
-export const locales = [
-  "en-US",
-  "en-GB",
-  "de-DE",
-  "fr-FR",
-  "nl-NL",
-  "es-ES",
-] as const;
+export const locales = ["en-US"] as const;
 
 export type Locale = (typeof locales)[number];
 
@@ -46,11 +37,6 @@ export function resolveLocale(value: string | null | undefined): Locale {
 // Currency data per locale
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
   "en-US": { currency: "USD", symbol: "$" },
-  "en-GB": { currency: "GBP", symbol: "£" },
-  "de-DE": { currency: "EUR", symbol: "€" },
-  "fr-FR": { currency: "EUR", symbol: "€" },
-  "nl-NL": { currency: "EUR", symbol: "€" },
-  "es-ES": { currency: "EUR", symbol: "€" },
 };
 
 export type LocaleData = {
