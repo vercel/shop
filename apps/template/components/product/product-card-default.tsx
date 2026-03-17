@@ -1,5 +1,6 @@
+import Link from "next/link";
+
 import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
-import { PrefetchLink } from "@/components/prefetch-link";
 import {
   ProductCard,
   ProductCardContent,
@@ -28,7 +29,7 @@ export function ProductCardDefault({
   className,
 }: ProductCardDefaultProps) {
   return (
-    <PrefetchLink href={`/products/${product.handle}`} className={className}>
+    <Link href={`/products/${product.handle}`} className={className}>
       <ProductCard variant="default">
         <ProductCardImageContainer variant="default">
           <ProductCardImage
@@ -59,6 +60,6 @@ export function ProductCardDefault({
           </ProductCardContent>
         </ProductCardImageContainer>
       </ProductCard>
-    </PrefetchLink>
+    </Link>
   );
 }

@@ -1,6 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
 
-import { PrefetchLink } from "@/components/prefetch-link";
 import { Button } from "@/components/ui/button";
 import type { ContentSection } from "@/lib/types";
 
@@ -38,7 +38,7 @@ export function PromoBannerSection({ section }: PromoBannerSectionProps) {
               {subtitle && <p className="text-base sm:text-lg text-white/90 mb-4">{subtitle}</p>}
               {ctaText && ctaLink && (
                 <Button asChild variant="secondary" size="lg" className="font-semibold">
-                  <PrefetchLink href={ctaLink}>{ctaText}</PrefetchLink>
+                  <Link href={ctaLink}>{ctaText}</Link>
                 </Button>
               )}
             </div>

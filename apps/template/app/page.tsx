@@ -63,12 +63,6 @@ export default async function HomePage() {
               storeName: siteConfig.name,
             }),
             subheadline: contentT("hero.subheadline"),
-            backgroundImage: {
-              url: "/og-default.png",
-              alt: siteConfig.name,
-              width: 1200,
-              height: 630,
-            },
             ctaText: contentT("hero.ctaText"),
             ctaLink: featuredCollection ? `/collections/${featuredCollection.handle}` : "/search",
           }}

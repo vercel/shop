@@ -1,6 +1,7 @@
+import Link from "next/link";
+
 import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
 import { FeaturedBadge } from "@/components/featured-badge";
-import { PrefetchLink } from "@/components/prefetch-link";
 import {
   ProductCard,
   ProductCardBadge,
@@ -30,7 +31,7 @@ export function ProductCardFeatured({
   className,
 }: ProductCardFeaturedProps) {
   return (
-    <PrefetchLink href={`/products/${product.handle}`} className={className}>
+    <Link href={`/products/${product.handle}`} className={className}>
       <ProductCard variant="featured">
         <ProductCardBadge>
           <FeaturedBadge />
@@ -64,6 +65,6 @@ export function ProductCardFeatured({
           </ProductCardContent>
         </ProductCardImageContainer>
       </ProductCard>
-    </PrefetchLink>
+    </Link>
   );
 }
