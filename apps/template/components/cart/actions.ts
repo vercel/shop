@@ -1,11 +1,9 @@
 "use server";
 
-import { getSession } from "@/lib/auth/server";
 import { isEnabledLocale } from "@/lib/i18n";
 import {
   addToCart,
   getCart,
-  linkCartToCustomer,
   removeFromCart,
   updateCart,
   updateCartBuyerIdentity,
@@ -236,10 +234,6 @@ export async function updateCartNoteAction(
 /**
  * Add item to cart and return the Shopify checkout URL.
  * Used by "Buy Now" — adds to whatever is already in the cart, then redirects.
- *
- * Optimised: addToCart and getSession run in parallel since they're independent.
- * addToCart already returns the full cart (including checkoutUrl), so no extra
- * getCart() round-trip is needed for unauthenticated users.
  */
 export async function buyNowAction(
   merchandiseId: string,
@@ -250,21 +244,7 @@ export async function buyNowAction(
   }
 
   try {
-    // Run add-to-cart and session lookup in parallel
-    const [cart, session] = await Promise.all([
-      addToCart([{ merchandiseId, quantity }]),
-      getSession(),
-    ]);
-
-    // If authenticated, link cart to customer so Shopify recognises them at checkout
-    if (session?.accessToken) {
-      const linkedCart = await linkCartToCustomer(session.accessToken);
-      if (linkedCart) {
-        return { checkoutUrl: linkedCart.checkoutUrl };
-      }
-    }
-
-    // addToCart already returned the cart with checkoutUrl — use it directly
+    const cart = await addToCart([{ merchandiseId, quantity }]);
     return { checkoutUrl: cart.checkoutUrl };
   } catch (error) {
     console.error("Buy now failed:", error);
@@ -277,28 +257,17 @@ export async function buyNowAction(
 }
 
 /**
- * Link cart to customer if authenticated, then return the checkout URL.
- * Called before redirecting to Shopify checkout so the customer is recognized.
+ * Return the checkout URL for the current cart.
+ * Called before redirecting to Shopify checkout.
  */
 export async function prepareCheckoutAction(): Promise<{
   checkoutUrl: string | null;
 }> {
   try {
-    const session = await getSession();
-
-    if (session?.accessToken) {
-      const updatedCart = await linkCartToCustomer(session.accessToken);
-      if (updatedCart) {
-        return { checkoutUrl: updatedCart.checkoutUrl };
-      }
-    }
-
-    // Not authenticated or no cart — fall back to current cart's checkout URL
     const cart = await getCart();
     return { checkoutUrl: cart?.checkoutUrl ?? null };
   } catch (error) {
     console.error("Prepare checkout failed:", error);
-    // Fall back to current cart URL so checkout isn't blocked
     const cart = await getCart();
     return { checkoutUrl: cart?.checkoutUrl ?? null };
   }

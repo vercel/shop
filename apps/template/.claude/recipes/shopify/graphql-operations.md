@@ -19,9 +19,7 @@
 | `lib/shopify/operations/products.ts` | Product queries (getProduct, getProducts, etc.) |
 | `lib/shopify/operations/cart.ts` | Cart queries and mutations |
 | `lib/shopify/operations/collections.ts` | Collection queries |
-| `lib/shopify/operations/customer.ts` | Customer Account API operations |
 | `.claude/schemas/shopify-storefront.graphql` | Storefront API schema reference |
-| `.claude/schemas/shopify-customer.graphql` | Customer Account API schema reference |
 
 ## How it works
 
@@ -103,20 +101,6 @@ const products = flattenEdges(data.collection.products);
 // ShopifyEdges<Product> → Product[]
 ```
 
-### Customer Account API
-
-The Customer Account API uses a separate client and OAuth tokens (not the Storefront API token):
-
-```tsx
-// operations/customer.ts uses its own fetch with Bearer token
-const response = await fetch(customerApiEndpoint, {
-  headers: { Authorization: `Bearer ${accessToken}` },
-  body: JSON.stringify({ query, variables }),
-});
-```
-
-See [Customer API](./customer-api.md) for details.
-
 ## GUARDRAILS
 
 > These rules are non-negotiable. Violating them will break the application.
@@ -152,5 +136,4 @@ Set `DEBUG_SHOPIFY=true` in your `.env` to log all Shopify API calls with timing
 
 - [Type Seams](../architecture/type-seams.md) — Domain vs Shopify types
 - [Caching Strategy](../architecture/caching-strategy.md) — Cache profiles and invalidation
-- [Customer API](./customer-api.md) — Customer Account API specifics
 - [Add New Product Field](../guides/add-new-product-field.md) — End-to-end example

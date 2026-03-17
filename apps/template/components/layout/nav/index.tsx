@@ -2,26 +2,8 @@ import { CartIcon, CartIconFallback } from "./cart";
 
 import Link from "next/link";
 import { Megamenu } from "./megamenu";
-import { NavAccount } from "./account";
 import { QuickLinks } from "./quick-links";
 import { Suspense } from "react";
-import { UserIcon } from "lucide-react";
-
-function AccountFallback() {
-  return (
-    <div className="flex items-center gap-2 px-3 py-2">
-      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-        <UserIcon className="w-4 h-4" />
-      </div>
-      <div className="hidden lg:flex flex-col leading-tight w-18">
-        <span className="text-xs font-semibold text-foreground">Account</span>
-        <span className="text-xs text-transparent" aria-hidden="true">
-          &nbsp;
-        </span>
-      </div>
-    </div>
-  );
-}
 
 export function Nav({ locale }: { locale: string }) {
   return (
@@ -59,9 +41,6 @@ export function Nav({ locale }: { locale: string }) {
         </Suspense>
 
         <div className="flex items-center gap-4 ml-auto">
-          <Suspense fallback={<AccountFallback />}>
-            <NavAccount />
-          </Suspense>
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>

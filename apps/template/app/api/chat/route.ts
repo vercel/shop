@@ -16,7 +16,6 @@ import { createAgent } from "@/lib/agent/agent";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProduct } from "@/lib/shopify/operations/products";
-import { getSession } from "@/lib/auth/server";
 import { pipeJsonRender } from "@json-render/core";
 
 /**
@@ -38,32 +37,6 @@ function parseReferer(referer: string | null): {
   } catch {
     return { locale: defaultLocale, segments: [] };
   }
-}
-
-/**
- * Resolve user context server-side from auth session.
- */
-async function resolveUser(locale: Locale): Promise<User> {
-  try {
-    const session = await getSession();
-    if (session?.accessToken) {
-      return {
-        type: "user",
-        locale,
-        id: session.customerId,
-        email: session.email,
-        name: [session.firstName, session.lastName].filter(Boolean).join(" "),
-        accessToken: session.accessToken,
-      };
-    }
-  } catch {
-    // Session resolution failed, fall through to guest
-  }
-
-  return {
-    type: "guest",
-    locale,
-  };
 }
 
 /**
@@ -114,10 +87,6 @@ async function resolvePageContext(
     return { type: "cart" };
   }
 
-  if (pageType === "account") {
-    return { type: "account" };
-  }
-
   return null;
 }
 
@@ -140,7 +109,7 @@ export async function POST(request: Request) {
   // Resolve context from Referer header (server-side, not client-sent)
   const referer = request.headers.get("referer");
   const { locale, segments } = parseReferer(referer);
-  const user = await resolveUser(locale);
+  const user: User = { type: "guest", locale };
   const page = await resolvePageContext(segments, locale, referer);
 
   // Get or create cart before streaming (cookies can't be set during stream)

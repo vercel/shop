@@ -16,7 +16,6 @@
 | **Understand caching** | [Caching Strategy](architecture/caching-strategy.md) |
 | **Replace Shopify** with another provider | [Swap Commerce Provider](guides/swap-commerce-provider.md), [Type Seams](architecture/type-seams.md) |
 | **Add a CMS** to the homepage | [Swap CMS Provider](guides/swap-cms-provider.md) |
-| **Modify customer features** (profile, orders) | [Customer API](shopify/customer-api.md) |
 | **Add shipping estimates** to storefront | [Add Shipping](guides/add-shipping.md) |
 | **Debug stale data** | [Caching Strategy](architecture/caching-strategy.md), [Cart Actions](cart/cart-actions.md) |
 | **Add a new locale** | [Locale Routing](architecture/locale-routing.md), [Translations](i18n/translations.md) |
@@ -45,7 +44,6 @@
 | Recipe | Purpose |
 |--------|---------|
 | [GraphQL Operations](shopify/graphql-operations.md) | Schema refs, fragments, transforms pipeline |
-| [Customer API](shopify/customer-api.md) | Customer Account API (separate client, OAuth) |
 
 ### i18n
 

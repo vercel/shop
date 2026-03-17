@@ -23,9 +23,6 @@ const nextConfig: NextConfig = {
       destination: "/products/:handle/:variantId",
     },
   ],
-  // Better Auth pulls some adapter modules via internal imports that Turbopack may split
-  // into runtime chunks. Keep these packages external and explicitly traced for Vercel.
-  serverExternalPackages: ["better-auth"],
 };
 
 const withNextIntl = createNextIntlPlugin({

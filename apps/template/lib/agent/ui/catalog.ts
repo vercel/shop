@@ -95,31 +95,5 @@ export const catalog = defineCatalog(schema, {
         "Display-only — the user picks a variant by typing in chat.",
     },
 
-    AgentOrderCard: {
-      props: z.object({
-        orderNumber: z.string(),
-        date: z.string(),
-        fulfillmentStatus: z.string(),
-        financialStatus: z.string(),
-        total: z.string(),
-        itemCount: z.number(),
-        items: z.string(),
-        cancelled: z.boolean(),
-        statusPageUrl: z.string(),
-      }),
-      description:
-        "A compact order summary card with order number, status badge, date, total, " +
-        "and item summary. Includes a link to the order status page.",
-    },
-
-    AgentOrderList: {
-      props: z.object({
-        title: z.string().nullable(),
-      }),
-      slots: ["default"],
-      description:
-        "A container for multiple AgentOrderCard components. " +
-        "Wrap multiple order cards in this list.",
-    },
   },
 });

@@ -21,7 +21,6 @@
     "@xyflow/react": "12.10.1",
     "ai": "6.0.116",
     "babel-plugin-react-compiler": "1.0.0",
-    "better-auth": "1.5.5",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",

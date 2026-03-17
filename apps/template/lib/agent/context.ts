@@ -5,14 +5,6 @@ export type User =
   | {
       type: "guest";
       locale: Locale;
-    }
-  | {
-      type: "user";
-      locale: Locale;
-      id: string;
-      email: string;
-      name: string;
-      accessToken: string;
     };
 
 // Page context resolved from Referer header with trusted data
@@ -21,7 +13,6 @@ export type PageContext =
   | { type: "collection"; handle: string; title: string }
   | { type: "search"; query: string }
   | { type: "cart" }
-  | { type: "account" }
   | null;
 
 // We can track context in here like current user or current page
