@@ -3,8 +3,8 @@
 import { Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import Link from "next/link";
 
-import { PrefetchLink } from "@/components/prefetch-link";
 import {
   Select,
   SelectContent,
@@ -36,7 +36,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
 
   return (
     <div className="flex gap-6 p-2">
-      <PrefetchLink
+      <Link
         href={`/products/${item.merchandise.product.handle}`}
         className="shrink-0 relative size-[120px] lg:size-[152px] bg-muted rounded-xl overflow-hidden hover:opacity-80 transition-opacity"
       >
@@ -47,18 +47,18 @@ export function ItemRow({ item, locale }: ItemRowProps) {
           className="object-cover"
           sizes="(max-width: 1024px) 120px, 152px"
         />
-      </PrefetchLink>
+      </Link>
 
       <div className="flex flex-1 justify-between items-start px-2 py-4">
         <div className="max-w-[297px]">
-          <PrefetchLink
+          <Link
             href={`/products/${item.merchandise.product.handle}`}
             className="block hover:opacity-70 transition-opacity"
           >
             <h3 className="text-lg lg:text-xl font-semibold tracking-[-0.3px] text-foreground line-clamp-2">
               {item.merchandise.product.title}
             </h3>
-          </PrefetchLink>
+          </Link>
 
           {variantText && <p className="mt-1 text-sm font-semibold opacity-30">{variantText}</p>}
         </div>

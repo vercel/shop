@@ -1,6 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
 
-import { PrefetchLink } from "@/components/prefetch-link";
 import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
@@ -35,13 +35,13 @@ export function HeroSection({ hero }: HeroSectionProps) {
                 {hero.subheadline && <span>{hero.subheadline}</span>}
                 {hero.subheadline && hero.ctaText && <span>|</span>}
                 {hero.ctaText && hero.ctaLink && (
-                  <PrefetchLink
+                  <Link
                     href={hero.ctaLink}
                     className="font-medium hover:underline inline-flex items-center gap-1"
                   >
                     {hero.ctaText}
                     <span aria-hidden="true">→</span>
-                  </PrefetchLink>
+                  </Link>
                 )}
               </div>
             )}
