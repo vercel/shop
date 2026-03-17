@@ -15,7 +15,7 @@
 | **Understand the data flow** | [Data Flow](architecture/data-flow.md) |
 | **Understand caching** | [Caching Strategy](architecture/caching-strategy.md) |
 | **Replace Shopify** with another provider | [Swap Commerce Provider](guides/swap-commerce-provider.md), [Type Seams](architecture/type-seams.md) |
-| **Replace the CMS** (metaobjects → Contentful/Sanity) | [Swap CMS Provider](guides/swap-cms-provider.md), [Metaobject CMS](cms/metaobject-cms.md) |
+| **Add a CMS** to the homepage | [Swap CMS Provider](guides/swap-cms-provider.md) |
 | **Modify customer features** (profile, orders) | [Customer API](shopify/customer-api.md) |
 | **Add shipping estimates** to storefront | [Add Shipping](guides/add-shipping.md) |
 | **Debug stale data** | [Caching Strategy](architecture/caching-strategy.md), [Cart Actions](cart/cart-actions.md) |
@@ -47,12 +47,6 @@
 | [GraphQL Operations](shopify/graphql-operations.md) | Schema refs, fragments, transforms pipeline |
 | [Customer API](shopify/customer-api.md) | Customer Account API (separate client, OAuth) |
 
-### CMS
-
-| Recipe | Purpose |
-|--------|---------|
-| [Metaobject CMS](cms/metaobject-cms.md) | Shopify metaobjects as CMS, transforms |
-
 ### i18n
 
 | Recipe | Purpose |
@@ -67,5 +61,5 @@
 | [Add New Page](guides/add-new-page.md) | New route with locale/caching/translations |
 | [Add UI Component](guides/add-ui-component.md) | Compound component following shadcn conventions |
 | [Swap Commerce Provider](guides/swap-commerce-provider.md) | Replace Shopify with another provider |
-| [Swap CMS Provider](guides/swap-cms-provider.md) | Replace metaobject CMS with Contentful/Sanity |
+| [Swap CMS Provider](guides/swap-cms-provider.md) | Add CMS to the hardcoded homepage |
 | [Add Shipping](guides/add-shipping.md) | Add pre-checkout shipping estimation UI |

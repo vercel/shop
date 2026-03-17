@@ -103,15 +103,15 @@ Cart has a different flow because it involves client-side state:
 7. Client: Context replaces optimistic state with server response
 ```
 
-### Data flow for CMS
+### Data flow for homepage content
 
-CMS content comes from Shopify metaobjects:
+The homepage renders hardcoded content structure with dynamic product data:
 
 ```
-1. getHomepage(locale) or getMarketingPage(slug, locale)
-2. Shopify metaobject query → raw metaobject data
-3. Transform functions in operations/cms.ts convert to Homepage/MarketingPage
-4. Components render sections, heroes, content blocks
+1. app/page.tsx fetches products and collections from Shopify
+2. Hero, intro text, and section layout are hardcoded in the page component
+3. Product data is passed to ProductCard and TopProductsCarousel components
+4. No CMS layer by default — use the enable-shopify-cms skill to add one
 ```
 
 ## GUARDRAILS

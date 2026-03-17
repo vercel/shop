@@ -1,42 +1,36 @@
 ---
 name: swap-content-system
-description: Replace the shop template's default local homepage/page content with Shopify metaobjects, Contentful, Sanity, or another CMS. Use when changing where homepage or marketing-page content comes from.
+description: Replace the shop template's default hardcoded homepage with a CMS-driven content system (Shopify metaobjects, Contentful, Sanity, or another CMS). Use when changing where homepage or marketing-page content comes from.
 ---
 
 # Swap Content System
 
-The shop template now ships with local content helpers instead of a CMS-backed default. Use this skill when replacing that local content source with Shopify metaobjects or another CMS.
+The shop template ships with a hardcoded homepage and an empty marketing-page registry. Use this skill when replacing the default content with a CMS.
 
 ## Default content entrypoints
 
-- `lib/content/homepage.ts` builds the homepage
-- `lib/content/pages.ts` resolves `/pages/[slug]`
-- `app/page.tsx`, `app/pages/[slug]/page.tsx`, and `app/sitemap.ts` are the only route-level consumers
+- `app/page.tsx` renders the homepage directly with hardcoded structure and Shopify product fetches
+- `lib/content/pages.ts` resolves `/pages/[slug]` (empty registry by default)
+- `app/pages/[slug]/page.tsx` and `app/sitemap.ts` consume marketing pages
 
 ## Goal
 
-Keep the rendering contract unchanged. Whatever replaces the local content must still return the domain types from `lib/types.ts`:
+Implement content operations that return the domain types from `lib/types.ts`:
 
 - `Homepage`
 - `MarketingPage`
 - `HeroSection`
 - `ContentSection`
 
-Do not introduce CMS-specific response types into components.
+The `MarketingPageRenderer` in `components/cms/page-renderer.tsx` already handles rendering these types. Wire your CMS operations to return these types and the renderer will work unchanged.
 
 ## Recommended workflow
 
-1. Read `lib/content/homepage.ts` and `lib/content/pages.ts` to understand the current local default.
-2. Decide whether to:
-   - replace those helper implementations directly, or
-   - create CMS-specific operations and point the route imports at them.
-3. Return the existing domain types from `lib/types.ts`.
-4. Resolve product references to ready-to-render product card data before rendering.
+1. Create CMS-specific operations that return `Homepage` and `MarketingPage`.
+2. Update `app/page.tsx` to call your CMS operation instead of rendering hardcoded content.
+3. Use `MarketingPageRenderer` to render the returned page data.
+4. Resolve product references to ready-to-render `ProductCard[]` data before rendering.
 5. Update `app/sitemap.ts` if page discovery changes.
-
-## Shopify metaobjects
-
-If you want a Shopify-native CMS, the old implementation still exists in `lib/shopify/operations/cms.ts`. Use it as a reference or as the starting point for wiring Shopify metaobjects back in.
 
 ## Guardrails
 
