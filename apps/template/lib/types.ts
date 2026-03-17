@@ -282,7 +282,7 @@ export interface HeroSection {
   id: string;
   headline: string;
   subheadline: string | null;
-  backgroundImage: MarketingImage | null;
+  backgroundImage?: MarketingImage | null;
   ctaText: string | null;
   ctaLink: string | null;
 }
