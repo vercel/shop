@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import { useCart } from "@/components/cart/context";
 
 export function CartStatusClient({
@@ -15,9 +16,7 @@ export function CartStatusClient({
 
   if (!variantId) return null;
 
-  const itemInCart = cartWithPending?.lines.find(
-    (item) => item.merchandise.id === variantId,
-  );
+  const itemInCart = cartWithPending?.lines.find((item) => item.merchandise.id === variantId);
 
   const quantity = itemInCart?.quantity ?? initialQuantity;
 

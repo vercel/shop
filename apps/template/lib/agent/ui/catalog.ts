@@ -94,6 +94,5 @@ export const catalog = defineCatalog(schema, {
         "Shows option groups as pills and a list of variants with price/availability. " +
         "Display-only — the user picks a variant by typing in chat.",
     },
-
   },
 });

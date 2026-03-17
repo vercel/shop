@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Suspense, use, useState } from "react";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -19,11 +20,7 @@ function Fallback() {
   );
 }
 
-function Content({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+function Content({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const product = use(productPromise);
   const images = product.images;
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -38,10 +35,7 @@ function Content({
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
         <Image
           src={selectedImage.url}
-          alt={
-            selectedImage.altText ||
-            `${product.title} image ${selectedIndex + 1}`
-          }
+          alt={selectedImage.altText || `${product.title} image ${selectedIndex + 1}`}
           fill
           className="object-contain"
           sizes="(min-width: 1280px) 0px, (min-width: 1024px) 66vw, 100vw"
@@ -81,11 +75,7 @@ function Content({
   );
 }
 
-export function ImageGallery({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function ImageGallery({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Content productPromise={productPromise} />

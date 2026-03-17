@@ -1,18 +1,11 @@
 "use client";
 
-import {
-  Checkpoint,
-  CheckpointIcon,
-  CheckpointTrigger,
-} from "@/components/ai-elements/checkpoint";
-import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
 import { nanoid } from "nanoid";
 import { Fragment, memo, useCallback, useState } from "react";
+
+import { Checkpoint, CheckpointIcon, CheckpointTrigger } from "@/components/ai-elements/checkpoint";
+import { Conversation, ConversationContent } from "@/components/ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 
 interface MessageType {
   id: string;
@@ -44,25 +37,20 @@ interface CheckpointItemProps {
   onRestore: (messageCount: number) => void;
 }
 
-const CheckpointItem = memo(
-  ({ checkpoint, onRestore }: CheckpointItemProps) => {
-    const handleClick = useCallback(
-      () => onRestore(checkpoint.messageCount),
-      [onRestore, checkpoint.messageCount]
-    );
-    return (
-      <Checkpoint>
-        <CheckpointIcon />
-        <CheckpointTrigger
-          onClick={handleClick}
-          tooltip="Restores workspace and chat to this point"
-        >
-          Restore checkpoint
-        </CheckpointTrigger>
-      </Checkpoint>
-    );
-  }
-);
+const CheckpointItem = memo(({ checkpoint, onRestore }: CheckpointItemProps) => {
+  const handleClick = useCallback(
+    () => onRestore(checkpoint.messageCount),
+    [onRestore, checkpoint.messageCount],
+  );
+  return (
+    <Checkpoint>
+      <CheckpointIcon />
+      <CheckpointTrigger onClick={handleClick} tooltip="Restores workspace and chat to this point">
+        Restore checkpoint
+      </CheckpointTrigger>
+    </Checkpoint>
+  );
+});
 
 CheckpointItem.displayName = "CheckpointItem";
 
@@ -81,9 +69,7 @@ const Example = () => {
       <Conversation>
         <ConversationContent>
           {messages.map((message, index) => {
-            const checkpoint = checkpoints.find(
-              (cp) => cp.messageCount === index + 1
-            );
+            const checkpoint = checkpoints.find((cp) => cp.messageCount === index + 1);
 
             return (
               <Fragment key={message.id}>
@@ -92,12 +78,7 @@ const Example = () => {
                     <MessageResponse>{message.content}</MessageResponse>
                   </MessageContent>
                 </Message>
-                {checkpoint && (
-                  <CheckpointItem
-                    checkpoint={checkpoint}
-                    onRestore={handleRestore}
-                  />
-                )}
+                {checkpoint && <CheckpointItem checkpoint={checkpoint} onRestore={handleRestore} />}
               </Fragment>
             );
           })}

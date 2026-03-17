@@ -10,14 +10,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type * as React from "react";
+
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-function FilterSidebar({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"aside">) {
+function FilterSidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
   return (
     <aside
       data-slot="filter-sidebar"
@@ -130,10 +127,8 @@ function FilterBadge({
       data-variant={variant}
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold tracking-[-0.12px] transition-colors",
-        variant === "default" &&
-          "bg-foreground/60 text-background hover:bg-foreground/70",
-        variant === "primary" &&
-          "bg-primary/15 text-primary hover:bg-primary/25",
+        variant === "default" && "bg-foreground/60 text-background hover:bg-foreground/70",
+        variant === "primary" && "bg-primary/15 text-primary hover:bg-primary/25",
         className,
       )}
       onClick={onRemove ?? props.onClick}
@@ -145,17 +140,9 @@ function FilterBadge({
   );
 }
 
-function FilterSection({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterSection({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="filter-section"
-      className={cn("flex flex-col gap-5", className)}
-      {...props}
-    >
+    <div data-slot="filter-section" className={cn("flex flex-col gap-5", className)} {...props}>
       {children}
     </div>
   );
@@ -167,11 +154,7 @@ interface FilterSectionHeaderProps {
   children?: React.ReactNode;
 }
 
-function FilterSectionHeader({
-  title,
-  className,
-  children,
-}: FilterSectionHeaderProps) {
+function FilterSectionHeader({ title, className, children }: FilterSectionHeaderProps) {
   return (
     <div
       data-slot="filter-section-header"
@@ -185,33 +168,17 @@ function FilterSectionHeader({
   );
 }
 
-function FilterSectionContent({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterSectionContent({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="filter-section-content"
-      className={cn(className)}
-      {...props}
-    >
+    <div data-slot="filter-section-content" className={cn(className)} {...props}>
       {children}
     </div>
   );
 }
 
-function FilterOptionList({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterOptionList({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="filter-option-list"
-      className={cn("flex flex-col gap-3", className)}
-      {...props}
-    >
+    <div data-slot="filter-option-list" className={cn("flex flex-col gap-3", className)} {...props}>
       {children}
     </div>
   );
@@ -250,9 +217,7 @@ function FilterOption({
     <>
       <span>
         {label}
-        {count !== undefined && (
-          <span className="text-muted-foreground"> ({count})</span>
-        )}
+        {count !== undefined && <span className="text-muted-foreground"> ({count})</span>}
       </span>
       {trailingIcon && (
         <span className="flex size-3.5 shrink-0 items-center justify-center overflow-hidden">
@@ -269,9 +234,7 @@ function FilterOption({
         data-slot="filter-option"
         data-selected={selected}
         className={sharedClassName}
-        onClick={
-          onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>
-        }
+        onClick={onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>}
       >
         {content}
       </Link>
@@ -313,16 +276,10 @@ function FilterPriceRange({
   ...props
 }: FilterPriceRangeProps) {
   return (
-    <div
-      data-slot="filter-price-range"
-      className={cn("flex flex-col gap-3", className)}
-      {...props}
-    >
+    <div data-slot="filter-price-range" className={cn("flex flex-col gap-3", className)} {...props}>
       <div className="flex items-center gap-2">
         <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
-          <span className="text-sm text-muted-foreground">
-            {currencySymbol}
-          </span>
+          <span className="text-sm text-muted-foreground">{currencySymbol}</span>
           <Input
             type="number"
             step="0.01"
@@ -335,9 +292,7 @@ function FilterPriceRange({
         </div>
         <span className="text-muted-foreground">–</span>
         <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
-          <span className="text-sm text-muted-foreground">
-            {currencySymbol}
-          </span>
+          <span className="text-sm text-muted-foreground">{currencySymbol}</span>
           <Input
             type="number"
             step="0.01"
@@ -388,11 +343,7 @@ function FilterPricePreset({
   );
 }
 
-function FilterSidebarCategories({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterSidebarCategories({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-sidebar-categories"
@@ -404,8 +355,7 @@ function FilterSidebarCategories({
   );
 }
 
-interface FilterSidebarCategoryBackProps
-  extends React.ComponentProps<"button"> {
+interface FilterSidebarCategoryBackProps extends React.ComponentProps<"button"> {
   pending?: boolean;
 }
 
@@ -436,8 +386,7 @@ function FilterSidebarCategoryBack({
   );
 }
 
-interface FilterSidebarCategoryItemProps
-  extends React.ComponentProps<"button"> {
+interface FilterSidebarCategoryItemProps extends React.ComponentProps<"button"> {
   label: string;
   count?: number;
   pending?: boolean;
@@ -463,9 +412,7 @@ function FilterSidebarCategoryItem({
     >
       <span>
         {label}
-        {count !== undefined && (
-          <span className="text-muted-foreground"> ({count})</span>
-        )}
+        {count !== undefined && <span className="text-muted-foreground"> ({count})</span>}
       </span>
       {pending ? (
         <LoaderCircleIcon className="size-4 animate-spin" />
@@ -476,10 +423,7 @@ function FilterSidebarCategoryItem({
   );
 }
 
-function FilterSidebarScrollFade({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterSidebarScrollFade({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-sidebar-scroll-fade"

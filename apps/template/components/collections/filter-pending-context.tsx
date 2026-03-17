@@ -1,40 +1,29 @@
 "use client";
 
 import { createContext, useContext, useTransition } from "react";
+
 import { cn } from "@/lib/utils";
 
-const FilterTransitionContext = createContext<React.TransitionStartFunction>(
-  (callback) => callback(),
+const FilterTransitionContext = createContext<React.TransitionStartFunction>((callback) =>
+  callback(),
 );
 const FilterTransitionPendingContext = createContext(false);
 const FilterPendingContext = createContext(false);
 
-export function FilterTransitionProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function FilterTransitionProvider({ children }: { children: React.ReactNode }) {
   const [isPending, startTransition] = useTransition();
 
   return (
     <FilterTransitionContext value={startTransition}>
-      <FilterTransitionPendingContext value={isPending}>
-        {children}
-      </FilterTransitionPendingContext>
+      <FilterTransitionPendingContext value={isPending}>{children}</FilterTransitionPendingContext>
     </FilterTransitionContext>
   );
 }
 
-export function FilterPendingScope({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function FilterPendingScope({ children }: { children: React.ReactNode }) {
   const isPending = useContext(FilterTransitionPendingContext);
 
-  return (
-    <FilterPendingContext value={isPending}>{children}</FilterPendingContext>
-  );
+  return <FilterPendingContext value={isPending}>{children}</FilterPendingContext>;
 }
 
 export function useFilterTransition() {
@@ -45,11 +34,7 @@ export function useFilterPending() {
   return useContext(FilterPendingContext);
 }
 
-export function ProductGridPendingOverlay({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function ProductGridPendingOverlay({ children }: { children: React.ReactNode }) {
   const isPending = useFilterPending();
 
   return (

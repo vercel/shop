@@ -1,7 +1,9 @@
-import { getAgentContext } from "../context";
 import { tool } from "ai";
-import { updateCart } from "@/lib/shopify/operations/cart";
 import { z } from "zod";
+
+import { updateCart } from "@/lib/shopify/operations/cart";
+
+import { getAgentContext } from "../context";
 
 export function updateCartItemTool() {
   return tool({
@@ -11,12 +13,8 @@ Use the lineId from getCart results, not the product or variant ID.`,
     inputSchema: z.object({
       lineId: z
         .string()
-        .describe(
-          "The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')",
-        ),
-      merchandiseId: z
-        .string()
-        .describe("The merchandise/variant ID from getCart results"),
+        .describe("The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')"),
+      merchandiseId: z.string().describe("The merchandise/variant ID from getCart results"),
       quantity: z.number().min(1).max(99).describe("New quantity for the item"),
     }),
     execute: async ({ lineId, merchandiseId, quantity }) => {
@@ -30,10 +28,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
       }
 
       try {
-        const updatedCart = await updateCart(
-          [{ id: lineId, merchandiseId, quantity }],
-          cartId,
-        );
+        const updatedCart = await updateCart([{ id: lineId, merchandiseId, quantity }], cartId);
 
         return {
           success: true,
@@ -44,10 +39,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
         console.error("Failed to update cart item:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to update cart item",
+          error: error instanceof Error ? error.message : "Failed to update cart item",
         };
       }
     },

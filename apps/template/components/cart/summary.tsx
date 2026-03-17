@@ -3,9 +3,11 @@
 import { ArrowRightIcon, InfoIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState, useTransition } from "react";
+
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { cn, formatPrice } from "@/lib/utils";
+
 import { prepareCheckoutAction, updateCartNoteAction } from "./actions";
 import { useCart } from "./context";
 import { useCartRender } from "./context-sync";
@@ -29,10 +31,7 @@ function CheckoutLink({
 
   if (isUpdatingCart || isCheckingOut) {
     return (
-      <span
-        className={cn(baseClassName, "opacity-50 cursor-not-allowed")}
-        aria-disabled="true"
-      >
+      <span className={cn(baseClassName, "opacity-50 cursor-not-allowed")} aria-disabled="true">
         <span className="flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           <span>{isCheckingOut ? checkoutText : updatingText}</span>
@@ -91,9 +90,7 @@ export function Summary({ locale }: SummaryProps) {
     0,
   );
   const itemCount = cart.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const tax = cart.cost.totalTaxAmount
-    ? parseFloat(cart.cost.totalTaxAmount.amount)
-    : 0;
+  const tax = cart.cost.totalTaxAmount ? parseFloat(cart.cost.totalTaxAmount.amount) : 0;
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
   return (
@@ -126,10 +123,7 @@ export function Summary({ locale }: SummaryProps) {
               disabled={isPending}
             />
             <div className="flex-1">
-              <label
-                htmlFor="gift-toggle"
-                className="text-sm font-medium cursor-pointer"
-              >
+              <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
                 {t("isThisAGift")}
               </label>
               <button

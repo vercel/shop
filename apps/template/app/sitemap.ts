@@ -1,12 +1,9 @@
-import {
-  getAllLocalMarketingPageSlugs,
-  getLocalMarketingPage,
-} from "@/lib/content/pages";
-
-import { getAllProductHandles } from "@/lib/shopify/operations/sitemap";
-import { getCollections } from "@/lib/shopify/operations/collections";
 import type { MetadataRoute } from "next";
+
 import { siteConfig } from "@/lib/config";
+import { getAllLocalMarketingPageSlugs, getLocalMarketingPage } from "@/lib/content/pages";
+import { getCollections } from "@/lib/shopify/operations/collections";
+import { getAllProductHandles } from "@/lib/shopify/operations/sitemap";
 
 function toAbsoluteUrl(pathname: string): string {
   return `${siteConfig.url}${pathname}`;
@@ -14,9 +11,7 @@ function toAbsoluteUrl(pathname: string): string {
 
 async function buildMarketingEntries(): Promise<MetadataRoute.Sitemap> {
   const pairs = getAllLocalMarketingPageSlugs();
-  const uniqueSlugs = Array.from(
-    new Map(pairs.map((pair) => [pair.slug, pair])).values(),
-  );
+  const uniqueSlugs = Array.from(new Map(pairs.map((pair) => [pair.slug, pair])).values());
 
   const pages = await Promise.all(
     uniqueSlugs.map(async (pair) => {
@@ -45,22 +40,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const collectionEntries: MetadataRoute.Sitemap = collections.map(
-    (collection) => ({
-      url: toAbsoluteUrl(`/collections/${collection.handle}`),
-      lastModified: collection.updatedAt,
-    }),
-  );
+  const collectionEntries: MetadataRoute.Sitemap = collections.map((collection) => ({
+    url: toAbsoluteUrl(`/collections/${collection.handle}`),
+    lastModified: collection.updatedAt,
+  }));
 
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
     url: toAbsoluteUrl(`/products/${product.handle}`),
     lastModified: product.updatedAt,
   }));
 
-  return [
-    ...homeEntry,
-    ...collectionEntries,
-    ...productEntries,
-    ...marketingPages,
-  ];
+  return [...homeEntry, ...collectionEntries, ...productEntries, ...marketingPages];
 }

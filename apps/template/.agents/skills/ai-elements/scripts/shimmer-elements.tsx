@@ -5,9 +5,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 const Example = () => (
   <div className="flex flex-col gap-6 p-8">
     <div className="text-center">
-      <p className="mb-3 text-muted-foreground text-sm">
-        As paragraph (default)
-      </p>
+      <p className="mb-3 text-muted-foreground text-sm">As paragraph (default)</p>
       <Shimmer as="p">This is rendered as a paragraph</Shimmer>
     </div>
 
@@ -30,9 +28,7 @@ const Example = () => (
     </div>
 
     <div className="text-center">
-      <p className="mb-3 text-muted-foreground text-sm">
-        As div with custom styling
-      </p>
+      <p className="mb-3 text-muted-foreground text-sm">As div with custom styling</p>
       <Shimmer as="div" className="font-semibold text-lg">
         Custom styled shimmer text
       </Shimmer>

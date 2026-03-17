@@ -1,11 +1,13 @@
 "use client";
 
 import { ArrowRightIcon, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
+
 import { prepareCheckoutAction } from "./actions";
 import { useCart } from "./context";
 import { OverlayItem } from "./overlay-item";
@@ -68,8 +70,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
     setIsCheckingOut(true);
 
     const { checkoutUrl } = await prepareCheckoutAction();
-    window.location.href =
-      checkoutUrl || cart?.checkoutUrl || displayCart?.checkoutUrl || "";
+    window.location.href = checkoutUrl || cart?.checkoutUrl || displayCart?.checkoutUrl || "";
   };
 
   // Use cartWithPending for display - it includes optimistic lines
@@ -94,9 +95,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">
-          {t("empty")}
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground mb-1">{t("empty")}</h3>
         <p className="text-sm text-muted-foreground mb-6">{t("startAdding")}</p>
         <Button
           onClick={() => {
@@ -118,10 +117,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
       </header>
 
       {/* Items List - Scrollable */}
-      <ul
-        className="flex-1 overflow-y-auto px-5 space-y-4"
-        aria-label={t("cartItemsLabel")}
-      >
+      <ul className="flex-1 overflow-y-auto px-5 space-y-4" aria-label={t("cartItemsLabel")}>
         {displayCart.lines.map((item) => (
           <OverlayItem key={item.id} item={item} locale={locale} />
         ))}
@@ -139,10 +135,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}
         >
-          <CheckoutButtonContent
-            isCheckingOut={isCheckingOut}
-            isUpdatingCart={isUpdatingCart}
-          />
+          <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />
         </Button>
 
         {/* View Full Cart Link */}

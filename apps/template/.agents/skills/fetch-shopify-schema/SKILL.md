@@ -6,9 +6,11 @@ description: Fetch local Shopify Storefront and Customer Account GraphQL schema 
 # Fetch Shopify GraphQL Schema
 
 ## Description
+
 Fetches the latest Shopify GraphQL schemas (Storefront API and Customer Account API) for reference when working with Shopify operations.
 
 ## When to Use This Skill
+
 - Before writing new Shopify GraphQL queries or mutations
 - When you need to check available fields on a type
 - When debugging GraphQL errors related to field names or types
@@ -43,6 +45,7 @@ SHOPIFY_CUSTOMER_ACCESS_TOKEN="<token>" bun run .claude/scripts/fetch-shopify-sc
 **Option B: Set the token in environment**
 
 Add to `.env.local`:
+
 ```
 SHOPIFY_CUSTOMER_ACCESS_TOKEN=<your-token>
 ```
@@ -60,19 +63,21 @@ The schemas are in SDL (Schema Definition Language) format.
 
 ## Schema Locations
 
-| API | Schema File | Auth Required |
-|-----|-------------|---------------|
-| Storefront API | `.claude/schemas/shopify-storefront.graphql` | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (public) |
-| Customer Account API | `.claude/schemas/shopify-customer.graphql` | User access token via OAuth |
+| API                  | Schema File                                  | Auth Required                              |
+| -------------------- | -------------------------------------------- | ------------------------------------------ |
+| Storefront API       | `.claude/schemas/shopify-storefront.graphql` | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (public) |
+| Customer Account API | `.claude/schemas/shopify-customer.graphql`   | User access token via OAuth                |
 
 ## Notes
 
 ### Storefront API
+
 - Uses the public Storefront Access Token (already in `.env`)
 - Provides read access to products, collections, cart operations
 - Most common API for storefront implementations
 
 ### Customer Account API
+
 - Requires a logged-in user's OAuth access token
 - Provides access to customer data, orders, addresses
 - Token expires after a period (use refresh flow for long-term access)

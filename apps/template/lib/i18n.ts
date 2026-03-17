@@ -50,8 +50,7 @@ export type LocaleData = {
 
 export function getLocaleData(locale: string): LocaleData {
   const [lang, country] = locale.split("-");
-  const currencyData =
-    localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
+  const currencyData = localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
 
   // Get native language name (e.g., "Deutsch" for de-DE)
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
@@ -59,8 +58,7 @@ export function getLocaleData(locale: string): LocaleData {
 
   // Get currency name in the locale's language
   const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
-  const currencyName =
-    currencyNames.of(currencyData.currency) ?? currencyData.currency;
+  const currencyName = currencyNames.of(currencyData.currency) ?? currencyData.currency;
 
   return {
     label: `${languageName} - ${country}`,
@@ -81,8 +79,7 @@ export function getLanguageCode(locale: string): string {
 }
 
 export function getCurrencyCode(locale: string): string {
-  return (localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale])
-    .currency;
+  return (localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale]).currency;
 }
 
 export type LocaleOption = {
@@ -128,10 +125,7 @@ export function getEnabledCurrencies(): EnabledCurrencyOption[] {
 }
 
 export function getPrimaryLocaleForCurrency(currency: string): Locale | null {
-  return (
-    enabledLocales.find((locale) => getCurrencyCode(locale) === currency) ??
-    null
-  );
+  return enabledLocales.find((locale) => getCurrencyCode(locale) === currency) ?? null;
 }
 
 export function getLocaleFlag(locale: string): string {

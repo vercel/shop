@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 export function ImageGallery({
@@ -185,7 +185,7 @@ export function ImageGallery({
 
       {/* Main gallery with scroll snap */}
       <div className="flex-1 order-1 lg:order-2">
-        {/** biome-ignore lint/a11y/noStaticElementInteractions: allow drag-to-scroll on the gallery container */}
+        {/** oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- allow drag-to-scroll on the gallery container */}
         <div
           ref={scrollContainerRef}
           className={`relative overflow-x-auto flex gap-0 scrollbar-hide cursor-grab active:cursor-grabbing select-none ${

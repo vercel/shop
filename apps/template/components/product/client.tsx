@@ -1,18 +1,14 @@
 "use client";
 
-import {
-  Loader2,
-  MinusIcon,
-  PlusCircleIcon,
-  PlusIcon,
-  ShoppingBagIcon,
-} from "lucide-react";
+import { Loader2, MinusIcon, PlusCircleIcon, PlusIcon, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
+
 import { buyNowAction } from "@/components/cart/actions";
 import { useCart } from "@/components/cart/context";
 import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
 import type { ProductDetails } from "@/lib/types";
+
 import { Button } from "../ui/button";
 import { NativeSelect, NativeSelectOption } from "../ui/native-select";
 

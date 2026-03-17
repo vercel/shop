@@ -1,5 +1,6 @@
-import { MegamenuClient } from "./megamenu-client";
 import type { MegamenuItem } from "@/lib/shopify/types/megamenu";
+
+import { MegamenuClient } from "./megamenu-client";
 
 type Props = {
   items: MegamenuItem[];

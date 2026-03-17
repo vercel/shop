@@ -1,5 +1,7 @@
 "use client";
 
+import { z } from "zod";
+
 import {
   Agent,
   AgentContent,
@@ -9,7 +11,6 @@ import {
   AgentTool,
   AgentTools,
 } from "@/components/ai-elements/agent";
-import { z } from "zod";
 
 const webSearchTool = {
   description: "Search the web for information",
@@ -44,9 +45,9 @@ const Example = () => (
     <AgentHeader model="openai/gpt-5.2-pro" name="Research Assistant" />
     <AgentContent>
       <AgentInstructions>
-        You are a helpful research assistant. Your job is to search the web for
-        information and summarize findings for the user. Always cite your
-        sources and provide accurate, up-to-date information.
+        You are a helpful research assistant. Your job is to search the web for information and
+        summarize findings for the user. Always cite your sources and provide accurate, up-to-date
+        information.
       </AgentInstructions>
       <AgentTools type="multiple">
         <AgentTool tool={webSearchTool} value="web_search" />

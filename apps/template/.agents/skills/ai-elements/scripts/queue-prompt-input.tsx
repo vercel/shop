@@ -1,5 +1,8 @@
 "use client";
 
+import { CheckIcon, GlobeIcon, Trash2 } from "lucide-react";
+import { memo, useCallback, useRef, useState } from "react";
+
 import {
   Attachment,
   AttachmentPreview,
@@ -47,8 +50,6 @@ import {
   QueueSection,
   QueueSectionContent,
 } from "@/components/ai-elements/queue";
-import { CheckIcon, GlobeIcon, Trash2 } from "lucide-react";
-import { memo, useCallback, useRef, useState } from "react";
 
 const models = [
   {
@@ -103,10 +104,7 @@ interface AttachmentItemProps {
 }
 
 const AttachmentItem = memo(({ attachment, onRemove }: AttachmentItemProps) => {
-  const handleRemove = useCallback(
-    () => onRemove(attachment.id),
-    [onRemove, attachment.id]
-  );
+  const handleRemove = useCallback(() => onRemove(attachment.id), [onRemove, attachment.id]);
   return (
     <Attachment data={attachment} key={attachment.id} onRemove={handleRemove}>
       <AttachmentPreview />
@@ -124,18 +122,13 @@ interface TodoItemProps {
 
 const TodoItem = memo(({ todo, onRemove }: TodoItemProps) => {
   const isCompleted = todo.status === "completed";
-  const handleRemove = useCallback(
-    () => onRemove(todo.id),
-    [onRemove, todo.id]
-  );
+  const handleRemove = useCallback(() => onRemove(todo.id), [onRemove, todo.id]);
 
   return (
     <QueueItem key={todo.id}>
       <div className="flex items-center gap-2">
         <QueueItemIndicator completed={isCompleted} />
-        <QueueItemContent completed={isCompleted}>
-          {todo.title}
-        </QueueItemContent>
+        <QueueItemContent completed={isCompleted}>{todo.title}</QueueItemContent>
         <QueueItemActions>
           <QueueItemAction aria-label="Remove todo" onClick={handleRemove}>
             <Trash2 size={12} />
@@ -143,9 +136,7 @@ const TodoItem = memo(({ todo, onRemove }: TodoItemProps) => {
         </QueueItemActions>
       </div>
       {todo.description && (
-        <QueueItemDescription completed={isCompleted}>
-          {todo.description}
-        </QueueItemDescription>
+        <QueueItemDescription completed={isCompleted}>{todo.description}</QueueItemDescription>
       )}
     </QueueItem>
   );
@@ -216,10 +207,7 @@ const sampleTodos: QueueTodo[] = [
 const PromptInputAttachmentsDisplay = () => {
   const attachments = usePromptInputAttachments();
 
-  const handleRemove = useCallback(
-    (id: string) => attachments.remove(id),
-    [attachments]
-  );
+  const handleRemove = useCallback((id: string) => attachments.remove(id), [attachments]);
 
   if (attachments.files.length === 0) {
     return null;
@@ -228,11 +216,7 @@ const PromptInputAttachmentsDisplay = () => {
   return (
     <Attachments variant="inline">
       {attachments.files.map((attachment) => (
-        <AttachmentItem
-          attachment={attachment}
-          key={attachment.id}
-          onRemove={handleRemove}
-        />
+        <AttachmentItem attachment={attachment} key={attachment.id} onRemove={handleRemove} />
       ))}
     </Attachments>
   );
@@ -248,14 +232,12 @@ const Example = () => {
   const [text, setText] = useState<string>("");
   const [model, setModel] = useState<string>(models[0].id);
   const [modelSelectorOpen, setModelSelectorOpen] = useState(false);
-  const [status, setStatus] = useState<
-    "submitted" | "streaming" | "ready" | "error"
-  >("ready");
+  const [status, setStatus] = useState<"submitted" | "streaming" | "ready" | "error">("ready");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value),
-    []
+    [],
   );
 
   const handleModelSelect = useCallback((id: string) => {
@@ -305,7 +287,7 @@ const Example = () => {
         timeoutRef.current = null;
       }, STREAMING_TIMEOUT);
     },
-    [status]
+    [status],
   );
 
   return (
@@ -316,11 +298,7 @@ const Example = () => {
             <QueueSectionContent>
               <div>
                 {todos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    onRemove={handleRemoveTodo}
-                    todo={todo}
-                  />
+                  <TodoItem key={todo.id} onRemove={handleRemoveTodo} todo={todo} />
                 ))}
               </div>
             </QueueSectionContent>
@@ -346,19 +324,14 @@ const Example = () => {
               <GlobeIcon size={16} />
               <span>Search</span>
             </PromptInputButton>
-            <ModelSelector
-              onOpenChange={setModelSelectorOpen}
-              open={modelSelectorOpen}
-            >
+            <ModelSelector onOpenChange={setModelSelectorOpen} open={modelSelectorOpen}>
               <ModelSelectorTrigger asChild>
                 <PromptInputButton>
                   {selectedModelData?.chefSlug && (
                     <ModelSelectorLogo provider={selectedModelData.chefSlug} />
                   )}
                   {selectedModelData?.name && (
-                    <ModelSelectorName>
-                      {selectedModelData.name}
-                    </ModelSelectorName>
+                    <ModelSelectorName>{selectedModelData.name}</ModelSelectorName>
                   )}
                 </PromptInputButton>
               </ModelSelectorTrigger>

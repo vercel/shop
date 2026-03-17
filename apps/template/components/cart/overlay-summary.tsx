@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Price } from "@/components/product/price";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -57,15 +58,8 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
       <CardFooter className="flex-col items-stretch gap-3 bg-muted/30 px-4 py-3">
         {/* Gift Toggle */}
         <div className="flex items-center gap-2">
-          <Switch
-            id="gift-toggle"
-            checked={isGift}
-            onCheckedChange={setIsGift}
-          />
-          <Label
-            htmlFor="gift-toggle"
-            className="text-sm text-muted-foreground cursor-pointer"
-          >
+          <Switch id="gift-toggle" checked={isGift} onCheckedChange={setIsGift} />
+          <Label htmlFor="gift-toggle" className="text-sm text-muted-foreground cursor-pointer">
             Is this a gift?
           </Label>
         </div>

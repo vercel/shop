@@ -2,13 +2,8 @@
 
 import { MicIcon, SquareIcon } from "lucide-react";
 import type { ComponentProps } from "react";
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { defaultLocale } from "@/lib/i18n";
@@ -75,8 +70,7 @@ export const SpeechInput = ({
       return;
     }
 
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const speechRecognition = new SpeechRecognition();
 
     speechRecognition.continuous = true;
@@ -95,11 +89,7 @@ export const SpeechInput = ({
       const speechEvent = event as SpeechRecognitionEvent;
       let finalTranscript = "";
 
-      for (
-        let i = speechEvent.resultIndex;
-        i < speechEvent.results.length;
-        i += 1
-      ) {
+      for (let i = speechEvent.resultIndex; i < speechEvent.results.length; i += 1) {
         const result = speechEvent.results[i];
         if (result.isFinal) {
           finalTranscript += result[0]?.transcript ?? "";

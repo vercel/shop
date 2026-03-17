@@ -1,7 +1,8 @@
 "use client";
 
-import { Terminal } from "@/components/ai-elements/terminal";
 import { useCallback, useState } from "react";
+
+import { Terminal } from "@/components/ai-elements/terminal";
 
 const initialOutput = `\u001B[36m$\u001B[0m npm run build
 Building project...

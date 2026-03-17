@@ -1,11 +1,12 @@
+import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
-import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 import { CollectionSchema } from "@/components/schema/collection-schema";
+import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { getTranslations } from "next-intl/server";
-import type { Locale } from "@/lib/i18n";
-import { Suspense } from "react";
+import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 
 async function Render({
   locale,
@@ -51,9 +52,7 @@ async function Render({
   return (
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
-      <CollectionSchema
-        collection={{ handle, title, description, updatedAt }}
-      />
+      <CollectionSchema collection={{ handle, title, description, updatedAt }} />
     </>
   );
 }
@@ -69,11 +68,7 @@ export function CollectionStructuredData({
 }) {
   return (
     <Suspense fallback={null}>
-      <Render
-        locale={locale}
-        handlePromise={handlePromise}
-        collectionPromise={collectionPromise}
-      />
+      <Render locale={locale} handlePromise={handlePromise} collectionPromise={collectionPromise} />
     </Suspense>
   );
 }

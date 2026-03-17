@@ -1,13 +1,13 @@
 import { stepCountIs, ToolLoopAgent, type ToolLoopAgentSettings } from "ai";
 
+import { getAgentContext } from "./context";
+import { getSystemPrompt } from "./prompt";
 import { addCartNoteTool } from "./tools/add-cart-note";
 import { addToCartTool } from "./tools/add-to-cart";
 import { browseCollectionTool } from "./tools/browse-collection";
-import { getAgentContext } from "./context";
 import { getCartTool } from "./tools/get-cart";
 import { getProductDetailsTool } from "./tools/get-product-details";
 import { getRecommendationsTool } from "./tools/get-recommendations";
-import { getSystemPrompt } from "./prompt";
 import { listCollectionsTool } from "./tools/list-collections";
 import { navigateTool } from "./tools/navigate";
 import { removeFromCartTool } from "./tools/remove-from-cart";

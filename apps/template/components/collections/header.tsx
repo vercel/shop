@@ -1,3 +1,14 @@
+import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Fragment, Suspense } from "react";
+
+import {
+  MobileFilterSortBar,
+  MobileFilterSortBarSkeleton,
+} from "@/components/collections/mobile-filter-sort-bar";
+import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,27 +17,17 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
-import { Fragment, Suspense } from "react";
-import {
-  MobileFilterSortBar,
-  MobileFilterSortBarSkeleton,
-} from "@/components/collections/mobile-filter-sort-bar";
-
-import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
-import { CollectionFilters } from "./filters";
-import { CollectionResultCount } from "./result-count";
-import type { CollectionResultsData } from "./data";
-import { CollectionsSortSelect } from "./sort-select";
-import { FilterPendingScope } from "./filter-pending-context";
-import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import type { Locale } from "@/lib/i18n";
-import { notFound } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
+import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
+
+import type { CollectionResultsData } from "./data";
+import { FilterPendingScope } from "./filter-pending-context";
+import { CollectionFilters } from "./filters";
+import { CollectionResultCount } from "./result-count";
+import { CollectionsSortSelect } from "./sort-select";
 
 function Fallback() {
   return (
@@ -85,9 +86,7 @@ async function Render({
           <ChevronLeftIcon className="size-4" />
           <span>{parentLabel}</span>
         </Link>
-        <CollectionResultCount
-          collectionResultsDataPromise={collectionResultsDataPromise}
-        />
+        <CollectionResultCount collectionResultsDataPromise={collectionResultsDataPromise} />
       </div>
 
       <Breadcrumb className="mb-3 hidden md:block">
@@ -125,19 +124,14 @@ async function Render({
           <FilterSidebarSheet
             label={tSearch("filters")}
             trigger={
-              <button
-                type="button"
-                className="flex items-center gap-2 text-sm font-medium"
-              >
+              <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
                 <span>{tSearch("filters")}</span>
               </button>
             }
           >
             <FilterPendingScope>
-              <CollectionFilters
-                collectionResultsDataPromise={collectionResultsDataPromise}
-              />
+              <CollectionFilters collectionResultsDataPromise={collectionResultsDataPromise} />
             </FilterPendingScope>
           </FilterSidebarSheet>
         }
@@ -147,9 +141,7 @@ async function Render({
       <div className="mt-4 mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between md:mt-0">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-          {description && (
-            <p className="mt-1 text-muted-foreground">{description}</p>
-          )}
+          {description && <p className="mt-1 text-muted-foreground">{description}</p>}
         </div>
         <div className="hidden md:block">
           <CollectionsSortSelect />

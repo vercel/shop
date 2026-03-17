@@ -3,11 +3,13 @@
 import { ArrowRightIcon, Loader2, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
+
 import { buyNowAction } from "@/components/cart/actions";
 import { useCart } from "@/components/cart/context";
 import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
 import { Button } from "@/components/ui/button";
 import type { Image, ProductVariant } from "@/lib/types";
+
 import { usePdpVariantState } from "./variant-state";
 import { resolveSelectedVariant } from "./variants";
 
@@ -62,8 +64,7 @@ export function MobileBuyButtons({
 
   // Button text logic
   const getButtonText = () => {
-    if (pendingQuantity > 0)
-      return t("addingQuantity", { quantity: String(pendingQuantity) });
+    if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
     if (isAddingToCart) return t("addingToCart");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");

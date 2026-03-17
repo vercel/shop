@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useEffect, useEffectEvent, useState } from "react";
 import { RemoveScroll } from "react-remove-scroll";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { cn } from "@/lib/utils";
 import type { MegamenuData } from "@/lib/shopify/types/megamenu";
+import { cn } from "@/lib/utils";
 
 type MegamenuMobileProps = {
   data: MegamenuData;
@@ -137,10 +138,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                     {exploreCategoriesLabel}
                   </h3>
 
-                  <nav
-                    aria-label="Categories"
-                    className="mt-3 flex-1 min-h-0 overflow-hidden"
-                  >
+                  <nav aria-label="Categories" className="mt-3 flex-1 min-h-0 overflow-hidden">
                     {data.items.length === 0 ? null : (
                       <ul className="h-full w-full space-y-4 overflow-y-auto overscroll-contain pr-2 pt-1 pb-6 [scrollbar-gutter:stable]">
                         {data.items.map((item) => {
@@ -158,21 +156,18 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                   value={expandedItemId}
                                   onValueChange={setExpandedItemId}
                                 >
-                                  <AccordionItem
-                                    value={item.id}
-                                    className="border-b-0"
-                                  >
+                                  <AccordionItem value={item.id} className="border-b-0">
                                     <AccordionTrigger
-                                      className={cn(TOP_LEVEL_ITEM_CLASS, "flex items-center py-0.5 hover:no-underline data-[state=open]:text-foreground")}
+                                      className={cn(
+                                        TOP_LEVEL_ITEM_CLASS,
+                                        "flex items-center py-0.5 hover:no-underline data-[state=open]:text-foreground",
+                                      )}
                                     >
                                       {label}
                                     </AccordionTrigger>
                                     <AccordionContent className="pb-2 pl-2 pt-4">
                                       {item.panels.map((panel) => (
-                                        <div
-                                          key={panel.id}
-                                          className="mt-6 first:mt-0"
-                                        >
+                                        <div key={panel.id} className="mt-6 first:mt-0">
                                           {panel.header ? (
                                             <h4 className="mb-1">
                                               {panel.href ? (
@@ -191,19 +186,17 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                             </h4>
                                           ) : null}
                                           <ul className="space-y-1">
-                                            {panel.categories.map(
-                                              (category) => (
-                                                <li key={category.href}>
-                                                  <MobileLink
-                                                    href={category.href}
-                                                    className="block py-1 text-base hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
-                                                    onClick={handleClose}
-                                                  >
-                                                    {category.title}
-                                                  </MobileLink>
-                                                </li>
-                                              ),
-                                            )}
+                                            {panel.categories.map((category) => (
+                                              <li key={category.href}>
+                                                <MobileLink
+                                                  href={category.href}
+                                                  className="block py-1 text-base hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                                  onClick={handleClose}
+                                                >
+                                                  {category.title}
+                                                </MobileLink>
+                                              </li>
+                                            ))}
                                           </ul>
                                         </div>
                                       ))}
@@ -231,9 +224,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                   {label}
                                 </MobileLink>
                               ) : (
-                                <span className={TOP_LEVEL_ITEM_CLASS}>
-                                  {label}
-                                </span>
+                                <span className={TOP_LEVEL_ITEM_CLASS}>{label}</span>
                               )}
                             </li>
                           );

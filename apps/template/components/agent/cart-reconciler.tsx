@@ -2,6 +2,7 @@
 
 import type { UIMessage } from "ai";
 import { useEffect, useRef } from "react";
+
 import { useCart } from "../cart/context";
 
 /** Tool names that return an updated cart object in their results. */
@@ -56,10 +57,7 @@ export function CartReconciler({ messages }: { messages: UIMessage[] }) {
           const toolCallId = part.toolCallId as string;
 
           // Only process each tool call once, and only when output is available
-          if (
-            part.state === "output-available" &&
-            !processedToolCalls.current.has(toolCallId)
-          ) {
+          if (part.state === "output-available" && !processedToolCalls.current.has(toolCallId)) {
             processedToolCalls.current.add(toolCallId);
 
             const result = (part as { output: unknown }).output as
@@ -67,7 +65,7 @@ export function CartReconciler({ messages }: { messages: UIMessage[] }) {
               | { success: false };
 
             if (result?.success && "cart" in result) {
-              // biome-ignore lint/suspicious/noExplicitAny: Tool result is typed loosely
+              // oxlint-disable-next-line typescript/no-explicit-any -- Tool result is typed loosely
               setCart(result.cart as any);
               // Don't open overlay for getCart (read-only), only for mutations
               if (toolName !== "getCart") {

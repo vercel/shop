@@ -17,9 +17,7 @@ export type CartActionResult = {
   cart?: Cart;
 };
 
-export async function removeFromCartAction(
-  itemId: string,
-): Promise<CartActionResult> {
+export async function removeFromCartAction(itemId: string): Promise<CartActionResult> {
   if (!itemId) {
     return {
       success: false,
@@ -47,10 +45,7 @@ export async function removeFromCartAction(
     console.error("Remove from cart failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to remove item from cart",
+      error: error instanceof Error ? error.message : "Failed to remove item from cart",
     };
   }
 }
@@ -115,10 +110,7 @@ export async function updateCartQuantityAction(
     console.error("Update cart quantity failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to update item quantity",
+      error: error instanceof Error ? error.message : "Failed to update item quantity",
     };
   }
 }
@@ -161,8 +153,7 @@ export async function addToCartAction(
     console.error("Add to cart failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to add item to cart",
+      error: error instanceof Error ? error.message : "Failed to add item to cart",
     };
   }
 }
@@ -172,9 +163,7 @@ export async function addToCartAction(
  * This ensures the cart uses the correct country/currency for the locale
  * Should be called when the locale changes or on initial page load
  */
-export async function syncCartLocaleAction(
-  locale: string,
-): Promise<CartActionResult> {
+export async function syncCartLocaleAction(locale: string): Promise<CartActionResult> {
   if (!isEnabledLocale(locale)) {
     return {
       success: false,
@@ -198,15 +187,12 @@ export async function syncCartLocaleAction(
     console.error("Sync cart locale failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to sync cart locale",
+      error: error instanceof Error ? error.message : "Failed to sync cart locale",
     };
   }
 }
 
-export async function updateCartNoteAction(
-  note: string,
-): Promise<CartActionResult> {
+export async function updateCartNoteAction(note: string): Promise<CartActionResult> {
   try {
     const result = await updateCartNote(note);
 
@@ -225,8 +211,7 @@ export async function updateCartNoteAction(
     console.error("Update cart note failed:", error);
     return {
       success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to update cart note",
+      error: error instanceof Error ? error.message : "Failed to update cart note",
     };
   }
 }
@@ -250,8 +235,7 @@ export async function buyNowAction(
     console.error("Buy now failed:", error);
     return {
       checkoutUrl: null,
-      error:
-        error instanceof Error ? error.message : "Failed to process buy now",
+      error: error instanceof Error ? error.message : "Failed to process buy now",
     };
   }
 }

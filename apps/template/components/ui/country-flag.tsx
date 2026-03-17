@@ -1,5 +1,6 @@
-import { cn } from "@/lib/utils";
 import Image from "next/image";
+
+import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES: Record<string, string> = {
   "en-US": "US",
@@ -29,11 +30,7 @@ const SIZE_DIMENSIONS = {
   lg: { width: 40, height: 28 },
 };
 
-export function CountryFlag({
-  locale,
-  className,
-  size = "md",
-}: CountryFlagProps) {
+export function CountryFlag({ locale, className, size = "md" }: CountryFlagProps) {
   const countryCode = COUNTRY_CODES[locale] || locale.split("-")[1] || "US";
   const dimensions = SIZE_DIMENSIONS[size];
 

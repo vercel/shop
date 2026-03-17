@@ -1,8 +1,9 @@
 "use client";
 
 import { Trash2Icon } from "lucide-react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
+
 import { PrefetchLink } from "@/components/prefetch-link";
 import {
   Select,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+
 import { useCart } from "./context";
 
 interface ItemRowProps {
@@ -30,9 +32,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
   const { currencyCode, amount: totalAmount } = item.cost.totalAmount;
   const unitPrice = parseFloat(totalAmount) / item.quantity;
 
-  const variantText = item.merchandise.selectedOptions
-    .map((opt) => opt.value)
-    .join(" / ");
+  const variantText = item.merchandise.selectedOptions.map((opt) => opt.value).join(" / ");
 
   return (
     <div className="flex gap-6 p-2">
@@ -60,11 +60,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
             </h3>
           </PrefetchLink>
 
-          {variantText && (
-            <p className="mt-1 text-sm font-semibold opacity-30">
-              {variantText}
-            </p>
-          )}
+          {variantText && <p className="mt-1 text-sm font-semibold opacity-30">{variantText}</p>}
         </div>
 
         <div className="flex items-center gap-4">
@@ -81,9 +77,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
 
             <Select
               value={quantity.toString()}
-              onValueChange={(value) =>
-                updateItemOptimistic(item.id || "", Number(value))
-              }
+              onValueChange={(value) => updateItemOptimistic(item.id || "", Number(value))}
             >
               <SelectTrigger className="h-8 w-[70px] rounded-full bg-secondary border-0 px-3 text-sm font-medium shadow-none">
                 <SelectValue />

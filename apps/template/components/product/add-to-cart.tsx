@@ -1,7 +1,9 @@
-import { AddToCartClient } from "./client";
-import type { ProductDetails } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ProductDetails } from "@/lib/types";
+
+import { AddToCartClient } from "./client";
 
 function Fallback() {
   return (
@@ -11,11 +13,7 @@ function Fallback() {
   );
 }
 
-async function Render({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+async function Render({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const product = await productPromise;
 
   return (
@@ -25,11 +23,7 @@ async function Render({
   );
 }
 
-export function AddToCart({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function AddToCart({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render productPromise={productPromise} />

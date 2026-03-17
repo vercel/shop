@@ -1,13 +1,9 @@
+import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
-import {
-  type TransformedFilters,
-  transformShopifyFilters,
-} from "@/lib/shopify/transforms/filters";
-
-import type { Locale } from "@/lib/i18n";
+import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 
@@ -83,8 +79,6 @@ export function getExactCollectionResultCount({
   return result.products.length;
 }
 
-function getSingleSearchParam(
-  value: string | string[] | undefined,
-): string | undefined {
+function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }

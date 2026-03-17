@@ -49,9 +49,7 @@ export function computeInitialSelectedOptions(
   return getInitialSelectedOptions(variants);
 }
 
-export function getInitialSelectedOptions(
-  variants: ProductVariant[],
-): SelectedOptions {
+export function getInitialSelectedOptions(variants: ProductVariant[]): SelectedOptions {
   const initial: SelectedOptions = {};
   for (const option of variants[0]?.selectedOptions ?? []) {
     initial[option.name] = option.value;
@@ -69,9 +67,7 @@ export function resolveSelectedVariant(
 
   return (
     variants.find((variant) =>
-      variant.selectedOptions.every(
-        (option) => selectedOptions[option.name] === option.value,
-      ),
+      variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
     ) ?? variants[0]
   );
 }
@@ -113,9 +109,7 @@ export function getImagesForSelectedColor(
   const colorToImageUrls = new Map<string, Set<string>>();
   for (const variant of variants) {
     if (!variant.image) continue;
-    const colorOpt = variant.selectedOptions.find(
-      (opt) => opt.name === colorOption.name,
-    );
+    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
     if (!colorOpt) continue;
 
     let urls = colorToImageUrls.get(colorOpt.value);
@@ -168,9 +162,7 @@ export function getImagesForSelectedColor(
   const variantImageUrl = selectedVariant?.image?.url;
 
   if (variantImageUrl) {
-    const variantIdx = colorImages.findIndex(
-      (img) => img.url === variantImageUrl,
-    );
+    const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
     if (variantIdx > 0) {
       const [variantImage] = colorImages.splice(variantIdx, 1);
       colorImages.unshift(variantImage);

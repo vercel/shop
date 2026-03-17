@@ -1,7 +1,9 @@
-import { CartIconClient } from "./cart-client";
-import { cookies } from "next/headers";
-import { getCart } from "@/lib/shopify/operations/cart";
 import { ShoppingBagIcon } from "lucide-react";
+import { cookies } from "next/headers";
+
+import { getCart } from "@/lib/shopify/operations/cart";
+
+import { CartIconClient } from "./cart-client";
 
 export async function CartIcon() {
   const cartId = (await cookies()).get("shopify_cartId")?.value;

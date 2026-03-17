@@ -1,7 +1,7 @@
-import { getLocaleData, localeSwitchingEnabled } from "@/lib/i18n";
-
 import { ChevronDownIcon } from "lucide-react";
+
 import { CountryFlag } from "@/components/ui/country-flag";
+import { getLocaleData, localeSwitchingEnabled } from "@/lib/i18n";
 
 export function LocaleCurrencySelectorFallback({ locale }: { locale: string }) {
   const data = getLocaleData(locale);
@@ -14,9 +14,7 @@ export function LocaleCurrencySelectorFallback({ locale }: { locale: string }) {
       <span className="flex items-center gap-1 px-4 py-2 opacity-50">
         {data.currencySymbol}
         {data.currency}
-        {localeSwitchingEnabled ? (
-          <ChevronDownIcon className="size-3.5" />
-        ) : null}
+        {localeSwitchingEnabled ? <ChevronDownIcon className="size-3.5" /> : null}
       </span>
     </div>
   );

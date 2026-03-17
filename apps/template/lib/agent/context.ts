@@ -1,11 +1,10 @@
 import type { Locale } from "../i18n";
 import type { ProductDetails } from "../types";
 
-export type User =
-  | {
-      type: "guest";
-      locale: Locale;
-    };
+export type User = {
+  type: "guest";
+  locale: Locale;
+};
 
 // Page context resolved from Referer header with trusted data
 export type PageContext =

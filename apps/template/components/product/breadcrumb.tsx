@@ -1,3 +1,7 @@
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Suspense } from "react";
+
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -5,13 +9,9 @@ import {
   BreadcrumbSeparator,
   Breadcrumb as BreadcrumbUI,
 } from "@/components/ui/breadcrumb";
-
-import { getCollections } from "@/lib/shopify/operations/collections";
-import { getLocale } from "@/lib/params";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
+import { getLocale } from "@/lib/params";
+import { getCollections } from "@/lib/shopify/operations/collections";
 
 /** Collection handles to exclude from breadcrumbs */
 const EXCLUDED_COLLECTION_HANDLES = new Set(["all-products"]);
@@ -21,10 +21,7 @@ const EXCLUDED_COLLECTION_HANDLES = new Set(["all-products"]);
 const HYPHEN_NUMBER_SUFFIX_PATTERN = /-\d+$/;
 
 function shouldExcludeCollection(handle: string): boolean {
-  return (
-    EXCLUDED_COLLECTION_HANDLES.has(handle) ||
-    HYPHEN_NUMBER_SUFFIX_PATTERN.test(handle)
-  );
+  return EXCLUDED_COLLECTION_HANDLES.has(handle) || HYPHEN_NUMBER_SUFFIX_PATTERN.test(handle);
 }
 
 function Fallback() {
@@ -38,16 +35,11 @@ function Fallback() {
 }
 
 async function Render({ collectionHandles }: { collectionHandles: string[] }) {
-  const [t, locale] = await Promise.all([
-    getTranslations("product.breadcrumb"),
-    getLocale(),
-  ]);
+  const [t, locale] = await Promise.all([getTranslations("product.breadcrumb"), getLocale()]);
 
   // Fetch all collections to get titles for the handles
   const allCollections = await getCollections(locale);
-  const collectionsMap = new Map(
-    allCollections.map((c) => [c.handle, c.title]),
-  );
+  const collectionsMap = new Map(allCollections.map((c) => [c.handle, c.title]));
 
   // Build collection items from the product's collectionHandles, deduplicated by title
   const seenTitles = new Set<string>();
@@ -77,9 +69,7 @@ async function Render({ collectionHandles }: { collectionHandles: string[] }) {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/collections/${collection.handle}`}>
-                  {collection.title}
-                </Link>
+                <Link href={`/collections/${collection.handle}`}>{collection.title}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
           </div>
@@ -89,11 +79,7 @@ async function Render({ collectionHandles }: { collectionHandles: string[] }) {
   );
 }
 
-export function Breadcrumb({
-  collectionHandles,
-}: {
-  collectionHandles: string[];
-}) {
+export function Breadcrumb({ collectionHandles }: { collectionHandles: string[] }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render collectionHandles={collectionHandles} />

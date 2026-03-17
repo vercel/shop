@@ -1,7 +1,9 @@
-import { getAgentContext } from "../context";
-import { removeFromCart } from "@/lib/shopify/operations/cart";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { removeFromCart } from "@/lib/shopify/operations/cart";
+
+import { getAgentContext } from "../context";
 
 export function removeFromCartTool() {
   return tool({
@@ -11,9 +13,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
     inputSchema: z.object({
       lineId: z
         .string()
-        .describe(
-          "The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')",
-        ),
+        .describe("The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')"),
     }),
     execute: async ({ lineId }) => {
       const { cart: cartId } = getAgentContext();
@@ -37,10 +37,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
         console.error("Failed to remove from cart:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to remove item from cart",
+          error: error instanceof Error ? error.message : "Failed to remove item from cart",
         };
       }
     },

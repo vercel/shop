@@ -1,9 +1,11 @@
 "use client";
 
 import type { ComponentPropsWithoutRef } from "react";
+
 import { DEFAULT_OPTION } from "@/lib/constants";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
 import { AboutItem } from "./about-item";
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
@@ -91,9 +93,7 @@ function ProductInfoOptions({
 
     if (!newVariant) {
       const variantWithOption = variants.find((v) =>
-        v.selectedOptions.some(
-          (opt) => opt.name === optionName && opt.value === value,
-        ),
+        v.selectedOptions.some((opt) => opt.name === optionName && opt.value === value),
       );
       if (variantWithOption) {
         const updatedOptions: Record<string, string> = {};
@@ -121,12 +121,8 @@ function ProductInfoOptions({
   const isDefaultOption = (opt: { values: { name: string }[] }) =>
     opt.values.length === 1 && opt.values[0].name === DEFAULT_OPTION;
 
-  const colorOptions = options.filter(
-    (opt) => isColorOption(opt) && !isDefaultOption(opt),
-  );
-  const otherOptions = options.filter(
-    (opt) => !isColorOption(opt) && !isDefaultOption(opt),
-  );
+  const colorOptions = options.filter((opt) => isColorOption(opt) && !isDefaultOption(opt));
+  const otherOptions = options.filter((opt) => !isColorOption(opt) && !isDefaultOption(opt));
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
@@ -139,9 +135,7 @@ function ProductInfoOptions({
               option={colorOption}
               selectedValue={selectedOptions[colorOption.name]}
               variants={variants}
-              onValueChange={(value) =>
-                handleOptionChange(colorOption.name, value)
-              }
+              onValueChange={(value) => handleOptionChange(colorOption.name, value)}
             />
           ) : null,
         )}
@@ -195,21 +189,11 @@ function ProductInfo({
 }) {
   return (
     <div data-slot="product-info" className="space-y-8">
-      <ProductInfoHeader
-        variants={variants}
-        title={title}
-        locale={locale}
-        size={size}
-      />
+      <ProductInfoHeader variants={variants} title={title} locale={locale} size={size} />
       <ProductInfoOptions variants={variants} options={options} size={size} />
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
   );
 }
 
-export {
-  ProductInfo,
-  ProductInfoHeader,
-  ProductInfoOptions,
-  ProductInfoDescription,
-};
+export { ProductInfo, ProductInfoHeader, ProductInfoOptions, ProductInfoDescription };

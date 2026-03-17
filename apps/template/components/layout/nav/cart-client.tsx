@@ -3,6 +3,7 @@
 import { ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+
 import { useCart } from "@/components/cart/context";
 import { Badge } from "@/components/ui/badge";
 import type { Cart } from "@/lib/types";

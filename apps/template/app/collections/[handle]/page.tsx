@@ -1,11 +1,11 @@
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
-import { getCollection } from "@/lib/shopify/operations/collections";
 import { getLocale } from "@/lib/params";
-import { getTranslations } from "next-intl/server";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { getCollection } from "@/lib/shopify/operations/collections";
 
 // export async function generateStaticParams() {
 //   return [{ handle: "__placeholder__" }];
@@ -81,9 +81,7 @@ export default async function CollectionPage({
   const [locale] = await Promise.all([getLocale()]);
   const handlePromise = params.then(({ handle }) => handle);
 
-  const collectionPromise = handlePromise.then((handle) =>
-    getCollection(handle, locale),
-  );
+  const collectionPromise = handlePromise.then((handle) => getCollection(handle, locale));
 
   return (
     <CollectionDetailPage

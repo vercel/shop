@@ -1,6 +1,6 @@
-import type { CmsRichTextNode, ContentSection } from "@/lib/types";
-
 import Image from "next/image";
+
+import type { CmsRichTextNode, ContentSection } from "@/lib/types";
 
 interface RichTextSectionProps {
   section: ContentSection;
@@ -18,9 +18,7 @@ export function RichTextSection({ section }: RichTextSectionProps) {
       <section className="py-10">
         <div className="border-t border-border/40 pt-8">
           <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
-            {title && (
-              <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
-            )}
+            {title && <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>}
             <div className="max-w-2xl text-base leading-7 text-muted-foreground [&_a]:text-foreground [&_a]:underline-offset-4 hover:[&_a]:underline [&_p:not(:last-child)]:mb-4">
               <RichTextRenderer node={content} />
             </div>
@@ -33,11 +31,7 @@ export function RichTextSection({ section }: RichTextSectionProps) {
   return (
     <section className="py-12 px-4">
       <div className="container mx-auto max-w-3xl">
-        {title && (
-          <h2 className="mb-6 text-3xl font-semibold tracking-tight">
-            {title}
-          </h2>
-        )}
+        {title && <h2 className="mb-6 text-3xl font-semibold tracking-tight">{title}</h2>}
         <div className="prose prose-lg max-w-none">
           <RichTextRenderer node={content} />
         </div>
@@ -70,8 +64,7 @@ function renderText(node: CmsRichTextNode) {
 
   const isBold = node.bold || marks.some((mark) => mark.type === "bold");
   const isItalic = node.italic || marks.some((mark) => mark.type === "italic");
-  const isUnderline =
-    node.underline || marks.some((mark) => mark.type === "underline");
+  const isUnderline = node.underline || marks.some((mark) => mark.type === "underline");
   const isCode = node.code || marks.some((mark) => mark.type === "code");
 
   if (isCode) {
@@ -176,11 +169,7 @@ function RichTextRenderer({ node }: RichTextRendererProps) {
     case "ordered-list":
       return <ol>{children}</ol>;
     case "list":
-      return node.listType === "ordered" ? (
-        <ol>{children}</ol>
-      ) : (
-        <ul>{children}</ul>
-      );
+      return node.listType === "ordered" ? <ol>{children}</ol> : <ul>{children}</ul>;
     case "list-item":
       return <li>{children}</li>;
     case "blockquote":

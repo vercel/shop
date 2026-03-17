@@ -1,9 +1,9 @@
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { cacheLife, cacheTag } from "next/cache";
-
-import { getProduct } from "@/lib/shopify/operations/products";
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
+
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { getProduct } from "@/lib/shopify/operations/products";
 
 export async function getProductDetails(handle: string, locale: string) {
   "use cache";

@@ -4,6 +4,7 @@ import { Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+
 import { BottomBarSearch } from "./bottom-bar-search";
 import { MenuTriggerIcon } from "./nav/megamenu/menu-trigger-icon";
 
@@ -93,9 +94,7 @@ export function BottomBar({ children }: BottomBarProps) {
               ) : (
                 <MenuTriggerIcon className="size-4 text-foreground opacity-50" />
               )}
-              <span className="text-xs font-medium text-foreground opacity-50">
-                Browse
-              </span>
+              <span className="text-xs font-medium text-foreground opacity-50">Browse</span>
             </button>
             <div className="w-px h-5 bg-border/50 md:hidden" />
             <button
@@ -104,9 +103,7 @@ export function BottomBar({ children }: BottomBarProps) {
               onClick={openSearch}
             >
               <Search className="size-4 text-foreground opacity-50" />
-              <span className="text-xs font-medium text-foreground opacity-50">
-                Search
-              </span>
+              <span className="text-xs font-medium text-foreground opacity-50">Search</span>
             </button>
             {children ? <div className="w-px h-5 bg-border/50" /> : null}
           </motion.div>
@@ -115,9 +112,7 @@ export function BottomBar({ children }: BottomBarProps) {
       {children ? (
         <div
           className={
-            searchOpen
-              ? "pointer-events-none absolute -z-10 opacity-0"
-              : "flex items-center pr-2"
+            searchOpen ? "pointer-events-none absolute -z-10 opacity-0" : "flex items-center pr-2"
           }
         >
           {children}

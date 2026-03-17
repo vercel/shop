@@ -1,12 +1,14 @@
 "use client";
 
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
+
 import { useCart } from "./context";
 
 interface OverlayItemProps {
@@ -58,9 +60,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
 
           {item.merchandise.selectedOptions.length > 0 && (
             <p className="text-xs text-muted-foreground mt-0.5">
-              {item.merchandise.selectedOptions
-                .map((option) => option.value)
-                .join(" / ")}
+              {item.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
             </p>
           )}
         </div>

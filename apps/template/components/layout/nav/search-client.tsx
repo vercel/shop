@@ -1,10 +1,12 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { startTransition, useRef, useState } from "react";
+
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
+
 import { PredictiveSearchPanel } from "../predictive-search-results";
 
 export function SearchClient() {
@@ -15,16 +17,8 @@ export function SearchClient() {
   const [showPanel, setShowPanel] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const {
-    query,
-    setQuery,
-    results,
-    isLoading,
-    totalItems,
-    activeIndex,
-    setActiveIndex,
-    reset,
-  } = usePredictiveSearch(locale);
+  const { query, setQuery, results, isLoading, totalItems, activeIndex, setActiveIndex, reset } =
+    usePredictiveSearch(locale);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,8 +57,7 @@ export function SearchClient() {
       return;
     }
 
-    const collection =
-      results.collections[activeIndex - queriesLen - productsLen];
+    const collection = results.collections[activeIndex - queriesLen - productsLen];
     if (collection) {
       reset();
       setShowPanel(false);
@@ -132,9 +125,7 @@ export function SearchClient() {
           aria-expanded={showPanel && !!results}
           aria-controls="predictive-search-results"
           aria-activedescendant={
-            activeIndex >= 0
-              ? `predictive-search-item-${activeIndex}`
-              : undefined
+            activeIndex >= 0 ? `predictive-search-item-${activeIndex}` : undefined
           }
         />
       </form>

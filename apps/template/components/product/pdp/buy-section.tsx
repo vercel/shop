@@ -1,7 +1,9 @@
-import { BuySectionClient } from "./buy-section-client";
-import type { ProductDetails } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ProductDetails } from "@/lib/types";
+
+import { BuySectionClient } from "./buy-section-client";
 
 function Fallback() {
   return (
@@ -12,11 +14,7 @@ function Fallback() {
   );
 }
 
-export function BuySection({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function BuySection({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <BuySectionClient productPromise={productPromise} />

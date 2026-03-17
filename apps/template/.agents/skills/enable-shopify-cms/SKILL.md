@@ -16,33 +16,33 @@ Add Shopify metaobject-based CMS support to the shop template. This replaces the
 
 ### `cms_homepage`
 
-| Field handle      | Type                | Description                                  |
-|-------------------|---------------------|----------------------------------------------|
-| `title`           | single_line_text    | Page title                                   |
-| `meta_title`      | single_line_text    | SEO title override                           |
-| `meta_description`| single_line_text    | SEO description override                     |
-| `hero_headline`   | single_line_text    | Hero banner headline                         |
-| `hero_subheadline`| single_line_text    | Hero banner subheadline                      |
-| `hero_image`      | file                | Hero background image                        |
-| `hero_cta_text`   | single_line_text    | Hero call-to-action label                    |
-| `hero_cta_link`   | single_line_text    | Hero call-to-action URL                      |
-| `sections`        | json                | Array of content section definitions          |
+| Field handle       | Type             | Description                          |
+| ------------------ | ---------------- | ------------------------------------ |
+| `title`            | single_line_text | Page title                           |
+| `meta_title`       | single_line_text | SEO title override                   |
+| `meta_description` | single_line_text | SEO description override             |
+| `hero_headline`    | single_line_text | Hero banner headline                 |
+| `hero_subheadline` | single_line_text | Hero banner subheadline              |
+| `hero_image`       | file             | Hero background image                |
+| `hero_cta_text`    | single_line_text | Hero call-to-action label            |
+| `hero_cta_link`    | single_line_text | Hero call-to-action URL              |
+| `sections`         | json             | Array of content section definitions |
 
 ### `cms_page`
 
-| Field handle      | Type                | Description                                  |
-|-------------------|---------------------|----------------------------------------------|
-| `slug`            | single_line_text    | URL slug                                     |
-| `title`           | single_line_text    | Page title                                   |
-| `locale`          | single_line_text    | Locale code (e.g. `en-US`)                   |
-| `meta_title`      | single_line_text    | SEO title override                           |
-| `meta_description`| single_line_text    | SEO description override                     |
-| `hero_headline`   | single_line_text    | Hero banner headline                         |
-| `hero_subheadline`| single_line_text    | Hero banner subheadline                      |
-| `hero_image`      | file                | Hero background image                        |
-| `hero_cta_text`   | single_line_text    | Hero call-to-action label                    |
-| `hero_cta_link`   | single_line_text    | Hero call-to-action URL                      |
-| `sections`        | json                | Array of content section definitions          |
+| Field handle       | Type             | Description                          |
+| ------------------ | ---------------- | ------------------------------------ |
+| `slug`             | single_line_text | URL slug                             |
+| `title`            | single_line_text | Page title                           |
+| `locale`           | single_line_text | Locale code (e.g. `en-US`)           |
+| `meta_title`       | single_line_text | SEO title override                   |
+| `meta_description` | single_line_text | SEO description override             |
+| `hero_headline`    | single_line_text | Hero banner headline                 |
+| `hero_subheadline` | single_line_text | Hero banner subheadline              |
+| `hero_image`       | file             | Hero background image                |
+| `hero_cta_text`    | single_line_text | Hero call-to-action label            |
+| `hero_cta_link`    | single_line_text | Hero call-to-action URL              |
+| `sections`         | json             | Array of content section definitions |
 
 ## Implementation steps
 

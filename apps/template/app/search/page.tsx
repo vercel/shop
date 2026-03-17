@@ -1,17 +1,9 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import {
-  buildProductFiltersFromParams,
-  getProducts,
-} from "@/lib/shopify/operations/products";
 import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Suspense } from "react";
+
 import {
   FilterPendingScope,
   FilterTransitionProvider,
@@ -20,27 +12,30 @@ import {
   MobileFilterSortBar,
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
-import { Results, ResultsSkeleton } from "@/components/search/results";
-
+import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { Container } from "@/components/layout/container";
 import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
-import { getLocale } from "@/lib/params";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
+import { Container } from "@/components/layout/container";
+import { Results, ResultsSkeleton } from "@/components/search/results";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import type { Metadata } from "next";
+import { getLocale } from "@/lib/params";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 
-export async function generateMetadata({
-  searchParams,
-}: PageProps<"/search">): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations("seo");
   const q = Array.isArray(resolvedSearchParams.q)
@@ -49,9 +44,7 @@ export async function generateMetadata({
   const query = q ?? "";
   const hasQuery = query.length > 0;
   const title = hasQuery ? t("searchTitleQuery", { query }) : t("searchTitle");
-  const description = hasQuery
-    ? t("searchDescriptionQuery", { query })
-    : t("searchDescription");
+  const description = hasQuery ? t("searchDescriptionQuery", { query }) : t("searchDescription");
 
   return {
     title,
@@ -79,9 +72,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function SearchPage({
-  searchParams,
-}: PageProps<"/search">) {
+export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const locale = await getLocale();
 
   return (
@@ -151,9 +142,7 @@ async function SearchHeader({
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>
-              {q
-                ? t("breadcrumb.searchQuery", { query: q })
-                : t("breadcrumb.search")}
+              {q ? t("breadcrumb.searchQuery", { query: q }) : t("breadcrumb.search")}
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -165,10 +154,7 @@ async function SearchHeader({
           <FilterSidebarSheet
             label={t("filters")}
             trigger={
-              <button
-                type="button"
-                className="flex items-center gap-2 text-sm font-medium"
-              >
+              <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
                 <span>{t("filters")}</span>
               </button>
@@ -178,9 +164,7 @@ async function SearchHeader({
               <FilterPendingScope>
                 <SearchFilterContent
                   query={q}
-                  collection={
-                    resolvedSearchParams.collection as string | undefined
-                  }
+                  collection={resolvedSearchParams.collection as string | undefined}
                   locale={locale}
                   activeFilters={activeFilters}
                 />
@@ -197,9 +181,7 @@ async function SearchHeader({
           <h1 className="text-3xl font-semibold tracking-tight">
             {q ? t("titleQuery", { query: q }) : t("title")}
           </h1>
-          {q && (
-            <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>
-          )}
+          {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
         </div>
         <div className="hidden md:block">
           <CollectionsSortSelect />
@@ -214,10 +196,7 @@ async function SearchResults({
 }: {
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [locale, resolvedSearchParams] = await Promise.all([
-    getLocale(),
-    searchParamsPromise,
-  ]);
+  const [locale, resolvedSearchParams] = await Promise.all([getLocale(), searchParamsPromise]);
   const { q, sort, collection, cursor } = resolvedSearchParams;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
 
@@ -296,9 +275,7 @@ async function SearchResultCount({
   if (result.products.length === 0) return null;
 
   return (
-    <p className="text-sm text-muted-foreground">
-      {t("resultCount", { count: result.total })}
-    </p>
+    <p className="text-sm text-muted-foreground">{t("resultCount", { count: result.total })}</p>
   );
 }
 

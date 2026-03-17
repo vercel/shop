@@ -19,9 +19,7 @@ export default function GlobalError({
               <AlertCircleIcon className="h-12 w-12 text-muted-foreground" />
             </div>
           </div>
-          <h1 className="mb-2 text-2xl font-medium lg:text-3xl">
-            Something went wrong
-          </h1>
+          <h1 className="mb-2 text-2xl font-medium lg:text-3xl">Something went wrong</h1>
           <p className="mb-8 max-w-md text-muted-foreground">
             An unexpected error occurred. Please try again.
           </p>

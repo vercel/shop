@@ -1,5 +1,4 @@
 import "server-only";
-
 import { revalidateTag, updateTag } from "next/cache";
 
 import { TAGS } from "@/lib/constants";

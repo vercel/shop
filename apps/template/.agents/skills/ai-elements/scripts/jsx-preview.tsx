@@ -1,12 +1,13 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import {
   JSXPreview,
   JSXPreviewContent,
   JSXPreviewError,
 } from "@/components/ai-elements/jsx-preview";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 const handleError = (error: Error) => {
   console.log("JSX Parse Error:", error);
@@ -74,17 +75,12 @@ const Example = () => {
         clearInterval(intervalRef.current);
       }
     },
-    []
+    [],
   );
 
   return (
     <div className="space-y-4">
-      <Button
-        disabled={isStreaming}
-        onClick={simulateStreaming}
-        size="sm"
-        variant="outline"
-      >
+      <Button disabled={isStreaming} onClick={simulateStreaming} size="sm" variant="outline">
         {isStreaming ? "Streaming..." : "Simulate Streaming"}
       </Button>
 

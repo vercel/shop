@@ -1,10 +1,11 @@
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
-
-import type { Cart } from "@/lib/types";
 import { cookies } from "next/headers";
+
 import { invalidateCartCache } from "@/lib/cart-cache";
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import type { Cart } from "@/lib/types";
+
 import { shopifyFetch } from "../client";
+import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
 const CART_FRAGMENT = `
   fragment CartFields on Cart {
@@ -113,9 +114,7 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
  * Use this in streaming contexts (e.g., AI agent) where cookies().set() won't work.
  * The caller is responsible for setting the cookie via response headers.
  */
-export async function createCartWithoutCookie(
-  locale: string = defaultLocale,
-): Promise<Cart> {
+export async function createCartWithoutCookie(locale: string = defaultLocale): Promise<Cart> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -147,9 +146,7 @@ export async function createCartWithoutCookie(
   return cart;
 }
 
-export async function createCart(
-  locale: string = defaultLocale,
-): Promise<Cart> {
+export async function createCart(locale: string = defaultLocale): Promise<Cart> {
   const cart = await createCartWithoutCookie(locale);
 
   // Store cart ID in HTTP-only cookie (server-side only)
@@ -205,8 +202,7 @@ export async function updateCart(
   lines: { id: string; merchandiseId: string; quantity: number }[],
   cartIdOverride?: string,
 ): Promise<Cart> {
-  const cartId =
-    cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
@@ -234,12 +230,8 @@ export async function updateCart(
   return cart;
 }
 
-export async function removeFromCart(
-  lineIds: string[],
-  cartIdOverride?: string,
-): Promise<Cart> {
-  const cartId =
-    cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+export async function removeFromCart(lineIds: string[], cartIdOverride?: string): Promise<Cart> {
+  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
@@ -313,8 +305,7 @@ export async function linkCartToCustomer(
   customerAccessToken: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId =
-    cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -357,8 +348,7 @@ export async function updateCartNote(
   note: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId =
-    cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -395,9 +385,7 @@ export async function updateCartNote(
   return cart;
 }
 
-export async function getCartSelectableAddressId(): Promise<
-  string | undefined
-> {
+export async function getCartSelectableAddressId(): Promise<string | undefined> {
   const cartId = (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) return undefined;
 

@@ -24,10 +24,7 @@ export function useScrollContain(
     if (!panel) return;
 
     const scrollEl = panel.querySelector<HTMLElement>(scrollSelector);
-    if (
-      scrollEl?.contains(e.target as Node) &&
-      !isAtScrollBoundary(scrollEl, e.deltaY)
-    ) {
+    if (scrollEl?.contains(e.target as Node) && !isAtScrollBoundary(scrollEl, e.deltaY)) {
       return;
     }
     e.preventDefault();
@@ -43,16 +40,13 @@ export function useScrollContain(
 
     const deltaY = touchStartYRef.current - (e.touches[0]?.clientY ?? 0);
     const scrollEl = panel.querySelector<HTMLElement>(scrollSelector);
-    if (
-      scrollEl?.contains(e.target as Node) &&
-      !isAtScrollBoundary(scrollEl, deltaY)
-    ) {
+    if (scrollEl?.contains(e.target as Node) && !isAtScrollBoundary(scrollEl, deltaY)) {
       return;
     }
     e.preventDefault();
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ref is stable; enabled changing to true coincides with the panel mounting
+  // oxlint-disable-next-line react/exhaustive-deps -- ref is stable; enabled changing to true coincides with the panel mounting
   useEffect(() => {
     if (!enabled) return;
     const panel = ref.current;

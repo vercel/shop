@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import type { ProductDetails } from "@/lib/types";
+
 import { Button } from "../ui/button";
 import { Price } from "./price";
 
@@ -12,15 +14,9 @@ type PickerProps = {
   locale: string;
 };
 
-export function Picker({
-  productHandle: _productHandle,
-  variants,
-  options,
-  locale,
-}: PickerProps) {
+export function Picker({ productHandle: _productHandle, variants, options, locale }: PickerProps) {
   const [selectedVariantId, setSelectedVariantId] = useState(variants[0]?.id);
-  const selectedVariant =
-    variants.find((v) => v.id === selectedVariantId) ?? variants[0];
+  const selectedVariant = variants.find((v) => v.id === selectedVariantId) ?? variants[0];
 
   if (!selectedVariant) return null;
 
@@ -32,9 +28,7 @@ export function Picker({
     currentSelections.set(optionName, value);
 
     const newVariant = variants.find((v) =>
-      v.selectedOptions.every(
-        (opt) => currentSelections.get(opt.name) === opt.value,
-      ),
+      v.selectedOptions.every((opt) => currentSelections.get(opt.name) === opt.value),
     );
 
     if (newVariant) {
@@ -52,9 +46,7 @@ export function Picker({
           locale={locale}
         />
         {!selectedVariant.availableForSale && (
-          <span className="text-sm text-destructive font-medium">
-            Out of Stock
-          </span>
+          <span className="text-sm text-destructive font-medium">Out of Stock</span>
         )}
       </div>
 
@@ -66,15 +58,10 @@ export function Picker({
 
         return (
           <div key={option.id} className="space-y-3">
-            <label
-              htmlFor={option.id}
-              className="block text-sm font-medium text-foreground"
-            >
+            <label htmlFor={option.id} className="block text-sm font-medium text-foreground">
               {option.name}
               {currentValue && (
-                <span className="ml-2 text-muted-foreground font-normal">
-                  - {currentValue}
-                </span>
+                <span className="ml-2 text-muted-foreground font-normal">- {currentValue}</span>
               )}
             </label>
 
@@ -84,8 +71,7 @@ export function Picker({
                 const isSelected = currentValue === value.name;
                 const variantWithThisOption = variants.find((v) =>
                   v.selectedOptions.some(
-                    (opt) =>
-                      opt.name === option.name && opt.value === value.name,
+                    (opt) => opt.name === option.name && opt.value === value.name,
                   ),
                 );
                 const isAvailable = variantWithThisOption?.availableForSale;

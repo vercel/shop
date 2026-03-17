@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Container } from "@/components/layout/container";
 import { FileQuestionIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+
+import { Container } from "@/components/layout/container";
+import { Button } from "@/components/ui/button";
 
 export default async function NotFoundError() {
   const t = await getTranslations("common");

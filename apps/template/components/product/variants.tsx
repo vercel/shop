@@ -1,8 +1,10 @@
-import { getLocale } from "@/lib/params";
-import { Picker } from "./picker";
-import type { ProductDetails } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import { getLocale } from "@/lib/params";
+import type { ProductDetails } from "@/lib/types";
+
+import { Picker } from "./picker";
 
 function Fallback() {
   return (
@@ -19,11 +21,7 @@ function Fallback() {
   );
 }
 
-async function Render({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+async function Render({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const [product, locale] = await Promise.all([productPromise, getLocale()]);
 
   return (
@@ -38,11 +36,7 @@ async function Render({
   );
 }
 
-export function Variants({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function Variants({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render productPromise={productPromise} />

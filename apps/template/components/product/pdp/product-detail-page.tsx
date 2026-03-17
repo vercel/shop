@@ -1,26 +1,26 @@
-import type { Category, ProductDetails } from "@/lib/types";
-import { defaultLocale, type Locale } from "@/lib/i18n";
+import { Suspense } from "react";
+
+import { Container } from "@/components/layout/container";
+import { Breadcrumb } from "@/components/product/breadcrumb";
+import { ImageGrid } from "@/components/product/pdp/image-grid";
+import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
+import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
 import {
   ProductInfo,
   ProductInfoDescription,
   ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
-
-import { Breadcrumb } from "@/components/product/breadcrumb";
-import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
-import { buildProductCategoryPath } from "@/lib/utils/breadcrumbs";
-import { computeInitialSelectedOptions } from "@/components/product/pdp/variants";
-import { Container } from "@/components/layout/container";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { ImageGrid } from "@/components/product/pdp/image-grid";
-import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
-import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
 import { PdpVariantStateProvider } from "@/components/product/pdp/variant-state";
-import { ProductSchema } from "@/components/product/schema";
+import { computeInitialSelectedOptions } from "@/components/product/pdp/variants";
 import { Recommendations } from "@/components/product/recommendations";
+import { ProductSchema } from "@/components/product/schema";
+import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { siteConfig } from "@/lib/config";
-import { Suspense } from "react";
+import { defaultLocale, type Locale } from "@/lib/i18n";
+import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import type { Category, ProductDetails } from "@/lib/types";
+import { buildProductCategoryPath } from "@/lib/utils/breadcrumbs";
 
 async function ProductBreadcrumbSchema({
   category,
@@ -36,19 +36,11 @@ async function ProductBreadcrumbSchema({
   locale: Locale;
 }) {
   const menu = await getMegamenuData(locale);
-  let categorySegments = buildProductCategoryPath(
-    category,
-    menu,
-    collectionHandles,
-  );
+  let categorySegments = buildProductCategoryPath(category, menu, collectionHandles);
 
   if (categorySegments.length === 0 && locale !== defaultLocale) {
     const fallbackMenu = await getMegamenuData(defaultLocale);
-    categorySegments = buildProductCategoryPath(
-      category,
-      fallbackMenu,
-      collectionHandles,
-    );
+    categorySegments = buildProductCategoryPath(category, fallbackMenu, collectionHandles);
   }
 
   return (
@@ -90,10 +82,7 @@ export async function ProductDetailPage({
     collectionHandles,
   } = product;
 
-  const initialSelectedOptions = computeInitialSelectedOptions(
-    variants,
-    variantId,
-  );
+  const initialSelectedOptions = computeInitialSelectedOptions(variants, variantId);
   const imageProps = { images, videos, title, options, variants };
   const buyButtonProps = { variants, title, handle, featuredImage };
 
@@ -135,11 +124,7 @@ export async function ProductDetailPage({
             </div>
 
             <div className="space-y-8">
-              <ProductInfoHeader
-                variants={variants}
-                title={title}
-                locale={locale}
-              />
+              <ProductInfoHeader variants={variants} title={title} locale={locale} />
               <ProductInfoOptions variants={variants} options={options} />
               <MobileBuyButtons {...buyButtonProps} />
               <ProductInfoDescription descriptionHtml={descriptionHtml} />

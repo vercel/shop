@@ -7,11 +7,7 @@ interface CollectionSchemaData {
   updatedAt: string;
 }
 
-export function CollectionSchema({
-  collection,
-}: {
-  collection: CollectionSchemaData;
-}) {
+export function CollectionSchema({ collection }: { collection: CollectionSchemaData }) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",

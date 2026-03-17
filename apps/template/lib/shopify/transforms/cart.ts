@@ -1,5 +1,5 @@
-import type { Cart, CartLine, CartProduct, Image, Money } from "@/lib/types";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
+import type { Cart, CartLine, CartProduct, Image, Money } from "@/lib/types";
 
 interface ShopifyMoney {
   amount: string;
@@ -64,9 +64,7 @@ function transformImage(image: ShopifyImage | null): Image {
   };
 }
 
-function transformCartProduct(
-  product: ShopifyCartLine["merchandise"]["product"],
-): CartProduct {
+function transformCartProduct(product: ShopifyCartLine["merchandise"]["product"]): CartProduct {
   return {
     id: product.id,
     handle: product.handle,
@@ -103,10 +101,7 @@ function transformShippingCost(cart: ShopifyCart): Money | null {
   if (selected.length === 0) return null;
 
   const currencyCode = selected[0].estimatedCost.currencyCode;
-  const total = selected.reduce(
-    (sum, opt) => sum + parseFloat(opt.estimatedCost.amount),
-    0,
-  );
+  const total = selected.reduce((sum, opt) => sum + parseFloat(opt.estimatedCost.amount), 0);
 
   return { amount: total.toString(), currencyCode };
 }

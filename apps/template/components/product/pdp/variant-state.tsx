@@ -26,14 +26,10 @@ export function PdpVariantStateProvider({
   children: ReactNode;
   initialSelectedOptions: SelectedOptions;
 }) {
-  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>(
-    initialSelectedOptions,
-  );
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>(initialSelectedOptions);
 
   return (
-    <PdpVariantStateContext.Provider
-      value={{ selectedOptions, setSelectedOptions }}
-    >
+    <PdpVariantStateContext.Provider value={{ selectedOptions, setSelectedOptions }}>
       {children}
     </PdpVariantStateContext.Provider>
   );
@@ -42,9 +38,7 @@ export function PdpVariantStateProvider({
 export function usePdpVariantState() {
   const context = useContext(PdpVariantStateContext);
   if (!context) {
-    throw new Error(
-      "usePdpVariantState must be used within PdpVariantStateProvider",
-    );
+    throw new Error("usePdpVariantState must be used within PdpVariantStateProvider");
   }
   return context;
 }

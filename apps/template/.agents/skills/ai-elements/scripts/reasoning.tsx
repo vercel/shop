@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
 import { useCallback, useEffect, useState } from "react";
+
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 
 const reasoningSteps = [
   "Let me think about this problem step by step.",

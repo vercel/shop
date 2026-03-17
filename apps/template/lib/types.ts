@@ -1,8 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-export type SearchParamsPromise = Promise<
-  Record<string, string | string[] | undefined>
->;
+export type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>>;
 
 export type NormalizedSearchParams = Record<string, string | undefined>;
 
@@ -14,10 +12,7 @@ export function normalizeSearchParams(
   params: Record<string, string | string[] | undefined>,
 ): NormalizedSearchParams {
   return Object.fromEntries(
-    Object.entries(params).map(([key, value]) => [
-      key,
-      Array.isArray(value) ? value[0] : value,
-    ]),
+    Object.entries(params).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value]),
   );
 }
 

@@ -2,10 +2,7 @@
 
 import { type ComponentPropsWithoutRef, useEffect, useRef } from "react";
 
-type AutoPlayVideoProps = Omit<
-  ComponentPropsWithoutRef<"video">,
-  "autoPlay" | "ref"
->;
+type AutoPlayVideoProps = Omit<ComponentPropsWithoutRef<"video">, "autoPlay" | "ref">;
 
 /**
  * A video element that autoplays when visible and pauses when off-screen.

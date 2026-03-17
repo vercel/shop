@@ -1,13 +1,14 @@
 import { cacheLife, cacheTag } from "next/cache";
+
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import type { Collection } from "@/lib/types";
+
+import { shopifyFetch } from "../client";
 import {
   type ShopifyCollection,
   transformShopifyCollection,
   transformShopifyCollections,
 } from "../transforms/collection";
-
-import type { Collection } from "@/lib/types";
-import { shopifyFetch } from "../client";
 
 type CollectionsResponse = {
   collections: { edges: Array<{ node: ShopifyCollection }> };
@@ -17,9 +18,7 @@ type CollectionResponse = {
   collection: ShopifyCollection | null;
 };
 
-export async function getCollections(
-  locale: string = defaultLocale,
-): Promise<Collection[]> {
+export async function getCollections(locale: string = defaultLocale): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("collections");

@@ -22,10 +22,7 @@ const handleValueChange = (newValue: string) => {
 
 const Example = () => (
   <div className="flex size-full flex-col items-center justify-center gap-4">
-    <MicSelector
-      onOpenChange={handleOpenChange}
-      onValueChange={handleValueChange}
-    >
+    <MicSelector onOpenChange={handleOpenChange} onValueChange={handleValueChange}>
       <MicSelectorTrigger className="w-full max-w-sm">
         <MicSelectorValue />
       </MicSelectorTrigger>

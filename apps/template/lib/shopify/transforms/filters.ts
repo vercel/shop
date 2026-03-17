@@ -1,9 +1,6 @@
 import type { Filter, FilterType, FilterValue, PriceRange } from "@/lib/types";
-import type {
-  ProductFilter,
-  ShopifyFilter,
-  ShopifyFilterType,
-} from "../types/filters";
+
+import type { ProductFilter, ShopifyFilter, ShopifyFilterType } from "../types/filters";
 
 export interface TransformFiltersOptions {
   hideZeroCount?: boolean;
@@ -131,9 +128,7 @@ export function transformShopifyFilters(
 
   let filters = listFilters
     .map(transformFilter)
-    .filter(
-      (filter) => filter.paramKey !== "category" && filter.paramKey !== "price",
-    );
+    .filter((filter) => filter.paramKey !== "category" && filter.paramKey !== "price");
 
   if (hideZeroCount) {
     filters = filters
@@ -152,9 +147,7 @@ export function transformShopifyFilters(
 
   return {
     filters,
-    priceRange: priceFilter
-      ? extractPriceRange(priceFilter)
-      : { min: 0, max: 1000 },
+    priceRange: priceFilter ? extractPriceRange(priceFilter) : { min: 0, max: 1000 },
   };
 }
 

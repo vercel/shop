@@ -23,11 +23,7 @@ Add the following component to your frontend:
 ```tsx title="app/page.tsx"
 "use client";
 
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "@/components/ai-elements/reasoning";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "@/components/ai-elements/reasoning";
 import {
   Conversation,
   ConversationContent,
@@ -40,11 +36,7 @@ import {
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
@@ -59,16 +51,13 @@ const MessageParts = ({
   isStreaming: boolean;
 }) => {
   // Consolidate all reasoning parts into one block
-  const reasoningParts = message.parts.filter(
-    (part) => part.type === "reasoning"
-  );
+  const reasoningParts = message.parts.filter((part) => part.type === "reasoning");
   const reasoningText = reasoningParts.map((part) => part.text).join("\n\n");
   const hasReasoning = reasoningParts.length > 0;
 
   // Check if reasoning is still streaming (last part is reasoning on last message)
   const lastPart = message.parts.at(-1);
-  const isReasoningStreaming =
-    isLastMessage && isStreaming && lastPart?.type === "reasoning";
+  const isReasoningStreaming = isLastMessage && isStreaming && lastPart?.type === "reasoning";
 
   return (
     <>
@@ -80,11 +69,7 @@ const MessageParts = ({
       )}
       {message.parts.map((part, i) => {
         if (part.type === "text") {
-          return (
-            <MessageResponse key={`${message.id}-${i}`}>
-              {part.text}
-            </MessageResponse>
-          );
+          return <MessageResponse key={`${message.id}-${i}`}>{part.text}</MessageResponse>;
         }
         return null;
       })}
@@ -125,10 +110,7 @@ const ReasoningDemo = () => {
           <ConversationScrollButton />
         </Conversation>
 
-        <PromptInput
-          onSubmit={handleSubmit}
-          className="mt-4 w-full max-w-2xl mx-auto relative"
-        >
+        <PromptInput onSubmit={handleSubmit} className="mt-4 w-full max-w-2xl mx-auto relative">
           <PromptInputTextarea
             value={input}
             placeholder="Say something..."
@@ -158,8 +140,7 @@ import { streamText, UIMessage, convertToModelMessages } from "ai";
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { model, messages }: { messages: UIMessage[]; model: string } =
-    await req.json();
+  const { model, messages }: { messages: UIMessage[]; model: string } = await req.json();
 
   const result = streamText({
     model: "deepseek/deepseek-r1",
@@ -195,28 +176,28 @@ If your model outputs discrete, labeled steps (search queries, tool calls, disti
 
 ### `<Reasoning />`
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `isStreaming` | `boolean` | `false` | Whether the reasoning is currently streaming (auto-opens and closes the panel). |
-| `open` | `boolean` | - | Controlled open state. |
-| `defaultOpen` | `boolean` | `true` | Default open state when uncontrolled. |
-| `onOpenChange` | `(open: boolean) => void` | - | Callback when open state changes. |
-| `duration` | `number` | - | Duration in seconds to display (can be controlled externally). |
-| `...props` | `React.ComponentProps<typeof Collapsible>` | - | Any other props are spread to the underlying Collapsible component. |
+| Prop           | Type                                       | Default | Description                                                                     |
+| -------------- | ------------------------------------------ | ------- | ------------------------------------------------------------------------------- |
+| `isStreaming`  | `boolean`                                  | `false` | Whether the reasoning is currently streaming (auto-opens and closes the panel). |
+| `open`         | `boolean`                                  | -       | Controlled open state.                                                          |
+| `defaultOpen`  | `boolean`                                  | `true`  | Default open state when uncontrolled.                                           |
+| `onOpenChange` | `(open: boolean) => void`                  | -       | Callback when open state changes.                                               |
+| `duration`     | `number`                                   | -       | Duration in seconds to display (can be controlled externally).                  |
+| `...props`     | `React.ComponentProps<typeof Collapsible>` | -       | Any other props are spread to the underlying Collapsible component.             |
 
 ### `<ReasoningTrigger />`
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `getThinkingMessage` | `(isStreaming: boolean, duration?: number) => ReactNode` | - | Optional function to customize the thinking message. Receives isStreaming and duration parameters. |
-| `...props` | `React.ComponentProps<typeof CollapsibleTrigger>` | - | Any other props are spread to the underlying CollapsibleTrigger component. |
+| Prop                 | Type                                                     | Default | Description                                                                                        |
+| -------------------- | -------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------- |
+| `getThinkingMessage` | `(isStreaming: boolean, duration?: number) => ReactNode` | -       | Optional function to customize the thinking message. Receives isStreaming and duration parameters. |
+| `...props`           | `React.ComponentProps<typeof CollapsibleTrigger>`        | -       | Any other props are spread to the underlying CollapsibleTrigger component.                         |
 
 ### `<ReasoningContent />`
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `string` | Required | The reasoning text to display (rendered via Streamdown). |
-| `...props` | `React.ComponentProps<typeof CollapsibleContent>` | - | Any other props are spread to the underlying CollapsibleContent component. |
+| Prop       | Type                                              | Default  | Description                                                                |
+| ---------- | ------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `children` | `string`                                          | Required | The reasoning text to display (rendered via Streamdown).                   |
+| `...props` | `React.ComponentProps<typeof CollapsibleContent>` | -        | Any other props are spread to the underlying CollapsibleContent component. |
 
 ## Hooks
 
@@ -230,9 +211,9 @@ const { isStreaming, isOpen, setIsOpen, duration } = useReasoning();
 
 Returns:
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `isStreaming` | `boolean` | - | Whether reasoning is currently streaming. |
-| `isOpen` | `boolean` | - | Whether the reasoning panel is open. |
-| `setIsOpen` | `(open: boolean) => void` | - | Function to set the open state. |
-| `duration` | `number | undefined` | - | Duration in seconds (undefined while streaming). |
+| Prop          | Type                      | Default    | Description                               |
+| ------------- | ------------------------- | ---------- | ----------------------------------------- | ------------------------------------------------ |
+| `isStreaming` | `boolean`                 | -          | Whether reasoning is currently streaming. |
+| `isOpen`      | `boolean`                 | -          | Whether the reasoning panel is open.      |
+| `setIsOpen`   | `(open: boolean) => void` | -          | Function to set the open state.           |
+| `duration`    | `number                   | undefined` | -                                         | Duration in seconds (undefined while streaming). |

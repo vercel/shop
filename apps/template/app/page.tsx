@@ -1,21 +1,18 @@
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-
-import { Container } from "@/components/layout/container";
-import { HeroSection } from "@/components/cms/hero-section";
-import { ProductCard } from "@/components/product-card";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TopProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
-import {
-  getCollectionProducts,
-  getProducts,
-} from "@/lib/shopify/operations/products";
-import { getCollections } from "@/lib/shopify/operations/collections";
-import { getLocale } from "@/lib/params";
-import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
-import type { Locale } from "@/lib/i18n";
+import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+
+import { TopProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
+import { HeroSection } from "@/components/cms/hero-section";
+import { Container } from "@/components/layout/container";
+import { ProductCard } from "@/components/product-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
+import type { Locale } from "@/lib/i18n";
+import { getLocale } from "@/lib/params";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { getCollections } from "@/lib/shopify/operations/collections";
+import { getCollectionProducts, getProducts } from "@/lib/shopify/operations/products";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
@@ -45,18 +42,16 @@ const FEATURED_COLLECTION_HANDLE = "furniture";
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [contentT, productT, collections, featuredProductsResult] =
-    await Promise.all([
-      getTranslations("content.homepage"),
-      getTranslations("product"),
-      getCollections(locale),
-      getProducts({ limit: 10, locale }),
-    ]);
+  const [contentT, productT, collections, featuredProductsResult] = await Promise.all([
+    getTranslations("content.homepage"),
+    getTranslations("product"),
+    getCollections(locale),
+    getProducts({ limit: 10, locale }),
+  ]);
 
   const featuredCollection =
-    collections.find(
-      (collection) => collection.handle === FEATURED_COLLECTION_HANDLE,
-    ) ?? collections[0];
+    collections.find((collection) => collection.handle === FEATURED_COLLECTION_HANDLE) ??
+    collections[0];
 
   return (
     <Container>
@@ -75,18 +70,14 @@ export default async function HomePage() {
               height: 630,
             },
             ctaText: contentT("hero.ctaText"),
-            ctaLink: featuredCollection
-              ? `/collections/${featuredCollection.handle}`
-              : "/search",
+            ctaLink: featuredCollection ? `/collections/${featuredCollection.handle}` : "/search",
           }}
         />
 
         <section className="py-10">
           <div className="border-t border-border/40 pt-8">
             <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
-              <h2 className="text-3xl font-semibold tracking-tight">
-                {contentT("intro.title")}
-              </h2>
+              <h2 className="text-3xl font-semibold tracking-tight">{contentT("intro.title")}</h2>
               <div className="max-w-2xl text-base leading-7 text-muted-foreground">
                 <p>{contentT("intro.paragraphOne")}</p>
                 <p className="mt-4">{contentT("intro.paragraphTwo")}</p>
@@ -162,10 +153,7 @@ function CollectionGridSkeleton() {
       <Skeleton className="mb-8 h-8 w-48" />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {[1, 2, 3, 4, 5].map((slot) => (
-          <Skeleton
-            key={`product-skeleton-${slot}`}
-            className="aspect-square rounded-lg"
-          />
+          <Skeleton key={`product-skeleton-${slot}`} className="aspect-square rounded-lg" />
         ))}
       </div>
     </section>
