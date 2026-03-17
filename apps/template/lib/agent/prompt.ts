@@ -25,12 +25,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
 
   let prompt = BASE_SYSTEM_PROMPT;
 
-  if (user.type === "user") {
-    prompt += dedent`\n
-      You are logged in as ${user.email}.
-    `;
-  }
-
   prompt += dedent`\n
     You are currently in the ${user.locale} locale, always respond in the same language as the user but prefer to use the user's language when unclear.
   `;
@@ -44,19 +38,8 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     - **Product details**: Look up pricing, availability, variants, descriptions for any product
     - **Cart management**: Add items to cart, update quantities, remove items, add notes, view cart contents
     - **Checkout**: Direct users to checkout via their cart
-    - **Navigation**: Guide users to any page on the site (products, collections, search, cart, account)
+    - **Navigation**: Guide users to any page on the site (products, collections, search, cart)
   `;
-
-  if (user.type === "user") {
-    prompt += dedent`\n
-      - **Order tracking**: View order history, check fulfillment status, see tracking info
-      - **Address book**: View saved shipping addresses
-    `;
-  } else {
-    prompt += dedent`\n
-      Note: The user is not logged in. If they ask about orders or account features, suggest they log in first.
-    `;
-  }
 
   // Add page-specific context
   if (page?.type === "product") {
@@ -115,13 +98,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
       The user is viewing their shopping cart.
       You can help them update quantities, remove items, add notes, or proceed to checkout.
     `;
-  } else if (page?.type === "account") {
-    prompt += dedent`\n
-      ## Current Page Context
-
-      The user is on their account page.
-      You can help them view orders, manage addresses, or navigate to other account sections.
-    `;
   }
 
   // Append json-render catalog prompt for generative UI
@@ -137,7 +113,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
         "When getCart returns a non-empty cart (empty: false), ALWAYS render an AgentCartSummary with the cart data. Pass items (including image), subtotal, total, tax, totalQuantity, and checkoutUrl directly from the tool result.",
         "After a successful addToCart call, ALWAYS render an AgentCartConfirmation. Use product data from your context (prior search results, product details, or page context) to populate image, title, variant, and price props.",
         "When a user wants to add a product to cart but hasn't specified a variant, and the product has multiple variants, render an AgentVariantPicker with the product's variants from getProductDetails. Then ask the user which variant they'd like. Do NOT use AgentVariantPicker for single-variant products.",
-        "When getOrderHistory returns orders, render AgentOrderCard components inside an AgentOrderList. For a single order, use one AgentOrderCard without the AgentOrderList wrapper.",
       ],
     });
 

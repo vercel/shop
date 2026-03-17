@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { Price } from "@/components/product/price";
-import { Badge } from "@/components/ui/badge";
 import {
   ProductCard,
   ProductCardContent,
@@ -325,81 +324,5 @@ export const { registry } = defineRegistry(catalog, {
       );
     },
 
-    AgentOrderCard: ({ props }) => {
-      const formattedDate = new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(new Date(props.date));
-
-      const total = parsePriceString(props.total);
-
-      const statusVariant = (():
-        | "default"
-        | "secondary"
-        | "outline"
-        | "destructive" => {
-        const status = props.fulfillmentStatus.toUpperCase();
-        if (props.cancelled) return "destructive";
-        if (status === "DELIVERED" || status === "FULFILLED") return "default";
-        if (status === "IN_TRANSIT" || status === "SHIPPING")
-          return "secondary";
-        if (status === "ON_HOLD" || status === "UNFULFILLED") return "outline";
-        return "secondary";
-      })();
-
-      const statusLabel = props.cancelled
-        ? "Cancelled"
-        : props.fulfillmentStatus.charAt(0).toUpperCase() +
-          props.fulfillmentStatus.slice(1).toLowerCase().replace(/_/g, " ");
-
-      return (
-        <div className="overflow-hidden rounded-lg border">
-          <div className="flex items-center justify-between border-b px-3 py-2">
-            <span className="font-medium text-sm">
-              Order #{props.orderNumber}
-            </span>
-            <Badge variant={statusVariant}>{statusLabel}</Badge>
-          </div>
-          <div className="space-y-1 p-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{formattedDate}</span>
-              <Price
-                amount={total.amount}
-                currencyCode={total.currencyCode}
-                className="font-medium"
-              />
-            </div>
-            <p className="line-clamp-2 text-muted-foreground text-xs">
-              {props.itemCount} {props.itemCount === 1 ? "item" : "items"}:{" "}
-              {props.items}
-            </p>
-          </div>
-          <div className="border-t px-3 py-2">
-            <a
-              href={props.statusPageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary text-xs hover:underline"
-            >
-              View order details
-            </a>
-          </div>
-        </div>
-      );
-    },
-
-    AgentOrderList: ({ props, children }) => {
-      return (
-        <div className="my-2">
-          {props.title && (
-            <h4 className="mb-2 font-medium text-muted-foreground text-xs">
-              {props.title}
-            </h4>
-          )}
-          <div className="space-y-2">{children}</div>
-        </div>
-      );
-    },
   },
 });
