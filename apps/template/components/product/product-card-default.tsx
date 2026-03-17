@@ -1,3 +1,5 @@
+import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
+import { PrefetchLink } from "@/components/prefetch-link";
 import {
   ProductCard,
   ProductCardContent,
@@ -6,11 +8,8 @@ import {
   ProductCardPrice,
   ProductCardTitle,
 } from "@/components/ui/product-card";
-
-import type { Locale } from "@/lib/i18n";
-import { PrefetchLink } from "@/components/prefetch-link";
 import { ProductCardQuickAdd } from "@/components/ui/product-card-quick-add";
-import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
+import type { Locale } from "@/lib/i18n";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 export interface ProductCardDefaultProps {

@@ -2,6 +2,7 @@
 
 import { BotMessageSquare } from "lucide-react";
 import { useRef, useState } from "react";
+
 import { AgentPanel } from "./client";
 
 export function AgentButton() {
@@ -20,13 +21,7 @@ export function AgentButton() {
         <BotMessageSquare className="size-4 text-primary" />
         <span className="text-xs font-medium text-primary">Agent</span>
       </button>
-      {open && (
-        <AgentPanel
-          open={open}
-          onOpenChange={setOpen}
-          triggerRef={triggerRef}
-        />
-      )}
+      {open && <AgentPanel open={open} onOpenChange={setOpen} triggerRef={triggerRef} />}
     </>
   );
 }

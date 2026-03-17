@@ -1,14 +1,15 @@
+import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Homepage, MarketingPage } from "@/lib/types";
 
 import { FeaturedProductsSection } from "./blocks/featured-products";
-import { HeroSection } from "./hero-section";
 import { ImageGallerySection } from "./blocks/image-gallery";
 import { ProductGridSection } from "./blocks/product-grid";
 import { PromoBannerSection } from "./blocks/promo-banner";
 import { RichTextSection } from "./blocks/rich-text";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
 import { TopProductsSection } from "./blocks/top-products";
+import { HeroSection } from "./hero-section";
 
 interface MarketingPageRendererProps {
   page: MarketingPage | Homepage;
@@ -30,11 +31,7 @@ interface ContentSectionRendererProps {
   section: MarketingPage["sections"][number];
 }
 
-const ASYNC_BLOCK_TYPES = new Set([
-  "featured-products",
-  "product-grid",
-  "products",
-]);
+const ASYNC_BLOCK_TYPES = new Set(["featured-products", "product-grid", "products"]);
 
 function ContentSectionRenderer({ section }: ContentSectionRendererProps) {
   const content = renderBlock(section);
@@ -42,9 +39,7 @@ function ContentSectionRenderer({ section }: ContentSectionRendererProps) {
 
   if (ASYNC_BLOCK_TYPES.has(section.blockType)) {
     return (
-      <Suspense fallback={<SectionSkeleton blockType={section.blockType} />}>
-        {content}
-      </Suspense>
+      <Suspense fallback={<SectionSkeleton blockType={section.blockType} />}>{content}</Suspense>
     );
   }
 
@@ -82,10 +77,7 @@ function SectionSkeleton({ blockType }: { blockType: string }) {
             <Skeleton className="mb-8 h-8 w-48" />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {skeletonSlots.map((slot) => (
-                <Skeleton
-                  key={`product-skeleton-${slot}`}
-                  className="aspect-square rounded-lg"
-                />
+                <Skeleton key={`product-skeleton-${slot}`} className="aspect-square rounded-lg" />
               ))}
             </div>
           </div>

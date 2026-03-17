@@ -1,8 +1,9 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+
 import {
   Select,
   SelectContent,
@@ -44,11 +45,7 @@ export function CollectionsSortSelect() {
   };
 
   return (
-    <Select
-      value={currentSort}
-      onValueChange={handleSortChange}
-      disabled={isPending}
-    >
+    <Select value={currentSort} onValueChange={handleSortChange} disabled={isPending}>
       <SelectTrigger className="border-0 shadow-none bg-transparent px-0">
         <SelectValue placeholder={t("bestMatches")} />
       </SelectTrigger>

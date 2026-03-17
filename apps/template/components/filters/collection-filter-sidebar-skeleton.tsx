@@ -1,8 +1,4 @@
-import {
-  FilterSidebar,
-  FilterSidebarScrollFade,
-} from "@/components/ui/filter-sidebar";
-
+import { FilterSidebar, FilterSidebarScrollFade } from "@/components/ui/filter-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FILTER_SECTION_SKELETON_KEYS = Array.from(
@@ -24,10 +20,7 @@ export function CollectionFilterSidebarSkeleton() {
             <Skeleton className="h-6 w-24" />
             <div className="space-y-3">
               {FILTER_OPTION_SKELETON_KEYS.map((optionKey) => (
-                <Skeleton
-                  key={`${sectionKey}-${optionKey}`}
-                  className="h-5 w-full"
-                />
+                <Skeleton key={`${sectionKey}-${optionKey}`} className="h-5 w-full" />
               ))}
             </div>
           </div>

@@ -1,9 +1,10 @@
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
 import { getTranslations } from "next-intl/server";
-import type { Locale } from "@/lib/i18n";
+import { Suspense } from "react";
+
 import { RecommendationsCarousel } from "@/components/product/recommendations-carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Suspense } from "react";
+import type { Locale } from "@/lib/i18n";
+import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
 interface UpsellsProps {
   locale: Locale;
@@ -20,9 +21,7 @@ async function UpsellsContent({ locale, firstItemHandle }: UpsellsProps) {
   // Fetch product recommendations based on first cart item
   const products = await getProductRecommendations(firstItemHandle, locale);
 
-  const recommendations = products.filter(
-    (product) => product.featuredImage?.url,
-  );
+  const recommendations = products.filter((product) => product.featuredImage?.url);
 
   if (recommendations.length === 0) {
     return null;
@@ -30,11 +29,7 @@ async function UpsellsContent({ locale, firstItemHandle }: UpsellsProps) {
 
   return (
     <section className="mt-12 pt-12 border-t border-border">
-      <RecommendationsCarousel
-        title={t("title")}
-        products={recommendations}
-        locale={locale}
-      />
+      <RecommendationsCarousel title={t("title")} products={recommendations} locale={locale} />
     </section>
   );
 }
@@ -49,10 +44,7 @@ export function Upsells({ locale, firstItemHandle }: UpsellsProps) {
               <Skeleton className="h-9 w-48 mb-4" />
               <div className="grid grid-flow-col auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] gap-4">
                 {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-80 bg-muted rounded-lg animate-pulse"
-                  />
+                  <div key={i} className="h-80 bg-muted rounded-lg animate-pulse" />
                 ))}
               </div>
             </div>

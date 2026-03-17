@@ -1,11 +1,9 @@
-import {
-  type CollectionResultsData,
-  getExactCollectionResultCount,
-} from "./data";
-
 import { getTranslations } from "next-intl/server";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { type CollectionResultsData, getExactCollectionResultCount } from "./data";
 
 function Fallback() {
   return <Skeleton className="h-4 w-24" />;
@@ -24,11 +22,7 @@ async function Render({
 
   if (exactCount === undefined || exactCount === 0) return null;
 
-  return (
-    <p className="text-sm text-muted-foreground">
-      {t("resultCount", { count: exactCount })}
-    </p>
-  );
+  return <p className="text-sm text-muted-foreground">{t("resultCount", { count: exactCount })}</p>;
 }
 
 export function CollectionResultCount({

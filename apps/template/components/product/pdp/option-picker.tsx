@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentPropsWithoutRef } from "react";
+
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -32,9 +33,7 @@ export function OptionPicker({
           const isAvailable = variants.some(
             (v) =>
               v.availableForSale &&
-              v.selectedOptions.some(
-                (opt) => opt.name === option.name && opt.value === value.name,
-              ),
+              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           );
 
           return (

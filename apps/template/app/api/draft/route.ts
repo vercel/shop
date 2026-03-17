@@ -1,6 +1,6 @@
 import { draftMode } from "next/headers";
-import type { NextRequest } from "next/server";
 import { redirect } from "next/navigation";
+import type { NextRequest } from "next/server";
 
 const DRAFT_SECRET = process.env.CMS_DRAFT_MODE_SECRET;
 

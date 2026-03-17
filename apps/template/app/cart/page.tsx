@@ -1,18 +1,18 @@
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { CartContextSync } from "@/components/cart/context-sync";
 import { Empty } from "@/components/cart/empty-cart";
-import { getCart } from "@/lib/shopify/operations/cart";
-import { getLocale } from "@/lib/params";
 import { Header } from "@/components/cart/header";
 import { ItemsSection } from "@/components/cart/items-section";
-import type { Locale } from "@/lib/i18n";
-import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
 import { PageSkeleton } from "@/components/cart/skeletons";
 import { Summary } from "@/components/cart/summary";
-import { Suspense } from "react";
 import { Upsells } from "@/components/cart/upsell-recommendations";
+import type { Locale } from "@/lib/i18n";
+import { getLocale } from "@/lib/params";
+import { getCart } from "@/lib/shopify/operations/cart";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");

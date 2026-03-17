@@ -1,7 +1,9 @@
-import { getAgentContext } from "../context";
-import { getProduct } from "@/lib/shopify/operations/products";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { getProduct } from "@/lib/shopify/operations/products";
+
+import { getAgentContext } from "../context";
 
 export function getProductDetailsTool() {
   return tool({
@@ -12,9 +14,7 @@ You can get handles from search results or the current page context.`,
     inputSchema: z.object({
       handle: z
         .string()
-        .describe(
-          "The product handle (URL slug) from search results or page context",
-        ),
+        .describe("The product handle (URL slug) from search results or page context"),
     }),
     execute: async ({ handle }) => {
       const { user } = getAgentContext();
@@ -41,9 +41,7 @@ You can get handles from search results or the current page context.`,
               title: v.title,
               available: v.availableForSale,
               price: `${v.price.amount} ${v.price.currencyCode}`,
-              options: v.selectedOptions
-                .map((o) => `${o.name}: ${o.value}`)
-                .join(", "),
+              options: v.selectedOptions.map((o) => `${o.name}: ${o.value}`).join(", "),
             })),
             options: product.options.map((o) => ({
               name: o.name,
@@ -55,10 +53,7 @@ You can get handles from search results or the current page context.`,
         console.error("Failed to get product details:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to get product details",
+          error: error instanceof Error ? error.message : "Failed to get product details",
         };
       }
     },

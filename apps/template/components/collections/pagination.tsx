@@ -1,13 +1,10 @@
 "use client";
 
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LoaderCircleIcon,
-} from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, LoaderCircleIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+
 import {
   useFilterPending,
   useFilterTransition,
@@ -63,10 +60,7 @@ export function CollectionsPagination({
         </Button>
       ) : (
         <Button variant="outline" size="sm" disabled={isPending} asChild>
-          <Link
-            href={firstPageHref}
-            onClick={(e) => navigate(e, firstPageHref)}
-          >
+          <Link href={firstPageHref} onClick={(e) => navigate(e, firstPageHref)}>
             <ChevronLeftIcon className="h-4 w-4 mr-1" />
             {t("first")}
             {isPending && <LoaderCircleIcon className="size-4 animate-spin" />}

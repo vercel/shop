@@ -1,12 +1,8 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
-
-import { getProduct } from "@/lib/shopify/operations/products";
 import { productToMarkdown } from "@/lib/markdown/product";
+import { getProduct } from "@/lib/shopify/operations/products";
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ handle: string }> },
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
   const url = new URL(request.url);
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);

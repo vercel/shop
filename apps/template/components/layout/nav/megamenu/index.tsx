@@ -1,9 +1,10 @@
-import { MegamenuMobile, MegamenuMobileFallback } from "./megamenu-mobile";
+import { Suspense } from "react";
 
 import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { MegamenuDesktop } from "./megamenu-desktop";
+
 import { MegamenuFallback } from "./megamenu-client";
-import { Suspense } from "react";
+import { MegamenuDesktop } from "./megamenu-desktop";
+import { MegamenuMobile, MegamenuMobileFallback } from "./megamenu-mobile";
 
 type MegamenuProps = {
   locale: string;

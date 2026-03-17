@@ -1,15 +1,12 @@
-import { createTable, escapeMarkdown, formatPrice } from "./utils";
-
 import type { ProductDetails } from "@/lib/types";
+
+import { createTable, escapeMarkdown, formatPrice } from "./utils";
 
 /**
  * Convert a ProductDetails object to a Markdown string.
  * Designed for agent/crawler consumption with structured, parseable output.
  */
-export function productToMarkdown(
-  product: ProductDetails,
-  locale: string,
-): string {
+export function productToMarkdown(product: ProductDetails, locale: string): string {
   const sections: string[] = [];
 
   // Title
@@ -38,12 +35,9 @@ export function productToMarkdown(
   sections.push("");
   sections.push(`- **Price**: ${formatPrice(product.price, locale)}`);
   if (product.compareAtPrice) {
-    sections.push(
-      `- **Compare At**: ${formatPrice(product.compareAtPrice, locale)}`,
-    );
+    sections.push(`- **Compare At**: ${formatPrice(product.compareAtPrice, locale)}`);
     const savings =
-      Number.parseFloat(product.compareAtPrice.amount) -
-      Number.parseFloat(product.price.amount);
+      Number.parseFloat(product.compareAtPrice.amount) - Number.parseFloat(product.price.amount);
     if (savings > 0) {
       const savingsPercent = Math.round(
         (savings / Number.parseFloat(product.compareAtPrice.amount)) * 100,
@@ -53,10 +47,7 @@ export function productToMarkdown(
       );
     }
   }
-  if (
-    product.priceRange.minVariantPrice.amount !==
-    product.priceRange.maxVariantPrice.amount
-  ) {
+  if (product.priceRange.minVariantPrice.amount !== product.priceRange.maxVariantPrice.amount) {
     sections.push(
       `- **Price Range**: ${formatPrice(product.priceRange.minVariantPrice, locale)} - ${formatPrice(product.priceRange.maxVariantPrice, locale)}`,
     );
@@ -76,9 +67,7 @@ export function productToMarkdown(
     sections.push("## Options");
     sections.push("");
     for (const option of product.options) {
-      const values = option.values
-        .map((v) => escapeMarkdown(v.name))
-        .join(", ");
+      const values = option.values.map((v) => escapeMarkdown(v.name)).join(", ");
       sections.push(`- **${escapeMarkdown(option.name)}**: ${values}`);
     }
     sections.push("");
@@ -91,12 +80,7 @@ export function productToMarkdown(
 
     // Build dynamic headers based on selected options
     const optionNames = product.options.map((o) => o.name);
-    const headers = [
-      "Variant",
-      ...optionNames.map(escapeMarkdown),
-      "Price",
-      "Available",
-    ];
+    const headers = ["Variant", ...optionNames.map(escapeMarkdown), "Price", "Available"];
 
     const rows = product.variants.map((variant) => {
       const optionValues = optionNames.map((name) => {
@@ -156,9 +140,7 @@ export function productToMarkdown(
       sections.push(`- **Title**: ${escapeMarkdown(product.seo.title)}`);
     }
     if (product.seo.description) {
-      sections.push(
-        `- **Description**: ${escapeMarkdown(product.seo.description)}`,
-      );
+      sections.push(`- **Description**: ${escapeMarkdown(product.seo.description)}`);
     }
     sections.push("");
   }

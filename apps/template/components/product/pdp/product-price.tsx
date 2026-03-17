@@ -1,7 +1,8 @@
-import { cn } from "@/lib/utils";
 import type { ComponentPropsWithoutRef } from "react";
-import { DiscountBadge } from "@/components/ui/discount-badge";
+
 import { Price } from "@/components/product/price";
+import { DiscountBadge } from "@/components/ui/discount-badge";
+import { cn } from "@/lib/utils";
 
 interface ProductPriceProps extends ComponentPropsWithoutRef<"div"> {
   amount: string;
@@ -22,21 +23,14 @@ export function ProductPrice({
 }: ProductPriceProps) {
   const discountPercent =
     compareAtAmount && Number(compareAtAmount) > Number(amount)
-      ? Math.round(
-          ((Number(compareAtAmount) - Number(amount)) /
-            Number(compareAtAmount)) *
-            100,
-        )
+      ? Math.round(((Number(compareAtAmount) - Number(amount)) / Number(compareAtAmount)) * 100)
       : null;
 
   const priceSize = size === "sm" ? "text-xl" : "text-3xl";
   const compareSize = size === "sm" ? "text-xl" : "text-3xl";
 
   return (
-    <div
-      className={cn("flex items-center gap-3 flex-wrap", className)}
-      {...props}
-    >
+    <div className={cn("flex items-center gap-3 flex-wrap", className)} {...props}>
       <Price
         amount={amount}
         currencyCode={currencyCode}
@@ -48,10 +42,7 @@ export function ProductPrice({
           amount={compareAtAmount}
           currencyCode={currencyCode}
           locale={locale}
-          className={cn(
-            compareSize,
-            "font-medium line-through text-foreground/35",
-          )}
+          className={cn(compareSize, "font-medium line-through text-foreground/35")}
         />
       )}
       {discountPercent && <DiscountBadge percent={discountPercent} />}

@@ -1,5 +1,6 @@
-import type { ContentSection } from "@/lib/types";
 import Image from "next/image";
+
+import type { ContentSection } from "@/lib/types";
 
 interface ImageGallerySectionProps {
   section: ContentSection;
@@ -15,9 +16,7 @@ export function ImageGallerySection({ section }: ImageGallerySectionProps) {
     <section className="py-12 px-4">
       <div className="container mx-auto">
         {title && (
-          <h2 className="mb-8 text-center text-3xl font-semibold tracking-tight">
-            {title}
-          </h2>
+          <h2 className="mb-8 text-center text-3xl font-semibold tracking-tight">{title}</h2>
         )}
         <div
           className="grid gap-4"

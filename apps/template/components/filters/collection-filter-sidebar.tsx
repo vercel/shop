@@ -1,8 +1,9 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState } from "react";
+
 import {
   useFilterPending,
   useFilterTransition,
@@ -60,11 +61,7 @@ function toFilterStateValue(values: string[]): string | string[] | undefined {
   return values;
 }
 
-function toggleFilterStateValue(
-  current: FilterState,
-  key: string,
-  value: string,
-): FilterState {
+function toggleFilterStateValue(current: FilterState, key: string, value: string): FilterState {
   const values = getFilterValues(current[key]);
   const nextValues = values.includes(value)
     ? values.filter((currentValue) => currentValue !== value)
@@ -81,11 +78,7 @@ function buildHref(pathname: string, params: URLSearchParams): string {
   return query ? `${pathname}?${query}` : pathname;
 }
 
-function toggleFilterParam(
-  params: URLSearchParams,
-  key: string,
-  value: string,
-): void {
+function toggleFilterParam(params: URLSearchParams, key: string, value: string): void {
   const nextValues = getFilterValues(params.getAll(key));
 
   if (nextValues.includes(value)) {
@@ -107,11 +100,7 @@ function parsePriceValue(value: string | null): number | null {
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed;
 }
 
-function applyPriceParams(
-  params: URLSearchParams,
-  min: number | null,
-  max: number | null,
-): void {
+function applyPriceParams(params: URLSearchParams, min: number | null, max: number | null): void {
   if (min === null) {
     params.delete("price_min");
   } else {
@@ -178,10 +167,8 @@ export function CollectionFilterSidebarClient({
     const minNum = min ? Number.parseFloat(min) : null;
     const maxNum = max ? Number.parseFloat(max) : null;
 
-    const validMin =
-      minNum !== null && !Number.isNaN(minNum) && minNum >= 0 ? minNum : null;
-    const validMax =
-      maxNum !== null && !Number.isNaN(maxNum) && maxNum >= 0 ? maxNum : null;
+    const validMin = minNum !== null && !Number.isNaN(minNum) && minNum >= 0 ? minNum : null;
+    const validMax = maxNum !== null && !Number.isNaN(maxNum) && maxNum >= 0 ? maxNum : null;
 
     const params = new URLSearchParams(searchParams.toString());
     applyPriceParams(params, validMin, validMax);
@@ -295,9 +282,7 @@ export function CollectionFilterSidebarClient({
         {filters.map((filter) => {
           if (filter.values.length === 0) return null;
 
-          const currentValues = getFilterValues(
-            optimisticFilters[filter.paramKey],
-          );
+          const currentValues = getFilterValues(optimisticFilters[filter.paramKey]);
 
           return (
             <FilterSection key={filter.id}>
@@ -313,8 +298,7 @@ export function CollectionFilterSidebarClient({
                       href={computeFilterHref(filter.paramKey, value.value)}
                       pending={
                         isPending &&
-                        pendingFilterRef.current ===
-                          `${filter.paramKey}:${value.value}`
+                        pendingFilterRef.current === `${filter.paramKey}:${value.value}`
                       }
                       onClick={(e) => {
                         e.preventDefault();

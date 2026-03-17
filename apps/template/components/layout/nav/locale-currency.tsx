@@ -3,6 +3,7 @@
 import { ChevronDownIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+
 import { syncCartLocaleAction } from "@/components/cart/actions";
 import { CountryFlag } from "@/components/ui/country-flag";
 import {
@@ -16,18 +17,9 @@ import {
   SelectPanelSection,
   SelectPanelTrigger,
 } from "@/components/ui/select-panel";
-import {
-  enabledLocales,
-  getLocaleData,
-  type Locale,
-  localeSwitchingEnabled,
-} from "@/lib/i18n";
+import { enabledLocales, getLocaleData, type Locale, localeSwitchingEnabled } from "@/lib/i18n";
 
-export function LocaleCurrencySelector({
-  locale: currentLocale,
-}: {
-  locale: string;
-}) {
+export function LocaleCurrencySelector({ locale: currentLocale }: { locale: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [, startTransition] = useTransition();
@@ -45,9 +37,7 @@ export function LocaleCurrencySelector({
           {current.currencySymbol}
           {current.currency}
         </span>
-        {localeSwitchingEnabled ? (
-          <ChevronDownIcon className="size-3.5" />
-        ) : null}
+        {localeSwitchingEnabled ? <ChevronDownIcon className="size-3.5" /> : null}
       </span>
     </>
   );
@@ -94,10 +84,7 @@ export function LocaleCurrencySelector({
         <SelectPanelDivider />
         <SelectPanelSection className="p-0">
           <div className="px-6 py-4">
-            <SelectPanelHeader
-              title="Currency"
-              subtitle="For display, final charges might defer"
-            />
+            <SelectPanelHeader title="Currency" subtitle="For display, final charges might defer" />
           </div>
           <SelectPanelRow
             label={`${current.currencySymbol}${current.currency}`}

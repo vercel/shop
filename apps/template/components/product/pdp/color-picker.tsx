@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import type { ComponentPropsWithoutRef } from "react";
+
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -32,15 +33,11 @@ export function ColorPicker({
           const isAvailable = variants.some(
             (v) =>
               v.availableForSale &&
-              v.selectedOptions.some(
-                (opt) => opt.name === option.name && opt.value === value.name,
-              ),
+              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           );
 
           const variantImage = variants.find((v) =>
-            v.selectedOptions.some(
-              (opt) => opt.name === option.name && opt.value === value.name,
-            ),
+            v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           )?.image?.url;
 
           const imageUrl = value.swatch?.image || variantImage;
@@ -61,9 +58,7 @@ export function ColorPicker({
               <div
                 className={cn(
                   "aspect-square w-full rounded-lg transition-all overflow-hidden",
-                  isSelected
-                    ? "ring-1 ring-inset ring-foreground/50"
-                    : "ring-1 ring-transparent",
+                  isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
                 )}
               >
                 {imageUrl ? (
@@ -78,9 +73,7 @@ export function ColorPicker({
                   <div
                     className="size-full rounded-lg border border-foreground/10"
                     style={
-                      value.swatch?.color
-                        ? { backgroundColor: value.swatch.color }
-                        : undefined
+                      value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined
                     }
                   />
                 )}

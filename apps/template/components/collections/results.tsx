@@ -1,8 +1,9 @@
-import { CollectionFilters } from "./filters";
-import type { CollectionResultsData } from "./data";
-import { CollectionResultsGrid } from "./results-grid";
-import { FilterPendingScope } from "./filter-pending-context";
 import type { Locale } from "@/lib/i18n";
+
+import type { CollectionResultsData } from "./data";
+import { FilterPendingScope } from "./filter-pending-context";
+import { CollectionFilters } from "./filters";
+import { CollectionResultsGrid } from "./results-grid";
 
 export function CollectionResultsSection({
   locale,
@@ -15,9 +16,7 @@ export function CollectionResultsSection({
     <div className="flex flex-col md:flex-row gap-8">
       <aside className="hidden md:block w-64 shrink-0">
         <FilterPendingScope>
-          <CollectionFilters
-            collectionResultsDataPromise={collectionResultsDataPromise}
-          />
+          <CollectionFilters collectionResultsDataPromise={collectionResultsDataPromise} />
         </FilterPendingScope>
       </aside>
 

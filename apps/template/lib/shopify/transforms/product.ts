@@ -1,3 +1,4 @@
+import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
   Image,
@@ -9,7 +10,6 @@ import type {
   ProductVariant,
   Video,
 } from "@/lib/types";
-import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 
 interface ShopifyImage {
   url: string;
@@ -86,10 +86,7 @@ interface ShopifyOtherMediaNode {
   mediaContentType: "EXTERNAL_VIDEO" | "MODEL_3D";
 }
 
-type ShopifyMediaNode =
-  | ShopifyMediaImageNode
-  | ShopifyVideoNode
-  | ShopifyOtherMediaNode;
+type ShopifyMediaNode = ShopifyMediaImageNode | ShopifyVideoNode | ShopifyOtherMediaNode;
 
 export interface ShopifyProduct {
   id: string;
@@ -188,11 +185,8 @@ function extractMediaFromProduct(product: ShopifyProduct): {
       if (img) images.push(img);
     } else if (node.mediaContentType === "VIDEO") {
       // Pick the best mp4 source (largest width)
-      const mp4Sources = node.sources.filter((s) =>
-        s.mimeType.startsWith("video/mp4"),
-      );
-      const bestSource =
-        mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
+      const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));
+      const bestSource = mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
       if (bestSource) {
         videos.push({
           url: bestSource.url,
@@ -207,9 +201,7 @@ function extractMediaFromProduct(product: ShopifyProduct): {
   return { images, videos };
 }
 
-function transformCategory(
-  category: ShopifyCategory | null | undefined,
-): Category | null {
+function transformCategory(category: ShopifyCategory | null | undefined): Category | null {
   if (!category) return null;
   // Cap to 3 levels (Shopify menu limit): keep only the last 2 ancestors
   const cappedAncestors = category.ancestors.slice(-2);
@@ -236,14 +228,11 @@ function transformVariant(variant: ShopifyVariant): ProductVariant {
   };
 }
 
-function transformSwatch(
-  swatch: ShopifyOptionValueSwatch | null,
-): OptionValueSwatch | undefined {
+function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSwatch | undefined {
   if (!swatch) return undefined;
   const result: OptionValueSwatch = {};
   if (swatch.color) result.color = swatch.color;
-  if (swatch.image?.previewImage?.url)
-    result.image = swatch.image.previewImage.url;
+  if (swatch.image?.previewImage?.url) result.image = swatch.image.previewImage.url;
   if (!result.color && !result.image) return undefined;
   return result;
 }
@@ -301,12 +290,8 @@ function formatKey(key: string): string {
   return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function transformShopifyProductCard(
-  product: ShopifyCategoryProduct,
-): ProductCard {
-  const defaultVariant = product.variants?.edges
-    .map((e) => e.node)
-    .find((v) => v.availableForSale);
+export function transformShopifyProductCard(product: ShopifyCategoryProduct): ProductCard {
+  const defaultVariant = product.variants?.edges.map((e) => e.node).find((v) => v.availableForSale);
   return {
     id: product.id,
     handle: product.handle,
@@ -321,9 +306,7 @@ export function transformShopifyProductCard(
   };
 }
 
-export function transformShopifyProductDetails(
-  product: ShopifyProduct,
-): ProductDetails {
+export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   return {
     id: product.id,
     handle: product.handle,
@@ -349,15 +332,11 @@ export function transformShopifyProductDetails(
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
     manufacturerName: product.vendor,
     categoryId: product.category?.id,
-    collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map(
-      (c) => c.handle,
-    ),
+    collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
     metafields: transformMetafields(product.metafields),
   };
 }
 
-export function transformShopifyProductCards(
-  products: ShopifyCategoryProduct[],
-): ProductCard[] {
+export function transformShopifyProductCards(products: ShopifyCategoryProduct[]): ProductCard[] {
   return products.map(transformShopifyProductCard);
 }

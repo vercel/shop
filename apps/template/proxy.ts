@@ -5,6 +5,7 @@ export const config = {
 };
 
 import { type NextRequest, NextResponse } from "next/server";
+
 import { defaultLocale } from "@/lib/i18n";
 
 /**
@@ -53,10 +54,7 @@ export default async function middleware(request: NextRequest) {
 
     if (segments.length >= 2 && segments[0] === "products") {
       const handle = segments[1];
-      const rewriteUrl = new URL(
-        `/api/md/products/${handle}?locale=${defaultLocale}`,
-        request.url,
-      );
+      const rewriteUrl = new URL(`/api/md/products/${handle}?locale=${defaultLocale}`, request.url);
       return NextResponse.rewrite(rewriteUrl);
     }
   }

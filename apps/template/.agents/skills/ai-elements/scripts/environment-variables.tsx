@@ -37,21 +37,14 @@ const Example = () => (
     </EnvironmentVariablesHeader>
     <EnvironmentVariablesContent>
       {variables.map((variable) => (
-        <EnvironmentVariable
-          key={variable.name}
-          name={variable.name}
-          value={variable.value}
-        >
+        <EnvironmentVariable key={variable.name} name={variable.name} value={variable.value}>
           <EnvironmentVariableGroup>
             <EnvironmentVariableName />
             {variable.required && <EnvironmentVariableRequired />}
           </EnvironmentVariableGroup>
           <EnvironmentVariableGroup>
             <EnvironmentVariableValue />
-            <EnvironmentVariableCopyButton
-              copyFormat="export"
-              onCopy={handleCopy}
-            />
+            <EnvironmentVariableCopyButton copyFormat="export" onCopy={handleCopy} />
           </EnvironmentVariableGroup>
         </EnvironmentVariable>
       ))}

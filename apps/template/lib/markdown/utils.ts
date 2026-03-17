@@ -48,9 +48,7 @@ export function createTable(headers: string[], rows: string[][]): string {
 
   const headerRow = `| ${headers.join(" | ")} |`;
   const separator = `|${headers.map(() => "---").join("|")}|`;
-  const dataRows = normalizedRows
-    .map((row) => `| ${row.join(" | ")} |`)
-    .join("\n");
+  const dataRows = normalizedRows.map((row) => `| ${row.join(" | ")} |`).join("\n");
 
   return `${headerRow}\n${separator}\n${dataRows}`;
 }

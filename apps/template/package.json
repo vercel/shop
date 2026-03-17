@@ -6,12 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
+    "lint": "oxlint . && oxfmt --check",
+    "format": "oxfmt"
   },
   "dependencies": {
     "@ai-sdk/react": "3.0.118",
-    "@biomejs/biome": "2.4.7",
     "@json-render/core": "0.14.0",
     "@json-render/react": "0.14.0",
     "@tailwindcss/postcss": "4.2.1",
@@ -29,6 +28,8 @@
     "nanoid": "5.1.7",
     "next": "16.2.0-canary.101",
     "next-intl": "4.8.3",
+    "oxfmt": "^0.41.0",
+    "oxlint": "^1.52.0",
     "radix-ui": "1.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",

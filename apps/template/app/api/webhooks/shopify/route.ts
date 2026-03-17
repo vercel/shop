@@ -1,16 +1,15 @@
 import crypto from "node:crypto";
-import { getNumericShopifyId } from "@/lib/shopify/utils";
+
 import { revalidateTag } from "next/cache";
+
+import { getNumericShopifyId } from "@/lib/shopify/utils";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 
 /**
  * Verify Shopify webhook HMAC signature
  */
-async function verifyWebhook(
-  body: string,
-  hmacHeader: string | null,
-): Promise<boolean> {
+async function verifyWebhook(body: string, hmacHeader: string | null): Promise<boolean> {
   if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
     return false;
   }
@@ -20,10 +19,7 @@ async function verifyWebhook(
     .update(body, "utf8")
     .digest("base64");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(hash, "base64"),
-    Buffer.from(hmacHeader, "base64"),
-  );
+  return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
 }
 
 /**
@@ -123,12 +119,8 @@ export async function POST(request: Request) {
 
     try {
       const payload = JSON.parse(body);
-      const type =
-        payload.type || payload.metaobject?.type || payload.metaobject_type;
-      const handle =
-        payload.handle ||
-        payload.metaobject?.handle ||
-        payload.metaobject_handle;
+      const type = payload.type || payload.metaobject?.type || payload.metaobject_type;
+      const handle = payload.handle || payload.metaobject?.handle || payload.metaobject_handle;
 
       if (type === "cms_page") {
         cmsTags.push("cms:pages");
@@ -153,9 +145,7 @@ export async function POST(request: Request) {
     }
   }
 
-  console.log(
-    `[Shopify Webhook] Invalidated tags: ${tagsInvalidated.join(", ")}`,
-  );
+  console.log(`[Shopify Webhook] Invalidated tags: ${tagsInvalidated.join(", ")}`);
 
   return Response.json({
     success: true,

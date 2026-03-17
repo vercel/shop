@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "@/lib/utils";
 
 interface ScrollCarouselContextValue {
@@ -21,25 +22,17 @@ interface ScrollCarouselContextValue {
   handleScroll: () => void;
 }
 
-const ScrollCarouselContext = createContext<ScrollCarouselContextValue | null>(
-  null,
-);
+const ScrollCarouselContext = createContext<ScrollCarouselContextValue | null>(null);
 
 function useScrollCarousel() {
   const ctx = useContext(ScrollCarouselContext);
   if (!ctx) {
-    throw new Error(
-      "ScrollCarousel compound components must be used within <ScrollCarousel>",
-    );
+    throw new Error("ScrollCarousel compound components must be used within <ScrollCarousel>");
   }
   return ctx;
 }
 
-function ScrollCarousel({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"section">) {
+function ScrollCarousel({ className, children, ...props }: React.ComponentProps<"section">) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -48,9 +41,7 @@ function ScrollCarousel({
     const container = scrollContainerRef.current;
     if (!container) return;
     setCanScrollLeft(container.scrollLeft > 0);
-    setCanScrollRight(
-      container.scrollLeft + container.clientWidth < container.scrollWidth - 1,
-    );
+    setCanScrollRight(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
   });
 
   useEffect(() => {
@@ -90,11 +81,7 @@ function ScrollCarousel({
   );
 }
 
-function ScrollCarouselHeader({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function ScrollCarouselHeader({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="scroll-carousel-header"
@@ -106,18 +93,11 @@ function ScrollCarouselHeader({
   );
 }
 
-function ScrollCarouselTitle({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"h2">) {
+function ScrollCarouselTitle({ className, children, ...props }: React.ComponentProps<"h2">) {
   return (
     <h2
       data-slot="scroll-carousel-title"
-      className={cn(
-        "text-2xl sm:text-3xl font-semibold tracking-tighter",
-        className,
-      )}
+      className={cn("text-2xl sm:text-3xl font-semibold tracking-tighter", className)}
       {...props}
     >
       {children}
@@ -125,10 +105,7 @@ function ScrollCarouselTitle({
   );
 }
 
-function ScrollCarouselNav({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">) {
   const { canScrollLeft, canScrollRight, scroll } = useScrollCarousel();
 
   // Hide arrows entirely when there aren't enough items to scroll
@@ -137,11 +114,7 @@ function ScrollCarouselNav({
   }
 
   return (
-    <div
-      data-slot="scroll-carousel-nav"
-      className={cn("flex gap-2", className)}
-      {...props}
-    >
+    <div data-slot="scroll-carousel-nav" className={cn("flex gap-2", className)} {...props}>
       <button
         type="button"
         onClick={() => scroll("left")}
@@ -196,17 +169,9 @@ function ScrollCarouselContent({
   );
 }
 
-function ScrollCarouselItem({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function ScrollCarouselItem({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="scroll-carousel-item"
-      className={cn("snap-start", className)}
-      {...props}
-    >
+    <div data-slot="scroll-carousel-item" className={cn("snap-start", className)} {...props}>
       {children}
     </div>
   );

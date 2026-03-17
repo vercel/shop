@@ -34,11 +34,7 @@ const sampleStackTrace = `TypeError: Cannot read properties of undefined (readin
     at workLoopSync (node_modules/react-dom/cjs/react-dom.development.js:22707:5)`;
 
 const Example = () => (
-  <StackTrace
-    defaultOpen
-    onFilePathClick={handleFilePathClick}
-    trace={sampleStackTrace}
-  >
+  <StackTrace defaultOpen onFilePathClick={handleFilePathClick} trace={sampleStackTrace}>
     <StackTraceHeader>
       <StackTraceError>
         <StackTraceErrorType />

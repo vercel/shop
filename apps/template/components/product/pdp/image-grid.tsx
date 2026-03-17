@@ -2,20 +2,15 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
-import type {
-  Image as ImageType,
-  ProductOption,
-  ProductVariant,
-  Video,
-} from "@/lib/types";
+
+import type { Image as ImageType, ProductOption, ProductVariant, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
 import { AutoPlayVideo } from "./auto-play-video";
 import { usePdpVariantState } from "./variant-state";
 import { getImagesForSelectedColor } from "./variants";
 
-type MediaItem =
-  | { type: "video"; video: Video }
-  | { type: "image"; image: ImageType };
+type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 
 function ImageViewer({
   images,
@@ -99,9 +94,7 @@ function ImageViewer({
         ) : selected ? (
           <Image
             src={selected.image.url}
-            alt={
-              selected.image.altText || `${title} image ${selectedIndex + 1}`
-            }
+            alt={selected.image.altText || `${title} image ${selectedIndex + 1}`}
             fill
             className="object-cover rounded-xl"
             sizes="(min-width: 1024px) 45vw, 100vw"
@@ -129,12 +122,7 @@ export function ImageGrid({
   variants: ProductVariant[];
 }) {
   const { selectedOptions } = usePdpVariantState();
-  const filteredImages = getImagesForSelectedColor(
-    images,
-    options,
-    variants,
-    selectedOptions,
-  );
+  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
 
   return <ImageViewer images={filteredImages} videos={videos} title={title} />;
 }

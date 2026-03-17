@@ -3,6 +3,7 @@
 import { CheckIcon, LoaderCircleIcon, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useCart } from "@/components/cart/context";
 import type { OptimisticProductInfo } from "@/components/cart/optimistic-info";
 import { cn } from "@/lib/utils";
@@ -78,9 +79,7 @@ export function ProductCardQuickAdd({
       )}
     >
       {state === "idle" && <ShoppingBagIcon className="size-4" />}
-      {state === "adding" && (
-        <LoaderCircleIcon className="size-4 animate-spin" />
-      )}
+      {state === "adding" && <LoaderCircleIcon className="size-4 animate-spin" />}
       {state === "success" && <CheckIcon className="size-4 text-positive" />}
     </button>
   );

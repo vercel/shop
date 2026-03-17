@@ -58,9 +58,7 @@ export function transformPredictiveSearchResult(
   };
 }
 
-function transformPredictiveProduct(
-  product: ShopifyPredictiveProduct,
-): PredictiveSearchProduct {
+function transformPredictiveProduct(product: ShopifyPredictiveProduct): PredictiveSearchProduct {
   return {
     id: product.id,
     handle: product.handle,
@@ -89,9 +87,7 @@ function transformPredictiveCollection(
   };
 }
 
-function transformSearchSuggestion(
-  suggestion: ShopifySearchQuerySuggestion,
-): SearchSuggestion {
+function transformSearchSuggestion(suggestion: ShopifySearchQuerySuggestion): SearchSuggestion {
   return {
     text: suggestion.text,
     styledText: suggestion.styledText,

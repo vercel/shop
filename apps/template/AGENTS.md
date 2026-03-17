@@ -93,7 +93,8 @@ pnpm run .claude/scripts/fetch-shopify-schemas.ts
 ## Configuration
 
 - `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`
-- `biome.json`: Biome linting/formatting
+- `.oxlintrc.json`: oxlint linting configuration
+- `.oxfmtrc.json`: oxfmt formatting configuration
 - `components.json`: shadcn/ui configuration
 
 Environment variables are documented in `.env.example`.

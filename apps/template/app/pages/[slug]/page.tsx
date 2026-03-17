@@ -1,18 +1,15 @@
-import {
-  getAllLocalMarketingPageSlugs,
-  getLocalMarketingPage,
-} from "@/lib/content/pages";
-
-import { buildOpenGraph } from "@/lib/seo";
-import { Container } from "@/components/layout/container";
-import { getLocale } from "@/lib/params";
-import type { Locale } from "@/lib/i18n";
-import type { MarketingPage } from "@/lib/types";
-import { MarketingPageRenderer } from "@/components/cms/page-renderer";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { MarketingPageRenderer } from "@/components/cms/page-renderer";
+import { Container } from "@/components/layout/container";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getAllLocalMarketingPageSlugs, getLocalMarketingPage } from "@/lib/content/pages";
+import type { Locale } from "@/lib/i18n";
+import { getLocale } from "@/lib/params";
+import { buildOpenGraph } from "@/lib/seo";
+import type { MarketingPage } from "@/lib/types";
 
 export async function generateStaticParams() {
   const localPages = getAllLocalMarketingPageSlugs().map((pair) => ({
@@ -27,9 +24,7 @@ async function getPageDetails(slug: string, locale: Locale) {
   return getLocalMarketingPage(slug, locale);
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps<"/pages/[slug]">): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps<"/pages/[slug]">): Promise<Metadata> {
   const [{ slug }, locale] = await Promise.all([params, getLocale()]);
 
   const page = await getPageDetails(slug, locale);
@@ -66,9 +61,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function MarketingContentPage({
-  params,
-}: PageProps<"/pages/[slug]">) {
+export default async function MarketingContentPage({ params }: PageProps<"/pages/[slug]">) {
   const [{ slug }, locale] = await Promise.all([params, getLocale()]);
   const pagePromise = getPageDetails(slug, locale);
 
@@ -106,10 +99,7 @@ function MarketingPageSkeleton() {
           <Skeleton className="mb-8 h-8 w-48" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {skeletonSlots.map((slot) => (
-              <Skeleton
-                key={`marketing-skeleton-${slot}`}
-                className="aspect-square rounded-lg"
-              />
+              <Skeleton key={`marketing-skeleton-${slot}`} className="aspect-square rounded-lg" />
             ))}
           </div>
         </div>

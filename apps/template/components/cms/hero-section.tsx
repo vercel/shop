@@ -1,6 +1,7 @@
-import type { HeroSection as HeroSectionType } from "@/lib/types";
 import Image from "next/image";
+
 import { PrefetchLink } from "@/components/prefetch-link";
+import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
   hero: HeroSectionType;

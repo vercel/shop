@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import { ProductCard } from "@/components/product-card";
 import {
   ScrollCarousel,
@@ -19,11 +20,7 @@ interface TopProductsCarouselProps {
   locale: Locale;
 }
 
-export function TopProductsCarousel({
-  title,
-  products,
-  locale,
-}: TopProductsCarouselProps) {
+export function TopProductsCarousel({ title, products, locale }: TopProductsCarouselProps) {
   const t = useTranslations("product");
   return (
     <ScrollCarousel>
@@ -36,11 +33,7 @@ export function TopProductsCarousel({
       <ScrollCarouselContent fullBleed>
         {products.map((product) => (
           <ScrollCarouselItem key={product.id}>
-            <ProductCard
-              product={product}
-              locale={locale}
-              outOfStockText={t("outOfStock")}
-            />
+            <ProductCard product={product} locale={locale} outOfStockText={t("outOfStock")} />
           </ScrollCarouselItem>
         ))}
       </ScrollCarouselContent>

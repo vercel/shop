@@ -1,7 +1,9 @@
-import { addToCart } from "@/lib/shopify/operations/cart";
-import { getAgentContext } from "../context";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { addToCart } from "@/lib/shopify/operations/cart";
+
+import { getAgentContext } from "../context";
 
 export function addToCartTool() {
   return tool({
@@ -16,12 +18,7 @@ If there are multiple variants (sizes, colors), ask the user which one they want
         .describe(
           "The Shopify variant ID (gid://shopify/ProductVariant/...). Get this from the product context.",
         ),
-      quantity: z
-        .number()
-        .min(1)
-        .max(99)
-        .default(1)
-        .describe("Quantity to add (defaults to 1)"),
+      quantity: z.number().min(1).max(99).default(1).describe("Quantity to add (defaults to 1)"),
     }),
     execute: async ({ variant_id, quantity }) => {
       const { cart: cartId, page, user } = getAgentContext();
@@ -61,10 +58,7 @@ If there are multiple variants (sizes, colors), ask the user which one they want
         console.error("Failed to add product to cart:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to add product to cart",
+          error: error instanceof Error ? error.message : "Failed to add product to cart",
         };
       }
     },

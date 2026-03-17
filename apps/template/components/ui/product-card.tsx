@@ -1,19 +1,15 @@
-import { cn } from "@/lib/utils";
-import { DiscountBadge } from "@/components/ui/discount-badge";
 import Image from "next/image";
-import { Price } from "@/components/product/price";
 import type * as React from "react";
+
+import { Price } from "@/components/product/price";
+import { DiscountBadge } from "@/components/ui/discount-badge";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
   variant?: "default" | "featured";
 }
 
-function ProductCard({
-  variant = "default",
-  className,
-  children,
-  ...props
-}: ProductCardProps) {
+function ProductCard({ variant = "default", className, children, ...props }: ProductCardProps) {
   return (
     <article
       data-slot="product-card"
@@ -26,11 +22,7 @@ function ProductCard({
   );
 }
 
-function ProductCardBadge({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function ProductCardBadge({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div data-slot="product-card-badge" className={cn(className)} {...props}>
       {children}
@@ -118,11 +110,7 @@ function ProductCardImage({
   );
 }
 
-function ProductCardContent({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function ProductCardContent({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="product-card-content"
@@ -134,11 +122,7 @@ function ProductCardContent({
   );
 }
 
-function ProductCardTitle({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"h3">) {
+function ProductCardTitle({ className, children, ...props }: React.ComponentProps<"h3">) {
   return (
     <h3
       data-slot="product-card-title"
@@ -163,10 +147,7 @@ interface ProductCardPriceProps {
   className?: string;
 }
 
-function getDiscountPercent(
-  price: number,
-  compareAtPrice: number | undefined,
-): number | null {
+function getDiscountPercent(price: number, compareAtPrice: number | undefined): number | null {
   if (!compareAtPrice || compareAtPrice <= price) return null;
   return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
 }
@@ -181,16 +162,11 @@ function ProductCardPrice({
   className,
 }: ProductCardPriceProps) {
   const priceNum = parseFloat(amount);
-  const compareAtNum = compareAtAmount
-    ? parseFloat(compareAtAmount)
-    : undefined;
+  const compareAtNum = compareAtAmount ? parseFloat(compareAtAmount) : undefined;
   const discountPercent = getDiscountPercent(priceNum, compareAtNum);
 
   return (
-    <div
-      data-slot="product-card-price"
-      className={cn("mt-auto pt-2", className)}
-    >
+    <div data-slot="product-card-price" className={cn("mt-auto pt-2", className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <Price
           amount={amount}
@@ -206,10 +182,7 @@ function ProductCardPrice({
               locale={locale}
               className="text-sm font-medium text-muted-foreground line-through"
             />
-            <DiscountBadge
-              percent={discountPercent}
-              variant={discountVariant}
-            />
+            <DiscountBadge percent={discountPercent} variant={discountVariant} />
           </>
         )}
       </div>
@@ -221,10 +194,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
-      className={cn(
-        "flex flex-col border rounded-lg overflow-hidden",
-        className,
-      )}
+      className={cn("flex flex-col border rounded-lg overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="p-3 space-y-2">

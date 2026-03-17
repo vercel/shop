@@ -1,5 +1,7 @@
 "use client";
 
+import { FileText } from "lucide-react";
+
 import {
   Plan,
   PlanAction,
@@ -11,7 +13,6 @@ import {
   PlanTrigger,
 } from "@/components/ai-elements/plan";
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
 
 const Example = () => (
   <Plan defaultOpen={false}>
@@ -22,10 +23,9 @@ const Example = () => (
           <PlanTitle>Rewrite AI Elements to SolidJS</PlanTitle>
         </div>
         <PlanDescription>
-          Rewrite the AI Elements component library from React to SolidJS while
-          maintaining compatibility with existing React-based shadcn/ui
-          components using solid-js/compat, updating all 29 components and their
-          test suite.
+          Rewrite the AI Elements component library from React to SolidJS while maintaining
+          compatibility with existing React-based shadcn/ui components using solid-js/compat,
+          updating all 29 components and their test suite.
         </PlanDescription>
       </div>
       <PlanTrigger />
@@ -35,9 +35,8 @@ const Example = () => (
         <div>
           <h3 className="mb-2 font-semibold">Overview</h3>
           <p>
-            This plan outlines the migration strategy for converting the AI
-            Elements library from React to SolidJS, ensuring compatibility and
-            maintaining existing functionality.
+            This plan outlines the migration strategy for converting the AI Elements library from
+            React to SolidJS, ensuring compatibility and maintaining existing functionality.
           </p>
         </div>
         <div>

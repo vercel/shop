@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "warn",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "no-unused-vars": "off"
+  },
+  "plugins": ["typescript", "react", "nextjs"],
+  "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**", "app/.well-known/**"],
+  "settings": {
+    "jsx-a11y": {
+      "components": {
+        "Link": "a",
+        "Image": "img"
+      }
+    }
+  }
+}

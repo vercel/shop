@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+
 import {
   Terminal,
   TerminalActions,
@@ -10,7 +12,6 @@ import {
   TerminalStatus,
   TerminalTitle,
 } from "@/components/ai-elements/terminal";
-import { useCallback, useEffect, useState } from "react";
 
 const handleTerminalCopy = () => {
   console.log("Copied!");
@@ -58,12 +59,7 @@ const Example = () => {
   }, []);
 
   return (
-    <Terminal
-      autoScroll={true}
-      isStreaming={isStreaming}
-      onClear={handleClear}
-      output={output}
-    >
+    <Terminal autoScroll={true} isStreaming={isStreaming} onClear={handleClear} output={output}>
       <TerminalHeader>
         <TerminalTitle>Build Output</TerminalTitle>
         <div className="flex items-center gap-1">

@@ -1,5 +1,8 @@
 "use client";
 
+import { nanoid } from "nanoid";
+import { memo, useCallback, useState } from "react";
+
 import {
   Attachment,
   AttachmentHoverCard,
@@ -12,8 +15,6 @@ import {
   getAttachmentLabel,
   getMediaCategory,
 } from "@/components/ai-elements/attachments";
-import { nanoid } from "nanoid";
-import { memo, useCallback, useState } from "react";
 
 const initialAttachments = [
   {
@@ -52,10 +53,7 @@ interface AttachmentItemProps {
 }
 
 const AttachmentItem = memo(({ attachment, onRemove }: AttachmentItemProps) => {
-  const handleRemove = useCallback(
-    () => onRemove(attachment.id),
-    [onRemove, attachment.id]
-  );
+  const handleRemove = useCallback(() => onRemove(attachment.id), [onRemove, attachment.id]);
   const mediaCategory = getMediaCategory(attachment);
   const label = getAttachmentLabel(attachment);
 
@@ -74,25 +72,21 @@ const AttachmentItem = memo(({ attachment, onRemove }: AttachmentItemProps) => {
       </AttachmentHoverCardTrigger>
       <AttachmentHoverCardContent>
         <div className="space-y-3">
-          {mediaCategory === "image" &&
-            attachment.type === "file" &&
-            attachment.url && (
-              <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
-                <img
-                  alt={label}
-                  className="max-h-full max-w-full object-contain"
-                  height={384}
-                  src={attachment.url}
-                  width={320}
-                />
-              </div>
-            )}
+          {mediaCategory === "image" && attachment.type === "file" && attachment.url && (
+            <div className="flex max-h-96 w-80 items-center justify-center overflow-hidden rounded-md border">
+              <img
+                alt={label}
+                className="max-h-full max-w-full object-contain"
+                height={384}
+                src={attachment.url}
+                width={320}
+              />
+            </div>
+          )}
           <div className="space-y-1 px-0.5">
             <h4 className="font-semibold text-sm leading-none">{label}</h4>
             {attachment.mediaType && (
-              <p className="font-mono text-muted-foreground text-xs">
-                {attachment.mediaType}
-              </p>
+              <p className="font-mono text-muted-foreground text-xs">{attachment.mediaType}</p>
             )}
           </div>
         </div>
@@ -114,11 +108,7 @@ const Example = () => {
     <div className="flex items-center justify-center p-8">
       <Attachments variant="inline">
         {attachments.map((attachment) => (
-          <AttachmentItem
-            attachment={attachment}
-            key={attachment.id}
-            onRemove={handleRemove}
-          />
+          <AttachmentItem attachment={attachment} key={attachment.id} onRemove={handleRemove} />
         ))}
       </Attachments>
     </div>

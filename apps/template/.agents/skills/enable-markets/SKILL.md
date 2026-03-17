@@ -126,7 +126,12 @@ If the user chose locales not in the existing `locales` array, add them:
 
 ```ts
 export const locales = [
-  "en-US", "en-GB", "de-DE", "fr-FR", "nl-NL", "es-ES",
+  "en-US",
+  "en-GB",
+  "de-DE",
+  "fr-FR",
+  "nl-NL",
+  "es-ES",
   "ja-JP", // new custom locale
 ] as const;
 ```
@@ -191,12 +196,12 @@ export const routing = defineRouting({
   localePrefix: "as-needed",
   domains: [
     {
-      domain: "store.com",       // from user's mapping
+      domain: "store.com", // from user's mapping
       defaultLocale: "en-US",
       locales: ["en-US"],
     },
     {
-      domain: "de.store.com",    // from user's mapping
+      domain: "de.store.com", // from user's mapping
       defaultLocale: "de-DE",
       locales: ["de-DE"],
     },
@@ -358,10 +363,7 @@ export default async function middleware(request: NextRequest) {
     if (productIndex !== -1 && segments[productIndex + 1]) {
       const handle = segments[productIndex + 1];
       const locale = productIndex > 0 ? segments[0] : defaultLocale;
-      const rewriteUrl = new URL(
-        `/api/md/products/${handle}?locale=${locale}`,
-        request.url,
-      );
+      const rewriteUrl = new URL(`/api/md/products/${handle}?locale=${locale}`, request.url);
       return NextResponse.rewrite(rewriteUrl);
     }
   }
@@ -501,7 +503,10 @@ export function buildAlternates({
   for (const locale of enabledLocales) {
     languages[locale] = withLocalePath(locale, buildCanonicalPath(pathname, searchParams));
   }
-  languages["x-default"] = withLocalePath(defaultLocale, buildCanonicalPath(pathname, searchParams));
+  languages["x-default"] = withLocalePath(
+    defaultLocale,
+    buildCanonicalPath(pathname, searchParams),
+  );
 
   return { canonical, languages };
 }
@@ -554,6 +559,7 @@ For each custom locale not already in `lib/i18n/messages/`, create a translation
 3. Keep the same JSON structure and key names
 
 Existing translation files:
+
 - `en.json` (English — also used for en-GB)
 - `de-DE.json` (German)
 - `fr-FR.json` (French)

@@ -1,5 +1,9 @@
 "use client";
 
+import { FileIcon } from "lucide-react";
+import { useCallback, useState } from "react";
+import type { BundledLanguage } from "shiki";
+
 import {
   CodeBlock,
   CodeBlockActions,
@@ -13,9 +17,6 @@ import {
   CodeBlockLanguageSelectorValue,
   CodeBlockTitle,
 } from "@/components/ai-elements/code-block";
-import { FileIcon } from "lucide-react";
-import { useCallback, useState } from "react";
-import type { BundledLanguage } from "shiki";
 
 const codeExamples = {
   go: {
@@ -92,19 +93,13 @@ const Example = () => {
           <CodeBlockFilename>{filename}</CodeBlockFilename>
         </CodeBlockTitle>
         <CodeBlockActions>
-          <CodeBlockLanguageSelector
-            onValueChange={handleLanguageChange}
-            value={language}
-          >
+          <CodeBlockLanguageSelector onValueChange={handleLanguageChange} value={language}>
             <CodeBlockLanguageSelectorTrigger>
               <CodeBlockLanguageSelectorValue />
             </CodeBlockLanguageSelectorTrigger>
             <CodeBlockLanguageSelectorContent>
               {languages.map((lang) => (
-                <CodeBlockLanguageSelectorItem
-                  key={lang.value}
-                  value={lang.value}
-                >
+                <CodeBlockLanguageSelectorItem key={lang.value} value={lang.value}>
                   {lang.label}
                 </CodeBlockLanguageSelectorItem>
               ))}

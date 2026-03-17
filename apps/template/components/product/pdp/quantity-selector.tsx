@@ -3,11 +3,9 @@
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { ComponentPropsWithoutRef } from "react";
+
 import { Button } from "@/components/ui/button";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { cn } from "@/lib/utils";
 
 interface QuantitySelectorProps extends ComponentPropsWithoutRef<"div"> {

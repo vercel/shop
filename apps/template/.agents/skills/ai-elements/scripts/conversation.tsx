@@ -1,5 +1,9 @@
 "use client";
 
+import { MessageSquareIcon } from "lucide-react";
+import { nanoid } from "nanoid";
+import { useEffect, useState } from "react";
+
 import {
   Conversation,
   ConversationContent,
@@ -8,9 +12,6 @@ import {
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
 import { Message, MessageContent } from "@/components/ai-elements/message";
-import { MessageSquareIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
 
 const messages: {
   key: string;
@@ -33,8 +34,7 @@ const messages: {
     role: "user",
   },
   {
-    content:
-      "Sure! We offer a variety of AI solutions. What are you interested in?",
+    content: "Sure! We offer a variety of AI solutions. What are you interested in?",
     key: nanoid(),
     role: "assistant",
   },

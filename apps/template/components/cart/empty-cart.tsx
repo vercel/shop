@@ -1,8 +1,8 @@
 "use client";
 
 import { ShoppingBagIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 
 export function Empty() {
   const t = useTranslations("cart");
@@ -17,9 +17,7 @@ export function Empty() {
         </div>
 
         <h2 className="text-2xl lg:text-3xl font-medium mb-2">{t("empty")}</h2>
-        <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-          {t("emptyDescription")}
-        </p>
+        <p className="text-muted-foreground mb-8 max-w-md mx-auto">{t("emptyDescription")}</p>
 
         <Link
           href="/"

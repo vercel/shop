@@ -1,5 +1,8 @@
 "use client";
 
+import { CheckIcon, XIcon } from "lucide-react";
+import { nanoid } from "nanoid";
+
 import {
   Confirmation,
   ConfirmationAccepted,
@@ -9,8 +12,6 @@ import {
   ConfirmationRequest,
   ConfirmationTitle,
 } from "@/components/ai-elements/confirmation";
-import { CheckIcon, XIcon } from "lucide-react";
-import { nanoid } from "nanoid";
 
 const handleReject = () => {
   // In production, call respondToConfirmationRequest with approved: false
@@ -26,10 +27,8 @@ const Example = () => (
       <ConfirmationTitle>
         <ConfirmationRequest>
           This tool wants to delete the file{" "}
-          <code className="inline rounded bg-muted px-1.5 py-0.5 text-sm">
-            /tmp/example.txt
-          </code>
-          . Do you approve this action?
+          <code className="inline rounded bg-muted px-1.5 py-0.5 text-sm">/tmp/example.txt</code>.
+          Do you approve this action?
         </ConfirmationRequest>
         <ConfirmationAccepted>
           <CheckIcon className="size-4 text-green-600 dark:text-green-400" />

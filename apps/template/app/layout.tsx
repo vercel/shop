@@ -1,21 +1,20 @@
 import "./globals.css";
-
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 
 import { AgentButton } from "@/components/agent/agent-button";
-import { BottomBar } from "@/components/layout/bottom-bar";
-import { buildAlternates } from "@/lib/seo";
-import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
 import { CartProvider } from "@/components/cart/context";
+import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
+import { BottomBar } from "@/components/layout/bottom-bar";
 import { Footer } from "@/components/layout/footer";
-import { getLocale } from "@/lib/params";
-import type { Metadata } from "next";
 import { Nav } from "@/components/layout/nav";
-import { NextIntlClientProvider } from "next-intl";
-import { siteConfig } from "@/lib/config";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { Suspense } from "react";
+import { siteConfig } from "@/lib/config";
+import { getLocale } from "@/lib/params";
+import { buildAlternates } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,9 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlayWithAddress locale={locale} />
             </Suspense>
             <Suspense>
-              <BottomBar>
-                {process.env.AI_AGENT_DISABLED ? null : <AgentButton />}
-              </BottomBar>
+              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>

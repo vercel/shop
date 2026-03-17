@@ -1,15 +1,12 @@
-import {
-  getCollectionResultsData,
-  getCollectionSearchState,
-} from "@/components/collections/data";
-
+import { getCollectionResultsData, getCollectionSearchState } from "@/components/collections/data";
 import { CollectionHeader } from "@/components/collections/header";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/layout/container";
-import { FilterTransitionProvider } from "./filter-pending-context";
-import type { getCollection } from "@/lib/shopify/operations/collections";
 import type { Locale } from "@/lib/i18n";
+import type { getCollection } from "@/lib/shopify/operations/collections";
+
+import { FilterTransitionProvider } from "./filter-pending-context";
 
 export function CollectionDetailPage({
   handlePromise,

@@ -1,7 +1,9 @@
-import { getAgentContext } from "../context";
-import { getCollections } from "@/lib/shopify/operations/collections";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { getCollections } from "@/lib/shopify/operations/collections";
+
+import { getAgentContext } from "../context";
 
 export function listCollectionsTool() {
   return tool({
@@ -25,10 +27,7 @@ Use this when the user asks "what categories do you have?", "show me your depart
         console.error("Failed to list collections:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to list collections",
+          error: error instanceof Error ? error.message : "Failed to list collections",
         };
       }
     },

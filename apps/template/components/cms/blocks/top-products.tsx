@@ -1,5 +1,6 @@
-import type { ContentSection } from "@/lib/types";
 import { getLocale } from "@/lib/params";
+import type { ContentSection } from "@/lib/types";
+
 import { TopProductsCarousel } from "./top-products-carousel";
 
 interface TopProductsSectionProps {
@@ -10,8 +11,7 @@ export async function TopProductsSection({ section }: TopProductsSectionProps) {
   const locale = await getLocale();
   const { title, products, collectionProducts } = section;
 
-  const resolvedProducts =
-    products.length > 0 ? products : (collectionProducts ?? []);
+  const resolvedProducts = products.length > 0 ? products : (collectionProducts ?? []);
 
   if (resolvedProducts.length === 0) return null;
 

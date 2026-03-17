@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { ComponentPropsWithoutRef } from "react";
+
 import { cn } from "@/lib/utils";
 
 export interface Spec {
@@ -31,12 +32,8 @@ export function SpecsTable({
       <div className="border-b border-border/70 space-y-2 py-1.5">
         {specs.map((spec) => (
           <div key={spec.label} className="flex gap-2">
-            <span className="flex-1 text-sm font-semibold text-muted-foreground">
-              {spec.label}
-            </span>
-            <span className="flex-1 text-sm font-normal text-muted-foreground">
-              {spec.value}
-            </span>
+            <span className="flex-1 text-sm font-semibold text-muted-foreground">{spec.label}</span>
+            <span className="flex-1 text-sm font-normal text-muted-foreground">{spec.value}</span>
           </div>
         ))}
       </div>

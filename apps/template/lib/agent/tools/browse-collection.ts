@@ -1,7 +1,9 @@
-import { getAgentContext } from "../context";
-import { getCollectionProducts } from "@/lib/shopify/operations/products";
 import { tool } from "ai";
 import { z } from "zod";
+
+import { getCollectionProducts } from "@/lib/shopify/operations/products";
+
+import { getAgentContext } from "../context";
 
 export function browseCollectionTool() {
   return tool({
@@ -9,25 +11,12 @@ export function browseCollectionTool() {
 Use this when the user wants to see products in a particular category.
 Get collection handles from the listCollections tool or the current page context.`,
     inputSchema: z.object({
-      collection: z
-        .string()
-        .describe("The collection handle (e.g. 'electronics', 'clothing')"),
+      collection: z.string().describe("The collection handle (e.g. 'electronics', 'clothing')"),
       sortKey: z
-        .enum([
-          "best-matches",
-          "price-low-to-high",
-          "price-high-to-low",
-          "BEST_SELLING",
-          "CREATED",
-        ])
+        .enum(["best-matches", "price-low-to-high", "price-high-to-low", "BEST_SELLING", "CREATED"])
         .default("best-matches")
         .describe("How to sort results"),
-      limit: z
-        .number()
-        .min(1)
-        .max(10)
-        .default(5)
-        .describe("Number of products to return (max 10)"),
+      limit: z.number().min(1).max(10).default(5).describe("Number of products to return (max 10)"),
     }),
     execute: async ({ collection, sortKey, limit }) => {
       const { user } = getAgentContext();
@@ -59,10 +48,7 @@ Get collection handles from the listCollections tool or the current page context
         console.error("Failed to browse collection:", error);
         return {
           success: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to browse collection",
+          error: error instanceof Error ? error.message : "Failed to browse collection",
         };
       }
     },

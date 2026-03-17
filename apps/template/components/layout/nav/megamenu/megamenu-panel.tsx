@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+
 import type { MegamenuPanel as MegamenuPanelType } from "@/lib/shopify/types/megamenu";
 
 type Props = {

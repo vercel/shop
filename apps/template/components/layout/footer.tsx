@@ -1,23 +1,18 @@
-import { connection } from "next/server";
-import { getMenu } from "@/lib/shopify/operations/menu";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
-const LINK_CLASS =
-  "text-sm text-muted-foreground transition-colors hover:text-foreground";
+import { getMenu } from "@/lib/shopify/operations/menu";
+
+const LINK_CLASS = "text-sm text-muted-foreground transition-colors hover:text-foreground";
 
 function FooterLink({ title, url }: { title: string; url: string }) {
   const isExternal = url.startsWith("http");
 
   if (isExternal) {
     return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={LINK_CLASS}
-      >
+      <a href={url} target="_blank" rel="noopener noreferrer" className={LINK_CLASS}>
         {title}
       </a>
     );
@@ -38,12 +33,7 @@ function FooterHeading({ title, url }: { title: string; url: string }) {
     if (isExternal) {
       return (
         <h3 className="text-sm font-semibold text-foreground">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline"
-          >
+          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
             {title}
           </a>
         </h3>

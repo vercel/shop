@@ -22,13 +22,11 @@ export function useControllableState<T>({
   const setValue = useCallback(
     (next: T | ((prev: T) => T)) => {
       if (isControlled) {
-        const nextValue =
-          typeof next === "function" ? (next as (prev: T) => T)(prop) : next;
+        const nextValue = typeof next === "function" ? (next as (prev: T) => T)(prop) : next;
         onChangeRef.current?.(nextValue);
       } else {
         setInternal((prev) => {
-          const nextValue =
-            typeof next === "function" ? (next as (prev: T) => T)(prev) : next;
+          const nextValue = typeof next === "function" ? (next as (prev: T) => T)(prev) : next;
           onChangeRef.current?.(nextValue);
           return nextValue;
         });

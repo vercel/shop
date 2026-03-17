@@ -1,5 +1,9 @@
 "use client";
 
+import { GlobeIcon, MicIcon, PlusIcon, SendIcon } from "lucide-react";
+import { nanoid } from "nanoid";
+import { memo, useCallback, useState } from "react";
+
 import type { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import {
   PromptInput,
@@ -15,9 +19,6 @@ import {
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { GlobeIcon, MicIcon, PlusIcon, SendIcon } from "lucide-react";
-import { nanoid } from "nanoid";
-import { memo, useCallback, useState } from "react";
 
 const suggestions: { key: string; value: string }[] = [
   { key: nanoid(), value: "What are the latest trends in AI?" },
@@ -59,21 +60,13 @@ interface SuggestionItemProps {
   onSuggestionClick: (value: string) => void;
 }
 
-const SuggestionItem = memo(
-  ({ suggestion, onSuggestionClick }: SuggestionItemProps) => {
-    const handleClick = useCallback(
-      () => onSuggestionClick(suggestion.value),
-      [onSuggestionClick, suggestion.value]
-    );
-    return (
-      <Suggestion
-        key={suggestion.key}
-        onClick={handleClick}
-        suggestion={suggestion.value}
-      />
-    );
-  }
-);
+const SuggestionItem = memo(({ suggestion, onSuggestionClick }: SuggestionItemProps) => {
+  const handleClick = useCallback(
+    () => onSuggestionClick(suggestion.value),
+    [onSuggestionClick, suggestion.value],
+  );
+  return <Suggestion key={suggestion.key} onClick={handleClick} suggestion={suggestion.value} />;
+});
 
 SuggestionItem.displayName = "SuggestionItem";
 
@@ -87,7 +80,7 @@ const Example = () => {
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value),
-    []
+    [],
   );
 
   return (

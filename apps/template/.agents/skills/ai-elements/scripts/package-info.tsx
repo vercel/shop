@@ -14,12 +14,7 @@ import {
 
 const Example = () => (
   <div className="flex flex-col gap-4">
-    <PackageInfo
-      changeType="major"
-      currentVersion="18.2.0"
-      name="react"
-      newVersion="19.0.0"
-    >
+    <PackageInfo changeType="major" currentVersion="18.2.0" name="react" newVersion="19.0.0">
       <PackageInfoHeader>
         <PackageInfoName />
         <PackageInfoChangeType />

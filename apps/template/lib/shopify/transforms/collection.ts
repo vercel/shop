@@ -17,9 +17,7 @@ interface ShopifyCollection {
   };
 }
 
-export function transformShopifyCollection(
-  collection: ShopifyCollection,
-): Collection {
+export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {
     handle: collection.handle,
     title: collection.title,
@@ -41,9 +39,7 @@ export function transformShopifyCollection(
   };
 }
 
-export function transformShopifyCollections(
-  collections: ShopifyCollection[],
-): Collection[] {
+export function transformShopifyCollections(collections: ShopifyCollection[]): Collection[] {
   return collections.map(transformShopifyCollection);
 }
 

@@ -1,5 +1,5 @@
-import type { Category } from "@/lib/types";
 import type { MegamenuData } from "@/lib/shopify/types/megamenu";
+import type { Category } from "@/lib/types";
 
 export interface BreadcrumbSegment {
   label: string;
@@ -10,10 +10,7 @@ export interface BreadcrumbSegment {
  * Find a node in the megamenu by normalized name and return the full path
  * from root to that node (inclusive).
  */
-function findMenuPathByName(
-  name: string,
-  menu: MegamenuData,
-): BreadcrumbSegment[] | null {
+function findMenuPathByName(name: string, menu: MegamenuData): BreadcrumbSegment[] | null {
   const target = name.toLowerCase().trim();
 
   for (const item of menu.items) {
@@ -57,10 +54,7 @@ function handleMatches(a: string, b: string): boolean {
  * against the megamenu hrefs. Normalizes handles to ignore Shopify's duplicate
  * collection suffixes. Exits early when max depth (3) is reached.
  */
-function findDeepestCollectionPath(
-  handles: string[],
-  menu: MegamenuData,
-): BreadcrumbSegment[] {
+function findDeepestCollectionPath(handles: string[], menu: MegamenuData): BreadcrumbSegment[] {
   let best: BreadcrumbSegment[] = [];
 
   for (const handle of handles) {
@@ -75,11 +69,7 @@ function findDeepestCollectionPath(
       }
 
       for (const panel of item.panels) {
-        if (
-          panel.href &&
-          handleMatches(panel.href, target) &&
-          best.length < 2
-        ) {
+        if (panel.href && handleMatches(panel.href, target) && best.length < 2) {
           best = [
             { label: item.label, href: item.href },
             { label: panel.header, href: panel.href },
@@ -125,10 +115,7 @@ export function buildProductCategoryPath(
   // Strategy 2: name-based matching via taxonomy category
   if (!category) return [];
 
-  const chain = [
-    ...category.ancestors,
-    { id: category.id, name: category.name },
-  ];
+  const chain = [...category.ancestors, { id: category.id, name: category.name }];
 
   for (let i = chain.length - 1; i >= 0; i--) {
     const path = findMenuPathByName(chain[i].name, menu);

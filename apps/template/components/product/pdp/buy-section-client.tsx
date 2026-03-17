@@ -3,6 +3,7 @@
 import { ArrowRightIcon, Loader2, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense, use, useState, useTransition } from "react";
+
 import { buyNowAction } from "@/components/cart/actions";
 import { useCart } from "@/components/cart/context";
 import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
+
 import { QuantitySelector } from "./quantity-selector";
 import { usePdpVariantState } from "./variant-state";
 import { resolveSelectedVariant } from "./variants";
@@ -23,17 +25,10 @@ function Fallback() {
   );
 }
 
-function Content({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+function Content({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const product = use(productPromise);
   const { selectedOptions } = usePdpVariantState();
-  const selectedVariant = resolveSelectedVariant(
-    product.variants,
-    selectedOptions,
-  );
+  const selectedVariant = resolveSelectedVariant(product.variants, selectedOptions);
   const selectedVariantId = selectedVariant?.id;
 
   const [quantity, setQuantity] = useState(1);
@@ -70,8 +65,7 @@ function Content({
 
   // Button text logic
   const getButtonText = () => {
-    if (pendingQuantity > 0)
-      return t("addingQuantity", { quantity: String(pendingQuantity) });
+    if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
     if (isAddingToCart) return t("addingToCart");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");
@@ -89,12 +83,7 @@ function Content({
           </div>
 
           {/* Quantity Selector */}
-          {!isOutOfStock && (
-            <QuantitySelector
-              quantity={quantity}
-              onQuantityChange={setQuantity}
-            />
-          )}
+          {!isOutOfStock && <QuantitySelector quantity={quantity} onQuantityChange={setQuantity} />}
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -138,11 +127,7 @@ function Content({
   );
 }
 
-export function BuySectionClient({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function BuySectionClient({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Content productPromise={productPromise} />

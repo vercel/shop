@@ -1,11 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  JSONUIProvider,
-  Renderer,
-  useJsonRenderMessage,
-} from "@json-render/react";
+import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   BotMessageSquareIcon,
@@ -35,12 +31,14 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { nanoid } from "nanoid";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { useScrollContain } from "@/hooks/use-scroll-contain";
 import { registry } from "@/lib/agent/ui/registry";
+
 import {
   ChainOfThought,
   ChainOfThoughtContent,
@@ -55,7 +53,6 @@ import {
   MessageContent,
   MessageResponse,
 } from "../ai-elements/message";
-
 import {
   PromptInput,
   PromptInputBody,
@@ -67,11 +64,7 @@ import {
 } from "../ai-elements/prompt-input";
 import { Shimmer } from "../ai-elements/shimmer";
 import { SpeechInput } from "../ai-elements/speech-input";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "../ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { CartReconciler } from "./cart-reconciler";
 
 const easing = [0.32, 0.72, 0, 1] as const;
@@ -119,9 +112,7 @@ function readPersistedAgentChat(): PersistedAgentChat {
           ? parsed.chatId
           : fallback.chatId,
       input: typeof parsed.input === "string" ? parsed.input : "",
-      messages: Array.isArray(parsed.messages)
-        ? (parsed.messages as UIMessage[])
-        : [],
+      messages: Array.isArray(parsed.messages) ? (parsed.messages as UIMessage[]) : [],
     };
   } catch {
     return fallback;
@@ -225,9 +216,7 @@ function AttachmentChips() {
     <div className="flex w-full flex-wrap gap-1.5 px-3 pb-1.5 pt-2.5">
       {files.map((file) => {
         const imageUrl = typeof file.url === "string" ? file.url : null;
-        const isImage = Boolean(
-          file.mediaType?.startsWith("image/") && imageUrl,
-        );
+        const isImage = Boolean(file.mediaType?.startsWith("image/") && imageUrl);
         const label = file.filename || "Attachment";
 
         return (
@@ -271,9 +260,7 @@ function AttachmentChips() {
                 <div className="space-y-1 px-1">
                   <p className="font-medium text-sm">{label}</p>
                   {file.mediaType && (
-                    <p className="font-mono text-muted-foreground text-xs">
-                      {file.mediaType}
-                    </p>
+                    <p className="font-mono text-muted-foreground text-xs">{file.mediaType}</p>
                   )}
                 </div>
               )}
@@ -302,8 +289,7 @@ function ChatMessage({
   const { spec, text, hasSpec } = useJsonRenderMessage(message.parts);
 
   // Chain of thought state — hooks must be before early return
-  const isStreamingThisMessage =
-    status === "streaming" && message.id === messages.at(-1)?.id;
+  const isStreamingThisMessage = status === "streaming" && message.id === messages.at(-1)?.id;
 
   const chainParts = message.parts.filter(
     (part) => part.type === "reasoning" || getToolNameFromPart(part) !== null,
@@ -314,9 +300,7 @@ function ChatMessage({
     if (part.type === "reasoning") return isStreamingThisMessage;
     if ("state" in part) {
       const state = part.state as string;
-      return !["output-available", "output-error", "output-denied"].includes(
-        state,
-      );
+      return !["output-available", "output-error", "output-denied"].includes(state);
     }
     return false;
   });
@@ -344,9 +328,7 @@ function ChatMessage({
             return (
               <Message key={getMessagePartKey(part)} from="user">
                 <MessageContent>
-                  <MessageResponse linkSafety={linkSafety}>
-                    {part.text}
-                  </MessageResponse>
+                  <MessageResponse linkSafety={linkSafety}>{part.text}</MessageResponse>
                 </MessageContent>
               </Message>
             );
@@ -360,11 +342,7 @@ function ChatMessage({
   return (
     <div>
       {hasChain && (
-        <ChainOfThought
-          open={isChainOpen}
-          onOpenChange={setIsChainOpen}
-          className="mb-4 w-full"
-        >
+        <ChainOfThought open={isChainOpen} onOpenChange={setIsChainOpen} className="mb-4 w-full">
           <ChainOfThoughtHeader>
             {hasActiveWork ? (
               <Shimmer duration={1}>Working...</Shimmer>
@@ -381,8 +359,7 @@ function ChatMessage({
                     icon={BrainIcon}
                     label="Thinking"
                     status={
-                      isStreamingThisMessage &&
-                      part === chainParts[chainParts.length - 1]
+                      isStreamingThisMessage && part === chainParts[chainParts.length - 1]
                         ? "active"
                         : "complete"
                     }
@@ -413,13 +390,9 @@ function ChatMessage({
 
       {(text || hasSpec) && (
         <Message from="assistant">
-          {isLastAssistant && (
-            <BotMessageSquareIcon className="size-5 shrink-0 text-primary" />
-          )}
+          {isLastAssistant && <BotMessageSquareIcon className="size-5 shrink-0 text-primary" />}
           <MessageContent>
-            {text && (
-              <MessageResponse linkSafety={linkSafety}>{text}</MessageResponse>
-            )}
+            {text && <MessageResponse linkSafety={linkSafety}>{text}</MessageResponse>}
             {hasSpec && spec && (
               <JSONUIProvider registry={registry}>
                 <Renderer spec={spec} registry={registry} />
@@ -565,9 +538,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     [sendMessage],
   );
 
-  const lastAssistantIndex = messages.findLastIndex(
-    (m) => m.role === "assistant",
-  );
+  const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant");
 
   return (
     <>
@@ -588,9 +559,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             {isDragging && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 backdrop-blur-sm">
                 <UploadIcon className="size-8 text-primary/60" />
-                <p className="font-medium text-primary/80 text-sm">
-                  {t("dropFiles")}
-                </p>
+                <p className="font-medium text-primary/80 text-sm">{t("dropFiles")}</p>
               </div>
             )}
 
@@ -598,9 +567,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{t("name")}</span>
-                <span className="text-muted-foreground text-sm">
-                  {t("title")}
-                </span>
+                <span className="text-muted-foreground text-sm">{t("title")}</span>
               </div>
               <button
                 type="button"
@@ -613,18 +580,13 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             </div>
 
             {/* Messages */}
-            <div
-              className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-              data-slot="messages"
-            >
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" data-slot="messages">
               <Conversation>
                 <ConversationContent>
                   {messages.length === 0 && (
                     <div className="flex items-start gap-3">
                       <BotMessageSquareIcon className="size-5 shrink-0 text-primary mt-0.5" />
-                      <p className="pt-2 text-sm text-foreground">
-                        {t("greeting")}
-                      </p>
+                      <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
                     </div>
                   )}
                   {messages.map((message, messageIndex) => (

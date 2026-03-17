@@ -60,14 +60,12 @@ const citation = {
 
 const Example = () => (
   <p className="text-sm leading-relaxed">
-    According to recent studies, artificial intelligence has shown remarkable
-    progress in natural language processing.{" "}
+    According to recent studies, artificial intelligence has shown remarkable progress in natural
+    language processing.{" "}
     <InlineCitation>
       <InlineCitationText>{citation.text}</InlineCitationText>
       <InlineCitationCard>
-        <InlineCitationCardTrigger
-          sources={citation.sources.map((source) => source.url)}
-        />
+        <InlineCitationCardTrigger sources={citation.sources.map((source) => source.url)} />
         <InlineCitationCardBody>
           <InlineCitationCarousel>
             <InlineCitationCarouselHeader>

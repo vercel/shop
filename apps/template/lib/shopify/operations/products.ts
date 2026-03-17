@@ -1,15 +1,13 @@
 import { cacheLife, cacheTag } from "next/cache";
+
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { PageInfo, ProductDetails } from "@/lib/types";
-import type { ProductFilter, ShopifyFilter } from "../types/filters";
-import {
-  type ShopifyProduct,
-  transformShopifyProductDetails,
-} from "../transforms/product";
 
-import { getNumericShopifyId } from "../utils";
-import { PRODUCT_FRAGMENT } from "../fragments";
 import { shopifyFetch } from "../client";
+import { PRODUCT_FRAGMENT } from "../fragments";
+import { type ShopifyProduct, transformShopifyProductDetails } from "../transforms/product";
+import type { ProductFilter, ShopifyFilter } from "../types/filters";
+import { getNumericShopifyId } from "../utils";
 
 /**
  * Generate a `product-{numericId}` cache tag for a Shopify product GID.
@@ -41,10 +39,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
-export async function getProduct(
-  handle: string,
-  locale: string = defaultLocale,
-) {
+export async function getProduct(handle: string, locale: string = defaultLocale) {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
@@ -112,10 +107,7 @@ const PRODUCTS_SEARCH_QUERY = `
 
 // SearchSortKeys only supports PRICE and RELEVANCE.
 // TITLE is not a valid SearchSortKeys value, so name-based sorts fall back to RELEVANCE.
-const SEARCH_SORT_KEY_MAP: Record<
-  string,
-  { sortKey: string; reverse: boolean }
-> = {
+const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
@@ -171,9 +163,7 @@ export function buildProductFiltersFromParams(
   const priceMax = searchParams.price_max;
 
   if (priceMin || priceMax) {
-    const parsePrice = (
-      value: string | string[] | undefined,
-    ): number | undefined => {
+    const parsePrice = (value: string | string[] | undefined): number | undefined => {
       if (!value || Array.isArray(value)) return undefined;
       const parsed = Number.parseFloat(value);
       return !Number.isNaN(parsed) && parsed >= 0 ? parsed : undefined;
@@ -244,8 +234,7 @@ export async function getProducts(params: {
     locale = defaultLocale,
   } = params;
 
-  const sortConfig =
-    SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
+  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
   const searchQuery = buildShopifySearchQuery(query, collection);
@@ -321,10 +310,7 @@ const COLLECTION_PRODUCTS_QUERY = `
   }
 `;
 
-const COLLECTION_SORT_KEY_MAP: Record<
-  string,
-  { sortKey: string; reverse: boolean }
-> = {
+const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
@@ -364,9 +350,7 @@ export async function getCollectionProducts(params: {
     locale = defaultLocale,
   } = params;
 
-  const sortConfig =
-    COLLECTION_SORT_KEY_MAP[rawSortKey] ??
-    COLLECTION_SORT_KEY_MAP["best-matches"];
+  const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -406,9 +390,7 @@ export async function getCollectionProducts(params: {
     };
   }
 
-  const shopifyProducts = data.collection.products.edges.map(
-    (edge) => edge.node,
-  );
+  const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
 
   tagProducts(shopifyProducts);
 
@@ -446,13 +428,11 @@ export async function getProductRecommendations(
     return [];
   }
 
-  const data = await shopifyFetch<{ productRecommendations: ShopifyProduct[] }>(
-    {
-      operation: "productRecommendations",
-      query: PRODUCT_RECOMMENDATIONS_QUERY,
-      variables: { productId: product.id, country, language },
-    },
-  );
+  const data = await shopifyFetch<{ productRecommendations: ShopifyProduct[] }>({
+    operation: "productRecommendations",
+    query: PRODUCT_RECOMMENDATIONS_QUERY,
+    variables: { productId: product.id, country, language },
+  });
 
   if (!data.productRecommendations) {
     return [];
@@ -556,9 +536,7 @@ export async function getProductsByIds(
   });
 
   // Filter out nulls and transform, preserving order
-  const shopifyProducts = data.nodes.filter(
-    (node): node is ShopifyProduct => node !== null,
-  );
+  const shopifyProducts = data.nodes.filter((node): node is ShopifyProduct => node !== null);
 
   tagProducts(shopifyProducts);
 

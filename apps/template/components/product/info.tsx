@@ -1,6 +1,7 @@
-import type { ProductDetails } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ProductDetails } from "@/lib/types";
 
 function Fallback() {
   return (
@@ -27,26 +28,17 @@ function Fallback() {
   );
 }
 
-async function Render({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+async function Render({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const product = await productPromise;
 
   return (
     <div className="flex flex-col gap-y-2">
       <div>
-        <h1 className="text-3xl text-main-foreground font-semibold leading-9">
-          {product.title}
-        </h1>
+        <h1 className="text-3xl text-main-foreground font-semibold leading-9">{product.title}</h1>
         {product.tags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {product.tags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded"
-              >
+              <span key={tag} className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">
                 {tag}
               </span>
             ))}
@@ -58,11 +50,7 @@ async function Render({
   );
 }
 
-export function Info({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function Info({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render productPromise={productPromise} />

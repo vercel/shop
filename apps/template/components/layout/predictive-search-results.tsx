@@ -2,9 +2,10 @@
 
 import { Search, Tag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+
 import { Price } from "@/components/product/price";
 import type {
   PredictiveSearchCollection,
@@ -98,10 +99,7 @@ export function PredictiveSearchPanel({
                     <CollectionItem
                       key={collection.handle}
                       collection={collection}
-                      active={
-                        activeIndex ===
-                        results.queries.length + results.products.length + i
-                      }
+                      active={activeIndex === results.queries.length + results.products.length + i}
                       onClick={onNavigate}
                     />
                   ))}
@@ -133,13 +131,7 @@ export function PredictiveSearchPanel({
   );
 }
 
-function SearchSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function SearchSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-border/30 last:border-b-0">
       <div className="px-4 pt-3 pb-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
@@ -171,7 +163,7 @@ function SuggestionItem({
       <Search className="size-3.5 shrink-0 text-muted-foreground" />
       <span
         className="truncate [&_b]:font-semibold"
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: styledText from Shopify API contains safe markup (<b> tags)
+        // oxlint-disable-next-line react/no-danger -- styledText from Shopify API contains safe markup (<b> tags)
         dangerouslySetInnerHTML={{ __html: suggestion.styledText }}
       />
     </button>
@@ -212,9 +204,7 @@ function ProductItem({
       <div className="flex-1 min-w-0">
         <div className="text-sm text-foreground truncate">{product.title}</div>
         {product.vendor && (
-          <div className="text-xs text-muted-foreground truncate">
-            {product.vendor}
-          </div>
+          <div className="text-xs text-muted-foreground truncate">{product.vendor}</div>
         )}
       </div>
       <Price

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  FileTree,
-  FileTreeFile,
-  FileTreeFolder,
-} from "@/components/ai-elements/file-tree";
+import { FileTree, FileTreeFile, FileTreeFolder } from "@/components/ai-elements/file-tree";
 
 const Example = () => (
   <FileTree>

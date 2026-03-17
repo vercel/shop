@@ -1,11 +1,13 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef } from "react";
+
 import { SpeechInput } from "@/components/ai-elements/speech-input";
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
+
 import { PredictiveSearchPanel } from "./predictive-search-results";
 
 interface BottomBarSearchProps {
@@ -18,16 +20,8 @@ export function BottomBarSearch({ onClose }: BottomBarSearchProps) {
   const locale = useLocale();
   const t = useTranslations("nav");
 
-  const {
-    query,
-    setQuery,
-    results,
-    isLoading,
-    totalItems,
-    activeIndex,
-    setActiveIndex,
-    reset,
-  } = usePredictiveSearch(locale);
+  const { query, setQuery, results, isLoading, totalItems, activeIndex, setActiveIndex, reset } =
+    usePredictiveSearch(locale);
 
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -70,8 +64,7 @@ export function BottomBarSearch({ onClose }: BottomBarSearchProps) {
       return;
     }
 
-    const collection =
-      results.collections[activeIndex - queriesLen - productsLen];
+    const collection = results.collections[activeIndex - queriesLen - productsLen];
     if (collection) {
       close();
       startTransition(() => {
@@ -130,9 +123,7 @@ export function BottomBarSearch({ onClose }: BottomBarSearchProps) {
           aria-expanded={!!results}
           aria-controls="predictive-search-results"
           aria-activedescendant={
-            activeIndex >= 0
-              ? `predictive-search-item-${activeIndex}`
-              : undefined
+            activeIndex >= 0 ? `predictive-search-item-${activeIndex}` : undefined
           }
           autoComplete="off"
           className="flex-1 min-w-0 bg-transparent text-base md:text-sm text-foreground placeholder:text-foreground/50 focus:outline-none"

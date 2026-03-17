@@ -1,21 +1,18 @@
-import {
-  buildProductFiltersFromParams,
-  getProducts,
-} from "@/lib/shopify/operations/products";
+import { getTranslations } from "next-intl/server";
+
 import {
   FilterPendingScope,
   ProductGridPendingOverlay,
 } from "@/components/collections/filter-pending-context";
-import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
-
+import { CollectionsPagination } from "@/components/collections/pagination";
 import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
-import { CollectionsPagination } from "@/components/collections/pagination";
-import { getTranslations } from "next-intl/server";
-import type { Locale } from "@/lib/i18n";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Locale } from "@/lib/i18n";
+import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
 
 const RESULTS_SKELETON_KEYS = Array.from(
   { length: 10 },
@@ -56,10 +53,7 @@ export async function Results({
   cursor?: string;
   activeFilters: Record<string, string | string[] | undefined>;
 }) {
-  const [t, tProduct] = await Promise.all([
-    getTranslations("search"),
-    getTranslations("product"),
-  ]);
+  const [t, tProduct] = await Promise.all([getTranslations("search"), getTranslations("product")]);
 
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const result = await getProducts({
@@ -95,9 +89,7 @@ export async function Results({
             <div className="text-center py-12">
               <h2 className="text-2xl font-semibold mb-2">{t("noResults")}</h2>
               <p className="text-muted-foreground">
-                {query
-                  ? t("noResultsQuery", { query })
-                  : t("noResultsAvailable")}
+                {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}
               </p>
             </div>
           ) : (

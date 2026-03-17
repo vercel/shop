@@ -46,9 +46,7 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     const { product } = page;
     const variantInfo = product.variants
       .map((v) => {
-        const options = v.selectedOptions
-          .map((o) => `${o.name}: ${o.value}`)
-          .join(", ");
+        const options = v.selectedOptions.map((o) => `${o.name}: ${o.value}`).join(", ");
         const stock = v.availableForSale ? "in stock" : "out of stock";
         return `  - "${v.title}" (${options}) - ${v.price.amount} ${v.price.currencyCode} [${stock}]\n    variant_id: ${v.id}`;
       })

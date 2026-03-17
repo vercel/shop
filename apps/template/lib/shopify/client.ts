@@ -21,10 +21,7 @@ function stableSerialize(value: unknown): string {
   if (value && typeof value === "object") {
     return `{${Object.entries(value)
       .sort(([left], [right]) => left.localeCompare(right))
-      .map(
-        ([key, entryValue]) =>
-          `${JSON.stringify(key)}:${stableSerialize(entryValue)}`,
-      )
+      .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableSerialize(entryValue)}`)
       .join(",")}}`;
   }
 
@@ -34,10 +31,7 @@ function stableSerialize(value: unknown): string {
 function buildVariableCacheKey(variables?: Record<string, unknown>): string {
   if (!variables) return "";
 
-  return createHash("sha1")
-    .update(stableSerialize(variables))
-    .digest("hex")
-    .slice(0, 12);
+  return createHash("sha1").update(stableSerialize(variables)).digest("hex").slice(0, 12);
 }
 
 export async function shopifyFetch<T>({
@@ -66,9 +60,7 @@ export async function shopifyFetch<T>({
   });
 
   if (!response.ok) {
-    throw new Error(
-      `Shopify API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
   }
 
   const json = await response.json();
@@ -78,23 +70,17 @@ export async function shopifyFetch<T>({
     const varsPreview = variables
       ? Object.entries(variables)
           .slice(0, 3)
-          .map(
-            ([k, v]) => `${k}=${typeof v === "string" ? v : JSON.stringify(v)}`,
-          )
+          .map(([k, v]) => `${k}=${typeof v === "string" ? v : JSON.stringify(v)}`)
           .join(" ")
       : "";
-    console.log(
-      `[shopify] ${operation} ${duration.toFixed(0)}ms ${varsPreview}`,
-    );
+    console.log(`[shopify] ${operation} ${duration.toFixed(0)}ms ${varsPreview}`);
   }
 
   if (json.errors) {
     if (!json.data) {
       throw new Error(`GraphQL errors: ${JSON.stringify(json.errors)}`);
     }
-    console.warn(
-      `[shopify] ${operation} returned partial errors: ${JSON.stringify(json.errors)}`,
-    );
+    console.warn(`[shopify] ${operation} returned partial errors: ${JSON.stringify(json.errors)}`);
   }
 
   return json.data;

@@ -3,17 +3,9 @@
 import { ChevronDownIcon } from "lucide-react";
 import type * as React from "react";
 import { createContext, use } from "react";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 
@@ -24,10 +16,7 @@ import { cn } from "@/lib/utils";
 
 const SelectPanelContext = createContext({ isDesktop: true });
 
-function SelectPanel({
-  children,
-  ...props
-}: React.ComponentProps<typeof Popover>) {
+function SelectPanel({ children, ...props }: React.ComponentProps<typeof Popover>) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   if (isDesktop) {
@@ -118,17 +107,9 @@ function SelectPanelContent({
   );
 }
 
-function SelectPanelSection({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function SelectPanelSection({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="select-panel-section"
-      className={cn("p-6", className)}
-      {...props}
-    >
+    <div data-slot="select-panel-section" className={cn("p-6", className)} {...props}>
       {children}
     </div>
   );
@@ -210,9 +191,7 @@ function SelectPanelItem({
         {icon && <span className="shrink-0 w-8 h-6">{icon}</span>}
         <span className="text-sm font-medium">{children}</span>
       </span>
-      {selected && (
-        <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-primary mr-1" />
-      )}
+      {selected && <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-primary mr-1" />}
     </button>
   );
 }
@@ -244,10 +223,7 @@ function SelectPanelShowMore({
   );
 }
 
-function SelectPanelDivider({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
+function SelectPanelDivider({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="select-panel-divider"
@@ -283,13 +259,9 @@ function SelectPanelRow({
     >
       <span className="flex-1 flex items-center gap-2 text-sm">
         <span className="font-semibold">{label}</span>
-        {description && (
-          <span className="text-foreground/50">{description}</span>
-        )}
+        {description && <span className="text-foreground/50">{description}</span>}
       </span>
-      {icon || (
-        <ChevronDownIcon className="shrink-0 size-5 text-foreground/50" />
-      )}
+      {icon || <ChevronDownIcon className="shrink-0 size-5 text-foreground/50" />}
     </button>
   );
 }

@@ -1,7 +1,9 @@
-import { ImageGallery } from "./image-gallery";
-import type { ProductDetails } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
+
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ProductDetails } from "@/lib/types";
+
+import { ImageGallery } from "./image-gallery";
 
 function Fallback() {
   return (
@@ -27,11 +29,7 @@ function Fallback() {
   );
 }
 
-async function Render({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+async function Render({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   const product = await productPromise;
 
   const featuredUrl = product.featuredImage?.url;
@@ -43,11 +41,7 @@ async function Render({
   return <ImageGallery images={images} title={product.title} />;
 }
 
-export function Images({
-  productPromise,
-}: {
-  productPromise: Promise<ProductDetails>;
-}) {
+export function Images({ productPromise }: { productPromise: Promise<ProductDetails> }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render productPromise={productPromise} />

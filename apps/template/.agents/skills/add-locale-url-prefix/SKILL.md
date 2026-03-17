@@ -12,6 +12,7 @@ Restore locale-prefixed URLs (e.g., `/en-US/products/foo`) to this codebase. Thi
 ### 1. Route Segment: `app/[locale]/`
 
 All page routes lived under `app/[locale]/` as a dynamic segment:
+
 ```
 app/[locale]/layout.tsx
 app/[locale]/page.tsx
@@ -21,6 +22,7 @@ app/[locale]/collections/[handle]/page.tsx
 ```
 
 Pages used `PageProps<"/[locale]/products/[handle]">` and `LayoutProps<"/[locale]">` types. The root layout had `generateStaticParams` returning all locales:
+
 ```ts
 export const generateStaticParams = async () => {
   return locales.map((locale) => ({ locale }));
@@ -30,6 +32,7 @@ export const generateStaticParams = async () => {
 ### 2. `proxy.ts` — Locale Middleware
 
 The middleware used `next-intl/middleware` to handle locale detection, redirects, and rewrites:
+
 ```ts
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/lib/i18n/routing";
@@ -79,6 +82,7 @@ Components imported `Link` from `@/lib/i18n/navigation` instead of `next/link`. 
 ### 5. `lib/params.ts` — getLocale()
 
 Used `next/root-params` to extract locale from the `[locale]` dynamic segment:
+
 ```ts
 import { locale } from "next/root-params";
 export async function getLocale(): Promise<Locale> {
@@ -91,6 +95,7 @@ export async function getLocale(): Promise<Locale> {
 ### 6. `lib/i18n/request.ts`
 
 Loaded messages based on the current locale from params:
+
 ```ts
 const requested = await getLocale();
 const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
@@ -119,6 +124,7 @@ function withLocalePath(locale: string, pathname: string): string {
 ### 8. URL Construction in Components
 
 Components used `/${locale}/...` template literals:
+
 - `/${locale}/search?q=...`
 - `/${locale}/products/${handle}`
 - `/${locale}/collections/${handle}`
@@ -131,6 +137,7 @@ Had `localizePath()` function and generated per-locale URLs for every page (6 en
 ### 10. `next.config.ts` Redirects
 
 Had locale-prefixed redirect rules:
+
 ```ts
 { source: "/:locale/product", destination: "/:locale/products", permanent: true },
 { source: "/:locale/product/:path*", destination: "/:locale/products/:path*", permanent: true },
@@ -139,6 +146,7 @@ Had locale-prefixed redirect rules:
 ### 11. `app/(unlocalized)/page.tsx`
 
 Fallback redirect for requests without locale prefix:
+
 ```ts
 permanentRedirect(`/${locales[0]}`);
 ```
@@ -148,6 +156,7 @@ permanentRedirect(`/${locales[0]}`);
 ### Step 1: Recreate routing and navigation files
 
 Create `lib/i18n/routing.ts`:
+
 ```ts
 import { defineRouting } from "next-intl/routing";
 
@@ -159,6 +168,7 @@ export const routing = defineRouting({
 ```
 
 Create `lib/i18n/navigation.ts`:
+
 ```ts
 import { createNavigation } from "next-intl/navigation";
 import { routing } from "./routing";
@@ -169,6 +179,7 @@ export const { Link, redirect, usePathname, useRouter } = createNavigation(routi
 ### Step 2: Move route files back under `app/[locale]/`
 
 Move all routes from `app/` to `app/[locale]/`:
+
 - `app/layout.tsx` → `app/[locale]/layout.tsx`
 - `app/page.tsx` → `app/[locale]/page.tsx`
 - `app/error.tsx` → `app/[locale]/error.tsx`

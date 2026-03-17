@@ -20,9 +20,7 @@ const Example = () => (
     </div>
 
     <div className="text-center">
-      <p className="mb-3 text-muted-foreground text-sm">
-        Very Slow (6 seconds)
-      </p>
+      <p className="mb-3 text-muted-foreground text-sm">Very Slow (6 seconds)</p>
       <Shimmer duration={6}>Loading very slowly...</Shimmer>
     </div>
   </div>

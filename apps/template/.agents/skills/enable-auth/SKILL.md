@@ -15,13 +15,13 @@ Add customer authentication using [better-auth](https://www.better-auth.com/) wi
 
 ## Required environment variables
 
-| Variable | Description |
-|----------|-------------|
-| `AUTH_SECRET` | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
-| `SHOPIFY_CUSTOMER_CLIENT_ID` | Shopify Customer Account API client ID |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret |
-| `BETTER_AUTH_BASE_URL` | App base URL (e.g. `http://localhost:3000` for dev) |
-| `SHOPIFY_STORE_DOMAIN` | Already set — used for OIDC discovery |
+| Variable                         | Description                                                      |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `AUTH_SECRET`                    | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
+| `SHOPIFY_CUSTOMER_CLIENT_ID`     | Shopify Customer Account API client ID                           |
+| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret                       |
+| `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
+| `SHOPIFY_STORE_DOMAIN`           | Already set — used for OIDC discovery                            |
 
 ## Implementation steps
 
@@ -68,9 +68,7 @@ import { genericOAuth } from "better-auth/plugins";
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
 if (!SHOPIFY_STORE_DOMAIN) {
-  console.warn(
-    "[better-auth] SHOPIFY_STORE_DOMAIN not set - auth will not work",
-  );
+  console.warn("[better-auth] SHOPIFY_STORE_DOMAIN not set - auth will not work");
 }
 
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
@@ -133,9 +131,7 @@ export const auth = betterAuth({
 
             const decoded = decodeIdTokenPayload(idToken);
 
-            const nameParts = [decoded.given_name, decoded.family_name].filter(
-              Boolean,
-            );
+            const nameParts = [decoded.given_name, decoded.family_name].filter(Boolean);
             let name = nameParts.join(" ");
             if (!name) {
               name = decoded.email?.split("@")[0] || "Customer";
@@ -233,12 +229,10 @@ const getAccessToken = cache(async (): Promise<string> => {
   return accessToken;
 });
 
-export const getCustomerSession = cache(
-  async (): Promise<CustomerSession | null> => {
-    const session = await getAuthSession();
-    return mapCustomerSession(session);
-  },
-);
+export const getCustomerSession = cache(async (): Promise<CustomerSession | null> => {
+  const session = await getAuthSession();
+  return mapCustomerSession(session);
+});
 
 export const getSession = cache(async (): Promise<FullSession | null> => {
   const session = await getCustomerSession();
@@ -350,9 +344,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function LoginLayout({
-  children,
-}: { children: React.ReactNode }) {
+export default function LoginLayout({ children }: { children: React.ReactNode }) {
   return children;
 }
 ```
@@ -379,11 +371,7 @@ export default function LoginPage() {
         <p className="text-muted-foreground">{t("loginRedirecting")}</p>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("loginNotRedirected")}{" "}
-          <button
-            type="button"
-            onClick={() => signIn("/account")}
-            className="underline"
-          >
+          <button type="button" onClick={() => signIn("/account")} className="underline">
             {t("loginClickHere")}
           </button>
         </p>
@@ -398,6 +386,7 @@ export default function LoginPage() {
 Create `lib/shopify/types/customer.ts` with domain types for Customer, Address, Order, Fulfillment, and related types.
 
 Create `lib/shopify/operations/customer.ts` with:
+
 - `discoverCustomerApiEndpoint()` — auto-discovers GraphQL endpoint from `.well-known/customer-account-api`
 - `customerApiFetch()` — GraphQL client with Bearer token auth
 - `getCustomer(accessToken)` — profile data
@@ -460,10 +449,7 @@ import Link from "next/link";
 import { UserIcon } from "lucide-react";
 
 export async function NavAccount() {
-  const [session, t] = await Promise.all([
-    getCustomerSession(),
-    getTranslations("nav"),
-  ]);
+  const [session, t] = await Promise.all([getCustomerSession(), getTranslations("nav")]);
 
   if (!session) {
     return (
@@ -475,9 +461,7 @@ export async function NavAccount() {
           <UserIcon className="w-4 h-4" />
         </div>
         <div className="hidden lg:flex flex-col leading-tight w-18">
-          <span className="text-xs font-semibold text-foreground">
-            {t("account")}
-          </span>
+          <span className="text-xs font-semibold text-foreground">{t("account")}</span>
           <span className="text-xs text-muted-foreground">{t("signIn")}</span>
         </div>
       </Link>
@@ -507,7 +491,7 @@ import { NavAccount } from "./account";
 // ... in the nav bar, inside the actions div:
 <Suspense fallback={<AccountFallback />}>
   <NavAccount />
-</Suspense>
+</Suspense>;
 ```
 
 ### Step 12. Wire cart actions for authenticated checkout
@@ -563,6 +547,7 @@ export type User =
 ### Step 14. Add translation keys
 
 Add to ALL locale files under `nav`:
+
 - `signIn`, `signOut`, `profile`, `orders`
 
 Add `seo.loginTitle`.

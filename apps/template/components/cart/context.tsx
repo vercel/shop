@@ -9,24 +9,21 @@ import {
   useState,
   useTransition,
 } from "react";
+
 import { addToCartAction } from "@/components/cart/actions";
 import type { Cart, CartLine } from "@/lib/types";
+
 import { removeFromCartAction, updateCartQuantityAction } from "./actions";
 import { DEBOUNCE_MS } from "./constants";
 import type { OptimisticProductInfo } from "./optimistic-info";
 
 // Internal utility functions (moved from utils.ts)
-function createOptimisticCart(
-  cart: Cart,
-  lineId: string,
-  newQuantity: number,
-): Cart {
+function createOptimisticCart(cart: Cart, lineId: string, newQuantity: number): Cart {
   const currentLine = cart.lines.find((l) => l.id === lineId);
   if (!currentLine) return cart;
 
   const quantityDiff = newQuantity - currentLine.quantity;
-  const unitPrice =
-    parseFloat(currentLine.cost.totalAmount.amount) / currentLine.quantity;
+  const unitPrice = parseFloat(currentLine.cost.totalAmount.amount) / currentLine.quantity;
 
   return {
     ...cart,
@@ -69,14 +66,11 @@ function computeCartWithPending(
     // Merge pending lines into existing cart lines
     const mergedLines = [...cart.lines];
     for (const pl of pendingLines) {
-      const existingIndex = mergedLines.findIndex(
-        (l) => l.merchandise.id === pl.merchandise.id,
-      );
+      const existingIndex = mergedLines.findIndex((l) => l.merchandise.id === pl.merchandise.id);
       if (existingIndex >= 0) {
         // Increment quantity on existing line
         const existing = mergedLines[existingIndex];
-        const unitPrice =
-          parseFloat(existing.cost.totalAmount.amount) / existing.quantity;
+        const unitPrice = parseFloat(existing.cost.totalAmount.amount) / existing.quantity;
         const newQty = existing.quantity + pl.quantity;
         mergedLines[existingIndex] = {
           ...existing,
@@ -135,8 +129,7 @@ function applyPendingLineOperations(
 
     changed = true;
     const quantityDiff = op.targetQuantity - currentLine.quantity;
-    const unitPrice =
-      parseFloat(currentLine.cost.totalAmount.amount) / currentLine.quantity;
+    const unitPrice = parseFloat(currentLine.cost.totalAmount.amount) / currentLine.quantity;
 
     nextCart = {
       ...nextCart,
@@ -233,9 +226,7 @@ export function CartProvider({
     pending: new Map<string, number>(),
     timer: null as ReturnType<typeof setTimeout> | null,
   });
-  const addToCartResolversRef = useRef<
-    Map<string, Array<(success: boolean) => void>>
-  >(new Map());
+  const addToCartResolversRef = useRef<Map<string, Array<(success: boolean) => void>>>(new Map());
 
   // Track overlay state for timeout callback
   const isOverlayOpenRef = useRef(isOverlayOpen);
@@ -254,11 +245,7 @@ export function CartProvider({
 
   const displayCart = applyPendingLineOperations(cart, lineOpsRef.current);
   // Compute cart with pending quantity and optimistic lines
-  const cartWithPending = computeCartWithPending(
-    displayCart,
-    pendingQuantity,
-    pendingLines,
-  );
+  const cartWithPending = computeCartWithPending(displayCart, pendingQuantity, pendingLines);
 
   // Build an optimistic CartLine from product info
   const buildOptimisticLine = (
@@ -289,9 +276,7 @@ export function CartProvider({
   });
 
   // Ref to track product info for each variant (used when building optimistic lines)
-  const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(
-    new Map(),
-  );
+  const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(new Map());
 
   // Add to cart with debouncing - accumulates rapid clicks into a single request
   const addToCartOptimistic = (
@@ -316,10 +301,7 @@ export function CartProvider({
     debounce.pending.set(variantId, current + quantity);
 
     // Update pending quantity display
-    const totalPending = Array.from(debounce.pending.values()).reduce(
-      (sum, q) => sum + q,
-      0,
-    );
+    const totalPending = Array.from(debounce.pending.values()).reduce((sum, q) => sum + q, 0);
     setPendingQuantity(totalPending);
 
     // Build optimistic pending lines from all accumulated variants
@@ -353,10 +335,7 @@ export function CartProvider({
 
       if (items.size === 0) return;
 
-      const flushedResolvers = new Map<
-        string,
-        Array<(success: boolean) => void>
-      >();
+      const flushedResolvers = new Map<string, Array<(success: boolean) => void>>();
       for (const [vid] of items) {
         flushedResolvers.set(vid, addToCartResolversRef.current.get(vid) ?? []);
         addToCartResolversRef.current.delete(vid);
@@ -410,11 +389,7 @@ export function CartProvider({
   };
 
   // Send update request to server
-  const fireUpdateRequest = (
-    lineId: string,
-    quantity: number,
-    originalCart: Cart | null,
-  ) => {
+  const fireUpdateRequest = (lineId: string, quantity: number, originalCart: Cart | null) => {
     const requestId = nextLineRequestId(lineId);
     const endTracking = trackInFlight();
 

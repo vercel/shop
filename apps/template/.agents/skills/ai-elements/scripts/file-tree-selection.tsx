@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  FileTree,
-  FileTreeFile,
-  FileTreeFolder,
-} from "@/components/ai-elements/file-tree";
 import { useState } from "react";
+
+import { FileTree, FileTreeFile, FileTreeFolder } from "@/components/ai-elements/file-tree";
 
 const Example = () => {
   const [selectedPath, setSelectedPath] = useState<string>();

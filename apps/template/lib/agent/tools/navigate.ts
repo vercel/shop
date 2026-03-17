@@ -23,9 +23,7 @@ Returns a URL that the user can click to navigate.`,
       identifier: z
         .string()
         .optional()
-        .describe(
-          "Product handle, collection handle, or search query (depending on destination)",
-        ),
+        .describe("Product handle, collection handle, or search query (depending on destination)"),
     }),
     execute: async ({ destination, identifier }) => {
       const urls: Record<string, { url: string; label: string }> = {

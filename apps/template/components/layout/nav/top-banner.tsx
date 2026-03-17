@@ -1,30 +1,23 @@
+import { GlobeIcon } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  enabledLocales,
-  getLocaleData,
-  getLocaleFlag,
-  localeSwitchingEnabled,
-} from "@/lib/i18n";
-import { getLocale, getTranslations } from "next-intl/server";
-
+import { enabledLocales, getLocaleData, getLocaleFlag, localeSwitchingEnabled } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
 import { CurrentPageLink } from "./current-page-link";
-import { GlobeIcon } from "lucide-react";
 
 export async function TopBanner() {
   if (!localeSwitchingEnabled) {
     return null;
   }
 
-  const [currentLocale, t] = await Promise.all([
-    getLocale(),
-    getTranslations("nav"),
-  ]);
+  const [currentLocale, t] = await Promise.all([getLocale(), getTranslations("nav")]);
 
   const currentLocaleData = getLocaleData(currentLocale);
 
@@ -60,9 +53,7 @@ export async function TopBanner() {
                         <span className="text-lg">{getLocaleFlag(locale)}</span>
                         <span>{localeData.label}</span>
                         {locale === currentLocale && (
-                          <span className="ml-auto text-xs text-muted-foreground">
-                            ✓
-                          </span>
+                          <span className="ml-auto text-xs text-muted-foreground">✓</span>
                         )}
                       </CurrentPageLink>
                     </DropdownMenuItem>

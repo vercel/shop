@@ -1,7 +1,8 @@
+import Image from "next/image";
+
+import { PrefetchLink } from "@/components/prefetch-link";
 import { Button } from "@/components/ui/button";
 import type { ContentSection } from "@/lib/types";
-import Image from "next/image";
-import { PrefetchLink } from "@/components/prefetch-link";
 
 interface PromoBannerSectionProps {
   section: ContentSection;
@@ -10,12 +11,9 @@ interface PromoBannerSectionProps {
 export function PromoBannerSection({ section }: PromoBannerSectionProps) {
   const { title, media, settings } = section;
   const backgroundImage = media[0];
-  const ctaText =
-    typeof settings?.ctaText === "string" ? settings.ctaText : undefined;
-  const ctaLink =
-    typeof settings?.ctaLink === "string" ? settings.ctaLink : undefined;
-  const subtitle =
-    typeof settings?.subtitle === "string" ? settings.subtitle : undefined;
+  const ctaText = typeof settings?.ctaText === "string" ? settings.ctaText : undefined;
+  const ctaLink = typeof settings?.ctaLink === "string" ? settings.ctaLink : undefined;
+  const subtitle = typeof settings?.subtitle === "string" ? settings.subtitle : undefined;
 
   return (
     <section className="py-8 px-4">
@@ -35,22 +33,11 @@ export function PromoBannerSection({ section }: PromoBannerSectionProps) {
           <div className="absolute inset-0 flex items-center">
             <div className="px-6 sm:px-12 max-w-lg">
               {title && (
-                <h2 className="mb-2 text-3xl font-semibold tracking-tight text-white">
-                  {title}
-                </h2>
+                <h2 className="mb-2 text-3xl font-semibold tracking-tight text-white">{title}</h2>
               )}
-              {subtitle && (
-                <p className="text-base sm:text-lg text-white/90 mb-4">
-                  {subtitle}
-                </p>
-              )}
+              {subtitle && <p className="text-base sm:text-lg text-white/90 mb-4">{subtitle}</p>}
               {ctaText && ctaLink && (
-                <Button
-                  asChild
-                  variant="secondary"
-                  size="lg"
-                  className="font-semibold"
-                >
+                <Button asChild variant="secondary" size="lg" className="font-semibold">
                   <PrefetchLink href={ctaLink}>{ctaText}</PrefetchLink>
                 </Button>
               )}

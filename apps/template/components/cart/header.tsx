@@ -1,7 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import { formatPrice } from "@/lib/utils";
+
 import { useCartRender } from "./context-sync";
 
 interface HeaderProps {
@@ -19,20 +21,14 @@ export function Header({ locale }: HeaderProps) {
     0,
   );
   const itemCount = cart.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const formattedTotal = formatPrice(
-    subtotal,
-    cart.cost.subtotalAmount.currencyCode,
-    locale,
-  );
+  const formattedTotal = formatPrice(subtotal, cart.cost.subtotalAmount.currencyCode, locale);
 
   return (
     <h1 className="text-4xl lg:text-[48px] font-semibold tracking-[-1.44px] mb-8 lg:mb-12">
       <span>
         {t("cartTotalIs")} {formattedTotal}
       </span>
-      <span className="opacity-30 ml-2">
-        ({t("itemCount", { count: itemCount })})
-      </span>
+      <span className="opacity-30 ml-2">({t("itemCount", { count: itemCount })})</span>
     </h1>
   );
 }

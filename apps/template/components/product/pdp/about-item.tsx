@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { ComponentPropsWithoutRef } from "react";
+
 import { cn } from "@/lib/utils";
 
 interface AboutItemProps extends ComponentPropsWithoutRef<"div"> {
@@ -35,11 +36,7 @@ function getDescriptionBlocks(descriptionHtml: string): string[] {
     .filter(Boolean);
 }
 
-export function AboutItem({
-  descriptionHtml,
-  className,
-  ...props
-}: AboutItemProps) {
+export function AboutItem({ descriptionHtml, className, ...props }: AboutItemProps) {
   const t = useTranslations("product");
   const descriptionBlocks = getDescriptionBlocks(descriptionHtml);
 

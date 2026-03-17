@@ -1,19 +1,14 @@
 "use client";
 
 import { XIcon } from "lucide-react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  useCallback,
-  useEffect,
-  useEffectEvent,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import Link from "next/link";
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 import { RemoveScroll } from "react-remove-scroll";
+
 import { Button } from "@/components/ui/button";
 import type { MegamenuItem } from "@/lib/shopify/types/megamenu";
+
 import { MegamenuPanel } from "./megamenu-panel";
 import { MenuTriggerIcon } from "./menu-trigger-icon";
 import { MouseSafeArea } from "./mouse-safe-area";
@@ -169,10 +164,7 @@ export function MegamenuClient({ items, children }: Props) {
     () => items.find((item) => item.id === activeId) ?? items[0],
     [items, activeId],
   );
-  const hasPanels = useMemo(
-    () => items.some((item) => item.panels.length > 0),
-    [items],
-  );
+  const hasPanels = useMemo(() => items.some((item) => item.panels.length > 0), [items]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
@@ -189,11 +181,7 @@ export function MegamenuClient({ items, children }: Props) {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        {isOpen ? (
-          <XIcon className="h-4 w-4" />
-        ) : (
-          <MenuTriggerIcon className="h-4 w-4" />
-        )}
+        {isOpen ? <XIcon className="h-4 w-4" /> : <MenuTriggerIcon className="h-4 w-4" />}
         <span>{categoriesLabel}</span>
       </Button>
 
@@ -262,10 +250,7 @@ export function MegamenuClient({ items, children }: Props) {
                   </div>
 
                   {hasPanels ? (
-                    <div
-                      ref={panelRef}
-                      className="relative flex h-full min-w-0 flex-col"
-                    >
+                    <div ref={panelRef} className="relative flex h-full min-w-0 flex-col">
                       <MouseSafeArea parentRef={panelRef} />
                       <div className="h-[20px]" aria-hidden />
 
@@ -292,8 +277,7 @@ export function MegamenuClient({ items, children }: Props) {
                                     className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                   >
                                     {t("showAllCategory", {
-                                      category:
-                                        activeItem.label || categoriesLabel,
+                                      category: activeItem.label || categoriesLabel,
                                     })}
                                   </a>
                                 ) : (
@@ -303,8 +287,7 @@ export function MegamenuClient({ items, children }: Props) {
                                     className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                   >
                                     {t("showAllCategory", {
-                                      category:
-                                        activeItem.label || categoriesLabel,
+                                      category: activeItem.label || categoriesLabel,
                                     })}
                                   </Link>
                                 )}

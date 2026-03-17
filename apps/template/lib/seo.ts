@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { siteConfig } from "./config";
 
 type SearchParamsInput =
@@ -34,10 +35,7 @@ function toSearchParams(input: SearchParamsInput): URLSearchParams {
   return params;
 }
 
-export function buildCanonicalPath(
-  pathname: string,
-  searchParams?: SearchParamsInput,
-): string {
+export function buildCanonicalPath(pathname: string, searchParams?: SearchParamsInput): string {
   const params = toSearchParams(searchParams);
   for (const key of PAGINATION_CURSOR_PARAMS) {
     params.delete(key);
