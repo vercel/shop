@@ -1,24 +1,25 @@
 # Recipe: Swap CMS Provider
 
-> Replace Shopify metaobject CMS with Contentful, Sanity, or another CMS by implementing operations that return the same domain types.
+> Replace the hardcoded homepage content with Contentful, Sanity, Shopify metaobjects, or another CMS by implementing operations that return the same domain types.
 
 ## When to read this
 
-- Replacing Shopify metaobjects with a headless CMS
+- Adding CMS-managed content to the template
 - Understanding the CMS boundary and what needs to change
-- Evaluating the effort for a CMS swap
+- Evaluating the effort for a CMS integration
 
 ## Key files
 
 | File | Role |
 |------|------|
 | `lib/types.ts` | CMS domain types: `Homepage`, `MarketingPage`, `HeroSection`, `ContentSection` |
-| `lib/shopify/operations/cms.ts` | Current CMS operations to replace |
-| `lib/shopify/transforms/cms.ts` | Current transform utilities |
+| `app/page.tsx` | Homepage (hardcoded content + Shopify product fetches) |
+| `lib/content/pages.ts` | Marketing page registry (empty by default) |
+| `components/cms/page-renderer.tsx` | `MarketingPageRenderer` — renders `Homepage` / `MarketingPage` domain types |
 
 ## The CMS seam
 
-CMS content is isolated to three operations:
+To add CMS support, implement three operations:
 
 ```tsx
 // These three functions are the entire CMS surface area
@@ -27,7 +28,7 @@ getMarketingPage(slug: string, locale: string): Promise<MarketingPage | null>
 getAllMarketingPageSlugs(): Promise<Array<{ slug: string; updatedAt: string }>>
 ```
 
-Replace these three functions, and the rest of the app works unchanged.
+Then update `app/page.tsx` to call `getHomepage()` and render with `MarketingPageRenderer`, and update `app/pages/[slug]/page.tsx` to call `getMarketingPage()`.
 
 ## Step-by-step
 
@@ -118,7 +119,7 @@ interface ContentSection {
 
 ### 4. Handle product references
 
-CMS sections that reference products need those products resolved. In the current implementation, `operations/cms.ts` fetches referenced products inline. Your implementation should do the same:
+CMS sections that reference products need those products resolved:
 
 ```tsx
 // Resolve product references from CMS to ProductCard[]
@@ -159,15 +160,27 @@ export async function POST(request: Request) {
 }
 ```
 
-### 7. Update imports
+### 7. Update routes
 
-Only two places import from CMS operations:
+Replace the hardcoded homepage in `app/page.tsx`:
 
-```bash
-grep -r "operations/cms" apps/shop/ --include="*.ts" --include="*.tsx"
+```tsx
+import { getHomepage } from "@/lib/your-cms/operations/cms";
+import { MarketingPageRenderer } from "@/components/cms/page-renderer";
+
+export default async function HomePage() {
+  const locale = await getLocale();
+  const page = await getHomepage(locale);
+  if (!page) return notFound();
+  return (
+    <Container>
+      <MarketingPageRenderer page={page} />
+    </Container>
+  );
+}
 ```
 
-Update these imports to point to your new CMS operations.
+Update `app/pages/[slug]/page.tsx` and `app/sitemap.ts` to use your CMS operations.
 
 ## GUARDRAILS
 
@@ -180,6 +193,5 @@ Update these imports to point to your new CMS operations.
 
 ## See also
 
-- [Metaobject CMS](../cms/metaobject-cms.md) — Current CMS implementation reference
 - [Type Seams](../architecture/type-seams.md) — The domain type boundary
 - [Caching Strategy](../architecture/caching-strategy.md) — Cache profiles for CMS content
