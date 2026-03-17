@@ -34,10 +34,6 @@ Do not introduce CMS-specific response types into components.
 4. Resolve product references to ready-to-render product card data before rendering.
 5. Update `app/sitemap.ts` if page discovery changes.
 
-## Shopify metaobjects
-
-If you want a Shopify-native CMS, the old implementation still exists in `lib/shopify/operations/cms.ts`. Use it as a reference or as the starting point for wiring Shopify metaobjects back in.
-
 ## Guardrails
 
 - Keep the template working without a CMS unless the user explicitly wants the default replaced.

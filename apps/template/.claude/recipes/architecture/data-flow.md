@@ -103,15 +103,14 @@ Cart has a different flow because it involves client-side state:
 7. Client: Context replaces optimistic state with server response
 ```
 
-### Data flow for CMS
+### Data flow for CMS content
 
-CMS content comes from Shopify metaobjects:
+Homepage and marketing page content is built locally in `lib/content/`:
 
 ```
-1. getHomepage(locale) or getMarketingPage(slug, locale)
-2. Shopify metaobject query → raw metaobject data
-3. Transform functions in operations/cms.ts convert to Homepage/MarketingPage
-4. Components render sections, heroes, content blocks
+1. getDefaultHomepage(locale) builds Homepage from hardcoded content + product data
+2. getLocalMarketingPage(slug, locale) looks up local page builders
+3. Components render sections, heroes, content blocks via MarketingPageRenderer
 ```
 
 ## GUARDRAILS

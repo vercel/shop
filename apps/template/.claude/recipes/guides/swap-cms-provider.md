@@ -1,33 +1,35 @@
 # Recipe: Swap CMS Provider
 
-> Replace Shopify metaobject CMS with Contentful, Sanity, or another CMS by implementing operations that return the same domain types.
+> Replace the local content helpers with Contentful, Sanity, Shopify metaobjects, or another CMS by implementing operations that return the same domain types.
 
 ## When to read this
 
-- Replacing Shopify metaobjects with a headless CMS
-- Understanding the CMS boundary and what needs to change
-- Evaluating the effort for a CMS swap
+- Adding a headless CMS for homepage or marketing page content
+- Understanding the content boundary and what needs to change
+- Evaluating the effort for a CMS integration
 
 ## Key files
 
 | File | Role |
 |------|------|
-| `lib/types.ts` | CMS domain types: `Homepage`, `MarketingPage`, `HeroSection`, `ContentSection` |
-| `lib/shopify/operations/cms.ts` | Current CMS operations to replace |
-| `lib/shopify/transforms/cms.ts` | Current transform utilities |
+| `lib/types.ts` | Content domain types: `Homepage`, `MarketingPage`, `HeroSection`, `ContentSection` |
+| `lib/content/homepage.ts` | Current local homepage builder to replace |
+| `lib/content/pages.ts` | Current local marketing page registry to replace |
 
-## The CMS seam
+## The content seam
 
-CMS content is isolated to three operations:
+Content is isolated to two entrypoints:
 
 ```tsx
-// These three functions are the entire CMS surface area
-getHomepage(locale: string): Promise<Homepage | null>
-getMarketingPage(slug: string, locale: string): Promise<MarketingPage | null>
-getAllMarketingPageSlugs(): Promise<Array<{ slug: string; updatedAt: string }>>
+// lib/content/homepage.ts
+getDefaultHomepage(locale: Locale): Promise<Homepage>
+
+// lib/content/pages.ts
+getLocalMarketingPage(slug: string, locale: Locale): Promise<MarketingPage | null>
+getAllLocalMarketingPageSlugs(): Array<{ slug: string; locale: Locale }>
 ```
 
-Replace these three functions, and the rest of the app works unchanged.
+Replace these functions (or point route imports at new CMS operations), and the rest of the app works unchanged.
 
 ## Step-by-step
 
@@ -180,6 +182,5 @@ Update these imports to point to your new CMS operations.
 
 ## See also
 
-- [Metaobject CMS](../cms/metaobject-cms.md) — Current CMS implementation reference
 - [Type Seams](../architecture/type-seams.md) — The domain type boundary
 - [Caching Strategy](../architecture/caching-strategy.md) — Cache profiles for CMS content

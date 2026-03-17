@@ -19,7 +19,6 @@
 | `lib/shopify/operations/products.ts` | Product queries (getProduct, getProducts, etc.) |
 | `lib/shopify/operations/cart.ts` | Cart queries and mutations |
 | `lib/shopify/operations/collections.ts` | Collection queries |
-| `lib/shopify/operations/cms.ts` | CMS metaobject queries |
 | `lib/shopify/operations/customer.ts` | Customer Account API operations |
 | `.claude/schemas/shopify-storefront.graphql` | Storefront API schema reference |
 | `.claude/schemas/shopify-customer.graphql` | Customer Account API schema reference |
