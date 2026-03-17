@@ -1,13 +1,3 @@
-import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Fragment, Suspense } from "react";
-import {
-  MobileFilterSortBar,
-  MobileFilterSortBarSkeleton,
-} from "@/components/collections/mobile-filter-sort-bar";
-import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,16 +6,27 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
-import type { getCollection } from "@/lib/shopify/operations/collections";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import { Fragment, Suspense } from "react";
+import {
+  MobileFilterSortBar,
+  MobileFilterSortBarSkeleton,
+} from "@/components/collections/mobile-filter-sort-bar";
+
 import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
-import type { CollectionResultsData } from "./data";
-import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionResultCount } from "./result-count";
+import type { CollectionResultsData } from "./data";
 import { CollectionsSortSelect } from "./sort-select";
+import { FilterPendingScope } from "./filter-pending-context";
+import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
+import type { getCollection } from "@/lib/shopify/operations/collections";
+import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import type { Locale } from "@/lib/i18n";
+import { notFound } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Fallback() {
   return (

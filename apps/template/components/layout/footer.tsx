@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { connection } from "next/server";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
 import { getMenu } from "@/lib/shopify/operations/menu";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Suspense } from "react";
 
 const LINK_CLASS =
   "text-sm text-muted-foreground transition-colors hover:text-foreground";

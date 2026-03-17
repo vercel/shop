@@ -1,6 +1,6 @@
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 function Fallback() {
   return (

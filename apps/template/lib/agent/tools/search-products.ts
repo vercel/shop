@@ -1,7 +1,7 @@
+import { getAgentContext } from "../context";
+import { getProducts } from "@/lib/shopify/operations/products";
 import { tool } from "ai";
 import { z } from "zod";
-import { getProducts } from "@/lib/shopify/operations/products";
-import { getAgentContext } from "../context";
 
 export function searchProductsTool() {
   return tool({

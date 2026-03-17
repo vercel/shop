@@ -1,18 +1,19 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { AccountPageHeader } from "@/components/account/page-header";
 import {
   OrderDeliverySection,
   OrderDetailSkeleton,
   OrderPackageSection,
   OrderProgressSection,
 } from "@/components/orders/order-detail";
-import { requireSession } from "@/lib/auth/server";
+
+import { AccountPageHeader } from "@/components/account/page-header";
 import { getLocale } from "@/lib/params";
 import { getOrder } from "@/lib/shopify/operations/customer";
 import { getOrderStatusInfo } from "@/lib/utils/order";
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { requireSession } from "@/lib/auth/server";
+import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("orders");

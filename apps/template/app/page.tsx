@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { MarketingPageRenderer } from "@/components/cms/page-renderer";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+
 import { Container } from "@/components/layout/container";
 import { getDefaultHomepage } from "@/lib/content/homepage";
 import { getLocale } from "@/lib/params";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { getTranslations } from "next-intl/server";
+import { MarketingPageRenderer } from "@/components/cms/page-renderer";
+import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");

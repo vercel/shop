@@ -1,20 +1,21 @@
-import { getTranslations } from "next-intl/server";
-import {
-  FilterPendingScope,
-  ProductGridPendingOverlay,
-} from "@/components/collections/filter-pending-context";
-import { CollectionsPagination } from "@/components/collections/pagination";
-import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
-import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
-import { ProductCard } from "@/components/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   getProducts,
 } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import {
+  FilterPendingScope,
+  ProductGridPendingOverlay,
+} from "@/components/collections/filter-pending-context";
 import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
+
+import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
+import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
+import { CollectionsPagination } from "@/components/collections/pagination";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n";
+import { ProductCard } from "@/components/product-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 
 const RESULTS_SKELETON_KEYS = Array.from(
   { length: 10 },

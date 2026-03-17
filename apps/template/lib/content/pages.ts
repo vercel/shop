@@ -1,4 +1,5 @@
 import { defaultLocale, type Locale } from "@/lib/i18n";
+
 import type { MarketingPage } from "@/lib/types";
 
 type LocalMarketingPageBuilder = (locale: Locale) => Promise<MarketingPage>;

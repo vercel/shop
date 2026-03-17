@@ -1,9 +1,10 @@
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
+
+import type { Cart } from "@/lib/types";
 import { cookies } from "next/headers";
 import { invalidateCartCache } from "@/lib/cart-cache";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Cart } from "@/lib/types";
 import { shopifyFetch } from "../client";
-import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
 const CART_FRAGMENT = `
   fragment CartFields on Cart {

@@ -1,7 +1,7 @@
-import { Suspense } from "react";
+import { CartStatusClient } from "./cart-status-client";
 import { getCart } from "@/lib/shopify/operations/cart";
 import type { ProductDetails } from "@/lib/types";
-import { CartStatusClient } from "./cart-status-client";
+import { Suspense } from "react";
 
 async function Render({
   productPromise,

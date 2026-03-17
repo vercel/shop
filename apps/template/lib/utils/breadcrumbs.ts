@@ -1,5 +1,5 @@
-import type { MegamenuData } from "@/lib/shopify/types/megamenu";
 import type { Category } from "@/lib/types";
+import type { MegamenuData } from "@/lib/shopify/types/megamenu";
 
 export interface BreadcrumbSegment {
   label: string;

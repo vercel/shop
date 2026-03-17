@@ -1,10 +1,11 @@
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   type CollectionResultsData,
   getExactCollectionResultCount,
 } from "./data";
+
+import { getTranslations } from "next-intl/server";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 function Fallback() {
   return <Skeleton className="h-4 w-24" />;

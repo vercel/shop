@@ -1,4 +1,3 @@
-import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
   Image,
@@ -10,6 +9,7 @@ import type {
   ProductVariant,
   Video,
 } from "@/lib/types";
+import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 
 interface ShopifyImage {
   url: string;

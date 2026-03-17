@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -8,9 +5,13 @@ import {
   BreadcrumbSeparator,
   Breadcrumb as BreadcrumbUI,
 } from "@/components/ui/breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getLocale } from "@/lib/params";
+
 import { getCollections } from "@/lib/shopify/operations/collections";
+import { getLocale } from "@/lib/params";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 /** Collection handles to exclude from breadcrumbs */
 const EXCLUDED_COLLECTION_HANDLES = new Set(["all-products"]);

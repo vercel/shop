@@ -1,9 +1,9 @@
+import { getProductRecommendations } from "@/lib/shopify/operations/products";
 import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
+import type { Locale } from "@/lib/i18n";
 import { RecommendationsCarousel } from "@/components/product/recommendations-carousel";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { Suspense } from "react";
 
 interface UpsellsProps {
   locale: Locale;

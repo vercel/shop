@@ -1,22 +1,23 @@
-import { pipeJsonRender } from "@json-render/core";
 import {
   convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
   safeValidateUIMessages,
 } from "ai";
-import { cookies } from "next/headers";
-import { createAgent } from "@/lib/agent/agent";
+import { defaultLocale, type Locale } from "@/lib/i18n";
 import {
   type PageContext,
   type User,
   withAgentContext,
 } from "@/lib/agent/context";
-import { getSession } from "@/lib/auth/server";
-import { defaultLocale, type Locale } from "@/lib/i18n";
+
+import { cookies } from "next/headers";
+import { createAgent } from "@/lib/agent/agent";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProduct } from "@/lib/shopify/operations/products";
+import { getSession } from "@/lib/auth/server";
+import { pipeJsonRender } from "@json-render/core";
 
 /**
  * Parse referer URL to extract locale and path segments.

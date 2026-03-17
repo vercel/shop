@@ -1,7 +1,7 @@
+import { getAgentContext } from "../context";
+import { removeFromCart } from "@/lib/shopify/operations/cart";
 import { tool } from "ai";
 import { z } from "zod";
-import { removeFromCart } from "@/lib/shopify/operations/cart";
-import { getAgentContext } from "../context";
 
 export function removeFromCartTool() {
   return tool({

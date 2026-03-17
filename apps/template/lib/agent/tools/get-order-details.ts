@@ -1,7 +1,7 @@
+import { getAgentContext } from "../context";
+import { getOrder } from "@/lib/shopify/operations/customer";
 import { tool } from "ai";
 import { z } from "zod";
-import { getOrder } from "@/lib/shopify/operations/customer";
-import { getAgentContext } from "../context";
 
 export function getOrderDetailsTool() {
   return tool({

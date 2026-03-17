@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { ContentSection } from "@/lib/types";
+import Image from "next/image";
 
 interface ImageGallerySectionProps {
   section: ContentSection;

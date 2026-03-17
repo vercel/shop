@@ -1,15 +1,16 @@
 import { stepCountIs, ToolLoopAgent, type ToolLoopAgentSettings } from "ai";
-import { getAgentContext } from "./context";
-import { getSystemPrompt } from "./prompt";
+
 import { addCartNoteTool } from "./tools/add-cart-note";
 import { addToCartTool } from "./tools/add-to-cart";
 import { browseCollectionTool } from "./tools/browse-collection";
 import { getAddressesTool } from "./tools/get-addresses";
+import { getAgentContext } from "./context";
 import { getCartTool } from "./tools/get-cart";
 import { getOrderDetailsTool } from "./tools/get-order-details";
 import { getOrderHistoryTool } from "./tools/get-orders";
 import { getProductDetailsTool } from "./tools/get-product-details";
 import { getRecommendationsTool } from "./tools/get-recommendations";
+import { getSystemPrompt } from "./prompt";
 import { listCollectionsTool } from "./tools/list-collections";
 import { manageAddressTool } from "./tools/manage-address";
 import { navigateTool } from "./tools/navigate";

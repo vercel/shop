@@ -1,25 +1,26 @@
-import { Suspense } from "react";
-import { Container } from "@/components/layout/container";
-import { Breadcrumb } from "@/components/product/breadcrumb";
-import { ImageGrid } from "@/components/product/pdp/image-grid";
-import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
-import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
+import type { Category, ProductDetails } from "@/lib/types";
+import { defaultLocale, type Locale } from "@/lib/i18n";
 import {
   ProductInfo,
   ProductInfoDescription,
   ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
-import { PdpVariantStateProvider } from "@/components/product/pdp/variant-state";
-import { computeInitialSelectedOptions } from "@/components/product/pdp/variants";
-import { Recommendations } from "@/components/product/recommendations";
-import { ProductSchema } from "@/components/product/schema";
+
+import { Breadcrumb } from "@/components/product/breadcrumb";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
-import { siteConfig } from "@/lib/config";
-import { defaultLocale, type Locale } from "@/lib/i18n";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import type { Category, ProductDetails } from "@/lib/types";
 import { buildProductCategoryPath } from "@/lib/utils/breadcrumbs";
+import { computeInitialSelectedOptions } from "@/components/product/pdp/variants";
+import { Container } from "@/components/layout/container";
+import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { ImageGrid } from "@/components/product/pdp/image-grid";
+import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
+import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
+import { PdpVariantStateProvider } from "@/components/product/pdp/variant-state";
+import { ProductSchema } from "@/components/product/schema";
+import { Recommendations } from "@/components/product/recommendations";
+import { siteConfig } from "@/lib/config";
+import { Suspense } from "react";
 
 async function ProductBreadcrumbSchema({
   category,

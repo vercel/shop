@@ -1,7 +1,7 @@
-import { Suspense } from "react";
 import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
 import type { CollectionResultsData } from "./data";
+import { Suspense } from "react";
 
 function Fallback() {
   return <CollectionFilterSidebarSkeleton />;

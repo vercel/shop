@@ -1,7 +1,7 @@
+import { getAgentContext } from "../context";
+import { getCollections } from "@/lib/shopify/operations/collections";
 import { tool } from "ai";
 import { z } from "zod";
-import { getCollections } from "@/lib/shopify/operations/collections";
-import { getAgentContext } from "../context";
 
 export function listCollectionsTool() {
   return tool({

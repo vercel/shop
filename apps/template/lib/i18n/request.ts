@@ -1,6 +1,7 @@
-import { getRequestConfig } from "next-intl/server";
 import { defaultLocale, resolveLocale } from "../i18n";
+
 import type enMessages from "./messages/en.json";
+import { getRequestConfig } from "next-intl/server";
 
 const messageLoaders = {
   "en-US": () => import("./messages/en.json"),

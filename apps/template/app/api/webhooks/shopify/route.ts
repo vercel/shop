@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { revalidateTag } from "next/cache";
 import { getNumericShopifyId } from "@/lib/shopify/utils";
+import { revalidateTag } from "next/cache";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 

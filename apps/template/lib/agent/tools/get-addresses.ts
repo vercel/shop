@@ -1,7 +1,7 @@
-import { tool } from "ai";
-import { z } from "zod";
 import { getAddresses } from "@/lib/shopify/operations/customer";
 import { getAgentContext } from "../context";
+import { tool } from "ai";
+import { z } from "zod";
 
 export function getAddressesTool() {
   return tool({

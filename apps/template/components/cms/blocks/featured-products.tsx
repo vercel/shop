@@ -1,7 +1,7 @@
+import type { ContentSection } from "@/lib/types";
+import { getLocale } from "@/lib/params";
 import { getTranslations } from "next-intl/server";
 import { ProductCard } from "@/components/product-card";
-import { getLocale } from "@/lib/params";
-import type { ContentSection } from "@/lib/types";
 
 interface FeaturedProductsSectionProps {
   section: ContentSection;

@@ -1,15 +1,16 @@
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { ProductCard } from "@/components/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
-import { toProductCard } from "@/lib/utils/product-card";
 import {
   type CollectionResultsData,
   getExactCollectionResultCount,
 } from "./data";
-import { ProductGridPendingOverlay } from "./filter-pending-context";
+
 import { CollectionsPagination } from "./pagination";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n";
+import { ProductCard } from "@/components/product-card";
+import { ProductGridPendingOverlay } from "./filter-pending-context";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
+import { toProductCard } from "@/lib/utils/product-card";
 
 const RESULTS_SKELETON_KEYS = Array.from(
   { length: 10 },

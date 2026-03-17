@@ -1,12 +1,13 @@
-import { tool } from "ai";
-import { z } from "zod";
 import {
   createAddress,
   deleteAddress,
   setDefaultAddress,
   updateAddress,
 } from "@/lib/shopify/operations/customer";
+
 import { getAgentContext } from "../context";
+import { tool } from "ai";
+import { z } from "zod";
 
 const addressFields = {
   firstName: z.string().optional().describe("First name"),

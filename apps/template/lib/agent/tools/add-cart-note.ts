@@ -1,7 +1,7 @@
-import { tool } from "ai";
-import { z } from "zod";
-import { updateCartNote } from "@/lib/shopify/operations/cart";
 import { getAgentContext } from "../context";
+import { tool } from "ai";
+import { updateCartNote } from "@/lib/shopify/operations/cart";
+import { z } from "zod";
 
 export function addCartNoteTool() {
   return tool({

@@ -1,7 +1,3 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { AccountPageHeader } from "@/components/account/page-header";
 import {
   ProfileSection,
   ProfileSectionAvatar,
@@ -13,9 +9,14 @@ import {
   ProfileSectionFieldRow,
   ProfileSectionFieldValue,
 } from "@/components/account/profile-section";
-import { ProfileEditToggle } from "@/components/account/client";
+
+import { AccountPageHeader } from "@/components/account/page-header";
 import { AccountProfilePageSkeleton } from "@/components/account/profile-page-skeleton";
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import { ProfileEditToggle } from "@/components/account/client";
 import { requireCustomerSession } from "@/lib/auth/server";
+import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("account");

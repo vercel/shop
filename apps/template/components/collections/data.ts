@@ -1,4 +1,3 @@
-import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   getCollectionProducts,
@@ -7,6 +6,8 @@ import {
   type TransformedFilters,
   transformShopifyFilters,
 } from "@/lib/shopify/transforms/filters";
+
+import type { Locale } from "@/lib/i18n";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 

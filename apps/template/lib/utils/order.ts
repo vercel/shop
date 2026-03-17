@@ -1,6 +1,7 @@
+import type { Money, Order } from "@/lib/shopify/types/customer";
+
 import type { OrderStatusVariant } from "@/components/orders/order-card";
 import type { FulfillmentStatus as ProgressFulfillmentStatus } from "@/components/orders/order-progress";
-import type { Money, Order } from "@/lib/shopify/types/customer";
 
 // biome-ignore lint/suspicious/noExplicitAny: next-intl Translator has strict key types incompatible with plain string
 export type TranslationFn = (key: any, values?: any) => string;

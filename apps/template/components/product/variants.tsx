@@ -1,8 +1,8 @@
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getLocale } from "@/lib/params";
-import type { ProductDetails } from "@/lib/types";
 import { Picker } from "./picker";
+import type { ProductDetails } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 function Fallback() {
   return (

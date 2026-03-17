@@ -1,8 +1,3 @@
-import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { AccountMobileTabs } from "@/components/account/mobile-tabs";
-import { AccountMobileTabItems } from "@/components/account/mobile-tabs-client";
 import {
   AccountSidebar,
   AccountSidebarFooter,
@@ -11,7 +6,13 @@ import {
   AccountSidebarNav,
   AccountSidebarNavList,
 } from "@/components/account/sidebar";
+
+import { AccountMobileTabItems } from "@/components/account/mobile-tabs-client";
+import { AccountMobileTabs } from "@/components/account/mobile-tabs";
 import { AccountSidebarNavItems } from "@/components/account/sidebar-client";
+import { getTranslations } from "next-intl/server";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   robots: {

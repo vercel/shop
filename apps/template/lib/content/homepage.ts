@@ -1,13 +1,14 @@
-import { getTranslations } from "next-intl/server";
-import { siteConfig } from "@/lib/config";
-import { createRichTextDocument } from "@/lib/content/rich-text";
-import type { Locale } from "@/lib/i18n";
-import { getCollections } from "@/lib/shopify/operations/collections";
+import type { ContentSection, Homepage, MarketingImage } from "@/lib/types";
 import {
   getCollectionProducts,
   getProducts,
 } from "@/lib/shopify/operations/products";
-import type { ContentSection, Homepage, MarketingImage } from "@/lib/types";
+
+import { createRichTextDocument } from "@/lib/content/rich-text";
+import { getCollections } from "@/lib/shopify/operations/collections";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n";
+import { siteConfig } from "@/lib/config";
 
 const DEFAULT_PUBLISHED_AT = "2025-01-01T00:00:00.000Z";
 const FEATURED_COLLECTION_HANDLE = "furniture";

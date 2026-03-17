@@ -1,5 +1,6 @@
-import Image from "next/image";
 import type { CmsRichTextNode, ContentSection } from "@/lib/types";
+
+import Image from "next/image";
 
 interface RichTextSectionProps {
   section: ContentSection;

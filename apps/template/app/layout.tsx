@@ -1,19 +1,21 @@
 import "./globals.css";
-import type { Metadata } from "next";
+
 import { Geist, Geist_Mono } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import { Suspense } from "react";
+
 import { AgentButton } from "@/components/agent/agent-button";
-import { CartProvider } from "@/components/cart/context";
-import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
-import { Nav } from "@/components/layout/nav";
-import { SiteSchema } from "@/components/schema/site-schema";
-import { siteConfig } from "@/lib/config";
-import { getLocale } from "@/lib/params";
-import { buildAlternates } from "@/lib/seo";
 import { BottomBar } from "@/components/layout/bottom-bar";
+import { buildAlternates } from "@/lib/seo";
+import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
+import { CartProvider } from "@/components/cart/context";
 import { Footer } from "@/components/layout/footer";
+import { getLocale } from "@/lib/params";
+import type { Metadata } from "next";
+import { Nav } from "@/components/layout/nav";
+import { NextIntlClientProvider } from "next-intl";
+import { siteConfig } from "@/lib/config";
+import { SiteSchema } from "@/components/schema/site-schema";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

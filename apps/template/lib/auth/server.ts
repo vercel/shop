@@ -1,7 +1,7 @@
+import { auth } from "./auth";
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { cache } from "react";
-import { auth } from "./auth";
 
 export { auth };
 
