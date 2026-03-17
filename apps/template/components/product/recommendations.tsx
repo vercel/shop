@@ -1,9 +1,9 @@
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { getTranslations } from "next-intl/server";
+import type { Locale } from "@/lib/i18n";
 import { RecommendationsCarousel } from "./recommendations-carousel";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 function Fallback() {
   return (

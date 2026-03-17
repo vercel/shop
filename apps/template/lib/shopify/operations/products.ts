@@ -1,14 +1,15 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { PageInfo, ProductDetails } from "@/lib/types";
-import { shopifyFetch } from "../client";
-import { PRODUCT_FRAGMENT } from "../fragments";
+import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import {
   type ShopifyProduct,
   transformShopifyProductDetails,
 } from "../transforms/product";
-import type { ProductFilter, ShopifyFilter } from "../types/filters";
+
 import { getNumericShopifyId } from "../utils";
+import { PRODUCT_FRAGMENT } from "../fragments";
+import { shopifyFetch } from "../client";
 
 /**
  * Generate a `product-{numericId}` cache tag for a Shopify product GID.

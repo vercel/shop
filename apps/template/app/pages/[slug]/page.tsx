@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import { MarketingPageRenderer } from "@/components/cms/page-renderer";
-import { Container } from "@/components/layout/container";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   getAllLocalMarketingPageSlugs,
   getLocalMarketingPage,
 } from "@/lib/content/pages";
-import type { Locale } from "@/lib/i18n";
-import { getLocale } from "@/lib/params";
+
 import { buildOpenGraph } from "@/lib/seo";
+import { Container } from "@/components/layout/container";
+import { getLocale } from "@/lib/params";
+import type { Locale } from "@/lib/i18n";
 import type { MarketingPage } from "@/lib/types";
+import { MarketingPageRenderer } from "@/components/cms/page-renderer";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 
 export async function generateStaticParams() {
   const localPages = getAllLocalMarketingPageSlugs().map((pair) => ({

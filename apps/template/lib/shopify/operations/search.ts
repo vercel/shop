@@ -1,11 +1,12 @@
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { PredictiveSearchResult } from "@/lib/types";
-import { shopifyFetch } from "../client";
 import { IMAGE_FRAGMENT, MONEY_FRAGMENT } from "../fragments";
 import {
   type ShopifyPredictiveSearchResult,
   transformPredictiveSearchResult,
 } from "../transforms/search";
+
+import type { PredictiveSearchResult } from "@/lib/types";
+import { shopifyFetch } from "../client";
 
 const PREDICTIVE_SEARCH_QUERY = `
   ${IMAGE_FRAGMENT}

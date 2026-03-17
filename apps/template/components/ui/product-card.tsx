@@ -1,8 +1,8 @@
-import Image from "next/image";
-import type * as React from "react";
-import { Price } from "@/components/product/price";
-import { DiscountBadge } from "@/components/ui/discount-badge";
 import { cn } from "@/lib/utils";
+import { DiscountBadge } from "@/components/ui/discount-badge";
+import Image from "next/image";
+import { Price } from "@/components/product/price";
+import type * as React from "react";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
   variant?: "default" | "featured";

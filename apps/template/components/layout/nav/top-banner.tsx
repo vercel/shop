@@ -1,5 +1,3 @@
-import { GlobeIcon } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +10,11 @@ import {
   getLocaleFlag,
   localeSwitchingEnabled,
 } from "@/lib/i18n";
+import { getLocale, getTranslations } from "next-intl/server";
+
 import { cn } from "@/lib/utils";
 import { CurrentPageLink } from "./current-page-link";
+import { GlobeIcon } from "lucide-react";
 
 export async function TopBanner() {
   if (!localeSwitchingEnabled) {

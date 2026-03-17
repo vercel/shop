@@ -1,5 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
+import type { ComponentProps } from "react";
 
 type StepStatus = "completed" | "current" | "upcoming";
 

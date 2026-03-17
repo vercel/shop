@@ -1,7 +1,7 @@
-import type { ComponentPropsWithoutRef } from "react";
-import { Price } from "@/components/product/price";
-import { DiscountBadge } from "@/components/ui/discount-badge";
 import { cn } from "@/lib/utils";
+import type { ComponentPropsWithoutRef } from "react";
+import { DiscountBadge } from "@/components/ui/discount-badge";
+import { Price } from "@/components/product/price";
 
 interface ProductPriceProps extends ComponentPropsWithoutRef<"div"> {
   amount: string;

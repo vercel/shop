@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { getMenu } from "@/lib/shopify/operations/menu";
+import Link from "next/link";
 
 export async function QuickLinks({ locale }: { locale: string }) {
   const menu = await getMenu("quick-links", locale);

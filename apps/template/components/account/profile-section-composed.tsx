@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import {
   ProfileSection,
   ProfileSectionAvatar,
@@ -10,6 +9,8 @@ import {
   ProfileSectionFieldRow,
   ProfileSectionFieldValue,
 } from "./profile-section";
+
+import { getTranslations } from "next-intl/server";
 
 export interface ProfileData {
   fullName?: string;

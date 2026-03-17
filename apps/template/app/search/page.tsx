@@ -1,22 +1,3 @@
-import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import {
-  FilterPendingScope,
-  FilterTransitionProvider,
-} from "@/components/collections/filter-pending-context";
-import {
-  MobileFilterSortBar,
-  MobileFilterSortBarSkeleton,
-} from "@/components/collections/mobile-filter-sort-bar";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
-import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
-import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
-import { Container } from "@/components/layout/container";
-import { Results, ResultsSkeleton } from "@/components/search/results";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -25,17 +6,37 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   buildProductFiltersFromParams,
   getProducts,
 } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import {
+  FilterPendingScope,
+  FilterTransitionProvider,
+} from "@/components/collections/filter-pending-context";
+import {
+  MobileFilterSortBar,
+  MobileFilterSortBarSkeleton,
+} from "@/components/collections/mobile-filter-sort-bar";
+import { Results, ResultsSkeleton } from "@/components/search/results";
+
+import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
+import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
+import { CollectionsSortSelect } from "@/components/collections/sort-select";
+import { Container } from "@/components/layout/container";
+import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
+import { getLocale } from "@/lib/params";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import type { Locale } from "@/lib/i18n";
+import type { Metadata } from "next";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
+import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 
 export async function generateMetadata({
   searchParams,

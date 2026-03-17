@@ -1,10 +1,11 @@
-import { UserIcon } from "lucide-react";
-import Link from "next/link";
-import { Suspense } from "react";
-import { NavAccount } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
+
+import Link from "next/link";
 import { Megamenu } from "./megamenu";
+import { NavAccount } from "./account";
 import { QuickLinks } from "./quick-links";
+import { Suspense } from "react";
+import { UserIcon } from "lucide-react";
 
 function AccountFallback() {
   return (

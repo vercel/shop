@@ -1,10 +1,11 @@
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+
+import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { getCollection } from "@/lib/shopify/operations/collections";
+import { getLocale } from "@/lib/params";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
-import { CollectionDetailPage } from "@/components/collections/collection-page";
-import { getLocale } from "@/lib/params";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollection } from "@/lib/shopify/operations/collections";
 
 // export async function generateStaticParams() {
 //   return [{ handle: "__placeholder__" }];

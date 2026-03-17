@@ -1,6 +1,6 @@
+import { SearchClient } from "./search-client";
 import { SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { SearchClient } from "./search-client";
 
 export function SearchFallback() {
   const t = useTranslations("nav");

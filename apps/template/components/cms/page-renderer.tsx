@@ -1,13 +1,14 @@
-import { Suspense } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Homepage, MarketingPage } from "@/lib/types";
+
 import { FeaturedProductsSection } from "./blocks/featured-products";
+import { HeroSection } from "./hero-section";
 import { ImageGallerySection } from "./blocks/image-gallery";
 import { ProductGridSection } from "./blocks/product-grid";
 import { PromoBannerSection } from "./blocks/promo-banner";
 import { RichTextSection } from "./blocks/rich-text";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Suspense } from "react";
 import { TopProductsSection } from "./blocks/top-products";
-import { HeroSection } from "./hero-section";
 
 interface MarketingPageRendererProps {
   page: MarketingPage | Homepage;

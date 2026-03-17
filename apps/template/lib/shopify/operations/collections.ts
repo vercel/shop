@@ -1,12 +1,13 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Collection } from "@/lib/types";
-import { shopifyFetch } from "../client";
 import {
   type ShopifyCollection,
   transformShopifyCollection,
   transformShopifyCollections,
 } from "../transforms/collection";
+
+import type { Collection } from "@/lib/types";
+import { shopifyFetch } from "../client";
 
 type CollectionsResponse = {
   collections: { edges: Array<{ node: ShopifyCollection }> };

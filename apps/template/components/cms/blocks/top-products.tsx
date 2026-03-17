@@ -1,5 +1,5 @@
-import { getLocale } from "@/lib/params";
 import type { ContentSection } from "@/lib/types";
+import { getLocale } from "@/lib/params";
 import { TopProductsCarousel } from "./top-products-carousel";
 
 interface TopProductsSectionProps {

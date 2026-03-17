@@ -1,7 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
+import type { Menu, MenuItem, MenuItemType } from "../types/menu";
+
 import { defaultLocale } from "@/lib/i18n";
 import { shopifyFetch } from "../client";
-import type { Menu, MenuItem, MenuItemType } from "../types/menu";
 import { transformShopifyMenuItemUrl } from "../utils";
 
 type ShopifyMenuItem = {

@@ -2,6 +2,7 @@ import {
   FilterSidebar,
   FilterSidebarScrollFade,
 } from "@/components/ui/filter-sidebar";
+
 import { Skeleton } from "@/components/ui/skeleton";
 
 const FILTER_SECTION_SKELETON_KEYS = Array.from(

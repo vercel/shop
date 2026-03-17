@@ -1,8 +1,8 @@
-import type { Locale } from "@/lib/i18n";
-import type { CollectionResultsData } from "./data";
-import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
+import type { CollectionResultsData } from "./data";
 import { CollectionResultsGrid } from "./results-grid";
+import { FilterPendingScope } from "./filter-pending-context";
+import type { Locale } from "@/lib/i18n";
 
 export function CollectionResultsSection({
   locale,

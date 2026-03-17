@@ -1,8 +1,8 @@
-import { UserIcon } from "lucide-react";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { getCustomerSession } from "@/lib/auth/server";
 import { AccountClient } from "./account-client";
+import { getCustomerSession } from "@/lib/auth/server";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { UserIcon } from "lucide-react";
 
 export async function NavAccount() {
   const [session, t] = await Promise.all([

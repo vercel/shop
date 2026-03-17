@@ -1,5 +1,6 @@
-import type { ProductDetails } from "@/lib/types";
 import { createTable, escapeMarkdown, formatPrice } from "./utils";
+
+import type { ProductDetails } from "@/lib/types";
 
 /**
  * Convert a ProductDetails object to a Markdown string.

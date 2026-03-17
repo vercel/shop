@@ -1,5 +1,5 @@
-import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type { Cart, CartLine, CartProduct, Image, Money } from "@/lib/types";
+import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 
 interface ShopifyMoney {
   amount: string;

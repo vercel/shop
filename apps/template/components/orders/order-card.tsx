@@ -1,6 +1,6 @@
-import Image from "next/image";
-import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
+import type { ComponentProps } from "react";
+import Image from "next/image";
 
 interface OrderCardProps extends ComponentProps<"article"> {
   highlighted?: boolean;

@@ -1,7 +1,7 @@
-import Image from "next/image";
-import { PrefetchLink } from "@/components/prefetch-link";
 import { Button } from "@/components/ui/button";
 import type { ContentSection } from "@/lib/types";
+import Image from "next/image";
+import { PrefetchLink } from "@/components/prefetch-link";
 
 interface PromoBannerSectionProps {
   section: ContentSection;

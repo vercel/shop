@@ -1,6 +1,7 @@
+import { getLocaleData, localeSwitchingEnabled } from "@/lib/i18n";
+
 import { ChevronDownIcon } from "lucide-react";
 import { CountryFlag } from "@/components/ui/country-flag";
-import { getLocaleData, localeSwitchingEnabled } from "@/lib/i18n";
 
 export function LocaleCurrencySelectorFallback({ locale }: { locale: string }) {
   const data = getLocaleData(locale);

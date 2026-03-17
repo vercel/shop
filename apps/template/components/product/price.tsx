@@ -1,6 +1,6 @@
+import { cn } from "@/lib/utils";
 import type { ComponentPropsWithoutRef } from "react";
 import { defaultLocale } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 interface PriceProps extends ComponentPropsWithoutRef<"span"> {
   amount: string;

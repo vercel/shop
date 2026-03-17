@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { AccountPageHeader } from "@/components/account/page-header";
+import {
+  filterOrders,
+  getOrderDateLabel,
+  getOrderStatusLabel,
+  getOrderStatusVariant,
+  isOrderCancelled,
+  isOrderCompleted,
+} from "@/lib/utils/order";
 import {
   OrderCard,
   OrderCardBadge,
@@ -14,20 +17,18 @@ import {
   OrderCardProductList,
   OrderCardTitle,
 } from "@/components/orders/order-card";
+
+import { AccountPageHeader } from "@/components/account/page-header";
 import type { FilterTab } from "@/components/orders/order-filters";
-import { OrderFiltersComposed } from "@/components/orders/order-filters-client";
-import { requireSession } from "@/lib/auth/server";
 import { getLocale } from "@/lib/params";
 import { getOrders } from "@/lib/shopify/operations/customer";
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import type { Metadata } from "next";
 import type { Order } from "@/lib/shopify/types/customer";
-import {
-  filterOrders,
-  getOrderDateLabel,
-  getOrderStatusLabel,
-  getOrderStatusVariant,
-  isOrderCancelled,
-  isOrderCompleted,
-} from "@/lib/utils/order";
+import { OrderFiltersComposed } from "@/components/orders/order-filters-client";
+import { requireSession } from "@/lib/auth/server";
+import { Suspense } from "react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("orders");

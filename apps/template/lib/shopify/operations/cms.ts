@@ -1,10 +1,4 @@
 import { cacheLife, cacheTag } from "next/cache";
-import {
-  defaultLocale,
-  getCountryCode,
-  getLanguageCode,
-  locales,
-} from "@/lib/i18n";
 import type {
   CmsRichText,
   ContentSection,
@@ -15,8 +9,12 @@ import type {
   MarketingPage,
   ProductCard,
 } from "@/lib/types";
-import { shopifyFetch } from "../client";
-import { CATEGORY_PRODUCT_FRAGMENT } from "../fragments";
+import {
+  defaultLocale,
+  getCountryCode,
+  getLanguageCode,
+  locales,
+} from "@/lib/i18n";
 import {
   normalizeBlockType,
   parseJson,
@@ -26,6 +24,9 @@ import {
   type ShopifyCategoryProduct,
   transformShopifyProductCard,
 } from "../transforms/product";
+
+import { CATEGORY_PRODUCT_FRAGMENT } from "../fragments";
+import { shopifyFetch } from "../client";
 
 const REFERENCES_FIRST = 50;
 const PRODUCTS_FIRST = 20;

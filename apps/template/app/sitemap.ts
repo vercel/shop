@@ -1,11 +1,12 @@
-import type { MetadataRoute } from "next";
-import { siteConfig } from "@/lib/config";
 import {
   getAllLocalMarketingPageSlugs,
   getLocalMarketingPage,
 } from "@/lib/content/pages";
-import { getCollections } from "@/lib/shopify/operations/collections";
+
 import { getAllProductHandles } from "@/lib/shopify/operations/sitemap";
+import { getCollections } from "@/lib/shopify/operations/collections";
+import type { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/config";
 
 function toAbsoluteUrl(pathname: string): string {
   return `${siteConfig.url}${pathname}`;
