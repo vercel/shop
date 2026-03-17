@@ -9,6 +9,7 @@ import { useCart } from "@/components/cart/context";
 import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
 import { Button } from "@/components/ui/button";
 import type { Image, ProductVariant } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 import { usePdpVariantState } from "./variant-state";
 import { resolveSelectedVariant } from "./variants";
@@ -18,11 +19,13 @@ export function MobileBuyButtons({
   title,
   handle,
   featuredImage,
+  availableForSale = true,
 }: {
   variants: ProductVariant[];
   title: string;
   handle: string;
   featuredImage: Image | null;
+  availableForSale?: boolean;
 }) {
   const { selectedOptions } = usePdpVariantState();
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
@@ -74,7 +77,7 @@ export function MobileBuyButtons({
     <div className="flex gap-2">
       <Button
         type="button"
-        className="flex-1 justify-between h-11"
+        className={cn("flex-1 justify-between h-11", !availableForSale && "invisible")}
         disabled={isOutOfStock || isBuyingNow}
         onClick={handleBuyNow}
       >

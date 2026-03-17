@@ -45,7 +45,13 @@ export async function ProductDetailPage({
 
   const initialSelectedOptions = computeInitialSelectedOptions(variants, variantId);
   const imageProps = { images, videos, title, options, variants };
-  const buyButtonProps = { variants, title, handle, featuredImage };
+  const buyButtonProps = {
+    variants,
+    title,
+    handle,
+    featuredImage,
+    availableForSale: product.availableForSale,
+  };
 
   return (
     <Container className="bg-background">
