@@ -2,6 +2,7 @@ import DynamicLink from "fumadocs-core/dynamic-link";
 import type { Metadata } from "next";
 import { Installer } from "@/components/geistdocs/installer";
 import { Button } from "@/components/ui/button";
+import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
 import { CenteredSection } from "./components/centered-section";
 import { CTA } from "./components/cta";
@@ -79,6 +80,12 @@ const HomePage = () => (
 			</div>
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
+			<OneTwoSection
+				description="Skills and recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+				title="Agentic development"
+			>
+				<AgentDemo />
+			</OneTwoSection>
 			<CenteredSection
 				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
 				title="Dynamic storefronts with instant static responses"
