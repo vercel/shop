@@ -20,12 +20,13 @@ import { Video } from "./video";
 
 export const getMDXComponents = (
   components?: MDXComponents
-): MDXComponents => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any => ({
   ...defaultMdxComponents,
 
   pre: CodeBlock,
 
-  a: ({ href, ...props }) =>
+  a: ({ href, ...props }: any) =>
     href.startsWith("/") ? (
       <DynamicLink
         className="font-normal text-primary no-underline"

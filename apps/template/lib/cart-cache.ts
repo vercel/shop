@@ -6,10 +6,8 @@ import { TAGS } from "@/lib/constants";
 export function invalidateCartCache(): void {
   try {
     updateTag(TAGS.cart);
-    updateTag("cart-status");
   } catch {
     // Fallback when used outside of server actions where updateTag is not available
     revalidateTag(TAGS.cart, { expire: 0 });
-    revalidateTag("cart-status", { expire: 0 });
   }
 }

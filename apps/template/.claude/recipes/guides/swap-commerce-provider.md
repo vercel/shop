@@ -161,7 +161,7 @@ YOUR_PROVIDER_API_KEY=...
 - [ ] GUARDRAIL: New operations MUST return the exact domain types from `lib/types.ts` — components depend on this contract
 - [ ] GUARDRAIL: Keep the same cache tags (`TAGS.products`, `TAGS.collections`, `TAGS.cart`) — the invalidation system depends on them
 - [ ] GUARDRAIL: Every cached operation needs `"use cache: remote"` + `cacheLife()` + `cacheTag()` — missing any breaks caching
-- [ ] GUARDRAIL: Cart server actions must still call `updateTag(TAGS.cart)` AND `updateTag("cart-status")` after mutations
+- [ ] GUARDRAIL: Cart server actions must still call `invalidateCartCache()` after mutations
 - [ ] GUARDRAIL: Do NOT modify `lib/types.ts` unless your provider genuinely can't provide a field — the types are the stable contract
 
 ## Verification checklist
