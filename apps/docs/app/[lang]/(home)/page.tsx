@@ -2,9 +2,10 @@ import DynamicLink from "fumadocs-core/dynamic-link";
 import type { Metadata } from "next";
 import { Installer } from "@/components/geistdocs/installer";
 import { Button } from "@/components/ui/button";
+import { AssistantDemo } from "./components/assistant-demo";
 import { CenteredSection } from "./components/centered-section";
-import { FakeBrowser } from "./components/fake-browser";
 import { CTA } from "./components/cta";
+import { FakeBrowser } from "./components/fake-browser";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
 import { Templates } from "./components/templates";
@@ -12,7 +13,7 @@ import { TextGridSection } from "./components/text-grid-section";
 
 const title = "Vercel Shop";
 const description =
-	"The agentic first way to build your Shopify store. Powered by Next.js and Vercel.";
+	"Build Shopify stores using coding agents. The standard for agentic Shopify development.";
 
 export const metadata: Metadata = {
 	title,
@@ -21,20 +22,20 @@ export const metadata: Metadata = {
 
 const templates = [
 	{
-		title: "Template 1",
-		description: "Description of template 1",
+		title: "Base template",
+		description: "The base template for your Shopify store.",
 		link: "https://example.com/template-1",
 		image: "https://placehold.co/600x400.png",
 	},
 	{
-		title: "Template 2",
-		description: "Description of template 2",
+		title: "Shopify Markets",
+		description: "Multi-locale and multi-currency support for your store",
 		link: "https://example.com/template-2",
 		image: "https://placehold.co/600x400.png",
 	},
 	{
-		title: "Template 3",
-		description: "Description of template 3",
+		title: "Composable with Sanity",
+		description: "Add a content layer to your store with Sanity.",
 		link: "https://example.com/template-3",
 		image: "https://placehold.co/600x400.png",
 	},
@@ -79,8 +80,8 @@ const HomePage = () => (
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
 			<CenteredSection
-				description="Using Cache Components you can power dynamic sites with instant static responses."
-				title="Your dynamic storefront built for speed"
+				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
+				title="Dynamic storefronts with instant static responses"
 			>
 				<FakeBrowser />
 			</CenteredSection>
@@ -88,7 +89,7 @@ const HomePage = () => (
 				description="Built-in shopping assistant for your store powered by the AI SDK and AI Gateway."
 				title="Shopping assistant"
 			>
-				<div className="aspect-video rounded-lg border bg-background" />
+				<AssistantDemo />
 			</OneTwoSection>
 			<TextGridSection data={textGridSection} />
 			<Templates
