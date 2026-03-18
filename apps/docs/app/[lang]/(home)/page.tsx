@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Installer } from "@/components/geistdocs/installer";
 import { Button } from "@/components/ui/button";
 import { CenteredSection } from "./components/centered-section";
+import { FakeBrowser } from "./components/fake-browser";
 import { CTA } from "./components/cta";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
@@ -81,7 +82,7 @@ const HomePage = () => (
 				description="Using Cache Components you can power dynamic sites with instant static responses."
 				title="Your dynamic storefront built for speed"
 			>
-				<div className="aspect-video rounded-lg border bg-background" />
+				<FakeBrowser />
 			</CenteredSection>
 			<OneTwoSection
 				description="Built-in shopping assistant for your store powered by the AI SDK and AI Gateway."
