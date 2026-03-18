@@ -55,7 +55,7 @@ export default async function HomePage() {
 
   return (
     <Container>
-      <div className="flex flex-col gap-8 pb-16">
+      <div className="flex flex-col gap-16 pb-16">
         <HeroSection
           hero={{
             id: "homepage-hero",
@@ -68,14 +68,12 @@ export default async function HomePage() {
           }}
         />
 
-        <section className="py-10">
-          <div className="border-t border-border/40 pt-8">
-            <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
-              <h2 className="text-3xl font-semibold tracking-tight">{contentT("intro.title")}</h2>
-              <div className="max-w-2xl text-base leading-7 text-muted-foreground">
-                <p>{contentT("intro.paragraphOne")}</p>
-                <p className="mt-4">{contentT("intro.paragraphTwo")}</p>
-              </div>
+        <section>
+          <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
+            <h2 className="text-3xl font-semibold tracking-tight">{contentT("intro.title")}</h2>
+            <div className="max-w-2xl text-base leading-7 text-muted-foreground">
+              <p>{contentT("intro.paragraphOne")}</p>
+              <p className="mt-4">{contentT("intro.paragraphTwo")}</p>
             </div>
           </div>
         </section>
@@ -125,7 +123,7 @@ async function CollectionProductGrid({
   if (result.products.length === 0) return null;
 
   return (
-    <section className="py-12">
+    <section>
       <h2 className="mb-8 text-3xl font-semibold tracking-tight">{title}</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {result.products.map((product) => (
@@ -143,7 +141,7 @@ async function CollectionProductGrid({
 
 function CollectionGridSkeleton() {
   return (
-    <section className="py-12">
+    <section>
       <Skeleton className="mb-8 h-8 w-48" />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {[1, 2, 3, 4, 5].map((slot) => (
