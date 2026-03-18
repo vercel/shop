@@ -15,4 +15,4 @@ const create = await dynamic<typeof Config, import("fumadocs-mdx/runtime/types")
       lastModified?: Date;
     },
   }
-}>(Config, {"configPath":"source.config.ts","environment":"next","outDir":".source"}, {"doc":{"passthroughs":["extractedReferences","lastModified"]}});
+}>(Config, {"environment":"next","outDir":".source","configPath":"source.config.ts"}, {"doc":{"passthroughs":["extractedReferences","lastModified"]}});
