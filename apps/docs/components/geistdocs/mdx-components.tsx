@@ -23,7 +23,7 @@ export const getMDXComponents = (
 ): MDXComponents => ({
   ...defaultMdxComponents,
 
-  pre: CodeBlock,
+  pre: CodeBlock as MDXComponents["pre"],
 
   a: ({ href, ...props }) =>
     href.startsWith("/") ? (
