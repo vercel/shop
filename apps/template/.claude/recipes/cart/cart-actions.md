@@ -26,8 +26,7 @@ Every cart server action follows this pattern:
 ```tsx
 "use server";
 
-import { updateTag } from "next/cache";
-import { TAGS } from "@/lib/constants";
+import { invalidateCartCache } from "@/lib/cart-cache";
 
 export async function someCartAction(...): Promise<CartActionResult> {
   // 1. Validate inputs
@@ -36,9 +35,8 @@ export async function someCartAction(...): Promise<CartActionResult> {
   // 2. Call Shopify operation
   const result = await shopifyOperation(...);
 
-  // 3. Invalidate cache tags (REQUIRED)
-  updateTag(TAGS.cart);
-  updateTag("cart-status");
+  // 3. Invalidate cache (REQUIRED)
+  invalidateCartCache();
 
   // 4. Fetch fresh cart and return
   const updatedCart = await getCart();
@@ -70,16 +68,9 @@ type CartActionResult = {
 
 The `cart` field contains the full updated cart from Shopify, which the context uses to replace optimistic state.
 
-### Cache invalidation: the two-tag pattern
+### Cache invalidation
 
-Every cart mutation must invalidate **both** tags:
-
-```tsx
-updateTag(TAGS.cart);       // Revalidates cart data (line items, totals)
-updateTag("cart-status");   // Revalidates VariantCartStatus remote cache
-```
-
-`TAGS.cart` = `"cart"` (defined in `lib/constants.ts`). The `"cart-status"` tag is used by remote-cached components that show variant-level cart status (e.g., "Already in cart").
+Every cart mutation must invalidate the cart cache by calling `invalidateCartCache()` from `@/lib/cart-cache`. This invalidates the `TAGS.cart` tag (`"cart"`, defined in `lib/constants.ts`).
 
 ### Shipping address seeding
 
@@ -115,7 +106,7 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
 
 > These rules are non-negotiable. Violating them will break the application.
 
-- [ ] GUARDRAIL: Every cart mutation MUST call `updateTag(TAGS.cart)` AND `updateTag("cart-status")` — omitting either causes stale cache in different parts of the UI
+- [ ] GUARDRAIL: Every cart mutation MUST call `invalidateCartCache()` — omitting it causes stale cache
 - [ ] GUARDRAIL: Cart actions must be marked `"use server"` — they're called from client components via the cart context
 - [ ] GUARDRAIL: Always return `CartActionResult` with `success: boolean` — the optimistic cart context uses this to decide whether to keep optimistic state or roll back
 - [ ] GUARDRAIL: Never call `updateTag` before the Shopify mutation succeeds — premature invalidation causes a race where stale data gets re-cached
@@ -129,8 +120,7 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
    ```tsx
    export async function applyDiscountAction(code: string): Promise<CartActionResult> {
      const result = await applyDiscountCode(code);
-     updateTag(TAGS.cart);
-     updateTag("cart-status");
+     invalidateCartCache();
      const updatedCart = await getCart();
      return { success: true, cart: updatedCart };
    }
@@ -140,7 +130,7 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
 ### Debugging stale cart data
 
 If the cart shows stale data after mutations:
-1. Verify the action calls both `updateTag(TAGS.cart)` and `updateTag("cart-status")`
+1. Verify the action calls `invalidateCartCache()`
 2. Check that `updateTag` is called AFTER the Shopify mutation, not before
 3. Verify the action returns the fresh cart (`await getCart()`) in the result
 

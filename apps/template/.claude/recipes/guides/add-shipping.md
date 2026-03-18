@@ -223,8 +223,7 @@ export async function updateShippingAddressAction(
       );
     }
 
-    updateTag(TAGS.cart);
-    updateTag("cart-status");
+    invalidateCartCache();
 
     return { success: true };
   } catch (error) {
@@ -614,7 +613,7 @@ In **`overlay-summary.tsx`**, add the shipping line and address section:
 
 ## GUARDRAILS
 
-1. **Every cart mutation MUST call `updateTag(TAGS.cart)` AND `updateTag("cart-status")`** — the shipping address action does both.
+1. **Every cart mutation MUST call `invalidateCartCache()`** — the shipping address action does this.
 2. **Cookie format**: The `shipping-address` cookie stores `{ city, countryCode, zip }` as JSON. It's `httpOnly`, `secure` in production, `sameSite: "lax"`, and expires after 1 year.
 3. **Geo header decoding**: Vercel geo headers (`x-vercel-ip-country`, `x-vercel-ip-city`, `x-vercel-ip-postal-code`) are URL-encoded. Always `decodeURIComponent()` them.
 4. **`after()` for auto-seeding**: The delivery address seed runs via `after()` from `next/server` so it doesn't block the add-to-cart response. The estimate appears on the next render.

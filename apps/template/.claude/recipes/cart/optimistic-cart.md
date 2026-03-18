@@ -126,7 +126,7 @@ If a server action fails, the context restores the `originalCart` snapshot captu
 - [ ] GUARDRAIL: `computeCartWithPending` must run AFTER `applyPendingLineOperations` — reversing the order causes quantity doubling because pending ops get applied twice
 - [ ] GUARDRAIL: `DEBOUNCE_MS = 400` is a tested value — values below 200 cause race conditions with Shopify API, values above 800 feel sluggish
 - [ ] GUARDRAIL: `removeFromCartAction` (quantity === 0) bypasses debounce and fires immediately — never add debounce to removes
-- [ ] GUARDRAIL: Every cart server action must call both `updateTag(TAGS.cart)` AND `updateTag("cart-status")` after mutation — missing either causes stale cache
+- [ ] GUARDRAIL: Every cart server action must call `invalidateCartCache()` after mutation — missing it causes stale cache
 
 ## Common modifications
 
@@ -135,8 +135,7 @@ If a server action fails, the context restores the `originalCart` snapshot captu
 1. Add the Shopify GraphQL mutation in `lib/shopify/operations/cart.ts`
 2. Create a server action in `components/cart/actions.ts` that calls the operation and invalidates tags:
    ```tsx
-   updateTag(TAGS.cart);
-   updateTag("cart-status");
+   invalidateCartCache();
    ```
 3. If the operation needs optimistic UI, add state tracking in `context.tsx` following the pattern of `updateItemOptimistic`
 4. Expose the new function through the `CartContextType` interface

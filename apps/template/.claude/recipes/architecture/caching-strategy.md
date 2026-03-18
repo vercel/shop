@@ -62,8 +62,6 @@ export const TAGS = {
 };
 ```
 
-Plus `"cart-status"` used by variant-level cart status components.
-
 ### Invalidation flow
 
 ```
@@ -94,8 +92,7 @@ The webhook handler maps Shopify topics to cache tags:
 Cart server actions invalidate cache after every mutation:
 
 ```tsx
-updateTag(TAGS.cart);       // Cart data (line items, totals)
-updateTag("cart-status");   // Variant-level "in cart" indicators
+invalidateCartCache(); // from @/lib/cart-cache — invalidates TAGS.cart
 ```
 
 ## GUARDRAILS
@@ -103,7 +100,7 @@ updateTag("cart-status");   // Variant-level "in cart" indicators
 > These rules are non-negotiable. Violating them will break the application.
 
 - [ ] GUARDRAIL: Every cached operation MUST have both `cacheLife()` and `cacheTag()` — missing `cacheTag` means the cache can never be invalidated on demand
-- [ ] GUARDRAIL: Every cart mutation MUST call `updateTag(TAGS.cart)` AND `updateTag("cart-status")` — omitting either causes different parts of the UI to show stale data
+- [ ] GUARDRAIL: Every cart mutation MUST call `invalidateCartCache()` — omitting it causes stale data
 - [ ] GUARDRAIL: Call `updateTag()` AFTER the mutation succeeds — premature invalidation causes a race where stale data gets re-cached
 - [ ] GUARDRAIL: The webhook route MUST verify HMAC signatures — removing verification allows anyone to trigger cache invalidation
 
