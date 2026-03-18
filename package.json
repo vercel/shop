@@ -1,5 +1,9 @@
 {
+	"dependencies": {
+    "turbo": "2.8.17"
+  },
   "name": "monorepo",
+  "packageManager": "pnpm@10.32.1",
   "private": true,
   "scripts": {
     "dev": "turbo run dev",
@@ -8,9 +12,5 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "turbo run format"
-  },
-  "devDependencies": {
-    "turbo": "2.8.17"
-  },
-  "packageManager": "pnpm@10.32.1"
+  }
 }
