@@ -57,7 +57,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlayWithAddress locale={locale} />
             </Suspense>
             <Suspense>
-              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
+              <BottomBar>
+                {process.env.AI_AGENT_DISABLED ? null : <AgentButton />}
+              </BottomBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
@@ -70,16 +72,17 @@ export const generateMetadata = async (): Promise<Metadata> => {
   const t = await getTranslations("seo");
 
   return {
-    metadataBase: new URL(siteConfig.url),
-    title: {
-      default: siteConfig.name,
-      template: `%s | ${siteConfig.name}`,
-    },
+    alternates: buildAlternates({ pathname: "/" }),
     description: t("defaultDescription"),
+    generator: "Vercel Shop",
+    metadataBase: new URL(siteConfig.url),
     robots: {
       index: true,
       follow: true,
     },
-    alternates: buildAlternates({ pathname: "/" }),
+    title: {
+      default: siteConfig.name,
+      template: `%s | ${siteConfig.name}`,
+    },
   };
 };
