@@ -86,26 +86,32 @@ export const Folder: SidebarPageTreeComponents["Folder"] = ({
 }) => {
   const path = useTreePath();
   const pathname = usePathname();
+
+  if (item.index) {
+    return (
+      <div>
+        <SidebarItem
+          active={pathname === item.index.url}
+          className="block w-full truncate text-pretty py-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground"
+          external={item.index.external}
+          href={item.index.url}
+          icon={item.icon}
+        >
+          {item.name}
+        </SidebarItem>
+        <div className="ml-2">{children}</div>
+      </div>
+    );
+  }
+
   const defaultOpen = item.defaultOpen ?? path.includes(item);
 
   return (
     <SidebarFolder active={path.includes(item)} defaultOpen={defaultOpen}>
-      {item.index ? (
-        <SidebarFolderLink
-          active={pathname === item.index.url}
-          className="flex items-center gap-2 text-pretty py-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground [&_svg]:size-3.5"
-          external={item.index.external}
-          href={item.index.url}
-        >
-          {item.icon}
-          {item.name}
-        </SidebarFolderLink>
-      ) : (
-        <SidebarFolderTrigger className="flex items-center gap-2 text-pretty py-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground [&_svg]:size-3.5">
-          {item.icon}
-          {item.name}
-        </SidebarFolderTrigger>
-      )}
+      <SidebarFolderTrigger className="flex items-center gap-2 text-pretty py-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground [&_svg]:size-3.5">
+        {item.icon}
+        {item.name}
+      </SidebarFolderTrigger>
       <SidebarFolderContent className="ml-2">{children}</SidebarFolderContent>
     </SidebarFolder>
   );
