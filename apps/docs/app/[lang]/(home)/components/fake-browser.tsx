@@ -20,9 +20,9 @@ const StaticBadge = () => (
 );
 
 const DynamicBadge = ({ label }: { label: string }) => (
-	<span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold whitespace-nowrap text-white transition-all duration-200 group-hover/dynamic:px-2">
+	<span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold whitespace-nowrap text-white transition-all duration-200 group-hover/dynamic:px-2 group-focus-within/dynamic:px-2">
 		<span>D</span>
-		<span className="ml-0 max-w-0 overflow-hidden transition-all duration-200 group-hover/dynamic:ml-1 group-hover/dynamic:max-w-32">
+		<span className="ml-0 max-w-0 overflow-hidden transition-all duration-200 group-hover/dynamic:ml-1 group-hover/dynamic:max-w-32 group-focus-within/dynamic:ml-1 group-focus-within/dynamic:max-w-32">
 			{label}
 		</span>
 	</span>
@@ -31,13 +31,13 @@ const DynamicBadge = ({ label }: { label: string }) => (
 export const FakeBrowser = () => (
 	<div className="w-full rounded-xl border bg-fd-background shadow-xl">
 		{/* Browser chrome */}
-		<div className="flex items-center gap-2 overflow-hidden rounded-t-xl border-b bg-fd-muted/50 px-4 py-2.5">
-			<div className="flex gap-1.5">
+		<div className="relative flex items-center justify-center overflow-hidden rounded-t-xl border-b bg-fd-muted/50 px-4 py-2.5">
+			<div className="absolute left-4 flex gap-1.5">
 				<div className="size-3 rounded-full bg-red-400" />
 				<div className="size-3 rounded-full bg-yellow-400" />
 				<div className="size-3 rounded-full bg-green-400" />
 			</div>
-			<div className="mx-auto flex items-center gap-2 rounded-lg border bg-fd-background px-5 py-1.5 text-sm text-fd-muted-foreground">
+			<div className="flex items-center gap-2 rounded-lg border bg-fd-background px-8 py-1.5 text-sm text-fd-muted-foreground">
 				<svg
 					className="size-3.5"
 					fill="none"
@@ -55,7 +55,7 @@ export const FakeBrowser = () => (
 		{/* Page content */}
 		<div className="relative p-5">
 			{/* Static boundary - wraps entire page */}
-			<div className="relative rounded-lg border-2 border-purple-400 bg-purple-50/50 p-3 dark:bg-purple-950/20">
+			<div className="relative rounded-lg border-2 border-purple-400 bg-white p-3 dark:bg-purple-950/20">
 				{/* S badge */}
 				<div className="absolute -top-2.5 -left-2.5">
 					<StaticBadge />
@@ -68,7 +68,7 @@ export const FakeBrowser = () => (
 						<div className="h-3 w-24 rounded bg-fd-muted" />
 					</div>
 					{/* Cart - dynamic */}
-					<div className="group/dynamic relative cursor-default rounded border-2 border-dashed border-blue-400 bg-blue-50/50 p-1.5 transition-colors hover:bg-blue-100/50 dark:bg-blue-950/20 dark:hover:bg-blue-900/30">
+					<div tabIndex={0} className="group/dynamic relative cursor-default rounded border-2 border-dashed border-blue-400 bg-blue-100/70 p-1.5 outline-none transition-colors hover:bg-blue-200/60 focus-within:bg-blue-200/60 dark:bg-blue-950/20 dark:hover:bg-blue-900/30 dark:focus-within:bg-blue-900/30">
 						<div className="absolute -top-2.5 -right-2.5">
 							<DynamicBadge label="Cart" />
 						</div>
@@ -102,7 +102,7 @@ export const FakeBrowser = () => (
 				</div>
 
 				{/* Recommendations - dynamic */}
-				<div className="group/dynamic relative cursor-default rounded-lg border-2 border-dashed border-blue-400 bg-blue-50/50 p-2.5 transition-colors hover:bg-blue-100/50 dark:bg-blue-950/20 dark:hover:bg-blue-900/30">
+				<div tabIndex={0} className="group/dynamic relative cursor-default rounded-lg border-2 border-dashed border-blue-400 bg-blue-100/70 p-2.5 outline-none transition-colors hover:bg-blue-200/60 focus-within:bg-blue-200/60 dark:bg-blue-950/20 dark:hover:bg-blue-900/30 dark:focus-within:bg-blue-900/30">
 					<div className="absolute -top-2.5 -left-2.5">
 						<DynamicBadge label="Recommendations" />
 					</div>

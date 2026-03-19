@@ -70,13 +70,21 @@ const HomePage = () => (
 			description={description}
 			title={title}
 		>
-			<div className="mx-auto inline-flex w-fit items-center gap-3">
-				<Button asChild className="px-4" size="lg">
-					<DynamicLink href="/[lang]/docs/getting-started">
-						Get Started
-					</DynamicLink>
-				</Button>
-				<Installer command="npx create-next-app@latest --example vercel/shop --example-path apps/template" />
+			<div className="flex flex-col items-center gap-4">
+				<div className="inline-flex items-center gap-3">
+					<Button asChild className="px-4" size="lg">
+						<DynamicLink href="/[lang]/docs/getting-started">
+							Get Started
+						</DynamicLink>
+					</Button>
+					<Installer command="npx create-next-app@latest --example vercel/shop --example-path apps/template" />
+				</div>
+				<a
+					className="text-muted-foreground text-sm underline underline-offset-4 transition-colors hover:text-foreground"
+					href="https://vercel-shop.labs.vercel.dev"
+				>
+					View the demo store
+				</a>
 			</div>
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
