@@ -1,11 +1,8 @@
-import { ShoppingBagIcon } from "lucide-react";
-
 export const Logo = () => (
 	<div className="flex items-center gap-2">
-		<ShoppingBagIcon className="size-5" />
-		<p className="font-semibold text-xl tracking-tight">Shop</p>
+	  <p className="font-semibold text-xl tracking-tight">▲ / Shop</p>
 	</div>
-);
+  );
 
 export const github = {
 	owner: "vercel",
@@ -18,8 +15,9 @@ export const nav = [
 		href: "/docs",
 	},
 	{
-		label: "Source",
-		href: `https://github.com/${github.owner}/${github.repo}/`,
+		label: "Demo",
+		href: "https://shop-template.labs.vercel.dev",
+		target: "_blank",
 	},
 ];
 
