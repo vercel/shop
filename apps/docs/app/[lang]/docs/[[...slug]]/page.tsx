@@ -9,10 +9,7 @@ import {
   DocsPage,
   DocsTitle,
 } from "@/components/geistdocs/docs-page";
-import { EditSource } from "@/components/geistdocs/edit-source";
-import { Feedback } from "@/components/geistdocs/feedback";
 import { getMDXComponents } from "@/components/geistdocs/mdx-components";
-import { OpenInChat } from "@/components/geistdocs/open-in-chat";
 import { ScrollTop } from "@/components/geistdocs/scroll-top";
 import { Separator } from "@/components/ui/separator";
 import { getLLMText, getPageImage, source } from "@/lib/geistdocs/source";
@@ -36,12 +33,9 @@ const Page = async ({ params }: PageProps<"/[lang]/docs/[[...slug]]">) => {
         footer: (
           <div className="my-3 space-y-3">
             <Separator />
-            <EditSource path={page.path} />
             <ScrollTop />
-            <Feedback />
             <CopyPage text={markdown} />
             <AskAI href={page.url} />
-            <OpenInChat href={page.url} />
           </div>
         ),
       }}
