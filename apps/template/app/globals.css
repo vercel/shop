@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@plugin "@tailwindcss/typography"
+
 @theme inline {
   --breakpoint-3xl: 112rem; /* 1792px */
   --breakpoint-4xl: 140rem; /* 2240px */
