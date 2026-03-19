@@ -31,13 +31,13 @@ const DynamicBadge = ({ label }: { label: string }) => (
 export const FakeBrowser = () => (
 	<div className="w-full rounded-xl border bg-fd-background shadow-xl">
 		{/* Browser chrome */}
-		<div className="flex items-center gap-2 overflow-hidden rounded-t-xl border-b bg-fd-muted/50 px-4 py-2.5">
-			<div className="flex gap-1.5">
+		<div className="relative flex items-center justify-center overflow-hidden rounded-t-xl border-b bg-fd-muted/50 px-4 py-2.5">
+			<div className="absolute left-4 flex gap-1.5">
 				<div className="size-3 rounded-full bg-red-400" />
 				<div className="size-3 rounded-full bg-yellow-400" />
 				<div className="size-3 rounded-full bg-green-400" />
 			</div>
-			<div className="mx-auto flex items-center gap-2 rounded-lg border bg-fd-background px-5 py-1.5 text-sm text-fd-muted-foreground">
+			<div className="flex items-center gap-2 rounded-lg border bg-fd-background px-8 py-1.5 text-sm text-fd-muted-foreground">
 				<svg
 					className="size-3.5"
 					fill="none"
