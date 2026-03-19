@@ -1,6 +1,6 @@
 export const Logo = () => (
-	<div className="flex items-center gap-2">
-	  <p className="font-semibold text-xl tracking-tight">▲ / Shop</p>
+	<div>
+	  <p className="font-semibold text-xl tracking-tight">Shop</p>
 	</div>
   );
 
