@@ -42,9 +42,7 @@ const FEATURED_COLLECTION_HANDLE = "furniture";
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [contentT, productT, collections, featuredProductsResult] = await Promise.all([
-    getTranslations("content.homepage"),
-    getTranslations("product"),
+  const [collections, featuredProductsResult] = await Promise.all([
     getCollections(locale),
     getProducts({ limit: 10, locale }),
   ]);
@@ -59,21 +57,27 @@ export default async function HomePage() {
         <HeroSection
           hero={{
             id: "homepage-hero",
-            headline: contentT("hero.headline", {
-              storeName: siteConfig.name,
-            }),
-            subheadline: contentT("hero.subheadline"),
-            ctaText: contentT("hero.ctaText"),
+            headline: `Start selling with ${siteConfig.name}`,
+            subheadline: "A clean Shopify storefront you can shape as you go.",
+            ctaText: "Browse the catalog",
             ctaLink: featuredCollection ? `/collections/${featuredCollection.handle}` : "/search",
           }}
         />
 
         <section>
-          <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
-            <h2 className="text-3xl font-semibold tracking-tight">{contentT("intro.title")}</h2>
-            <div className="max-w-2xl text-base leading-7 text-muted-foreground">
-              <p>{contentT("intro.paragraphOne")}</p>
-              <p className="mt-4">{contentT("intro.paragraphTwo")}</p>
+          <div className="grid items-start gap-6 md:grid-cols-2 lg:gap-12">
+            <h2 className="text-3xl font-semibold tracking-tight">Built to launch first, customize later</h2>
+            <div className="prose prose-neutral max-w-2xl">
+              <p>
+                This is a production-ready Shopify storefront built with Next.js. It connects to
+                your Shopify store out of the box, giving you product pages, collections, cart
+                functionality, and search — everything you need to start selling.
+              </p>
+              <p>
+                Every part of this template is yours to change. Update the layout, swap components,
+                adjust the styling, or wire in a CMS — the code is designed to be read and modified,
+                not worked around.
+              </p>
             </div>
           </div>
         </section>
@@ -82,18 +86,16 @@ export default async function HomePage() {
           <Suspense fallback={<CollectionGridSkeleton />}>
             <CollectionProductGrid
               handle={featuredCollection.handle}
-              title={contentT("featuredCollection.title", {
-                collectionTitle: featuredCollection.title,
-              })}
+              title={`From ${featuredCollection.title}`}
               locale={locale}
-              outOfStockText={productT("outOfStock")}
+              outOfStockText="Out of Stock"
             />
           </Suspense>
         )}
 
         {featuredProductsResult.products.length > 0 && (
           <TopProductsCarousel
-            title={contentT("featuredProducts.title")}
+            title="Featured products"
             products={featuredProductsResult.products}
             locale={locale}
           />
