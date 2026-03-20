@@ -273,6 +273,8 @@ export const generateStaticParams = async () => {
 
 The rest of the layout stays the same — it already uses `getLocale()`, `getMessages()`, and `NextIntlClientProvider`.
 
+The layout-level `generateStaticParams` provides locale values for all child routes — no per-page changes needed for the locale param.
+
 ---
 
 ## Step 7: Update Locale Resolution
@@ -567,6 +569,15 @@ Existing translation files:
 - `es-ES.json` (Spanish)
 
 For new locales like `ja-JP`, create `lib/i18n/messages/ja-JP.json` with translated content.
+
+### CRITICAL: Validate JSON after generating translation files
+
+Translated strings must not contain unescaped ASCII double-quote characters (`"`, U+0022) inside JSON string values. This is easy to hit when a language uses typographic quotation marks that look similar to ASCII `"`:
+
+- **German:** `„` (U+201E) opens, `"` (U+201C) closes — but LLMs sometimes emit a bare ASCII `"` for the closing mark, which terminates the JSON string early.
+- **French:** `«»` (guillemets) are safe — they are not ASCII `"`.
+
+After writing each translation file, **validate it is parseable JSON** (e.g. `node -e "require('./lib/i18n/messages/de-DE.json')"` or equivalent). If validation fails, escape any rogue inner `"` as `\"` or replace typographic quotes with `\"...\"`.
 
 ---
 
