@@ -42,9 +42,7 @@ const FEATURED_COLLECTION_HANDLE = "furniture";
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [contentT, productT, collections, featuredProductsResult] = await Promise.all([
-    getTranslations("content.homepage"),
-    getTranslations("product"),
+  const [collections, featuredProductsResult] = await Promise.all([
     getCollections(locale),
     getProducts({ limit: 10, locale }),
   ]);
@@ -59,21 +57,29 @@ export default async function HomePage() {
         <HeroSection
           hero={{
             id: "homepage-hero",
-            headline: contentT("hero.headline", {
-              storeName: siteConfig.name,
-            }),
-            subheadline: contentT("hero.subheadline"),
-            ctaText: contentT("hero.ctaText"),
+            headline: `Start selling with ${siteConfig.name}`,
+            subheadline: "A clean Shopify storefront you can shape as you go.",
+            ctaText: "Browse the catalog",
             ctaLink: featuredCollection ? `/collections/${featuredCollection.handle}` : "/search",
           }}
         />
 
         <section>
           <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
-            <h2 className="text-3xl font-semibold tracking-tight">{contentT("intro.title")}</h2>
-            <div className="max-w-2xl text-base leading-7 text-muted-foreground">
-              <p>{contentT("intro.paragraphOne")}</p>
-              <p className="mt-4">{contentT("intro.paragraphTwo")}</p>
+            <h2 className="text-3xl font-semibold tracking-tight">Built to launch first, customize later</h2>
+            <div className="prose prose-neutral dark:prose-invert max-w-2xl">
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
+                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
+                ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+                fugiat nulla pariatur.
+              </p>
+              <p>
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+                laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
+                laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae
+                vitae dicta sunt explicabo.
+              </p>
             </div>
           </div>
         </section>
@@ -82,18 +88,16 @@ export default async function HomePage() {
           <Suspense fallback={<CollectionGridSkeleton />}>
             <CollectionProductGrid
               handle={featuredCollection.handle}
-              title={contentT("featuredCollection.title", {
-                collectionTitle: featuredCollection.title,
-              })}
+              title={`From ${featuredCollection.title}`}
               locale={locale}
-              outOfStockText={productT("outOfStock")}
+              outOfStockText="Out of Stock"
             />
           </Suspense>
         )}
 
         {featuredProductsResult.products.length > 0 && (
           <TopProductsCarousel
-            title={contentT("featuredProducts.title")}
+            title="Featured products"
             products={featuredProductsResult.products}
             locale={locale}
           />
