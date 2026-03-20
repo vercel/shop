@@ -94,6 +94,13 @@
   --sidebar-ring: #5a5a5a;
 }
 
+@layer components {
+  .prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    letter-spacing: -0.025em; /* tracking-tight */
+    font-weight: 600; /* font-semibold */
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
