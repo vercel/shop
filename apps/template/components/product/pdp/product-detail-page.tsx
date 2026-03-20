@@ -77,7 +77,7 @@ export async function ProductDetailPage({
         {/* Desktop Layout — breadcrumbs span full width, then 2-column (50/50 images + info) */}
         <div className="hidden lg:block space-y-8">
           <Breadcrumb title={title} handle={handle} />
-          <div className="grid grid-cols-2 items-start gap-8">
+          <div className="grid grid-cols-2 items-start gap-4">
             <div>
               <ImageGrid {...imageProps} />
             </div>
