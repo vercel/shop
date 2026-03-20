@@ -1,6 +1,6 @@
 // @ts-nocheck
 import * as __fd_glob_8 from "../content/docs/skills/index.mdx?collection=docs"
-import * as __fd_glob_7 from "../content/docs/skills/enable-markets.mdx?collection=docs"
+import * as __fd_glob_7 from "../content/docs/skills/enable-shopify-markets.mdx?collection=docs"
 import * as __fd_glob_6 from "../content/docs/shopify/pdp.mdx?collection=docs"
 import * as __fd_glob_5 from "../content/docs/shopify/index.mdx?collection=docs"
 import * as __fd_glob_4 from "../content/docs/index.mdx?collection=docs"
@@ -26,4 +26,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
   }
 }>({"doc":{"passthroughs":["extractedReferences","lastModified"]}});
 
-export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "skills/meta.json": __fd_glob_1, }, {"env-vars.mdx": __fd_glob_2, "getting-started.mdx": __fd_glob_3, "index.mdx": __fd_glob_4, "shopify/index.mdx": __fd_glob_5, "shopify/pdp.mdx": __fd_glob_6, "skills/enable-markets.mdx": __fd_glob_7, "skills/index.mdx": __fd_glob_8, });
+export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "skills/meta.json": __fd_glob_1, }, {"env-vars.mdx": __fd_glob_2, "getting-started.mdx": __fd_glob_3, "index.mdx": __fd_glob_4, "shopify/index.mdx": __fd_glob_5, "shopify/pdp.mdx": __fd_glob_6, "skills/enable-shopify-markets.mdx": __fd_glob_7, "skills/index.mdx": __fd_glob_8, });

@@ -1,5 +1,5 @@
 ---
-name: enable-markets
+name: enable-shopify-markets
 description: >
   Enable Shopify Markets with multi-locale routing using next-intl. Use when
   the user wants to add internationalization, multi-locale support, locale-prefixed
@@ -17,7 +17,7 @@ Interactively set up Shopify Markets with multi-locale routing using next-intl. 
 
 - When the user wants to enable Shopify Markets / multi-locale support
 - When the user wants to add internationalization (i18n) with locale-prefixed URLs
-- When invoked via `/enable-markets`
+- When invoked via `/enable-shopify-markets`
 
 ## Prerequisites
 

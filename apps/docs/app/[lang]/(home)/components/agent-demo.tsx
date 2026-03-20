@@ -11,7 +11,7 @@ type Phase =
 	| "log-3"
 	| "done";
 
-const command = "/enable-markets";
+const command = "/enable-shopify-markets";
 
 const logs = [
 	{ icon: "edit", text: "Updated next.config.ts with i18n routing" },
