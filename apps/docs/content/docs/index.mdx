@@ -3,3 +3,33 @@ description: Learn about the Vercel Shop template and what it offers.
 title: Introduction
 type: overview
 ---
+
+Vercel Shop is a Next.js storefront template for Shopify, built from the ground up for agentic development.
+
+## Agentic development
+
+The template ships with context, feedback loops, and skills that let coding agents understand and extend your store. Recipes and skills describe common tasks — from enabling Shopify Markets to swapping your CMS — so an agent can execute them in a single command.
+
+Every skill includes the context an agent needs: which files to touch, what patterns to follow, and how to validate the result. This means less back-and-forth and more correct code on the first pass.
+
+## Performance by default
+
+Vercel Shop uses Cache Components to serve instant static responses while streaming in dynamic data. Product pages, collection grids, and layouts are cached at the edge — dynamic parts like cart state and personalized recommendations stream in without blocking the initial render.
+
+Cart mutations use optimistic updates so add-to-cart and quantity changes feel instant. Collection pages use optimistic filter state so switching between filters never waits for a server round-trip.
+
+## Skills
+
+Skills are agent-ready guides that transform your storefront. Browse the available skills or run them directly:
+
+<Cards>
+  <Card title="Enable Markets" href="/docs/skills/enable-markets">
+    Multi-locale and multi-currency support with Shopify Markets.
+  </Card>
+  <Card title="Enable auth" href="/docs/skills/enable-auth">
+    Customer authentication with login, account pages, and nav integration.
+  </Card>
+  <Card title="Shopify CMS" href="/docs/skills/enable-shopify-cms">
+    Wire Shopify metaobjects as the CMS for homepage and marketing pages.
+  </Card>
+</Cards>
