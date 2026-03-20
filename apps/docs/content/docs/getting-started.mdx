@@ -4,8 +4,51 @@ title: Getting Started
 type: guide
 ---
 
-## Installation
+## Create a Shopify store
 
-## Shopify Requirements
+If you don't already have one, create a Shopify store at [shopify.com](https://www.shopify.com). You'll need a store with the Headless channel installed to get your Storefront API credentials.
 
-## Development Environment
+## Create your project
+
+There are three ways to get started:
+
+### Deploy with Vercel
+
+The fastest way — deploy directly to Vercel and it will create the repository for you.
+
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&env=SHOPIFY_STOREFRONT_ACCESS_TOKEN,SHOPIFY_STORE_DOMAIN,SITE_NAME&envDescription=Required%20values%20to%20work%20with%20Shopify&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Fenv-vars">
+  <img src="https://vercel.com/button" alt="Deploy with Vercel" />
+</a>
+
+### Clone with create-next-app
+
+```bash
+npx create-next-app@latest --example vercel/shop --example-path apps/template
+```
+
+### Start from v0
+
+You can also use [v0](https://v0.dev) to generate a storefront and iterate on the design before connecting it to Shopify.
+
+## Environment variables
+
+In your Shopify admin, go to **Settings → Apps and sales channels → Headless** and copy the Storefront API credentials. Create a `.env.local` file in your project root:
+
+```bash
+SHOPIFY_STORE_DOMAIN="your-store.myshopify.com"
+SHOPIFY_STOREFRONT_ACCESS_TOKEN="your-storefront-access-token"
+SITE_NAME="Your Store Name"
+```
+
+## Run locally
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Your store is now running at [localhost:3000](http://localhost:3000).
+
+## Deploy
+
+Push your repository to GitHub and import it on [vercel.com/new](https://vercel.com/new). Add the same environment variables from your `.env.local` to your Vercel project settings.
