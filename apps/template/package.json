@@ -26,7 +26,7 @@
 		"react-dom": "19.2.4",
 		"react-remove-scroll": "2.7.2",
 		"server-only": "0.0.1",
-		"shadcn": "4.0.8",
+		"shadcn": "4.1.0",
 		"streamdown": "2.5.0",
 		"tailwind-merge": "3.5.0",
 		"tailwindcss": "4.2.2",
