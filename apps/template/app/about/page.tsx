@@ -4,7 +4,7 @@ import { Container } from "@/components/layout/container";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Vercel Shop — a Next.js storefront template for Shopify.",
+  description: "Learn about Vercel Shop, a Next.js storefront template for Shopify.",
 };
 
 export default function AboutPage() {
@@ -13,25 +13,22 @@ export default function AboutPage() {
       <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
         <h1>About Vercel Shop</h1>
         <p>
-          Vercel Shop is a production-ready Shopify storefront built with Next.js. It connects to
-          your Shopify store out of the box, giving you product pages, collections, cart
-          functionality, and search — everything you need to start selling.
+          Vercel Shop is a Next.js storefront that connects to Shopify. You get product pages,
+          collections, a cart, and search out of the box. Point it at your store and you're selling.
         </p>
         <p>
-          The template is designed for agentic development. It ships with context, feedback loops,
-          and skills that let coding agents understand and extend your store. Recipes describe common
-          tasks — from enabling Shopify Markets to swapping your CMS — so an agent can execute them
-          in a single command.
+          The template is built for agents. It includes context files, structured skills, and
+          recipes that describe common tasks so a coding agent can pick them up and run. Enable
+          Shopify Markets, swap your CMS, add customer accounts: each one is a single command.
         </p>
         <p>
-          Performance is a first-class concern. Pages use Server Components and streaming by default,
-          the cart is fully optimistic, and collection filters update without waiting for a round-trip.
-          Cache Components keep static shells instant while dynamic content streams in behind them.
+          Pages render on the server and stream by default. The cart is optimistic. Collection
+          filters update instantly, without a round-trip. Static shells are cached and dynamic
+          content streams in behind them.
         </p>
         <p>
-          Every part of the codebase is yours to change. Update the layout, swap components, adjust
-          the styling, or wire in a different CMS — the code is designed to be read and modified, not
-          worked around.
+          The code is yours. Change the layout, pull out components, restyle things, wire in a
+          different CMS. It's written to be read and modified, not worked around.
         </p>
       </article>
     </Container>
