@@ -65,20 +65,18 @@ export default async function HomePage() {
         />
 
         <section>
-          <div className="grid items-start gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
+          <div className="grid items-start gap-6 md:grid-cols-2 lg:gap-12">
             <h2 className="text-3xl font-semibold tracking-tight">Built to launch first, customize later</h2>
-            <div className="prose prose-neutral dark:prose-invert max-w-2xl">
+            <div className="prose prose-neutral max-w-2xl">
               <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-                ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
-                fugiat nulla pariatur.
+                This is a production-ready Shopify storefront built with Next.js. It connects to
+                your Shopify store out of the box, giving you product pages, collections, cart
+                functionality, and search — everything you need to start selling.
               </p>
               <p>
-                Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-                laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque
-                laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae
-                vitae dicta sunt explicabo.
+                Every part of this template is yours to change. Update the layout, swap components,
+                adjust the styling, or wire in a CMS — the code is designed to be read and modified,
+                not worked around.
               </p>
             </div>
           </div>
