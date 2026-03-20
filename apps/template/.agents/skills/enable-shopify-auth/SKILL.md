@@ -1,5 +1,5 @@
 ---
-name: enable-auth
+name: enable-shopify-auth
 description: Add customer authentication to the shop template using better-auth with Shopify OIDC. Includes login flow, account pages (profile, orders, addresses), and nav integration.
 ---
 
