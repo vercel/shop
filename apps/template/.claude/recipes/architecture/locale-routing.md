@@ -13,7 +13,6 @@
 
 | File | Role |
 |------|------|
-| `proxy.ts` | Request interception (currently a pass-through) |
 | `next.config.ts` | Content negotiation rewrite (Accept: text/markdown) and variant URL rewrites |
 | `lib/i18n.ts` | Locale catalog, default locale, enabled locales, currency/country helpers |
 | `lib/params.ts` | Current deployment locale helper used by pages and operations |
@@ -56,7 +55,7 @@ rewrites: async () => [
 ],
 ```
 
-`proxy.ts` is a pass-through — it does not currently detect locale from the URL.
+There is no `proxy.ts` by default — add one when locale-prefixed routing is needed.
 
 ### Current locale model
 
@@ -88,15 +87,6 @@ Page files live directly under `app/...` and links should use clean, unprefixed 
 ### Content negotiation
 
 Markdown content negotiation is handled by a `next.config.ts` rewrite (see above). When a request to `/products/:handle` includes `Accept: text/markdown`, it rewrites to the route handler at `app/products/md/[handle]/route.ts`.
-
-### Excluded paths
-
-The middleware matcher excludes these paths (they bypass locale routing):
-
-```
-.well-known, api, sitemaps, webhooks, _next/static, _next/image,
-favicon.ico, sitemap.xml, robots.txt
-```
 
 ### Future upgrade path
 
