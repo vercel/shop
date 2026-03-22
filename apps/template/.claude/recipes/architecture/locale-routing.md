@@ -13,7 +13,8 @@
 
 | File | Role |
 |------|------|
-| `proxy.ts` | Request rewrites for markdown and variant URLs |
+| `proxy.ts` | Request interception (currently a pass-through) |
+| `next.config.ts` | Content negotiation rewrite (Accept: text/markdown) and variant URL rewrites |
 | `lib/i18n.ts` | Locale catalog, default locale, enabled locales, currency/country helpers |
 | `lib/params.ts` | Current deployment locale helper used by pages and operations |
 | `lib/i18n/request.ts` | `next-intl` request config and message loading |
@@ -27,25 +28,35 @@
 ```
 GET /products/speaker
     ↓
-proxy.ts middleware
-    ↓ handles markdown negotiation and variant rewrites only
+next.config.ts rewrites
+    ↓ Accept: text/markdown → /products/md/:handle (content negotiation)
+    ↓ ?variantId=... → /products/:handle/:variantId
     ↓
 app/products/[handle]/page.tsx
     ↓ getLocale() resolves the current deployment locale
     ↓ Shopify operations receive that locale
 ```
 
-### What `proxy.ts` does today
+### What `next.config.ts` rewrites do today
 
-```tsx
-// Accept: text/markdown on product pages
-return NextResponse.rewrite(`/api/md/products/${handle}?locale=${defaultLocale}`);
+Content negotiation and variant rewrites are handled declaratively in `next.config.ts`:
+
+```ts
+rewrites: async () => [
+  {
+    source: "/products/:handle",
+    destination: "/products/md/:handle",
+    has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
+  },
+  {
+    source: "/products/:handle",
+    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
+    destination: "/products/:handle/:variantId",
+  },
+],
 ```
 
-The middleware does not currently detect locale from the URL. It only:
-
-- rewrites markdown product requests to the markdown API route
-- rewrites `/products/[handle]?variantId=...` to `/products/[handle]/[variantId]`
+`proxy.ts` is a pass-through — it does not currently detect locale from the URL.
 
 ### Current locale model
 
@@ -76,14 +87,7 @@ Page files live directly under `app/...` and links should use clean, unprefixed 
 
 ### Content negotiation
 
-The proxy also handles markdown content negotiation for product pages:
-
-```tsx
-// If Accept: text/markdown, rewrite to API route
-if (segments[0] === "products") {
-  return NextResponse.rewrite(`/api/md/products/${handle}?locale=${defaultLocale}`);
-}
-```
+Markdown content negotiation is handled by a `next.config.ts` rewrite (see above). When a request to `/products/:handle` includes `Accept: text/markdown`, it rewrites to the route handler at `app/products/md/[handle]/route.ts`.
 
 ### Excluded paths
 

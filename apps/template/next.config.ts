@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
   rewrites: async () => [
     {
       source: "/products/:handle",
+      destination: "/products/md/:handle",
+      has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
+    },
+    {
+      source: "/products/:handle",
       has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
       destination: "/products/:handle/:variantId",
     },
