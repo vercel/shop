@@ -40,12 +40,12 @@ pnpm format
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
-- `proxy.ts` for content negotiation and request rewrites
+- `next.config.ts` rewrites for variant URL resolution
 
 ## Data Flow
 
 ```text
-Request → proxy.ts → Page → Operation → shopifyFetch → Shopify API → Transform → Domain type → Component
+Request → Page → Operation → shopifyFetch → Shopify API → Transform → Domain type → Component
 ```
 
 ## Recipes

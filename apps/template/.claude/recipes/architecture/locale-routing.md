@@ -13,7 +13,7 @@
 
 | File | Role |
 |------|------|
-| `proxy.ts` | Request rewrites for markdown and variant URLs |
+| `next.config.ts` | Variant URL rewrites |
 | `lib/i18n.ts` | Locale catalog, default locale, enabled locales, currency/country helpers |
 | `lib/params.ts` | Current deployment locale helper used by pages and operations |
 | `lib/i18n/request.ts` | `next-intl` request config and message loading |
@@ -27,25 +27,12 @@
 ```
 GET /products/speaker
     ↓
-proxy.ts middleware
-    ↓ handles markdown negotiation and variant rewrites only
-    ↓
 app/products/[handle]/page.tsx
     ↓ getLocale() resolves the current deployment locale
     ↓ Shopify operations receive that locale
 ```
 
-### What `proxy.ts` does today
-
-```tsx
-// Accept: text/markdown on product pages
-return NextResponse.rewrite(`/api/md/products/${handle}?locale=${defaultLocale}`);
-```
-
-The middleware does not currently detect locale from the URL. It only:
-
-- rewrites markdown product requests to the markdown API route
-- rewrites `/products/[handle]?variantId=...` to `/products/[handle]/[variantId]`
+There is no `proxy.ts` by default — add one when locale-prefixed routing is needed.
 
 ### Current locale model
 
@@ -73,26 +60,6 @@ Link:  <Link href="/products/speaker">
 ```
 
 Page files live directly under `app/...` and links should use clean, unprefixed paths.
-
-### Content negotiation
-
-The proxy also handles markdown content negotiation for product pages:
-
-```tsx
-// If Accept: text/markdown, rewrite to API route
-if (segments[0] === "products") {
-  return NextResponse.rewrite(`/api/md/products/${handle}?locale=${defaultLocale}`);
-}
-```
-
-### Excluded paths
-
-The middleware matcher excludes these paths (they bypass locale routing):
-
-```
-.well-known, api, sitemaps, webhooks, _next/static, _next/image,
-favicon.ico, sitemap.xml, robots.txt
-```
 
 ### Future upgrade path
 

@@ -12,7 +12,6 @@
 
 | File | Role |
 |------|------|
-| `proxy.ts` | Request rewrites and content negotiation |
 | `app/` | Page routes (server components) |
 | `lib/params.ts` | Current deployment locale helper |
 | `lib/shopify/operations/*.ts` | Data fetching + caching |
@@ -28,10 +27,7 @@
 ```
 1. Browser request: GET /products/speaker
         ↓
-2. proxy.ts middleware
-   - Handles markdown negotiation and variant URL rewrites
-        ↓
-3. Next.js matches: app/products/[handle]/page.tsx
+2. Next.js matches: app/products/[handle]/page.tsx
    - params: { handle: "speaker" }
         ↓
 4. Page component (async server component)
