@@ -332,7 +332,7 @@ The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/ope
 
 **File:** `proxy.ts`
 
-Add next-intl middleware while preserving existing markdown content negotiation and variant ID rewrites. The locale middleware must run for the normal flow after the existing checks:
+Add a `proxy.ts` with next-intl middleware for locale routing and variant ID rewrites:
 
 ```ts
 export const config = {
@@ -343,37 +343,15 @@ export const config = {
 
 import { type NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { defaultLocale } from "@/lib/i18n";
 import { routing } from "@/lib/i18n/routing";
 
 const handlei18n = createMiddleware(routing);
 
-function acceptsMarkdown(acceptHeader: string): boolean {
-  // ... existing implementation unchanged ...
-}
-
 export default async function middleware(request: NextRequest) {
-  const acceptHeader = request.headers.get("accept") || "";
-
-  // 1. Content negotiation for markdown (product pages)
-  if (acceptsMarkdown(acceptHeader)) {
-    const url = new URL(request.url);
-    const segments = url.pathname.split("/").filter(Boolean);
-
-    // Account for optional locale prefix in the path
-    const productIndex = segments.findIndex((s) => s === "products");
-    if (productIndex !== -1 && segments[productIndex + 1]) {
-      const handle = segments[productIndex + 1];
-      const locale = productIndex > 0 ? segments[0] : defaultLocale;
-      const rewriteUrl = new URL(`/api/md/products/${handle}?locale=${locale}`, request.url);
-      return NextResponse.rewrite(rewriteUrl);
-    }
-  }
-
-  // 2. Normal flow: locale routing via next-intl
+  // 1. Normal flow: locale routing via next-intl
   let response = handlei18n(request);
 
-  // 3. Variant ID rewrite (after locale resolution)
+  // 2. Variant ID rewrite (after locale resolution)
   const url = new URL(request.url);
   const variantId = url.searchParams.get("variantId");
   if (variantId) {
@@ -392,6 +370,8 @@ export default async function middleware(request: NextRequest) {
   return response;
 }
 ```
+
+> **Note:** If you have also run the **enable-content-negotiation** skill, the `next.config.ts` rewrite handles markdown negotiation automatically — no proxy.ts changes needed.
 
 ---
 
@@ -610,6 +590,6 @@ After completing all steps, verify the implementation:
    - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
    - Product prices render in the correct currency for each locale
 3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Middleware**: Confirm markdown content negotiation (`Accept: text/markdown` on product pages) and `?variantId=` rewrites still work
+4. **Middleware**: Confirm `?variantId=` rewrites still work
 5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
 6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries
