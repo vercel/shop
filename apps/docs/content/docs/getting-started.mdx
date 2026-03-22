@@ -49,6 +49,24 @@ pnpm dev
 
 Your store is now running at [localhost:3000](http://localhost:3000).
 
+## AI coding agents
+
+If you use [Claude Code](https://claude.ai/code) or [Cursor](https://cursor.sh), install the [Vercel plugin](https://vercel.com/changelog/introducing-vercel-plugin-for-coding-agents) to get platform-aware guidance for Next.js, AI SDK, shadcn/ui, caching, and more — 47+ skills that activate automatically as you work.
+
+### Claude Code
+
+```bash
+npx plugins add vercel/vercel-plugin
+```
+
+### Cursor
+
+```bash
+/add-plugin vercel
+```
+
+The plugin provides real-time context about Vercel APIs, catches deprecated patterns, and includes slash commands like `/bootstrap`, `/deploy`, `/env`, `/status`, and `/marketplace`.
+
 ## Deploy
 
 Push your repository to GitHub and import it on [vercel.com/new](https://vercel.com/new). Add the same environment variables from your `.env.local` to your Vercel project settings.
