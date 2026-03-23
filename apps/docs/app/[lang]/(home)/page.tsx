@@ -9,7 +9,6 @@ import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
-import { Templates } from "./components/templates";
 import { TextGridSection } from "./components/text-grid-section";
 
 const title = "Vercel Shop";
@@ -20,27 +19,6 @@ export const metadata: Metadata = {
 	title,
 	description,
 };
-
-const templates = [
-	{
-		title: "Base template",
-		description: "The base template for your Shopify store.",
-		link: "https://example.com/template-1",
-		image: "https://placehold.co/600x400.png",
-	},
-	{
-		title: "Shopify Markets",
-		description: "Multi-locale and multi-currency support for your store",
-		link: "https://example.com/template-2",
-		image: "https://placehold.co/600x400.png",
-	},
-	{
-		title: "Composable with Sanity",
-		description: "Add a content layer to your store with Sanity.",
-		link: "https://example.com/template-3",
-		image: "https://placehold.co/600x400.png",
-	},
-];
 
 const textGridSection = [
 	{
@@ -115,12 +93,6 @@ const HomePage = () => (
 				<AssistantDemo />
 			</OneTwoSection>
 			<TextGridSection data={textGridSection} />
-			<Templates
-				data={templates}
-				description="See Geistdocs in action with one of our templates."
-				title="Get started quickly"
-			/>
-
 			<CTA cta="Get started" href="/docs" title="Start your shop today" />
 		</div>
 	</div>
