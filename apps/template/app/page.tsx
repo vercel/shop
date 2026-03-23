@@ -24,12 +24,6 @@ export async function generateMetadata(): Promise<Metadata> {
       url: "/",
       type: "website",
     }),
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ["/og-default.png"],
-    },
   };
 }
 

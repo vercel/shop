@@ -76,10 +76,6 @@ export const generateMetadata = async (): Promise<Metadata> => {
     description: t("defaultDescription"),
     generator: "Vercel Shop",
     metadataBase: new URL(siteConfig.url),
-    robots: {
-      index: true,
-      follow: true,
-    },
     title: {
       default: siteConfig.name,
       template: `%s | ${siteConfig.name}`,
