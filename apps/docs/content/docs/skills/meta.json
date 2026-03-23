@@ -1,4 +1,8 @@
 {
   "title": "Extending with agent skills",
+<<<<<<< Updated upstream
   "pages": ["enable-shopify-markets", "enable-shopify-cms", "enable-shopify-auth", "enable-content-negotiation"]
+=======
+  "pages": ["enable-shopify-markets", "enable-shopify-cms", "enable-shopify-customer-accounts"]
+>>>>>>> Stashed changes
 }

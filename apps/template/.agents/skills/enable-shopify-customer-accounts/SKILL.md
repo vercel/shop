@@ -1,11 +1,23 @@
 ---
-name: enable-shopify-auth
-description: Add customer authentication to the shop template using better-auth with Shopify OIDC. Includes login flow, account pages (profile, orders, addresses), and nav integration.
+name: enable-shopify-customer-accounts
+description: >
+  Enable Shopify Customer Accounts with login, account pages (profile, orders,
+  addresses), and nav integration using better-auth with Shopify OIDC.
+argument-hint: "[profile|orders|addresses]"
 ---
 
-# Enable Authentication
+# Enable Shopify Customer Accounts
 
-Add customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API OIDC. This enables customer login, profile management, order history, and address book.
+## Description
+
+Add customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API OIDC. This enables customer login, profile management, order history, and address book. Features are modular — pick what you need.
+
+## When to Use This Skill
+
+- When the user wants to add customer login / sign-in to their storefront
+- When the user wants account pages (profile, orders, addresses)
+- When the user wants authenticated checkout (cart linked to customer)
+- When invoked via `/enable-shopify-customer-accounts`
 
 ## Prerequisites
 
@@ -22,6 +34,70 @@ Add customer authentication using [better-auth](https://www.better-auth.com/) wi
 | `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret                       |
 | `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
 | `SHOPIFY_STORE_DOMAIN`           | Already set — used for OIDC discovery                            |
+
+---
+
+## Step 0: Gather User Preferences
+
+If the user hasn't already specified their preferences, ask them. Use a single round of questions.
+
+```json
+{
+  "questions": [
+    {
+      "question": "Which account features do you need?",
+      "header": "Features",
+      "multiSelect": true,
+      "options": [
+        {
+          "label": "Profile management",
+          "description": "View and edit customer name and email"
+        },
+        {
+          "label": "Order history",
+          "description": "List orders with status filters and detail pages with fulfillment tracking"
+        },
+        {
+          "label": "Address book",
+          "description": "Full CRUD for saved shipping addresses"
+        },
+        {
+          "label": "Authenticated checkout",
+          "description": "Link the cart to the logged-in customer before redirecting to Shopify checkout"
+        }
+      ]
+    },
+    {
+      "question": "Should auth context be wired into the AI chat route?",
+      "header": "Chat",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes (Recommended)",
+          "description": "Pass the authenticated customer's identity and access token to the chat route so the agent can make personalized queries"
+        },
+        {
+          "label": "No",
+          "description": "Keep the chat route guest-only — skip Step 13"
+        }
+      ]
+    }
+  ]
+}
+```
+
+Based on the answers:
+
+- **Core auth** (Steps 1–8, 11, 14) is always implemented — this gives you better-auth setup, the login page, nav integration, and translation keys.
+- **Profile management** → include profile page and components in Step 10 and customer `getCustomer`/`updateCustomer` operations in Step 9.
+- **Order history** → include orders pages in Step 10 and `getOrders`/`getOrder` operations in Step 9.
+- **Address book** → include addresses page in Step 10 and address CRUD operations in Step 9.
+- **Authenticated checkout** → include Step 12.
+- **Chat context** → include Step 13.
+
+If the user selects none of the account features, skip Steps 9–10 entirely and create a minimal `/account` page that just shows the customer's name/email with a sign-out button.
+
+---
 
 ## Implementation steps
 
@@ -556,6 +632,8 @@ Add `common.loginRedirecting`, `common.loginNotRedirected`, `common.loginClickHe
 
 Add full `account`, `orders`, and `address` sections. See the base `en.json` translations for the complete key set.
 
+---
+
 ## Shopify Admin setup
 
 1. Go to **Shopify Admin → Settings → Customer accounts**
@@ -573,3 +651,16 @@ Add full `account`, `orders`, and `address` sections. See the base `en.json` tra
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - The login page uses `robots: { index: false, follow: false }` to prevent indexing
 - PKCE is enabled for the OAuth flow — never disable it
+
+## Verification
+
+After completing all steps, verify the implementation:
+
+1. **Build**: Run `pnpm build` and confirm no TypeScript errors
+2. **Smoke test**: Run `pnpm dev` and check:
+   - Visiting `/login` redirects to Shopify's OIDC login page
+   - After login, the nav shows the account dropdown with the customer's email
+   - Visiting `/account` while logged out redirects to `/login`
+3. **Account pages** (if enabled): Confirm profile displays customer data, orders list loads, and address CRUD works
+4. **Authenticated checkout** (if enabled): Add an item to cart, proceed to checkout, and confirm the cart is linked to the customer
+5. **Session**: Confirm sign-out clears the session and redirects to `/`
