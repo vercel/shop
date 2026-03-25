@@ -4,6 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
 
 import { BuySectionClient } from "./buy-section-client";
+import type { SelectedOptions } from "./variants";
 
 function Fallback() {
   return (
@@ -14,10 +15,16 @@ function Fallback() {
   );
 }
 
-export function BuySection({ productPromise }: { productPromise: Promise<ProductDetails> }) {
+export function BuySection({
+  productPromise,
+  selectedOptions,
+}: {
+  productPromise: Promise<ProductDetails>;
+  selectedOptions: SelectedOptions;
+}) {
   return (
     <Suspense fallback={<Fallback />}>
-      <BuySectionClient productPromise={productPromise} />
+      <BuySectionClient productPromise={productPromise} selectedOptions={selectedOptions} />
     </Suspense>
   );
 }

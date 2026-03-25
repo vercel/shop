@@ -1,22 +1,26 @@
-"use client";
-
+import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import type { SelectedOptions } from "./variants";
+import { getVariantUrl } from "./variants";
+
 interface OptionPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;
   selectedValue: string;
   variants: ProductVariant[];
-  onValueChange: (value: string) => void;
+  handle: string;
+  selectedOptions: SelectedOptions;
 }
 
 export function OptionPicker({
   option,
   selectedValue,
   variants,
-  onValueChange,
+  handle,
+  selectedOptions,
   className,
   ...props
 }: OptionPickerProps) {
@@ -29,29 +33,34 @@ export function OptionPicker({
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
 
-          // Check if any variant with this option value is available
           const isAvailable = variants.some(
             (v) =>
               v.availableForSale &&
               v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           );
 
+          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+
+          const classes = cn(
+            "px-4 py-2 text-sm font-medium rounded-lg border transition-all",
+            isSelected
+              ? "border-foreground text-foreground"
+              : "border-border text-foreground/50 hover:border-foreground/50",
+            !isAvailable && "opacity-40 cursor-not-allowed line-through",
+          );
+
+          if (!isAvailable) {
+            return (
+              <span key={value.id} className={classes}>
+                {value.name}
+              </span>
+            );
+          }
+
           return (
-            <button
-              key={value.id}
-              type="button"
-              onClick={() => onValueChange(value.name)}
-              disabled={!isAvailable}
-              className={cn(
-                "px-4 py-2 text-sm font-medium rounded-lg border transition-all",
-                isSelected
-                  ? "border-foreground text-foreground"
-                  : "border-border text-foreground/50 hover:border-foreground/50",
-                !isAvailable && "opacity-40 cursor-not-allowed line-through",
-              )}
-            >
+            <Link key={value.id} href={href} className={classes}>
               {value.name}
-            </button>
+            </Link>
           );
         })}
       </div>

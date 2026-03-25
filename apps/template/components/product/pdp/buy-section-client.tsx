@@ -10,11 +10,11 @@ import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { ProductDetails } from "@/lib/types";
+import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { QuantitySelector } from "./quantity-selector";
-import { usePdpVariantState } from "./variant-state";
 import { resolveSelectedVariant } from "./variants";
+import type { SelectedOptions } from "./variants";
 
 function Fallback() {
   return (
@@ -25,9 +25,14 @@ function Fallback() {
   );
 }
 
-function Content({ productPromise }: { productPromise: Promise<ProductDetails> }) {
+function Content({
+  productPromise,
+  selectedOptions,
+}: {
+  productPromise: Promise<ProductDetails>;
+  selectedOptions: SelectedOptions;
+}) {
   const product = use(productPromise);
-  const { selectedOptions } = usePdpVariantState();
   const selectedVariant = resolveSelectedVariant(product.variants, selectedOptions);
   const selectedVariantId = selectedVariant?.id;
 
@@ -127,10 +132,16 @@ function Content({ productPromise }: { productPromise: Promise<ProductDetails> }
   );
 }
 
-export function BuySectionClient({ productPromise }: { productPromise: Promise<ProductDetails> }) {
+export function BuySectionClient({
+  productPromise,
+  selectedOptions,
+}: {
+  productPromise: Promise<ProductDetails>;
+  selectedOptions: SelectedOptions;
+}) {
   return (
     <Suspense fallback={<Fallback />}>
-      <Content productPromise={productPromise} />
+      <Content productPromise={productPromise} selectedOptions={selectedOptions} />
     </Suspense>
   );
 }
