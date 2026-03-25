@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +33,7 @@ function Fallback() {
 }
 
 async function Render({ handle, locale }: { handle: string; locale: Locale }) {
+  await connection();
   const [t, recommendations] = await Promise.all([
     getTranslations("product"),
     getProductRecommendations(handle, locale),
