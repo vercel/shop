@@ -1,5 +1,3 @@
-"use client";
-
 import type { ComponentPropsWithoutRef } from "react";
 
 import { DEFAULT_OPTION } from "@/lib/constants";
@@ -10,27 +8,23 @@ import { AboutItem } from "./about-item";
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { ProductPrice } from "./product-price";
-import { usePdpVariantState } from "./variant-state";
-import { getNumericShopifyId, resolveSelectedVariant } from "./variants";
+import type { SelectedOptions } from "./variants";
 
 interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
-  variants: ProductVariant[];
+  selectedVariant: ProductVariant | undefined;
   title: string;
   locale: string;
   size?: "default" | "sm";
 }
 
 function ProductInfoHeader({
-  variants,
+  selectedVariant,
   title,
   locale,
   size = "default",
   className,
   ...props
 }: ProductInfoHeaderProps) {
-  const { selectedOptions } = usePdpVariantState();
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-
   const titleSize = size === "sm" ? "text-xl" : "text-[30px]";
   return (
     <div data-slot="product-info-header" className={className} {...props}>
@@ -63,58 +57,21 @@ function ProductInfoHeader({
 interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
   variants: ProductVariant[];
   options: ProductOption[];
+  selectedOptions: SelectedOptions;
+  handle: string;
   size?: "default" | "sm";
 }
 
 function ProductInfoOptions({
   variants,
   options,
+  selectedOptions,
+  handle,
   size = "default",
   className,
   ...props
 }: ProductInfoOptionsProps) {
-  const { selectedOptions, setSelectedOptions } = usePdpVariantState();
-
-  const updateVariantIdParam = (variantId: string) => {
-    const numericId = getNumericShopifyId(variantId);
-    if (!numericId) return;
-
-    const params = new URLSearchParams(window.location.search);
-    params.set("variantId", numericId);
-    window.history.replaceState(null, "", `?${params.toString()}`);
-  };
-
-  const handleOptionChange = (optionName: string, value: string) => {
-    const newOptions = { ...selectedOptions, [optionName]: value };
-
-    const newVariant = variants.find((v) =>
-      v.selectedOptions.every((opt) => newOptions[opt.name] === opt.value),
-    );
-
-    if (!newVariant) {
-      const variantWithOption = variants.find((v) =>
-        v.selectedOptions.some((opt) => opt.name === optionName && opt.value === value),
-      );
-      if (variantWithOption) {
-        const updatedOptions: Record<string, string> = {};
-        for (const opt of variantWithOption.selectedOptions) {
-          updatedOptions[opt.name] = opt.value;
-        }
-        setSelectedOptions(updatedOptions);
-        updateVariantIdParam(variantWithOption.id);
-        return;
-      }
-    }
-
-    setSelectedOptions(newOptions);
-    if (newVariant) {
-      updateVariantIdParam(newVariant.id);
-    }
-  };
-
   // Separate color/swatch options from other options.
-  // Use swatch data (locale-agnostic) as the primary signal, falling back to
-  // the English name for stores without swatches configured.
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
@@ -135,7 +92,8 @@ function ProductInfoOptions({
               option={colorOption}
               selectedValue={selectedOptions[colorOption.name]}
               variants={variants}
-              onValueChange={(value) => handleOptionChange(colorOption.name, value)}
+              handle={handle}
+              selectedOptions={selectedOptions}
             />
           ) : null,
         )}
@@ -147,7 +105,8 @@ function ProductInfoOptions({
             option={option}
             selectedValue={selectedOptions[option.name] ?? ""}
             variants={variants}
-            onValueChange={(value) => handleOptionChange(option.name, value)}
+            handle={handle}
+            selectedOptions={selectedOptions}
           />
         ))}
       </div>
@@ -175,6 +134,9 @@ function ProductInfoDescription({
 function ProductInfo({
   variants,
   options,
+  selectedVariant,
+  selectedOptions,
+  handle,
   title,
   descriptionHtml,
   locale,
@@ -182,6 +144,9 @@ function ProductInfo({
 }: {
   variants: ProductVariant[];
   options: ProductOption[];
+  selectedVariant: ProductVariant | undefined;
+  selectedOptions: SelectedOptions;
+  handle: string;
   title: string;
   descriptionHtml: string;
   locale: string;
@@ -189,8 +154,8 @@ function ProductInfo({
 }) {
   return (
     <div data-slot="product-info" className="space-y-8">
-      <ProductInfoHeader variants={variants} title={title} locale={locale} size={size} />
-      <ProductInfoOptions variants={variants} options={options} size={size} />
+      <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} size={size} />
+      <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} size={size} />
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
   );

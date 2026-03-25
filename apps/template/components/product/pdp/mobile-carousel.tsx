@@ -4,29 +4,20 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
-import type { Image as ImageType, ProductOption, ProductVariant, Video } from "@/lib/types";
+import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { AutoPlayVideo } from "./auto-play-video";
-import { usePdpVariantState } from "./variant-state";
-import { getImagesForSelectedColor } from "./variants";
 
 export function MobileCarousel({
-  images: allImages,
+  images,
   videos,
   title,
-  options,
-  variants,
 }: {
   images: ImageType[];
   videos: Video[];
   title: string;
-  options: ProductOption[];
-  variants: ProductVariant[];
 }) {
-  const { selectedOptions } = usePdpVariantState();
-  const images = getImagesForSelectedColor(allImages, options, variants, selectedOptions);
-
   type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 
   const mediaItems: MediaItem[] = [

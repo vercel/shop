@@ -11,8 +11,11 @@ import {
   ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
-import { PdpVariantStateProvider } from "@/components/product/pdp/variant-state";
-import { computeInitialSelectedOptions } from "@/components/product/pdp/variants";
+import {
+  computeInitialSelectedOptions,
+  getImagesForSelectedColor,
+  resolveSelectedVariant,
+} from "@/components/product/pdp/variants";
 import { Recommendations } from "@/components/product/recommendations";
 import { ProductSchema } from "@/components/product/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -43,10 +46,12 @@ export async function ProductDetailPage({
   const { handle, title, featuredImage, images, videos, variants, options, descriptionHtml } =
     product;
 
-  const initialSelectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const imageProps = { images, videos, title, options, variants };
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
+
   const buyButtonProps = {
-    variants,
+    selectedVariant,
     title,
     handle,
     featuredImage,
@@ -73,42 +78,43 @@ export async function ProductDetailPage({
       </Suspense>
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      <PdpVariantStateProvider initialSelectedOptions={initialSelectedOptions}>
-        {/* Desktop Layout — breadcrumbs span full width, then 2-column (50/50 images + info) */}
-        <div className="hidden lg:block space-y-8">
-          <Breadcrumb title={title} handle={handle} />
-          <div className="grid grid-cols-2 items-start gap-4">
-            <div>
-              <ImageGrid {...imageProps} />
-            </div>
+      {/* Desktop Layout — breadcrumbs span full width, then 2-column (50/50 images + info) */}
+      <div className="hidden lg:block space-y-8">
+        <Breadcrumb title={title} handle={handle} />
+        <div className="grid grid-cols-2 items-start gap-4">
+          <div>
+            <ImageGrid images={filteredImages} videos={videos} title={title} />
+          </div>
 
-            <div className="space-y-8">
-              <ProductInfoHeader variants={variants} title={title} locale={locale} />
-              <ProductInfoOptions variants={variants} options={options} />
-              <MobileBuyButtons {...buyButtonProps} />
-              <ProductInfoDescription descriptionHtml={descriptionHtml} />
-            </div>
+          <div className="space-y-8">
+            <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
+            <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} />
+            <MobileBuyButtons {...buyButtonProps} />
+            <ProductInfoDescription descriptionHtml={descriptionHtml} />
           </div>
         </div>
+      </div>
 
-        {/* Mobile Layout — breadcrumbs first, then gallery, then product info */}
-        <div className="lg:hidden space-y-8">
-          <Breadcrumb title={title} handle={handle} />
+      {/* Mobile Layout — breadcrumbs first, then gallery, then product info */}
+      <div className="lg:hidden space-y-8">
+        <Breadcrumb title={title} handle={handle} />
 
-          <MobileCarousel {...imageProps} />
+        <MobileCarousel images={filteredImages} videos={videos} title={title} />
 
-          <MobileBuyButtons {...buyButtonProps} />
+        <MobileBuyButtons {...buyButtonProps} />
 
-          <ProductInfo
-            variants={variants}
-            options={options}
-            title={title}
-            descriptionHtml={descriptionHtml}
-            locale={locale}
-            size="sm"
-          />
-        </div>
-      </PdpVariantStateProvider>
+        <ProductInfo
+          variants={variants}
+          options={options}
+          selectedVariant={selectedVariant}
+          selectedOptions={selectedOptions}
+          handle={handle}
+          title={title}
+          descriptionHtml={descriptionHtml}
+          locale={locale}
+          size="sm"
+        />
+      </div>
 
       <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />

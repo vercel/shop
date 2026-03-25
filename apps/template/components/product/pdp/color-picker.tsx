@@ -1,23 +1,27 @@
-"use client";
-
 import Image from "next/image";
+import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import type { SelectedOptions } from "./variants";
+import { getVariantUrl } from "./variants";
+
 interface ColorPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;
   selectedValue: string;
   variants: ProductVariant[];
-  onValueChange: (value: string) => void;
+  handle: string;
+  selectedOptions: SelectedOptions;
 }
 
 export function ColorPicker({
   option,
   selectedValue,
   variants,
-  onValueChange,
+  handle,
+  selectedOptions,
   className,
   ...props
 }: ColorPickerProps) {
@@ -42,51 +46,68 @@ export function ColorPicker({
 
           const imageUrl = value.swatch?.image || variantImage;
 
-          return (
-            <button
-              key={value.id}
-              type="button"
-              onClick={() => onValueChange(value.name)}
-              disabled={!isAvailable}
-              data-selected={isSelected}
+          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+
+          const swatch = (
+            <div
               className={cn(
-                "flex flex-col items-center gap-2",
-                !isAvailable && "opacity-40 cursor-not-allowed",
+                "aspect-square w-full rounded-lg transition-all overflow-hidden",
+                isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
+            >
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  width={200}
+                  height={200}
+                  alt={`${value.name} swatch`}
+                  className="size-full rounded-lg border border-foreground/10 object-cover"
+                />
+              ) : (
+                <div
+                  className="size-full rounded-lg border border-foreground/10"
+                  style={
+                    value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined
+                  }
+                />
+              )}
+            </div>
+          );
+
+          const label = (
+            <span
+              className={cn(
+                "text-sm font-medium transition-opacity",
+                isSelected ? "text-foreground" : "text-foreground/50",
+              )}
+            >
+              {value.name}
+            </span>
+          );
+
+          if (!isAvailable) {
+            return (
+              <span
+                key={value.id}
+                className="flex flex-col items-center gap-2 opacity-40 cursor-not-allowed"
+                aria-label={`${option.name}: ${value.name} (unavailable)`}
+              >
+                {swatch}
+                {label}
+              </span>
+            );
+          }
+
+          return (
+            <Link
+              key={value.id}
+              href={href}
+              className="flex flex-col items-center gap-2"
               aria-label={`Select ${option.name}: ${value.name}`}
             >
-              <div
-                className={cn(
-                  "aspect-square w-full rounded-lg transition-all overflow-hidden",
-                  isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
-                )}
-              >
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    width={200}
-                    height={200}
-                    alt={`${value.name} swatch`}
-                    className="size-full rounded-lg border border-foreground/10 object-cover"
-                  />
-                ) : (
-                  <div
-                    className="size-full rounded-lg border border-foreground/10"
-                    style={
-                      value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined
-                    }
-                  />
-                )}
-              </div>
-              <span
-                className={cn(
-                  "text-sm font-medium transition-opacity",
-                  isSelected ? "text-foreground" : "text-foreground/50",
-                )}
-              >
-                {value.name}
-              </span>
-            </button>
+              {swatch}
+              {label}
+            </Link>
           );
         })}
       </div>

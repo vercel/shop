@@ -11,24 +11,19 @@ import { Button } from "@/components/ui/button";
 import type { Image, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { usePdpVariantState } from "./variant-state";
-import { resolveSelectedVariant } from "./variants";
-
 export function MobileBuyButtons({
-  variants,
+  selectedVariant,
   title,
   handle,
   featuredImage,
   availableForSale = true,
 }: {
-  variants: ProductVariant[];
+  selectedVariant: ProductVariant | undefined;
   title: string;
   handle: string;
   featuredImage: Image | null;
   availableForSale?: boolean;
 }) {
-  const { selectedOptions } = usePdpVariantState();
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
   const selectedVariantId = selectedVariant?.id;
 
   const t = useTranslations("product");

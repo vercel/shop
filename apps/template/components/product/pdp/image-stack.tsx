@@ -7,8 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { usePdpVariantState } from "./variant-state";
 import { getImagesForSelectedColor } from "./variants";
+import type { SelectedOptions } from "./variants";
 
 interface ImageStackContentProps extends ComponentPropsWithoutRef<"div"> {
   images: Array<{ url: string; altText: string }>;
@@ -46,9 +46,14 @@ function Fallback() {
   );
 }
 
-function Content({ productPromise }: { productPromise: Promise<ProductDetails> }) {
+function Content({
+  productPromise,
+  selectedOptions,
+}: {
+  productPromise: Promise<ProductDetails>;
+  selectedOptions: SelectedOptions;
+}) {
   const product = use(productPromise);
-  const { selectedOptions } = usePdpVariantState();
   const images = getImagesForSelectedColor(
     product.images,
     product.options,
@@ -59,10 +64,16 @@ function Content({ productPromise }: { productPromise: Promise<ProductDetails> }
   return <ImageStackContent images={images} title={product.title} />;
 }
 
-export function ImageStack({ productPromise }: { productPromise: Promise<ProductDetails> }) {
+export function ImageStack({
+  productPromise,
+  selectedOptions,
+}: {
+  productPromise: Promise<ProductDetails>;
+  selectedOptions: SelectedOptions;
+}) {
   return (
     <Suspense fallback={<Fallback />}>
-      <Content productPromise={productPromise} />
+      <Content productPromise={productPromise} selectedOptions={selectedOptions} />
     </Suspense>
   );
 }
