@@ -4,4 +4,111 @@ description: Individual product pages with variants, media, and add-to-cart.
 type: guide
 ---
 
-Coming soon.
+The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered — variant selection happens through navigation, not client-side state.
+
+## Variant selection
+
+Variants are selected via URL. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
+
+```
+/products/classic-tee?variantId=123456
+```
+
+A rewrite rule in `next.config.ts` maps this to the `/products/[handle]/[variantId]` route segment so the server can resolve the variant before rendering:
+
+```ts
+rewrites: async () => [
+  {
+    source: "/products/:handle",
+    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
+    destination: "/products/:handle/:variantId",
+  },
+],
+```
+
+On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props — no client-side variant context or `useState` is involved. This means:
+
+- Every variant selection is a navigation, giving you browser back/forward for free
+- URLs are shareable — opening a link loads the exact variant
+- The page is fully server-rendered with zero layout shift
+
+The `getVariantUrl()` helper in `variants.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
+
+Unavailable options render as inert `<span>` elements instead of links.
+
+## Image gallery
+
+The gallery adapts to screen size with two distinct components.
+
+**Desktop** — `ImageGrid` displays a thumbnail sidebar (80px wide, vertically scrollable) alongside a main image. Hovering or clicking a thumbnail selects it. Videos are supported inline with autoplay.
+
+**Mobile** — `MobileCarousel` is a horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
+
+Both components receive pre-filtered images as props from the server.
+
+### Color-based image filtering
+
+When a product has color variants, the gallery shows only images relevant to the selected color. The `getImagesForSelectedColor()` function in `variants.ts`:
+
+1. Identifies the color option via swatch data or option name
+2. Collects variant images assigned to each color
+3. Excludes images belonging to other colors
+4. Preserves shared/unassigned images
+5. Moves the selected variant's image to the front
+
+If a product has only one color or no color option, all images are shown.
+
+## Buy section
+
+The buy section includes stock status, a quantity selector, and two action buttons:
+
+- **Buy Now** — creates a Shopify checkout and redirects to it
+- **Add to Cart** — adds the item optimistically to the cart drawer
+
+On desktop, the full buy section includes a quantity selector (1–99). On mobile, a simplified two-button row adds a quantity of 1.
+
+Both components receive the `selectedVariant` as a prop and remain client components for cart interactivity.
+
+## Recommendations
+
+Below the product details, a `Recommendations` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
+
+Recommendations display as a horizontally scrollable carousel of product cards — 2 columns on mobile, 3 on tablet, 4 on desktop.
+
+## Layout
+
+The page uses two responsive layouts wrapped in a shared `Container`:
+
+**Desktop** (`lg:` breakpoint and up):
+- Breadcrumbs spanning full width
+- Two-column grid: image gallery on the left, product info on the right
+- Right column stacks: title/price, option pickers, buy buttons, description
+
+**Mobile** (below `lg:`):
+- Breadcrumbs, then full-width carousel
+- Buy buttons immediately below the gallery
+- Compact product info (title, options, description) at the bottom
+
+## Structured data
+
+The page emits two JSON-LD schemas:
+
+- **Product schema** — name, description, images, brand, price range, availability, and variant count
+- **Breadcrumb schema** — Home → Product Title
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `components/product/pdp/product-detail-page.tsx` | Server component entry point, computes variant state and threads props |
+| `components/product/pdp/variants.ts` | Variant resolution, URL generation, image filtering |
+| `components/product/pdp/color-picker.tsx` | Color swatch Links with variant images |
+| `components/product/pdp/option-picker.tsx` | Text option Links (size, material, etc.) |
+| `components/product/pdp/product-info.tsx` | Header, options, and description composition |
+| `components/product/pdp/image-grid.tsx` | Desktop thumbnail + main image gallery |
+| `components/product/pdp/mobile-carousel.tsx` | Mobile horizontal snap-scroll carousel |
+| `components/product/pdp/buy-section-client.tsx` | Quantity selector, buy now, add to cart |
+| `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons |
+| `app/products/[handle]/page.tsx` | Base product route |
+| `app/products/[handle]/[variantId]/page.tsx` | Variant-specific route |
+| `next.config.ts` | `?variantId` → route segment rewrite |
