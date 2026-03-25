@@ -1,7 +1,43 @@
 ---
 title: Home
-description: The storefront landing page — hero, featured collections, and promotional content.
+description: The storefront landing page — hero, featured products, and promotional content.
 type: guide
 ---
 
-Coming soon.
+The home page is a server component that renders a hero banner, a featured products carousel, and an informational section. Product data is fetched server-side from Shopify.
+
+## Hero section
+
+A full-width banner with a background image, gradient overlay, headline, subheadline, and a CTA link. The hero scales responsively — 300px tall on mobile, 400px on small screens, and 500px on medium and up.
+
+The headline and CTA are configurable through the `HeroSection` type. By default the CTA links to `/search` to browse the catalog.
+
+On mobile, the subheadline and CTA text are hidden to keep the banner compact.
+
+## Featured products carousel
+
+A horizontally scrollable carousel showing up to 10 products fetched via `getProducts()`. Each item is a product card with:
+
+- Featured image (with out-of-stock overlay when unavailable)
+- Title and price (with compare-at price for discounts)
+- Quick-add button for in-stock items
+
+The carousel uses CSS snap scrolling with chevron navigation arrows that appear based on scroll position. Items per view scale with screen size: 2 on mobile, 3 on tablet, 4 on desktop, 5+ on wide screens.
+
+## Information section
+
+A two-column grid (stacked on mobile) with a heading and descriptive prose. This is static content explaining the template's capabilities.
+
+## Data fetching
+
+Products are fetched server-side with `getProducts({ limit: 10, locale })`, which queries the Shopify Storefront API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/page.tsx` | Root page, metadata generation, product fetch |
+| `components/cms/hero-section.tsx` | Full-width hero banner with image, headline, CTA |
+| `components/cms/blocks/top-products-carousel.tsx` | Horizontally scrollable product carousel |
+| `components/product-card.tsx` | Product card with image, price, quick-add |
+| `lib/shopify/operations/products.ts` | Shopify product fetching with caching |
