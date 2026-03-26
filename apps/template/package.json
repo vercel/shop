@@ -1,26 +1,26 @@
 {
 	"dependencies": {
-		"@ai-sdk/react": "3.0.136",
-		"@json-render/core": "0.14.1",
-		"@json-render/react": "0.14.1",
+		"@ai-sdk/react": "3.0.140",
+		"@json-render/core": "0.15.0",
+		"@json-render/react": "0.15.0",
 		"@tailwindcss/postcss": "4.2.2",
 		"@tailwindcss/typography": "0.5.19",
 		"@types/node": "25.5.0",
 		"@types/react": "19.2.14",
 		"@types/react-dom": "19.2.3",
 		"@xyflow/react": "12.10.1",
-		"ai": "6.0.134",
+		"ai": "6.0.138",
 		"babel-plugin-react-compiler": "1.0.0",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cmdk": "1.1.1",
-		"lucide-react": "0.577.0",
+		"lucide-react": "1.7.0",
 		"motion": "12.38.0",
 		"nanoid": "5.1.7",
 		"next": "16.2.1",
 		"next-intl": "4.8.3",
-		"oxfmt": "0.41.0",
-		"oxlint": "1.56.0",
+		"oxfmt": "0.42.0",
+		"oxlint": "1.57.0",
 		"radix-ui": "1.4.3",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
@@ -46,5 +46,5 @@
 		"lint": "oxlint . && oxfmt --check",
 		"start": "next start"
 	},
-	"version": "0.20260322.0"
+	"version": "0.20260326.0"
 }
