@@ -14,7 +14,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full group", className)}
+      className={cn("flex flex-col h-full group bg-white rounded-lg overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -45,7 +45,7 @@ function ProductCardImageContainer({
       data-slot="product-card-image-container"
       data-variant={variant}
       className={cn(
-        "flex flex-col rounded-lg pt-1.5 px-1.5",
+        "flex flex-col",
         "data-[variant=featured]:-mt-px data-[variant=featured]:rounded-tl-none data-[variant=featured]:bg-linear-to-b/oklch data-[variant=featured]:from-primary data-[variant=featured]:from-0% data-[variant=featured]:to-45% data-[variant=featured]:to-primary/10",
         className,
       )}
@@ -81,7 +81,7 @@ function ProductCardImage({
     <div
       data-slot="product-card-image"
       className={cn(
-        "relative aspect-square rounded-[calc(var(--radius-lg)-0.2rem)] overflow-hidden bg-muted",
+        "relative aspect-square overflow-hidden bg-muted",
         className,
       )}
     >
@@ -90,7 +90,7 @@ function ProductCardImage({
           src={src}
           alt={alt}
           fill
-          className="object-cover scale-105 group-hover:scale-110 transition-transform duration-300 group-data-[variant=featured]:rounded-[calc(var(--radius-lg)-0.2rem)] rounded-lg"
+          className="object-cover scale-105 group-hover:scale-110 transition-transform duration-300"
           sizes={sizes}
         />
       ) : (
@@ -194,7 +194,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
-      className={cn("flex flex-col border rounded-lg overflow-hidden", className)}
+      className={cn("flex flex-col bg-white rounded-lg overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="p-3 space-y-2">
