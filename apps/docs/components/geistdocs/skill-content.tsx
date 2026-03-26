@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import Markdown from "react-markdown";
+import { Streamdown } from 'streamdown';
 
 function stripFrontmatter(content: string): string {
   if (content.startsWith("---")) {
@@ -21,7 +21,7 @@ export async function SkillContent({ skill }: { skill: string }) {
 
   return (
     <div className="prose prose-fd">
-      <Markdown>{content}</Markdown>
+      <Streamdown>{content}</Streamdown>
     </div>
   );
 }

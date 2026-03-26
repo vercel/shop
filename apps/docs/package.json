@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@ai-sdk/react": "3.0.136",
+		"@ai-sdk/react": "3.0.140",
 		"@icons-pack/react-simple-icons": "13.13.0",
 		"@orama/tokenizers": "3.1.18",
 		"@streamdown/cjk": "1.0.3",
@@ -12,18 +12,18 @@
 		"@types/react-dom": "19.2.3",
 		"@vercel/analytics": "2.0.1",
 		"@vercel/speed-insights": "2.0.0",
-		"ai": "6.0.134",
+		"ai": "6.0.138",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cmdk": "1.1.1",
 		"dexie": "4.3.0",
 		"dexie-react-hooks": "4.2.0",
 		"feed": "5.2.0",
-		"fumadocs-core": "16.6.17",
-		"fumadocs-mdx": "14.2.10",
-		"fumadocs-ui": "16.6.17",
-		"jotai": "2.18.1",
-		"lucide-react": "0.577.0",
+		"fumadocs-core": "16.7.6",
+		"fumadocs-mdx": "14.2.11",
+		"fumadocs-ui": "16.7.6",
+		"jotai": "2.19.0",
+		"lucide-react": "1.7.0",
 		"mermaid": "11.13.0",
 		"motion": "12.38.0",
 		"nanoid": "5.1.7",
@@ -33,7 +33,6 @@
 		"radix-ui": "1.4.3",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
-		"react-markdown": "^10.1.0",
 		"react-player": "3.4.0",
 		"shiki": "4.0.2",
 		"sonner": "2.0.7",
@@ -55,5 +54,5 @@
 		"postinstall": "fumadocs-mdx",
 		"translate": "npx @vercel/geistdocs translate"
 	},
-	"version": "0.20260318.0"
+	"version": "0.20260326.0"
 }
