@@ -65,32 +65,31 @@ async function Copyright() {
 
 async function FooterContent({ locale }: { locale: string }) {
   const menu = await getMenu("footer", locale);
-
-  if (!menu || menu.items.length === 0) {
-    return null;
-  }
+  const hasMenu = menu && menu.items.length > 0;
 
   return (
     <footer className="bg-muted/30">
       <div className="mx-auto px-4 py-12 lg:px-8">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
-          {menu.items.map((column) => (
-            <div key={column.id}>
-              <FooterHeading title={column.title} url={column.url} />
-              {column.items.length > 0 ? (
-                <ul className="mt-4 space-y-3">
-                  {column.items.map((item) => (
-                    <li key={item.id}>
-                      <FooterLink title={item.title} url={item.url} />
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
-          ))}
-        </div>
+        {hasMenu ? (
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
+            {menu.items.map((column) => (
+              <div key={column.id}>
+                <FooterHeading title={column.title} url={column.url} />
+                {column.items.length > 0 ? (
+                  <ul className="mt-4 space-y-3">
+                    {column.items.map((item) => (
+                      <li key={item.id}>
+                        <FooterLink title={item.title} url={item.url} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
 
-        <div className="mt-12 border-t border-border/40 pt-8">
+        <div className={hasMenu ? "mt-12 border-t border-border/40 pt-8" : ""}>
           <Suspense>
             <Copyright />
           </Suspense>
