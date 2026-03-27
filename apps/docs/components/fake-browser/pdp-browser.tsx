@@ -1,12 +1,12 @@
-import { BrowserChrome } from "@/components/fake-browser/browser-chrome";
+import { BrowserChrome } from "./browser-chrome";
 import {
 	DynamicBoundary,
 	ImagePlaceholder,
 	StaticBoundary,
-} from "@/components/fake-browser/primitives";
+} from "./primitives";
 
-export const FakeBrowser = () => (
-	<BrowserChrome url="vercel.shop">
+export const PDPBrowser = () => (
+	<BrowserChrome url="vercel.shop/products/classic-tee">
 		<StaticBoundary>
 			{/* Header */}
 			<div className="mb-3 flex items-center justify-between">
@@ -14,7 +14,6 @@ export const FakeBrowser = () => (
 					<div className="size-7 rounded-full bg-fd-muted" />
 					<div className="h-3 w-24 rounded bg-fd-muted" />
 				</div>
-				{/* Cart - dynamic */}
 				<DynamicBoundary label="Cart" className="!p-1.5 !rounded">
 					<div className="size-5 rounded bg-fd-muted" />
 				</DynamicBoundary>
@@ -32,10 +31,7 @@ export const FakeBrowser = () => (
 					<div className="h-3 w-3/5 rounded bg-fd-muted" />
 					<div className="mt-1 flex gap-1.5">
 						{Array.from({ length: 5 }).map((_, i) => (
-							<div
-								key={i}
-								className="size-5 rounded bg-fd-muted"
-							/>
+							<div key={i} className="size-5 rounded bg-fd-muted" />
 						))}
 					</div>
 					<div className="mt-1 h-3 w-1/3 rounded bg-fd-muted" />

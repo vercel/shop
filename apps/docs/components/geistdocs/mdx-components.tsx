@@ -15,6 +15,11 @@ import {
   CodeBlockTabsList,
   CodeBlockTabsTrigger,
 } from "./code-block-tabs";
+import { CartBrowser } from "../fake-browser/cart-browser";
+import { ContentBrowser } from "../fake-browser/content-browser";
+import { HomeBrowser } from "../fake-browser/home-browser";
+import { PDPBrowser } from "../fake-browser/pdp-browser";
+import { PLPBrowser } from "../fake-browser/plp-browser";
 import { Mermaid } from "./mermaid";
 import { SkillContent } from "./skill-content";
 import { Video } from "./video";
@@ -59,6 +64,12 @@ export const getMDXComponents = (
   SkillContent,
 
   Video,
+
+  HomeBrowser,
+  PDPBrowser,
+  PLPBrowser,
+  CartBrowser,
+  ContentBrowser,
 
   // User components last to allow overwriting defaults
   ...components,

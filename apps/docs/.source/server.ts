@@ -1,17 +1,17 @@
 // @ts-nocheck
-import * as __fd_glob_18 from "../content/docs/shopify/pdp.mdx?collection=docs"
-import * as __fd_glob_17 from "../content/docs/shopify/index.mdx?collection=docs"
-import * as __fd_glob_16 from "../content/docs/pages/plp.mdx?collection=docs"
-import * as __fd_glob_15 from "../content/docs/pages/pdp.mdx?collection=docs"
-import * as __fd_glob_14 from "../content/docs/pages/index.mdx?collection=docs"
-import * as __fd_glob_13 from "../content/docs/pages/home.mdx?collection=docs"
-import * as __fd_glob_12 from "../content/docs/pages/content.mdx?collection=docs"
-import * as __fd_glob_11 from "../content/docs/pages/cart.mdx?collection=docs"
-import * as __fd_glob_10 from "../content/docs/skills/index.mdx?collection=docs"
-import * as __fd_glob_9 from "../content/docs/skills/enable-shopify-markets.mdx?collection=docs"
-import * as __fd_glob_8 from "../content/docs/skills/enable-shopify-cms.mdx?collection=docs"
-import * as __fd_glob_7 from "../content/docs/skills/enable-shopify-auth.mdx?collection=docs"
-import * as __fd_glob_6 from "../content/docs/skills/enable-content-negotiation.mdx?collection=docs"
+import * as __fd_glob_18 from "../content/docs/skills/index.mdx?collection=docs"
+import * as __fd_glob_17 from "../content/docs/skills/enable-shopify-markets.mdx?collection=docs"
+import * as __fd_glob_16 from "../content/docs/skills/enable-shopify-cms.mdx?collection=docs"
+import * as __fd_glob_15 from "../content/docs/skills/enable-shopify-auth.mdx?collection=docs"
+import * as __fd_glob_14 from "../content/docs/skills/enable-content-negotiation.mdx?collection=docs"
+import * as __fd_glob_13 from "../content/docs/shopify/pdp.mdx?collection=docs"
+import * as __fd_glob_12 from "../content/docs/shopify/index.mdx?collection=docs"
+import * as __fd_glob_11 from "../content/docs/pages/plp.mdx?collection=docs"
+import * as __fd_glob_10 from "../content/docs/pages/pdp.mdx?collection=docs"
+import * as __fd_glob_9 from "../content/docs/pages/index.mdx?collection=docs"
+import * as __fd_glob_8 from "../content/docs/pages/home.mdx?collection=docs"
+import * as __fd_glob_7 from "../content/docs/pages/content.mdx?collection=docs"
+import * as __fd_glob_6 from "../content/docs/pages/cart.mdx?collection=docs"
 import * as __fd_glob_5 from "../content/docs/index.mdx?collection=docs"
 import * as __fd_glob_4 from "../content/docs/getting-started.mdx?collection=docs"
 import * as __fd_glob_3 from "../content/docs/env-vars.mdx?collection=docs"
@@ -36,4 +36,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
   }
 }>({"doc":{"passthroughs":["extractedReferences","lastModified"]}});
 
-export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "pages/meta.json": __fd_glob_1, "skills/meta.json": __fd_glob_2, }, {"env-vars.mdx": __fd_glob_3, "getting-started.mdx": __fd_glob_4, "index.mdx": __fd_glob_5, "skills/enable-content-negotiation.mdx": __fd_glob_6, "skills/enable-shopify-auth.mdx": __fd_glob_7, "skills/enable-shopify-cms.mdx": __fd_glob_8, "skills/enable-shopify-markets.mdx": __fd_glob_9, "skills/index.mdx": __fd_glob_10, "pages/cart.mdx": __fd_glob_11, "pages/content.mdx": __fd_glob_12, "pages/home.mdx": __fd_glob_13, "pages/index.mdx": __fd_glob_14, "pages/pdp.mdx": __fd_glob_15, "pages/plp.mdx": __fd_glob_16, "shopify/index.mdx": __fd_glob_17, "shopify/pdp.mdx": __fd_glob_18, });
+export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "pages/meta.json": __fd_glob_1, "skills/meta.json": __fd_glob_2, }, {"env-vars.mdx": __fd_glob_3, "getting-started.mdx": __fd_glob_4, "index.mdx": __fd_glob_5, "pages/cart.mdx": __fd_glob_6, "pages/content.mdx": __fd_glob_7, "pages/home.mdx": __fd_glob_8, "pages/index.mdx": __fd_glob_9, "pages/pdp.mdx": __fd_glob_10, "pages/plp.mdx": __fd_glob_11, "shopify/index.mdx": __fd_glob_12, "shopify/pdp.mdx": __fd_glob_13, "skills/enable-content-negotiation.mdx": __fd_glob_14, "skills/enable-shopify-auth.mdx": __fd_glob_15, "skills/enable-shopify-cms.mdx": __fd_glob_16, "skills/enable-shopify-markets.mdx": __fd_glob_17, "skills/index.mdx": __fd_glob_18, });
