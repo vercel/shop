@@ -6,10 +6,12 @@
     "getting-started",
     "---Storefront---",
     "anatomy",
+    "writing-shopify-queries",
     "shopify",
     "---Agentic Development---",
     "skills",
     "---Reference---",
-    "env-vars"
+    "env-vars",
+    "storefront-api"
   ]
 }

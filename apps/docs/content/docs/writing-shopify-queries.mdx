@@ -1,0 +1,179 @@
+---
+title: Writing Shopify Queries
+description: Step-by-step guide to adding a new Storefront API query or mutation.
+type: guide
+prerequisites:
+  - /docs/storefront-api
+---
+
+This guide walks through adding a new Shopify Storefront API operation from scratch. We'll fetch a shop's privacy policy as a concrete example.
+
+## 1. Check the schema
+
+Open `.claude/schemas/shopify-storefront.graphql` and find the field you need. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:
+
+```graphql
+type ShopPolicy {
+  body: String!
+  handle: String!
+  title: String!
+  url: URL!
+}
+```
+
+Never guess field names — the local schema is the source of truth. Refresh it with `pnpm run .claude/scripts/fetch-shopify-schemas.ts` if it's outdated.
+
+## 2. Write the query
+
+Create the GraphQL query as a template string. Interpolate any shared fragments from `lib/shopify/fragments.ts` at the top. Include `@inContext` if the data is locale-sensitive:
+
+```ts
+const PRIVACY_POLICY_QUERY = `
+  query getPrivacyPolicy($country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    shop {
+      privacyPolicy {
+        title
+        body
+        handle
+      }
+    }
+  }
+`;
+```
+
+The operation name (`getPrivacyPolicy`) must match the `operation` field you pass to `shopifyFetch`.
+
+## 3. Define the response type
+
+Type the shape of `data` that the GraphQL response will return:
+
+```ts
+interface ShopifyPrivacyPolicyResponse {
+  shop: {
+    privacyPolicy: {
+      title: string;
+      body: string;
+      handle: string;
+    } | null;
+  };
+}
+```
+
+This is a local type scoped to your operation file — it maps directly to the GraphQL response shape.
+
+## 4. Write the operation function
+
+Create a new file in `lib/shopify/operations/` or add to an existing one. The function calls `shopifyFetch`, applies caching, and returns the result:
+
+```ts
+import { cacheLife, cacheTag } from "next/cache";
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { shopifyFetch } from "../client";
+
+export async function getPrivacyPolicy(locale: string = defaultLocale) {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("policies");
+
+  const data = await shopifyFetch<ShopifyPrivacyPolicyResponse>({
+    operation: "getPrivacyPolicy",
+    query: PRIVACY_POLICY_QUERY,
+    variables: {
+      country: getCountryCode(locale),
+      language: getLanguageCode(locale),
+    },
+  });
+
+  return data.shop.privacyPolicy;
+}
+```
+
+Key points:
+
+- **`"use cache: remote"`** enables Next.js caching for the function
+- **`cacheLife("max")`** caches until you manually invalidate
+- **`cacheTag("policies")`** lets you invalidate with `revalidateTag("policies")` later
+- Always pass `locale` and extract `country`/`language` from it
+
+## 5. Add a transform (if needed)
+
+If the Shopify response shape differs from how your components want to consume the data, add a transform in `lib/shopify/transforms/`. This keeps Shopify-specific types out of your UI:
+
+```ts
+// lib/shopify/transforms/policy.ts
+import type { Policy } from "@/lib/types";
+
+export function transformShopifyPolicy(shopifyPolicy: ShopifyPolicy): Policy {
+  return {
+    title: shopifyPolicy.title,
+    body: shopifyPolicy.body,
+    slug: shopifyPolicy.handle,
+  };
+}
+```
+
+Then call it in your operation before returning:
+
+```ts
+return data.shop.privacyPolicy
+  ? transformShopifyPolicy(data.shop.privacyPolicy)
+  : null;
+```
+
+For simple responses where the shape already matches your needs, you can skip the transform.
+
+## 6. Use it in a page
+
+Call the operation from a Server Component:
+
+```tsx
+import { getPrivacyPolicy } from "@/lib/shopify/operations/policies";
+import { getLocale } from "@/lib/i18n";
+
+export default async function PrivacyPolicyPage() {
+  const locale = await getLocale();
+  const policy = await getPrivacyPolicy(locale);
+
+  if (!policy) return notFound();
+
+  return (
+    <article>
+      <h1>{policy.title}</h1>
+      <div dangerouslySetInnerHTML={{ __html: policy.body }} />
+    </article>
+  );
+}
+```
+
+## Writing a mutation
+
+Mutations follow the same pattern but without caching directives. If the mutation modifies cart state, you must call `invalidateCartCache()` afterward:
+
+```ts
+import { invalidateCartCache } from "@/lib/cart-cache";
+
+export async function updateCartNote(note: string, cartId: string) {
+  const data = await shopifyFetch<{ cartNoteUpdate: { cart: ShopifyCart } }>({
+    operation: "updateCartNote",
+    query: UPDATE_CART_NOTE_MUTATION,
+    variables: { cartId, note },
+  });
+
+  invalidateCartCache();
+  return transformShopifyCart(data.cartNoteUpdate.cart);
+}
+```
+
+Expose mutations to the client through server actions in `components/cart/actions.ts` using `"use server"`.
+
+## Checklist
+
+- [ ] Verified field names against `.claude/schemas/shopify-storefront.graphql`
+- [ ] Operation name in the query string matches the `operation` parameter
+- [ ] Variables passed as an object, never interpolated into the query
+- [ ] `@inContext` directive included if data is locale-sensitive
+- [ ] `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
+- [ ] Transform added if the Shopify response shape needs mapping
+- [ ] Components import domain types from `lib/types`, not Shopify response types
+- [ ] Cart mutations call `invalidateCartCache()`
