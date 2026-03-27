@@ -19,6 +19,11 @@ export const nav = [
 		href: "https://vercel-shop.labs.vercel.dev",
 		target: "_blank",
 	},
+	{
+		label: "GitHub",
+		href: "https://github.com/vercel/shop",
+		target: "_blank",
+	},
 ];
 
 export const suggestions = [

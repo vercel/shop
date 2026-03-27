@@ -13,7 +13,7 @@ import { TextGridSection } from "./components/text-grid-section";
 
 const title = "Vercel Shop";
 const description =
-	"A production-grade Shopify storefront with optimistic cart, streaming, and agent-ready skills to extend it further.";
+	"An agent-native, fast-by-default Shopify storefront built on Next.js. Ship features in minutes, not weeks.";
 
 export const metadata: Metadata = {
 	title,
