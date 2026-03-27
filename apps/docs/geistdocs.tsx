@@ -16,7 +16,7 @@ export const nav = [
 	},
 	{
 		label: "Demo",
-		href: "https://shop-template.labs.vercel.dev",
+		href: "https://vercel-shop.labs.vercel.dev",
 		target: "_blank",
 	},
 ];
