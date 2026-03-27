@@ -1,0 +1,28 @@
+---
+title: Footer
+description: The storefront footer — copyright, link columns from Shopify menus, and responsive layout.
+type: guide
+---
+
+The footer renders at the bottom of every page. It always displays a copyright notice and optionally renders link columns sourced from a Shopify menu.
+
+## Default behavior
+
+The footer always renders, even when no footer menu exists in Shopify. At minimum it shows the copyright line with the current year. When a `"footer"` menu is configured in Shopify, the footer also displays a grid of link columns above the copyright.
+
+## Link columns
+
+Link columns are sourced from `getMenu("footer", locale)`. The menu supports a two-level hierarchy: top-level items become column headings and their children become the links. Column headings can optionally link to a URL.
+
+The grid is responsive: 2 columns on mobile, 3 on tablet (`md`), and 4 on desktop (`lg`).
+
+## Copyright
+
+The copyright line is a server component that reads the current year and the `footer.copyright` translation key. It is wrapped in a `Suspense` boundary so the rest of the footer can render without waiting for the translation lookup.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `components/layout/footer.tsx` | Footer composition, link columns, copyright |
+| `lib/shopify/operations/menu.ts` | Shopify menu data fetching |
