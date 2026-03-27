@@ -13,7 +13,7 @@ import { TextGridSection } from "./components/text-grid-section";
 
 const title = "Vercel Shop";
 const description =
-	"Build Shopify stores using coding agents. The standard for agentic Shopify development.";
+	"A production-grade Shopify storefront with optimistic cart, streaming, and agent-ready skills to extend it further.";
 
 export const metadata: Metadata = {
 	title,
