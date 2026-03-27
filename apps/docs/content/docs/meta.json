@@ -1,4 +1,15 @@
 {
   "title": "Docs",
-  "pages": ["index", "getting-started", "pages", "skills", "---API Reference---", "env-vars"]
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "getting-started",
+    "---Storefront---",
+    "pages",
+    "shopify",
+    "---Agentic Development---",
+    "skills",
+    "---Reference---",
+    "env-vars"
+  ]
 }
