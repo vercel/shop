@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { Footer } from "@/components/geistdocs/footer";
 import { Navbar } from "@/components/geistdocs/navbar";
 import { Toaster } from "@/components/ui/sonner";
-import { mono, sans } from "@/lib/geistdocs/fonts";
+import { mono, pixel, sans } from "@/lib/geistdocs/fonts";
 import { cn } from "@/lib/utils";
 import { Providers } from "./providers";
 
@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      className={cn(sans.variable, mono.variable, "scroll-smooth antialiased")}
+      className={cn(sans.variable, mono.variable, pixel.variable, "scroll-smooth antialiased")}
       lang="en"
       suppressHydrationWarning
     >
