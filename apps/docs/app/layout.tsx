@@ -5,9 +5,9 @@ import type { ReactNode } from "react";
 import { Footer } from "@/components/geistdocs/footer";
 import { Navbar } from "@/components/geistdocs/navbar";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { mono, sans } from "@/lib/geistdocs/fonts";
 import { cn } from "@/lib/utils";
+import { Providers } from "./providers";
 
 export const metadata = {
   title: "Vercel Shop Documentation",
@@ -23,12 +23,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <body>
-        <TooltipProvider>
+        <Providers>
           <Navbar />
           {children}
           <Footer />
           <Toaster />
-        </TooltipProvider>
+        </Providers>
         <Analytics />
         <SpeedInsights />
       </body>

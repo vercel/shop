@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
+import remarkGfm from "remark-gfm";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
 
@@ -17,12 +18,16 @@ export default async function DocsPage({ params }: Props) {
   }
 
   return (
-    <article className="prose max-w-3xl px-8 py-12">
+    <article className="prose dark:prose-invert max-w-3xl px-8 py-12">
       <h1 className="mb-2 text-2xl font-bold">{doc.title}</h1>
       {doc.description ? (
         <p className="text-muted-foreground mb-8">{doc.description}</p>
       ) : null}
-      <MDXRemote source={doc.content} components={mdxComponents} />
+      <MDXRemote
+        source={doc.content}
+        components={mdxComponents}
+        options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+      />
     </article>
   );
 }
