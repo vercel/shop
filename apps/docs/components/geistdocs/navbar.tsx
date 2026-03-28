@@ -1,6 +1,6 @@
 import { SiVercel } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
-import { Logo, nav } from "@/geistdocs";
+import { Logo, nav } from "@/site.config";
 import { SlashIcon } from "./icons";
 
 export const Navbar = () => (

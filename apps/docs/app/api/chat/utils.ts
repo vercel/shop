@@ -1,4 +1,4 @@
-import { prompt } from "@/geistdocs";
+import { prompt } from "@/site.config";
 
 export const createSystemPrompt = (currentRoute: string) => {
   const newPrompt = `# Role and Objective
