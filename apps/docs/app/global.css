@@ -162,6 +162,14 @@
   @apply tracking-tight;
 }
 
+.prose code,
+.prose pre,
+.prose table,
+.prose th,
+.prose td {
+  font-size: max(0.875em, 14px);
+}
+
 @layer utilities {
   .line-numbers code {
     counter-reset: step;
