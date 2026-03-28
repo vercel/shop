@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Geist Mono", ui-monospace, monospace;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-heading: "GeistPixel-Square", "Geist Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
@@ -120,6 +120,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 14px;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-geist-pixel-square), var(--font-geist-mono), ui-monospace, monospace;

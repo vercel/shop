@@ -1,7 +1,10 @@
 export const Logo = () => (
-  <div>
-    <p className="font-semibold text-xl tracking-tight">Shop</p>
-  </div>
+  <p
+    className="font-semibold text-xl tracking-tight"
+    style={{ fontFamily: "var(--font-geist-pixel-square), ui-monospace, monospace" }}
+  >
+    Shop
+  </p>
 );
 
 export const github = {
