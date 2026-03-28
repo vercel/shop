@@ -1,6 +1,5 @@
 import { SiVercel } from "@icons-pack/react-simple-icons";
 import { GitHubButton } from "./github-button";
-import { LanguageSelector } from "./language-selector";
 import { RSSButton } from "./rss-button";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -20,7 +19,6 @@ export const Footer = ({
         </p>
       </div>
       <div className="flex items-center gap-2">
-        <LanguageSelector />
         <RSSButton />
         <GitHubButton />
         <ThemeToggle />
