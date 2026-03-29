@@ -5,7 +5,7 @@ import { nav } from "@/site.config";
 import { SlashIcon } from "./icons";
 
 export const Navbar = () => (
-  <header className="sticky top-0 z-40 w-full gap-6 border-b bg-sidebar">
+  <header className="sticky top-0 z-40 w-full border-b bg-sidebar">
     <div className="mx-auto flex h-16 w-full items-center gap-4 px-4 py-3.5 md:px-6">
       <div className="flex shrink-0 items-center gap-2.5">
         <a href="https://vercel.com/" rel="noopener" target="_blank">
@@ -16,7 +16,7 @@ export const Navbar = () => (
           <Logo />
         </Link>
       </div>
-      <nav className="ml-4 hidden items-center gap-6 xl:flex">
+      <nav className="ml-4 flex items-center gap-6">
         {nav.map((item) => (
           <Link
             key={item.href}
@@ -28,9 +28,6 @@ export const Navbar = () => (
           </Link>
         ))}
       </nav>
-      <div className="ml-auto flex flex-1 items-center justify-end gap-2">
-        {/* Search and chat will be re-added in Phase 3/4 */}
-      </div>
     </div>
   </header>
 );

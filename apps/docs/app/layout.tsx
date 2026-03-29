@@ -18,7 +18,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
-      className={cn(sans.variable, mono.variable, pixel.variable, "scroll-smooth antialiased")}
+      className={cn(sans.variable, mono.variable, pixel.variable)}
       lang="en"
       suppressHydrationWarning
     >
