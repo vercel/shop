@@ -1,0 +1,105 @@
+---
+title: Agent
+description: The documentation chat agent — AI-powered search, tool calling, and streaming responses.
+type: guide
+prerequisites:
+  - /docs/getting-started
+---
+
+The docs site includes an AI chat agent that can search documentation, retrieve full page content, and answer questions about Vercel Shop. It uses the Vercel AI SDK with streaming responses and tool calling to provide context-aware help.
+
+## Architecture
+
+The agent follows a stateless request/response pattern:
+
+1. The client sends the conversation history and the current page context to `/api/chat`
+2. The server constructs a system prompt and streams the response using `streamText`
+3. The model calls tools to search and retrieve documentation before answering
+4. The response streams back as text chunks with source attributions
+
+```
+Client → POST /api/chat → streamText (gpt-4.1-mini) → tools → streaming response
+```
+
+Messages are not persisted — the full conversation history is sent with each request, and state is lost on page refresh.
+
+## System prompt
+
+The system prompt is assembled from two parts. A site-specific role description comes from `site.config.tsx`:
+
+```ts filename="site.config.tsx"
+export const prompt =
+  "You are a helpful assistant specializing in answering questions about Vercel Shop, the standard for Shopify development.";
+```
+
+This is combined with detailed behavioral instructions in `app/api/chat/utils.ts` that tell the model to always search documentation first, format responses in Markdown, never disclose its model name, and validate tool results before answering.
+
+The current page route is also injected so the model knows where the user is browsing.
+
+## Tools
+
+The agent has three tools, defined in `app/api/chat/tools.ts`. All tools use the fromsrc content API to query documentation.
+
+### search_docs
+
+Searches documentation by query. This tool is **force-called** on the first step of every conversation — the model must search before it can answer.
+
+Results are scored by relevance: title matches score highest (+10), followed by description (+5), then content (+1). Individual word matches add additional weight. The top 8 results are returned with content previews, and source URLs are written to the stream so the UI can display them.
+
+### get_doc_page
+
+Retrieves the full content of a single documentation page by slug (e.g., `"getting-started"` or `"anatomy/cart"`). Used when the model needs the complete text of a page after finding it via search.
+
+### list_docs
+
+Returns a list of all available documentation pages with their titles, URLs, and descriptions. Useful when the model needs an overview of what documentation exists.
+
+## API route
+
+The chat endpoint at `app/api/chat/route.ts` handles the streaming lifecycle:
+
+```ts filename="app/api/chat/route.ts"
+const stream = createUIMessageStream({
+  execute: async (writer) => {
+    await streamText({
+      model: "openai/gpt-4.1-mini",
+      system: createSystemPrompt(currentRoute),
+      messages: convertToModelMessages(messages),
+      tools: createTools(writer),
+      toolChoice: { type: "tool", toolName: "search_docs" },
+      stopWhen: stepCountIs(10),
+      onToolResult: ({ result }) => {
+        writer.write({ type: "stream-end", data: { message: result } });
+      },
+    });
+  },
+});
+```
+
+The model routes through the Vercel AI Gateway using the `"openai/gpt-4.1-mini"` model string. Tool calls are capped at 10 steps per request, and the function timeout is set to 800 seconds.
+
+## UI components
+
+The chat interface is built from composable AI Elements components in `components/ai-elements/`:
+
+| Component | Purpose |
+|-----------|---------|
+| `Conversation` | Scrollable message container with auto-scroll to bottom |
+| `Message` | Individual message bubble with role-based styling |
+| `MessageResponse` | Renders Markdown responses using Streamdown with code highlighting |
+| `PromptInput` | Auto-expanding textarea with file attachment and keyboard shortcuts |
+| `Sources` | Collapsible list of documentation source links from tool calls |
+| `Suggestion` | Clickable suggestion buttons for common questions |
+| `OpenInChat` | Dropdown to open the conversation in external AI tools (ChatGPT, Claude, v0, Cursor) |
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/api/chat/route.ts` | Chat API route with streaming and tool orchestration |
+| `app/api/chat/tools.ts` | Tool definitions: search_docs, get_doc_page, list_docs |
+| `app/api/chat/utils.ts` | System prompt construction |
+| `app/api/chat/types.ts` | Message and tool type definitions |
+| `components/ai-elements/` | Chat UI components (Message, Conversation, PromptInput, Sources) |
+| `site.config.tsx` | Site-specific prompt and suggestion configuration |
+| `lib/fromsrc/content.ts` | Content API used by tools to query documentation |
