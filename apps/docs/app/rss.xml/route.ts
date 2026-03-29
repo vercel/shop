@@ -1,5 +1,5 @@
 import { Feed } from "feed";
-import { title } from "@/site.config";
+const title = "Vercel Shop";
 import { docs } from "@/lib/fromsrc/content";
 
 const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
