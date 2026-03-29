@@ -1,105 +1,111 @@
 ---
 title: Agent
-description: The documentation chat agent — AI-powered search, tool calling, and streaming responses.
+description: The shopping assistant — AI-powered product discovery, cart management, and generative UI.
 type: guide
 prerequisites:
   - /docs/getting-started
 ---
 
-The docs site includes an AI chat agent that can search documentation, retrieve full page content, and answer questions about Vercel Shop. It uses the Vercel AI SDK with streaming responses and tool calling to provide context-aware help.
+The storefront includes an AI shopping assistant powered by Claude via the Vercel AI SDK. It can search products, browse collections, manage the cart, and render rich product cards — all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
 
 ## Architecture
 
-The agent follows a stateless request/response pattern:
-
-1. The client sends the conversation history and the current page context to `/api/chat`
-2. The server constructs a system prompt and streams the response using `streamText`
-3. The model calls tools to search and retrieve documentation before answering
-4. The response streams back as text chunks with source attributions
+The agent runs as a `ToolLoopAgent` that streams responses back to a floating chat panel:
 
 ```
-Client → POST /api/chat → streamText (gpt-4.1-mini) → tools → streaming response
+AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → Shopify tools → streaming response
 ```
 
-Messages are not persisted — the full conversation history is sent with each request, and state is lost on page refresh.
+1. The client sends conversation history and a `chatId` to `/api/chat`
+2. The server resolves page context from the `Referer` header (product, collection, search, or cart page)
+3. A Shopify cart is created or retrieved from a cookie before the agent runs
+4. The agent calls tools to search products, manage the cart, or generate navigation links
+5. Tool results include json-render specs that the client renders as product cards, cart summaries, and variant pickers
 
-## System prompt
+## Page context
 
-The system prompt is assembled from two parts. A site-specific role description comes from `site.config.tsx`:
+The agent adapts its instructions based on where the user is browsing. Page context is resolved server-side from the `Referer` header:
 
-```ts filename="site.config.tsx"
-export const prompt =
-  "You are a helpful assistant specializing in answering questions about Vercel Shop, the standard for Shopify development.";
-```
+- **Product page** — the full product is injected into the prompt with all variants, prices, availability, and variant IDs ready for "add to cart"
+- **Collection page** — the collection handle and title are included
+- **Search page** — the active search query is passed through
+- **Cart page** — the agent knows the user is viewing their cart
 
-This is combined with detailed behavioral instructions in `app/api/chat/utils.ts` that tell the model to always search documentation first, format responses in Markdown, never disclose its model name, and validate tool results before answering.
-
-The current page route is also injected so the model knows where the user is browsing.
+The system prompt also includes the user's locale so the agent responds in the correct language.
 
 ## Tools
 
-The agent has three tools, defined in `app/api/chat/tools.ts`. All tools use the fromsrc content API to query documentation.
+The agent has 11 tools organized into three groups. All tools access the agent context (chat ID, cart ID, locale, page) via AsyncLocalStorage.
 
-### search_docs
+### Product discovery
 
-Searches documentation by query. This tool is **force-called** on the first step of every conversation — the model must search before it can answer.
+| Tool | Purpose |
+|------|---------|
+| `searchProducts` | Keyword search with sorting (best matches, price low/high) — returns up to 10 results |
+| `getProductDetails` | Full product info: title, description, price, variants, availability, images |
+| `getProductRecommendations` | AI-powered similar products (up to 5) |
+| `listCollections` | All store categories |
+| `browseCollection` | Products within a collection with sorting |
 
-Results are scored by relevance: title matches score highest (+10), followed by description (+5), then content (+1). Individual word matches add additional weight. The top 8 results are returned with content previews, and source URLs are written to the stream so the UI can display them.
+### Cart management
 
-### get_doc_page
+| Tool | Purpose |
+|------|---------|
+| `addToCart` | Add a variant to cart (requires Shopify variant ID) |
+| `getCart` | View cart contents, line items, and costs |
+| `updateCartItemQuantity` | Change quantity of a line item |
+| `removeFromCart` | Remove items by line ID |
+| `addCartNote` | Delivery notes, gift messages, special instructions |
 
-Retrieves the full content of a single documentation page by slug (e.g., `"getting-started"` or `"anatomy/cart"`). Used when the model needs the complete text of a page after finding it via search.
+### Navigation
 
-### list_docs
+| Tool | Purpose |
+|------|---------|
+| `navigateUser` | Generate links to product pages, collections, search, cart, checkout, account, orders |
 
-Returns a list of all available documentation pages with their titles, URLs, and descriptions. Useful when the model needs an overview of what documentation exists.
+## Generative UI
 
-## API route
+The agent doesn't just return text — it renders rich UI components via json-render. The system prompt includes a catalog of components the model can invoke:
 
-The chat endpoint at `app/api/chat/route.ts` handles the streaming lifecycle:
+- **AgentProductCard** — clickable card with image, title, price, compare-at price, and availability
+- **AgentProductGrid** — 2-column responsive grid wrapping multiple product cards
+- **AgentCartSummary** — full cart breakdown with line item thumbnails, subtotal, tax, total, and checkout button
+- **AgentCartConfirmation** — success card shown after adding an item to cart
+- **AgentVariantPicker** — display-only variant selector with option groups and availability status
 
-```ts filename="app/api/chat/route.ts"
-const stream = createUIMessageStream({
-  execute: async (writer) => {
-    await streamText({
-      model: "openai/gpt-4.1-mini",
-      system: createSystemPrompt(currentRoute),
-      messages: convertToModelMessages(messages),
-      tools: createTools(writer),
-      toolChoice: { type: "tool", toolName: "search_docs" },
-      stopWhen: stepCountIs(10),
-      onToolResult: ({ result }) => {
-        writer.write({ type: "stream-end", data: { message: result } });
-      },
-    });
-  },
-});
-```
+These components are registered in a json-render registry and rendered client-side from specs embedded in the assistant's streamed messages.
 
-The model routes through the Vercel AI Gateway using the `"openai/gpt-4.1-mini"` model string. Tool calls are capped at 10 steps per request, and the function timeout is set to 800 seconds.
+## Cart reconciliation
 
-## UI components
+A `CartReconciler` component watches the agent's tool results for cart mutations. When `addToCart`, `updateCartItemQuantity`, `removeFromCart`, or `addCartNote` succeed, it extracts the updated cart object and syncs it to the global cart context — updating the cart UI without a page reload and opening the cart overlay for visual feedback.
 
-The chat interface is built from composable AI Elements components in `components/ai-elements/`:
+## Chat UI
 
-| Component | Purpose |
-|-----------|---------|
-| `Conversation` | Scrollable message container with auto-scroll to bottom |
-| `Message` | Individual message bubble with role-based styling |
-| `MessageResponse` | Renders Markdown responses using Streamdown with code highlighting |
-| `PromptInput` | Auto-expanding textarea with file attachment and keyboard shortcuts |
-| `Sources` | Collapsible list of documentation source links from tool calls |
-| `Suggestion` | Clickable suggestion buttons for common questions |
-| `OpenInChat` | Dropdown to open the conversation in external AI tools (ChatGPT, Claude, v0, Cursor) |
+The agent panel is toggled from a button in the bottom bar. The panel includes:
+
+- Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
+- Generative UI rendering via `useJsonRenderMessage()` and a component registry
+- File attachment support via drag-and-drop
+- Speech input
+- Regenerate and copy message actions
+- Chat history persisted to localStorage (`template-agent-chat:v1`)
+- Click-outside and Escape to minimize
+
+## Configuration
+
+The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environment variable, which hides the agent button from the storefront.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
-| `app/api/chat/route.ts` | Chat API route with streaming and tool orchestration |
-| `app/api/chat/tools.ts` | Tool definitions: search_docs, get_doc_page, list_docs |
-| `app/api/chat/utils.ts` | System prompt construction |
-| `app/api/chat/types.ts` | Message and tool type definitions |
-| `components/ai-elements/` | Chat UI components (Message, Conversation, PromptInput, Sources) |
-| `site.config.tsx` | Site-specific prompt and suggestion configuration |
-| `lib/fromsrc/content.ts` | Content API used by tools to query documentation |
+| `app/api/chat/route.ts` | Chat endpoint — page context resolution, cart initialization, streaming |
+| `lib/agent/agent.ts` | ToolLoopAgent creation with model, tools, and system prompt |
+| `lib/agent/prompt.ts` | Dynamic system prompt with page context and UI catalog rules |
+| `lib/agent/context.ts` | AsyncLocalStorage context (chatId, user, cart, page) |
+| `lib/agent/tools/` | 11 tool implementations using Shopify operations |
+| `lib/agent/ui/catalog.ts` | json-render catalog schema definitions |
+| `lib/agent/ui/registry.tsx` | Generative UI component implementations |
+| `components/agent/agent.tsx` | Chat panel with messages, input, attachments, chain-of-thought |
+| `components/agent/agent-button.tsx` | Toggle button in bottom bar |
+| `components/agent/cart-reconciler.tsx` | Syncs agent cart mutations to global cart context |
