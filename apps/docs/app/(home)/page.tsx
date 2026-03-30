@@ -44,7 +44,7 @@ const textGridSection = [
 const HomePage = () => (
 	<div className="container mx-auto max-w-5xl">
 		<Hero
-			badge="Vercel Shop is now in beta"
+			badge="Vercel Shop is now in alpha"
 			description={description}
 			title={title}
 		>
