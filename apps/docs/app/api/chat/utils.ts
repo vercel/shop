@@ -1,4 +1,4 @@
-import { prompt } from "@/site.config";
+import { prompt } from "@/lib/constants";
 
 export const createSystemPrompt = (currentRoute: string) => {
   const newPrompt = `# Role and Objective
