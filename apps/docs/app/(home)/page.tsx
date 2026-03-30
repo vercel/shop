@@ -57,20 +57,6 @@ const HomePage = () => (
 					</Button>
 					<Installer command="npx create-next-app@latest --example vercel/shop --example-path apps/template" />
 				</div>
-				<div className="inline-flex items-center gap-4">
-					<a
-						className="text-muted-foreground text-sm underline underline-offset-4 transition-colors hover:text-foreground"
-						href="https://vercel-shop.labs.vercel.dev"
-					>
-						View the demo store
-					</a>
-					<a
-						className="text-muted-foreground text-sm underline underline-offset-4 transition-colors hover:text-foreground"
-						href="https://github.com/vercel/shop"
-					>
-						GitHub
-					</a>
-				</div>
 			</div>
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
