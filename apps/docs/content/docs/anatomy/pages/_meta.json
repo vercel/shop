@@ -1,4 +1,4 @@
 {
   "title": "Pages",
-  "pages": ["home", "pdp", "plp", "content"]
+  "pages": ["index", "home", "pdp", "plp", "content"]
 }
