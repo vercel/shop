@@ -1,0 +1,13 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "getting-started",
+    "anatomy",
+    "writing-shopify-queries",
+    "shopify",
+    "skills",
+    "env-vars",
+    "storefront-api"
+  ]
+}

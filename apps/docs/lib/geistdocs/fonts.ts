@@ -1,18 +1,7 @@
-import {
-  Geist_Mono as createMono,
-  Geist as createSans,
-} from "next/font/google";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
+import { GeistPixelSquare } from "geist/font/pixel";
 
-export const sans = createSans({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: "variable",
-  display: "swap",
-});
-
-export const mono = createMono({
-  variable: "--font-mono",
-  subsets: ["latin"],
-  weight: "variable",
-  display: "swap",
-});
+export const sans = GeistSans;
+export const mono = GeistMono;
+export const pixel = GeistPixelSquare;
