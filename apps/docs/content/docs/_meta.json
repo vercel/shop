@@ -3,13 +3,10 @@
 	"pages": [
 		"index",
 		"getting-started",
-		"extending-with-agents",
 		"---Storefront---",
 		"anatomy",
-		"writing-shopify-queries",
 		"shopify",
 		"skills",
-		"env-vars",
-		"storefront-api"
+		"reference"
 	]
 }

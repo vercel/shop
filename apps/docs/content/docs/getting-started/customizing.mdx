@@ -1,0 +1,122 @@
+---
+title: Customizing Your Store
+description: Prompt patterns and challenges for extending your storefront with a coding agent.
+type: guide
+prerequisites:
+  - /docs/getting-started/using-a-coding-agent
+---
+
+Once you're comfortable with the [agent workflow](/docs/getting-started/using-a-coding-agent), use these patterns to tackle common storefront customizations.
+
+## Prompt patterns
+
+### Adding UI to a page
+
+```
+Add [component] to [page].
+It should [behavior].
+Pull data from [source].
+Show it [condition].
+```
+
+Example:
+```
+Add a "Recently Viewed" section to the bottom of the PDP.
+It should display the last 4 products the user visited as a horizontal carousel.
+Store the viewed product handles in localStorage.
+Only show the section when there are at least 2 items.
+```
+
+### Modifying existing behavior
+
+```
+Change [component] so that [new behavior] instead of [current behavior].
+Keep [constraint].
+```
+
+Example:
+```
+Change the product grid on collection pages so that it shows 3 columns on desktop
+instead of 4. Keep the 2-column mobile layout.
+```
+
+### Integrating a third-party service
+
+```
+Integrate [service] for [purpose].
+Use their [SDK/API].
+Add it to [page/component].
+```
+
+Example:
+```
+Integrate Judge.me for product reviews.
+Use their public API to fetch reviews by product handle.
+Add a reviews section below recommendations on the PDP.
+Show average rating in the product card on collection pages.
+```
+
+### Styling changes
+
+```
+Update [component] to [visual description].
+Match the existing design system.
+```
+
+Example:
+```
+Update the cart overlay to use a full-screen modal on mobile instead of a bottom drawer.
+Keep the side sheet on desktop. Match the existing transition animations.
+```
+
+## Try it yourself
+
+These challenges are ranked by complexity. Each one is a single agent prompt — describe what you want and let the agent handle the implementation.
+
+### Simple
+
+**Change the product grid layout**
+```
+Change the product grid from 4 columns to 3 on desktop. Keep 2 columns on mobile.
+```
+
+**Add a "Back to top" button**
+```
+Add a "Back to top" button that appears when the user scrolls past the fold.
+Use smooth scrolling. Place it in the bottom-right corner.
+```
+
+### Medium
+
+**Add a promotional banner**
+```
+Add a dismissible promotional banner above the navigation.
+Store the dismissed state in localStorage so it stays hidden.
+The banner text should come from a "banner_text" metafield on the shop object.
+```
+
+**Add product reviews from metafields**
+```
+Add a reviews section below recommendations on the PDP.
+Use a "reviews" JSON metafield on each product with an array of
+{ rating, author, text, date } objects.
+Show average star rating, individual reviews, and "No reviews yet" when empty.
+```
+
+### Complex
+
+**Add a wishlist**
+```
+Add a wishlist feature using localStorage.
+Add a heart icon to each product card and the PDP buy section.
+Create a /wishlist page that displays saved products in the same grid as collections.
+Sync the wishlist state across tabs.
+```
+
+**Replace the built-in search**
+```
+Replace the built-in Shopify search with Algolia.
+Use the Algolia InstantSearch React library.
+Index products from Shopify and keep the existing filter sidebar UI.
+Fall back to Shopify search if Algolia is not configured.
+```

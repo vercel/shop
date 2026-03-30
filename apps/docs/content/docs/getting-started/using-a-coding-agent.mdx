@@ -1,0 +1,144 @@
+---
+title: Using a Coding Agent
+description: How to work with a coding agent to build and extend your storefront — the mental model, workflow, and feedback loop.
+type: guide
+prerequisites:
+  - /docs/getting-started/extending-with-agents
+---
+
+This guide teaches you how to collaborate with a coding agent on your storefront. If you've never used a coding agent before, start here. If you're already comfortable with agents, skip to [Customizing Your Store](/docs/getting-started/customizing).
+
+## What is a coding agent?
+
+A coding agent reads your codebase, writes code, runs commands, and validates results — all from a natural language prompt. It's not autocomplete that suggests the next line. It's a collaborator that holds the full context of your project and executes multi-step tasks end to end.
+
+The key shift: instead of searching docs for how to do something, you describe what you want and review what the agent produces.
+
+## How agents work with this template
+
+The template ships with structured context files that agents read automatically:
+
+- **`AGENTS.md`** — architecture rules and constraints. This tells the agent things like "every cart mutation must call `invalidateCartCache()`" and "components in `ui/` must not import domain types."
+- **`.claude/schemas/`** — local Shopify GraphQL schema snapshots. The agent uses these to write type-safe queries without guessing field names.
+- **`.agents/skills/`** — step-by-step playbooks for common tasks like enabling Shopify Markets or adding customer auth.
+
+This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules — before you type a single prompt.
+
+## Skills: the agent's playbooks
+
+Skills are markdown files that describe exactly how to complete a specific task. Each skill includes what files to touch, what patterns to follow, and how to verify the result.
+
+To run a skill in Claude Code:
+
+```bash
+/enable-shopify-markets
+```
+
+In Cursor, describe the task and the agent finds the matching skill:
+
+```
+Enable multi-locale support with Shopify Markets
+```
+
+When you run a skill, the agent reads the playbook and executes each step — writing files, installing dependencies, updating configs. Then it runs the verification steps to confirm everything works.
+
+Skills aren't black boxes. They're plain markdown files in `.agents/skills/` that you can read, modify, or use as a reference for manual implementation.
+
+## The feedback loop
+
+Agents work best in a tight loop: you prompt, the agent proposes, you review, the agent refines.
+
+### Let the agent propose first
+
+Before the agent writes code, ask it to explain its approach:
+
+```
+Add a size guide to the PDP. Before writing code, tell me your plan.
+```
+
+A good proposal names the files it will touch, the patterns it will follow, and how it will validate the result. If the approach doesn't look right, redirect before any code is written.
+
+### Review the approach, not just the diff
+
+When reviewing what the agent produces, check the architectural decisions:
+
+- Does it use server components where possible?
+- Does it follow the domain type boundary (components import from `lib/types`, not Shopify types)?
+- Does it respect the `ui/` → `product/` wrapper pattern from `AGENTS.md`?
+- For GraphQL changes, did it check the schema in `.claude/schemas/`?
+
+### Iterate with follow-ups
+
+After the first pass, refine with targeted follow-ups:
+
+```
+Make the accordion closed by default on mobile
+```
+
+This is more effective than re-prompting the entire task. The agent retains context from the previous exchange.
+
+### When something breaks
+
+Tell the agent what failed and where. Specific error messages are more useful than "fix it":
+
+```
+The build fails with "Type 'string' is not assignable to type 'Money'".
+Check the transform in lib/shopify/transforms/product.ts.
+```
+
+## Writing effective prompts
+
+The difference between a vague prompt and a good one is specificity about *what*, *where*, and *when*.
+
+**Vague:**
+```
+add size guide
+```
+
+**Specific:**
+```
+Add a size guide accordion below the product description on the PDP.
+Pull sizing data from a product metafield called "sizing_guide".
+Only show the section when the metafield exists.
+```
+
+**Vague:**
+```
+fix the cart
+```
+
+**Specific:**
+```
+The cart overlay shows the wrong total after removing an item.
+Check overlay-item.tsx and the optimistic update logic in context.tsx.
+```
+
+**Vague:**
+```
+add reviews
+```
+
+**Specific:**
+```
+Add a customer reviews section below recommendations on the PDP.
+Fetch reviews from a "reviews" metafield on each product.
+Display star rating, reviewer name, and review text.
+Show "No reviews yet" when the metafield is empty.
+```
+
+## What agents can and can't do
+
+**Agents can:**
+- Read and modify any file in your project
+- Run build and test commands
+- Follow skills step by step
+- Write GraphQL queries validated against the local schema
+- Install dependencies and update configs
+
+**Agents can't:**
+- Access your Shopify admin panel
+- Deploy to production (unless you explicitly authorize it)
+- Make business decisions about pricing, copy, or design direction
+- Test visual appearance — you need to check the browser
+
+You're the product owner. The agent is the engineer. Describe what you want, review what it builds, and iterate until it's right.

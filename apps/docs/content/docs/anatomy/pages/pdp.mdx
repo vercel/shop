@@ -16,6 +16,8 @@ Variants are selected via URL. Each option (color, size, etc.) renders as a `<Li
 /products/classic-tee?variantId=123456
 ```
 
+> **Required:** The rewrite rule below in `next.config.ts` is essential — without it, variant selection appends a query parameter but the page won't re-render with the correct variant.
+
 A rewrite rule in `next.config.ts` maps this to the `/products/[handle]/[variantId]` route segment so the server can resolve the variant before rendering:
 
 ```ts

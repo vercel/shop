@@ -1,6 +1,95 @@
 ---
-description: All about Shopify
-title: Shopify
+title: Shopify Integration
+description: How the template maps to Shopify concepts — menus, products, collections, and cache invalidation via webhooks.
+type: reference
+prerequisites:
+  - /docs/getting-started
 ---
 
-TK TK TK
+The template connects to Shopify through the Storefront API. This page covers the Shopify-side configuration that the template expects — concept mapping, required menus, and cache invalidation.
+
+For the API client and query patterns, see [Storefront API](/docs/reference/storefront-api).
+
+## Concept mapping
+
+| Shopify concept | Template route | What renders it |
+|---|---|---|
+| Products | `/products/[handle]` | Product detail page with variants, gallery, buy section |
+| Collections | `/collections/[handle]` | Product grid with filtering, sorting, pagination |
+| Menus | Navigation, footer | Megamenu, quick links bar, footer columns |
+| Pages | `/pages/[slug]` | Marketing page renderer (requires CMS setup) |
+| Search | `/search` | Same grid as collections, driven by query param |
+| Cart | `/cart` + overlay | Cart context with optimistic updates |
+
+## Required menus
+
+The template fetches three menus from Shopify by handle. These must exist in your Shopify admin under **Online Store → Navigation** with the exact handles below:
+
+| Menu handle | Where it renders | Structure |
+|---|---|---|
+| `main-menu` | Top navigation megamenu | 3-level hierarchy: top items → panels → categories |
+| `footer` | Footer link columns | 2-level: column headings → links |
+| `quick-links` | Secondary nav bar below the megamenu trigger | Flat list of links |
+
+If a menu doesn't exist, the corresponding UI section renders empty. Menu items can link to collections, products, pages, or custom URLs.
+
+## Webhooks and cache invalidation
+
+All read operations are cached with `"use cache"` and `cacheLife("max")`. Without webhooks, changes in Shopify won't appear until the cache expires. To get near-instant updates, configure Shopify webhooks to hit the template's invalidation endpoint.
+
+### Webhook endpoint
+
+```
+POST /api/webhooks/shopify
+```
+
+The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` environment variable, then calls `revalidateTag()` for the affected cache tags.
+
+### Supported topics
+
+| Webhook topic | Cache tags invalidated |
+|---|---|
+| `products/create` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/update` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/delete` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `collections/create` | `collections`, `products`, `menus`, `collection-{handle}` |
+| `collections/update` | `collections`, `products`, `menus`, `collection-{handle}` |
+| `collections/delete` | `collections`, `products`, `menus` |
+| `inventory_levels/*` | `products`, `collections` |
+| `metaobjects/*` | `cms:all` + type-specific tags (if using Shopify CMS) |
+
+### Setting up webhooks
+
+In your Shopify admin, go to **Settings → Notifications → Webhooks**:
+
+1. Set the webhook URL to `https://your-domain.com/api/webhooks/shopify`
+2. Select **JSON** as the format
+3. Create webhooks for each topic in the table above
+4. Copy the webhook signing secret and add it to your environment:
+
+```bash
+SHOPIFY_WEBHOOK_SECRET="your-webhook-signing-secret"
+```
+
+> **Important:** Without `SHOPIFY_WEBHOOK_SECRET`, the handler skips signature verification. Always set this in production.
+
+### How it works
+
+When Shopify sends a webhook, the handler:
+
+1. Verifies the HMAC-SHA256 signature using `crypto.timingSafeEqual`
+2. Parses the topic header to determine what changed
+3. Extracts the product/collection handle from the payload for targeted invalidation
+4. Calls `revalidateTag()` for each affected cache tag
+5. Returns the list of invalidated tags for logging
+
+This means a product update in Shopify invalidates only that product's cache and its recommendations — not every page on the site.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification |
+| `lib/shopify/operations/menu.ts` | Menu fetching by handle |
+| `lib/shopify/operations/megamenu.ts` | Megamenu data fetching from `main-menu` |
+| `lib/shopify/client.ts` | Core Storefront API client |

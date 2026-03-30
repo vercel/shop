@@ -1,0 +1,82 @@
+---
+title: Troubleshooting
+description: Solutions to common setup and runtime issues.
+type: troubleshooting
+---
+
+## Products not showing up
+
+The most common cause is missing Storefront API permissions. In your Shopify admin, go to **Settings → Apps and sales channels → Headless → your storefront** and verify these scopes are enabled:
+
+| Scope | Required for |
+|---|---|
+| `unauthenticated_read_product_listings` | Product pages and search |
+| `unauthenticated_read_product_inventory` | Stock availability |
+| `unauthenticated_read_collection_listings` | Collection pages |
+| `unauthenticated_write_checkouts` | Cart and checkout |
+| `unauthenticated_read_content` | Shopify pages |
+
+Also check that your products are set to the **Online Store** and **Headless** sales channels in Shopify admin.
+
+## Cart not persisting across page loads
+
+The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Common causes:
+
+- **Cookie domain mismatch** — if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools → Application → Cookies.
+- **Missing `invalidateCartCache()`** — every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI may show an outdated state.
+
+## Variant selection not working
+
+Variant selection relies on a rewrite rule in `next.config.ts` that maps `?variantId=123` to a route segment:
+
+```ts
+rewrites: async () => [
+  {
+    source: "/products/:handle",
+    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
+    destination: "/products/:handle/:variantId",
+  },
+],
+```
+
+If this rule is missing or modified, clicking a variant option will append a query parameter but the page won't re-render with the new variant.
+
+## Images not loading
+
+Shopify serves images from its CDN. The template's `next.config.ts` must include Shopify's image domain in `images.remotePatterns`. Verify that `cdn.shopify.com` is listed:
+
+```ts
+images: {
+  remotePatterns: [
+    { hostname: "cdn.shopify.com" },
+  ],
+},
+```
+
+## Build fails with GraphQL errors
+
+The template includes a local Shopify schema snapshot at `.claude/schemas/shopify-storefront.graphql`. If the schema is outdated relative to the API version in use, queries may reference fields that don't exist.
+
+Refresh the schema:
+
+```bash
+pnpm run .claude/scripts/fetch-shopify-schemas.ts
+```
+
+## Changes in Shopify not appearing on the site
+
+All product and collection data is cached with `cacheLife("max")`. Without webhooks configured, changes only appear when the cache expires.
+
+To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/shopify`. See [Shopify Integration → Webhooks](/docs/shopify#webhooks-and-cache-invalidation) for the full setup guide.
+
+## Locale or currency not changing
+
+Multi-locale support requires Shopify Markets to be enabled. The template ships as single-locale by default. Run the [Enable Shopify Markets](/docs/skills/enable-shopify-markets) skill to add multi-locale and multi-currency routing.
+
+## Agent can't find context files
+
+Coding agents rely on `AGENTS.md` in the project root for architecture context and `.agents/skills/` for task playbooks. If these files are missing:
+
+- Verify you cloned from the correct template (`vercel/shop`, `apps/template` path)
+- Check that `.agents/` isn't in your `.gitignore`
+- The `AGENTS.md` file should be at the project root, not nested in a subdirectory

@@ -1,9 +1,64 @@
 ---
-title: Content
-description: CMS-driven marketing and informational pages.
+title: Content Pages
+description: CMS-driven marketing and informational pages rendered from a pluggable content registry.
 type: guide
 ---
 
 <ContentBrowser />
 
-Coming soon.
+The `/pages/[slug]` route renders marketing and informational pages through a pluggable content system. By default, the page registry is empty — it's designed to be populated by a CMS integration or custom builder functions.
+
+## Architecture
+
+The route follows a simple chain:
+
+1. `app/pages/[slug]/page.tsx` receives the slug from the URL
+2. `getLocalMarketingPage(slug, locale)` looks up a builder function in the page registry
+3. If a builder exists, it returns a `MarketingPage` domain type
+4. `MarketingPageRenderer` renders the page using the structured sections
+
+The page is wrapped in a `Suspense` boundary with a skeleton fallback, so content can stream in without blocking the shell.
+
+## Page registry
+
+The registry in `lib/content/pages.ts` maps slugs to async builder functions:
+
+```ts
+type LocalMarketingPageBuilder = (locale: Locale) => Promise<MarketingPage>;
+
+const localMarketingPages: Record<string, LocalMarketingPageBuilder> = {};
+```
+
+Each builder receives the active locale and returns a `MarketingPage` object with structured sections (hero, product grids, text blocks, etc.). The registry is intentionally empty by default — you populate it by either:
+
+- Adding builder functions directly for static or code-driven pages
+- Running the **Enable Shopify CMS** skill, which wires Shopify metaobjects into the registry
+
+## MarketingPage type
+
+The `MarketingPage` type in `lib/types.ts` defines the structure a builder must return. It includes:
+
+- `title`, `slug`, `metaTitle`, `metaDescription` — page identity and SEO
+- `heroSection` — optional hero with background image, headline, subheadline, and CTA
+- `sections` — an array of content sections (product carousels, text blocks, etc.)
+
+## Static generation
+
+`generateStaticParams()` calls `getAllLocalMarketingPageSlugs()` to pre-render all registered pages at build time. When the registry is empty, it returns a placeholder to satisfy Next.js.
+
+## SEO
+
+`generateMetadata()` pulls `metaTitle` and `metaDescription` from the page data, falling back to the page title. It generates Open Graph and Twitter card metadata, using the hero background image when available.
+
+## Extending with a CMS
+
+The [Enable Shopify CMS](/docs/skills/enable-shopify-cms) skill connects Shopify metaobjects to this page system. It creates `cms_homepage` and `cms_page` metaobject types in Shopify, adds GraphQL queries to fetch them, and wires the results into the page registry as `MarketingPage` objects.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `app/pages/[slug]/page.tsx` | Route handler with Suspense and metadata |
+| `lib/content/pages.ts` | Page registry and lookup functions |
+| `components/cms/page-renderer.tsx` | Renders `MarketingPage` sections |
+| `lib/types.ts` | `MarketingPage` domain type definition |

@@ -1,4 +1,4 @@
 {
-  "title": "Shopify Integration",
-  "pages": ["index", "pdp"]
+  "title": "Shopify",
+  "pages": ["writing-shopify-queries", "index", "pdp"]
 }

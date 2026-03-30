@@ -1,16 +1,35 @@
 ---
 description: How to get up and running with Vercel Shop.
-title: Getting Started
+title: Setup
 type: guide
 ---
 
 ## Set up Shopify for headless
 
-If you don't already have a Shopify store, create one at [shopify.com](https://www.shopify.com). Then follow [Shopify's headless setup guide](https://shopify.dev/docs/storefronts/headless/bring-your-own-stack) to:
+If you don't already have a Shopify store, create one at [shopify.com](https://www.shopify.com). Then set up the Headless channel:
 
-1. Install the **Headless** channel from the Shopify App Store
-2. Create a storefront inside the Headless channel to get your API credentials
-3. Enable the Storefront API permissions your store needs
+1. In your Shopify admin, go to **Settings → Apps and sales channels → Develop apps**
+2. Install the **Headless** channel from the Shopify App Store
+3. Open the Headless channel and create a new storefront
+4. Copy the **Storefront API access token** — you'll need this for your environment variables
+5. Under **Storefront API permissions**, enable the scopes listed below
+
+### Required API permissions
+
+| Scope | Purpose |
+|---|---|
+| `unauthenticated_read_product_listings` | Product pages, search, recommendations |
+| `unauthenticated_read_product_inventory` | Stock availability on PDPs and PLPs |
+| `unauthenticated_read_collection_listings` | Collection pages and navigation |
+| `unauthenticated_write_checkouts` | Cart operations and checkout |
+| `unauthenticated_read_content` | Shopify pages and metaobjects |
+
+Additional scopes are needed if you enable optional features:
+
+| Scope | Required by |
+|---|---|
+| `unauthenticated_read_customer_tags` | [Enable Shopify Auth](/docs/skills/enable-shopify-auth) skill |
+| `unauthenticated_read_metaobjects` | [Enable Shopify CMS](/docs/skills/enable-shopify-cms) skill |
 
 ## Create your project
 

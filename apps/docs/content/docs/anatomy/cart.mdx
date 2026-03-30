@@ -6,6 +6,8 @@ type: guide
 
 <CartBrowser />
 
+> **Note:** The cart ID is stored in a `shopify_cartId` cookie with a 7-day expiry. Sessions longer than 7 days start a fresh cart.
+
 The cart system spans the entire storefront, not just the cart page. A React Context provider wraps the app in `layout.tsx`, giving every component access to cart state. Mutations flow through server actions that call Shopify's GraphQL API, while optimistic updates keep the UI responsive during network round-trips.
 
 ## Cart context
@@ -30,6 +32,8 @@ All cart mutations update the UI before the server responds. The implementation 
 **Update quantity** — leading-edge debounce. The first change fires immediately so the user sees instant feedback. Subsequent changes within the debounce window are batched. Removals (quantity set to 0) bypass debounce entirely and fire immediately.
 
 Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest — stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
+
+> **Hard requirement:** Every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI shows outdated state after the next page navigation.
 
 ## Server actions
 
