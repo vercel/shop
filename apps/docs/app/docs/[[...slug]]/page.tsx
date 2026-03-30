@@ -18,7 +18,7 @@ export default async function DocsPage({ params }: Props) {
   }
 
   return (
-    <article className="prose prose-sm dark:prose-invert max-w-3xl px-8 py-12 font-sans">
+    <article className="prose dark:prose-invert max-w-3xl px-8 py-12 font-sans">
       <h1 className="mb-2 text-2xl font-bold">{doc.title}</h1>
       {doc.description ? (
         <p className="text-muted-foreground mb-8">{doc.description}</p>
