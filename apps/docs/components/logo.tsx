@@ -3,7 +3,7 @@ export const Logo = () => (
     className="font-semibold text-xl tracking-tight"
     style={{
       fontFamily:
-        "var(--font-geist-pixel-square), ui-monospace, monospace",
+        "var(--font-geist-pixel-grid), ui-monospace, monospace",
     }}
   >
     Shop
