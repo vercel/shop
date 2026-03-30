@@ -1,5 +1,5 @@
 {
-	"dependencies": {
+  "dependencies": {
     "turbo": "2.8.17"
   },
   "name": "monorepo",
@@ -12,5 +12,9 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "turbo run format"
-  }
+  },
+  "workspaces": [
+    "apps/*",
+    "examples/*"
+  ]
 }
