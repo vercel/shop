@@ -7,7 +7,7 @@ export const BrowserChrome = ({
 }) => (
 	<div className="not-prose mb-6 w-full rounded-xl border bg-fd-background shadow-xl">
 		{/* Browser chrome */}
-		<div className="relative flex items-center justify-center overflow-hidden rounded-t-xl border-b bg-fd-muted/50 px-4 py-2.5">
+		<div className="relative flex items-center justify-center overflow-hidden rounded-t-xl border-b bg-black/5 dark:bg-white/5 px-4 py-2.5">
 			<div className="absolute left-4 flex gap-1.5">
 				<div className="size-3 rounded-full bg-red-400" />
 				<div className="size-3 rounded-full bg-yellow-400" />

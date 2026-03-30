@@ -11,12 +11,12 @@ export const FakeBrowser = () => (
 			{/* Header */}
 			<div className="mb-3 flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<div className="size-7 rounded-full bg-fd-muted" />
-					<div className="h-3 w-24 rounded bg-fd-muted" />
+					<div className="size-7 rounded-full bg-black/10 dark:bg-white/10" />
+					<div className="h-3 w-24 rounded bg-black/10 dark:bg-white/10" />
 				</div>
 				{/* Cart - dynamic */}
 				<DynamicBoundary label="Cart" className="!p-1.5 !rounded">
-					<div className="size-5 rounded bg-fd-muted" />
+					<div className="size-5 rounded bg-black/10 dark:bg-white/10" />
 				</DynamicBoundary>
 			</div>
 
@@ -27,18 +27,18 @@ export const FakeBrowser = () => (
 
 				{/* Product info */}
 				<div className="flex flex-col gap-2 py-1">
-					<div className="h-3 w-full rounded bg-fd-muted" />
-					<div className="h-3 w-4/5 rounded bg-fd-muted" />
-					<div className="h-3 w-3/5 rounded bg-fd-muted" />
+					<div className="h-3 w-full rounded bg-black/10 dark:bg-white/10" />
+					<div className="h-3 w-4/5 rounded bg-black/10 dark:bg-white/10" />
+					<div className="h-3 w-3/5 rounded bg-black/10 dark:bg-white/10" />
 					<div className="mt-1 flex gap-1.5">
 						{Array.from({ length: 5 }).map((_, i) => (
 							<div
 								key={i}
-								className="size-5 rounded bg-fd-muted"
+								className="size-5 rounded bg-black/10 dark:bg-white/10"
 							/>
 						))}
 					</div>
-					<div className="mt-1 h-3 w-1/3 rounded bg-fd-muted" />
+					<div className="mt-1 h-3 w-1/3 rounded bg-black/10 dark:bg-white/10" />
 				</div>
 
 				{/* Side thumbnail */}

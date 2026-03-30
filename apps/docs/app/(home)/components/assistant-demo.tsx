@@ -7,7 +7,7 @@ const ProductCard = ({ delay }: { delay: number }) => (
 		className="flex shrink-0 flex-col gap-1.5 rounded-lg border bg-fd-background p-2 opacity-0 animate-[fade-in_0.3s_ease_forwards]"
 		style={{ animationDelay: `${delay}ms` }}
 	>
-		<div className="flex aspect-square w-20 items-center justify-center rounded-md bg-fd-muted sm:w-24">
+		<div className="flex aspect-square w-20 items-center justify-center rounded-md bg-black/10 dark:bg-white/10 sm:w-24">
 			<svg
 				className="size-6 text-fd-muted-foreground/40"
 				fill="currentColor"
@@ -17,8 +17,8 @@ const ProductCard = ({ delay }: { delay: number }) => (
 				<path d="M21 17l-5-5-4 4-3-3-5 5v2h17z" />
 			</svg>
 		</div>
-		<div className="h-2 w-3/4 rounded bg-fd-muted" />
-		<div className="h-2 w-1/2 rounded bg-fd-muted" />
+		<div className="h-2 w-3/4 rounded bg-black/10 dark:bg-white/10" />
+		<div className="h-2 w-1/2 rounded bg-black/10 dark:bg-white/10" />
 	</div>
 );
 
@@ -27,7 +27,7 @@ const TypingDots = () => (
 		{[0, 1, 2].map((i) => (
 			<div
 				key={i}
-				className="size-1.5 animate-[pulse_1s_ease-in-out_infinite] rounded-full bg-fd-muted-foreground/50"
+				className="size-1.5 animate-[pulse_1s_ease-in-out_infinite] rounded-full bg-black/30 dark:bg-white/30"
 				style={{ animationDelay: `${i * 200}ms` }}
 			/>
 		))}
@@ -94,7 +94,7 @@ export const AssistantDemo = () => {
 	return (
 		<div
 			ref={ref}
-			className="flex h-64 flex-col justify-end overflow-hidden rounded-xl border bg-fd-muted/30 p-4 sm:h-72"
+			className="flex h-64 flex-col justify-end overflow-hidden rounded-xl border bg-black/5 dark:bg-white/5 p-4 sm:h-72"
 		>
 			<div className="flex flex-col gap-3">
 				{/* User message */}
@@ -117,7 +117,7 @@ export const AssistantDemo = () => {
 				{showAssistant && (
 					<div className="flex flex-col gap-2 animate-[fade-in_0.3s_ease]">
 						<div className="flex items-center gap-2">
-							<div className="flex size-6 items-center justify-center rounded-full bg-fd-muted">
+							<div className="flex size-6 items-center justify-center rounded-full bg-black/10 dark:bg-white/10">
 								<svg
 									className="size-3.5 text-fd-muted-foreground"
 									fill="none"

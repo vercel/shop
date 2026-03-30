@@ -1,9 +1,9 @@
 export const ImagePlaceholder = ({ className }: { className?: string }) => (
 	<div
-		className={`flex items-center justify-center bg-fd-muted ${className ?? ""}`}
+		className={`flex items-center justify-center bg-black/10 dark:bg-white/10 ${className ?? ""}`}
 	>
 		<svg
-			className="size-8 text-fd-muted-foreground/40"
+			className="size-8 text-black/30 dark:text-white/30"
 			fill="currentColor"
 			viewBox="0 0 24 24"
 		>
