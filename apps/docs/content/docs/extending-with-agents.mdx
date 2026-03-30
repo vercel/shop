@@ -1,0 +1,94 @@
+---
+title: Extending with Agents
+description: Use coding agents like Claude Code, Cursor, and Codex to personalize and extend your storefront.
+type: guide
+prerequisites:
+  - /docs/getting-started
+---
+
+Vercel Shop is built for agentic development. Instead of copy-pasting snippets from docs, you describe what you want and a coding agent handles the implementation — editing files, running commands, and validating the result.
+
+This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture, GraphQL schemas for type-safe queries, and a set of skills that encode common storefront tasks.
+
+## Supported agents
+
+Any agent that reads markdown context files will work. The ones we've tested most:
+
+- [**Claude Code**](https://claude.ai/code) — Anthropic's CLI agent. Reads `AGENTS.md` and skills automatically.
+- [**Cursor**](https://cursor.sh) — AI-powered editor with agent mode and plugin support.
+- [**Codex**](https://openai.com/index/introducing-codex/) — OpenAI's coding agent.
+
+## Setting up
+
+After [creating your project](/docs/getting-started), install the Vercel plugin to give your agent access to 47+ skills for Next.js, AI SDK, shadcn/ui, caching, and more.
+
+### Claude Code
+
+```bash
+npx plugins add vercel/vercel-plugin
+```
+
+### Cursor
+
+```bash
+/add-plugin vercel
+```
+
+The plugin provides platform-aware guidance, catches deprecated patterns, and includes slash commands like `/bootstrap`, `/deploy`, `/env`, `/status`, and `/marketplace`.
+
+## What are skills?
+
+Skills are agent-ready guides that describe how to complete a specific task in your storefront. Each skill is a markdown file that contains:
+
+- **What to do** — the files to create or modify, the patterns to follow
+- **Why** — the reasoning behind the approach
+- **How to validate** — checks the agent runs to confirm the change works
+
+When you ask your agent to enable a feature, it reads the relevant skill and executes each step — writing code, installing dependencies, updating configs — then verifies the result.
+
+### Why skills work
+
+Skills aren't generated on the fly. They're written and tested against the template, so the instructions match the actual codebase. This means:
+
+- **Fewer hallucinations** — the agent follows a concrete plan instead of guessing
+- **Consistent patterns** — every skill follows the same conventions the template uses
+- **Validated output** — skills include verification steps so you know the change landed correctly
+
+### Running a skill
+
+With Claude Code, run a skill as a slash command:
+
+```bash
+/enable-shopify-markets
+```
+
+With Cursor, describe what you want and the agent will find and apply the right skill:
+
+```
+Enable multi-locale support with Shopify Markets
+```
+
+You can also follow any skill manually — they're plain markdown files in `.agents/skills/`.
+
+## Available skills
+
+<Cards>
+  <Card title="Enable Shopify Markets" href="/docs/skills/enable-shopify-markets">
+    Multi-locale and multi-currency support.
+  </Card>
+  <Card title="Enable Shopify Auth" href="/docs/skills/enable-shopify-auth">
+    Customer login, account pages, and nav integration.
+  </Card>
+  <Card title="Shopify CMS" href="/docs/skills/enable-shopify-cms">
+    Wire metaobjects as the CMS for homepage and marketing pages.
+  </Card>
+  <Card title="Content Negotiation" href="/docs/skills/enable-content-negotiation">
+    Serve product pages as markdown to LLM agents.
+  </Card>
+</Cards>
+
+## Going beyond skills
+
+Skills cover the most common extensions, but agents aren't limited to them. You can ask your agent to do anything — restyle the product page, add a wishlist, integrate a third-party review system. The `AGENTS.md` file and GraphQL schemas give it enough context to work with the codebase directly.
+
+For best results, be specific about what you want and let the agent propose an approach before it starts writing code.
