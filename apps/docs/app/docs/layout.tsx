@@ -37,7 +37,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="fromsrc flex min-h-screen">
       <Sidebar
         basePath="/docs"
         collapsible
