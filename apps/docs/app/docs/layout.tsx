@@ -14,12 +14,10 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
-      <pre>{JSON.stringify(cleanedNavigation, null, 2)}</pre>
       <Sidebar
-        title="Vercel Shop"
-        navigation={cleanedNavigation}
         basePath="/docs"
-        collapsible
+        navigation={cleanedNavigation}
+        title="Vercel Shop"
       />
       <main className="flex-1 min-w-0">{children}</main>
     </div>
