@@ -4,6 +4,7 @@
 
 /* Scan fromsrc component classes so Tailwind doesn't purge them */
 @source "../node_modules/fromsrc/dist/components";
+@source "../node_modules/fromsrc/dist/components/toc";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -180,6 +181,12 @@
 .prose th,
 .prose td {
   font-size: max(0.875em, 14px);
+}
+
+/* Bump fromsrc sidebar section headings from text-xs to text-sm */
+[aria-label="sidebar navigation"] section > h3 {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 @layer utilities {
