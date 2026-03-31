@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { nav } from "@/lib/constants";
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
+import { CartDemo } from "./components/cart-demo";
 import { CenteredSection } from "./components/centered-section";
 import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
@@ -57,6 +58,13 @@ const HomePage = () => (
 			>
 				<FakeBrowser />
 			</CenteredSection>
+			<OneTwoSection
+				description="Optimistic UI means the cart updates before the server responds. No spinners, no delays."
+				title="Instant cart updates"
+				reverse
+			>
+				<CartDemo />
+			</OneTwoSection>
 			<OneTwoSection
 				description="Built-in shopping assistant for your store powered by the AI SDK and AI Gateway."
 				title="Shopping assistant"
