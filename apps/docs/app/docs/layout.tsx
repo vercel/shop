@@ -12,6 +12,19 @@ export default async function Layout({ children }: { children: ReactNode }) {
     items: section.items.map(({ type, ...rest }) => rest),
   }));
 
+  // Merge standalone root pages (like why-shop) into the Docs section
+  const rootSection = cleanedNavigation.find((s) => s.title === "Docs" || s.title === "docs");
+  const standaloneKeys = new Set(["why shop", "why-shop"]);
+  const merged = cleanedNavigation
+    .filter((s) => !standaloneKeys.has(s.title.toLowerCase()))
+    .map((section) => {
+      if (section !== rootSection) return section;
+      const extras = cleanedNavigation
+        .filter((s) => standaloneKeys.has(s.title.toLowerCase()))
+        .flatMap((s) => s.items);
+      return { ...section, items: [...section.items, ...extras] };
+    });
+
   const sidebarNavigation = [
     {
       title: "",
@@ -20,7 +33,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         { type: "item" as const, title: "GitHub", href: "https://github.com/vercel/shop" },
       ],
     },
-    ...cleanedNavigation,
+    ...merged,
   ];
 
   return (
