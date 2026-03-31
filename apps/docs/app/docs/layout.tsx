@@ -1,13 +1,25 @@
 import type { ReactNode } from "react";
 import { docs } from "@/lib/fromsrc/content";
-import { DocsSidebar } from "./sidebar";
+import { Sidebar } from "fromsrc/client";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const navigation = await docs.getNavigation();
 
+  // Strip the schema `type` field (guide/reference/etc.) from nav items so it
+  // doesn't collide with fromsrc's internal `type` discriminant (item/folder).
+  const cleanedNavigation = navigation.map((section) => ({
+    ...section,
+    items: section.items.map(({ type, ...rest }) => rest),
+  }));
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)]">
-      <DocsSidebar navigation={navigation} />
+      <Sidebar
+        title="Vercel Shop"
+        navigation={cleanedNavigation}
+        basePath="/docs"
+        collapsible
+      />
       <main className="flex-1 min-w-0">{children}</main>
     </div>
   );
