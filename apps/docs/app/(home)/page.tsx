@@ -46,12 +46,6 @@ const HomePage = () => (
 			</div>
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
-			<OneTwoSection
-				description="Skills and recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
-				title="Agentic development"
-			>
-				<AgentDemo />
-			</OneTwoSection>
 			<CenteredSection
 				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
 				title="Dynamic storefronts with instant static responses"
@@ -59,17 +53,24 @@ const HomePage = () => (
 				<FakeBrowser />
 			</CenteredSection>
 			<OneTwoSection
-				description="Optimistic UI means the cart updates before the server responds. No spinners, no delays."
-				title="Instant cart updates"
+				description="Skills and recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+				title="Agentic development"
 				reverse
 			>
-				<CartDemo />
+				<AgentDemo />
 			</OneTwoSection>
 			<OneTwoSection
 				description="Built-in shopping assistant for your store powered by the AI SDK and AI Gateway."
 				title="Shopping assistant"
 			>
 				<AssistantDemo />
+			</OneTwoSection>
+			<OneTwoSection
+				description="Optimistic UI means the cart updates before the server responds. No spinners, no delays."
+				title="Instant cart updates"
+				reverse
+			>
+				<CartDemo />
 			</OneTwoSection>
 			<CTA cta="Get started" href="/docs" title="Start your shop today" />
 		</div>
