@@ -1,4 +1,4 @@
 {
   "title": "Features",
-  "pages": ["index", "navigation", "cart", "footer", "pages", "agent"]
+  "pages": ["navigation", "cart", "footer", "pages", "agent"]
 }
