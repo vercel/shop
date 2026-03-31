@@ -10,8 +10,6 @@ import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
-import { TextGridSection } from "./components/text-grid-section";
-
 const title = "Vercel Shop";
 const description =
 	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
@@ -20,27 +18,6 @@ export const metadata: Metadata = {
 	title,
 	description,
 };
-
-const textGridSection = [
-	{
-		id: "1",
-		title: "Agentic development first",
-		description:
-			"Vercel Shop contains skills and recipes for building and extending your Shopify store.",
-	},
-	{
-		id: "2",
-		title: "Lightning fast performance",
-		description:
-			"Instant cart updates, instant static responses with dynamic data streamed in.",
-	},
-	{
-		id: "3",
-		title: "Enterprise-grade Shopify development",
-		description:
-			"Vercel Shop is built for enterprise-grade Shopify development with a focus on performance, scalability, and security. Ready for composability.",
-	},
-];
 
 const HomePage = () => (
 	<div className="container mx-auto max-w-[1114px]">
@@ -86,7 +63,6 @@ const HomePage = () => (
 			>
 				<AssistantDemo />
 			</OneTwoSection>
-			<TextGridSection data={textGridSection} />
 			<CTA cta="Get started" href="/docs" title="Start your shop today" />
 		</div>
 	</div>
