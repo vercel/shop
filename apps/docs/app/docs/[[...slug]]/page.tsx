@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
+import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
@@ -26,7 +27,7 @@ export default async function DocsPage({ params }: Props) {
       <MDXRemote
         source={doc.content}
         components={mdxComponents}
-        options={{ mdxOptions: { remarkPlugins: [remarkGfm] } }}
+        options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
       />
     </article>
   );

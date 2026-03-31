@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Scan fromsrc component classes so Tailwind doesn't purge them */
+@source "../node_modules/fromsrc/dist/components";
+@source "../node_modules/fromsrc/dist/components/toc";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -24,9 +28,9 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
+  --color-muted: var(--muted-foreground);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
+  --color-accent: var(--primary);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -37,6 +41,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* fromsrc component tokens mapped to shadcn equivalents */
+  --color-bg: var(--background);
+  --color-fg: var(--foreground);
+  --color-line: var(--border);
+  --color-surface: var(--card);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -172,6 +181,12 @@
 .prose th,
 .prose td {
   font-size: max(0.875em, 14px);
+}
+
+/* Bump fromsrc sidebar section headings from text-xs to text-sm */
+[aria-label="sidebar navigation"] section > h3 {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 @layer utilities {
