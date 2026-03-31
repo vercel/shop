@@ -13,8 +13,8 @@ export const OneTwoSection = ({
   reverse,
   children,
 }: OneTwoSectionProps) => (
-  <div className="grid gap-12 p-8 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:p-0">
-    <div className={`flex flex-col gap-2 text-balance sm:p-12 ${reverse ? "sm:order-last" : ""}`}>
+  <div className={`grid gap-12 p-8 sm:grid-cols-3 sm:gap-0 sm:p-0 ${reverse ? "" : "sm:divide-x"}`}>
+    <div className={`flex flex-col gap-2 text-balance sm:p-12 ${reverse ? "sm:order-last sm:border-l sm:border-fd-border" : ""}`}>
       <h2 className="font-pixel-square font-normal text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl">
         {title}
       </h2>
