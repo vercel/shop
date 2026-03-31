@@ -28,9 +28,9 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted-foreground);
+  --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--primary);
+  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -187,6 +187,15 @@
 [aria-label="sidebar navigation"] section > h3 {
   font-size: 0.875rem;
   line-height: 1.25rem;
+}
+
+/* Scope fromsrc color token overrides to the sidebar only.
+   fromsrc uses text-muted for dim text and text-accent for highlights,
+   but shadcn's muted/accent are background swatches. */
+[aria-label="sidebar navigation"],
+[aria-expanded][data-collapsed] {
+  --color-muted: var(--muted-foreground);
+  --color-accent: var(--primary);
 }
 
 @layer utilities {
