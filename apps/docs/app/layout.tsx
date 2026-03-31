@@ -3,8 +3,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
-import { Footer } from "@/components/geistdocs/footer";
-import { Navbar } from "@/components/geistdocs/navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { mono, pixel, pixelSquare, pixelTriangle, sans } from "@/lib/geistdocs/fonts";
 import { cn } from "@/lib/utils";
@@ -23,9 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Navbar />
           {children}
-          <Footer />
           <Toaster />
         </ThemeProvider>
         <Analytics />

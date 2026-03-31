@@ -16,6 +16,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
     <div className="flex min-h-[calc(100vh-4rem)]">
       <Sidebar
         basePath="/docs"
+        collapsible
         navigation={cleanedNavigation}
         title="Vercel Shop"
       />
