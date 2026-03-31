@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Installer } from "@/components/geistdocs/installer";
 import { Button } from "@/components/ui/button";
+import { nav } from "@/lib/constants";
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
 import { CenteredSection } from "./components/centered-section";
@@ -56,6 +57,13 @@ const HomePage = () => (
 						</Link>
 					</Button>
 					<Installer command="npx create-next-app@latest --example vercel/shop --example-path apps/template" />
+				</div>
+				<div className="flex items-center gap-4 text-sm text-muted-foreground">
+					{nav.filter((item) => item.target === "_blank").map((item) => (
+						<a key={item.href} href={item.href} className="underline underline-offset-4 hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
+							{item.label}
+						</a>
+					))}
 				</div>
 			</div>
 		</Hero>
