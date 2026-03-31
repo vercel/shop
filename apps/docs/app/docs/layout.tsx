@@ -12,12 +12,23 @@ export default async function Layout({ children }: { children: ReactNode }) {
     items: section.items.map(({ type, ...rest }) => rest),
   }));
 
+  const sidebarNavigation = [
+    {
+      title: "",
+      items: [
+        { type: "item" as const, title: "Demo", href: "https://shop-template.labs.vercel.dev" },
+        { type: "item" as const, title: "GitHub", href: "https://github.com/vercel/shop" },
+      ],
+    },
+    ...cleanedNavigation,
+  ];
+
   return (
     <div className="flex min-h-screen">
       <Sidebar
         basePath="/docs"
         collapsible
-        navigation={cleanedNavigation}
+        navigation={sidebarNavigation}
         title="Vercel Shop"
       />
       <main className="flex-1 min-w-0">{children}</main>
