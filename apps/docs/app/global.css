@@ -8,6 +8,8 @@
   --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-heading: "GeistPixel-Grid", "Geist Mono", ui-monospace, monospace;
+  --font-pixel-square: var(--font-geist-pixel-square), ui-monospace, monospace;
+  --font-pixel-triangle: var(--font-geist-pixel-triangle), ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -125,6 +127,7 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-geist-pixel-grid), var(--font-geist-mono), ui-monospace, monospace;
+    font-weight: 400;
   }
 }
 

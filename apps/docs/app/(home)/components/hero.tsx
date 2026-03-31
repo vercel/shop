@@ -15,10 +15,10 @@ export const Hero = ({ badge, title, description, children }: HeroProps) => (
         <div className="size-2 rounded-full bg-muted-foreground" />
         <p>{badge}</p>
       </Badge>
-      <h1 className="text-balance text-center font-semibold text-[40px]! leading-[1.1] tracking-tight sm:text-5xl! lg:font-semibold xl:text-6xl!">
+      <h1 className="font-pixel-triangle text-balance text-center font-normal text-[40px]! leading-[1.1] tracking-tight dark:text-white sm:text-5xl! xl:text-6xl!">
         {title}
       </h1>
-      <p className="mx-auto max-w-3xl text-balance text-muted-foreground leading-relaxed sm:text-xl">
+      <p className="mx-auto max-w-3xl font-sans text-balance text-muted-foreground leading-relaxed sm:text-xl">
         {description}
       </p>
     </div>

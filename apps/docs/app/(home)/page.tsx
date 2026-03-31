@@ -13,7 +13,7 @@ import { TextGridSection } from "./components/text-grid-section";
 
 const title = "Vercel Shop";
 const description =
-	"An agent-native, fast-by-default Shopify storefront built on Next.js. Ship features in minutes, not weeks.";
+	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
 
 export const metadata: Metadata = {
 	title,
@@ -42,7 +42,7 @@ const textGridSection = [
 ];
 
 const HomePage = () => (
-	<div className="container mx-auto max-w-5xl">
+	<div className="container mx-auto max-w-[1114px]">
 		<Hero
 			badge="Vercel Shop is now in alpha"
 			description={description}
