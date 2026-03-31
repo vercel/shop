@@ -191,16 +191,9 @@
 
 /* fromsrc uses text-muted for dim text and text-accent for highlights,
    but shadcn's muted/accent are background swatches. Override the raw
-   CSS variables inside fromsrc's sidebar so text is readable.
-   The main content area uses fromsrc's <Content> renderer which also
-   relies on text-muted/text-accent as text colors, so override there too
-   but scope shadcn bg-muted/bg-accent fixes to specific selectors. */
+   CSS variables inside fromsrc's sidebar so text is readable. */
 [aria-label="sidebar navigation"],
 [aria-expanded][data-collapsed] {
-  --muted: var(--muted-foreground);
-  --accent: var(--primary);
-}
-.fromsrc > main article {
   --muted: var(--muted-foreground);
   --accent: var(--primary);
 }

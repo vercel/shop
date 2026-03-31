@@ -20,7 +20,7 @@ export async function SkillContent({ skill }: { skill: string }) {
   const content = stripFrontmatter(raw);
 
   return (
-    <div className="prose prose-fd">
+    <div className="prose dark:prose-invert">
       <Streamdown>{content}</Streamdown>
     </div>
   );
