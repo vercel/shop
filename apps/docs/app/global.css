@@ -37,6 +37,11 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* fromsrc component tokens mapped to shadcn equivalents */
+  --color-bg: var(--background);
+  --color-fg: var(--foreground);
+  --color-line: var(--border);
+  --color-surface: var(--card);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
