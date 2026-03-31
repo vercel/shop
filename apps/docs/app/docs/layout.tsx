@@ -12,9 +12,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
     items: section.items.map(({ type, ...rest }) => rest),
   }));
 
-  // Merge standalone root pages (like why-shop) into the Docs section
+  // Merge standalone root pages (like why-use-this) into the Docs section
   const rootSection = cleanedNavigation.find((s) => s.title === "Docs" || s.title === "docs");
-  const standaloneKeys = new Set(["why shop", "why-shop"]);
+  const standaloneKeys = new Set(["why use this", "why-use-this"]);
   const merged = cleanedNavigation
     .filter((s) => !standaloneKeys.has(s.title.toLowerCase()))
     .map((section) => {
@@ -22,7 +22,8 @@ export default async function Layout({ children }: { children: ReactNode }) {
       const extras = cleanedNavigation
         .filter((s) => standaloneKeys.has(s.title.toLowerCase()))
         .flatMap((s) => s.items);
-      return { ...section, items: [...section.items, ...extras] };
+      // Ensure the root section gets an empty string title
+      return { ...section, title: "", items: [...section.items, ...extras] };
     });
 
   const sidebarNavigation = [
