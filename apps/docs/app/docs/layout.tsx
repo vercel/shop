@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { docs } from "@/lib/fromsrc/content";
-import { Sidebar, Toc } from "fromsrc/client";
+import { Sidebar } from "fromsrc/client";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const navigation = await docs.getNavigation();
@@ -21,9 +21,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
         title="Vercel Shop"
       />
       <main className="flex-1 min-w-0">{children}</main>
-      <aside className="hidden xl:block w-56 shrink-0 sticky top-0 h-screen overflow-y-auto p-4 pt-8">
-        <Toc variant="minimal" />
-      </aside>
     </div>
   );
 }
