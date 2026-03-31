@@ -2,6 +2,9 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* Scan fromsrc component classes so Tailwind doesn't purge them */
+@source "../../node_modules/fromsrc/dist/components";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
