@@ -3,6 +3,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { Toc } from "fromsrc/client";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
 
@@ -19,17 +20,24 @@ export default async function DocsPage({ params }: Props) {
   }
 
   return (
-    <article className="prose dark:prose-invert max-w-3xl px-8 py-12 font-sans">
-      <h1 className="mb-2 text-2xl font-bold">{doc.title}</h1>
-      {doc.description ? (
-        <p className="text-muted-foreground mb-8">{doc.description}</p>
-      ) : null}
-      <MDXRemote
-        source={doc.content}
-        components={mdxComponents}
-        options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
-      />
-    </article>
+    <div className="flex gap-8">
+      <article className="prose dark:prose-invert max-w-3xl px-8 py-12 font-sans">
+        <h1 className="mb-2 text-2xl font-bold">{doc.title}</h1>
+        {doc.description ? (
+          <p className="text-muted-foreground mb-8">{doc.description}</p>
+        ) : null}
+        <MDXRemote
+          source={doc.content}
+          components={mdxComponents}
+          options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
+        />
+      </article>
+      <aside className="hidden xl:block w-56 shrink-0">
+        <div className="sticky top-12">
+          <Toc title="" />
+        </div>
+      </aside>
+    </div>
   );
 }
 
