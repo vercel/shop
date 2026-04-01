@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { commerce } from "@/lib/commerce";
 
 import { MegamenuFallback } from "./megamenu-client";
 import { MegamenuDesktop } from "./megamenu-desktop";
@@ -11,7 +11,7 @@ type MegamenuProps = {
 };
 
 async function MegamenuContent({ locale }: MegamenuProps) {
-  const data = await getMegamenuData(locale);
+  const data = await commerce.menu.getMegamenuData(locale);
   return (
     <>
       <div className="hidden md:block">

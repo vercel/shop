@@ -1,6 +1,8 @@
 "use server";
 
-import { predictiveSearch } from "@/lib/shopify/operations/search";
+import { commerce } from "@/lib/commerce";
+
+const { predictiveSearch } = commerce.search;
 import type { PredictiveSearchResult } from "@/lib/types";
 
 export async function predictiveSearchAction(

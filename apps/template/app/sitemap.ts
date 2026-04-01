@@ -2,8 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/lib/config";
 import { getAllLocalMarketingPageSlugs, getLocalMarketingPage } from "@/lib/content/pages";
-import { getCollections } from "@/lib/shopify/operations/collections";
-import { getAllProductHandles } from "@/lib/shopify/operations/sitemap";
+import { commerce } from "@/lib/commerce";
 
 function toAbsoluteUrl(pathname: string): string {
   return `${siteConfig.url}${pathname}`;
@@ -29,8 +28,8 @@ async function buildMarketingEntries(): Promise<MetadataRoute.Sitemap> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [collections, products, marketingPages] = await Promise.all([
-    getCollections(),
-    getAllProductHandles(),
+    commerce.collections.getCollections(),
+    commerce.sitemap.getAllProductHandles(),
     buildMarketingEntries(),
   ]);
 

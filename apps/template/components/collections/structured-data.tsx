@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import type { Locale } from "@/lib/i18n";
-import type { getCollection } from "@/lib/shopify/operations/collections";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { commerce } from "@/lib/commerce";
+import type { CollectionOperations } from "@/lib/commerce";
 import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 
 async function Render({
@@ -15,13 +15,13 @@ async function Render({
 }: {
   locale: Locale;
   handlePromise: Promise<string>;
-  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+  collectionPromise: Promise<Awaited<ReturnType<CollectionOperations["getCollection"]>>>;
 }) {
   const [handle, collection, t, menu] = await Promise.all([
     handlePromise,
     collectionPromise,
     getTranslations("collections.breadcrumb"),
-    getMegamenuData(locale),
+    commerce.menu.getMegamenuData(locale),
   ]);
 
   if (!collection) return null;
@@ -64,7 +64,7 @@ export function CollectionStructuredData({
 }: {
   locale: Locale;
   handlePromise: Promise<string>;
-  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+  collectionPromise: Promise<Awaited<ReturnType<CollectionOperations["getCollection"]>>>;
 }) {
   return (
     <Suspense fallback={null}>

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
-import { getMenu } from "@/lib/shopify/operations/menu";
+import { commerce } from "@/lib/commerce";
 
 const LINK_CLASS = "text-sm text-muted-foreground transition-colors hover:text-foreground";
 
@@ -64,7 +64,7 @@ async function Copyright() {
 }
 
 async function FooterContent({ locale }: { locale: string }) {
-  const menu = await getMenu("footer", locale);
+  const menu = await commerce.menu.getMenu("footer", locale);
   const hasMenu = menu && menu.items.length > 0;
 
   return (

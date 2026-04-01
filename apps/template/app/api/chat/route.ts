@@ -10,9 +10,7 @@ import { cookies } from "next/headers";
 import { createAgent } from "@/lib/agent/agent";
 import { type PageContext, type User, withAgentContext } from "@/lib/agent/context";
 import { defaultLocale, type Locale } from "@/lib/i18n";
-import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
-import { getCollection } from "@/lib/shopify/operations/collections";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 
 /**
  * Parse referer URL to extract locale and path segments.
@@ -50,7 +48,7 @@ async function resolvePageContext(
   if (pageType === "products" && segments.length >= 2) {
     try {
       const handle = segments[1];
-      const product = await getProduct(handle, locale);
+      const product = await commerce.products.getProduct(handle, locale);
       return { type: "product", product };
     } catch {
       // Product not found
@@ -60,7 +58,7 @@ async function resolvePageContext(
   if (pageType === "collections" && segments.length >= 2) {
     try {
       const handle = segments[1];
-      const collection = await getCollection(handle, locale);
+      const collection = await commerce.collections.getCollection(handle, locale);
       if (collection) {
         return { type: "collection", handle, title: collection.title };
       }
@@ -113,7 +111,7 @@ export async function POST(request: Request) {
   let newCartCookie: string | undefined;
 
   if (!cartId) {
-    const newCart = await createCartWithoutCookie(locale);
+    const newCart = await commerce.cart.createCartWithoutCookie(locale);
     cartId = newCart.id;
     // Build Set-Cookie header value for the new cart
     const secure = process.env.NODE_ENV === "production";

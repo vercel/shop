@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { getMenu } from "@/lib/shopify/operations/menu";
+import { commerce } from "@/lib/commerce";
 
 export async function QuickLinks({ locale }: { locale: string }) {
-  const menu = await getMenu("quick-links", locale);
+  const menu = await commerce.menu.getMenu("quick-links", locale);
 
   if (!menu || menu.items.length === 0) {
     return null;

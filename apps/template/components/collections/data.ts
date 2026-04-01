@@ -1,8 +1,5 @@
 import type { Locale } from "@/lib/i18n";
-import {
-  buildProductFiltersFromParams,
-  getCollectionProducts,
-} from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
@@ -16,7 +13,7 @@ export interface CollectionSearchState {
 export interface CollectionResultsData {
   activeFilters: Record<string, string | string[] | undefined>;
   cursor?: string;
-  result: Awaited<ReturnType<typeof getCollectionProducts>>;
+  result: Awaited<ReturnType<typeof commerce.products.getCollectionProducts>>;
   transformedFilters: TransformedFilters;
 }
 
@@ -45,8 +42,8 @@ export async function getCollectionResultsData({
     handlePromise,
     searchStatePromise,
   ]);
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getCollectionProducts({
+  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const result = await commerce.products.getCollectionProducts({
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
@@ -70,7 +67,7 @@ export function getExactCollectionResultCount({
   result,
 }: {
   cursor?: string;
-  result: Awaited<ReturnType<typeof getCollectionProducts>>;
+  result: Awaited<ReturnType<typeof commerce.products.getCollectionProducts>>;
 }): number | undefined {
   if (cursor || result.pageInfo.hasNextPage) {
     return undefined;

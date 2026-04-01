@@ -10,7 +10,7 @@ import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
 
@@ -55,8 +55,8 @@ export async function Results({
 }) {
   const [t, tProduct] = await Promise.all([getTranslations("search"), getTranslations("product")]);
 
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
+  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const result = await commerce.products.getProducts({
     query,
     collection,
     sortKey: sort,

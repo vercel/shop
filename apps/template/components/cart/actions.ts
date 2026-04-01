@@ -1,14 +1,10 @@
 "use server";
 
 import { isEnabledLocale } from "@/lib/i18n";
-import {
-  addToCart,
-  getCart,
-  removeFromCart,
-  updateCart,
-  updateCartBuyerIdentity,
-  updateCartNote,
-} from "@/lib/shopify/operations/cart";
+import { commerce } from "@/lib/commerce";
+
+const { addToCart, getCart, removeFromCart, updateCart, updateCartBuyerIdentity, updateCartNote } =
+  commerce.cart;
 import type { Cart } from "@/lib/types";
 
 export type CartActionResult = {

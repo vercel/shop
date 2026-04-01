@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
@@ -223,8 +223,8 @@ async function SearchFilterContent({
   locale: Locale;
   activeFilters: Record<string, string | string[] | undefined>;
 }) {
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
+  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const result = await commerce.products.getProducts({
     query,
     collection,
     limit: RESULTS_PER_PAGE,
@@ -261,8 +261,8 @@ async function SearchResultCount({
   activeFilters: Record<string, string | string[] | undefined>;
 }) {
   const t = await getTranslations("search");
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
+  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const result = await commerce.products.getProducts({
     query,
     collection,
     sortKey: sort,

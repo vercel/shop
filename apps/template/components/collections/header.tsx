@@ -19,8 +19,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import type { getCollection } from "@/lib/shopify/operations/collections";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
+import { commerce } from "@/lib/commerce";
+import type { CollectionOperations } from "@/lib/commerce";
 import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 
 import type { CollectionResultsData } from "./data";
@@ -50,7 +50,7 @@ async function Render({
 }: {
   handlePromise: Promise<string>;
   locale: Locale;
-  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+  collectionPromise: Promise<Awaited<ReturnType<CollectionOperations["getCollection"]>>>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
   const [handle, collection, t, tSearch, menu] = await Promise.all([
@@ -58,7 +58,7 @@ async function Render({
     collectionPromise,
     getTranslations("collections.breadcrumb"),
     getTranslations("search"),
-    getMegamenuData(locale),
+    commerce.menu.getMegamenuData(locale),
   ]);
 
   if (!collection) {
@@ -159,7 +159,7 @@ export function CollectionHeader({
 }: {
   handlePromise: Promise<string>;
   locale: Locale;
-  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+  collectionPromise: Promise<Awaited<ReturnType<CollectionOperations["getCollection"]>>>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
   return (

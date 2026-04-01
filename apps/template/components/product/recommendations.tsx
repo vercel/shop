@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 
 import { RecommendationsCarousel } from "./recommendations-carousel";
 
@@ -36,7 +36,7 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   await connection();
   const [t, recommendations] = await Promise.all([
     getTranslations("product"),
-    getProductRecommendations(handle, locale),
+    commerce.products.getProductRecommendations(handle, locale),
   ]);
 
   if (recommendations.length === 0) return null;

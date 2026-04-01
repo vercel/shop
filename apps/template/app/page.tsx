@@ -7,7 +7,7 @@ import { Container } from "@/components/layout/container";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getProducts } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const featuredProductsResult = await getProducts({ limit: 10, locale });
+  const featuredProductsResult = await commerce.products.getProducts({ limit: 10, locale });
 
   return (
     <Container>

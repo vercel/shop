@@ -3,13 +3,13 @@ import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 
 export async function getProductDetails(handle: string, locale: string) {
   "use cache";
   cacheLife("max");
   cacheTag("products", `product:${handle}`);
-  const product = await getProduct(handle, locale);
+  const product = await commerce.products.getProduct(handle, locale);
 
   if (!product) {
     notFound();

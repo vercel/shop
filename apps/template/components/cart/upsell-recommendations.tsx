@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { RecommendationsCarousel } from "@/components/product/recommendations-carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { commerce } from "@/lib/commerce";
 
 interface UpsellsProps {
   locale: Locale;
@@ -19,7 +19,7 @@ async function UpsellsContent({ locale, firstItemHandle }: UpsellsProps) {
   }
 
   // Fetch product recommendations based on first cart item
-  const products = await getProductRecommendations(firstItemHandle, locale);
+  const products = await commerce.products.getProductRecommendations(firstItemHandle, locale);
 
   const recommendations = products.filter((product) => product.featuredImage?.url);
 

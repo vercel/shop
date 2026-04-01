@@ -4,7 +4,7 @@ import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/layout/container";
 import type { Locale } from "@/lib/i18n";
-import type { getCollection } from "@/lib/shopify/operations/collections";
+import type { CollectionOperations } from "@/lib/commerce";
 
 import { FilterTransitionProvider } from "./filter-pending-context";
 
@@ -15,7 +15,7 @@ export function CollectionDetailPage({
   searchParams,
 }: {
   handlePromise: Promise<string>;
-  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+  collectionPromise: Promise<Awaited<ReturnType<CollectionOperations["getCollection"]>>>;
   locale: Locale;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {

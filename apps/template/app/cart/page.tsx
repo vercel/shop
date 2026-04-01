@@ -12,7 +12,7 @@ import { Summary } from "@/components/cart/summary";
 import { Upsells } from "@/components/cart/upsell-recommendations";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
-import { getCart } from "@/lib/shopify/operations/cart";
+import { commerce } from "@/lib/commerce";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");
@@ -38,7 +38,7 @@ export default async function CartPage() {
 }
 
 async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages] = await Promise.all([getCart(), getMessages()]);
+  const [cart, messages] = await Promise.all([commerce.cart.getCart(), getMessages()]);
 
   return (
     <NextIntlClientProvider messages={{ cart: messages.cart }}>

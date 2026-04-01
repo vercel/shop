@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollection } from "@/lib/shopify/operations/collections";
+import { commerce } from "@/lib/commerce";
 
 // export async function generateStaticParams() {
 //   return [{ handle: "__placeholder__" }];
@@ -21,7 +21,7 @@ export async function generateMetadata({
   }
 
   const [collection, t] = await Promise.all([
-    getCollection(handle, locale),
+    commerce.collections.getCollection(handle, locale),
     getTranslations("seo"),
   ]);
 
@@ -81,7 +81,7 @@ export default async function CollectionPage({
   const [locale] = await Promise.all([getLocale()]);
   const handlePromise = params.then(({ handle }) => handle);
 
-  const collectionPromise = handlePromise.then((handle) => getCollection(handle, locale));
+  const collectionPromise = handlePromise.then((handle) => commerce.collections.getCollection(handle, locale));
 
   return (
     <CollectionDetailPage

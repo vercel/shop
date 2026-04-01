@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
-import { getCart } from "@/lib/shopify/operations/cart";
+import { commerce } from "@/lib/commerce";
 import type { ProductDetails } from "@/lib/types";
 
 import { CartStatusClient } from "./cart-status-client";
 
 async function Render({ productPromise }: { productPromise: Promise<ProductDetails> }) {
-  const [product, cart] = await Promise.all([productPromise, getCart()]);
+  const [product, cart] = await Promise.all([productPromise, commerce.cart.getCart()]);
 
   // Check if THIS specific variant is in the cart
   // Note: Cart uses variant IDs, but we need to match by product handle
