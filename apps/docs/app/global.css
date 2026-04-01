@@ -173,6 +173,7 @@
 .prose h5,
 .prose h6 {
   @apply tracking-tight;
+  font-family: var(--font-sans);
 }
 
 .prose code,
@@ -184,6 +185,9 @@
 }
 
 /* Bump fromsrc sidebar section headings from text-xs to text-sm */
+[aria-label="sidebar navigation"] {
+  font-family: var(--font-sans);
+}
 [aria-label="sidebar navigation"] section > h3 {
   font-size: 0.875rem;
   line-height: 1.25rem;
