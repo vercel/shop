@@ -1,4 +1,5 @@
 import type { MDXComponents } from "mdx/types";
+import { H1, H2, H3, H4, H5, H6 } from "fromsrc/client";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { CartBrowser } from "@/components/fake-browser/cart-browser";
@@ -69,6 +70,13 @@ export const mdxComponents: MDXComponents = {
       />
     );
   },
+
+  h1: H1,
+  h2: H2,
+  h3: H3,
+  h4: H4,
+  h5: H5,
+  h6: H6,
 
   Card,
   Cards,
