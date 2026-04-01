@@ -76,7 +76,6 @@ const HomePage = () => (
 			<OneTwoSection
 				description="Product pages serve structured markdown to LLM agents via Accept header — making your catalog AI-readable."
 				title="Content negotiation"
-				reverse
 			>
 				<ContentNegotiationDemo />
 			</OneTwoSection>
