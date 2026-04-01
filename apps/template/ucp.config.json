@@ -1,0 +1,28 @@
+{
+  "ucp_version": "2026-01-11",
+  "roles": ["business"],
+  "runtime": "nodejs",
+  "capabilities": {
+    "core": ["dev.ucp.shopping.checkout"],
+    "extensions": [
+      "dev.ucp.shopping.catalog_search",
+      "dev.ucp.shopping.catalog_lookup"
+    ]
+  },
+  "transports": ["rest", "mcp"],
+  "transport_priority": ["rest", "mcp"],
+  "payment_handlers": [],
+  "features": {
+    "ap2_mandates": false,
+    "identity_linking": false,
+    "multi_destination_fulfillment": false
+  },
+  "domain": "",
+  "policy_urls": {
+    "privacy": "",
+    "terms": "",
+    "refunds": "",
+    "shipping": ""
+  },
+  "scaffold_depth": "full"
+}

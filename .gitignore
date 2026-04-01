@@ -56,3 +56,4 @@ certificates
 
 # opensrc - source code for packages
 opensrc/
+.ucp-spec/
