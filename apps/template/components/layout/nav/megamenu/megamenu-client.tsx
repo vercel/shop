@@ -7,7 +7,7 @@ import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } fro
 import { RemoveScroll } from "react-remove-scroll";
 
 import { Button } from "@/components/ui/button";
-import type { MegamenuItem } from "@/lib/shopify/types/megamenu";
+import type { MegamenuItem } from "@/lib/types";
 
 import { MegamenuPanel } from "./megamenu-panel";
 import { MenuTriggerIcon } from "./menu-trigger-icon";

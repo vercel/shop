@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import type { MegamenuPanel as MegamenuPanelType } from "@/lib/shopify/types/megamenu";
+import type { MegamenuPanel as MegamenuPanelType } from "@/lib/types";
 
 type Props = {
   panel: MegamenuPanelType;

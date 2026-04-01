@@ -213,7 +213,7 @@ declare const messages: {
     "homepage": {
       "hero": {
         "headline": "Start selling with {storeName}",
-        "subheadline": "A clean Shopify storefront you can shape as you go.",
+        "subheadline": "A clean storefront you can shape as you go.",
         "ctaText": "Browse the catalog"
       },
       "intro": {

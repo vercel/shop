@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 import { commerce } from "@/lib/commerce";
-import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import type { Filter, PriceRange } from "@/lib/types";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 
@@ -14,7 +14,8 @@ export interface CollectionResultsData {
   activeFilters: Record<string, string | string[] | undefined>;
   cursor?: string;
   result: Awaited<ReturnType<typeof commerce.products.getCollectionProducts>>;
-  transformedFilters: TransformedFilters;
+  filters: Filter[];
+  priceRange?: PriceRange;
 }
 
 export async function getCollectionSearchState(
@@ -42,13 +43,13 @@ export async function getCollectionResultsData({
     handlePromise,
     searchStatePromise,
   ]);
-  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const productFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
   const result = await commerce.products.getCollectionProducts({
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
     cursor,
-    filters: shopifyFilters,
+    filters: productFilters,
     locale,
   });
 
@@ -56,9 +57,8 @@ export async function getCollectionResultsData({
     activeFilters,
     cursor,
     result,
-    transformedFilters: transformShopifyFilters(result.filters, {
-      activeFilters,
-    }),
+    filters: result.filters,
+    priceRange: result.priceRange,
   };
 }
 

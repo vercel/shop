@@ -107,7 +107,7 @@ export async function POST(request: Request) {
   const page = await resolvePageContext(segments, locale, referer);
 
   // Get or create cart before streaming (cookies can't be set during stream)
-  let cartId = store.get("shopify_cartId")?.value;
+  let cartId = store.get("cartId")?.value;
   let newCartCookie: string | undefined;
 
   if (!cartId) {
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
     // Build Set-Cookie header value for the new cart
     const secure = process.env.NODE_ENV === "production";
     const maxAge = 60 * 60 * 24 * 7; // 7 days
-    newCartCookie = `shopify_cartId=${cartId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure ? "; Secure" : ""}`;
+    newCartCookie = `cartId=${cartId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure ? "; Secure" : ""}`;
   }
 
   return withAgentContext(

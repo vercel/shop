@@ -1,4 +1,4 @@
-import type { MegamenuData } from "@/lib/shopify/types/megamenu";
+import type { MegamenuData } from "@/lib/types";
 import type { Category } from "@/lib/types";
 
 export interface BreadcrumbSegment {
@@ -42,8 +42,8 @@ function findMenuPathByName(name: string, menu: MegamenuData): BreadcrumbSegment
 }
 
 /**
- * Compare two collection hrefs ignoring the trailing `-\d+` suffix that Shopify
- * appends to duplicate collections (e.g. `-1` vs `-12`).
+ * Compare two collection hrefs ignoring trailing `-\d+` suffixes
+ * that some providers append to duplicate collections.
  */
 function handleMatches(a: string, b: string): boolean {
   return a.replace(/-\d+$/, "") === b.replace(/-\d+$/, "");
@@ -51,7 +51,7 @@ function handleMatches(a: string, b: string): boolean {
 
 /**
  * Find the deepest menu path for a product by matching its collection handles
- * against the megamenu hrefs. Normalizes handles to ignore Shopify's duplicate
+ * against the megamenu hrefs. Normalizes handles to ignore duplicate
  * collection suffixes. Exits early when max depth (3) is reached.
  */
 function findDeepestCollectionPath(handles: string[], menu: MegamenuData): BreadcrumbSegment[] {

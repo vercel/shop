@@ -9,10 +9,7 @@ const nextConfig: NextConfig = {
   images: {
     minimumCacheTTL: 31536000,
     remotePatterns: [
-      {
-        hostname: "cdn.shopify.com",
-        protocol: "https",
-      },
+      { hostname: "storage.googleapis.com", protocol: "https" },
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },

@@ -2,7 +2,7 @@
  * UCP Handlers — Commerce operations mapped to UCP types
  *
  * These handlers bridge UCP REST/MCP requests to the CommerceProvider.
- * Shopify cart serves as the checkout session (cart ID = session ID).
+ * The commerce cart serves as the checkout session (cart ID = session ID).
  */
 
 import { commerce } from "@/lib/commerce";
@@ -138,7 +138,7 @@ export async function listCollections(locale?: string): Promise<UCPCollection[]>
   }));
 }
 
-// ─── Checkout (backed by Shopify Cart) ───────────────────────────────────────
+// ─── Checkout (backed by Commerce Cart) ──────────────────────────────────────
 
 function cartToCheckoutSession(cart: NonNullable<Awaited<ReturnType<typeof commerce.cart.getCart>>>): UCPCheckoutSession {
   const baseUrl = getBaseUrl();
@@ -201,7 +201,7 @@ export async function createCheckoutSession(params: {
   line_items: Array<{ variant_id: string; quantity: number }>;
   locale?: string;
 }): Promise<UCPCheckoutSession> {
-  // Create a cart (which is the Shopify checkout session)
+  // Create a cart (which serves as the checkout session)
   const cart = await commerce.cart.createCartWithoutCookie(params.locale);
 
   if (params.line_items.length > 0 && cart.id) {

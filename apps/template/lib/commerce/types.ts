@@ -2,20 +2,16 @@ import type { Locale } from "@/lib/i18n";
 import type {
   Cart,
   Collection,
+  Filter,
   MarketingPage,
+  MegamenuData,
+  NavigationMenu,
   PageInfo,
   PredictiveSearchResult,
+  PriceRange,
   ProductDetails,
+  ProductFilterInput,
 } from "@/lib/types";
-
-import type { ProductFilter, ShopifyFilter } from "@/lib/shopify/types/filters";
-import type { Menu } from "@/lib/shopify/types/menu";
-import type { MegamenuData } from "@/lib/shopify/types/megamenu";
-
-// Re-export types that consumers need
-export type { ProductFilter, ShopifyFilter } from "@/lib/shopify/types/filters";
-export type { Menu, MenuItem, MenuItemType } from "@/lib/shopify/types/menu";
-export type { MegamenuData, MegamenuItem, MegamenuPanel, MegamenuCategory } from "@/lib/shopify/types/megamenu";
 
 export interface ProductOperations {
   getProduct(handle: string, locale?: string): Promise<ProductDetails>;
@@ -25,25 +21,27 @@ export interface ProductOperations {
     sortKey?: string;
     limit?: number;
     cursor?: string;
-    filters?: ProductFilter[];
+    filters?: ProductFilterInput[];
     locale?: string;
   }): Promise<{
     products: ProductDetails[];
     total: number;
     pageInfo: PageInfo;
-    filters: ShopifyFilter[];
+    filters: Filter[];
+    priceRange?: PriceRange;
   }>;
   getCollectionProducts(params: {
     collection: string;
     limit?: number;
     sortKey?: string;
     cursor?: string;
-    filters?: ProductFilter[];
+    filters?: ProductFilterInput[];
     locale?: string;
   }): Promise<{
     products: ProductDetails[];
     pageInfo: PageInfo;
-    filters: ShopifyFilter[];
+    filters: Filter[];
+    priceRange?: PriceRange;
   }>;
   getProductRecommendations(handle: string, locale?: string): Promise<ProductDetails[]>;
   getProductById(id: string, locale?: string): Promise<ProductDetails>;
@@ -51,7 +49,7 @@ export interface ProductOperations {
   getProductsByHandles(handles: string[], locale?: string): Promise<ProductDetails[]>;
   buildProductFiltersFromParams(
     searchParams: Record<string, string | string[] | undefined>,
-  ): ProductFilter[];
+  ): ProductFilterInput[];
 }
 
 export type CartShippingOption = {
@@ -113,7 +111,7 @@ export interface SearchOperations {
 }
 
 export interface MenuOperations {
-  getMenu(handle: string, locale?: string): Promise<Menu | null>;
+  getMenu(handle: string, locale?: string): Promise<NavigationMenu | null>;
   getMegamenuData(locale?: string): Promise<MegamenuData>;
 }
 

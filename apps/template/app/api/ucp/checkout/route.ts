@@ -2,7 +2,7 @@
  * UCP Checkout Session Endpoint
  * POST /api/ucp/checkout — Create checkout session
  *
- * Maps to Shopify cart creation + line item addition.
+ * Maps to commerce cart creation + line item addition.
  */
 
 import {

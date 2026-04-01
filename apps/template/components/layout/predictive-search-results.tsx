@@ -163,7 +163,7 @@ function SuggestionItem({
       <Search className="size-3.5 shrink-0 text-muted-foreground" />
       <span
         className="truncate [&_b]:font-semibold"
-        // oxlint-disable-next-line react/no-danger -- styledText from Shopify API contains safe markup (<b> tags)
+        // oxlint-disable-next-line react/no-danger -- styledText from search API contains safe markup (<b> tags)
         dangerouslySetInnerHTML={{ __html: suggestion.styledText }}
       />
     </button>

@@ -14,12 +14,12 @@ async function Render({
 }: {
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const { activeFilters, transformedFilters } = await collectionResultsDataPromise;
+  const { activeFilters, filters, priceRange } = await collectionResultsDataPromise;
 
   return (
     <CollectionFilterSidebarClient
-      filters={transformedFilters.filters}
-      priceRange={transformedFilters.priceRange}
+      filters={filters}
+      priceRange={priceRange}
       activeFilters={activeFilters}
     />
   );

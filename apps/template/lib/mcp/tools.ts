@@ -226,7 +226,7 @@ export const mcpTools: McpToolDefinition[] = [
             properties: {
               merchandise_id: {
                 type: "string",
-                description: "Product variant ID (gid://shopify/ProductVariant/...)",
+                description: "Product variant ID from the commerce provider",
               },
               quantity: { type: "number", minimum: 1 },
             },

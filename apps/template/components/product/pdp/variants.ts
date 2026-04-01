@@ -3,17 +3,19 @@ import type { Image, ProductOption, ProductVariant } from "@/lib/types";
 export type SelectedOptions = Record<string, string>;
 
 /**
- * Extract the numeric ID from a Shopify GID string.
- * e.g. "gid://shopify/ProductVariant/1234567890" → "1234567890"
- *
- * Handles both raw GID strings and base64-encoded GIDs.
- * Returns `null` if the ID cannot be extracted.
+ * Extract a numeric ID from a provider ID string.
+ * Handles GID formats (e.g. "gid://provider/ProductVariant/123" → "123"),
+ * base64-encoded IDs, and plain numeric strings.
+ * Returns `null` if no numeric ID can be extracted.
  */
-export function getNumericShopifyId(gid: string): string | null {
-  let decoded = gid;
+export function getNumericId(id: string): string | null {
+  // Already a plain number
+  if (/^\d+$/.test(id)) return id;
 
-  // If it doesn't look like a GID, try base64 decoding
-  if (!decoded.startsWith("gid://")) {
+  let decoded = id;
+
+  // Try base64 decoding if it doesn't look like a URI
+  if (!decoded.includes("://")) {
     try {
       decoded = atob(decoded);
     } catch {
@@ -21,7 +23,8 @@ export function getNumericShopifyId(gid: string): string | null {
     }
   }
 
-  const match = decoded.match(/gid:\/\/shopify\/\w+\/(\d+)/);
+  // Extract trailing numeric segment from URI-style IDs
+  const match = decoded.match(/\/(\d+)(?:\?|$)/);
   return match?.[1] ?? null;
 }
 
@@ -35,7 +38,7 @@ export function computeInitialSelectedOptions(
 ): SelectedOptions {
   if (initialVariantId) {
     const matchedVariant = variants.find((v) => {
-      const numericId = getNumericShopifyId(v.id);
+      const numericId = getNumericId(v.id);
       return numericId === initialVariantId;
     });
     if (matchedVariant) {
@@ -98,7 +101,7 @@ export function getVariantUrl(
     );
   }
 
-  const numericId = variant ? getNumericShopifyId(variant.id) : null;
+  const numericId = variant ? getNumericId(variant.id) : null;
   if (numericId) {
     return `/products/${handle}?variantId=${numericId}`;
   }

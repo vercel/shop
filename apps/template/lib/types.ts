@@ -20,7 +20,7 @@ export function normalizeSearchParams(
  * Core types for the commerce template
  *
  * These types define the contract between data sources and components.
- * Each integration (Shopify, Algolia, etc.) transforms their API responses
+ * Each commerce provider transforms their API responses
  * into these types.
  */
 
@@ -341,3 +341,55 @@ export interface Homepage {
 }
 
 export type LocalizedSlugs = Record<Locale, string | null>;
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+
+export interface NavigationMenuItem {
+  id: string;
+  title: string;
+  url: string;
+  type?: string;
+  items: NavigationMenuItem[];
+}
+
+export interface NavigationMenu {
+  id: string;
+  handle: string;
+  title: string;
+  items: NavigationMenuItem[];
+}
+
+export interface MegamenuCategory {
+  href: string;
+  title: string;
+}
+
+export interface MegamenuPanel {
+  id: string;
+  header: string;
+  href: string | null;
+  categories: MegamenuCategory[];
+}
+
+export interface MegamenuItem {
+  id: string;
+  label: string;
+  href: string | null;
+  panels: MegamenuPanel[];
+}
+
+export interface MegamenuData {
+  items: MegamenuItem[];
+}
+
+// ── Filter input ────────────────────────────────────────────────────────────
+
+export interface ProductFilterInput {
+  available?: boolean;
+  price?: { min?: number; max?: number };
+  vendor?: string;
+  productType?: string;
+  tag?: string;
+  option?: { name: string; value: string };
+  metafield?: { namespace: string; key: string; value: string };
+}

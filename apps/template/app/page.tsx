@@ -38,7 +38,7 @@ export default async function HomePage() {
           hero={{
             id: "homepage-hero",
             headline: `Start selling with ${siteConfig.name}`,
-            subheadline: "A clean Shopify storefront you can shape as you go.",
+            subheadline: "A clean storefront you can shape as you go.",
             ctaText: "Browse the catalog",
             ctaLink: "/search",
           }}
@@ -49,7 +49,7 @@ export default async function HomePage() {
             <h2 className="text-3xl font-semibold tracking-tight">Built to launch first, customize later</h2>
             <div className="prose prose-neutral max-w-2xl">
               <p>
-                A Shopify storefront built with Next.js. Connect your store and you get product
+                A storefront built with Next.js. Connect your commerce backend and you get product
                 pages, collections, a cart, and search. It works out of the box, and every part
                 of it is yours to change.
               </p>

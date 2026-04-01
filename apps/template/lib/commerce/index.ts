@@ -1,6 +1,6 @@
-import { shopifyProvider } from "./providers/shopify";
+import { stubProvider } from "./providers/stub";
 
-export const commerce = shopifyProvider;
+export const commerce = stubProvider;
 
 export type { CommerceProvider } from "./types";
 export type {
@@ -12,13 +12,4 @@ export type {
   ProductOperations,
   SearchOperations,
   SitemapOperations,
-  ProductFilter,
-  ShopifyFilter,
-  Menu,
-  MenuItem,
-  MenuItemType,
-  MegamenuData,
-  MegamenuItem,
-  MegamenuPanel,
-  MegamenuCategory,
 } from "./types";

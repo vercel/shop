@@ -1,4 +1,4 @@
-import type { MegamenuItem } from "@/lib/shopify/types/megamenu";
+import type { MegamenuItem } from "@/lib/types";
 
 import { MegamenuClient } from "./megamenu-client";
 

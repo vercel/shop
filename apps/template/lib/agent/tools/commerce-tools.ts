@@ -115,7 +115,7 @@ You can get handles from search results or the current page context.`,
     getProductRecommendations: tool({
       description: `Get product recommendations for a given product.
 Use this when the user asks "what goes well with this?" or wants similar/related products.
-Returns AI-powered recommendations from Shopify.`,
+Returns related product recommendations.`,
       inputSchema: z.object({
         handle: z.string().describe("The product handle to get recommendations for"),
       }),
@@ -237,14 +237,14 @@ Get collection handles from the listCollections tool or the current page context
     addToCart: tool({
       description: `Add a product variant to the cart.
 
-IMPORTANT: You must use the variant_id (e.g., "gid://shopify/ProductVariant/..."), NOT the product_id.
+IMPORTANT: You must use the variant_id, NOT the product_id.
 When the user is on a product page, the available variant IDs are provided in the context.
 If there are multiple variants (sizes, colors), ask the user which one they want before calling this tool.`,
       inputSchema: z.object({
         variant_id: z
           .string()
           .describe(
-            "The Shopify variant ID (gid://shopify/ProductVariant/...). Get this from the product context.",
+            "The product variant ID. Get this from the product context.",
           ),
         quantity: z
           .number()
@@ -364,7 +364,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
         lineId: z
           .string()
           .describe(
-            "The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')",
+            "The cart line item ID from getCart results",
           ),
         merchandiseId: z.string().describe("The merchandise/variant ID from getCart results"),
         quantity: z.number().min(1).max(99).describe("New quantity for the item"),
@@ -408,7 +408,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
         lineId: z
           .string()
           .describe(
-            "The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')",
+            "The cart line item ID from getCart results",
           ),
       }),
       execute: async ({ lineId }) => {

@@ -11,7 +11,6 @@ import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { commerce } from "@/lib/commerce";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
 
 const RESULTS_SKELETON_KEYS = Array.from(
@@ -55,20 +54,17 @@ export async function Results({
 }) {
   const [t, tProduct] = await Promise.all([getTranslations("search"), getTranslations("product")]);
 
-  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const productFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
   const result = await commerce.products.getProducts({
     query,
     collection,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
     cursor,
-    filters: shopifyFilters,
+    filters: productFilters,
     locale,
   });
 
-  const transformedFilters = transformShopifyFilters(result.filters, {
-    activeFilters,
-  });
   const products = result.products;
 
   return (
@@ -76,8 +72,8 @@ export async function Results({
       <aside className="hidden md:block w-64 shrink-0">
         <FilterPendingScope>
           <CollectionFilterSidebarClient
-            filters={transformedFilters.filters}
-            priceRange={transformedFilters.priceRange}
+            filters={result.filters}
+            priceRange={result.priceRange}
             activeFilters={activeFilters}
           />
         </FilterPendingScope>

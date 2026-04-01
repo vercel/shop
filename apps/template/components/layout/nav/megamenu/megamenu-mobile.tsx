@@ -11,7 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { MegamenuData } from "@/lib/shopify/types/megamenu";
+import type { MegamenuData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type MegamenuMobileProps = {

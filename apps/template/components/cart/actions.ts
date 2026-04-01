@@ -213,7 +213,7 @@ export async function updateCartNoteAction(note: string): Promise<CartActionResu
 }
 
 /**
- * Add item to cart and return the Shopify checkout URL.
+ * Add item to cart and return the checkout URL.
  * Used by "Buy Now" — adds to whatever is already in the cart, then redirects.
  */
 export async function buyNowAction(
@@ -238,7 +238,7 @@ export async function buyNowAction(
 
 /**
  * Return the checkout URL for the current cart.
- * Called before redirecting to Shopify checkout.
+ * Called before redirecting to checkout.
  */
 export async function prepareCheckoutAction(): Promise<{
   checkoutUrl: string | null;

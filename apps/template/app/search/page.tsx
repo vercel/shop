@@ -31,7 +31,6 @@ import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { commerce } from "@/lib/commerce";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
 import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 
@@ -223,23 +222,19 @@ async function SearchFilterContent({
   locale: Locale;
   activeFilters: Record<string, string | string[] | undefined>;
 }) {
-  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const productFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
   const result = await commerce.products.getProducts({
     query,
     collection,
     limit: RESULTS_PER_PAGE,
-    filters: shopifyFilters,
+    filters: productFilters,
     locale,
-  });
-
-  const transformedFilters = transformShopifyFilters(result.filters, {
-    activeFilters,
   });
 
   return (
     <CollectionFilterSidebarClient
-      filters={transformedFilters.filters}
-      priceRange={transformedFilters.priceRange}
+      filters={result.filters}
+      priceRange={result.priceRange}
       activeFilters={activeFilters}
     />
   );
@@ -261,14 +256,14 @@ async function SearchResultCount({
   activeFilters: Record<string, string | string[] | undefined>;
 }) {
   const t = await getTranslations("search");
-  const shopifyFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
+  const productFilters = commerce.products.buildProductFiltersFromParams(activeFilters);
   const result = await commerce.products.getProducts({
     query,
     collection,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
     cursor,
-    filters: shopifyFilters,
+    filters: productFilters,
     locale,
   });
 

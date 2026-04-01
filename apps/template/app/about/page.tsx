@@ -4,7 +4,7 @@ import { Container } from "@/components/layout/container";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Vercel Shop, a Next.js storefront template for Shopify.",
+  description: "Learn about Vercel Shop, a Next.js storefront template.",
 };
 
 export default function AboutPage() {
@@ -13,13 +13,13 @@ export default function AboutPage() {
       <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
         <h1>About Vercel Shop</h1>
         <p>
-          Vercel Shop is a Next.js storefront that connects to Shopify. You get product pages,
-          collections, a cart, and search out of the box. Point it at your store and you're selling.
+          Vercel Shop is a Next.js storefront template. You get product pages,
+          collections, a cart, and search out of the box. Connect your commerce backend and you're selling.
         </p>
         <p>
           The template is built for agents. It includes context files, structured skills, and
           recipes that describe common tasks so a coding agent can pick them up and run. Enable
-          Shopify Markets, swap your CMS, add customer accounts: each one is a single command.
+          your commerce backend, swap your CMS, add customer accounts: each one is a single command.
         </p>
         <p>
           Pages render on the server and stream by default. The cart is optimistic. Collection

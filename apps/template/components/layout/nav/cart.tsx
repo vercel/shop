@@ -6,7 +6,7 @@ import { commerce } from "@/lib/commerce";
 import { CartIconClient } from "./cart-client";
 
 export async function CartIcon() {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = (await cookies()).get("cartId")?.value;
   const cart = cartId ? await commerce.cart.getCart(cartId) : undefined;
 
   return <CartIconClient initialCart={cart ?? null} />;

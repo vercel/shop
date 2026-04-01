@@ -22,7 +22,7 @@ import {
   FilterSidebarHeader,
   FilterSidebarScrollFade,
 } from "@/components/ui/filter-sidebar";
-import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
+import { getActiveFilterBadges } from "@/lib/utils/filter-params";
 import type { Filter, PriceRange } from "@/lib/types";
 
 interface CollectionFilterSidebarClientProps {
