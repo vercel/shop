@@ -34,7 +34,7 @@ export default async function DocsPage({ params }: Props) {
       </article>
       <aside className="hidden xl:block w-56 shrink-0 py-12">
         <div className="sticky top-12">
-          <Toc title="On this page" />
+          <Toc title="" />
         </div>
       </aside>
     </div>
