@@ -9,6 +9,7 @@ import { CartDemo } from "./components/cart-demo";
 import { CenteredSection } from "./components/centered-section";
 import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
+import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
 const title = "Vercel Shop";
@@ -71,6 +72,13 @@ const HomePage = () => (
 				reverse
 			>
 				<CartDemo />
+			</OneTwoSection>
+			<OneTwoSection
+				description="Product pages serve structured markdown to LLM agents via Accept header — making your catalog AI-readable."
+				title="Content negotiation"
+				reverse
+			>
+				<ContentNegotiationDemo />
 			</OneTwoSection>
 			<CTA cta="Get started" href="/docs" title="Start your shop today" />
 		</div>
