@@ -32,7 +32,7 @@ export default async function DocsPage({ params }: Props) {
           options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
         />
       </article>
-      <aside className="hidden xl:block w-56 shrink-0 py-12">
+      <aside className="hidden xl:block w-56 shrink-0">
         <div className="sticky top-12">
           <Toc title="" />
         </div>
