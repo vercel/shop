@@ -115,7 +115,7 @@ export const CartDemo = () => {
 	return (
 		<div
 			ref={ref}
-			className="relative flex h-64 flex-col overflow-hidden rounded-xl border bg-black/5 dark:bg-white/5 sm:h-72"
+			className="relative flex h-64 flex-col overflow-hidden rounded-xl border bg-white dark:bg-white/5 sm:h-72"
 		>
 			{/* Header with cart icon */}
 			<div className="flex items-center justify-between px-4 py-2.5">
@@ -140,7 +140,7 @@ export const CartDemo = () => {
 			{/* Split view: products | cart */}
 			<div className="flex flex-1 gap-px overflow-hidden bg-fd-border">
 				{/* Product list */}
-				<div className="relative flex flex-1 flex-col gap-2 bg-black/5 p-3 dark:bg-white/5">
+				<div className="relative flex flex-1 flex-col gap-2 bg-white p-3 dark:bg-white/5">
 					{/* First product row */}
 					<div className="flex items-center gap-3 rounded-lg border bg-fd-background p-2.5">
 						<div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-black/10 dark:bg-white/10 sm:size-16">

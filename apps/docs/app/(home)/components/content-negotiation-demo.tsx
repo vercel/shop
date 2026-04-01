@@ -83,15 +83,15 @@ export const ContentNegotiationDemo = () => {
 	return (
 		<div
 			ref={ref}
-			className="flex h-80 flex-col overflow-hidden rounded-xl border bg-[#0a0a0a] sm:h-96"
+			className="flex h-80 flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#0a0a0a] sm:h-96"
 		>
-			<div className="flex items-center gap-2 border-b border-white/10 px-4 py-2">
+			<div className="flex items-center gap-2 border-b border-black/10 dark:border-white/10 px-4 py-2">
 				<div className="flex gap-1.5">
-					<div className="size-2.5 rounded-full bg-white/20" />
-					<div className="size-2.5 rounded-full bg-white/20" />
-					<div className="size-2.5 rounded-full bg-white/20" />
+					<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
+					<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
+					<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
 				</div>
-				<span className="mx-auto font-mono text-[11px] text-white/40">
+				<span className="mx-auto font-mono text-[11px] text-black/40 dark:text-white/40">
 					terminal
 				</span>
 			</div>
@@ -99,13 +99,13 @@ export const ContentNegotiationDemo = () => {
 			<div className="flex flex-1 flex-col gap-1 overflow-hidden p-4">
 				{phase !== "idle" && (
 					<div className="flex items-start gap-2 animate-[fade-in_0.15s_ease]">
-						<span className="font-mono text-xs text-green-400">$</span>
-						<span className="font-mono text-xs text-white break-all">
+						<span className="font-mono text-xs text-green-600 dark:text-green-400">$</span>
+						<span className="font-mono text-xs text-black dark:text-white break-all">
 							{phase === "typing"
 								? CURL_COMMAND.slice(0, charIndex)
 								: CURL_COMMAND}
 							{phase === "typing" && (
-								<span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-white/70" />
+								<span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-black/70 dark:bg-white/70" />
 							)}
 						</span>
 					</div>
@@ -113,7 +113,7 @@ export const ContentNegotiationDemo = () => {
 
 				{phase === "loading" && (
 					<div className="mt-1 animate-[fade-in_0.2s_ease]">
-						<span className="inline-flex items-center gap-1.5 text-xs text-blue-400">
+						<span className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
 							<svg
 								className="size-3 animate-spin"
 								fill="none"
@@ -135,16 +135,16 @@ export const ContentNegotiationDemo = () => {
 								key={i}
 								className={`font-mono text-xs leading-relaxed ${
 									line.startsWith("# ")
-										? "text-white font-bold text-sm"
+										? "text-black dark:text-white font-bold text-sm"
 										: line.startsWith("## ")
-											? "text-white/90 font-semibold mt-1"
+											? "text-black/90 dark:text-white/90 font-semibold mt-1"
 											: line.startsWith("| ")
-												? "text-white/40"
+												? "text-black/40 dark:text-white/40"
 												: line.startsWith("- ")
-													? "text-white/50"
+													? "text-black/50 dark:text-white/50"
 													: line.startsWith("**")
-														? "text-white/70"
-														: "text-white/50"
+														? "text-black/70 dark:text-white/70"
+														: "text-black/50 dark:text-white/50"
 								}`}
 							>
 								{line || "\u00A0"}

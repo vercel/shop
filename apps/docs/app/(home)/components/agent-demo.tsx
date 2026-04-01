@@ -76,19 +76,19 @@ const LogLine = ({
 			<span
 				className={
 					icon === "add"
-						? "shrink-0 text-green-400"
-						: "shrink-0 text-yellow-400"
+						? "shrink-0 text-green-600 dark:text-green-400"
+						: "shrink-0 text-yellow-600 dark:text-yellow-400"
 				}
 			>
 				{icon === "add" ? "+" : "~"}
 			</span>
-			<span className="text-white/50">{text}</span>
+			<span className="text-black/50 dark:text-white/50">{text}</span>
 		</div>
 	);
 };
 
 const Spinner = () => (
-	<span className="inline-flex items-center gap-1.5 text-xs text-blue-400">
+	<span className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
 		<svg
 			className="size-3 animate-spin"
 			fill="none"
@@ -202,16 +202,16 @@ export const AgentDemo = () => {
 			{/* Terminal */}
 			<div
 				ref={ref}
-				className="flex h-64 flex-col overflow-hidden rounded-xl border bg-[#0a0a0a] sm:h-72"
+				className="flex h-64 flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#0a0a0a] sm:h-72"
 			>
 				{/* Terminal title bar */}
-				<div className="flex items-center gap-2 border-b border-white/10 px-4 py-2">
+				<div className="flex items-center gap-2 border-b border-black/10 dark:border-white/10 px-4 py-2">
 					<div className="flex gap-1.5">
-						<div className="size-2.5 rounded-full bg-white/20" />
-						<div className="size-2.5 rounded-full bg-white/20" />
-						<div className="size-2.5 rounded-full bg-white/20" />
+						<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
+						<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
+						<div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
 					</div>
-					<span className="mx-auto font-mono text-[11px] text-white/40">
+					<span className="mx-auto font-mono text-[11px] text-black/40 dark:text-white/40">
 						coding agent
 					</span>
 				</div>
@@ -221,15 +221,15 @@ export const AgentDemo = () => {
 					{/* Command input */}
 					{showCommand && (
 						<div className="flex items-center gap-2 animate-[fade-in_0.15s_ease]">
-							<span className="font-mono text-xs text-orange-400">
+							<span className="font-mono text-xs text-orange-600 dark:text-orange-400">
 								&gt;
 							</span>
-							<span className="font-mono text-xs text-white">
+							<span className="font-mono text-xs text-black dark:text-white">
 								{phase === "typing-command"
 									? skill.command.slice(0, charIndex)
 									: skill.command}
 								{phase === "typing-command" && (
-									<span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-white/70" />
+									<span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-black/70 dark:bg-white/70" />
 								)}
 							</span>
 						</div>
@@ -256,7 +256,7 @@ export const AgentDemo = () => {
 
 					{/* Done */}
 					{showDone && (
-						<div className="flex items-center gap-2 font-mono text-xs text-green-400 animate-[fade-in_0.3s_ease]">
+						<div className="flex items-center gap-2 font-mono text-xs text-green-600 dark:text-green-400 animate-[fade-in_0.3s_ease]">
 							<svg
 								className="size-3.5"
 								fill="none"
@@ -271,8 +271,8 @@ export const AgentDemo = () => {
 					)}
 
 					{/* Prompt input at bottom */}
-					<div className="mt-auto flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-						<span className="font-mono text-xs text-white/30">
+					<div className="mt-auto flex items-center gap-2 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-2">
+						<span className="font-mono text-xs text-black/30 dark:text-white/30">
 							Ask a question...
 						</span>
 					</div>

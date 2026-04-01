@@ -94,7 +94,7 @@ export const AssistantDemo = () => {
 	return (
 		<div
 			ref={ref}
-			className="flex h-64 flex-col justify-end overflow-hidden rounded-xl border bg-black/5 dark:bg-white/5 p-4 sm:h-72"
+			className="flex h-64 flex-col justify-end overflow-hidden rounded-xl border bg-white dark:bg-white/5 p-4 sm:h-72"
 		>
 			<div className="flex flex-col gap-3">
 				{/* User message */}
