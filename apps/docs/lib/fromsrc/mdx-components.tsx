@@ -7,7 +7,6 @@ import { ContentBrowser } from "@/components/fake-browser/content-browser";
 import { HomeBrowser } from "@/components/fake-browser/home-browser";
 import { PDPBrowser } from "@/components/fake-browser/pdp-browser";
 import { PLPBrowser } from "@/components/fake-browser/plp-browser";
-import { SkillContent } from "@/components/geistdocs/skill-content";
 
 /**
  * Simple Cards grid container — replaces fumadocs Cards component.
@@ -87,5 +86,4 @@ export const mdxComponents: MDXComponents = {
   PLPBrowser,
   CartBrowser,
   ContentBrowser,
-  SkillContent,
 };
