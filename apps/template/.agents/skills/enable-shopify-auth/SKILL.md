@@ -23,7 +23,7 @@ Add customer authentication using [better-auth](https://www.better-auth.com/) wi
 | `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
 | `SHOPIFY_STORE_DOMAIN`           | Already set — used for OIDC discovery                            |
 
-## Implementation steps
+## Part 1: Core auth plumbing (always run)
 
 ### Step 1. Install better-auth
 
@@ -328,6 +328,57 @@ import { toNextJsHandler } from "better-auth/next-js";
 export const { GET, POST } = toNextJsHandler(auth);
 ```
 
+### Shopify Admin setup
+
+1. Go to **Shopify Admin → Settings → Customer accounts**
+2. Enable **Customer Account API**
+3. Create a **Customer Account API client** (under "API clients")
+4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
+5. Copy the client ID and client secret to your environment variables
+6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+
+### Guardrails
+
+- Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
+- Always call `requireSession()` before any customer API operation
+- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference `.claude/schemas/shopify-customer.graphql`
+- Session cookies use `httpOnly` and `secure` flags automatically via better-auth
+- PKCE is enabled for the OAuth flow — never disable it
+
+---
+
+## After completing Part 1, ask the user:
+
+```json
+{
+  "questions": [
+    {
+      "question": "Auth plumbing is set up. Would you also like me to create the customer-facing UI?",
+      "header": "Auth UI",
+      "multiSelect": false,
+      "options": [
+        {
+          "label": "Yes, create the full UI",
+          "description": "Login page, account pages (profile, orders, addresses), nav account dropdown, authenticated checkout, and chat context. Includes all translation keys."
+        },
+        {
+          "label": "Skip UI for now",
+          "description": "Stop here. You can build the UI yourself or run this skill again later."
+        }
+      ]
+    }
+  ]
+}
+```
+
+If the user chooses **"Skip UI for now"**, stop here — Part 1 is complete and functional for programmatic use (server actions, API routes, session checks).
+
+If the user chooses **"Yes, create the full UI"**, proceed with Part 2.
+
+---
+
+## Part 2: Customer-facing UI (only if user opted in)
+
 ### Step 8. Create login page
 
 **`app/login/layout.tsx`**:
@@ -380,6 +431,8 @@ export default function LoginPage() {
   );
 }
 ```
+
+The login page uses `robots: { index: false, follow: false }` to prevent indexing.
 
 ### Step 9. Create customer operations
 
@@ -555,21 +608,3 @@ Add `seo.loginTitle`.
 Add `common.loginRedirecting`, `common.loginNotRedirected`, `common.loginClickHere`.
 
 Add full `account`, `orders`, and `address` sections. See the base `en.json` translations for the complete key set.
-
-## Shopify Admin setup
-
-1. Go to **Shopify Admin → Settings → Customer accounts**
-2. Enable **Customer Account API**
-3. Create a **Customer Account API client** (under "API clients")
-4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
-5. Copy the client ID and client secret to your environment variables
-6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
-
-## Guardrails
-
-- Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
-- Always call `requireSession()` before any customer API operation
-- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference `.claude/schemas/shopify-customer.graphql`
-- Session cookies use `httpOnly` and `secure` flags automatically via better-auth
-- The login page uses `robots: { index: false, follow: false }` to prevent indexing
-- PKCE is enabled for the OAuth flow — never disable it
