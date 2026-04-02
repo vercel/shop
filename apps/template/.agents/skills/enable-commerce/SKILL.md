@@ -28,6 +28,66 @@ Before implementing anything, read these files in order:
 5. **`lib/constants.ts`** — cache tag names (`TAGS.products`, `TAGS.collections`, `TAGS.cart`).
 6. **`lib/i18n.ts`** — how locale works (`Locale` type, `defaultLocale`, `getCountryCode`, `getLanguageCode`).
 
+## Step 1.5 — Explore the provider's API before writing any code
+
+This step is critical. Do NOT skip it. Implementing transforms against assumed data shapes leads to broken code. You must see real responses first.
+
+### a) Read the provider's API documentation
+
+Use `WebSearch` and `WebFetch` to read the provider's official API reference. Understand:
+- Authentication flow (OAuth2, API keys, bearer tokens, etc.)
+- How products are structured (variants, options, pricing model, images)
+- How categories/collections work (flat list vs tree, parent references)
+- How the cart/checkout API works (create, add items, what IDs are used)
+- How search/filtering works (full-text search, facets, available filters)
+- How pagination works (cursor-based, offset-based, page-based)
+- How prices are represented (cents vs decimals, currency handling, multi-currency)
+- How localized content works (field-level localization, locale parameter, etc.)
+
+### b) Make test API calls to see real response shapes
+
+Use `Bash` with `curl` to make real API requests against the user's credentials. This is non-negotiable — you must see the actual data before writing transforms.
+
+**Minimum exploration (do all of these):**
+
+```bash
+# 1. Authenticate — get a token or verify the API key works
+# 2. Fetch a single product — inspect EVERY field, especially:
+#    - How product names/descriptions are structured (plain string? localized object?)
+#    - How variants relate to products (embedded? separate? what's the variant ID format?)
+#    - How prices work (cents? decimals? multi-currency? discounts?)
+#    - How images are structured (URL format, dimensions, alt text)
+#    - How options/attributes work (color, size — how are they represented?)
+# 3. Fetch categories/collections — inspect hierarchy, slug format, parent references
+# 4. Create a test cart — see what the cart response looks like
+# 5. Check if search endpoint works — some providers require activation
+```
+
+**Print and study the raw JSON.** Pay attention to:
+- **ID formats** — are they UUIDs, numeric, GIDs, base64? Components pass these opaquely.
+- **Price format** — cents (integer) vs decimal (string)? How many fraction digits? What about multi-currency?
+- **Localized fields** — `Record<locale, string>` vs plain string? What locale keys exist in the data?
+- **Image URLs** — what CDN hostname? (You'll need to add it to `next.config.ts`)
+- **Variant structure** — how do variants encode options? Are they attributes? Separate option types?
+- **Availability** — how does the API indicate in-stock vs out-of-stock?
+
+### c) Document what you learned
+
+Before writing any code, write a brief internal comment in your `types.ts` file documenting the key mappings you discovered:
+
+```ts
+// Provider API observations:
+// - Products: localized fields as Record<string, string> with keys like "en-US", "en-GB"
+// - Prices: centPrecision format, centAmount (integer), fractionDigits (usually 2)
+// - Variant IDs: numeric (1, 2, 3) within a product — need productId#variantId encoding for cart
+// - Images: hosted on storage.googleapis.com, dimensions in { w, h } format
+// - Categories: tree structure with parent references and ancestor arrays
+// - Cart: versioned — every update requires current version number
+// - Search: /product-projections/search endpoint with facets (may need activation)
+```
+
+This prevents you from guessing and building transforms against wrong assumptions.
+
 ## Step 2 — Scaffold the provider
 
 Create the provider directory:
@@ -126,6 +186,43 @@ Add env vars to `.env.example`:
 <PROVIDER>_API_KEY=
 # ... provider-specific vars
 ```
+
+## Step 4 — Implement and test incrementally
+
+Do NOT implement all operations at once then test. Implement in this order, testing after each group:
+
+### Group 1: Products (get the homepage working)
+1. Implement `client.ts` (auth + fetch)
+2. Implement `types.ts` (provider response types from your Step 1.5 exploration)
+3. Implement `transforms/product.ts` (the hardest transform — get this right first)
+4. Implement `getProduct` and `getProducts`
+5. Wire the provider in `lib/commerce/index.ts` (even with stubs for other operations)
+6. **Test:** Run `pnpm dev`, load the homepage. Do products appear? Are prices correct? Images loading?
+7. **Fix issues before continuing.** The product transform is the foundation — everything depends on it.
+
+### Group 2: Collections + Navigation (get browsing working)
+1. Implement `transforms/collection.ts` and collection operations
+2. Implement menu operations (build nav from categories)
+3. **Test:** Click navigation links. Do collection pages load? Does the megamenu render?
+
+### Group 3: Search (get search working)
+1. Implement `predictiveSearch`
+2. Implement filter transforms if the provider supports facets
+3. **Test:** Type in the search bar. Do results appear? Try the search page.
+
+### Group 4: Cart (get buying working)
+1. Implement `transforms/cart.ts` and all cart operations
+2. Pay special attention to:
+   - How your variant IDs map to the cart API's expected format
+   - Cookie read/write for `"cartId"`
+   - Calling `invalidateCartCache()` after every mutation
+3. **Test:** Add to cart, view cart, update quantity, remove item. Check the cart icon badge updates.
+
+### Group 5: Remaining operations
+1. Recommendations, batch fetches, sitemap, CMS
+2. **Test:** PDP "You might also like", sitemap at `/sitemap.xml`
+
+**After each group, check the dev server console for errors.** Fix them before moving on. A broken product transform will cascade into broken cart, broken search, broken everything.
 
 ---
 
