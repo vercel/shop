@@ -44,7 +44,7 @@ Unavailable options render as inert `<span>` elements instead of links.
 
 The gallery adapts to screen size with two distinct components.
 
-**Desktop** — `ImageGrid` displays a thumbnail sidebar (80px wide, vertically scrollable) alongside a main image. Hovering or clicking a thumbnail selects it. Videos are supported inline with autoplay.
+**Desktop** — `ImageGrid` renders a side-by-side two-column grid of product images and videos. Clicking any image opens it in a lightbox — a full-viewport overlay powered by Radix Dialog. The lightbox supports closing via an explicit close button, clicking outside the image, or pressing Escape. The grid itself remains a server component; the interactive lightbox logic lives in a separate `Lightbox` client component.
 
 **Mobile** — `MobileCarousel` is a horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
 
@@ -109,7 +109,8 @@ The page emits two JSON-LD schemas:
 | `components/product/pdp/color-picker.tsx` | Color swatch Links with variant images |
 | `components/product/pdp/option-picker.tsx` | Text option Links (size, material, etc.) |
 | `components/product/pdp/product-info.tsx` | Header, options, and description composition |
-| `components/product/pdp/image-grid.tsx` | Desktop thumbnail + main image gallery |
+| `components/product/pdp/image-grid.tsx` | Desktop side-by-side image grid |
+| `components/product/pdp/lightbox.tsx` | Client component for full-viewport image lightbox |
 | `components/product/pdp/mobile-carousel.tsx` | Mobile horizontal snap-scroll carousel |
 | `components/product/pdp/buy-section-client.tsx` | Quantity selector, buy now, add to cart |
 | `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons |
