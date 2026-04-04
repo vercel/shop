@@ -6,10 +6,6 @@ import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "./shared";
 
-export async function generateStaticParams() {
-  return [{ handle: "__placeholder__" }];
-}
-
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
