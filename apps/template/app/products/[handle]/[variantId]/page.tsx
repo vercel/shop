@@ -6,9 +6,7 @@ import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "../shared";
 
-export async function generateStaticParams() {
-  return [{ handle: "__placeholder__", variantId: "__placeholder__" }];
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
