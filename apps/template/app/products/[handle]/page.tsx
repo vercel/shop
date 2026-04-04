@@ -4,7 +4,6 @@ import { Suspense } from "react";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
 import { ProductDetailSkeleton } from "@/components/product/pdp/product-detail-skeleton";
-import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "./shared";
@@ -17,17 +16,16 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
+export default function ProductPage({ params }: PageProps<"/products/[handle]">) {
   return (
     <Suspense fallback={<ProductDetailSkeleton />}>
-      <ProductContent handle={handle} locale={locale} />
+      <ProductContent params={params} />
     </Suspense>
   );
 }
 
-async function ProductContent({ handle, locale }: { handle: string; locale: Locale }) {
+async function ProductContent({ params }: { params: PageProps<"/products/[handle]">["params"] }) {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   const product = await getProductDetails(handle, locale);
 
   if (!product) {
