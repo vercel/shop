@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
-import { notFound } from "next/navigation";
 
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getProduct } from "@/lib/shopify/operations/products";
@@ -11,11 +10,7 @@ export async function getProductDetails(handle: string, locale: string) {
   cacheTag("products", `product:${handle}`);
   const product = await getProduct(handle, locale);
 
-  if (!product) {
-    notFound();
-  }
-
-  return product;
+  return product ?? null;
 }
 
 export async function buildProductMetadata(
@@ -24,6 +19,7 @@ export async function buildProductMetadata(
   canonicalPath: string,
 ): Promise<Metadata> {
   const product = await getProductDetails(handle, locale);
+  if (!product) return {};
   const images = product.featuredImage
     ? [
         {
