@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
+import { ProductDetailSkeleton } from "@/components/product/pdp/product-detail-skeleton";
 import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "./shared";
+
+export const unstable_instant = { prefetch: "static" as const };
 
 export async function generateMetadata({
   params,
@@ -15,7 +19,15 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
-  const productPromise = params.then(({ handle }) => getProductDetails(handle, locale));
 
-  return <ProductDetailPage productPromise={productPromise} locale={locale} />;
+  return (
+    <Suspense fallback={<ProductDetailSkeleton />}>
+      {params.then(({ handle }) => (
+        <ProductDetailPage
+          productPromise={getProductDetails(handle, locale)}
+          locale={locale}
+        />
+      ))}
+    </Suspense>
+  );
 }
