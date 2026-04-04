@@ -40,6 +40,9 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
 `;
 
 export async function getProduct(handle: string, locale: string = defaultLocale) {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
