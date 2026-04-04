@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getProduct } from "@/lib/shopify/operations/products";
 
 export async function getProductDetails(handle: string, locale: string) {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product:${handle}`);
-  const product = await getProduct(handle, locale);
-
-  return product ?? null;
+  return getProduct(handle, locale);
 }
 
 export async function buildProductMetadata(
