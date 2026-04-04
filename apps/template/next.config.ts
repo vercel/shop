@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
+  // cacheComponents: true, // Disabled: causes ISR fallback pages to serve text/html for RSC requests, breaking client-side navigation
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
