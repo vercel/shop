@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
-import { ProductDetailSkeleton } from "@/components/product/pdp/product-detail-skeleton";
 import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "../shared";
@@ -16,23 +14,32 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}?variantId=${variantId}`);
 }
 
-export default function ProductVariantPage({
+export default async function ProductVariantPage({
   params,
 }: PageProps<"/products/[handle]/[variantId]">) {
+  const locale = await getLocale();
+  const resolvedParams = params.then(({ handle, variantId }) => ({ handle, variantId }));
+  const productPromise = resolvedParams.then(({ handle }) => getProductDetails(handle, locale));
+
   return (
-    <Suspense fallback={<ProductDetailSkeleton />}>
-      <ProductVariantContent params={params} />
-    </Suspense>
+    <ProductVariantContent
+      productPromise={productPromise}
+      paramsPromise={resolvedParams}
+      locale={locale}
+    />
   );
 }
 
 async function ProductVariantContent({
-  params,
+  productPromise,
+  paramsPromise,
+  locale,
 }: {
-  params: PageProps<"/products/[handle]/[variantId]">["params"];
+  productPromise: Promise<Awaited<ReturnType<typeof getProductDetails>>>;
+  paramsPromise: Promise<{ handle: string; variantId: string }>;
+  locale: Awaited<ReturnType<typeof getLocale>>;
 }) {
-  const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
-  const product = await getProductDetails(handle, locale);
+  const [product, { variantId }] = await Promise.all([productPromise, paramsPromise]);
 
   if (!product) {
     notFound();
