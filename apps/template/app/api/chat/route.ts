@@ -48,12 +48,10 @@ async function resolvePageContext(
   const pageType = segments[0];
 
   if (pageType === "products" && segments.length >= 2) {
-    try {
-      const handle = segments[1];
-      const product = await getProduct(handle, locale);
+    const handle = segments[1];
+    const product = await getProduct(handle, locale);
+    if (product) {
       return { type: "product", product };
-    } catch {
-      // Product not found
     }
   }
 

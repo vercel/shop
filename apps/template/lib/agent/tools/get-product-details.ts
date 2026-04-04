@@ -22,6 +22,10 @@ You can get handles from search results or the current page context.`,
       try {
         const product = await getProduct(handle, user.locale);
 
+        if (!product) {
+          return { success: false, error: `Product not found: ${handle}` };
+        }
+
         return {
           success: true,
           product: {

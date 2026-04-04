@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
+import { ProductDetailSkeleton } from "@/components/product/pdp/product-detail-skeleton";
+import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "../shared";
-
-export async function generateStaticParams() {
-  return [{ handle: "__placeholder__", variantId: "__placeholder__" }];
-}
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]/[variantId]">): Promise<Metadata> {
   const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
-
-  if (handle === "__placeholder__") {
-    notFound();
-  }
 
   return buildProductMetadata(handle, locale, `/products/${handle}?variantId=${variantId}`);
 }
@@ -27,11 +22,27 @@ export default async function ProductVariantPage({
 }: PageProps<"/products/[handle]/[variantId]">) {
   const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
 
-  if (handle === "__placeholder__") {
+  return (
+    <Suspense fallback={<ProductDetailSkeleton />}>
+      <ProductVariantContent handle={handle} variantId={variantId} locale={locale} />
+    </Suspense>
+  );
+}
+
+async function ProductVariantContent({
+  handle,
+  variantId,
+  locale,
+}: {
+  handle: string;
+  variantId: string;
+  locale: Locale;
+}) {
+  const product = await getProductDetails(handle, locale);
+
+  if (!product) {
     notFound();
   }
-
-  const product = await getProductDetails(handle, locale);
 
   return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
 }

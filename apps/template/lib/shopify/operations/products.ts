@@ -55,7 +55,7 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
   });
 
   if (!data.productByHandle) {
-    throw new Error(`Product not found: ${handle}`);
+    return null;
   }
 
   tagProducts([data.productByHandle]);
