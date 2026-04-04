@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
@@ -5,6 +6,7 @@ import { Breadcrumb } from "@/components/product/breadcrumb";
 import { ImageGrid } from "@/components/product/pdp/image-grid";
 import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
 import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
+import { ProductDetailSkeleton } from "@/components/product/pdp/product-detail-skeleton";
 import {
   ProductInfo,
   ProductInfoDescription,
@@ -34,15 +36,44 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
   );
 }
 
-export async function ProductDetailPage({
-  product,
+export function ProductDetailPage({
+  productPromise,
   locale,
-  variantId,
+  variantIdPromise,
 }: {
-  product: ProductDetails;
+  productPromise: Promise<ProductDetails | null>;
   locale: Locale;
-  variantId?: string;
+  variantIdPromise?: Promise<string>;
 }) {
+  return (
+    <Suspense fallback={<ProductDetailSkeleton />}>
+      <ProductDetailContent
+        productPromise={productPromise}
+        locale={locale}
+        variantIdPromise={variantIdPromise}
+      />
+    </Suspense>
+  );
+}
+
+async function ProductDetailContent({
+  productPromise,
+  locale,
+  variantIdPromise,
+}: {
+  productPromise: Promise<ProductDetails | null>;
+  locale: Locale;
+  variantIdPromise?: Promise<string>;
+}) {
+  const [product, variantId] = await Promise.all([
+    productPromise,
+    variantIdPromise,
+  ]);
+
+  if (!product) {
+    notFound();
+  }
+
   const { handle, title, featuredImage, images, videos, variants, options, descriptionHtml } =
     product;
 

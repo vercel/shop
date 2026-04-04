@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
@@ -18,32 +17,14 @@ export default async function ProductVariantPage({
   params,
 }: PageProps<"/products/[handle]/[variantId]">) {
   const locale = await getLocale();
-  const resolvedParams = params.then(({ handle, variantId }) => ({ handle, variantId }));
-  const productPromise = resolvedParams.then(({ handle }) => getProductDetails(handle, locale));
+  const variantIdPromise = params.then(({ variantId }) => variantId);
+  const productPromise = params.then(({ handle }) => getProductDetails(handle, locale));
 
   return (
-    <ProductVariantContent
+    <ProductDetailPage
       productPromise={productPromise}
-      paramsPromise={resolvedParams}
       locale={locale}
+      variantIdPromise={variantIdPromise}
     />
   );
-}
-
-async function ProductVariantContent({
-  productPromise,
-  paramsPromise,
-  locale,
-}: {
-  productPromise: Promise<Awaited<ReturnType<typeof getProductDetails>>>;
-  paramsPromise: Promise<{ handle: string; variantId: string }>;
-  locale: Awaited<ReturnType<typeof getLocale>>;
-}) {
-  const [product, { variantId }] = await Promise.all([productPromise, paramsPromise]);
-
-  if (!product) {
-    notFound();
-  }
-
-  return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
 }

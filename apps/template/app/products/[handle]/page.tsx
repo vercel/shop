@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
@@ -16,29 +15,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => handle);
-  const productPromise = handlePromise.then((handle) => getProductDetails(handle, locale));
+  const productPromise = params.then(({ handle }) => getProductDetails(handle, locale));
 
-  return (
-    <ProductContent
-      productPromise={productPromise}
-      locale={locale}
-    />
-  );
-}
-
-async function ProductContent({
-  productPromise,
-  locale,
-}: {
-  productPromise: Promise<Awaited<ReturnType<typeof getProductDetails>>>;
-  locale: Awaited<ReturnType<typeof getLocale>>;
-}) {
-  const product = await productPromise;
-
-  if (!product) {
-    notFound();
-  }
-
-  return <ProductDetailPage product={product} locale={locale} />;
+  return <ProductDetailPage productPromise={productPromise} locale={locale} />;
 }
