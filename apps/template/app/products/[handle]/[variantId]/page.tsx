@@ -6,6 +6,10 @@ import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "../shared";
 
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]/[variantId]">): Promise<Metadata> {
