@@ -7,7 +7,8 @@ import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "./shared";
 
-export const unstable_instant = { prefetch: "static" as const };
+// TODO: Add `export const unstable_instant = { prefetch: "static" }` when Turbopack
+// supports it — enables build-time validation that cached data resolves instantly.
 
 export async function generateMetadata({
   params,
