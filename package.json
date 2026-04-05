@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "turbo": "2.8.17"
+    "turbo": "2.9.3"
   },
   "name": "monorepo",
   "packageManager": "pnpm@10.32.1",
