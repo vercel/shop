@@ -7,6 +7,8 @@ import { getLocale } from "@/lib/params";
 
 import { buildProductMetadata, getProductDetails } from "../shared";
 
+export const unstable_instant = { prefetch: "static" as const };
+
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]/[variantId]">): Promise<Metadata> {
