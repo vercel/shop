@@ -33,4 +33,8 @@ export default async function ProductVariantPage({
   return <Suspense fallback={<div>Loading...</div>}><Render params={params} /></Suspense>
 }
 
-export const unstable_instant = { prefetch: 'static' }
+export const unstable_instant = { prefetch: 'static', samples: [
+  { 
+    cookies: [{ name: "shopify_cartId", value: "123456" }],
+    params: { handle: "classic-tee", variantId: "123456" } },
+] }
