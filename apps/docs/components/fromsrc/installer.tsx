@@ -46,6 +46,7 @@ export const Installer = ({ command, className = "w-48" }: InstallerProps) => {
       <InputGroupAddon align="inline-end">
         <InputGroupButton
           aria-label="Copy"
+          className="hover:bg-muted hover:text-foreground"
           onClick={handleCopy}
           size="icon-xs"
           title="Copy"
