@@ -29,7 +29,7 @@ const HomePage = () => (
 			title={title}
 		>
 			<div className="flex flex-col items-center gap-4">
-				<Installer className="w-[18.75rem]" command="npx create-vercel-shop@latest" />
+				<Installer className="w-full max-w-[20rem]" command="npx create-vercel-shop@latest" />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
 						Get Started
