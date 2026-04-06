@@ -1,7 +1,6 @@
 {
   "name": "create-vercel-shop",
   "version": "0.0.1",
-  "private": true,
   "type": "module",
   "bin": {
     "create-vercel-shop": "./index.mjs"
