@@ -152,14 +152,14 @@ export function ImageGallery({
   return (
     <div className="flex flex-col lg:flex-row gap-4">
       {/* Vertical thumbnails - Desktop left side, Mobile top
-      <div className="flex flex-row lg:flex-col gap-3 order-2 lg:order-1 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] scrollbar-hide">
+      <div className="flex flex-row lg:flex-col gap-3 order-2 lg:order-1 overflow-x-auto lg:overflow-y-auto lg:max-h-150 scrollbar-hide">
         {images.map((image, idx) => (
           <button
             key={image.url}
             type="button"
             onClick={() => scrollToImage(idx)}
             className={`
-              relative flex-shrink-0 size-20 aspect-square overflow-hidden rounded-lg border-2 transition-all
+              relative shrink-0 size-20 aspect-square overflow-hidden rounded-lg border-2 transition-all
               ${
                 idx === selectedImageIndex
                   ? "border-foreground"

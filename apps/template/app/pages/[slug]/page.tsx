@@ -93,7 +93,7 @@ function MarketingPageSkeleton() {
 
   return (
     <div className="flex flex-col gap-8 pb-16">
-      <Skeleton className="h-[400px] w-full rounded-xl" />
+      <Skeleton className="h-100 w-full rounded-xl" />
       <section className="py-12 px-4">
         <div className="container mx-auto">
           <Skeleton className="mb-8 h-8 w-48" />

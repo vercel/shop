@@ -47,7 +47,7 @@ function SelectPanelTrigger({
     return (
       <PopoverTrigger
         className={cn(
-          "flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+          "flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           "data-[state=open]:rounded-t-xl data-[state=open]:border data-[state=open]:border-border data-[state=open]:bg-popover/80 data-[state=open]:backdrop-blur-xl",
           className,
         )}
@@ -61,7 +61,7 @@ function SelectPanelTrigger({
   return (
     <DrawerTrigger
       className={cn(
-        "flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         className,
       )}
       {...props}
@@ -177,7 +177,7 @@ function SelectPanelItem({
       data-slot="select-panel-item"
       data-selected={selected}
       className={cn(
-        "flex items-center justify-between gap-2 px-1 py-1 rounded text-left transition-colors outline-none focus-visible:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "flex items-center justify-between gap-2 px-1 py-1 rounded text-left transition-colors outline-none focus-visible:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50",
         "hover:bg-accent",
         selected && [
           "bg-background border border-ring/35 rounded",
@@ -213,7 +213,7 @@ function SelectPanelShowMore({
       data-slot="select-panel-show-more"
       onClick={onToggle}
       className={cn(
-        "text-sm text-foreground hover:text-foreground/80 transition-colors mt-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm",
+        "text-sm text-foreground hover:text-foreground/80 transition-colors mt-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm",
         className,
       )}
       {...props}
@@ -252,7 +252,7 @@ function SelectPanelRow({
       onClick={onClick}
       className={cn(
         "w-full flex items-center gap-2 px-6 py-3 bg-input/80 border-t border-border/50",
-        "text-left hover:bg-input transition-colors outline-none focus-visible:bg-input focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        "text-left hover:bg-input transition-colors outline-none focus-visible:bg-input focus-visible:ring-3 focus-visible:ring-ring/50",
         className,
       )}
       {...props}

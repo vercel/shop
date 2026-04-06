@@ -21,7 +21,7 @@ export async function QuickLinks({ locale }: { locale: string }) {
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm hover:opacity-70 focus-visible:opacity-70 transition-opacity outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+              className="flex items-center gap-1 text-sm hover:opacity-70 focus-visible:opacity-70 transition-opacity outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
             >
               {item.title}
             </a>

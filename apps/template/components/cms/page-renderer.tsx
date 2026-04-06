@@ -91,7 +91,7 @@ function SectionSkeleton({ blockType }: { blockType: string }) {
             {skeletonSlots.map((slot) => (
               <Skeleton
                 key={`carousel-skeleton-${slot}`}
-                className="aspect-square w-[200px] shrink-0 rounded-lg"
+                className="aspect-square w-50 shrink-0 rounded-lg"
               />
             ))}
           </div>
