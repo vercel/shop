@@ -46,7 +46,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {t("skipToContent")}
         </a>
         <SiteSchema locale={locale} />
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        {/* DEBUG: NextIntlClientProvider disabled to isolate hard-navigation issue */}
+        {/* <NextIntlClientProvider locale={locale} messages={messages}> */}
           {/* DEBUG: CartProvider kept as wrapper (now a no-op passthrough) to avoid import errors */}
           <CartProvider initialCart={null}>
             <Nav locale={locale} />
@@ -64,7 +65,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               </BottomBar>
             </Suspense>
           </CartProvider>
-        </NextIntlClientProvider>
+        {/* </NextIntlClientProvider> */}
       </body>
     </html>
   );
