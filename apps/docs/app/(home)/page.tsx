@@ -35,7 +35,7 @@ const HomePage = () => (
 							Get Started
 						</Link>
 					</Button>
-					<Installer command="npx create-next-app@latest --example vercel/shop --example-path apps/template" />
+					<Installer command="npx create-vercel-shop@latest" />
 				</div>
 				<div className="flex items-center gap-4 text-sm text-muted-foreground">
 					{nav.filter((item) => item.target === "_blank").map((item) => (
