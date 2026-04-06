@@ -58,7 +58,9 @@ function Content({
     startBuyNowTransition(async () => {
       const { checkoutUrl } = await buyNowAction(selectedVariantId, quantity);
       if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+        const url = new URL(checkoutUrl);
+        url.searchParams.set("payment", "shop_pay");
+        window.location.href = url.toString();
       }
     });
   };
