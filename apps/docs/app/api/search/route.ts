@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const searchDocs = await docs.getSearchDocs();
-  const results = localSearch.search(query, searchDocs, limit);
+  const results = await localSearch.search(query, searchDocs, limit);
 
   return NextResponse.json(
     results.map((r) => ({
