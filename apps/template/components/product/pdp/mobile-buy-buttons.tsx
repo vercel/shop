@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon, Loader2, ShoppingBagIcon } from "lucide-react";
+import { Loader2, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
@@ -10,6 +10,8 @@ import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
 import { Button } from "@/components/ui/button";
 import type { Image, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+import { ShopLogo } from "./shop-logo";
 
 export function MobileBuyButtons({
   selectedVariant,
@@ -70,19 +72,24 @@ export function MobileBuyButtons({
 
   return (
     <div className="flex gap-2">
-      <Button
+      <button
         type="button"
-        className={cn("flex-1 justify-between h-11", !availableForSale && "invisible")}
+        className={cn(
+          "flex flex-1 items-center justify-center gap-1.5 rounded-full h-11 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50",
+          !availableForSale && "invisible",
+        )}
         disabled={isOutOfStock || isBuyingNow}
         onClick={handleBuyNow}
       >
-        {t("buyNow")}
         {isBuyingNow ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <ArrowRightIcon className="size-4" />
+          <>
+            <span className="text-sm font-medium">{t("buyWithShop")}</span>
+            <ShopLogo className="h-4 w-auto" />
+          </>
         )}
-      </Button>
+      </button>
       <Button
         type="button"
         disabled={isOutOfStock}

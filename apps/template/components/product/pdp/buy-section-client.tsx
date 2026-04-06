@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon, Loader2, ShoppingBagIcon } from "lucide-react";
+import { Loader2, ShoppingBagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense, use, useState, useTransition } from "react";
 
@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { QuantitySelector } from "./quantity-selector";
+import { ShopLogo } from "./shop-logo";
 import { resolveSelectedVariant } from "./variants";
 import type { SelectedOptions } from "./variants";
 
@@ -93,27 +94,21 @@ function Content({
           {/* Action Buttons */}
           <div className="space-y-3">
             <div className="space-y-2">
-              <Button
+              <button
                 type="button"
-                className="w-full justify-between h-12"
+                className="flex w-full items-center justify-center gap-1.5 rounded-full h-12 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50"
                 disabled={isOutOfStock || isBuyingNow}
                 onClick={handleBuyNow}
               >
                 {isBuyingNow ? (
-                  <>
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
-                      {t("buyNow")}
-                    </span>
-                    <span className="size-4" />
-                  </>
+                  <Loader2 className="size-4 animate-spin" />
                 ) : (
                   <>
-                    {t("buyNow")}
-                    <ArrowRightIcon className="size-4" />
+                    <span className="text-sm font-medium">{t("buyWithShop")}</span>
+                    <ShopLogo className="h-[18px] w-auto" />
                   </>
                 )}
-              </Button>
+              </button>
               <Button
                 type="button"
                 variant="secondary"
