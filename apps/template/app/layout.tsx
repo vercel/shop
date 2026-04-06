@@ -47,15 +47,17 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
+          {/* DEBUG: CartProvider kept as wrapper (now a no-op passthrough) to avoid import errors */}
           <CartProvider initialCart={null}>
             <Nav locale={locale} />
             <main id="main-content" className="flex-1 min-w-0">
               {children}
             </main>
             <Footer locale={locale} />
-            <Suspense>
+            {/* DEBUG: CartOverlay disabled to isolate hard-navigation issue */}
+            {/* <Suspense>
               <CartOverlayWithAddress locale={locale} />
-            </Suspense>
+            </Suspense> */}
             <Suspense>
               <BottomBar>
                 {process.env.AI_AGENT_DISABLED ? null : <AgentButton />}
