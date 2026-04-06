@@ -152,6 +152,7 @@
   }
   html {
     text-rendering: optimizelegibility;
+    overflow-x: hidden;
   }
   * {
     scrollbar-width: none;
@@ -447,6 +448,22 @@ figure[role="group"] button {
 .fromsrc .prose :where(table) {
   margin-top: 0;
   margin-bottom: 0;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose :where(table) {
+  display: block;
+  overflow-x: auto;
+}
+
+.prose :where(pre) {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.prose :where(code) {
+  word-break: break-word;
 }
 
 .fromsrc .prose :where(div):has(> table) {
