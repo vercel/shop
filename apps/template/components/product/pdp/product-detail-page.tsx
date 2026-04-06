@@ -60,65 +60,11 @@ export async function ProductDetailPage({
 
   return (
     <Container className="bg-background">
-      <Suspense>
-        <ProductSchema
-          product={{
-            id: product.id,
-            handle,
-            title,
-            description: product.description,
-            images,
-            manufacturerName: product.manufacturerName,
-            currencyCode: product.currencyCode,
-            priceRange: product.priceRange,
-            variants,
-            availableForSale: product.availableForSale,
-          }}
-        />
-      </Suspense>
-      <ProductBreadcrumbSchema title={title} handle={handle} />
+      
 
-      {/* Desktop Layout — breadcrumbs span full width, then 2-column (50/50 images + info) */}
-      <div className="hidden lg:block space-y-8">
-        <Breadcrumb title={title} handle={handle} />
-        <div className="grid grid-cols-2 items-start gap-4">
-          <div>
-            <ImageGrid images={filteredImages} videos={videos} title={title} />
-          </div>
-
-          <div className="space-y-8">
-            <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
-            <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} />
-            <MobileBuyButtons {...buyButtonProps} />
-            <ProductInfoDescription descriptionHtml={descriptionHtml} />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Layout — breadcrumbs first, then gallery, then product info */}
-      <div className="lg:hidden space-y-8">
-        <Breadcrumb title={title} handle={handle} />
-
-        <MobileCarousel images={filteredImages} videos={videos} title={title} />
-
-        <MobileBuyButtons {...buyButtonProps} />
-
-        <ProductInfo
-          variants={variants}
-          options={options}
-          selectedVariant={selectedVariant}
-          selectedOptions={selectedOptions}
-          handle={handle}
-          title={title}
-          descriptionHtml={descriptionHtml}
-          locale={locale}
-          size="sm"
-        />
-      </div>
-
-      {/* <div className="mt-16">
+      <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
-      </div> */}
+      </div>
     </Container>
   );
 }
