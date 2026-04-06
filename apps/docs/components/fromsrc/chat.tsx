@@ -27,7 +27,7 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { Drawer, DrawerContent } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import type { MyUIMessage } from "@/app/api/chat/types";
 import { Metadata } from "@/components/fromsrc/metadata";
 import { useChatState } from "@/lib/chatstate";
@@ -324,7 +324,8 @@ export function Chat() {
   if (isMobile) {
     return (
       <Drawer open={isOpen} onOpenChange={setIsOpen}>
-        <DrawerContent className="h-[80dvh]">
+        <DrawerContent className="h-[80dvh] bg-sidebar" aria-describedby={undefined}>
+          <DrawerTitle className="sr-only">Chat</DrawerTitle>
           <ChatInner isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </DrawerContent>
       </Drawer>
