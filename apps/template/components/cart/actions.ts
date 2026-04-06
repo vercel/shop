@@ -217,8 +217,9 @@ export async function updateCartNoteAction(note: string): Promise<CartActionResu
 }
 
 /**
- * Add item to cart and return the Shopify checkout URL.
- * Used by "Buy Now" — adds to whatever is already in the cart, then redirects.
+ * Build a Shop Pay checkout URL for the given variant.
+ * Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`)
+ * so no cart needs to be created via the API.
  */
 export async function buyNowAction(
   merchandiseId: string,
@@ -228,16 +229,32 @@ export async function buyNowAction(
     return { checkoutUrl: null, error: "Invalid product ID" };
   }
 
-  try {
-    const cart = await addToCart([{ merchandiseId, quantity }]);
-    return { checkoutUrl: cart.checkoutUrl };
-  } catch (error) {
-    console.error("Buy now failed:", error);
-    return {
-      checkoutUrl: null,
-      error: error instanceof Error ? error.message : "Failed to process buy now",
-    };
+  const domain = process.env.SHOPIFY_STORE_DOMAIN;
+  if (!domain) {
+    return { checkoutUrl: null, error: "Store domain not configured" };
   }
+
+  // Extract numeric ID from GID (e.g. "gid://shopify/ProductVariant/123" → "123")
+  let numericId: string | null = merchandiseId;
+  if (merchandiseId.startsWith("gid://") || !merchandiseId.match(/^\d+$/)) {
+    let decoded = merchandiseId;
+    if (!decoded.startsWith("gid://")) {
+      try {
+        decoded = atob(decoded);
+      } catch {
+        return { checkoutUrl: null, error: "Invalid variant ID" };
+      }
+    }
+    const match = decoded.match(/gid:\/\/shopify\/\w+\/(\d+)/);
+    numericId = match?.[1] ?? null;
+  }
+
+  if (!numericId) {
+    return { checkoutUrl: null, error: "Could not resolve variant ID" };
+  }
+
+  const checkoutUrl = `https://${domain}/cart/${numericId}:${quantity}?payment=shop_pay`;
+  return { checkoutUrl };
 }
 
 /**
