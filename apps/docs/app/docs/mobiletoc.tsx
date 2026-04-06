@@ -121,7 +121,7 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
   const progress = (activeIdx + 1) / headings.length;
   const activeHeading = headings[activeIdx];
   const showHeading = !open && activeHeading;
-  const maxH = Math.min(contentHeight, window.innerHeight * 0.85);
+  const maxH = Math.min(contentHeight, typeof window !== "undefined" ? window.innerHeight * 0.85 : 600);
 
   return (
     <div className="lg:hidden sticky top-16 z-30 font-sans">
