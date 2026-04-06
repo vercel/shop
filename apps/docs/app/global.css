@@ -397,6 +397,12 @@ figure[role="group"] button {
   border-bottom: 1px solid var(--border);
 }
 
+.prose h2 > a[aria-label="copy link"],
+.prose h3 > a[aria-label="copy link"] {
+  top: 0.6em;
+  transform: none;
+}
+
 .fromsrc .prose h3 {
   font-size: 1.25rem;
   margin-top: 2rem;
@@ -459,6 +465,7 @@ figure[role="group"] button {
 }
 
 @media (max-width: 640px) {
+
   .prose :where(table) {
     font-size: 0.75rem;
   }
