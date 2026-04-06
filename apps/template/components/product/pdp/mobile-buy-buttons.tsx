@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, ShoppingBagIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 
@@ -94,10 +94,9 @@ export function MobileBuyButtons({
         type="button"
         disabled={isOutOfStock}
         onClick={handleAddToCart}
-        className="flex-1 justify-between h-11 bg-foreground text-background hover:bg-foreground/90"
+        className="flex-1 justify-center h-11 bg-foreground text-background hover:bg-foreground/90"
       >
         {getButtonText()}
-        <ShoppingBagIcon className="size-4" />
       </Button>
     </div>
   );

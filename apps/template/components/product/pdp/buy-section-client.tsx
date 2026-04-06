@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, ShoppingBagIcon } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense, use, useState, useTransition } from "react";
 
@@ -114,10 +114,9 @@ function Content({
                 variant="secondary"
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className="w-full justify-between h-11"
+                className="w-full justify-center h-11"
               >
                 {getButtonText()}
-                <ShoppingBagIcon className="size-4" />
               </Button>
             </div>
           </div>
