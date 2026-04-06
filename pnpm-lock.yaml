@@ -80,8 +80,8 @@ importers:
         specifier: 5.2.0
         version: 5.2.0
       fromsrc:
-        specifier: 0.0.29
-        version: 0.0.29(@types/react@19.2.14)(katex@0.16.38)(mermaid@11.13.0)(next@16.2.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
+        specifier: 0.0.30
+        version: 0.0.30(@types/react@19.2.14)(katex@0.16.38)(mermaid@11.13.0)(next@16.2.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       geist:
         specifier: 1.7.0
         version: 1.7.0(next@16.2.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))
@@ -3813,8 +3813,8 @@ packages:
     resolution: {integrity: sha512-Rx/WycZ60HOaqLKAi6cHRKKI7zxWbJ31MhntmtwMoaTeF7XFH9hhBp8vITaMidfljRQ6eYWCKkaTK+ykVJHP2A==}
     engines: {node: '>= 0.8'}
 
-  fromsrc@0.0.29:
-    resolution: {integrity: sha512-XPJ0fEdutgk0hTl04/St6DudnrRxDtImijwQF6pZFTLLUH8uIRg7mPd5zuevropnO9xjGKfYaz8ucXTlDZ9tPw==}
+  fromsrc@0.0.30:
+    resolution: {integrity: sha512-KfvB+AdtHYm9KwD+fkdtJUvqeGfBYqaTxvROWkt7a4l7V4r6EArQwRdGN5naW4i4aDTfRt7MREnwHXgAydfyVw==}
     peerDependencies:
       '@remix-run/react': '>=2.0.0'
       '@tanstack/react-router': '>=1.0.0'
@@ -9505,7 +9505,7 @@ snapshots:
 
   fresh@2.0.0: {}
 
-  fromsrc@0.0.29(@types/react@19.2.14)(katex@0.16.38)(mermaid@11.13.0)(next@16.2.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
+  fromsrc@0.0.30(@types/react@19.2.14)(katex@0.16.38)(mermaid@11.13.0)(next@16.2.2(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4):
     dependencies:
       '@mdx-js/mdx': 3.1.1
       '@shikijs/rehype': 3.23.0
