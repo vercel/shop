@@ -1,12 +1,12 @@
 ---
 title: Shopify Integration
-description: How the template maps to Shopify concepts — menus, products, collections, and cache invalidation via webhooks.
+description: How the template maps to Shopify concepts - menus, products, collections, and cache invalidation via webhooks.
 type: reference
 prerequisites:
   - /docs/getting-started
 ---
 
-The template connects to Shopify through the Storefront API. This page covers the Shopify-side configuration that the template expects — concept mapping, required menus, and cache invalidation.
+The template connects to Shopify through the Storefront API. This page covers the Shopify-side configuration that the template expects - concept mapping, required menus, and cache invalidation.
 
 For the API client and query patterns, see [Storefront API](/docs/reference/storefront-api).
 
@@ -83,7 +83,7 @@ When Shopify sends a webhook, the handler:
 4. Calls `revalidateTag()` for each affected cache tag
 5. Returns the list of invalidated tags for logging
 
-This means a product update in Shopify invalidates only that product's cache and its recommendations — not every page on the site.
+This means a product update in Shopify invalidates only that product's cache and its recommendations - not every page on the site.
 
 ## Key files
 

@@ -22,8 +22,8 @@ Also check that your products are set to the **Online Store** and **Headless** s
 
 The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Common causes:
 
-- **Cookie domain mismatch** — if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools → Application → Cookies.
-- **Missing `invalidateCartCache()`** — every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI may show an outdated state.
+- **Cookie domain mismatch** - if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools → Application → Cookies.
+- **Missing `invalidateCartCache()`** - every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI may show an outdated state.
 
 ## Variant selection not working
 

@@ -1,6 +1,6 @@
 ---
 title: Storefront API
-description: How the template calls Shopify's Storefront GraphQL API — the fetch client, query patterns, caching, and error handling.
+description: How the template calls Shopify's Storefront GraphQL API - the fetch client, query patterns, caching, and error handling.
 type: reference
 prerequisites:
   - /docs/getting-started
@@ -22,11 +22,11 @@ const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
 
 The function accepts three fields:
 
-- **operation** — the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter for cache key differentiation.
-- **query** — the full GraphQL query or mutation as a template string, including any fragment interpolations.
-- **variables** — an optional object passed as JSON in the request body. Never interpolate values into the query string directly.
+- **operation** - the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter for cache key differentiation.
+- **query** - the full GraphQL query or mutation as a template string, including any fragment interpolations.
+- **variables** - an optional object passed as JSON in the request body. Never interpolate values into the query string directly.
 
-The return type is generic — pass the expected shape of `data` from the GraphQL response as the type parameter.
+The return type is generic - pass the expected shape of `data` from the GraphQL response as the type parameter.
 
 ## Request details
 
@@ -63,7 +63,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
 
 The `@inContext` directive passes country and language for localized pricing and content. Use `getCountryCode(locale)` and `getLanguageCode(locale)` from `lib/i18n` to extract these from a locale string.
 
-Always reference the local schema snapshots in `.claude/schemas/shopify-storefront.graphql` when adding or modifying queries — don't guess field names.
+Always reference the local schema snapshots in `.claude/schemas/shopify-storefront.graphql` when adding or modifying queries - don't guess field names.
 
 ## Fragments
 
@@ -110,10 +110,10 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
 
 Key elements:
 
-1. **`"use cache: remote"`** — opts the function into Next.js request-level caching
-2. **`cacheLife("max")`** — caches indefinitely until manually revalidated
-3. **`cacheTag(...)`** — assigns tags for granular invalidation via `revalidateTag()`
-4. **Transform** — convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
+1. **`"use cache: remote"`** - opts the function into Next.js request-level caching
+2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
+3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
+4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
@@ -130,7 +130,7 @@ All read operations use `"use cache: remote"` with `cacheLife("max")` and one or
 | `menus` | Navigation menus |
 | `cart` | All cart operations |
 
-Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart-cache` — this is a hard requirement.
+Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart-cache` - this is a hard requirement.
 
 ## Mutations
 
@@ -155,9 +155,9 @@ Shopify returns the full updated cart in every mutation response, so there's no 
 
 The client handles errors at two levels:
 
-**HTTP errors** — a non-200 response throws immediately with the status code and text.
+**HTTP errors** - a non-200 response throws immediately with the status code and text.
 
-**GraphQL errors** — if the response contains `errors` and no `data`, the client throws. If there are errors but `data` is also present (partial success), it logs a warning and returns the partial data.
+**GraphQL errors** - if the response contains `errors` and no `data`, the client throws. If there are errors but `data` is also present (partial success), it logs a warning and returns the partial data.
 
 Individual operations add their own handling on top. For example, `getCart()` wraps the call in try-catch and returns `undefined` on failure, while `getProduct()` throws if the product isn't found.
 

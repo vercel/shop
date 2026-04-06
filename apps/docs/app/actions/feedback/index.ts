@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import type { Feedback } from "@/components/geistdocs/feedback";
+import type { Feedback } from "@/components/fromsrc/feedback";
 import { emotions } from "./emotions";
 
 const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
