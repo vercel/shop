@@ -2,7 +2,7 @@
 
 import type { Heading } from "fromsrc";
 import { ChevronDownIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 function ProgressCircle({ value, className }: { value: number; className?: string }) {
   const size = 16;
@@ -43,7 +43,9 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
   const [activeSet, setActiveSet] = useState<Set<string>>(new Set());
   const [activeIdx, setActiveIdx] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [thumbStyle, setThumbStyle] = useState({ top: 0, height: 0 });
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
     const elements = headings
@@ -104,18 +106,29 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
     });
   }, [activeSet]);
 
+  const measure = useCallback(() => {
+    if (contentRef.current) {
+      setContentHeight(contentRef.current.scrollHeight);
+    }
+  }, []);
+
+  useEffect(() => {
+    measure();
+  }, [measure, headings]);
+
   if (headings.length === 0) return null;
 
   const progress = (activeIdx + 1) / headings.length;
   const activeHeading = headings[activeIdx];
   const showHeading = !open && activeHeading;
+  const maxH = Math.min(contentHeight, window.innerHeight * 0.85);
 
   return (
     <div className="lg:hidden sticky top-16 z-30 font-sans">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center w-full gap-2.5 px-4 py-2.5 text-sm text-muted-foreground backdrop-blur-md transition-colors ${open ? "bg-background/80 shadow-lg" : "bg-background/80 border-b border-border"}`}
+        className={`flex items-center w-full gap-2.5 px-4 py-2.5 text-sm text-muted-foreground backdrop-blur-md transition-colors bg-background/80 border-b ${open ? "border-transparent" : "border-border"}`}
       >
         <ProgressCircle value={progress} className={open ? "text-foreground" : ""} />
         <span className="flex-1 truncate text-left">
@@ -127,36 +140,42 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
         />
       </button>
       <div
-        className={`absolute left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border shadow-lg overflow-hidden transition-[max-height] duration-200 ease-out ${open ? "max-h-[50vh]" : "max-h-0 border-b-0"}`}
+        className="absolute left-0 right-0 bg-background/80 backdrop-blur-md overflow-hidden transition-[height,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        style={{
+          height: open ? maxH : 0,
+          opacity: open ? 1 : 0,
+        }}
       >
-        <div className="flex flex-col px-4 pb-4 max-h-[50vh] overflow-y-auto">
-          <div ref={listRef} className="relative flex flex-col">
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-foreground/10" />
-            <div
-              className="absolute left-0 w-px bg-foreground transition-all duration-200 ease-out"
-              style={{
-                top: thumbStyle.top,
-                height: thumbStyle.height,
-              }}
-            />
-            {headings.map((heading) => {
-              const isActive = activeSet.has(heading.id);
-              return (
-                <a
-                  key={heading.id}
-                  href={`#${heading.id}`}
-                  data-active={isActive}
-                  onClick={() => setOpen(false)}
-                  className={`relative py-1.5 text-sm transition-colors ${heading.level >= 3 ? "ps-6" : "ps-3"} ${
-                    isActive
-                      ? "text-foreground font-medium"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {heading.text}
-                </a>
-              );
-            })}
+        <div ref={contentRef} className="border-b border-border shadow-lg">
+          <div className="flex flex-col px-4 pb-4 max-h-[85vh] overflow-y-auto">
+            <div ref={listRef} className="relative flex flex-col">
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-foreground/10" />
+              <div
+                className="absolute left-0 w-px bg-foreground transition-all duration-200 ease-out"
+                style={{
+                  top: thumbStyle.top,
+                  height: thumbStyle.height,
+                }}
+              />
+              {headings.map((heading) => {
+                const isActive = activeSet.has(heading.id);
+                return (
+                  <a
+                    key={heading.id}
+                    href={`#${heading.id}`}
+                    data-active={isActive}
+                    onClick={() => setOpen(false)}
+                    className={`relative py-1.5 text-sm transition-colors ${heading.level >= 3 ? "ps-6" : "ps-3"} ${
+                      isActive
+                        ? "text-foreground font-medium"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {heading.text}
+                  </a>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
