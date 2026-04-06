@@ -27,19 +27,10 @@ The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry
 
 ## Variant selection not working
 
-Variant selection relies on a rewrite rule in `next.config.ts` that maps `?variantId=123` to a route segment:
+Variant selection uses `useSearchParams()` in the `VariantContent` client component to read `?variantId=123` from the URL. The `VariantContent` component must be wrapped in a `<Suspense>` boundary for static rendering to work correctly. If variant selection appears broken, check that:
 
-```ts
-rewrites: async () => [
-  {
-    source: "/products/:handle",
-    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
-    destination: "/products/:handle/:variantId",
-  },
-],
-```
-
-If this rule is missing or modified, clicking a variant option will append a query parameter but the page won't re-render with the new variant.
+- The `VariantContent` component is wrapped in `<Suspense>` in `product-detail-page.tsx`
+- The `<Link>` elements in `ColorPicker` and `OptionPicker` generate URLs with `?variantId=` query parameters via `getVariantUrl()`
 
 ## Images not loading
 

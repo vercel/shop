@@ -154,8 +154,19 @@ function ProductInfo({
 }) {
   return (
     <div data-slot="product-info" className="space-y-8">
-      <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} size={size} />
-      <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} size={size} />
+      <ProductInfoHeader
+        selectedVariant={selectedVariant}
+        title={title}
+        locale={locale}
+        size={size}
+      />
+      <ProductInfoOptions
+        variants={variants}
+        options={options}
+        selectedOptions={selectedOptions}
+        handle={handle}
+        size={size}
+      />
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
   );

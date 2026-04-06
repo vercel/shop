@@ -6,37 +6,25 @@ type: guide
 
 <PDPBrowser />
 
-The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered — variant selection happens through navigation, not client-side state.
+The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. The page itself is a cached server component — variant selection happens client-side via `useSearchParams`, keeping the page statically cacheable while delivering instant variant switches.
 
 ## Variant selection
 
-Variants are selected via URL. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
+Variants are selected via URL query parameter. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
 
 ```
 /products/classic-tee?variantId=123456
 ```
 
-> **Required:** The rewrite rule below in `next.config.ts` is essential — without it, variant selection appends a query parameter but the page won't re-render with the correct variant.
+A client component (`VariantContent`) reads the `variantId` from `useSearchParams()` and resolves the selected variant, options, and filtered images entirely client-side. This means:
 
-A rewrite rule in `next.config.ts` maps this to the `/products/[handle]/[variantId]` route segment so the server can resolve the variant before rendering:
-
-```ts
-rewrites: async () => [
-  {
-    source: "/products/:handle",
-    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
-    destination: "/products/:handle/:variantId",
-  },
-],
-```
-
-On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props — no client-side variant context or `useState` is involved. This means:
-
+- The product page is statically cached — no dynamic rendering on variant change
+- Variant selection is instant — no server round-trip, just a client-side re-render
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable — opening a link loads the exact variant
-- The page is fully server-rendered with zero layout shift
+- Zero layout shift — the page shell (breadcrumbs, schema, recommendations) stays stable
 
-The `getVariantUrl()` helper in `variants.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
+The `computeInitialSelectedOptions()` function matches the numeric variant ID to the full variant object and extracts its selected options. The `getVariantUrl()` helper computes the target URL for each option picker.
 
 Unavailable options render as inert `<span>` elements instead of links.
 
@@ -48,7 +36,7 @@ The gallery adapts to screen size with two distinct components.
 
 **Mobile** — `MobileCarousel` is a horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
 
-Both components receive pre-filtered images as props from the server.
+Both components receive pre-filtered images as props from the variant resolver.
 
 ### Color-based image filtering
 
@@ -104,7 +92,9 @@ The page emits two JSON-LD schemas:
 
 | File | Purpose |
 |------|---------|
-| `components/product/pdp/product-detail-page.tsx` | Server component entry point, computes variant state and threads props |
+| `app/products/[handle]/page.tsx` | Cached product route — fetches product, renders server shell |
+| `components/product/pdp/product-detail-page.tsx` | Server component: breadcrumbs, schema, recommendations, layout |
+| `components/product/pdp/variant-content.tsx` | Client component: reads `useSearchParams`, resolves variant state |
 | `components/product/pdp/variants.ts` | Variant resolution, URL generation, image filtering |
 | `components/product/pdp/color-picker.tsx` | Color swatch Links with variant images |
 | `components/product/pdp/option-picker.tsx` | Text option Links (size, material, etc.) |
@@ -114,6 +104,3 @@ The page emits two JSON-LD schemas:
 | `components/product/pdp/mobile-carousel.tsx` | Mobile horizontal snap-scroll carousel |
 | `components/product/pdp/buy-section-client.tsx` | Quantity selector, buy now, add to cart |
 | `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons |
-| `app/products/[handle]/page.tsx` | Base product route |
-| `app/products/[handle]/[variantId]/page.tsx` | Variant-specific route |
-| `next.config.ts` | `?variantId` → route segment rewrite |

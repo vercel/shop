@@ -2,9 +2,9 @@
 
 import { XIcon } from "lucide-react";
 import Image from "next/image";
+import { Dialog as DialogPrimitive } from "radix-ui";
 import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import { Dialog as DialogPrimitive } from "radix-ui";
 
 import type { Image as ImageType, Video } from "@/lib/types";
 
@@ -61,13 +61,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
   );
 }
 
-export function LightboxTrigger({
-  item,
-  children,
-}: {
-  item: MediaItem;
-  children: ReactNode;
-}) {
+export function LightboxTrigger({ item, children }: { item: MediaItem; children: ReactNode }) {
   const open = useContext(LightboxContext);
   return (
     <button type="button" onClick={() => open?.(item)} className="h-full w-full cursor-zoom-in">
