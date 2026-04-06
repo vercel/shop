@@ -36,7 +36,7 @@ function Card({
     <div className="rounded-lg border p-4 transition-colors hover:bg-muted/50">
       <h3 className="mb-1 font-semibold">{title}</h3>
       {children ? (
-        <p className="text-sm text-muted-foreground">{children}</p>
+        <div className="text-sm text-muted-foreground [&>p]:m-0">{children}</div>
       ) : null}
     </div>
   );
