@@ -249,26 +249,26 @@
 :root {
   --color-code-bg: oklch(0.97 0 0);
   --color-code-border: oklch(0.922 0 0);
+  --color-code-header: oklch(0.94 0 0);
 }
 
 .dark {
   --color-code-bg: #0a0a0a;
   --color-code-border: rgba(255, 255, 255, 0.08);
-}
-
-figure[role="group"] {
-  background-color: var(--color-code-bg) !important;
-  border-color: var(--color-code-border) !important;
+  --color-code-header: rgba(255, 255, 255, 0.02);
 }
 
 figure[role="group"] pre,
 figure[role="group"] code {
-  color: oklch(0.205 0 0) !important;
+  color: var(--foreground);
 }
 
-.dark figure[role="group"] pre,
-.dark figure[role="group"] code {
-  color: oklch(0.87 0 0) !important;
+figure[role="group"] > div:first-child span {
+  color: var(--muted-foreground);
+}
+
+figure[role="group"] button {
+  color: var(--muted-foreground);
 }
 
 
