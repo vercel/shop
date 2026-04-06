@@ -19,7 +19,7 @@
 		"dexie": "^4.4.2",
 		"dexie-react-hooks": "^4.4.0",
 		"feed": "5.2.0",
-		"fromsrc": "0.0.29",
+		"fromsrc": "0.0.30",
 		"geist": "1.7.0",
 		"jotai": "^2.19.0",
 		"lucide-react": "1.7.0",
