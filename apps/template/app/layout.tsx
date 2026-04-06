@@ -49,7 +49,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
-            <ScrollToTop />
+            <Suspense>
+              <ScrollToTop />
+            </Suspense>
             <Nav locale={locale} />
             <main id="main-content" className="flex-1 min-w-0">
               {children}

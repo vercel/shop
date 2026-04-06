@@ -41,8 +41,8 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
     <>
       <div className="h-16" />
       <header className="fixed top-0 left-0 right-0 z-50 h-16 border-b bg-sidebar [backface-visibility:hidden]">
-        <div className="mx-auto flex h-full w-full items-center gap-4 px-4 md:px-6">
-          <div className="flex shrink-0 items-center gap-2.5">
+        <div className="mx-auto flex h-full w-full items-center gap-2 px-4 md:gap-4 md:px-6">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <a href="https://vercel.com/" rel="noopener" target="_blank">
               <SiVercel className="size-5" />
             </a>
@@ -67,7 +67,7 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-1">
+          <div className="ml-auto flex items-center gap-0.5 md:gap-1">
             {isDocs && (
               <>
                 <button
@@ -85,10 +85,10 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
             <button
               type="button"
               onClick={() => setChatOpen((prev) => !prev)}
-              className="shrink-0 flex items-center gap-1.5 h-8 px-2.5 rounded-md border bg-background text-sm text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 h-8 px-2 sm:px-2.5 rounded-md border bg-background text-sm text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 transition-colors"
             >
               <MessagesSquareIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
-              <span>Ask AI</span>
+              <span className="hidden sm:inline">Ask AI</span>
             </button>
             {isDocs && navigation && (
               <button
