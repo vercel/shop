@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"@ai-sdk/react": "3.0.148",
 		"@icons-pack/react-simple-icons": "13.13.0",
 		"@streamdown/cjk": "1.0.3",
 		"@streamdown/code": "1.1.1",
@@ -15,9 +16,12 @@
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cmdk": "1.1.1",
+		"dexie": "^4.4.2",
+		"dexie-react-hooks": "^4.4.0",
 		"feed": "5.2.0",
-		"fromsrc": "0.0.24",
+		"fromsrc": "0.0.29",
 		"geist": "1.7.0",
+		"jotai": "^2.19.0",
 		"lucide-react": "1.7.0",
 		"motion": "12.38.0",
 		"nanoid": "5.1.7",
