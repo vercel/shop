@@ -1,12 +1,9 @@
 import type { ReactNode } from "react";
 import { docs } from "@/lib/fromsrc/content";
-import { Search, Sidebar } from "fromsrc/client";
+import { Sidebar } from "fromsrc/client";
 
 export default async function Layout({ children }: { children: ReactNode }) {
-  const [navigation, searchDocs] = await Promise.all([
-    docs.getNavigation(),
-    docs.getSearchDocs(),
-  ]);
+  const navigation = await docs.getNavigation();
 
   const cleanedNavigation = navigation.map((section) => ({
     ...section,
@@ -29,7 +26,6 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <Search docs={searchDocs} basePath="/docs" hidden showRecent={false} />
       <div className="fromsrc flex min-h-[calc(100vh-4rem)]">
         <Sidebar
           basePath="/docs"

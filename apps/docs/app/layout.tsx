@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Chat } from "@/components/fromsrc/chat";
 import { Navbar } from "@/components/fromsrc/navbar";
+import { Search } from "@/components/fromsrc/search";
 import { Toaster } from "@/components/ui/sonner";
 import { docs } from "@/lib/fromsrc/content";
 import { mono, pixel, pixelSquare, pixelTriangle, sans } from "@/lib/geistdocs/fonts";
@@ -71,6 +72,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AdapterProvider adapter={nextAdapter}>
             <Navbar navigation={navSections} />
+            <Search />
             {children}
             <Chat />
             <Toaster />

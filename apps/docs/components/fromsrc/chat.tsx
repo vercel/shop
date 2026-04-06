@@ -14,6 +14,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { db } from "@/lib/chatdb";
 import {
@@ -55,8 +56,17 @@ function ChatInner({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  pathnameRef.current = pathname;
+
+  const [transport] = useState(() => new DefaultChatTransport({
+    api: "/api/chat",
+    body: () => ({ currentRoute: pathnameRef.current }),
+  }));
+
   const { messages, sendMessage, status, setMessages, stop } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport,
   });
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
