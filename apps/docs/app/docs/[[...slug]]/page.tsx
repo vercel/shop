@@ -7,6 +7,7 @@ import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
+import { MobileToc } from "../mobiletoc";
 import { Outline } from "../outline";
 
 interface Props {
@@ -69,8 +70,10 @@ export default async function DocsPage({ params }: Props) {
   );
 
   return (
-    <div className="grid w-full max-w-7xl mx-auto lg:grid-cols-[minmax(0,1fr)_14rem]">
-      <article className="min-w-0 px-4 py-8 sm:px-8 sm:py-12 lg:px-12">
+    <div>
+      <MobileToc headings={headings} title={doc.title} />
+      <div className="grid w-full max-w-7xl mx-auto lg:grid-cols-[minmax(0,1fr)_14rem]">
+      <article className="min-w-0 px-4 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
         <div className="max-w-[860px]">
           <header className="mb-10">
             <h1 className="text-3xl font-semibold tracking-tight">
@@ -125,6 +128,7 @@ export default async function DocsPage({ params }: Props) {
         </div>
       </article>
       <Outline headings={headings} />
+    </div>
     </div>
   );
 }
