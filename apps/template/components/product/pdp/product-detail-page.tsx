@@ -116,9 +116,9 @@ export async function ProductDetailPage({
         />
       </div>
 
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
-      </div>
+      </div> */}
     </Container>
   );
 }
