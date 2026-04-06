@@ -49,7 +49,7 @@ function buildPath(headings: Heading[], container: HTMLElement): ZigzagPath | nu
   return { height: Math.max(h, container.clientHeight), path: d.join(" "), width: w + 1 };
 }
 
-export function Outline({ headings, slug }: { headings: Heading[]; slug: string }) {
+export function Outline({ headings }: { headings: Heading[] }) {
   const [activeSet, setActiveSet] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -166,14 +166,14 @@ export function Outline({ headings, slug }: { headings: Heading[]; slug: string 
 
           <div ref={containerRef} className="flex flex-col">
             {headings.map((heading) => {
-              const isactive = activeSet.has(heading.id);
+              const isActive = activeSet.has(heading.id);
               return (
                 <a
                   key={heading.id}
                   href={`#${heading.id}`}
-                  data-active={isactive}
+                  data-active={isActive}
                   className={`relative py-1.5 text-sm transition-colors ${
-                    isactive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                   }`}
                   style={{ paddingLeft: padLeft(heading.level) }}
                 >
@@ -185,7 +185,7 @@ export function Outline({ headings, slug }: { headings: Heading[]; slug: string 
         </nav>
           </>
         )}
-        <PageActions slug={slug} />
+        <PageActions />
       </div>
     </aside>
   );

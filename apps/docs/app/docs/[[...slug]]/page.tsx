@@ -124,7 +124,7 @@ export default async function DocsPage({ params }: Props) {
           </nav>
         </div>
       </article>
-      <Outline headings={headings} slug={doc.slug} />
+      <Outline headings={headings} />
     </div>
   );
 }

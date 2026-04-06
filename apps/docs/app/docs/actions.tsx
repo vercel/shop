@@ -42,7 +42,6 @@ function ScrollTop() {
 
 function CopyPage() {
   const [copied, setCopied] = useState(false);
-  const pathname = usePathname();
 
   const handleCopy = useCallback(() => {
     const article = document.querySelector("article");
@@ -77,7 +76,8 @@ function AskAiAboutPage() {
 
 function OpenInChat() {
   const pathname = usePathname();
-  const url = `https://shop-docs.vercel.app${pathname}`;
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://shop-docs.vercel.app";
+  const url = `${origin}${pathname}`;
   const query = `Read this documentation page and answer questions about it: ${url}`;
 
   return (
@@ -116,7 +116,7 @@ function ThemeToggle() {
   );
 }
 
-export function PageActions({ slug }: { slug: string }) {
+export function PageActions() {
   return (
     <div className="flex flex-col gap-2.5 mt-6 pt-6 border-t border-border font-sans">
       <ScrollTop />
