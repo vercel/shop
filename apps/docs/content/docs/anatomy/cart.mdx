@@ -1,6 +1,6 @@
 ---
 title: Cart
-description: The cart system — state management, optimistic updates, server actions, and Shopify integration.
+description: The cart system - state management, optimistic updates, server actions, and Shopify integration.
 type: guide
 ---
 
@@ -14,12 +14,12 @@ The cart system spans the entire storefront, not just the cart page. A React Con
 
 The `CartProvider` in `context.tsx` exposes a `useCart()` hook with the following state:
 
-- **cart** — the last confirmed cart from the server
-- **cartWithPending** — the confirmed cart merged with optimistic line items, used for rendering
-- **isOverlayOpen** — controls the cart drawer/sheet visibility
-- **isAddingToCart** — true while an add-to-cart request is in flight
-- **isUpdatingCart** — true while a quantity update or removal is in flight
-- **pendingQuantity** — accumulated quantity from rapid add-to-cart clicks before the debounce fires
+- **cart** - the last confirmed cart from the server
+- **cartWithPending** - the confirmed cart merged with optimistic line items, used for rendering
+- **isOverlayOpen** - controls the cart drawer/sheet visibility
+- **isAddingToCart** - true while an add-to-cart request is in flight
+- **isUpdatingCart** - true while a quantity update or removal is in flight
+- **pendingQuantity** - accumulated quantity from rapid add-to-cart clicks before the debounce fires
 
 The provider tracks an `originalCart` snapshot for rollback if a mutation fails.
 
@@ -27,11 +27,11 @@ The provider tracks an `originalCart` snapshot for rollback if a mutation fails.
 
 All cart mutations update the UI before the server responds. The implementation uses two distinct debounce strategies:
 
-**Add to cart** — trailing-edge debounce at 400ms. Rapid clicks accumulate into `pendingQuantity` and display as an optimistic line via `OptimisticProductInfo`. When the debounce fires, a single request sends the accumulated quantity.
+**Add to cart** - trailing-edge debounce at 400ms. Rapid clicks accumulate into `pendingQuantity` and display as an optimistic line via `OptimisticProductInfo`. When the debounce fires, a single request sends the accumulated quantity.
 
-**Update quantity** — leading-edge debounce. The first change fires immediately so the user sees instant feedback. Subsequent changes within the debounce window are batched. Removals (quantity set to 0) bypass debounce entirely and fire immediately.
+**Update quantity** - leading-edge debounce. The first change fires immediately so the user sees instant feedback. Subsequent changes within the debounce window are batched. Removals (quantity set to 0) bypass debounce entirely and fire immediately.
 
-Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest — stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
+Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest - stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
 
 > **Hard requirement:** Every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI shows outdated state after the next page navigation.
 
@@ -39,13 +39,13 @@ Each cart line tracks a request ID that increments on every mutation. When a ser
 
 All cart mutations are defined in `actions.ts` with `"use server"`:
 
-- `addToCartAction()` — adds line items and returns the updated cart
-- `updateCartQuantityAction()` — validates quantity (1–99) and updates the line
-- `removeFromCartAction()` — removes a line item and fetches the updated cart
-- `syncCartLocaleAction()` — updates buyer identity for locale and currency switching
-- `updateCartNoteAction()` — updates the cart note field
-- `buyNowAction()` — adds an item and returns the Shopify checkout URL
-- `prepareCheckoutAction()` — retrieves the checkout URL for an existing cart
+- `addToCartAction()` - adds line items and returns the updated cart
+- `updateCartQuantityAction()` - validates quantity (1–99) and updates the line
+- `removeFromCartAction()` - removes a line item and fetches the updated cart
+- `syncCartLocaleAction()` - updates buyer identity for locale and currency switching
+- `updateCartNoteAction()` - updates the cart note field
+- `buyNowAction()` - adds an item and returns the Shopify checkout URL
+- `prepareCheckoutAction()` - retrieves the checkout URL for an existing cart
 
 ## Cart overlay
 

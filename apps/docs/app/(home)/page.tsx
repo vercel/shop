@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Installer } from "@/components/geistdocs/installer";
+import { Installer } from "@/components/fromsrc/installer";
 import { Button } from "@/components/ui/button";
 import { nav } from "@/lib/constants";
 import { AgentDemo } from "./components/agent-demo";
