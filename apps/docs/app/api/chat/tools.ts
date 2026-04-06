@@ -1,4 +1,5 @@
 import { type ToolSet, tool, type UIMessageStreamWriter } from "ai";
+import { localSearch } from "fromsrc";
 import z from "zod";
 import { docs } from "@/lib/fromsrc/content";
 
@@ -17,57 +18,34 @@ const search_docs = (writer: UIMessageStreamWriter) =>
         log(`Searching docs for: ${query}`);
 
         const searchDocs = await docs.getSearchDocs();
-        const queryLower = query.toLowerCase();
+        const results = await localSearch.search(query, searchDocs, 8);
+        log(`Found ${results.length} results`);
 
-        // Simple relevance scoring: title match > description match > content match
-        const scored = searchDocs
-          .map((doc) => {
-            let score = 0;
-            const titleLower = doc.title.toLowerCase();
-            const descLower = (doc.description ?? "").toLowerCase();
-            const contentLower = doc.content.toLowerCase();
-
-            if (titleLower.includes(queryLower)) score += 10;
-            if (descLower.includes(queryLower)) score += 5;
-            if (contentLower.includes(queryLower)) score += 1;
-
-            // Boost for individual query words
-            for (const word of queryLower.split(/\s+/)) {
-              if (titleLower.includes(word)) score += 3;
-              if (descLower.includes(word)) score += 2;
-              if (contentLower.includes(word)) score += 1;
-            }
-
-            return { doc, score };
-          })
-          .filter((item) => item.score > 0)
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 8);
-
-        log(`Found ${scored.length} results`);
-
-        if (scored.length === 0) {
+        if (results.length === 0) {
           return `No documentation found for query: "${query}"`;
         }
 
-        for (const [index, { doc }] of scored.entries()) {
+        for (const [index, result] of results.entries()) {
+          const { doc, anchor } = result;
           const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
+          const sourceUrl = anchor ? `${url}#${anchor}` : url;
           writer.write({
             type: "source-url",
-            sourceId: `doc-${index}-${url}`,
-            url,
+            sourceId: `doc-${index}-${sourceUrl}`,
+            url: sourceUrl,
             title: doc.title,
           });
         }
 
-        const formatted = scored
-          .map(({ doc }) => {
+        const formatted = results
+          .map(({ doc, snippet, heading, anchor }) => {
             const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
-            return `**${doc.title}**\nURL: ${url}\n${doc.description ?? ""}\n\n${doc.content.slice(0, 1500)}${doc.content.length > 1500 ? "..." : ""}\n\n---\n`;
+            const sourceUrl = anchor ? `${url}#${anchor}` : url;
+            return `**${doc.title}**\nURL: ${sourceUrl}\n${heading ? `Heading: ${heading}\n` : ""}${doc.description ?? ""}\n\n${snippet}\n\n---\n`;
           })
           .join("\n");
 
-        return `Found ${scored.length} documentation pages for "${query}":\n\n${formatted}`;
+        return `Found ${results.length} documentation pages for "${query}":\n\n${formatted}`;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Unknown error";
