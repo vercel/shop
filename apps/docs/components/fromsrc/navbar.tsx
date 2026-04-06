@@ -80,22 +80,12 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
                   <span>Search...</span>
                   <kbd className="pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded-sm border bg-background px-1 font-sans text-xs font-medium select-none text-muted-foreground">⌘K</kbd>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "k", metaKey: true }));
-                  }}
-                  className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Search"
-                >
-                  <SearchIcon className="size-4" aria-hidden="true" />
-                </button>
               </>
             )}
             <button
               type="button"
               onClick={() => setChatOpen((prev) => !prev)}
-              className="hidden shrink-0 md:flex items-center gap-1.5 h-8 px-2.5 rounded-md border bg-background text-sm text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 transition-colors"
+              className="shrink-0 flex items-center gap-1.5 h-8 px-2.5 rounded-md border bg-background text-sm text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 transition-colors"
             >
               <MessagesSquareIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
               <span>Ask AI</span>
