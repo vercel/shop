@@ -8,7 +8,7 @@ import { ImageGallery } from "./image-gallery";
 function Fallback() {
   return (
     <div className="flex flex-col lg:flex-row gap-4">
-      <div className="flex flex-row lg:flex-col gap-3 order-2 lg:order-1 overflow-x-auto lg:overflow-y-auto lg:max-h-[600px] scrollbar-hide">
+      <div className="flex flex-row lg:flex-col gap-3 order-2 lg:order-1 overflow-x-auto lg:overflow-y-auto lg:max-h-150 scrollbar-hide">
         <Skeleton className="shrink-0 size-20 aspect-square rounded-lg" />
         <Skeleton className="shrink-0 size-20 aspect-square rounded-lg" />
         <Skeleton className="shrink-0 size-20 aspect-square rounded-lg" />

@@ -83,7 +83,7 @@ export function AddToCartClient({ product }: AddToCartSectionProps) {
           <NativeSelect
             value={quantity}
             onChange={(e) => setQuantity(Number(e.target.value))}
-            className="rounded-full bg-muted border-0 min-w-[60px] h-8"
+            className="rounded-full bg-muted border-0 min-w-15 h-8"
             size="sm"
           >
             {Array.from({ length: 99 }, (_, i) => i + 1).map((num) => (

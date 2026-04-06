@@ -90,7 +90,7 @@ export function MobileCarousel({
         {mediaItems.map((item, idx) => (
           <div
             key={item.type === "video" ? item.video.url : item.image.url}
-            className="relative flex-shrink-0 w-full aspect-square snap-start snap-always overflow-hidden bg-accent"
+            className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden bg-accent"
           >
             {item.type === "video" ? (
               <AutoPlayVideo
