@@ -1,7 +1,7 @@
 import "./global.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { AdapterProvider, Search, nextAdapter } from "fromsrc/client";
+import { AdapterProvider, nextAdapter } from "fromsrc/client";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Chat } from "@/components/fromsrc/chat";
@@ -71,7 +71,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AdapterProvider adapter={nextAdapter}>
             <Navbar navigation={navSections} />
-            <Search basePath="/docs" hidden showRecent={false} endpoint="/api/search" />
             {children}
             <Chat />
             <Toaster />
