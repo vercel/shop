@@ -29,14 +29,12 @@ const HomePage = () => (
 			title={title}
 		>
 			<div className="flex flex-col items-center gap-4">
-				<div className="inline-flex items-center gap-3">
-					<Button asChild className="px-4" size="lg">
-						<Link href="/docs/getting-started">
-							Get Started
-						</Link>
-					</Button>
-					<Installer className="w-[18.75rem]" command="npx create-vercel-shop@latest" />
-				</div>
+				<Installer className="w-[18.75rem]" command="npx create-vercel-shop@latest" />
+				<Button asChild className="px-4" size="lg">
+					<Link href="/docs/getting-started">
+						Get Started
+					</Link>
+				</Button>
 				<div className="flex items-center gap-4 text-sm text-muted-foreground">
 					{nav.filter((item) => item.target === "_blank").map((item) => (
 						<a key={item.href} href={item.href} className="underline underline-offset-4 hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
