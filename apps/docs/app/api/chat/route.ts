@@ -8,6 +8,7 @@ import {
 import { createTools } from "./tools";
 import type { MyUIMessage } from "./types";
 import { createSystemPrompt } from "./utils";
+import { docs } from "@/lib/fromsrc/content";
 
 export const maxDuration = 800;
 
@@ -21,20 +22,62 @@ interface RequestBody {
   };
 }
 
+const MAX_PAGE_CONTEXT_CHARS = 8000;
+
+const trimPageContext = (value: string) => {
+  const normalized = value
+    .replace(/\r\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (normalized.length <= MAX_PAGE_CONTEXT_CHARS) {
+    return normalized;
+  }
+  return `${normalized.slice(0, MAX_PAGE_CONTEXT_CHARS)}...`;
+};
+
+const getPageContextFromRoute = async (
+  currentRoute: string
+): Promise<RequestBody["pageContext"] | undefined> => {
+  if (!currentRoute?.startsWith("/docs")) {
+    return undefined;
+  }
+
+  const pathname = currentRoute.split(/[?#]/)[0] ?? currentRoute;
+  const normalized = pathname.replace(/^\/docs\/?/, "");
+  const slugParts = normalized.split("/").filter(Boolean);
+  const doc = await docs.getDoc(slugParts);
+
+  if (!doc) {
+    return undefined;
+  }
+
+  const pageContent = [doc.description, doc.content]
+    .filter(Boolean)
+    .join("\n\n");
+
+  return {
+    title: doc.title,
+    url: pathname || "/docs",
+    content: trimPageContext(pageContent),
+  };
+};
+
 export async function POST(req: Request) {
   try {
     const { messages, currentRoute, pageContext }: RequestBody =
       await req.json();
+    const resolvedPageContext =
+      pageContext ?? (await getPageContextFromRoute(currentRoute));
 
     // Filter out UI-only page context messages (they're just visual feedback)
     const actualMessages = messages.filter(
       (msg) => !msg.metadata?.isPageContext
     );
 
-    // If pageContext is provided, prepend it to the last user message
+    // Prepend page context (client-provided or route-derived) to the latest user message.
     let processedMessages = actualMessages;
 
-    if (pageContext && actualMessages.length > 0) {
+    if (resolvedPageContext && actualMessages.length > 0) {
       const lastMessage = actualMessages.at(-1);
 
       if (!lastMessage) {
@@ -62,12 +105,12 @@ export async function POST(req: Request) {
                 type: "text",
                 text: `Here's the content from the current page:
 
-**Page:** ${pageContext.title}
-**URL:** ${pageContext.url}
+**Page:** ${resolvedPageContext.title}
+**URL:** ${resolvedPageContext.url}
 
 ---
 
-${pageContext.content}
+${resolvedPageContext.content}
 
 ---
 
