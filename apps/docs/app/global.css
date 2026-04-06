@@ -266,6 +266,16 @@
   color: oklch(0.87 0 0) !important;
 }
 
+.prose figure:has(> div > pre) pre,
+.prose figure:has(> div > pre) code {
+  color: oklch(0.205 0 0) !important;
+}
+
+.dark .prose figure:has(> div > pre) pre,
+.dark .prose figure:has(> div > pre) code {
+  color: oklch(0.87 0 0) !important;
+}
+
 
 
 .fromsrc {
