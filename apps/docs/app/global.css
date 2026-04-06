@@ -471,6 +471,21 @@ figure[role="group"] button {
   margin-bottom: 1.5rem;
 }
 
+@keyframes collapsible-down {
+  from { height: 0; }
+  to { height: var(--radix-collapsible-content-height); }
+}
+
+@keyframes collapsible-up {
+  from { height: var(--radix-collapsible-content-height); }
+  to { height: 0; }
+}
+
+@theme inline {
+  --animate-collapsible-down: collapsible-down 200ms ease-out;
+  --animate-collapsible-up: collapsible-up 200ms ease-out;
+}
+
 @layer utilities {
   .line-numbers code {
     counter-reset: step;
