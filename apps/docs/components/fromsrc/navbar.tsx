@@ -88,7 +88,7 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
               className="shrink-0 flex items-center gap-1.5 h-8 px-2 sm:px-2.5 rounded-md border bg-background text-sm text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 transition-colors"
             >
               <MessagesSquareIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
-              <span className="hidden sm:inline">Ask AI</span>
+              <span>Ask AI</span>
             </button>
             {isDocs && navigation && (
               <button

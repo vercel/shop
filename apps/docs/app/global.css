@@ -455,6 +455,24 @@ figure[role="group"] button {
 .prose :where(table) {
   display: block;
   overflow-x: auto;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 640px) {
+  .prose :where(table) {
+    font-size: 0.75rem;
+  }
+
+  .prose :where(th),
+  .prose :where(td) {
+    padding: 0.5rem;
+  }
+
+  .prose :where(code):not(:where(pre *)) {
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.25rem;
+    word-break: break-all;
+  }
 }
 
 .prose :where(pre) {
