@@ -1,6 +1,6 @@
 # Vercel Shop Monorepo
 
-This is a monorepo for developing a template, docs site, and skills for using Next.js with Shopify and deploying to Vercel.
+This is a monorepo for developing a template, docs site, and skills for building commerce storefronts with Next.js and deploying to Vercel.
 
 ## Docs
 
@@ -8,7 +8,7 @@ The docs app is in apps/docs using [fromsrc](https://www.fromsrc.com). It is lin
 
 ## Template
 
-The main app in this monorepo is apps/template, which is a template/reference architecture for using Shopify and Next.js. Learn more by reading the AGENTS.md in the directory. It is linked to the vercel-labs/shop-template project on Vercel. You MUST check if a feature being updated in the template is documented in the docs application. If so, also update the documentation.
+The main app in this monorepo is apps/template, which is a template/reference architecture for building commerce storefronts with Next.js. Learn more by reading the AGENTS.md in the directory. It is linked to the vercel-labs/shop-template project on Vercel. You MUST check if a feature being updated in the template is documented in the docs application. If so, also update the documentation.
 
 ## Skills
 

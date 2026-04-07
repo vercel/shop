@@ -1,5 +1,5 @@
 ---
-title: Shopify Auth
+title: Enable Auth
 description: Add customer authentication with login, account pages, and nav integration.
 type: guide
 ---
@@ -7,20 +7,20 @@ type: guide
 ## How to use
 
 ```bash
-/enable-shopify-auth
+/enable-auth
 ```
 
 <div className="pb-6" />
 
-{/* BEGIN SKILL CONTENT: enable-shopify-auth */}
+{/* BEGIN SKILL CONTENT: enable-auth */}
 
 # Enable Authentication
 
-Add customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API OIDC. This enables customer login, profile management, order history, and address book.
+Add customer authentication using [better-auth](https://www.better-auth.com/) with your commerce provider's OIDC. This enables customer login, profile management, order history, and address book.
 
 ## Prerequisites
 
-- Shopify store with **Customer Account API** enabled (Shopify Admin → Settings → Customer accounts)
+- Commerce provider with **Customer Account API** enabled (check your provider's admin settings)
 - Customer Account API credentials (client ID + client secret)
 - A `AUTH_SECRET` value for session signing (generate with `openssl rand -base64 32`)
 
@@ -29,10 +29,10 @@ Add customer authentication using [better-auth](https://www.better-auth.com/) wi
 | Variable                         | Description                                                      |
 | -------------------------------- | ---------------------------------------------------------------- |
 | `AUTH_SECRET`                    | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
-| `SHOPIFY_CUSTOMER_CLIENT_ID`     | Shopify Customer Account API client ID                           |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret                       |
+| `OIDC_CLIENT_ID`                | Customer Account API client ID                                   |
+| `OIDC_CLIENT_SECRET`            | Customer Account API client secret                               |
 | `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
-| `SHOPIFY_STORE_DOMAIN`           | Already set — used for OIDC discovery                            |
+| `COMMERCE_STORE_DOMAIN`         | Already set — used for OIDC discovery                            |
 
 ## Part 1: Core auth plumbing (always run)
 
@@ -61,28 +61,28 @@ Add auth env vars to `globalEnv`:
 {
   "globalEnv": [
     "BETTER_AUTH_SECRET",
-    "SHOPIFY_CUSTOMER_ACCOUNT_URL",
-    "SHOPIFY_CUSTOMER_CLIENT_ID",
-    "SHOPIFY_CUSTOMER_CLIENT_SECRET"
+    "OIDC_CUSTOMER_ACCOUNT_URL",
+    "OIDC_CLIENT_ID",
+    "OIDC_CLIENT_SECRET"
   ]
 }
 ```
 
 ### Step 4. Create `lib/auth/auth.ts`
 
-Core better-auth configuration with Shopify OIDC:
+Core better-auth configuration with OIDC provider:
 
 ```ts
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+const COMMERCE_STORE_DOMAIN = process.env.COMMERCE_STORE_DOMAIN;
 
-if (!SHOPIFY_STORE_DOMAIN) {
-  console.warn("[better-auth] SHOPIFY_STORE_DOMAIN not set - auth will not work");
+if (!COMMERCE_STORE_DOMAIN) {
+  console.warn("[better-auth] COMMERCE_STORE_DOMAIN not set - auth will not work");
 }
 
-const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
+const OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
 
 function decodeIdTokenPayload(idToken: string): {
   sub: string;
@@ -125,19 +125,19 @@ export const auth = betterAuth({
     genericOAuth({
       config: [
         {
-          providerId: "shopify",
-          clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
-          clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
-          discoveryUrl: SHOPIFY_STORE_DOMAIN
-            ? `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`
+          providerId: "commerce",
+          clientId: process.env.OIDC_CLIENT_ID ?? "",
+          clientSecret: process.env.OIDC_CLIENT_SECRET ?? "",
+          discoveryUrl: COMMERCE_STORE_DOMAIN
+            ? `https://${COMMERCE_STORE_DOMAIN}/.well-known/openid-configuration`
             : undefined,
-          scopes: SHOPIFY_OIDC_SCOPES,
+          scopes: OIDC_SCOPES,
           pkce: true,
           accessType: "offline",
           getUserInfo: async (tokens) => {
             const idToken = tokens.idToken;
             if (!idToken) {
-              throw new Error("No ID token received from Shopify");
+              throw new Error("No ID token received from provider");
             }
 
             const decoded = decodeIdTokenPayload(idToken);
@@ -230,7 +230,7 @@ const getAccessToken = cache(async (): Promise<string> => {
   try {
     const tokenResponse = await auth.api.getAccessToken({
       headers: reqHeaders,
-      body: { providerId: "shopify" },
+      body: { providerId: "commerce" },
     });
     accessToken = tokenResponse?.accessToken || "";
   } catch (error) {
@@ -316,7 +316,7 @@ export function useSession(): SessionState {
 }
 
 export function signIn(callbackURL = "/account"): void {
-  authClient.signIn.oauth2({ providerId: "shopify", callbackURL });
+  authClient.signIn.oauth2({ providerId: "commerce", callbackURL });
 }
 
 export async function signOut(): Promise<void> {
@@ -339,20 +339,20 @@ import { toNextJsHandler } from "better-auth/next-js";
 export const { GET, POST } = toNextJsHandler(auth);
 ```
 
-### Shopify Admin setup
+### Provider admin setup
 
-1. Go to **Shopify Admin → Settings → Customer accounts**
+1. Go to **your provider's admin** and navigate to customer account settings
 2. Enable **Customer Account API**
 3. Create a **Customer Account API client** (under "API clients")
-4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
+4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/commerce`
 5. Copy the client ID and client secret to your environment variables
-6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+6. Ensure the store domain matches `COMMERCE_STORE_DOMAIN`
 
 ### Guardrails
 
 - Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
 - Always call `requireSession()` before any customer API operation
-- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference `.claude/schemas/shopify-customer.graphql`
+- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference the customer account GraphQL schema
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - PKCE is enabled for the OAuth flow — never disable it
 
@@ -447,9 +447,9 @@ The login page uses `robots: { index: false, follow: false }` to prevent indexin
 
 ### Step 9. Create customer operations
 
-Create `lib/shopify/types/customer.ts` with domain types for Customer, Address, Order, Fulfillment, and related types.
+Create `lib/commerce/types/customer.ts` with domain types for Customer, Address, Order, Fulfillment, and related types.
 
-Create `lib/shopify/operations/customer.ts` with:
+Create `lib/commerce/operations/customer.ts` with:
 
 - `discoverCustomerApiEndpoint()` — auto-discovers GraphQL endpoint from `.well-known/customer-account-api`
 - `customerApiFetch()` — GraphQL client with Bearer token auth
@@ -463,7 +463,7 @@ Create `lib/shopify/operations/customer.ts` with:
 - `deleteAddress(accessToken, addressId)` — remove address
 - `setDefaultAddress(accessToken, addressId)` — set default
 
-Reference `.claude/schemas/shopify-customer.graphql` for field names. All operations use the Customer Account API (separate from Storefront API) with OAuth Bearer tokens.
+Reference the customer account GraphQL schema for field names. All operations use the Customer Account API (separate from Storefront API) with OAuth Bearer tokens.
 
 ### Step 10. Create account pages and components
 
@@ -620,4 +620,4 @@ Add `common.loginRedirecting`, `common.loginNotRedirected`, `common.loginClickHe
 
 Add full `account`, `orders`, and `address` sections. See the base `en.json` translations for the complete key set.
 
-{/* END SKILL CONTENT: enable-shopify-auth */}
+{/* END SKILL CONTENT: enable-auth */}

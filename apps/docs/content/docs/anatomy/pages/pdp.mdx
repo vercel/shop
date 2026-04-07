@@ -66,7 +66,7 @@ If a product has only one color or no color option, all images are shown.
 
 The buy section includes stock status, a quantity selector, and two action buttons:
 
-- **Buy with Shop** - creates a Shopify checkout and redirects to it, styled per [Shopify's brand guidelines](https://help.shopify.com/en/manual/payments/shop-pay/assets)
+- **Buy with Shop** - creates a checkout and redirects to it
 - **Add to Cart** - adds the item optimistically to the cart drawer
 
 On desktop, the full buy section includes a quantity selector (1–99). On mobile, a simplified two-button row adds a quantity of 1.
@@ -75,7 +75,7 @@ Both components receive the `selectedVariant` as a prop and remain client compon
 
 ## Recommendations
 
-Below the product details, a `Recommendations` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
+Below the product details, a `Recommendations` component fetches related products from the provider's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
 
 Recommendations display as a horizontally scrollable carousel of product cards - 2 columns on mobile, 3 on tablet, 4 on desktop.
 
