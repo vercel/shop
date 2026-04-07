@@ -10,7 +10,7 @@ interface HeroSectionProps {
 export function HeroSection({ hero }: HeroSectionProps) {
   return (
     <section className="relative w-full rounded-lg overflow-hidden">
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] bg-linear-to-r from-slate-900 via-slate-800 to-slate-900">
+      <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900">
         {hero.backgroundImage && (
           <>
             <Image

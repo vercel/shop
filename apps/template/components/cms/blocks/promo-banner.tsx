@@ -18,7 +18,7 @@ export function PromoBannerSection({ section }: PromoBannerSectionProps) {
   return (
     <section className="py-8 px-4">
       <div className="container mx-auto">
-        <div className="relative rounded-xl overflow-hidden h-[200px] sm:h-[280px] bg-linear-to-r from-primary/90 to-primary/70">
+        <div className="relative rounded-xl overflow-hidden h-50 sm:h-70 bg-linear-to-r from-primary/90 to-primary/70">
           {backgroundImage && (
             <Image
               src={backgroundImage.url}

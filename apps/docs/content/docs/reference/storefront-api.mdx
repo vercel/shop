@@ -1,39 +1,92 @@
 ---
-title: Commerce Provider API
-description: How the template calls your commerce provider's API through the CommerceProvider abstraction -- operations, caching, and error handling.
+title: Storefront API
+description: How the template calls Shopify's Storefront GraphQL API - the fetch client, query patterns, caching, and error handling.
 type: reference
 prerequisites:
   - /docs/getting-started
 ---
 
-All commerce data flows through a `CommerceProvider` interface defined in `lib/commerce/`. Each provider implements this interface, keeping the storefront decoupled from any specific backend. Operations are called through the commerce abstraction, and providers handle the underlying API communication.
+All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/client.ts`. It wraps the native `fetch` API with Shopify authentication, variable hashing for cache keys, and error handling.
 
-## Commerce operations
+## shopifyFetch
 
 ```ts
-import { commerce } from "@/lib/commerce";
+import { shopifyFetch } from "@/lib/shopify/client";
 
-const product = await commerce.getProduct(handle, locale);
+const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
+  operation: "getProductByHandle",
+  query: GET_PRODUCT_BY_HANDLE_QUERY,
+  variables: { handle, country, language },
+});
 ```
 
-The commerce object exposes typed operations for all storefront needs: products, collections, cart, search, and menus. Each provider implements these operations against its own API.
+The function accepts three fields:
 
-## Provider architecture
+- **operation** - the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter for cache key differentiation.
+- **query** - the full GraphQL query or mutation as a template string, including any fragment interpolations.
+- **variables** - an optional object passed as JSON in the request body. Never interpolate values into the query string directly.
 
-Providers live in `lib/commerce/providers/<name>/` and implement the `CommerceProvider` interface. A typical provider includes:
+The return type is generic - pass the expected shape of `data` from the GraphQL response as the type parameter.
 
-- **Client** — the API fetch wrapper with authentication and error handling
-- **Operations** — functions that call the provider's API and return data
-- **Transforms** — converters from provider-specific response shapes to domain types
+## Request details
 
-For example, a GraphQL-based provider would send `POST` requests to its API endpoint with the appropriate authentication headers.
+Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2025-01/graphql.json` with headers:
 
-## Writing an operation
+| Header | Value |
+|--------|-------|
+| `Content-Type` | `application/json` |
+| `X-Shopify-Storefront-Access-Token` | Your public storefront token |
+| `Accept-Encoding` | `gzip, deflate` |
 
-Operation functions follow a consistent pattern regardless of provider:
+The URL includes query parameters for `operation` and a 12-character SHA-1 hash of the serialized variables. This ensures Next.js treats requests with different variables as distinct cache entries, even though they hit the same endpoint.
+
+## Writing a query
+
+Define the query as a template string, interpolating shared fragments at the top:
+
+```ts
+import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
+
+const GET_PRODUCT_BY_HANDLE_QUERY = `
+  ${PRODUCT_FRAGMENT}
+  query getProductByHandle(
+    $handle: String!
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      ...ProductFields
+    }
+  }
+`;
+```
+
+The `@inContext` directive passes country and language for localized pricing and content. Use `getCountryCode(locale)` and `getLanguageCode(locale)` from `lib/i18n` to extract these from a locale string.
+
+Always reference the local schema snapshots in `.claude/schemas/shopify-storefront.graphql` when adding or modifying queries - don't guess field names.
+
+## Fragments
+
+Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
+
+| Fragment | Covers |
+|----------|--------|
+| `MONEY_FRAGMENT` | `amount` and `currencyCode` on `MoneyV2` |
+| `IMAGE_FRAGMENT` | `url`, `altText`, `width`, `height` on `Image` |
+| `PRODUCT_VARIANT_FRAGMENT` | Variant price, options, image, availability |
+| `PRODUCT_FRAGMENT` | Full product: media, variants (up to 50), options with swatches, metafields, price ranges, SEO |
+| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields) |
+
+Embed fragments in a query with template literal interpolation: `` `${PRODUCT_FRAGMENT} query ...` ``.
+
+## Writing an operation function
+
+Operation functions live in `lib/shopify/operations/` and follow a consistent pattern:
 
 ```ts
 import { cacheLife, cacheTag } from "next/cache";
+import { shopifyFetch } from "../client";
+import { PRODUCT_FRAGMENT } from "../fragments";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 export async function getProduct(handle: string, locale: string = defaultLocale) {
@@ -41,8 +94,9 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
 
-  const data = await providerFetch({
+  const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
     operation: "getProductByHandle",
+    query: GET_PRODUCT_BY_HANDLE_QUERY,
     variables: {
       handle,
       country: getCountryCode(locale),
@@ -50,16 +104,16 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
     },
   });
 
-  return transformProductDetails(data.productByHandle);
+  return transformShopifyProductDetails(data.productByHandle);
 }
 ```
 
 Key elements:
 
-1. **`"use cache: remote"`** — opts the function into Next.js request-level caching
-2. **`cacheLife("max")`** — caches indefinitely until manually revalidated
-3. **`cacheTag(...)`** — assigns tags for granular invalidation via `revalidateTag()`
-4. **Transform** — convert the provider response to a domain type before returning. Components never import provider-specific types directly.
+1. **`"use cache: remote"`** - opts the function into Next.js request-level caching
+2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
+3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
+4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
@@ -69,74 +123,76 @@ All read operations use `"use cache: remote"` with `cacheLife("max")` and one or
 |-------------|-------|
 | `products` | All product queries |
 | `product-{handle}` | Single product by handle |
-| `product-{numericId}` | Single product by numeric ID |
+| `product-{numericId}` | Single product by Shopify numeric ID |
 | `recommendations-{handle}` | Product recommendations |
 | `collections` | All collection queries |
 | `collection-{handle}` | Single collection |
 | `menus` | Navigation menus |
 | `cart` | All cart operations |
 
-Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart-cache` -- this is a hard requirement.
+Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart-cache` - this is a hard requirement.
 
 ## Mutations
 
-Cart mutations use the same provider fetch function but are not cached. They call the provider's cart line add, update, and remove operations:
+Cart mutations use the same `shopifyFetch` function but are not cached. They call Shopify `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove` mutations:
 
 ```ts
 export async function addToCart(lines: CartLineInput[], cartId: string, locale: string) {
-  const data = await providerFetch({
+  const data = await shopifyFetch<{ cartLinesAdd: { cart: ShopifyCart } }>({
     operation: "addToCart",
+    query: ADD_TO_CART_MUTATION,
     variables: { cartId, lines, country: getCountryCode(locale) },
   });
 
   invalidateCartCache();
-  return transformCart(data.cart);
+  return transformShopifyCart(data.cartLinesAdd.cart);
 }
 ```
 
-The provider returns the full updated cart in every mutation response, so there's no need for a follow-up query.
+Shopify returns the full updated cart in every mutation response, so there's no need for a follow-up query.
 
 ## Error handling
 
 The client handles errors at two levels:
 
-**HTTP errors** — a non-200 response throws immediately with the status code and text.
+**HTTP errors** - a non-200 response throws immediately with the status code and text.
 
-**API errors** — if the response contains errors and no data, the client throws. If there are errors but data is also present (partial success), it logs a warning and returns the partial data.
+**GraphQL errors** - if the response contains `errors` and no `data`, the client throws. If there are errors but `data` is also present (partial success), it logs a warning and returns the partial data.
 
 Individual operations add their own handling on top. For example, `getCart()` wraps the call in try-catch and returns `undefined` on failure, while `getProduct()` throws if the product isn't found.
 
 ## Debug logging
 
-Set `DEBUG_COMMERCE=true` to log every request with timing and a variable preview:
+Set `DEBUG_SHOPIFY=true` to log every request with timing and a variable preview:
 
 ```
-[commerce] getProductByHandle 45ms handle=blue-widget
-[commerce] searchProducts 120ms query=tee first=50 after=cursor123
+[shopify] getProductByHandle 45ms handle=blue-widget
+[shopify] searchProducts 120ms query=tee first=50 after=cursor123
 ```
 
 ## Transforms
 
-Every operation converts the provider response to a domain type before returning. Transforms live in `lib/commerce/providers/<name>/transforms/`:
+Every operation converts the Shopify response to a domain type before returning. Transforms live in `lib/shopify/transforms/`:
 
-| Transform | Input -> Output |
+| Transform | Input → Output |
 |-----------|---------------|
-| `transformProductDetails` | Provider product -> `ProductDetails` |
-| `transformCart` | Provider cart -> `Cart` |
+| `transformShopifyProductDetails` | `ShopifyProduct` → `ProductDetails` |
+| `transformShopifyCart` | `ShopifyCart` → `Cart` |
 
-Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the provider-specific response shapes. This keeps the UI decoupled from the API layer.
+Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
-| `lib/commerce/index.ts` | Commerce provider interface and exports |
-| `lib/commerce/providers/<name>/client.ts` | Provider-specific fetch wrapper with auth and error handling |
-| `lib/commerce/providers/<name>/operations/products.ts` | Product queries: single, batch, search, recommendations |
-| `lib/commerce/providers/<name>/operations/cart.ts` | Cart queries and mutations |
-| `lib/commerce/providers/<name>/operations/collections.ts` | Collection queries |
-| `lib/commerce/providers/<name>/operations/search.ts` | Predictive search |
-| `lib/commerce/providers/<name>/operations/menu.ts` | Navigation menu queries |
-| `lib/commerce/providers/<name>/transforms/product.ts` | Provider product -> domain type |
-| `lib/commerce/providers/<name>/transforms/cart.ts` | Provider cart -> domain type |
+| `lib/shopify/client.ts` | Core fetch wrapper with variable hashing and error handling |
+| `lib/shopify/fragments.ts` | Reusable GraphQL fragment definitions |
+| `lib/shopify/operations/products.ts` | Product queries: single, batch, search, recommendations |
+| `lib/shopify/operations/cart.ts` | Cart queries and mutations |
+| `lib/shopify/operations/collections.ts` | Collection queries |
+| `lib/shopify/operations/search.ts` | Predictive search |
+| `lib/shopify/operations/menu.ts` | Navigation menu queries |
+| `lib/shopify/transforms/product.ts` | Shopify product → domain type |
+| `lib/shopify/transforms/cart.ts` | Shopify cart → domain type |
 | `lib/cart-cache.ts` | `invalidateCartCache()` for mutation cache busting |
+| `.claude/schemas/shopify-storefront.graphql` | Local Storefront API schema snapshot |

@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
 import { AgentButton } from "@/components/agent/agent-button";
+import { ScrollToTop } from "@/components/scroll-top";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
 import { BottomBar } from "@/components/layout/bottom-bar";
@@ -48,6 +49,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
+            <Suspense>
+              <ScrollToTop />
+            </Suspense>
             <Nav locale={locale} />
             <main id="main-content" className="flex-1 min-w-0">
               {children}

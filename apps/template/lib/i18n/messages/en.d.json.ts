@@ -53,6 +53,7 @@ declare const messages: {
     "recommendations": "You May Also Like",
     "inStock": "In Stock",
     "buyNow": "Buy now",
+    "buyWithShop": "Buy with",
     "addingQuantity": "Adding {quantity}...",
     "freeShipping": "FREE",
     "manageAddressBook": "Manage address book",

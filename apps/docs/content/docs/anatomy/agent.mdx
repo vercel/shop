@@ -1,12 +1,12 @@
 ---
 title: Agent
-description: The shopping assistant — AI-powered product discovery, cart management, and generative UI.
+description: The shopping assistant - AI-powered product discovery, cart management, and generative UI.
 type: guide
 prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an AI shopping assistant powered by Claude via the Vercel AI SDK. It can search products, browse collections, manage the cart, and render rich product cards — all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
+The storefront includes an AI shopping assistant powered by Claude via the Vercel AI SDK. It can search products, browse collections, manage the cart, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
 
 ## Architecture
 
@@ -26,10 +26,10 @@ AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → commerce t
 
 The agent adapts its instructions based on where the user is browsing. Page context is resolved server-side from the `Referer` header:
 
-- **Product page** — the full product is injected into the prompt with all variants, prices, availability, and variant IDs ready for "add to cart"
-- **Collection page** — the collection handle and title are included
-- **Search page** — the active search query is passed through
-- **Cart page** — the agent knows the user is viewing their cart
+- **Product page** - the full product is injected into the prompt with all variants, prices, availability, and variant IDs ready for "add to cart"
+- **Collection page** - the collection handle and title are included
+- **Search page** - the active search query is passed through
+- **Cart page** - the agent knows the user is viewing their cart
 
 The system prompt also includes the user's locale so the agent responds in the correct language.
 
@@ -41,7 +41,7 @@ The agent has 11 tools organized into three groups. All tools access the agent c
 
 | Tool | Purpose |
 |------|---------|
-| `searchProducts` | Keyword search with sorting (best matches, price low/high) — returns up to 10 results |
+| `searchProducts` | Keyword search with sorting (best matches, price low/high) - returns up to 10 results |
 | `getProductDetails` | Full product info: title, description, price, variants, availability, images |
 | `getProductRecommendations` | AI-powered similar products (up to 5) |
 | `listCollections` | All store categories |
@@ -65,19 +65,19 @@ The agent has 11 tools organized into three groups. All tools access the agent c
 
 ## Generative UI
 
-The agent doesn't just return text — it renders rich UI components via json-render. The system prompt includes a catalog of components the model can invoke:
+The agent doesn't just return text - it renders rich UI components via json-render. The system prompt includes a catalog of components the model can invoke:
 
-- **AgentProductCard** — clickable card with image, title, price, compare-at price, and availability
-- **AgentProductGrid** — 2-column responsive grid wrapping multiple product cards
-- **AgentCartSummary** — full cart breakdown with line item thumbnails, subtotal, tax, total, and checkout button
-- **AgentCartConfirmation** — success card shown after adding an item to cart
-- **AgentVariantPicker** — display-only variant selector with option groups and availability status
+- **AgentProductCard** - clickable card with image, title, price, compare-at price, and availability
+- **AgentProductGrid** - 2-column responsive grid wrapping multiple product cards
+- **AgentCartSummary** - full cart breakdown with line item thumbnails, subtotal, tax, total, and checkout button
+- **AgentCartConfirmation** - success card shown after adding an item to cart
+- **AgentVariantPicker** - display-only variant selector with option groups and availability status
 
 These components are registered in a json-render registry and rendered client-side from specs embedded in the assistant's streamed messages.
 
 ## Cart reconciliation
 
-A `CartReconciler` component watches the agent's tool results for cart mutations. When `addToCart`, `updateCartItemQuantity`, `removeFromCart`, or `addCartNote` succeed, it extracts the updated cart object and syncs it to the global cart context — updating the cart UI without a page reload and opening the cart overlay for visual feedback.
+A `CartReconciler` component watches the agent's tool results for cart mutations. When `addToCart`, `updateCartItemQuantity`, `removeFromCart`, or `addCartNote` succeed, it extracts the updated cart object and syncs it to the global cart context - updating the cart UI without a page reload and opening the cart overlay for visual feedback.
 
 ## Chat UI
 
@@ -99,7 +99,7 @@ The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environmen
 
 | File | Purpose |
 |------|---------|
-| `app/api/chat/route.ts` | Chat endpoint — page context resolution, cart initialization, streaming |
+| `app/api/chat/route.ts` | Chat endpoint - page context resolution, cart initialization, streaming |
 | `lib/agent/agent.ts` | ToolLoopAgent creation with model, tools, and system prompt |
 | `lib/agent/prompt.ts` | Dynamic system prompt with page context and UI catalog rules |
 | `lib/agent/context.ts` | AsyncLocalStorage context (chatId, user, cart, page) |

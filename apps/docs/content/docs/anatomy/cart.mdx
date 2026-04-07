@@ -1,25 +1,25 @@
 ---
 title: Cart
-description: The cart system — state management, optimistic updates, server actions, and commerce provider integration.
+description: The cart system - state management, optimistic updates, server actions, and Shopify integration.
 type: guide
 ---
 
 <CartBrowser />
 
-> **Note:** The cart ID is stored in a `cartId` cookie with a 7-day expiry. Sessions longer than 7 days start a fresh cart.
+> **Note:** The cart ID is stored in a `shopify_cartId` cookie with a 7-day expiry. Sessions longer than 7 days start a fresh cart.
 
-The cart system spans the entire storefront, not just the cart page. A React Context provider wraps the app in `layout.tsx`, giving every component access to cart state. Mutations flow through server actions that call the commerce provider's API, while optimistic updates keep the UI responsive during network round-trips.
+The cart system spans the entire storefront, not just the cart page. A React Context provider wraps the app in `layout.tsx`, giving every component access to cart state. Mutations flow through server actions that call Shopify's GraphQL API, while optimistic updates keep the UI responsive during network round-trips.
 
 ## Cart context
 
 The `CartProvider` in `context.tsx` exposes a `useCart()` hook with the following state:
 
-- **cart** — the last confirmed cart from the server
-- **cartWithPending** — the confirmed cart merged with optimistic line items, used for rendering
-- **isOverlayOpen** — controls the cart drawer/sheet visibility
-- **isAddingToCart** — true while an add-to-cart request is in flight
-- **isUpdatingCart** — true while a quantity update or removal is in flight
-- **pendingQuantity** — accumulated quantity from rapid add-to-cart clicks before the debounce fires
+- **cart** - the last confirmed cart from the server
+- **cartWithPending** - the confirmed cart merged with optimistic line items, used for rendering
+- **isOverlayOpen** - controls the cart drawer/sheet visibility
+- **isAddingToCart** - true while an add-to-cart request is in flight
+- **isUpdatingCart** - true while a quantity update or removal is in flight
+- **pendingQuantity** - accumulated quantity from rapid add-to-cart clicks before the debounce fires
 
 The provider tracks an `originalCart` snapshot for rollback if a mutation fails.
 
@@ -27,11 +27,11 @@ The provider tracks an `originalCart` snapshot for rollback if a mutation fails.
 
 All cart mutations update the UI before the server responds. The implementation uses two distinct debounce strategies:
 
-**Add to cart** — trailing-edge debounce at 400ms. Rapid clicks accumulate into `pendingQuantity` and display as an optimistic line via `OptimisticProductInfo`. When the debounce fires, a single request sends the accumulated quantity.
+**Add to cart** - trailing-edge debounce at 400ms. Rapid clicks accumulate into `pendingQuantity` and display as an optimistic line via `OptimisticProductInfo`. When the debounce fires, a single request sends the accumulated quantity.
 
-**Update quantity** — leading-edge debounce. The first change fires immediately so the user sees instant feedback. Subsequent changes within the debounce window are batched. Removals (quantity set to 0) bypass debounce entirely and fire immediately.
+**Update quantity** - leading-edge debounce. The first change fires immediately so the user sees instant feedback. Subsequent changes within the debounce window are batched. Removals (quantity set to 0) bypass debounce entirely and fire immediately.
 
-Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest — stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
+Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest - stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
 
 > **Hard requirement:** Every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI shows outdated state after the next page navigation.
 
@@ -39,13 +39,13 @@ Each cart line tracks a request ID that increments on every mutation. When a ser
 
 All cart mutations are defined in `actions.ts` with `"use server"`:
 
-- `addToCartAction()` — adds line items and returns the updated cart
-- `updateCartQuantityAction()` — validates quantity (1–99) and updates the line
-- `removeFromCartAction()` — removes a line item and fetches the updated cart
-- `syncCartLocaleAction()` — updates buyer identity for locale and currency switching
-- `updateCartNoteAction()` — updates the cart note field
-- `buyNowAction()` — adds an item and returns the checkout URL
-- `prepareCheckoutAction()` — retrieves the checkout URL for an existing cart
+- `addToCartAction()` - adds line items and returns the updated cart
+- `updateCartQuantityAction()` - validates quantity (1–99) and updates the line
+- `removeFromCartAction()` - removes a line item and fetches the updated cart
+- `syncCartLocaleAction()` - updates buyer identity for locale and currency switching
+- `updateCartNoteAction()` - updates the cart note field
+- `buyNowAction()` - adds an item and returns the Shopify checkout URL
+- `prepareCheckoutAction()` - retrieves the checkout URL for an existing cart
 
 ## Cart overlay
 
@@ -61,11 +61,11 @@ Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect opt
 
 The full cart page at `/cart` renders a two-column layout on large screens: items on the left, a sticky summary sidebar on the right. Below the items, an upsell section shows product recommendations. When the cart is empty, a continue-shopping prompt replaces the items list.
 
-## Commerce provider integration
+## Shopify integration
 
-Cart operations in `lib/commerce/` use API mutations for adding, updating, and removing cart lines. The cart ID is stored in a `cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
+Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
 
-The transform layer in `lib/commerce/` converts the provider's API response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from the provider's API structure.
+The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
 
 ## Key files
 
@@ -80,5 +80,5 @@ The transform layer in `lib/commerce/` converts the provider's API response shap
 | `components/product/add-to-cart.tsx` | Product page add-to-cart server wrapper |
 | `components/product/client.tsx` | Add-to-cart client with quantity selector |
 | `app/cart/page.tsx` | Full cart page route |
-| `lib/commerce/` | Cart operations and API calls |
-| `lib/commerce/` | Provider response to domain type transform |
+| `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations |
+| `lib/shopify/transforms/cart.ts` | Shopify response to domain type transform |

@@ -1,4 +1,4 @@
 {
-  "title": "Extending with Skills",
-  "pages": ["index", "enable-markets", "enable-cms", "enable-auth", "enable-content-negotiation"]
+  "title": "Skills",
+  "pages": ["index", "enable-shopify-markets", "enable-shopify-cms", "enable-shopify-auth", "enable-content-negotiation"]
 }

@@ -28,7 +28,7 @@ type MegamenuTopLevelTriggerProps = {
 };
 
 const TRIGGER_CLASS =
-  "relative block py-0.5 text-3xl font-medium leading-[1.1] tracking-tight transition-colors text-muted-foreground/70 hover:text-foreground data-[active=true]:text-foreground data-[active=true]:after:absolute data-[active=true]:after:-left-3 data-[active=true]:after:top-1/2 data-[active=true]:after:h-2 data-[active=true]:after:w-2 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-full data-[active=true]:after:bg-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm";
+  "relative block py-0.5 text-3xl font-medium leading-[1.1] tracking-tight transition-colors text-muted-foreground/70 hover:text-foreground data-[active=true]:text-foreground data-[active=true]:after:absolute data-[active=true]:after:-left-3 data-[active=true]:after:top-1/2 data-[active=true]:after:h-2 data-[active=true]:after:w-2 data-[active=true]:after:-translate-y-1/2 data-[active=true]:after:rounded-full data-[active=true]:after:bg-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm";
 
 function MegamenuTopLevelTrigger({
   item,
@@ -252,10 +252,10 @@ export function MegamenuClient({ items, children }: Props) {
                   {hasPanels ? (
                     <div ref={panelRef} className="relative flex h-full min-w-0 flex-col">
                       <MouseSafeArea parentRef={panelRef} />
-                      <div className="h-[20px]" aria-hidden />
+                      <div className="h-5" aria-hidden />
 
                       <div className="flex-1 min-h-0 overflow-y-auto pr-4 [scrollbar-gutter:stable]">
-                        <div className="max-w-[720px]">
+                        <div className="max-w-180">
                           <div className="flex flex-col gap-16">
                             {(activeItem?.panels ?? []).map((panel) => (
                               <MegamenuPanel
@@ -274,7 +274,7 @@ export function MegamenuClient({ items, children }: Props) {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     onClick={handleClose}
-                                    className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                    className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                   >
                                     {t("showAllCategory", {
                                       category: activeItem.label || categoriesLabel,
@@ -284,7 +284,7 @@ export function MegamenuClient({ items, children }: Props) {
                                   <Link
                                     href={activeItem.href}
                                     onClick={handleClose}
-                                    className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                    className="text-sm font-medium text-foreground hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                   >
                                     {t("showAllCategory", {
                                       category: activeItem.label || categoriesLabel,

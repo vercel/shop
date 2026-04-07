@@ -20,7 +20,7 @@ type MegamenuMobileProps = {
 };
 
 const TOP_LEVEL_ITEM_CLASS =
-  "relative block w-full py-0.5 text-left text-2xl font-medium leading-[1.1] tracking-tight transition-colors text-muted-foreground/70 hover:text-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm";
+  "relative block w-full py-0.5 text-left text-2xl font-medium leading-[1.1] tracking-tight transition-colors text-muted-foreground/70 hover:text-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm";
 
 function MobileLink({
   href,
@@ -173,7 +173,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                               {panel.href ? (
                                                 <MobileLink
                                                   href={panel.href}
-                                                  className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                                  className="text-lg font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                                   onClick={handleClose}
                                                 >
                                                   {panel.header}
@@ -190,7 +190,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                               <li key={category.href}>
                                                 <MobileLink
                                                   href={category.href}
-                                                  className="block py-1 text-base hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                                  className="block py-1 text-base hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                                   onClick={handleClose}
                                                 >
                                                   {category.title}
@@ -204,7 +204,7 @@ export function MegamenuMobile({ data, children }: MegamenuMobileProps) {
                                       {item.href ? (
                                         <MobileLink
                                           href={item.href}
-                                          className="mt-4 block text-sm font-medium hover:underline outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                                          className="mt-4 block text-sm font-medium hover:underline outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                                           onClick={handleClose}
                                         >
                                           {t("showAllCategory", {

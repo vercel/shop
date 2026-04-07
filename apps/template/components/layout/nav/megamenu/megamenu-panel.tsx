@@ -21,7 +21,7 @@ export function MegamenuPanel({ panel, fallbackHeader, onLinkClick }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={onLinkClick}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
             >
               {panel.header || fallbackHeader}
             </a>
@@ -29,7 +29,7 @@ export function MegamenuPanel({ panel, fallbackHeader, onLinkClick }: Props) {
             <Link
               href={panel.href}
               onClick={onLinkClick}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
             >
               {panel.header || fallbackHeader}
             </Link>
@@ -52,7 +52,7 @@ export function MegamenuPanel({ panel, fallbackHeader, onLinkClick }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={onLinkClick}
-                  className="block truncate text-base font-medium text-foreground transition-colors hover:text-foreground/80 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                  className="block truncate text-base font-medium text-foreground transition-colors hover:text-foreground/80 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                 >
                   {category.title}
                 </a>
@@ -60,7 +60,7 @@ export function MegamenuPanel({ panel, fallbackHeader, onLinkClick }: Props) {
                 <Link
                   href={category.href}
                   onClick={onLinkClick}
-                  className="block truncate text-base font-medium text-foreground transition-colors hover:text-foreground/80 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-sm"
+                  className="block truncate text-base font-medium text-foreground transition-colors hover:text-foreground/80 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
                 >
                   {category.title}
                 </Link>

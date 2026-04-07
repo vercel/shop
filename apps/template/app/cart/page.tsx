@@ -58,7 +58,7 @@ async function CartContent({ locale }: { locale: Locale }) {
               </div>
 
               <aside className="hidden lg:block shrink-0">
-                <div className="w-[380px] xl:w-[420px] 2xl:w-[480px] min-h-full bg-input/50 rounded-tl-3xl shadow-[100vw_0_0_0_rgba(236,236,236,0.5)]">
+                <div className="w-95 xl:w-105 2xl:w-120 min-h-full bg-input/50 rounded-tl-3xl shadow-[100vw_0_0_0_rgba(236,236,236,0.5)]">
                   <div className="sticky top-0 p-8">
                     <Summary locale={locale} />
                   </div>

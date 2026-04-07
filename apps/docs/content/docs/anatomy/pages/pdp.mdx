@@ -6,7 +6,7 @@ type: guide
 
 <PDPBrowser />
 
-The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered — variant selection happens through navigation, not client-side state.
+The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered - variant selection happens through navigation, not client-side state.
 
 ## Variant selection
 
@@ -16,7 +16,7 @@ Variants are selected via URL. Each option (color, size, etc.) renders as a `<Li
 /products/classic-tee?variantId=123456
 ```
 
-> **Required:** The rewrite rule below in `next.config.ts` is essential — without it, variant selection appends a query parameter but the page won't re-render with the correct variant.
+> **Required:** The rewrite rule below in `next.config.ts` is essential - without it, variant selection appends a query parameter but the page won't re-render with the correct variant.
 
 A rewrite rule in `next.config.ts` maps this to the `/products/[handle]/[variantId]` route segment so the server can resolve the variant before rendering:
 
@@ -30,10 +30,10 @@ rewrites: async () => [
 ],
 ```
 
-On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props — no client-side variant context or `useState` is involved. This means:
+On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props - no client-side variant context or `useState` is involved. This means:
 
 - Every variant selection is a navigation, giving you browser back/forward for free
-- URLs are shareable — opening a link loads the exact variant
+- URLs are shareable - opening a link loads the exact variant
 - The page is fully server-rendered with zero layout shift
 
 The `getVariantUrl()` helper in `variants.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
@@ -44,9 +44,9 @@ Unavailable options render as inert `<span>` elements instead of links.
 
 The gallery adapts to screen size with two distinct components.
 
-**Desktop** — `ImageGrid` displays a thumbnail sidebar (80px wide, vertically scrollable) alongside a main image. Hovering or clicking a thumbnail selects it. Videos are supported inline with autoplay.
+**Desktop** - `ImageGrid` displays a thumbnail sidebar (80px wide, vertically scrollable) alongside a main image. Hovering or clicking a thumbnail selects it. Videos are supported inline with autoplay.
 
-**Mobile** — `MobileCarousel` is a horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
+**Mobile** - `MobileCarousel` is a horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
 
 Both components receive pre-filtered images as props from the server.
 
@@ -66,8 +66,8 @@ If a product has only one color or no color option, all images are shown.
 
 The buy section includes stock status, a quantity selector, and two action buttons:
 
-- **Buy Now** — creates a checkout and redirects to it
-- **Add to Cart** — adds the item optimistically to the cart drawer
+- **Buy with Shop** - creates a Shopify checkout and redirects to it, styled per [Shopify's brand guidelines](https://help.shopify.com/en/manual/payments/shop-pay/assets)
+- **Add to Cart** - adds the item optimistically to the cart drawer
 
 On desktop, the full buy section includes a quantity selector (1–99). On mobile, a simplified two-button row adds a quantity of 1.
 
@@ -75,9 +75,9 @@ Both components receive the `selectedVariant` as a prop and remain client compon
 
 ## Recommendations
 
-Below the product details, a `Recommendations` component fetches related products from the commerce provider's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
+Below the product details, a `Recommendations` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
 
-Recommendations display as a horizontally scrollable carousel of product cards — 2 columns on mobile, 3 on tablet, 4 on desktop.
+Recommendations display as a horizontally scrollable carousel of product cards - 2 columns on mobile, 3 on tablet, 4 on desktop.
 
 ## Layout
 
@@ -97,8 +97,8 @@ The page uses two responsive layouts wrapped in a shared `Container`:
 
 The page emits two JSON-LD schemas:
 
-- **Product schema** — name, description, images, brand, price range, availability, and variant count
-- **Breadcrumb schema** — Home → Product Title
+- **Product schema** - name, description, images, brand, price range, availability, and variant count
+- **Breadcrumb schema** - Home → Product Title
 
 ## Key files
 
@@ -111,8 +111,9 @@ The page emits two JSON-LD schemas:
 | `components/product/pdp/product-info.tsx` | Header, options, and description composition |
 | `components/product/pdp/image-grid.tsx` | Desktop thumbnail + main image gallery |
 | `components/product/pdp/mobile-carousel.tsx` | Mobile horizontal snap-scroll carousel |
-| `components/product/pdp/buy-section-client.tsx` | Quantity selector, buy now, add to cart |
-| `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons |
+| `components/product/pdp/buy-section-client.tsx` | Quantity selector, Buy with Shop, add to cart |
+| `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons (Buy with Shop + add to cart) |
+| `components/product/pdp/shop-logo.tsx` | Shop wordmark SVG for the Buy with Shop button |
 | `app/products/[handle]/page.tsx` | Base product route |
 | `app/products/[handle]/[variantId]/page.tsx` | Variant-specific route |
 | `next.config.ts` | `?variantId` → route segment rewrite |

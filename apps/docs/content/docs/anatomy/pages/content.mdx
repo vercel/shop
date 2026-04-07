@@ -6,7 +6,7 @@ type: guide
 
 <ContentBrowser />
 
-The `/pages/[slug]` route renders marketing and informational pages through a pluggable content system. By default, the page registry is empty — it's designed to be populated by a CMS integration or custom builder functions.
+The `/pages/[slug]` route renders marketing and informational pages through a pluggable content system. By default, the page registry is empty - it's designed to be populated by a CMS integration or custom builder functions.
 
 ## Architecture
 
@@ -29,7 +29,7 @@ type LocalMarketingPageBuilder = (locale: Locale) => Promise<MarketingPage>;
 const localMarketingPages: Record<string, LocalMarketingPageBuilder> = {};
 ```
 
-Each builder receives the active locale and returns a `MarketingPage` object with structured sections (hero, product grids, text blocks, etc.). The registry is intentionally empty by default — you populate it by either:
+Each builder receives the active locale and returns a `MarketingPage` object with structured sections (hero, product grids, text blocks, etc.). The registry is intentionally empty by default - you populate it by either:
 
 - Adding builder functions directly for static or code-driven pages
 - Running the **Enable CMS** skill, which wires CMS content types into the registry
@@ -38,9 +38,9 @@ Each builder receives the active locale and returns a `MarketingPage` object wit
 
 The `MarketingPage` type in `lib/types.ts` defines the structure a builder must return. It includes:
 
-- `title`, `slug`, `metaTitle`, `metaDescription` — page identity and SEO
-- `heroSection` — optional hero with background image, headline, subheadline, and CTA
-- `sections` — an array of content sections (product carousels, text blocks, etc.)
+- `title`, `slug`, `metaTitle`, `metaDescription` - page identity and SEO
+- `heroSection` - optional hero with background image, headline, subheadline, and CTA
+- `sections` - an array of content sections (product carousels, text blocks, etc.)
 
 ## Static generation
 

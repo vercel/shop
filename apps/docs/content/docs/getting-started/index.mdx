@@ -4,33 +4,32 @@ title: Setup
 type: guide
 ---
 
-## Set up your commerce provider
+## Set up Shopify for headless
 
-If you don't already have a commerce provider account, create one with your provider of choice. Then configure API access:
+If you don't already have a Shopify store, create one at [shopify.com](https://www.shopify.com). Then set up the Headless channel:
 
-1. In your provider's admin panel, navigate to the API or developer settings
-2. Create a new storefront or headless channel
-3. Copy the **API access token** — you'll need this for your environment variables
-4. Enable the API permissions listed below
+1. In your Shopify admin, go to **Settings → Apps and sales channels → Develop apps**
+2. Install the **Headless** channel from the Shopify App Store
+3. Open the Headless channel and create a new storefront
+4. Copy the **Storefront API access token** - you'll need this for your environment variables
+5. Under **Storefront API permissions**, enable the scopes listed below
 
 ### Required API permissions
 
-Your commerce provider needs to expose the following capabilities:
-
-| Capability | Purpose |
+| Scope | Purpose |
 |---|---|
-| Read products | Product pages, search, recommendations |
-| Read inventory | Stock availability on PDPs and PLPs |
-| Read collections | Collection pages and navigation |
-| Write cart / checkout | Cart operations and checkout |
-| Read content / pages | CMS pages and content objects |
+| `unauthenticated_read_product_listings` | Product pages, search, recommendations |
+| `unauthenticated_read_product_inventory` | Stock availability on PDPs and PLPs |
+| `unauthenticated_read_collection_listings` | Collection pages and navigation |
+| `unauthenticated_write_checkouts` | Cart operations and checkout |
+| `unauthenticated_read_content` | Shopify pages and metaobjects |
 
-Additional permissions are needed if you enable optional features:
+Additional scopes are needed if you enable optional features:
 
-| Capability | Required by |
+| Scope | Required by |
 |---|---|
-| Read customer data | [Enable Auth](/docs/skills/enable-auth) skill |
-| Read content objects | [Enable CMS](/docs/skills/enable-cms) skill |
+| `unauthenticated_read_customer_tags` | [Enable Shopify Auth](/docs/skills/enable-shopify-auth) skill |
+| `unauthenticated_read_metaobjects` | [Enable Shopify CMS](/docs/skills/enable-shopify-cms) skill |
 
 ## Create your project
 
@@ -38,29 +37,29 @@ There are three ways to get started:
 
 ### Deploy with Vercel
 
-The fastest way — deploy directly to Vercel and it will create the repository for you.
+The fastest way - deploy directly to Vercel and it will create the repository for you.
 
-<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&env=COMMERCE_API_TOKEN,COMMERCE_STORE_DOMAIN,NEXT_PUBLIC_SITE_NAME&envDescription=Required%20values%20to%20connect%20your%20commerce%20provider&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Fenv-vars">
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&env=SHOPIFY_STOREFRONT_ACCESS_TOKEN,SHOPIFY_STORE_DOMAIN,NEXT_PUBLIC_SITE_NAME&envDescription=Required%20values%20to%20work%20with%20Shopify&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Fenv-vars">
   <img src="https://vercel.com/button" alt="Deploy with Vercel" />
 </a>
 
-### Clone with create-next-app
+### Clone with create-vercel-shop
 
 ```bash
-npx create-next-app@latest --example vercel/shop --example-path apps/template
+npx create-vercel-shop@latest
 ```
 
 ### Start from v0
 
-You can also use [v0](https://v0.dev) to generate a storefront and iterate on the design before connecting it to your commerce provider.
+You can also use [v0](https://v0.dev) to generate a storefront and iterate on the design before connecting it to Shopify.
 
 ## Environment variables
 
-In your provider's admin panel, locate the API credentials for your storefront. Create a `.env.local` file in your project root:
+In your Shopify admin, go to **Settings → Apps and sales channels → Headless** and copy the Storefront API credentials. Create a `.env.local` file in your project root:
 
 ```bash
-COMMERCE_STORE_DOMAIN="your-store.example.com"
-COMMERCE_API_TOKEN="your-api-access-token"
+SHOPIFY_STORE_DOMAIN="your-store.myshopify.com"
+SHOPIFY_STOREFRONT_ACCESS_TOKEN="your-storefront-access-token"
 NEXT_PUBLIC_SITE_NAME="Your Store Name"
 ```
 
@@ -75,7 +74,7 @@ Your store is now running at [localhost:3000](http://localhost:3000).
 
 ## AI coding agents
 
-If you use [Claude Code](https://claude.ai/code) or [Cursor](https://cursor.sh), install the [Vercel plugin](https://vercel.com/changelog/introducing-vercel-plugin-for-coding-agents) to get platform-aware guidance for Next.js, AI SDK, shadcn/ui, caching, and more — 47+ skills that activate automatically as you work.
+If you use [Claude Code](https://claude.ai/code) or [Cursor](https://cursor.sh), install the [Vercel plugin](https://vercel.com/changelog/introducing-vercel-plugin-for-coding-agents) to get platform-aware guidance for Next.js, AI SDK, shadcn/ui, caching, and more - 47+ skills that activate automatically as you work.
 
 ### Claude Code
 
