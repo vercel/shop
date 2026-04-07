@@ -73,40 +73,6 @@ export function resolveSelectedVariant(
 }
 
 /**
- * Compute the URL for selecting a given option value.
- * Finds the variant matching the updated options and returns
- * `/products/{handle}?variantId={numericId}`.
- */
-export function getVariantUrl(
-  handle: string,
-  variants: ProductVariant[],
-  currentOptions: SelectedOptions,
-  optionName: string,
-  optionValue: string,
-): string {
-  const newOptions = { ...currentOptions, [optionName]: optionValue };
-
-  // Try exact match first
-  let variant = variants.find((v) =>
-    v.selectedOptions.every((opt) => newOptions[opt.name] === opt.value),
-  );
-
-  // Fall back to first variant with this option value
-  if (!variant) {
-    variant = variants.find((v) =>
-      v.selectedOptions.some((opt) => opt.name === optionName && opt.value === optionValue),
-    );
-  }
-
-  const numericId = variant ? getNumericShopifyId(variant.id) : null;
-  if (numericId) {
-    return `/products/${handle}?variantId=${numericId}`;
-  }
-
-  return `/products/${handle}`;
-}
-
-/**
  * Returns filtered images for the currently selected color variant.
  *
  * Collects variant images assigned to other colors and excludes them,

@@ -1,27 +1,25 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import type { SelectedOptions } from "./variants";
-import { getVariantUrl } from "./variants";
 
 interface ColorPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;
   selectedValue: string;
   variants: ProductVariant[];
-  handle: string;
   selectedOptions: SelectedOptions;
+  onSelectOption: (optionName: string, optionValue: string) => void;
 }
 
 export function ColorPicker({
   option,
   selectedValue,
   variants,
-  handle,
   selectedOptions,
+  onSelectOption,
   className,
   ...props
 }: ColorPickerProps) {
@@ -45,8 +43,6 @@ export function ColorPicker({
           )?.image?.url;
 
           const imageUrl = value.swatch?.image || variantImage;
-
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const swatch = (
             <div
@@ -97,15 +93,16 @@ export function ColorPicker({
           }
 
           return (
-            <Link
+            <button
+              type="button"
               key={value.id}
-              href={href}
+              onClick={() => onSelectOption(option.name, value.name)}
               className="flex flex-col items-center gap-2"
               aria-label={`Select ${option.name}: ${value.name}`}
             >
               {swatch}
               {label}
-            </Link>
+            </button>
           );
         })}
       </div>

@@ -1,26 +1,24 @@
-import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import type { SelectedOptions } from "./variants";
-import { getVariantUrl } from "./variants";
 
 interface OptionPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;
   selectedValue: string;
   variants: ProductVariant[];
-  handle: string;
   selectedOptions: SelectedOptions;
+  onSelectOption: (optionName: string, optionValue: string) => void;
 }
 
 export function OptionPicker({
   option,
   selectedValue,
   variants,
-  handle,
   selectedOptions,
+  onSelectOption,
   className,
   ...props
 }: OptionPickerProps) {
@@ -39,8 +37,6 @@ export function OptionPicker({
               v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           );
 
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
-
           const classes = cn(
             "px-4 py-2 text-sm font-medium rounded-lg border transition-all",
             isSelected
@@ -58,9 +54,14 @@ export function OptionPicker({
           }
 
           return (
-            <Link key={value.id} href={href} className={classes}>
+            <button
+              type="button"
+              key={value.id}
+              onClick={() => onSelectOption(option.name, value.name)}
+              className={classes}
+            >
               {value.name}
-            </Link>
+            </button>
           );
         })}
       </div>

@@ -1,23 +1,14 @@
 import { Container } from "@/components/layout/container";
 import { Breadcrumb } from "@/components/product/breadcrumb";
-import { BuyButtons } from "@/components/product/pdp/buy-buttons";
-import {
-  ProductInfoDescription,
-  ProductInfoHeader,
-  ProductInfoOptions,
-} from "@/components/product/pdp/product-info";
-import { ProductMedia } from "@/components/product/pdp/product-media";
-import {
-  computeInitialSelectedOptions,
-  getImagesForSelectedColor,
-  resolveSelectedVariant,
-} from "@/components/product/pdp/variants";
+import { ProductInfoDescription } from "@/components/product/pdp/product-info";
 import { Recommendations } from "@/components/product/recommendations";
 import { ProductSchema } from "@/components/product/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
+
+import { VariantSection } from "./variant-section";
 
 function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: string }) {
   return (
@@ -39,20 +30,7 @@ export async function ProductDetailPage({
   locale: Locale;
   variantId?: string;
 }) {
-  const { handle, title, featuredImage, images, videos, variants, options, descriptionHtml } =
-    product;
-
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
-
-  const buyButtonProps = {
-    selectedVariant,
-    title,
-    handle,
-    featuredImage,
-    availableForSale: product.availableForSale,
-  };
+  const { handle, title, images, variants, descriptionHtml } = product;
 
   return (
     <Container className="bg-background">
@@ -75,21 +53,9 @@ export async function ProductDetailPage({
       <div className="space-y-8">
         <Breadcrumb title={title} handle={handle} />
 
-        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-          <ProductMedia images={filteredImages} videos={videos} title={title} />
+        <VariantSection product={product} locale={locale} initialVariantId={variantId} />
 
-          <div className="space-y-8">
-            <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
-            <ProductInfoOptions
-              variants={variants}
-              options={options}
-              selectedOptions={selectedOptions}
-              handle={handle}
-            />
-            <BuyButtons {...buyButtonProps} />
-            <ProductInfoDescription descriptionHtml={descriptionHtml} />
-          </div>
-        </div>
+        <ProductInfoDescription descriptionHtml={descriptionHtml} />
       </div>
 
       <div className="mt-16">
