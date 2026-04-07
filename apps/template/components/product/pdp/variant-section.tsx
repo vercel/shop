@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { DEFAULT_OPTION } from "@/lib/constants";
-import type { Image, ProductDetails } from "@/lib/types";
+import type { ProductDetails } from "@/lib/types";
 
 import { BuyButtons } from "./buy-buttons";
 import { ColorPicker } from "./color-picker";
@@ -21,15 +21,14 @@ import {
 interface VariantSectionProps {
   product: ProductDetails;
   locale: string;
-  initialVariantId?: string;
 }
 
-export function VariantSection({ product, locale, initialVariantId }: VariantSectionProps) {
+export function VariantSection({ product, locale }: VariantSectionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
-  const variantId = searchParams.get("variantId") ?? initialVariantId;
+  const variantId = searchParams.get("variantId");
 
   const selectedOptions = useMemo(
     () => computeInitialSelectedOptions(variants, variantId ?? undefined),

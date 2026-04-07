@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { Container } from "@/components/layout/container";
 import { Breadcrumb } from "@/components/product/breadcrumb";
 import { ProductInfoDescription } from "@/components/product/pdp/product-info";
@@ -24,11 +26,9 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 export async function ProductDetailPage({
   product,
   locale,
-  variantId,
 }: {
   product: ProductDetails;
   locale: Locale;
-  variantId?: string;
 }) {
   const { handle, title, images, variants, descriptionHtml } = product;
 
@@ -53,7 +53,9 @@ export async function ProductDetailPage({
       <div className="space-y-8">
         <Breadcrumb title={title} handle={handle} />
 
-        <VariantSection product={product} locale={locale} initialVariantId={variantId} />
+        <Suspense>
+          <VariantSection product={product} locale={locale} />
+        </Suspense>
 
         <ProductInfoDescription descriptionHtml={descriptionHtml} />
       </div>

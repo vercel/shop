@@ -12,34 +12,24 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, query, locale] = await Promise.all([params, searchParams, getLocale()]);
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === "__placeholder__") {
     notFound();
   }
 
-  const variantId = typeof query.variantId === "string" ? query.variantId : undefined;
-  const canonicalPath = variantId
-    ? `/products/${handle}?variantId=${variantId}`
-    : `/products/${handle}`;
-
-  return buildProductMetadata(handle, locale, canonicalPath);
+  return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: PageProps<"/products/[handle]">) {
-  const [{ handle }, query, locale] = await Promise.all([params, searchParams, getLocale()]);
+export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === "__placeholder__") {
     notFound();
   }
 
-  const variantId = typeof query.variantId === "string" ? query.variantId : undefined;
   const product = await getProductDetails(handle, locale);
 
-  return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
+  return <ProductDetailPage product={product} locale={locale} />;
 }
