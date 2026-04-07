@@ -49,7 +49,7 @@ export default async function HomePage() {
             <h2 className="text-3xl font-semibold tracking-tight">
               Built to launch first, customize later
             </h2>
-            <div className="prose prose-neutral max-w-2xl">
+            <div className="prose prose-neutral">
               <p>
                 A Shopify storefront built with Next.js. Connect your store and you get product
                 pages, collections, a cart, and search. It works out of the box, and every part of
