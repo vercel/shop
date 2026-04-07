@@ -111,7 +111,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   return (
     <div
       data-slot="product-card-content"
-      className={cn("flex flex-col flex-1 p-3 gap-1.5", className)}
+      className={cn("flex flex-col flex-1 p-3", className)}
       {...props}
     >
       {children}
@@ -124,7 +124,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
     <h3
       data-slot="product-card-title"
       className={cn(
-        "text-sm sm:text-base font-medium text-main-foreground group-hover:underline line-clamp-2 leading-tight min-h-[2lh]",
+        "text-sm sm:text-base font-medium text-main-foreground group-hover:underline line-clamp-2 leading-tight",
         className,
       )}
       {...props}
