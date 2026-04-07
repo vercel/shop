@@ -25,7 +25,7 @@ function ProductInfoHeader({
 }: ProductInfoHeaderProps) {
   return (
     <div data-slot="product-info-header" className={className} {...props}>
-      <div className="space-y-4">
+      <div>
         <div>
           <h1
             className={cn(

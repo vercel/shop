@@ -6,13 +6,13 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
 import { AgentButton } from "@/components/agent/agent-button";
-import { ScrollToTop } from "@/components/scroll-top";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
 import { BottomBar } from "@/components/layout/bottom-bar";
 import { Footer } from "@/components/layout/footer";
 import { Nav } from "@/components/layout/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
+import { ScrollToTop } from "@/components/scroll-top";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -61,9 +61,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlayWithAddress locale={locale} />
             </Suspense>
             <Suspense>
-              <BottomBar>
-                {process.env.AI_AGENT_DISABLED ? null : <AgentButton />}
-              </BottomBar>
+              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
