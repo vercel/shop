@@ -92,9 +92,11 @@ export async function ProductDetailPage({
         </div>
       </div>
 
+      {/* TODO: re-enable recommendations once caching is sorted
       <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
       </div>
+      */}
     </Container>
   );
 }
