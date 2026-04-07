@@ -22,19 +22,21 @@ function MediaImage({
   idx,
   sizes,
   priority,
+  className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
   title: string;
   idx: number;
   sizes: string;
   priority: boolean;
+  className?: string;
 }) {
   return (
     <Image
       src={item.image.url}
       alt={item.image.altText || `${title} image ${idx + 1}`}
       fill
-      className="object-cover rounded-xl"
+      className={cn("object-cover", className)}
       sizes={sizes}
       priority={priority}
       loading={priority ? "eager" : "lazy"}
@@ -43,12 +45,18 @@ function MediaImage({
   );
 }
 
-function MediaVideo({ item }: { item: Extract<MediaItem, { type: "video" }> }) {
+function MediaVideo({
+  item,
+  className,
+}: {
+  item: Extract<MediaItem, { type: "video" }>;
+  className?: string;
+}) {
   return (
     <AutoPlayVideo
       src={item.video.url}
       poster={item.video.previewImage?.url}
-      className="h-full w-full object-cover rounded-xl"
+      className={cn("h-full w-full object-cover", className)}
     />
   );
 }
@@ -104,7 +112,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
         {mediaItems.map((item, idx) => (
           <div
             key={mediaKey(item)}
-            className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden bg-accent"
+            className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
           >
             {item.type === "video" ? (
               <MediaVideo item={item} />
