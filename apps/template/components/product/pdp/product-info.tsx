@@ -14,26 +14,23 @@ interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
   selectedVariant: ProductVariant | undefined;
   title: string;
   locale: string;
-  size?: "default" | "sm";
 }
 
 function ProductInfoHeader({
   selectedVariant,
   title,
   locale,
-  size = "default",
   className,
   ...props
 }: ProductInfoHeaderProps) {
-  const titleSize = size === "sm" ? "text-xl" : "text-[30px]";
   return (
     <div data-slot="product-info-header" className={className} {...props}>
-      <div className="space-y-4">
+      <div>
         <div>
           <h1
             className={cn(
               "font-semibold text-foreground lg:leading-[1.25] leading-tight tracking-tight",
-              titleSize,
+              "text-xl lg:text-[30px]",
             )}
           >
             {title}
@@ -46,7 +43,6 @@ function ProductInfoHeader({
             currencyCode={selectedVariant.price.currencyCode}
             compareAtAmount={selectedVariant.compareAtPrice?.amount}
             locale={locale}
-            size={size}
           />
         )}
       </div>
@@ -59,7 +55,6 @@ interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
   options: ProductOption[];
   selectedOptions: SelectedOptions;
   handle: string;
-  size?: "default" | "sm";
 }
 
 function ProductInfoOptions({
@@ -67,7 +62,6 @@ function ProductInfoOptions({
   options,
   selectedOptions,
   handle,
-  size = "default",
   className,
   ...props
 }: ProductInfoOptionsProps) {
@@ -131,34 +125,4 @@ function ProductInfoDescription({
   );
 }
 
-function ProductInfo({
-  variants,
-  options,
-  selectedVariant,
-  selectedOptions,
-  handle,
-  title,
-  descriptionHtml,
-  locale,
-  size = "default",
-}: {
-  variants: ProductVariant[];
-  options: ProductOption[];
-  selectedVariant: ProductVariant | undefined;
-  selectedOptions: SelectedOptions;
-  handle: string;
-  title: string;
-  descriptionHtml: string;
-  locale: string;
-  size?: "default" | "sm";
-}) {
-  return (
-    <div data-slot="product-info" className="space-y-8">
-      <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} size={size} />
-      <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} size={size} />
-      <ProductInfoDescription descriptionHtml={descriptionHtml} />
-    </div>
-  );
-}
-
-export { ProductInfo, ProductInfoHeader, ProductInfoOptions, ProductInfoDescription };
+export { ProductInfoHeader, ProductInfoOptions, ProductInfoDescription };

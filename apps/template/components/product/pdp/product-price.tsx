@@ -9,7 +9,6 @@ interface ProductPriceProps extends ComponentPropsWithoutRef<"div"> {
   currencyCode: string;
   compareAtAmount?: string;
   locale?: string;
-  size?: "default" | "sm";
 }
 
 export function ProductPrice({
@@ -17,7 +16,6 @@ export function ProductPrice({
   currencyCode,
   compareAtAmount,
   locale,
-  size = "default",
   className,
   ...props
 }: ProductPriceProps) {
@@ -26,23 +24,20 @@ export function ProductPrice({
       ? Math.round(((Number(compareAtAmount) - Number(amount)) / Number(compareAtAmount)) * 100)
       : null;
 
-  const priceSize = size === "sm" ? "text-xl" : "text-3xl";
-  const compareSize = size === "sm" ? "text-xl" : "text-3xl";
-
   return (
     <div className={cn("flex items-center gap-3 flex-wrap", className)} {...props}>
       <Price
         amount={amount}
         currencyCode={currencyCode}
         locale={locale}
-        className={cn(priceSize, "font-medium")}
+        className="text-xl lg:text-3xl font-medium"
       />
       {compareAtAmount && Number(compareAtAmount) > Number(amount) && (
         <Price
           amount={compareAtAmount}
           currencyCode={currencyCode}
           locale={locale}
-          className={cn(compareSize, "font-medium line-through text-foreground/35")}
+          className="text-xl lg:text-3xl font-medium line-through text-foreground/35"
         />
       )}
       {discountPercent && <DiscountBadge percent={discountPercent} />}

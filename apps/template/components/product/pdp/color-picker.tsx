@@ -66,9 +66,7 @@ export function ColorPicker({
               ) : (
                 <div
                   className="size-full rounded-lg border border-foreground/10"
-                  style={
-                    value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined
-                  }
+                  style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
                 />
               )}
             </div>
