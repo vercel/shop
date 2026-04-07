@@ -23,7 +23,13 @@ import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
 
-function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: string }) {
+function ProductBreadcrumbSchema({
+  title,
+  handle,
+}: {
+  title: string;
+  handle: string;
+}) {
   return (
     <BreadcrumbSchema
       items={[
@@ -43,12 +49,25 @@ export async function ProductDetailPage({
   locale: Locale;
   variantId?: string;
 }) {
-  const { handle, title, featuredImage, images, videos, variants, options, descriptionHtml } =
-    product;
+  const {
+    handle,
+    title,
+    featuredImage,
+    images,
+    videos,
+    variants,
+    options,
+    descriptionHtml,
+  } = product;
 
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
+  const filteredImages = getImagesForSelectedColor(
+    images,
+    options,
+    variants,
+    selectedOptions
+  );
 
   const buyButtonProps = {
     selectedVariant,
@@ -58,7 +77,25 @@ export async function ProductDetailPage({
     availableForSale: product.availableForSale,
   };
 
-  return <Container className="bg-background">{handle}</Container>
+  return (
+    <Container className="bg-background">
+      <ProductSchema
+        product={{
+          id: product.id,
+          handle,
+          title,
+          description: product.description,
+          images,
+          manufacturerName: product.manufacturerName,
+          currencyCode: product.currencyCode,
+          priceRange: product.priceRange,
+          variants,
+          availableForSale: product.availableForSale,
+        }}
+      />
+      <ProductBreadcrumbSchema title={title} handle={handle} />
+    </Container>
+  );
 
   return (
     <Container className="bg-background">
@@ -89,8 +126,17 @@ export async function ProductDetailPage({
           </div>
 
           <div className="space-y-8">
-            <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
-            <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} />
+            <ProductInfoHeader
+              selectedVariant={selectedVariant}
+              title={title}
+              locale={locale}
+            />
+            <ProductInfoOptions
+              variants={variants}
+              options={options}
+              selectedOptions={selectedOptions}
+              handle={handle}
+            />
             <MobileBuyButtons {...buyButtonProps} />
             <ProductInfoDescription descriptionHtml={descriptionHtml} />
           </div>
