@@ -491,6 +491,11 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
 
   useScrollContain(panelRef, open);
 
+  const scrollMessagesToBottom = useCallback(() => {
+    const el = panelRef.current?.querySelector<HTMLElement>("[data-slot=messages]");
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+
   useEffect(() => {
     if (!open) return;
 
@@ -552,6 +557,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
+            onAnimationComplete={scrollMessagesToBottom}
             transition={{ duration: 0.35, ease: easing }}
             className="fixed left-1/2 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 -translate-x-1/2 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm"
           >
