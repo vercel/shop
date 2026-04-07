@@ -59,6 +59,7 @@ export async function ProductDetailPage({
   };
 
   return (
+    <Suspense>
     <Container className="bg-background">
       <Suspense>
         <ProductSchema
@@ -120,5 +121,6 @@ export async function ProductDetailPage({
         <Recommendations handle={handle} locale={locale} />
       </div>
     </Container>
+    </Suspense>
   );
 }
