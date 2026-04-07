@@ -31,9 +31,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     notFound();
   }
 
-  return <div>{handle}</div>
+  const product = await getProductDetails(handle, locale);
 
-  // const product = await getProductDetails(handle, locale);
-
-  // return <ProductDetailPage product={product} locale={locale} />;
+  return <ProductDetailPage product={product} locale={locale} />;
 }
