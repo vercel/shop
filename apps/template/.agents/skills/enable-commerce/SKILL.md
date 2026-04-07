@@ -15,7 +15,8 @@ Before writing any code, ask:
 
 1. **Which commerce platform?** (SAP Commerce Cloud, BigCommerce, commercetools, Medusa, Saleor, custom, etc.)
 2. **API credentials** — what env vars are needed? Get the names and have the user fill `.env.local`.
-3. **Any special requirements?** (B2B pricing, multi-currency, custom checkout flow, etc.)
+3. **API documentation** — for known platforms, you'll find the docs yourself. For custom backends, ask: "Do you have an OpenAPI/Swagger spec URL, a local spec file, or written API docs I can read?"
+4. **Any special requirements?** (B2B pricing, multi-currency, custom checkout flow, etc.)
 
 ## Step 1 — Read the contract
 
@@ -34,7 +35,27 @@ This step is critical. Do NOT skip it. Implementing transforms against assumed d
 
 ### a) Read the provider's API documentation
 
-Use `WebSearch` and `WebFetch` to read the provider's official API reference. Understand:
+**Known platforms:** Use `WebSearch` and `WebFetch` to read the official API reference.
+
+**Custom backends with an OpenAPI/Swagger spec:** Fetch and read the spec first — it's the fastest way to understand what endpoints exist, what they accept, and what they return:
+
+```bash
+# Fetch remote spec
+curl -s https://api.example.com/openapi.json | jq . > .claude/schemas/openapi.json
+
+# Or read a local spec the user provides
+# cat path/to/swagger.yaml
+```
+
+Read the spec to build a mental map of endpoints → CommerceProvider operations:
+- Which endpoint returns products? What query params does it support (pagination, filtering, locale)?
+- Is there a cart/session API, or is checkout handled externally?
+- How does auth work (API key header, OAuth, basic auth)?
+- What does the product response shape look like — are variants nested or flat?
+
+**Custom backends without a spec:** Ask the user for a list of endpoints and make exploratory curl calls (see step b below).
+
+For any provider, understand:
 - Authentication flow (OAuth2, API keys, bearer tokens, etc.)
 - How products are structured (variants, options, pricing model, images)
 - How categories/collections work (flat list vs tree, parent references)
