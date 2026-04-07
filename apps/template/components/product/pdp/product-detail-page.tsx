@@ -58,8 +58,9 @@ export async function ProductDetailPage({
     availableForSale: product.availableForSale,
   };
 
+  return null
+
   return (
-    <Suspense>
     <Container className="bg-background">
       <Suspense>
         <ProductSchema
@@ -117,10 +118,9 @@ export async function ProductDetailPage({
         />
       </div>
 
-      <div className="mt-16">
+      {/* <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
-      </div>
+      </div> */}
     </Container>
-    </Suspense>
   );
 }
