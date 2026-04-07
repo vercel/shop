@@ -1,12 +1,11 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { BottomBarSearch } from "./bottom-bar-search";
-import { MenuTriggerIcon } from "./nav/megamenu/menu-trigger-icon";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 
@@ -23,25 +22,7 @@ interface BottomBarProps {
 }
 
 export function BottomBar({ children }: BottomBarProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
-  useEffect(() => {
-    const channel = new BroadcastChannel("megamenu");
-    channel.onmessage = (ev) => {
-      const { type } = ev.data;
-      if (type === "close") setMenuOpen(false);
-    };
-    return () => channel.close();
-  }, []);
-
-  function toggleMenu() {
-    vibrate();
-    const channel = new BroadcastChannel("megamenu");
-    channel.postMessage({ type: "toggle" });
-    channel.close();
-    setMenuOpen((prev) => !prev);
-  }
 
   function openSearch() {
     vibrate();
@@ -84,19 +65,6 @@ export function BottomBar({ children }: BottomBarProps) {
             transition={{ duration: 0.2 }}
             className="flex items-center gap-1 pl-3 pr-1"
           >
-            <button
-              type="button"
-              className="flex md:hidden items-center gap-1.5 px-2 py-1"
-              onClick={toggleMenu}
-            >
-              {menuOpen ? (
-                <X className="size-4 text-foreground opacity-50" />
-              ) : (
-                <MenuTriggerIcon className="size-4 text-foreground opacity-50" />
-              )}
-              <span className="text-xs font-medium text-foreground opacity-50">Browse</span>
-            </button>
-            <div className="w-px h-5 bg-border/50 md:hidden" />
             <button
               type="button"
               className="flex items-center gap-1.5 px-2 py-1"

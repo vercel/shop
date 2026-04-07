@@ -59,7 +59,6 @@ Shopify-specific types that match the GraphQL API response shapes:
 - `types/customer.ts` — Customer Account API types (Customer, Address, Order, Fulfillment)
 - `types/filters.ts` — ShopifyFilter, ShopifyFilterType, ProductFilter
 - `types/menu.ts` — MenuItem, MenuItemType
-- `types/megamenu.ts` — Megamenu structure
 
 ### Transform functions
 

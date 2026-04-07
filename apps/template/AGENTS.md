@@ -23,7 +23,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ## Critical Rules (Always Apply)
 
 1. **Every cart mutation MUST call `invalidateCartCache()`** (from `@/lib/cart-cache`) or cache goes stale.
-2. **New user-visible strings go in ALL locale files** (`en.json`, `de-DE.json`, `fr-FR.json`, `nl-NL.json`, `es-ES.json`) so the documented multi-locale upgrade path stays mechanical.
+2. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always reference `.claude/schemas/` when writing GraphQL**. Never guess Shopify field names.
 

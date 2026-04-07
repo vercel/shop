@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { CartIcon, CartIconFallback } from "./cart";
-import { Megamenu } from "./megamenu";
 import { QuickLinks } from "./quick-links";
 
 export function Nav({ locale }: { locale: string }) {
@@ -21,10 +20,6 @@ export function Nav({ locale }: { locale: string }) {
           </span>
           <span className="text-xl font-semibold leading-4 tracking-tight">Shop</span>
         </Link>
-
-        <Suspense fallback={null}>
-          <Megamenu locale={locale} />
-        </Suspense>
 
         <Suspense fallback={null}>
           <QuickLinks locale={locale} />
