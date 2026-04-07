@@ -5,19 +5,19 @@ import { Suspense } from "react";
 import { MarketingPageRenderer } from "@/components/cms/page-renderer";
 import { Container } from "@/components/layout/container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getLocalMarketingPage } from "@/lib/content/pages";
+import { getAllLocalMarketingPageSlugs, getLocalMarketingPage } from "@/lib/content/pages";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildOpenGraph } from "@/lib/seo";
 import type { MarketingPage } from "@/lib/types";
 
-// export async function generateStaticParams() {
-//   const localPages = getAllLocalMarketingPageSlugs().map((pair) => ({
-//     slug: pair.slug,
-//   }));
-//
-//   return localPages.length > 0 ? localPages : [{ slug: "__placeholder__" }];
-// }
+export async function generateStaticParams() {
+  const localPages = getAllLocalMarketingPageSlugs().map((pair) => ({
+    slug: pair.slug,
+  }));
+
+  return localPages.length > 0 ? localPages : [{ slug: "__placeholder__" }];
+}
 
 async function getPageDetails(slug: string, locale: Locale) {
   "use cache";
