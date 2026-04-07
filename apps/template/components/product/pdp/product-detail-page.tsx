@@ -58,7 +58,7 @@ export async function ProductDetailPage({
     availableForSale: product.availableForSale,
   };
 
-  return null
+  return <Container className="bg-background">{handle}</Container>
 
   return (
     <Container className="bg-background">
