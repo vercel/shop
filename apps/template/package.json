@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@ai-sdk/react": "3.0.148",
+		"@ai-sdk/react": "3.0.151",
 		"@json-render/core": "0.16.0",
 		"@json-render/react": "0.16.0",
 		"@tailwindcss/postcss": "4.2.2",
@@ -9,7 +9,7 @@
 		"@types/react": "19.2.14",
 		"@types/react-dom": "19.2.3",
 		"@xyflow/react": "12.10.2",
-		"ai": "6.0.146",
+		"ai": "6.0.149",
 		"babel-plugin-react-compiler": "1.0.0",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
@@ -19,8 +19,8 @@
 		"nanoid": "5.1.7",
 		"next": "16.2.2",
 		"next-intl": "4.9.0",
-		"oxfmt": "0.43.0",
-		"oxlint": "1.58.0",
+		"oxfmt": "0.44.0",
+		"oxlint": "1.59.0",
 		"radix-ui": "1.4.3",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",

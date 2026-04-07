@@ -10,28 +10,30 @@ export async function generateStaticParams() {
   return [{ handle: "__placeholder__", variantId: "__placeholder__" }];
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps<"/products/[handle]/[variantId]">): Promise<Metadata> {
-  const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
+// export async function generateMetadata({
+//   params,
+// }: PageProps<"/products/[handle]/[variantId]">): Promise<Metadata> {
+//   const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
 
-  if (handle === "__placeholder__") {
-    notFound();
-  }
+//   if (handle === "__placeholder__") {
+//     notFound();
+//   }
 
-  return buildProductMetadata(handle, locale, `/products/${handle}?variantId=${variantId}`);
-}
+//   return buildProductMetadata(handle, locale, `/products/${handle}?variantId=${variantId}`);
+// }
 
 export default async function ProductVariantPage({
   params,
 }: PageProps<"/products/[handle]/[variantId]">) {
   const [{ handle, variantId }, locale] = await Promise.all([params, getLocale()]);
 
-  if (handle === "__placeholder__") {
-    notFound();
-  }
+  return <div>{handle} {variantId}</div>
 
-  const product = await getProductDetails(handle, locale);
+  // if (handle === "__placeholder__") {
+  //   notFound();
+  // }
 
-  return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
+  // const product = await getProductDetails(handle, locale);
+
+  // return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
 }

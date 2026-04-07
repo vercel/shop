@@ -1,7 +1,6 @@
 {
   "dependencies": {
-    "turbo": "2.8.17",
-    "vercel": "^50.39.0"
+    "turbo": "2.9.4"
   },
   "name": "monorepo",
   "packageManager": "pnpm@10.32.1",
@@ -14,13 +13,7 @@
     "test": "turbo run test",
     "format": "turbo run format"
   },
-  "pnpm": {
-    "overrides": {
-      "path-to-regexp": ">=6.3.0"
-    }
-  },
   "workspaces": [
-    "apps/*",
-    "examples/*"
+    "apps/*"
   ]
 }
