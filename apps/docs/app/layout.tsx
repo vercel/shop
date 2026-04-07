@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const metadata = {
   title: "Vercel Shop Documentation",
   description:
-    "Documentation for Vercel Shop — an agent-native, fast-by-default Shopify storefront built on Next.js.",
+    "Documentation for Vercel Shop — an agent-native, fast-by-default commerce storefront built on Next.js.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

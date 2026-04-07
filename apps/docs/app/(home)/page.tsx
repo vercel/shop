@@ -14,7 +14,7 @@ import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
 const title = "Vercel Shop";
 const description =
-	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
+	"Ship a production-ready commerce storefront in days. Customize everything with AI agents. Built on Next.js.";
 
 export const metadata: Metadata = {
 	title,

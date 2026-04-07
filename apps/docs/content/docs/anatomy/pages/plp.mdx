@@ -41,19 +41,19 @@ Sort changes use `useTransition` for non-blocking navigation. On mobile, the sor
 
 ## Pagination
 
-Pagination is cursor-based using Shopify's `endCursor` rather than page numbers. A First/Next button pair navigates between pages, with loading indicators and disabled states at boundaries. The cursor resets automatically when filters or sort change.
+Pagination is cursor-based using the provider's cursor rather than page numbers. A First/Next button pair navigates between pages, with loading indicators and disabled states at boundaries. The cursor resets automatically when filters or sort change.
 
 ## Collection pages
 
 The `/collections/[handle]` route fetches collection metadata (title, description, image, SEO) and its products in parallel. Collection data is cached with `cacheLife("max")` and tagged for granular revalidation (`collection-{handle}`).
 
-Products within a collection are fetched via `getCollectionProducts()`, which accepts Shopify `ProductFilter[]` for server-side filtering by variant options, price, vendor, type, tags, and metafields.
+Products within a collection are fetched via `getCollectionProducts()`, which accepts the provider's filter type for server-side filtering by variant options, price, vendor, type, tags, and metafields.
 
-> **Note:** Filters are driven entirely by Shopify's `ProductFilter` type. Adding custom filter logic (e.g., filtering by a metafield) requires modifying the GraphQL query in `lib/shopify/operations/products.ts`.
+> **Note:** Filters are driven entirely by the provider's filter type. Adding custom filter logic (e.g., filtering by a metafield) requires modifying the query in `lib/commerce/`.
 
 ## Search page
 
-The `/search` route accepts a `q` query parameter and combines it with the same filter and sort controls. `getProducts()` builds a Shopify search query from the text input and active filters, mapping UI sort keys to Shopify's `RELEVANCE` and `PRICE` sort keys.
+The `/search` route accepts a `q` query parameter and combines it with the same filter and sort controls. `getProducts()` builds a search query from the text input and active filters, mapping UI sort keys to the provider's sort keys.
 
 The search page displays a custom header with the query and result count, and shows a "no results" message with i18n support when the query returns empty.
 
@@ -69,5 +69,5 @@ The search page displays a custom header with the query and result count, and sh
 | `components/collections/pagination.tsx` | Cursor-based pagination controls |
 | `components/product-card.tsx` | Product card with image, price, quick-add |
 | `components/search/results.tsx` | Search results layout with no-results state |
-| `lib/shopify/operations/products.ts` | Product search with caching and filter mapping |
-| `lib/shopify/operations/collections.ts` | Collection metadata fetching |
+| `lib/commerce/` | Product search with caching and filter mapping |
+| `lib/commerce/` | Collection metadata fetching |

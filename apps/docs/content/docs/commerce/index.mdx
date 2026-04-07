@@ -1,18 +1,18 @@
 ---
-title: Shopify Integration
-description: How the template maps to Shopify concepts — menus, products, collections, and cache invalidation via webhooks.
+title: Commerce Integration
+description: How the template maps to commerce concepts — menus, products, collections, and cache invalidation via webhooks.
 type: reference
 prerequisites:
   - /docs/getting-started
 ---
 
-The template connects to Shopify through the Storefront API. This page covers the Shopify-side configuration that the template expects — concept mapping, required menus, and cache invalidation.
+The template connects to the commerce provider through its API. This page covers the provider-side configuration that the template expects — concept mapping, required menus, and cache invalidation.
 
 For the API client and query patterns, see [Storefront API](/docs/reference/storefront-api).
 
 ## Concept mapping
 
-| Shopify concept | Template route | What renders it |
+| Commerce concept | Template route | What renders it |
 |---|---|---|
 | Products | `/products/[handle]` | Product detail page with variants, gallery, buy section |
 | Collections | `/collections/[handle]` | Product grid with filtering, sorting, pagination |
@@ -23,7 +23,7 @@ For the API client and query patterns, see [Storefront API](/docs/reference/stor
 
 ## Required menus
 
-The template fetches three menus from Shopify by handle. These must exist in your Shopify admin under **Online Store → Navigation** with the exact handles below:
+The template fetches three menus from the commerce provider by handle. These must exist in your commerce admin with the exact handles below:
 
 | Menu handle | Where it renders | Structure |
 |---|---|---|
@@ -35,15 +35,15 @@ If a menu doesn't exist, the corresponding UI section renders empty. Menu items 
 
 ## Webhooks and cache invalidation
 
-All read operations are cached with `"use cache"` and `cacheLife("max")`. Without webhooks, changes in Shopify won't appear until the cache expires. To get near-instant updates, configure Shopify webhooks to hit the template's invalidation endpoint.
+All read operations are cached with `"use cache"` and `cacheLife("max")`. Without webhooks, changes in your commerce admin won't appear until the cache expires. To get near-instant updates, configure commerce webhooks to hit the template's invalidation endpoint.
 
 ### Webhook endpoint
 
 ```
-POST /api/webhooks/shopify
+POST /api/webhooks
 ```
 
-The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` environment variable, then calls `revalidateTag()` for the affected cache tags.
+The handler verifies the signature using the `COMMERCE_WEBHOOK_SECRET` environment variable, then calls `revalidateTag()` for the affected cache tags.
 
 ### Supported topics
 
@@ -56,40 +56,40 @@ The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` envir
 | `collections/update` | `collections`, `products`, `menus`, `collection-{handle}` |
 | `collections/delete` | `collections`, `products`, `menus` |
 | `inventory_levels/*` | `products`, `collections` |
-| `metaobjects/*` | `cms:all` + type-specific tags (if using Shopify CMS) |
+| `metaobjects/*` | `cms:all` + type-specific tags (if using CMS) |
 
 ### Setting up webhooks
 
-In your Shopify admin, go to **Settings → Notifications → Webhooks**:
+In your commerce admin, configure webhooks:
 
-1. Set the webhook URL to `https://your-domain.com/api/webhooks/shopify`
+1. Set the webhook URL to `https://your-domain.com/api/webhooks`
 2. Select **JSON** as the format
 3. Create webhooks for each topic in the table above
 4. Copy the webhook signing secret and add it to your environment:
 
 ```bash
-SHOPIFY_WEBHOOK_SECRET="your-webhook-signing-secret"
+COMMERCE_WEBHOOK_SECRET="your-webhook-signing-secret"
 ```
 
-> **Important:** Without `SHOPIFY_WEBHOOK_SECRET`, the handler skips signature verification. Always set this in production.
+> **Important:** Without `COMMERCE_WEBHOOK_SECRET`, the handler skips signature verification. Always set this in production.
 
 ### How it works
 
-When Shopify sends a webhook, the handler:
+When the commerce provider sends a webhook, the handler:
 
-1. Verifies the HMAC-SHA256 signature using `crypto.timingSafeEqual`
+1. Verifies the signature
 2. Parses the topic header to determine what changed
 3. Extracts the product/collection handle from the payload for targeted invalidation
 4. Calls `revalidateTag()` for each affected cache tag
 5. Returns the list of invalidated tags for logging
 
-This means a product update in Shopify invalidates only that product's cache and its recommendations — not every page on the site.
+This means a product update invalidates only that product's cache and its recommendations — not every page on the site.
 
 ## Key files
 
 | File | Purpose |
-|------|---------|
-| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification |
-| `lib/shopify/operations/menu.ts` | Menu fetching by handle |
-| `lib/shopify/operations/megamenu.ts` | Megamenu data fetching from `main-menu` |
-| `lib/shopify/client.ts` | Core Storefront API client |
+|---|---|
+| `app/api/webhooks/route.ts` | Webhook handler with signature verification |
+| `lib/commerce/` | Menu fetching by handle |
+| `lib/commerce/` | Megamenu data fetching from `main-menu` |
+| `lib/commerce/` | Core API client |

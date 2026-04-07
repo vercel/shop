@@ -1,12 +1,12 @@
 # Recipe: Type Seams (Domain vs Provider Types)
 
-> Domain types in `lib/types.ts` are provider-agnostic. Transforms convert Shopify responses into these types. Components never import Shopify types.
+> Domain types in `lib/types.ts` are provider-agnostic. Transforms convert commerce provider responses into these types. Components never import provider types.
 
 ## When to read this
 
 - Adding a new data type (e.g., wishlist, reviews)
 - Modifying product or cart data structures
-- Replacing Shopify with another commerce provider
+- Replacing the commerce provider
 - Debugging type mismatches between API data and components
 
 ## Key files
@@ -14,14 +14,13 @@
 | File | Role |
 |------|------|
 | `lib/types.ts` | Domain types — the contract between data and components |
-| `lib/shopify/types/` | Shopify-specific API response types |
-| `lib/shopify/transforms/` | Convert Shopify → domain types |
-| `lib/shopify/transforms/product.ts` | `transformShopifyProductCard`, `transformShopifyProductDetails` |
-| `lib/shopify/transforms/cart.ts` | `transformShopifyCart` |
-| `lib/shopify/transforms/collection.ts` | `transformShopifyCollection` |
-| `lib/shopify/transforms/cms.ts` | CMS content transforms |
-| `lib/shopify/transforms/filters.ts` | Filter/facet transforms |
-| `lib/shopify/transforms/search.ts` | Predictive search transforms |
+| `lib/commerce/providers/<name>/types/` | Provider-specific API response types |
+| `lib/commerce/providers/<name>/transforms/` | Convert provider responses → domain types |
+| `lib/commerce/providers/<name>/transforms/product.ts` | `transformProductCard`, `transformProductDetails` |
+| `lib/commerce/providers/<name>/transforms/cart.ts` | `transformCart` |
+| `lib/commerce/providers/<name>/transforms/collection.ts` | `transformCollection` |
+| `lib/commerce/providers/<name>/transforms/filters.ts` | Filter/facet transforms |
+| `lib/commerce/providers/<name>/transforms/search.ts` | Predictive search transforms |
 
 ## How it works
 
@@ -30,14 +29,14 @@
 ```
 Components (import from @/lib/types)
         ↕ domain types only
-Transforms (lib/shopify/transforms/)
+Transforms (lib/commerce/providers/<name>/transforms/)
         ↕ both types meet here
-Operations (lib/shopify/operations/)
-        ↕ Shopify API types
-Shopify Storefront API
+Operations (lib/commerce/providers/<name>/operations/)
+        ↕ provider API types
+Commerce Provider API
 ```
 
-Transforms are the **only place** where Shopify types and domain types meet. This is the seam that makes the commerce provider swappable.
+Transforms are the **only place** where provider types and domain types meet. This is the seam that makes the commerce provider swappable.
 
 ### Domain types (lib/types.ts)
 
@@ -52,29 +51,29 @@ These types define what components expect. They're provider-agnostic:
 - **`Homepage`** / **`MarketingPage`** — CMS content types
 - **`Money`** / **`Image`** / **`SEO`** — Shared primitives
 
-### Shopify types (lib/shopify/types/)
+### Provider types (lib/commerce/providers/<name>/types/)
 
-Shopify-specific types that match the GraphQL API response shapes:
+Provider-specific types that match the API response shapes:
 
 - `types/customer.ts` — Customer Account API types (Customer, Address, Order, Fulfillment)
-- `types/filters.ts` — ShopifyFilter, ShopifyFilterType, ProductFilter
+- `types/filters.ts` — Provider filter types
 - `types/menu.ts` — MenuItem, MenuItemType
 - `types/megamenu.ts` — Megamenu structure
 
 ### Transform functions
 
-Each transform takes a Shopify API response and returns a domain type:
+Each transform takes a provider API response and returns a domain type:
 
 ```tsx
-// transforms/product.ts
-export function transformShopifyProductCard(product: ShopifyCategoryProduct): ProductCard { ... }
-export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails { ... }
+// providers/<name>/transforms/product.ts
+export function transformProductCard(product: ProviderCategoryProduct): ProductCard { ... }
+export function transformProductDetails(product: ProviderProduct): ProductDetails { ... }
 
-// transforms/cart.ts
-export function transformShopifyCart(cart: ShopifyCart): Cart { ... }
+// providers/<name>/transforms/cart.ts
+export function transformCart(cart: ProviderCart): Cart { ... }
 
-// transforms/collection.ts
-export function transformShopifyCollection(collection: ShopifyCollection): Collection { ... }
+// providers/<name>/transforms/collection.ts
+export function transformCollection(collection: ProviderCollection): Collection { ... }
 ```
 
 Transforms handle edge cases like null images, missing metafields, and placeholder review data.
@@ -84,10 +83,10 @@ Transforms handle edge cases like null images, missing metafields, and placehold
 Transforms are called inside operations, not in components:
 
 ```tsx
-// lib/shopify/operations/products.ts
-export async function getProduct(handle: string, locale: string) {
-  const data = await shopifyFetch<...>({ query, variables });
-  return transformShopifyProductDetails(data.product);  // ← Transform here
+// lib/commerce/providers/<name>/operations/products.ts
+export async function getProduct(handle: string, locale?: string) {
+  const data = await providerFetch<...>({ /* provider-specific request */ });
+  return transformProductDetails(data);  // ← Transform here
 }
 ```
 
@@ -103,10 +102,10 @@ return <ProductInfo product={product} />;
 
 > These rules are non-negotiable. Violating them will break the application.
 
-- [ ] GUARDRAIL: Components import from `@/lib/types` only — never from `@/lib/shopify/types` or `@/lib/shopify/transforms`
-- [ ] GUARDRAIL: Transforms are the only place Shopify types and domain types meet — don't leak Shopify types into operations' return types
-- [ ] GUARDRAIL: New domain types go in `lib/types.ts` — new Shopify-specific types go in `lib/shopify/types/`
-- [ ] GUARDRAIL: When modifying a domain type, update ALL transforms that produce it — search for the type name in `lib/shopify/transforms/`
+- [ ] GUARDRAIL: Components import from `@/lib/types` only — never from `@/lib/commerce/providers/*/types` or `@/lib/commerce/transforms`
+- [ ] GUARDRAIL: Transforms are the only place provider types and domain types meet — don't leak provider types into operations' return types
+- [ ] GUARDRAIL: New domain types go in `lib/types.ts` — new provider-specific types go in `lib/commerce/providers/<name>/types/`
+- [ ] GUARDRAIL: When modifying a domain type, update ALL transforms that produce it — search for the type name in `lib/commerce/providers/*/transforms/`
 
 ## Common modifications
 
@@ -119,9 +118,9 @@ return <ProductInfo product={product} />;
      isNew?: boolean;
    }
    ```
-2. Add the GraphQL field to `CATEGORY_PRODUCT_FRAGMENT` in `lib/shopify/fragments.ts`
-3. Update `ShopifyCategoryProduct` type in `transforms/product.ts`
-4. Update `transformShopifyProductCard` to map the new field
+2. Update your provider's API request to include the new field
+3. Update the provider response type in `providers/<name>/types.ts`
+4. Update `transformProductCard` to map the new field
 5. Use in components: `product.isNew`
 
 See [Add New Product Field](../guides/add-new-product-field.md) for the full walkthrough.
@@ -129,13 +128,12 @@ See [Add New Product Field](../guides/add-new-product-field.md) for the full wal
 ### Adding a new domain type
 
 1. Define the type in `lib/types.ts`
-2. Define the Shopify response type in `lib/shopify/types/` (new file if needed)
-3. Create a transform function in `lib/shopify/transforms/` (new file if needed)
-4. Export from `lib/shopify/transforms/index.ts`
+2. Define the provider response type in `lib/commerce/providers/<name>/types.ts`
+3. Create a transform function in `lib/commerce/providers/<name>/transforms/` (new file if needed)
 5. Use the transform in operations, return domain types to components
 
 ## See also
 
-- [GraphQL Operations](../shopify/graphql-operations.md) — Where API calls happen
-- [Swap Commerce Provider](../guides/swap-commerce-provider.md) — How to replace Shopify entirely
+- [Commerce Operations](../commerce/operations.md) — Operation patterns and caching
+- [Swap Commerce Provider](../guides/swap-commerce-provider.md) — How to replace the commerce provider
 - [Add New Product Field](../guides/add-new-product-field.md) — End-to-end example

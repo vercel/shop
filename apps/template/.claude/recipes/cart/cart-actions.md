@@ -1,6 +1,6 @@
 # Recipe: Cart Server Actions
 
-> Every cart mutation goes through server actions that call Shopify and invalidate cache tags.
+> Every cart mutation goes through server actions that call the commerce provider and invalidate cache tags.
 
 ## When to read this
 
@@ -14,7 +14,7 @@
 |------|------|
 | `components/cart/actions.ts` | Primary cart server actions (remove, update, add, checkout, buy now) |
 | `components/product/actions.ts` | `addToCartAction` used by the optimistic cart context via `FormData` |
-| `lib/shopify/operations/cart.ts` | Shopify GraphQL cart operations |
+| `lib/commerce/operations/cart.ts` | Commerce provider cart operations |
 | `lib/constants.ts` | `TAGS` constant (`{ collections, products, cart }`) |
 
 ## How it works
@@ -32,8 +32,8 @@ export async function someCartAction(...): Promise<CartActionResult> {
   // 1. Validate inputs
   if (!valid) return { success: false, error: "..." };
 
-  // 2. Call Shopify operation
-  const result = await shopifyOperation(...);
+  // 2. Call commerce operation
+  const result = await commerceOperation(...);
 
   // 3. Invalidate cache (REQUIRED)
   invalidateCartCache();
@@ -66,7 +66,7 @@ type CartActionResult = {
 };
 ```
 
-The `cart` field contains the full updated cart from Shopify, which the context uses to replace optimistic state.
+The `cart` field contains the full updated cart from the commerce provider, which the context uses to replace optimistic state.
 
 ### Cache invalidation
 
@@ -95,12 +95,12 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
 `buyNowAction` adds to cart and returns the checkout URL in one action:
 
 1. `addToCart` and `getSession` run in parallel (they're independent)
-2. If authenticated, `linkCartToCustomer` ensures Shopify recognizes the customer at checkout
+2. If authenticated, `linkCartToCustomer` ensures the provider recognizes the customer at checkout
 3. Returns `{ checkoutUrl }` for client-side redirect
 
 ### Checkout preparation
 
-`prepareCheckoutAction` links the cart to the authenticated customer before redirecting to Shopify checkout. Falls back gracefully if not authenticated.
+`prepareCheckoutAction` links the cart to the authenticated customer before redirecting to checkout. Falls back gracefully if not authenticated.
 
 ## GUARDRAILS
 
@@ -109,13 +109,13 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
 - [ ] GUARDRAIL: Every cart mutation MUST call `invalidateCartCache()` — omitting it causes stale cache
 - [ ] GUARDRAIL: Cart actions must be marked `"use server"` — they're called from client components via the cart context
 - [ ] GUARDRAIL: Always return `CartActionResult` with `success: boolean` — the optimistic cart context uses this to decide whether to keep optimistic state or roll back
-- [ ] GUARDRAIL: Never call `updateTag` before the Shopify mutation succeeds — premature invalidation causes a race where stale data gets re-cached
+- [ ] GUARDRAIL: Never call `updateTag` before the commerce mutation succeeds — premature invalidation causes a race where stale data gets re-cached
 
 ## Common modifications
 
 ### Adding a discount code action
 
-1. Add `applyDiscountCode` operation in `lib/shopify/operations/cart.ts`
+1. Add `applyDiscountCode` operation in `lib/commerce/operations/cart.ts`
 2. Create server action in `components/cart/actions.ts`:
    ```tsx
    export async function applyDiscountAction(code: string): Promise<CartActionResult> {
@@ -131,7 +131,7 @@ This runs after the response so add-to-cart stays fast. The shipping estimate sh
 
 If the cart shows stale data after mutations:
 1. Verify the action calls `invalidateCartCache()`
-2. Check that `updateTag` is called AFTER the Shopify mutation, not before
+2. Check that `updateTag` is called AFTER the commerce mutation, not before
 3. Verify the action returns the fresh cart (`await getCart()`) in the result
 
 ## See also

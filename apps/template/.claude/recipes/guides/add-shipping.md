@@ -18,13 +18,13 @@ The storefront ships without shipping estimation UI by default. This recipe adds
 3. **PDP address footer** — displays the current delivery address on the buy section card
 4. **Cart overlay shipping line** — shows "Shipping & Handling" in the overlay price breakdown
 5. **Cart page shipping line** — shows shipping in the full `/cart` summary
-6. **Auto-seeding** — seeds the cart with a delivery address from geo headers on first add-to-cart so Shopify can return estimates
+6. **Auto-seeding** — seeds the cart with a delivery address from geo headers on first add-to-cart so the commerce provider can return estimates
 
 ## Prerequisites
 
-- Shopify store with shipping zones and rates configured
-- The underlying Shopify operations already exist in `lib/shopify/operations/cart.ts` (`addCartDeliveryAddress`, `updateCartDeliveryAddress`, `getCartSelectableAddressId`, `getCartDeliveryOptions`)
-- The `Cart.shippingCost` field and `transformShippingCost()` already exist in `lib/types.ts` and `lib/shopify/transforms/cart.ts`
+- Commerce provider with shipping zones and rates configured
+- The underlying commerce operations already exist in `lib/commerce/operations/cart.ts` (`addCartDeliveryAddress`, `updateCartDeliveryAddress`, `getCartSelectableAddressId`, `getCartDeliveryOptions`)
+- The `Cart.shippingCost` field and `transformShippingCost()` already exist in `lib/types.ts` and `lib/commerce/transforms/cart.ts`
 
 ## Key files to create
 
@@ -47,8 +47,8 @@ This module reads the user's shipping address from: (a) their saved addresses if
 ```tsx
 import { cookies, headers } from "next/headers";
 import { getSession } from "@/lib/auth/server";
-import { getAddresses } from "@/lib/shopify/operations/customer";
-import type { Address } from "@/lib/shopify/types/customer";
+import { getAddresses } from "@/lib/commerce/operations/customer";
+import type { Address } from "@/lib/commerce/types/customer";
 
 export type ShippingAddressInfo = {
   city?: string;
@@ -163,7 +163,7 @@ import {
   getCartSelectableAddressId,
   updateCartBuyerIdentity,
   updateCartDeliveryAddress,
-} from "@/lib/shopify/operations/cart";
+} from "@/lib/commerce/operations/cart";
 
 const COOKIE_NAME = "shipping-address";
 
@@ -336,7 +336,7 @@ export async function ShippingAddress({
 
 import { useTranslations } from "next-intl";
 import { use } from "react";
-import type { CartShippingOption } from "@/lib/shopify/operations/cart";
+import type { CartShippingOption } from "@/lib/commerce/operations/cart";
 import { formatPrice } from "@/lib/utils";
 
 export function DeliveryInfo({
@@ -425,7 +425,7 @@ export function AddressSection({
 
 ```diff
 +import { getBuyZoneAddress } from "@/lib/address";
-+import { getCartDeliveryOptions } from "@/lib/shopify/operations/cart";
++import { getCartDeliveryOptions } from "@/lib/commerce/operations/cart";
 
 -export function BuySection({ productPromise, locale }) {
 -  return (
@@ -460,7 +460,7 @@ export function AddressSection({
 
 ```diff
 +import type { BuyZoneAddress } from "@/lib/address";
-+import type { CartShippingOption } from "@/lib/shopify/operations/cart";
++import type { CartShippingOption } from "@/lib/commerce/operations/cart";
 +import { AddressSection } from "./address-section";
 +import { DeliveryInfo } from "./delivery-info";
 
@@ -571,7 +571,7 @@ In **`overlay-summary.tsx`**, add the shipping line and address section:
 
 ### 8. Add auto-seeding to cart actions
 
-**`components/cart/actions.ts`** — in `addToCartAction`, after the `addToCart` call, seed a delivery address from geo headers so Shopify can return shipping estimates:
+**`components/cart/actions.ts`** — in `addToCartAction`, after the `addToCart` call, seed a delivery address from geo headers so the commerce provider can return shipping estimates:
 
 ```diff
 +import { after } from "next/server";
@@ -580,7 +580,7 @@ In **`overlay-summary.tsx`**, add the shipping line and address section:
 +  addCartDeliveryAddress,
 +  getCartSelectableAddressId,
 +  updateCartDeliveryAddress,
-+} from "@/lib/shopify/operations/cart";
++} from "@/lib/commerce/operations/cart";
 
  // After `const result = await addToCart(...)`, before `updateTag(TAGS.cart)`:
 +    if (!result.shippingCost) {
@@ -622,4 +622,3 @@ In **`overlay-summary.tsx`**, add the shipping line and address section:
 
 - [Cart Actions](../cart/cart-actions.md) — server action patterns and `updateTag` requirement
 - [Caching Strategy](../architecture/caching-strategy.md) — how `cacheTag`/`updateTag` work
-- [Customer API](../shopify/customer-api.md) — address CRUD for customer accounts

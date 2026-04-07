@@ -13,12 +13,12 @@ The storefront includes an AI shopping assistant powered by Claude via the Verce
 The agent runs as a `ToolLoopAgent` that streams responses back to a floating chat panel:
 
 ```
-AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → Shopify tools → streaming response
+AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → commerce tools → streaming response
 ```
 
 1. The client sends conversation history and a `chatId` to `/api/chat`
 2. The server resolves page context from the `Referer` header (product, collection, search, or cart page)
-3. A Shopify cart is created or retrieved from a cookie before the agent runs
+3. A commerce cart is created or retrieved from a cookie before the agent runs
 4. The agent calls tools to search products, manage the cart, or generate navigation links
 5. Tool results include json-render specs that the client renders as product cards, cart summaries, and variant pickers
 
@@ -51,7 +51,7 @@ The agent has 11 tools organized into three groups. All tools access the agent c
 
 | Tool | Purpose |
 |------|---------|
-| `addToCart` | Add a variant to cart (requires Shopify variant ID) |
+| `addToCart` | Add a variant to cart (requires variant ID) |
 | `getCart` | View cart contents, line items, and costs |
 | `updateCartItemQuantity` | Change quantity of a line item |
 | `removeFromCart` | Remove items by line ID |
@@ -103,7 +103,7 @@ The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environmen
 | `lib/agent/agent.ts` | ToolLoopAgent creation with model, tools, and system prompt |
 | `lib/agent/prompt.ts` | Dynamic system prompt with page context and UI catalog rules |
 | `lib/agent/context.ts` | AsyncLocalStorage context (chatId, user, cart, page) |
-| `lib/agent/tools/` | 11 tool implementations using Shopify operations |
+| `lib/agent/tools/` | 11 tool implementations using commerce operations |
 | `lib/agent/ui/catalog.ts` | json-render catalog schema definitions |
 | `lib/agent/ui/registry.tsx` | Generative UI component implementations |
 | `components/agent/agent.tsx` | Chat panel with messages, input, attachments, chain-of-thought |

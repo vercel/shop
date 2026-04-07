@@ -8,15 +8,15 @@ type: reference
 
 | Variable | Description |
 |----------|-------------|
-| `SHOPIFY_STORE_DOMAIN` | Your Shopify store domain, e.g. `your-store.myshopify.com`. Found in **Settings → Domains** in your Shopify admin. |
-| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token. Found in **Settings → Apps and sales channels → Headless**. |
+| `COMMERCE_STORE_DOMAIN` | Your store domain, e.g. `your-store.example.com`. Found in your provider's admin settings. |
+| `COMMERCE_API_TOKEN` | Public API access token for storefront requests. Found in your provider's admin under API credentials. |
 | `NEXT_PUBLIC_SITE_NAME` | The name displayed in your storefront's header and metadata. |
 
 ## Optional
 
 | Variable | Description |
 |----------|-------------|
-| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Private Storefront API token for server-side requests. Enables higher rate limits and access to draft content. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_URL` | Customer Account API URL. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Required when using the enable-shopify-auth skill. |
+| `COMMERCE_API_PRIVATE_TOKEN` | Private API token for server-side requests. Enables higher rate limits and access to draft content. |
+| `COMMERCE_CUSTOMER_ACCOUNT_URL` | Customer Account API URL. Required when using the enable-auth skill. |
+| `COMMERCE_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Required when using the enable-auth skill. |
+| `COMMERCE_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Required when using the enable-auth skill. |

@@ -32,7 +32,7 @@ const localMarketingPages: Record<string, LocalMarketingPageBuilder> = {};
 Each builder receives the active locale and returns a `MarketingPage` object with structured sections (hero, product grids, text blocks, etc.). The registry is intentionally empty by default — you populate it by either:
 
 - Adding builder functions directly for static or code-driven pages
-- Running the **Enable Shopify CMS** skill, which wires Shopify metaobjects into the registry
+- Running the **Enable CMS** skill, which wires CMS content types into the registry
 
 ## MarketingPage type
 
@@ -52,7 +52,7 @@ The `MarketingPage` type in `lib/types.ts` defines the structure a builder must 
 
 ## Extending with a CMS
 
-The [Enable Shopify CMS](/docs/skills/enable-shopify-cms) skill connects Shopify metaobjects to this page system. It creates `cms_homepage` and `cms_page` metaobject types in Shopify, adds GraphQL queries to fetch them, and wires the results into the page registry as `MarketingPage` objects.
+The [Enable CMS](/docs/skills/enable-cms) skill connects CMS content types to this page system. It creates `cms_homepage` and `cms_page` content types, adds queries to fetch them, and wires the results into the page registry as `MarketingPage` objects.
 
 ## Key files
 

@@ -1,18 +1,18 @@
 ---
-name: enable-shopify-cms
-description: Wire Shopify metaobjects as the CMS for homepage and marketing page content. Adds GraphQL queries for cms_homepage and cms_page metaobject types and transforms them into domain types.
+name: enable-cms
+description: Wire a CMS as the content source for homepage and marketing page content. Adds operations for cms_homepage and cms_page content types and transforms them into domain types.
 ---
 
-# Enable Shopify CMS
+# Enable CMS
 
-Add Shopify metaobject-based CMS support to the shop template. This replaces the hardcoded homepage content with Shopify-managed content using `cms_homepage` and `cms_page` metaobject definitions.
+Add CMS-driven content support to the shop template. This replaces the hardcoded homepage content with CMS-managed content using `cms_homepage` and `cms_page` content types.
 
 ## Prerequisites
 
-- Shopify store with metaobject definitions for `cms_homepage` and `cms_page`
-- Storefront API access token configured
+- A CMS with content types defined for `cms_homepage` and `cms_page`
+- API access credentials configured for the CMS
 
-## Metaobject content model
+## Content model
 
 ### `cms_homepage`
 
@@ -46,19 +46,18 @@ Add Shopify metaobject-based CMS support to the shop template. This replaces the
 
 ## Implementation steps
 
-### 1. Create `lib/shopify/operations/cms.ts`
+### 1. Create CMS operations
 
-Implement three operations that return domain types from `lib/types.ts`:
+Create operations that return domain types from `lib/types.ts`. The implementation depends on your CMS provider (Contentful, Sanity, Strapi, etc.):
 
 ```ts
-import { shopifyFetch } from "@/lib/shopify/client";
 import type { Homepage, MarketingPage } from "@/lib/types";
 
 export async function getHomepage(locale: string): Promise<Homepage | null> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
-  // Query cms_homepage metaobject, transform to Homepage type
+  // Query cms_homepage content type, transform to Homepage type
 }
 
 export async function getMarketingPage(
@@ -68,7 +67,7 @@ export async function getMarketingPage(
   "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
-  // Query cms_page metaobject by slug, transform to MarketingPage type
+  // Query cms_page content type by slug, transform to MarketingPage type
 }
 
 export async function getAllMarketingPageSlugs(): Promise<
@@ -77,17 +76,17 @@ export async function getAllMarketingPageSlugs(): Promise<
   "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
-  // Query all cms_page metaobjects, return slugs
+  // Query all cms_page entries, return slugs
 }
 ```
 
-### 2. Write GraphQL queries
+### 2. Write API queries
 
-Reference `.claude/schemas/shopify-storefront.graphql` for field names. Use `metaobjects(type: "cms_homepage")` and `metaobjects(type: "cms_page")` queries with `@inContext` locale directives.
+Reference your CMS provider's API documentation. Query `cms_homepage` and `cms_page` content types with locale-aware parameters.
 
-### 3. Transform metaobject responses
+### 3. Transform CMS responses
 
-Create `lib/shopify/transforms/cms.ts` to convert raw metaobject fields into the domain types:
+Create transforms to convert raw CMS responses into the domain types:
 
 - Parse the `sections` JSON field into `ContentSection[]`
 - Resolve product references in sections to `ProductCard[]` using `getProductsByIds`
@@ -99,7 +98,7 @@ Create `lib/shopify/transforms/cms.ts` to convert raw metaobject fields into the
 Update `app/page.tsx` to use the CMS operation:
 
 ```ts
-import { getHomepage } from "@/lib/shopify/operations/cms";
+import { getHomepage } from "@/lib/cms/operations";
 import { MarketingPageRenderer } from "@/components/cms/page-renderer";
 
 export default async function HomePage() {
@@ -118,13 +117,13 @@ Update `app/pages/[slug]/page.tsx` and `app/sitemap.ts` to use `getMarketingPage
 
 ### 5. Add cache invalidation webhook
 
-Create `app/api/webhooks/shopify-cms/route.ts`:
+Create `app/api/webhooks/cms/route.ts`:
 
 ```ts
 import { updateTag } from "next/cache";
 
 export async function POST(request: Request) {
-  // Verify Shopify webhook signature
+  // Verify webhook signature from your CMS provider
   updateTag("cms-content");
   return new Response("OK");
 }
@@ -132,7 +131,7 @@ export async function POST(request: Request) {
 
 ## Guardrails
 
-- Return the exact domain types from `lib/types.ts` — `Homepage`, `MarketingPage`, `ContentSection`.
-- Resolve product references to `ProductCard[]` — components expect ready-to-render product data.
-- Handle locale fallback gracefully — return default locale content if requested locale is unavailable, never throw.
-- Support the `alternates` field on `MarketingPage` — this powers locale-aware URL switching.
+- Return the exact domain types from `lib/types.ts` -- `Homepage`, `MarketingPage`, `ContentSection`.
+- Resolve product references to `ProductCard[]` -- components expect ready-to-render product data.
+- Handle locale fallback gracefully -- return default locale content if requested locale is unavailable, never throw.
+- Support the `alternates` field on `MarketingPage` -- this powers locale-aware URL switching.

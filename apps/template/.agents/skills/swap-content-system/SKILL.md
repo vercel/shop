@@ -1,6 +1,6 @@
 ---
 name: swap-content-system
-description: Replace the shop template's default hardcoded homepage with a CMS-driven content system (Shopify metaobjects, Contentful, Sanity, or another CMS). Use when changing where homepage or marketing-page content comes from.
+description: Replace the shop template's default hardcoded homepage with a CMS-driven content system (Contentful, Sanity, Strapi, or another CMS). Use when changing where homepage or marketing-page content comes from.
 ---
 
 # Swap Content System
@@ -9,7 +9,7 @@ The shop template ships with a hardcoded homepage and an empty marketing-page re
 
 ## Default content entrypoints
 
-- `app/page.tsx` renders the homepage directly with hardcoded structure and Shopify product fetches
+- `app/page.tsx` renders the homepage directly with hardcoded structure and commerce product fetches
 - `lib/content/pages.ts` resolves `/pages/[slug]` (empty registry by default)
 - `app/pages/[slug]/page.tsx` and `app/sitemap.ts` consume marketing pages
 

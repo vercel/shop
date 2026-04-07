@@ -4,7 +4,7 @@
 - Carries context on the user and current page as form of agent context
 - Based on user status (logged in user or not) the agent gets different tools and system prompt since it can help with user actions like adding addresses
 - Page context would be cool so we can recommend prompts or browsing tips
-- We need all sources to be available from Shopify collections and search
+- We need all sources to be available from commerce collections and search
 - `json-render` is the way to go for rendering
 - I am building an in-browser navigation helper that outputs tools and allows you to control navigation from an agent inside a page
 
@@ -19,7 +19,7 @@
 
 - How are we going to handle saving chats?
 - Normally I'd say DB but we don't want a separate db
-- Then Shopify but user might not even have a cart
+- Then the commerce provider but user might not even have a cart
 - So most likely local in the browser
 
 ## Tool Design

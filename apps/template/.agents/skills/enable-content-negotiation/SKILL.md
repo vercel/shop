@@ -255,7 +255,7 @@ Route Handler that serves product markdown.
 // app/products/md/[handle]/route.ts
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { productToMarkdown } from "@/lib/markdown/product";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProduct } from "@/lib/commerce";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
@@ -325,4 +325,4 @@ The `Vary: Accept` header ensures CDNs cache markdown and HTML responses separat
 
 ## Multi-locale note
 
-If you have also run the **Enable Shopify Markets** skill, the rewrite in `next.config.ts` already covers locale-prefixed URLs since the rewrite fires before locale routing. No additional configuration is needed.
+If you have also run the **Enable Markets** skill, the rewrite in `next.config.ts` already covers locale-prefixed URLs since the rewrite fires before locale routing. No additional configuration is needed.

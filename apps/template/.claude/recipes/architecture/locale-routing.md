@@ -29,7 +29,7 @@ GET /products/speaker
     ↓
 app/products/[handle]/page.tsx
     ↓ getLocale() resolves the current deployment locale
-    ↓ Shopify operations receive that locale
+    ↓ Commerce operations receive that locale
 ```
 
 There is no `proxy.ts` by default — add one when locale-prefixed routing is needed.
@@ -49,7 +49,7 @@ That means:
 - URLs stay unprefixed
 - `getLocale()` resolves to the deployment locale
 - `next-intl` loads messages for that locale
-- Shopify operations derive country/language context from that locale
+- Commerce operations derive country/language context from that locale
 
 ### File system structure vs URL structure
 
@@ -77,7 +77,7 @@ When you are ready to add true multi-locale routing:
 
 - [ ] GUARDRAIL: Page files live directly under `app/...` in the default template
 - [ ] GUARDRAIL: Links should use clean, unprefixed paths such as `/products/speaker`
-- [ ] GUARDRAIL: When fetching localized Shopify data, pass the locale from `getLocale()` instead of hardcoding a region
+- [ ] GUARDRAIL: When fetching localized commerce data, pass the locale from `getLocale()` instead of hardcoding a region
 - [ ] GUARDRAIL: Every new locale still needs a corresponding message file in `lib/i18n/messages/` — the upgrade path depends on catalogs staying aligned
 
 ## Common modifications
@@ -91,7 +91,7 @@ When you are ready to add true multi-locale routing:
 2. Add currency data in the `localeCurrency` map in `lib/i18n.ts`
 3. Add the locale to `enabledLocales` only when that locale is actually ready to ship
 4. Create `lib/i18n/messages/ja-JP.json` with all translation keys (copy from `en.json` as starting point)
-5. If Shopify has the market, update `getCountryCode`/`getLanguageCode` helpers if needed
+5. If your commerce provider has market support, update `getCountryCode`/`getLanguageCode` helpers if needed
 6. If you want locale-prefixed URLs, follow `.claude/skills/add-locale-url-prefix.md` instead of patching routing ad hoc
 
 ### Constructing links

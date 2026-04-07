@@ -1,10 +1,10 @@
 # Recipe: Swap Commerce Provider
 
-> Replace Shopify with another commerce provider (Saleor, Medusa, BigCommerce, etc.) by implementing operations that produce the same domain types.
+> Replace the active commerce provider by implementing a new provider module under `lib/commerce/providers/` that fulfills the CommerceProvider interface and produces the same domain types.
 
 ## When to read this
 
-- Replacing Shopify with another commerce provider
+- Adding a new commerce provider (Saleor, Medusa, BigCommerce, etc.)
 - Understanding the swappable architecture
 - Evaluating the effort required for a provider swap
 
@@ -12,10 +12,10 @@
 
 | File | Role |
 |------|------|
-| `lib/types.ts` | Domain types — the contract your new provider must fulfill |
-| `lib/shopify/` | Current Shopify implementation (reference) |
-| `lib/shopify/operations/*.ts` | Operations to reimplement |
-| `lib/shopify/transforms/*.ts` | Transform pattern to follow |
+| `lib/types.ts` | Domain types — the contract every provider must fulfill |
+| `lib/commerce/` | Commerce abstraction layer |
+| `lib/commerce/operations/*.ts` | Operations to reimplement per provider |
+| `lib/commerce/transforms/*.ts` | Transform pattern to follow |
 | `lib/constants.ts` | Cache tags (keep the same tags) |
 | `components/cart/actions.ts` | Cart server actions (update imports) |
 | `components/product/actions.ts` | Add-to-cart action (update imports) |
@@ -30,15 +30,15 @@ Components → Domain Types (lib/types.ts) → Operations → Provider API
                     Never changes          Replace this layer
 ```
 
-Components import only from `@/lib/types`. Operations return domain types. Your job is to replace the operations layer.
+Components import only from `@/lib/types`. Operations return domain types. Your job is to implement a new provider module under `lib/commerce/providers/`.
 
 ## Step-by-step
 
 ### Phase 1: Set up the new provider
 
-1. Create `lib/your-provider/` directory structure:
+1. Create `lib/commerce/providers/your-provider/` directory structure:
    ```
-   lib/your-provider/
+   lib/commerce/providers/your-provider/
      client.ts              ← API client
      types/                 ← Provider-specific types
      transforms/            ← Provider response → domain types
@@ -57,7 +57,7 @@ Each operation must return the exact domain types from `lib/types.ts`. Implement
 
 #### Products (most important)
 
-Reimplement functions from `lib/shopify/operations/products.ts`:
+Reimplement the product operations:
 
 | Function | Returns | Used by |
 |----------|---------|---------|
@@ -94,7 +94,7 @@ Reimplement functions from `lib/shopify/operations/products.ts`:
 For each operation, write transform functions that convert your provider's response to domain types:
 
 ```tsx
-// lib/your-provider/transforms/product.ts
+// lib/commerce/providers/your-provider/transforms/product.ts
 import type { ProductCard, ProductDetails } from "@/lib/types";
 import type { YourProviderProduct } from "../types/product";
 
@@ -125,11 +125,11 @@ Keep the same cache tags (`TAGS.products`, `TAGS.collections`, `TAGS.cart`) so e
 
 ### Phase 5: Update imports
 
-Search for all imports from `@/lib/shopify/operations/` and update to `@/lib/your-provider/operations/`:
+Update the commerce operations barrel exports to point to your new provider:
 
 ```bash
-# Find all files importing from Shopify operations
-grep -r "from.*@/lib/shopify/operations" apps/shop/ --include="*.ts" --include="*.tsx"
+# Find all files importing from commerce operations
+grep -r "from.*@/lib/commerce/operations" apps/shop/ --include="*.ts" --include="*.tsx"
 ```
 
 Key files to update:
@@ -139,15 +139,15 @@ Key files to update:
 
 ### Phase 6: Update webhook handler
 
-Replace `app/api/webhooks/shopify/route.ts` with your provider's webhook format, but keep the same `updateTag()` calls for cache invalidation.
+Replace `app/api/webhooks/commerce/route.ts` with your provider's webhook format, but keep the same `updateTag()` calls for cache invalidation.
 
 ### Phase 7: Update environment variables
 
-Replace Shopify env vars in `.env`:
+Replace provider env vars in `.env`:
 ```
-# Remove
-SHOPIFY_STORE_DOMAIN=...
-SHOPIFY_STOREFRONT_ACCESS_TOKEN=...
+# Remove old provider vars
+COMMERCE_PROVIDER_DOMAIN=...
+COMMERCE_STOREFRONT_ACCESS_TOKEN=...
 
 # Add your provider's vars
 YOUR_PROVIDER_API_URL=...
@@ -181,6 +181,6 @@ After swapping:
 ## See also
 
 - [Type Seams](../architecture/type-seams.md) — The domain/provider boundary
-- [GraphQL Operations](../shopify/graphql-operations.md) — Current Shopify implementation reference
+- [Commerce Operations](../commerce/operations.md) — Operation patterns and caching
 - [Cart Actions](../cart/cart-actions.md) — Cart mutation patterns to preserve
 - [Caching Strategy](../architecture/caching-strategy.md) — Cache tags and invalidation

@@ -10,11 +10,11 @@
 | **Add a new page** | [Add New Page](guides/add-new-page.md), [Locale Routing](architecture/locale-routing.md) |
 | **Add a product field** (metafield, attribute) | [Add New Product Field](guides/add-new-product-field.md) |
 | **Create a UI component** | [Add UI Component](guides/add-ui-component.md), [Compound Components](architecture/compound-components.md) |
-| **Write a Shopify query** | [GraphQL Operations](shopify/graphql-operations.md) |
+| **Write a commerce provider query** | [Commerce Operations](commerce/operations.md) |
 | **Add translation strings** | [Translations](i18n/translations.md) |
 | **Understand the data flow** | [Data Flow](architecture/data-flow.md) |
 | **Understand caching** | [Caching Strategy](architecture/caching-strategy.md) |
-| **Replace Shopify** with another provider | [Swap Commerce Provider](guides/swap-commerce-provider.md), [Type Seams](architecture/type-seams.md) |
+| **Swap commerce providers** | [Swap Commerce Provider](guides/swap-commerce-provider.md), [Type Seams](architecture/type-seams.md) |
 | **Add a CMS** to the homepage | [Swap CMS Provider](guides/swap-cms-provider.md) |
 | **Add shipping estimates** to storefront | [Add Shipping](guides/add-shipping.md) |
 | **Debug stale data** | [Caching Strategy](architecture/caching-strategy.md), [Cart Actions](cart/cart-actions.md) |
@@ -27,7 +27,7 @@
 | Recipe | Purpose |
 |--------|---------|
 | [Data Flow](architecture/data-flow.md) | Request lifecycle: proxy → page → operation → API → transform → render |
-| [Type Seams](architecture/type-seams.md) | Domain types vs Shopify types, the swappable boundary |
+| [Type Seams](architecture/type-seams.md) | Domain types vs provider types, the swappable boundary |
 | [Caching Strategy](architecture/caching-strategy.md) | `"use cache"`, cacheLife profiles, cacheTag, invalidation via webhooks |
 | [Locale Routing](architecture/locale-routing.md) | proxy.ts, next-intl, never-link-to-root |
 | [Compound Components](architecture/compound-components.md) | `ui/` → `product/` → backwards-compat three-layer pattern |
@@ -39,11 +39,11 @@
 | [Optimistic Cart](cart/optimistic-cart.md) | Debounce, request versioning, leading-edge, `optimistic-` prefix |
 | [Cart Actions](cart/cart-actions.md) | Server actions, `updateTag()` requirement |
 
-### Shopify
+### Commerce
 
 | Recipe | Purpose |
 |--------|---------|
-| [GraphQL Operations](shopify/graphql-operations.md) | Schema refs, fragments, transforms pipeline |
+| [Commerce Operations](commerce/operations.md) | Operation patterns, caching, transforms pipeline |
 
 ### i18n
 
@@ -55,9 +55,9 @@
 
 | Recipe | Purpose |
 |--------|---------|
-| [Add New Product Field](guides/add-new-product-field.md) | End-to-end: Shopify → fragment → transform → type → component |
+| [Add New Product Field](guides/add-new-product-field.md) | End-to-end: provider → fragment → transform → type → component |
 | [Add New Page](guides/add-new-page.md) | New route with locale/caching/translations |
 | [Add UI Component](guides/add-ui-component.md) | Compound component following shadcn conventions |
-| [Swap Commerce Provider](guides/swap-commerce-provider.md) | Replace Shopify with another provider |
+| [Swap Commerce Provider](guides/swap-commerce-provider.md) | Replace the commerce provider with another |
 | [Swap CMS Provider](guides/swap-cms-provider.md) | Add CMS to the hardcoded homepage |
 | [Add Shipping](guides/add-shipping.md) | Add pre-checkout shipping estimation UI |

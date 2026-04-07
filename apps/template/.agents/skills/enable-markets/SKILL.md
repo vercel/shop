@@ -1,29 +1,29 @@
 ---
-name: enable-shopify-markets
+name: enable-markets
 description: >
-  Enable Shopify Markets with multi-locale routing using next-intl. Use when
+  Enable multi-locale routing using next-intl. Use when
   the user wants to add internationalization, multi-locale support, locale-prefixed
-  URLs, or Shopify Markets. Supports sub-path and per-domain routing strategies.
+  URLs, or multi-market support. Supports sub-path and per-domain routing strategies.
 argument-hint: "[sub-path|per-domain]"
 ---
 
-# Enable Shopify Markets (Multi-Locale)
+# Enable Markets (Multi-Locale)
 
 ## Description
 
-Interactively set up Shopify Markets with multi-locale routing using next-intl. Supports both sub-path routing (`/en/products/...`) and per-domain routing (`en.store.com/products/...`). This skill supersedes `add-locale-url-prefix.md` as the recommended way to enable multi-locale support.
+Interactively set up multi-locale routing using next-intl. Supports both sub-path routing (`/en/products/...`) and per-domain routing (`en.store.com/products/...`). This skill supersedes `add-locale-url-prefix.md` as the recommended way to enable multi-locale support.
 
 ## When to Use This Skill
 
-- When the user wants to enable Shopify Markets / multi-locale support
+- When the user wants to enable multi-locale / multi-market support
 - When the user wants to add internationalization (i18n) with locale-prefixed URLs
-- When invoked via `/enable-shopify-markets`
+- When invoked via `/enable-markets`
 
 ## Prerequisites
 
 - The storefront is running in single-locale mode (default state)
 - `next-intl` is installed (it is by default)
-- Shopify Markets are configured in the Shopify admin for the desired locales
+- Markets / locales are configured in the commerce provider's admin for the desired locales
 
 ---
 
@@ -31,7 +31,7 @@ Interactively set up Shopify Markets with multi-locale routing using next-intl. 
 
 If the user hasn't already specified their preferences, ask them. Use two rounds of questions.
 
-### Round 1 — Strategy and Locales
+### Round 1 -- Strategy and Locales
 
 Ask the user the following questions (use `AskUserQuestion` if available, otherwise ask directly):
 
@@ -46,7 +46,7 @@ Ask the user the following questions (use `AskUserQuestion` if available, otherw
       ]
     },
     {
-      "question": "Which locales should be enabled? (en-US is always included as the default). You can pick from the pre-configured locales below, or specify any additional locales — translation files will be generated automatically.",
+      "question": "Which locales should be enabled? (en-US is always included as the default). You can pick from the pre-configured locales below, or specify any additional locales -- translation files will be generated automatically.",
       "multiSelect": true,
       "options": [
         "en-GB (English - United Kingdom, GBP)",
@@ -61,9 +61,9 @@ Ask the user the following questions (use `AskUserQuestion` if available, otherw
 }
 ```
 
-If the user selects "Add other locales" or provides custom locales via free-form input, ask a follow-up question to get the exact locale codes they want. Any locale in BCP 47 format (e.g., `ja-JP`, `pt-BR`, `zh-CN`, `it-IT`, `ko-KR`, `ar-SA`) is supported — translation files and currency config will be generated for them.
+If the user selects "Add other locales" or provides custom locales via free-form input, ask a follow-up question to get the exact locale codes they want. Any locale in BCP 47 format (e.g., `ja-JP`, `pt-BR`, `zh-CN`, `it-IT`, `ko-KR`, `ar-SA`) is supported -- translation files and currency config will be generated for them.
 
-### Round 2 — Strategy-Specific Options
+### Round 2 -- Strategy-Specific Options
 
 **If sub-path routing was chosen**, ask:
 
@@ -73,8 +73,8 @@ If the user selects "Add other locales" or provides custom locales via free-form
     {
       "question": "Should the default locale (en-US) have a URL prefix?",
       "options": [
-        "No — clean URLs for default locale, prefixes for others (recommended)",
-        "Yes — always show the locale prefix, including for en-US"
+        "No -- clean URLs for default locale, prefixes for others (recommended)",
+        "Yes -- always show the locale prefix, including for en-US"
       ]
     },
     {
@@ -141,7 +141,7 @@ Also add entries to the `localeCurrency` map:
 ```ts
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
   // ... existing entries ...
-  "ja-JP": { currency: "JPY", symbol: "¥" },
+  "ja-JP": { currency: "JPY", symbol: "Y" },
 };
 ```
 
@@ -230,27 +230,27 @@ export const { Link, redirect, usePathname, useRouter } = createNavigation(routi
 Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.ts`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
 
 ```
-app/layout.tsx          → app/[locale]/layout.tsx
-app/page.tsx            → app/[locale]/page.tsx
-app/error.tsx           → app/[locale]/error.tsx
-app/not-found.tsx       → app/[locale]/not-found.tsx
-app/cart/               → app/[locale]/cart/
-app/collections/        → app/[locale]/collections/
-app/products/           → app/[locale]/products/
-app/search/             → app/[locale]/search/
-app/pages/              → app/[locale]/pages/
-app/account/            → app/[locale]/account/
-app/login/              → app/[locale]/login/
+app/layout.tsx          -> app/[locale]/layout.tsx
+app/page.tsx            -> app/[locale]/page.tsx
+app/error.tsx           -> app/[locale]/error.tsx
+app/not-found.tsx       -> app/[locale]/not-found.tsx
+app/cart/               -> app/[locale]/cart/
+app/collections/        -> app/[locale]/collections/
+app/products/           -> app/[locale]/products/
+app/search/             -> app/[locale]/search/
+app/pages/              -> app/[locale]/pages/
+app/account/            -> app/[locale]/account/
+app/login/              -> app/[locale]/login/
 ```
 
 Update all `PageProps` and `LayoutProps` type parameters to include `[locale]`:
 
-- `LayoutProps<"/">` → `LayoutProps<"/[locale]">`
-- `PageProps<"/products/[handle]">` → `PageProps<"/[locale]/products/[handle]">`
-- `PageProps<"/products/[handle]/[variantId]">` → `PageProps<"/[locale]/products/[handle]/[variantId]">`
-- `PageProps<"/collections/[handle]">` → `PageProps<"/[locale]/collections/[handle]">`
-- `PageProps<"/search">` → `PageProps<"/[locale]/search">`
-- `PageProps<"/pages/[slug]">` → `PageProps<"/[locale]/pages/[slug]">`
+- `LayoutProps<"/">` -> `LayoutProps<"/[locale]">`
+- `PageProps<"/products/[handle]">` -> `PageProps<"/[locale]/products/[handle]">`
+- `PageProps<"/products/[handle]/[variantId]">` -> `PageProps<"/[locale]/products/[handle]/[variantId]">`
+- `PageProps<"/collections/[handle]">` -> `PageProps<"/[locale]/collections/[handle]">`
+- `PageProps<"/search">` -> `PageProps<"/[locale]/search">`
+- `PageProps<"/pages/[slug]">` -> `PageProps<"/[locale]/pages/[slug]">`
 - ... and so on for all page components.
 
 The `globals.css` import in `app/[locale]/layout.tsx` should be updated to `import "../globals.css"` since the CSS file stays at the `app/` root.
@@ -271,9 +271,9 @@ export const generateStaticParams = async () => {
 };
 ```
 
-The rest of the layout stays the same — it already uses `getLocale()`, `getMessages()`, and `NextIntlClientProvider`.
+The rest of the layout stays the same -- it already uses `getLocale()`, `getMessages()`, and `NextIntlClientProvider`.
 
-The layout-level `generateStaticParams` provides locale values for all child routes — no per-page changes needed for the locale param.
+The layout-level `generateStaticParams` provides locale values for all child routes -- no per-page changes needed for the locale param.
 
 ---
 
@@ -324,7 +324,7 @@ export default getRequestConfig(async () => {
 
 ### Scope menu queries for markets
 
-The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/operations/menu.ts) unscoped so menus load before Shopify Markets is configured. When enabling markets, update `getMenu` to derive `country` and `language` from the active locale and query `menu` with `@inContext(country: $country, language: $language)`. Without that change, the megamenu, quick links, and footer menu stay pinned to the default market.
+The base template keeps `lib/commerce/operations/menu.ts` unscoped so menus load before markets are configured. When enabling markets, update `getMenu` to derive `country` and `language` from the active locale and query the menu with locale context. Without that change, the megamenu, quick links, and footer menu stay pinned to the default market.
 
 ---
 
@@ -371,7 +371,7 @@ export default async function middleware(request: NextRequest) {
 }
 ```
 
-> **Note:** If you have also run the **enable-content-negotiation** skill, the `next.config.ts` rewrite handles markdown negotiation automatically — no proxy.ts changes needed.
+> **Note:** If you have also run the **enable-content-negotiation** skill, the `next.config.ts` rewrite handles markdown negotiation automatically -- no proxy.ts changes needed.
 
 ---
 
@@ -410,7 +410,7 @@ app/account/orders/[id]/page.tsx
 lib/agent/ui/registry.tsx
 ```
 
-Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navigation"`. The locale-aware `Link` automatically prefixes URLs with the current locale. Its API is the same as `next/link` — no other changes needed in the JSX.
+Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navigation"`. The locale-aware `Link` automatically prefixes URLs with the current locale. Its API is the same as `next/link` -- no other changes needed in the JSX.
 
 ---
 
@@ -542,7 +542,7 @@ For each custom locale not already in `lib/i18n/messages/`, create a translation
 
 Existing translation files:
 
-- `en.json` (English — also used for en-GB)
+- `en.json` (English -- also used for en-GB)
 - `de-DE.json` (German)
 - `fr-FR.json` (French)
 - `nl-NL.json` (Dutch)
@@ -554,8 +554,8 @@ For new locales like `ja-JP`, create `lib/i18n/messages/ja-JP.json` with transla
 
 Translated strings must not contain unescaped ASCII double-quote characters (`"`, U+0022) inside JSON string values. This is easy to hit when a language uses typographic quotation marks that look similar to ASCII `"`:
 
-- **German:** `„` (U+201E) opens, `"` (U+201C) closes — but LLMs sometimes emit a bare ASCII `"` for the closing mark, which terminates the JSON string early.
-- **French:** `«»` (guillemets) are safe — they are not ASCII `"`.
+- **German:** `"` (U+201E) opens, `"` (U+201C) closes -- but LLMs sometimes emit a bare ASCII `"` for the closing mark, which terminates the JSON string early.
+- **French:** `<<>>` (guillemets) are safe -- they are not ASCII `"`.
 
 After writing each translation file, **validate it is parseable JSON** (e.g. `node -e "require('./lib/i18n/messages/de-DE.json')"` or equivalent). If validation fails, escape any rogue inner `"` as `\"` or replace typographic quotes with `\"...\"`.
 
@@ -576,7 +576,7 @@ export default function RootPage() {
 }
 ```
 
-If `localePrefix: "as-needed"`, skip this step — the middleware handles root requests automatically.
+If `localePrefix: "as-needed"`, skip this step -- the middleware handles root requests automatically.
 
 ---
 

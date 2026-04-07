@@ -12,33 +12,33 @@ interface Skill {
 const skills: Skill[] = [
 	{
 		label: "Markets",
-		command: "/enable-shopify-markets",
+		command: "/enable-commerce",
 		logs: [
-			{ icon: "edit", text: "Updated next.config.ts with i18n routing" },
-			{ icon: "add", text: "Added locale files: de-DE, fr-FR, es-ES, nl-NL" },
-			{ icon: "edit", text: "Wrapped routes with [locale] segment" },
+			{ icon: "edit", text: "Scaffolded provider directory structure" },
+			{ icon: "add", text: "Implemented product and collection operations" },
+			{ icon: "edit", text: "Wired provider into commerce index" },
 		],
-		done: "Shopify Markets enabled — 4 locales configured",
+		done: "Commerce provider enabled — storefront connected",
 	},
 	{
 		label: "Auth",
-		command: "/enable-shopify-auth",
+		command: "/enable-auth",
 		logs: [
-			{ icon: "add", text: "Installed better-auth with Shopify OIDC" },
+			{ icon: "add", text: "Installed better-auth with OIDC provider" },
 			{ icon: "add", text: "Created account pages: profile, orders, addresses" },
 			{ icon: "edit", text: "Added login button to navigation" },
 		],
 		done: "Customer auth enabled — login flow ready",
 	},
 	{
-		label: "CMS",
-		command: "/enable-shopify-cms",
+		label: "Markets",
+		command: "/enable-markets",
 		logs: [
-			{ icon: "add", text: "Created cms_homepage metaobject definition" },
-			{ icon: "add", text: "Added GraphQL queries for metaobjects" },
-			{ icon: "edit", text: "Wired MarketingPageRenderer to CMS data" },
+			{ icon: "edit", text: "Updated next.config.ts with i18n routing" },
+			{ icon: "add", text: "Added locale files: de-DE, fr-FR, es-ES, nl-NL" },
+			{ icon: "edit", text: "Wrapped routes with [locale] segment" },
 		],
-		done: "Shopify CMS enabled — homepage connected",
+		done: "Markets enabled — 4 locales configured",
 	},
 ];
 

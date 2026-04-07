@@ -19,8 +19,8 @@ The key shift: instead of searching docs for how to do something, you describe w
 The template ships with structured context files that agents read automatically:
 
 - **`AGENTS.md`** — architecture rules and constraints. This tells the agent things like "every cart mutation must call `invalidateCartCache()`" and "components in `ui/` must not import domain types."
-- **`.claude/schemas/`** — local Shopify GraphQL schema snapshots. The agent uses these to write type-safe queries without guessing field names.
-- **`.agents/skills/`** — step-by-step playbooks for common tasks like enabling Shopify Markets or adding customer auth.
+- **`.claude/schemas/`** — local commerce API schema snapshots. The agent uses these to write type-safe queries without guessing field names.
+- **`.agents/skills/`** — step-by-step playbooks for common tasks like enabling Markets or adding customer auth.
 
 This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules — before you type a single prompt.
 
@@ -31,13 +31,13 @@ Skills are markdown files that describe exactly how to complete a specific task.
 To run a skill in Claude Code:
 
 ```bash
-/enable-shopify-markets
+/enable-markets
 ```
 
 In Cursor, describe the task and the agent finds the matching skill:
 
 ```
-Enable multi-locale support with Shopify Markets
+Enable multi-locale support with Markets
 ```
 
 When you run a skill, the agent reads the playbook and executes each step — writing files, installing dependencies, updating configs. Then it runs the verification steps to confirm everything works.
@@ -63,7 +63,7 @@ A good proposal names the files it will touch, the patterns it will follow, and 
 When reviewing what the agent produces, check the architectural decisions:
 
 - Does it use server components where possible?
-- Does it follow the domain type boundary (components import from `lib/types`, not Shopify types)?
+- Does it follow the domain type boundary (components import from `lib/types`, not provider-specific types)?
 - Does it respect the `ui/` → `product/` wrapper pattern from `AGENTS.md`?
 - For GraphQL changes, did it check the schema in `.claude/schemas/`?
 
@@ -83,7 +83,7 @@ Tell the agent what failed and where. Specific error messages are more useful th
 
 ```
 The build fails with "Type 'string' is not assignable to type 'Money'".
-Check the transform in lib/shopify/transforms/product.ts.
+Check the transform in lib/commerce/providers/*/transforms/.
 ```
 
 ## Writing effective prompts
@@ -136,7 +136,7 @@ Show "No reviews yet" when the metafield is empty.
 - Install dependencies and update configs
 
 **Agents can't:**
-- Access your Shopify admin panel
+- Access your provider's admin panel
 - Deploy to production (unless you explicitly authorize it)
 - Make business decisions about pricing, copy, or design direction
 - Test visual appearance — you need to check the browser

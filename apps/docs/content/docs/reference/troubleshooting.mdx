@@ -6,23 +6,23 @@ type: troubleshooting
 
 ## Products not showing up
 
-The most common cause is missing Storefront API permissions. In your Shopify admin, go to **Settings → Apps and sales channels → Headless → your storefront** and verify these scopes are enabled:
+The most common cause is missing API permissions. In your commerce provider's admin, verify that your API credentials have the necessary scopes enabled for:
 
 | Scope | Required for |
 |---|---|
-| `unauthenticated_read_product_listings` | Product pages and search |
-| `unauthenticated_read_product_inventory` | Stock availability |
-| `unauthenticated_read_collection_listings` | Collection pages |
-| `unauthenticated_write_checkouts` | Cart and checkout |
-| `unauthenticated_read_content` | Shopify pages |
+| Product read access | Product pages and search |
+| Inventory read access | Stock availability |
+| Collection read access | Collection pages |
+| Checkout write access | Cart and checkout |
+| Content read access | CMS pages |
 
-Also check that your products are set to the **Online Store** and **Headless** sales channels in Shopify admin.
+Also check that your products are published to the appropriate sales channels in your store admin.
 
 ## Cart not persisting across page loads
 
-The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Common causes:
+The cart ID is stored in a `cartId` HTTP-only cookie with a 7-day expiry. Common causes:
 
-- **Cookie domain mismatch** — if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools → Application → Cookies.
+- **Cookie domain mismatch** — if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools -> Application -> Cookies.
 - **Missing `invalidateCartCache()`** — every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI may show an outdated state.
 
 ## Variant selection not working
@@ -43,35 +43,31 @@ If this rule is missing or modified, clicking a variant option will append a que
 
 ## Images not loading
 
-Shopify serves images from its CDN. The template's `next.config.ts` must include Shopify's image domain in `images.remotePatterns`. Verify that `cdn.shopify.com` is listed:
+Your commerce provider serves images from its CDN. The template's `next.config.ts` must include your provider's image domain in `images.remotePatterns`. Verify that the correct hostname is listed:
 
 ```ts
 images: {
   remotePatterns: [
-    { hostname: "cdn.shopify.com" },
+    { hostname: "your-provider-cdn.example.com" },
   ],
 },
 ```
 
 ## Build fails with GraphQL errors
 
-The template includes a local Shopify schema snapshot at `.claude/schemas/shopify-storefront.graphql`. If the schema is outdated relative to the API version in use, queries may reference fields that don't exist.
+If your commerce provider uses a GraphQL API, the template may include a local schema snapshot. If the schema is outdated relative to the API version in use, queries may reference fields that don't exist.
 
-Refresh the schema:
+Refresh the schema by following your provider's documentation or running the appropriate schema fetch script for your provider.
 
-```bash
-pnpm run .claude/scripts/fetch-shopify-schemas.ts
-```
-
-## Changes in Shopify not appearing on the site
+## Changes in your store not appearing on the site
 
 All product and collection data is cached with `cacheLife("max")`. Without webhooks configured, changes only appear when the cache expires.
 
-To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/shopify`. See [Shopify Integration → Webhooks](/docs/shopify#webhooks-and-cache-invalidation) for the full setup guide.
+To get near-instant updates, set up commerce webhooks pointed at `/api/webhooks`. See your provider's documentation for the full webhook setup guide.
 
 ## Locale or currency not changing
 
-Multi-locale support requires Shopify Markets to be enabled. The template ships as single-locale by default. Run the [Enable Shopify Markets](/docs/skills/enable-shopify-markets) skill to add multi-locale and multi-currency routing.
+Multi-locale support requires Markets to be enabled in your commerce provider. The template ships as single-locale by default. Run the [Enable Markets](/docs/skills/enable-markets) skill to add multi-locale and multi-currency routing.
 
 ## Agent can't find context files
 

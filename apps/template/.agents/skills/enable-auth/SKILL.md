@@ -1,27 +1,27 @@
 ---
-name: enable-shopify-auth
-description: Add customer authentication to the shop template using better-auth with Shopify OIDC. Includes login flow, account pages (profile, orders, addresses), and nav integration.
+name: enable-auth
+description: Add customer authentication to the shop template using better-auth with a generic OIDC provider. Includes login flow, account pages (profile, orders, addresses), and nav integration.
 ---
 
 # Enable Authentication
 
-Add customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API OIDC. This enables customer login, profile management, order history, and address book.
+Add customer authentication using [better-auth](https://www.better-auth.com/) with a generic OIDC provider. This enables customer login, profile management, order history, and address book.
 
 ## Prerequisites
 
-- Shopify store with **Customer Account API** enabled (Shopify Admin → Settings → Customer accounts)
-- Customer Account API credentials (client ID + client secret)
+- An OIDC-compatible identity provider (e.g. Auth0, Clerk, Keycloak, or any provider with OpenID Connect discovery)
+- OIDC client credentials (client ID + client secret)
 - A `AUTH_SECRET` value for session signing (generate with `openssl rand -base64 32`)
 
 ## Required environment variables
 
-| Variable                         | Description                                                      |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `AUTH_SECRET`                    | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
-| `SHOPIFY_CUSTOMER_CLIENT_ID`     | Shopify Customer Account API client ID                           |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret                       |
-| `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
-| `SHOPIFY_STORE_DOMAIN`           | Already set — used for OIDC discovery                            |
+| Variable                  | Description                                                      |
+| ------------------------- | ---------------------------------------------------------------- |
+| `AUTH_SECRET`             | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
+| `OIDC_CLIENT_ID`         | OIDC provider client ID                                         |
+| `OIDC_CLIENT_SECRET`     | OIDC provider client secret                                     |
+| `OIDC_ISSUER_URL`        | OIDC issuer URL (used for discovery)                             |
+| `BETTER_AUTH_BASE_URL`   | App base URL (e.g. `http://localhost:3000` for dev)              |
 
 ## Implementation steps
 
@@ -50,28 +50,28 @@ Add auth env vars to `globalEnv`:
 {
   "globalEnv": [
     "BETTER_AUTH_SECRET",
-    "SHOPIFY_CUSTOMER_ACCOUNT_URL",
-    "SHOPIFY_CUSTOMER_CLIENT_ID",
-    "SHOPIFY_CUSTOMER_CLIENT_SECRET"
+    "OIDC_ISSUER_URL",
+    "OIDC_CLIENT_ID",
+    "OIDC_CLIENT_SECRET"
   ]
 }
 ```
 
 ### Step 4. Create `lib/auth/auth.ts`
 
-Core better-auth configuration with Shopify OIDC:
+Core better-auth configuration with generic OIDC:
 
 ```ts
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+const OIDC_ISSUER_URL = process.env.OIDC_ISSUER_URL;
 
-if (!SHOPIFY_STORE_DOMAIN) {
-  console.warn("[better-auth] SHOPIFY_STORE_DOMAIN not set - auth will not work");
+if (!OIDC_ISSUER_URL) {
+  console.warn("[better-auth] OIDC_ISSUER_URL not set - auth will not work");
 }
 
-const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
+const OIDC_SCOPES = ["openid", "email", "profile"];
 
 function decodeIdTokenPayload(idToken: string): {
   sub: string;
@@ -114,19 +114,19 @@ export const auth = betterAuth({
     genericOAuth({
       config: [
         {
-          providerId: "shopify",
-          clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
-          clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
-          discoveryUrl: SHOPIFY_STORE_DOMAIN
-            ? `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`
+          providerId: "oidc",
+          clientId: process.env.OIDC_CLIENT_ID ?? "",
+          clientSecret: process.env.OIDC_CLIENT_SECRET ?? "",
+          discoveryUrl: OIDC_ISSUER_URL
+            ? `${OIDC_ISSUER_URL}/.well-known/openid-configuration`
             : undefined,
-          scopes: SHOPIFY_OIDC_SCOPES,
+          scopes: OIDC_SCOPES,
           pkce: true,
           accessType: "offline",
           getUserInfo: async (tokens) => {
             const idToken = tokens.idToken;
             if (!idToken) {
-              throw new Error("No ID token received from Shopify");
+              throw new Error("No ID token received from provider");
             }
 
             const decoded = decodeIdTokenPayload(idToken);
@@ -219,7 +219,7 @@ const getAccessToken = cache(async (): Promise<string> => {
   try {
     const tokenResponse = await auth.api.getAccessToken({
       headers: reqHeaders,
-      body: { providerId: "shopify" },
+      body: { providerId: "oidc" },
     });
     accessToken = tokenResponse?.accessToken || "";
   } catch (error) {
@@ -305,7 +305,7 @@ export function useSession(): SessionState {
 }
 
 export function signIn(callbackURL = "/account"): void {
-  authClient.signIn.oauth2({ providerId: "shopify", callbackURL });
+  authClient.signIn.oauth2({ providerId: "oidc", callbackURL });
 }
 
 export async function signOut(): Promise<void> {
@@ -383,23 +383,21 @@ export default function LoginPage() {
 
 ### Step 9. Create customer operations
 
-Create `lib/shopify/types/customer.ts` with domain types for Customer, Address, Order, Fulfillment, and related types.
+Create `lib/commerce/operations/customer.ts` with domain types for Customer, Address, Order, Fulfillment, and related types.
 
-Create `lib/shopify/operations/customer.ts` with:
+The customer operations depend on your commerce provider's customer API. Implement:
 
-- `discoverCustomerApiEndpoint()` — auto-discovers GraphQL endpoint from `.well-known/customer-account-api`
-- `customerApiFetch()` — GraphQL client with Bearer token auth
-- `getCustomer(accessToken)` — profile data
-- `getOrders(accessToken, options)` — paginated orders
-- `getOrder(accessToken, orderId)` — single order detail
-- `getAddresses(accessToken)` — address book
-- `updateCustomer(accessToken, input)` — profile mutation
-- `createAddress(accessToken, address)` — add address
-- `updateAddress(accessToken, addressId, address)` — edit address
-- `deleteAddress(accessToken, addressId)` — remove address
-- `setDefaultAddress(accessToken, addressId)` — set default
+- `getCustomer(accessToken)` -- profile data
+- `getOrders(accessToken, options)` -- paginated orders
+- `getOrder(accessToken, orderId)` -- single order detail
+- `getAddresses(accessToken)` -- address book
+- `updateCustomer(accessToken, input)` -- profile mutation
+- `createAddress(accessToken, address)` -- add address
+- `updateAddress(accessToken, addressId, address)` -- edit address
+- `deleteAddress(accessToken, addressId)` -- remove address
+- `setDefaultAddress(accessToken, addressId)` -- set default
 
-Reference `.claude/schemas/shopify-customer.graphql` for field names. All operations use the Customer Account API (separate from Storefront API) with OAuth Bearer tokens.
+All operations use the commerce provider's customer API with OAuth Bearer tokens.
 
 ### Step 10. Create account pages and components
 
@@ -407,32 +405,32 @@ Create the account section with this structure:
 
 ```
 app/account/
-  layout.tsx      — Responsive layout with sidebar (desktop) and tabs (mobile)
-  page.tsx        — Redirect to /account/profile
-  error.tsx       — Error boundary
-  profile/page.tsx — Profile display with inline edit
-  orders/page.tsx  — Order list with status filters
-  orders/[id]/page.tsx — Order detail with fulfillment tracking
-  addresses/page.tsx — Address book CRUD
+  layout.tsx      -- Responsive layout with sidebar (desktop) and tabs (mobile)
+  page.tsx        -- Redirect to /account/profile
+  error.tsx       -- Error boundary
+  profile/page.tsx -- Profile display with inline edit
+  orders/page.tsx  -- Order list with status filters
+  orders/[id]/page.tsx -- Order detail with fulfillment tracking
+  addresses/page.tsx -- Address book CRUD
 
 components/account/
-  actions.ts       — Server action for profile update
-  sidebar.tsx      — Navigation sidebar with profile/orders/addresses links
-  sidebar-client.tsx — Active state detection for sidebar items
-  mobile-tabs.tsx  — Mobile tab navigation
-  mobile-tabs-client.tsx — Client-side mobile tab state
-  page-header.tsx  — Breadcrumb + title layout
-  profile-section.tsx — Profile UI primitives
-  profile-section-composed.tsx — Async composed profile section
-  profile-edit-form.tsx — Sheet-based profile edit form
-  profile-edit-inline.tsx — Inline profile edit form
-  profile-page-skeleton.tsx — Loading skeleton
-  client.tsx       — ProfileEditToggle client component
+  actions.ts       -- Server action for profile update
+  sidebar.tsx      -- Navigation sidebar with profile/orders/addresses links
+  sidebar-client.tsx -- Active state detection for sidebar items
+  mobile-tabs.tsx  -- Mobile tab navigation
+  mobile-tabs-client.tsx -- Client-side mobile tab state
+  page-header.tsx  -- Breadcrumb + title layout
+  profile-section.tsx -- Profile UI primitives
+  profile-section-composed.tsx -- Async composed profile section
+  profile-edit-form.tsx -- Sheet-based profile edit form
+  profile-edit-inline.tsx -- Inline profile edit form
+  profile-page-skeleton.tsx -- Loading skeleton
+  client.tsx       -- ProfileEditToggle client component
 
 components/addresses/
-  actions.ts       — Server actions for address CRUD
-  address-form.tsx — Address form with country select
-  address-card.tsx — Address card display
+  actions.ts       -- Server actions for address CRUD
+  address-form.tsx -- Address form with country select
+  address-card.tsx -- Address card display
 ```
 
 All account pages must call `requireSession()` or `requireCustomerSession()` before rendering. The layout uses `getTranslations("account")` for i18n.
@@ -556,20 +554,19 @@ Add `common.loginRedirecting`, `common.loginNotRedirected`, `common.loginClickHe
 
 Add full `account`, `orders`, and `address` sections. See the base `en.json` translations for the complete key set.
 
-## Shopify Admin setup
+## OIDC provider setup
 
-1. Go to **Shopify Admin → Settings → Customer accounts**
-2. Enable **Customer Account API**
-3. Create a **Customer Account API client** (under "API clients")
-4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
-5. Copy the client ID and client secret to your environment variables
-6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+1. Create an application/client in your OIDC provider's admin console
+2. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/oidc`
+3. Note the client ID, client secret, and issuer URL
+4. Add them to your environment variables (`OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `OIDC_ISSUER_URL`)
+5. Ensure the provider supports OpenID Connect discovery (`.well-known/openid-configuration`)
 
 ## Guardrails
 
-- Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
+- Never expose access tokens to the client -- `getSession()` and `requireSession()` are server-only
 - Always call `requireSession()` before any customer API operation
-- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference `.claude/schemas/shopify-customer.graphql`
+- Customer operations use the commerce provider's customer API -- consult your provider's documentation for the correct endpoints and schema
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - The login page uses `robots: { index: false, follow: false }` to prevent indexing
-- PKCE is enabled for the OAuth flow — never disable it
+- PKCE is enabled for the OAuth flow -- never disable it

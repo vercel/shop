@@ -1,86 +1,71 @@
 # Recipe: Add a New Product Field
 
-> End-to-end guide: Shopify metafield/field → GraphQL fragment → transform → domain type → component.
+> End-to-end guide: provider API field → API request → transform → domain type → component.
 
 ## When to read this
 
 - Adding a new product attribute (e.g., sustainability score, care instructions)
-- Exposing a Shopify metafield in the UI
-- Understanding the full pipeline from Shopify data to rendered component
+- Exposing a provider-specific field or custom metadata in the UI
+- Understanding the full pipeline from commerce data to rendered component
 
 ## Key files
 
 | File | Role |
 |------|------|
-| `.claude/schemas/shopify-storefront.graphql` | Verify field exists in Shopify schema |
-| `lib/shopify/fragments.ts` | Add field to GraphQL fragment |
-| `lib/shopify/transforms/product.ts` | Map Shopify field → domain type |
+| `.claude/schemas/` | Verify field exists in provider API |
+| `lib/commerce/providers/<name>/operations/products.ts` | Update API request to include field |
+| `lib/commerce/providers/<name>/transforms/product.ts` | Map provider field → domain type |
+| `lib/commerce/providers/<name>/types.ts` | Provider response type |
 | `lib/types.ts` | Add field to domain type |
 | Component file | Display the field |
 
 ## Step-by-step
 
-### 1. Check the Shopify schema
+### 1. Check the provider API
 
-Open `.claude/schemas/shopify-storefront.graphql` and verify the field exists. For metafields, the query pattern is:
+Open your provider's API reference in `.claude/schemas/` (or search the provider's documentation) and verify the field exists. Understand:
+- What the field is called in the provider's response
+- Whether it's a standard field or custom metadata
+- Whether it's included by default or requires an explicit request
 
-```graphql
-metafields(identifiers: [
-  {namespace: "custom", key: "your_field"}
-]) {
-  key
-  namespace
-  value
-  type
-}
-```
+### 2. Update the API request
 
-### 2. Add to the GraphQL fragment
+How you include a new field depends on your provider's protocol:
 
-**For a standard product field** — add directly to the fragment in `lib/shopify/fragments.ts`:
+**REST providers** — the field may already be in the response. If not, check if the endpoint supports a `fields` or `include` parameter:
 
 ```tsx
-export const PRODUCT_FRAGMENT = `
+// The field might already be in the response — check first
+const data = await providerFetch<ProviderProduct>({
+  endpoint: `/products/${handle}?include=custom_fields`,
+});
+```
+
+**GraphQL providers** — add the field to the appropriate query fragment:
+
+```tsx
+// Add to your product query
+const PRODUCT_QUERY = `
   ...existing fields...
   yourNewField
 `;
 ```
 
-**For a metafield** — add to the `metafields` identifiers list:
+**For custom metadata** (metafields, custom attributes, etc.) — consult your provider's docs for how to request them. Each provider handles this differently:
+- Some include all metadata by default
+- Some require explicit field names in the request
+- Some expose metadata through a separate endpoint
+
+### 3. Update the provider type
+
+In `lib/commerce/providers/<name>/types.ts`, update the relevant interface:
 
 ```tsx
-export const PRODUCT_FRAGMENT = `
-  ...
-  metafields(identifiers: [
-    ...existing identifiers...
-    {namespace: "custom", key: "sustainability_score"},
-  ]) {
-    ...MetafieldFields
-  }
-`;
-```
-
-If the field should also appear in listings/grids, add it to `CATEGORY_PRODUCT_FRAGMENT` too (but keep it minimal for performance).
-
-### 3. Update the Shopify type
-
-In `lib/shopify/transforms/product.ts`, update the relevant interface:
-
-```tsx
-// For PRODUCT_FRAGMENT (PDP)
-export interface ShopifyProduct {
-  // ...existing fields
-  yourNewField?: string;
-}
-
-// For CATEGORY_PRODUCT_FRAGMENT (listings) — only if added to that fragment
-export interface ShopifyCategoryProduct {
+export interface ProviderProduct {
   // ...existing fields
   yourNewField?: string;
 }
 ```
-
-For metafields, no type change is needed — they come through the existing `metafields` array.
 
 ### 4. Add to the domain type
 
@@ -102,11 +87,11 @@ export interface ProductCard {
 
 ### 5. Update the transform
 
-In `lib/shopify/transforms/product.ts`:
+In `lib/commerce/providers/<name>/transforms/product.ts`:
 
 **For a standard field:**
 ```tsx
-export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
+export function transformProductDetails(product: ProviderProduct): ProductDetails {
   return {
     // ...existing fields
     sustainabilityScore: product.yourNewField ? parseFloat(product.yourNewField) : undefined,
@@ -114,19 +99,11 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
 }
 ```
 
-**For a metafield:**
+**For custom metadata:**
 ```tsx
-// Add to METAFIELD_LABELS map if it should show in specs
-const METAFIELD_LABELS: Record<string, string> = {
-  // ...existing labels
-  sustainability_score: "Sustainability Score",
-};
-```
-
-Or extract it manually in the transform:
-```tsx
-const sustainabilityField = product.metafields?.find(
-  mf => mf?.namespace === "custom" && mf.key === "sustainability_score"
+// If the provider returns metadata as key-value pairs:
+const sustainabilityField = product.metadata?.find(
+  mf => mf.key === "sustainability_score"
 );
 return {
   // ...existing fields
@@ -134,11 +111,19 @@ return {
 };
 ```
 
+Or add to a label map if the field should show in a specs/details section:
+```tsx
+const METADATA_LABELS: Record<string, string> = {
+  // ...existing labels
+  sustainability_score: "Sustainability Score",
+};
+```
+
 ### 6. Use in component
 
 ```tsx
 // Server component
-const product = await getProduct(handle, locale);
+const product = await commerce.products.getProduct(handle, locale);
 
 // The field is now available as a domain type
 {product.sustainabilityScore && (
@@ -150,22 +135,21 @@ const product = await getProduct(handle, locale);
 
 > These rules are non-negotiable. Violating them will break the application.
 
-- [ ] GUARDRAIL: Verify the field exists in `.claude/schemas/shopify-storefront.graphql` before adding it — incorrect field names cause silent GraphQL errors
-- [ ] GUARDRAIL: Add the domain type field in `lib/types.ts`, not in Shopify types — components must never import from `lib/shopify/types`
-- [ ] GUARDRAIL: If adding to `CATEGORY_PRODUCT_FRAGMENT` (listings), keep it minimal — this fragment is used for potentially hundreds of products
+- [ ] GUARDRAIL: Verify the field exists in your provider's API before adding it — incorrect field names cause silent errors
+- [ ] GUARDRAIL: Add the domain type field in `lib/types.ts`, not in provider types — components must never import from provider-specific type files
+- [ ] GUARDRAIL: If adding the field to listing/grid queries, keep it minimal — these queries run for potentially hundreds of products
 - [ ] GUARDRAIL: Make new fields optional (`?`) in domain types — not all products will have the data
 
 ## Verification
 
 After implementing:
 
-1. Start dev server: `bun dev`
-2. Visit the test product: `http://localhost:3000/products/technest-smart-speaker-pro-jk0c`
-3. Verify the field renders correctly
-4. Check a listing page to verify card data (if added to `CATEGORY_PRODUCT_FRAGMENT`)
-5. Run `bun lint` to check for type errors
+1. Start dev server: `pnpm dev`
+2. Visit a product page and verify the field renders correctly
+3. Check a listing page to verify card data (if added to listings)
+4. Run `pnpm lint` to check for type errors
 
 ## See also
 
-- [Type Seams](../architecture/type-seams.md) — Domain vs Shopify types
-- [GraphQL Operations](../shopify/graphql-operations.md) — Query patterns
+- [Type Seams](../architecture/type-seams.md) — Domain vs provider types
+- [Commerce Operations](../commerce/operations.md) — Operation patterns

@@ -25,7 +25,7 @@
 
 The cart has three layers:
 
-1. **Server actions** (`actions.ts`) — Call Shopify API, invalidate cache tags, return updated cart
+1. **Server actions** (`actions.ts`) — Call commerce API, invalidate cache tags, return updated cart
 2. **Context provider** (`context.tsx`) — Manages optimistic state, debouncing, request versioning
 3. **Components** — Read from context via `useCart()`, call `addToCartOptimistic` or `updateItemOptimistic`
 
@@ -34,7 +34,7 @@ The cart has three layers:
 The context exposes two cart objects:
 
 ```
-cart           → The "real" cart from Shopify, with pending line operations overlaid
+cart           → The "real" cart from the commerce provider, with pending line operations overlaid
 cartWithPending → cart + pending add-to-cart items that haven't been sent yet
 ```
 
@@ -124,7 +124,7 @@ If a server action fails, the context restores the `originalCart` snapshot captu
 - [ ] GUARDRAIL: Never modify `lineOpsRef` or `latestLineRequestIdRef` outside their owning functions in `context.tsx` — these refs coordinate concurrent requests and races
 - [ ] GUARDRAIL: The `optimistic-` prefix on line IDs (e.g., `optimistic-${variantId}`) distinguishes pending from confirmed lines — never change this prefix or remove it
 - [ ] GUARDRAIL: `computeCartWithPending` must run AFTER `applyPendingLineOperations` — reversing the order causes quantity doubling because pending ops get applied twice
-- [ ] GUARDRAIL: `DEBOUNCE_MS = 400` is a tested value — values below 200 cause race conditions with Shopify API, values above 800 feel sluggish
+- [ ] GUARDRAIL: `DEBOUNCE_MS = 400` is a tested value — values below 200 cause race conditions with the commerce API, values above 800 feel sluggish
 - [ ] GUARDRAIL: `removeFromCartAction` (quantity === 0) bypasses debounce and fires immediately — never add debounce to removes
 - [ ] GUARDRAIL: Every cart server action must call `invalidateCartCache()` after mutation — missing it causes stale cache
 
@@ -132,7 +132,7 @@ If a server action fails, the context restores the `originalCart` snapshot captu
 
 ### Adding a new cart operation (e.g., gift wrapping)
 
-1. Add the Shopify GraphQL mutation in `lib/shopify/operations/cart.ts`
+1. Add the mutation in `lib/commerce/operations/cart.ts`
 2. Create a server action in `components/cart/actions.ts` that calls the operation and invalidates tags:
    ```tsx
    invalidateCartCache();

@@ -1,6 +1,6 @@
 # Recipe: Swap CMS Provider
 
-> Replace the hardcoded homepage content with Contentful, Sanity, Shopify metaobjects, or another CMS by implementing operations that return the same domain types.
+> Replace the hardcoded homepage content with Contentful, Sanity, or another CMS by implementing operations that return the same domain types.
 
 ## When to read this
 
@@ -13,7 +13,7 @@
 | File | Role |
 |------|------|
 | `lib/types.ts` | CMS domain types: `Homepage`, `MarketingPage`, `HeroSection`, `ContentSection` |
-| `app/page.tsx` | Homepage (hardcoded content + Shopify product fetches) |
+| `app/page.tsx` | Homepage (hardcoded content + commerce product fetches) |
 | `lib/content/pages.ts` | Marketing page registry (empty by default) |
 | `components/cms/page-renderer.tsx` | `MarketingPageRenderer` — renders `Homepage` / `MarketingPage` domain types |
 
@@ -123,7 +123,7 @@ CMS sections that reference products need those products resolved:
 
 ```tsx
 // Resolve product references from CMS to ProductCard[]
-import { getProductsByIds } from "@/lib/shopify/operations/products";
+import { getProductsByIds } from "@/lib/commerce/operations/products";
 
 async function resolveProducts(productIds: string[], locale: string): Promise<ProductCard[]> {
   if (!productIds.length) return [];
@@ -131,7 +131,7 @@ async function resolveProducts(productIds: string[], locale: string): Promise<Pr
 }
 ```
 
-Note: Product fetching stays on Shopify (or your commerce provider) even when CMS changes.
+Note: Product fetching stays on your commerce provider even when CMS changes.
 
 ### 5. Add caching
 

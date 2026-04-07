@@ -1,11 +1,11 @@
 # Recipe: Caching Strategy
 
-> The app uses Next.js `"use cache"` directive with named cache profiles and tag-based invalidation via Shopify webhooks.
+> The app uses Next.js `"use cache"` directive with named cache profiles and tag-based invalidation via commerce provider webhooks.
 
 ## When to read this
 
 - Adding a new cacheable operation
-- Debugging stale data after Shopify admin changes
+- Debugging stale data after commerce admin changes
 - Understanding why data isn't updating after a mutation
 - Configuring cache lifetimes for a new data type
 
@@ -15,8 +15,8 @@
 |------|------|
 | `next.config.ts` | Cache life profiles (`catalog`, `product`, `search`, `content`) |
 | `lib/constants.ts` | Cache tags: `TAGS = { collections, products, cart }` |
-| `lib/shopify/operations/*.ts` | Operations using `"use cache: remote"` + `cacheLife()` + `cacheTag()` |
-| `app/api/webhooks/shopify/route.ts` | Webhook handler that calls `updateTag()` for invalidation |
+| `lib/commerce/operations/*.ts` | Operations using `"use cache: remote"` + `cacheLife()` + `cacheTag()` |
+| `app/api/webhooks/commerce/route.ts` | Webhook handler that calls `updateTag()` for invalidation |
 | `components/cart/actions.ts` | Cart mutations that call `updateTag()` |
 
 ## How it works
@@ -31,7 +31,7 @@ export async function getProducts(params) {
   cacheLife("max");
   cacheTag(TAGS.products);
 
-  // ... fetch from Shopify
+  // ... fetch from commerce provider
 }
 ```
 
@@ -65,11 +65,11 @@ export const TAGS = {
 ### Invalidation flow
 
 ```
-Shopify admin change (product updated)
+Commerce admin change (product updated)
     ↓
-Shopify webhook → app/api/webhooks/shopify/route.ts
+Provider webhook → app/api/webhooks/commerce/route.ts
     ↓
-Verify HMAC signature
+Verify webhook signature
     ↓
 updateTag(TAGS.products)   // Invalidates all product caches
     ↓
@@ -78,7 +78,7 @@ Next request gets fresh data
 
 ### Webhook topics and tags
 
-The webhook handler maps Shopify topics to cache tags:
+The webhook handler maps provider topics to cache tags:
 
 | Webhook topic | Cache tag invalidated |
 |--------------|----------------------|
@@ -102,7 +102,7 @@ invalidateCartCache(); // from @/lib/cart-cache — invalidates TAGS.cart
 - [ ] GUARDRAIL: Every cached operation MUST have both `cacheLife()` and `cacheTag()` — missing `cacheTag` means the cache can never be invalidated on demand
 - [ ] GUARDRAIL: Every cart mutation MUST call `invalidateCartCache()` — omitting it causes stale data
 - [ ] GUARDRAIL: Call `updateTag()` AFTER the mutation succeeds — premature invalidation causes a race where stale data gets re-cached
-- [ ] GUARDRAIL: The webhook route MUST verify HMAC signatures — removing verification allows anyone to trigger cache invalidation
+- [ ] GUARDRAIL: The webhook route MUST verify signatures — removing verification allows anyone to trigger cache invalidation
 
 ## Common modifications
 
@@ -144,4 +144,4 @@ invalidateCartCache(); // from @/lib/cart-cache — invalidates TAGS.cart
 ## See also
 
 - [Cart Actions](../cart/cart-actions.md) — Cart-specific cache invalidation
-- [GraphQL Operations](../shopify/graphql-operations.md) — Where cache directives are applied
+- [Commerce Operations](../commerce/operations.md) — Where cache directives are applied

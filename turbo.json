@@ -1,10 +1,9 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "globalEnv": [
-    "SHOPIFY_ADMIN_DOMAIN",
-    "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
-    "SHOPIFY_STORE_DOMAIN",
-    "SHOPIFY_WEBHOOK_SECRET"
+    "COMMERCE_STORE_DOMAIN",
+    "COMMERCE_API_TOKEN",
+    "COMMERCE_WEBHOOK_SECRET"
   ],
   "tasks": {
     "build": {

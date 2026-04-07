@@ -6,7 +6,7 @@ type: guide
 
 <HomeBrowser />
 
-The home page is a server component that renders a hero banner, a featured products carousel, and an informational section. Product data is fetched server-side from Shopify.
+The home page is a server component that renders a hero banner, a featured products carousel, and an informational section. Product data is fetched server-side from the commerce provider.
 
 ## Hero section
 
@@ -32,7 +32,7 @@ A two-column grid (stacked on mobile) with a heading and descriptive prose. This
 
 ## Data fetching
 
-Products are fetched server-side with `getProducts({ limit: 10, locale })`, which queries the Shopify Storefront API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
+Products are fetched server-side with `getProducts({ limit: 10, locale })`, which queries the commerce API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
 
 ## Key files
 
@@ -42,4 +42,4 @@ Products are fetched server-side with `getProducts({ limit: 10, locale })`, whic
 | `components/cms/hero-section.tsx` | Full-width hero banner with image, headline, CTA |
 | `components/cms/blocks/top-products-carousel.tsx` | Horizontally scrollable product carousel |
 | `components/product-card.tsx` | Product card with image, price, quick-add |
-| `lib/shopify/operations/products.ts` | Shopify product fetching with caching |
+| `lib/commerce/` | Product fetching with caching |

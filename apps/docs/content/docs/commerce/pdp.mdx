@@ -1,0 +1,85 @@
+---
+title: Product Setup
+description: Product configuration for the Product Detail Page — variants, metafields, swatches, and SEO.
+type: reference
+prerequisites:
+  - /docs/anatomy/pages/pdp
+---
+
+This page covers the commerce admin configuration that the PDP expects. For how the page renders and how variant selection works, see [Anatomy → PDP](/docs/anatomy/pages/pdp).
+
+## Basic product setup
+
+The PDP renders any product that has a handle (URL slug). At minimum, a product needs:
+
+- A **title** and **description** (rendered as HTML via `descriptionHtml`)
+- At least one **variant** (even single-option products have a default variant)
+- A **featured image** and optionally up to 10 media items (images or videos)
+
+The template fetches up to 50 variants per product and 10 media items.
+
+## Metafields
+
+The template fetches 14 specific metafields to populate a product specs section. These are optional — if a metafield doesn't exist on a product, it's simply not displayed.
+
+| Namespace | Key | Display label |
+|---|---|---|
+| `custom` | `material` | Material |
+| `custom` | `dimensions` | Dimensions |
+| `custom` | `weight` | Weight |
+| `custom` | `connectivity` | Connectivity |
+| `custom` | `battery_life` | Battery Life |
+| `custom` | `warranty` | Warranty |
+| `custom` | `country_of_origin` | Country of Origin |
+| `custom` | `model_number` | Model Number |
+| `specs` | `material` | Material |
+| `specs` | `dimensions` | Dimensions |
+| `specs` | `weight` | Weight |
+| `specs` | `connectivity` | Connectivity |
+| `specs` | `battery_life` | Battery Life |
+| `specs` | `warranty` | Warranty |
+
+Both the `custom` and `specs` namespaces are queried. If you use a different namespace for product specs, update the metafield identifiers in `lib/commerce/` and the label map in the provider's transform layer.
+
+To add these metafields in your commerce admin: navigate to custom data settings for products and add definitions.
+
+## Color swatches
+
+When a product option has swatch data, the PDP renders color swatches instead of text buttons. The provider stores swatches as either:
+
+- A **hex color** value
+- A **swatch image** URL
+
+The template reads these from the swatch field in the API response. To configure swatches in your commerce admin: edit a product, click an option like "Color", and assign a swatch color or image to each value.
+
+Products without swatch data render standard text-based option pickers.
+
+## SEO fields
+
+The template reads the provider's SEO fields:
+
+- `seo.title` — used as the page `<title>` and Open Graph title
+- `seo.description` — used as the meta description and Open Graph description
+
+If these aren't set, the template falls back to the product title and description.
+
+## Product taxonomy
+
+The template reads the product taxonomy category (up to 3 levels deep) for structured data and breadcrumbs. This is configured in your commerce admin under each product's **Category** field.
+
+## Collections
+
+Products must be assigned to at least one collection to appear on collection listing pages. The PDP fetches the first 10 collections a product belongs to for breadcrumb generation.
+
+## Recommendations
+
+Product recommendations on the PDP are powered by the recommendation API. No configuration is needed — recommendations are generated automatically based on purchase history and product similarity.
+
+## Key files
+
+| File | Purpose |
+|---|---|
+| `lib/commerce/` | Product fragment with metafield identifiers |
+| `lib/commerce/` | Metafield label mapping and product transform |
+| `lib/commerce/` | Product fetch operations with caching |
+| `components/product/pdp/variants.ts` | Variant resolution and swatch handling |

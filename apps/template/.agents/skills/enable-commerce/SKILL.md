@@ -1,6 +1,6 @@
 ---
 name: enable-commerce
-description: Implement a commerce backend (Shopify, SAP Commerce Cloud, BigCommerce, commercetools, Medusa, Saleor, etc.) against the typed CommerceProvider contract. Generates client, operations, and transforms that return domain types. The template is completely provider-agnostic — this skill wires it to a real backend.
+description: Implement a commerce backend (SAP Commerce Cloud, BigCommerce, commercetools, Medusa, Saleor, etc.) against the typed CommerceProvider contract. Generates client, operations, and transforms that return domain types. The template is completely provider-agnostic -- this skill wires it to a real backend.
 ---
 
 # Enable Commerce
@@ -13,7 +13,7 @@ This skill implements a commerce backend against that contract. The coding agent
 
 Before writing any code, ask:
 
-1. **Which commerce platform?** (Shopify, SAP Commerce Cloud, BigCommerce, commercetools, Medusa, Saleor, custom, etc.)
+1. **Which commerce platform?** (SAP Commerce Cloud, BigCommerce, commercetools, Medusa, Saleor, custom, etc.)
 2. **API credentials** — what env vars are needed? Get the names and have the user fill `.env.local`.
 3. **Any special requirements?** (B2B pricing, multi-currency, custom checkout flow, etc.)
 
@@ -76,14 +76,14 @@ Use `Bash` with `curl` to make real API requests against the user's credentials.
 Before writing any code, write a brief internal comment in your `types.ts` file documenting the key mappings you discovered:
 
 ```ts
-// Provider API observations:
-// - Products: localized fields as Record<string, string> with keys like "en-US", "en-GB"
-// - Prices: centPrecision format, centAmount (integer), fractionDigits (usually 2)
-// - Variant IDs: numeric (1, 2, 3) within a product — need productId#variantId encoding for cart
-// - Images: hosted on storage.googleapis.com, dimensions in { w, h } format
-// - Categories: tree structure with parent references and ancestor arrays
-// - Cart: versioned — every update requires current version number
-// - Search: /product-projections/search endpoint with facets (may need activation)
+// Provider API observations (example — yours will differ):
+// - Products: title is a plain string, descriptions are HTML
+// - Prices: integer cents with a "currency" field — divide by 100 for domain Money.amount
+// - Variant IDs: UUIDs like "a1b2c3d4-..." — pass as-is to cart API
+// - Images: hosted on cdn.provider.com, response includes { src, width, height, alt }
+// - Categories: flat list with parentId references — need to build tree for megamenu
+// - Cart: session-based — cart ID returned on create, no versioning
+// - Search: full-text via /search?q=..., facets returned as separate "aggregations" object
 ```
 
 This prevents you from guessing and building transforms against wrong assumptions.
@@ -899,4 +899,4 @@ After implementation, verify:
 7. Navigation menus render in header and footer
 8. Product detail page shows variants, images, and option picker
 9. Predictive search returns typeahead results
-10. `grep -r "@/lib/shopify\|@/lib/commerce/providers/" --include="*.ts" --include="*.tsx" app/ components/ lib/commerce/types.ts lib/commerce/index.ts` returns zero results outside the provider directory
+10. `grep -r "@/lib/commerce/providers/" --include="*.ts" --include="*.tsx" app/ components/ lib/commerce/types.ts lib/commerce/index.ts` returns zero results outside the provider directory

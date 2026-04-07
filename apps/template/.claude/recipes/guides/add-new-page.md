@@ -111,7 +111,7 @@ export async function generateMetadata() {
 
 ### 6. Add to navigation (optional)
 
-If the page should appear in navigation, add it to the Shopify menu or handle it in the navigation component.
+If the page should appear in navigation, add it to the commerce provider's menu or handle it in the navigation component.
 
 ## GUARDRAILS
 

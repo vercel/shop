@@ -1,14 +1,14 @@
 ---
 title: Cart
-description: The cart system — state management, optimistic updates, server actions, and Shopify integration.
+description: The cart system — state management, optimistic updates, server actions, and commerce provider integration.
 type: guide
 ---
 
 <CartBrowser />
 
-> **Note:** The cart ID is stored in a `shopify_cartId` cookie with a 7-day expiry. Sessions longer than 7 days start a fresh cart.
+> **Note:** The cart ID is stored in a `cartId` cookie with a 7-day expiry. Sessions longer than 7 days start a fresh cart.
 
-The cart system spans the entire storefront, not just the cart page. A React Context provider wraps the app in `layout.tsx`, giving every component access to cart state. Mutations flow through server actions that call Shopify's GraphQL API, while optimistic updates keep the UI responsive during network round-trips.
+The cart system spans the entire storefront, not just the cart page. A React Context provider wraps the app in `layout.tsx`, giving every component access to cart state. Mutations flow through server actions that call the commerce provider's API, while optimistic updates keep the UI responsive during network round-trips.
 
 ## Cart context
 
@@ -44,7 +44,7 @@ All cart mutations are defined in `actions.ts` with `"use server"`:
 - `removeFromCartAction()` — removes a line item and fetches the updated cart
 - `syncCartLocaleAction()` — updates buyer identity for locale and currency switching
 - `updateCartNoteAction()` — updates the cart note field
-- `buyNowAction()` — adds an item and returns the Shopify checkout URL
+- `buyNowAction()` — adds an item and returns the checkout URL
 - `prepareCheckoutAction()` — retrieves the checkout URL for an existing cart
 
 ## Cart overlay
@@ -61,11 +61,11 @@ Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect opt
 
 The full cart page at `/cart` renders a two-column layout on large screens: items on the left, a sticky summary sidebar on the right. Below the items, an upsell section shows product recommendations. When the cart is empty, a continue-shopping prompt replaces the items list.
 
-## Shopify integration
+## Commerce provider integration
 
-Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
+Cart operations in `lib/commerce/` use API mutations for adding, updating, and removing cart lines. The cart ID is stored in a `cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
 
-The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
+The transform layer in `lib/commerce/` converts the provider's API response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from the provider's API structure.
 
 ## Key files
 
@@ -80,5 +80,5 @@ The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's Graph
 | `components/product/add-to-cart.tsx` | Product page add-to-cart server wrapper |
 | `components/product/client.tsx` | Add-to-cart client with quantity selector |
 | `app/cart/page.tsx` | Full cart page route |
-| `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations |
-| `lib/shopify/transforms/cart.ts` | Shopify response to domain type transform |
+| `lib/commerce/` | Cart operations and API calls |
+| `lib/commerce/` | Provider response to domain type transform |

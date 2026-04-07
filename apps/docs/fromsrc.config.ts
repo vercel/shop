@@ -3,7 +3,7 @@ import { defineConfig } from "fromsrc";
 export default defineConfig({
   title: "Vercel Shop",
   description:
-    "Documentation for Vercel Shop — an agent-native, fast-by-default Shopify storefront built on Next.js.",
+    "Documentation for Vercel Shop — an agent-native, fast-by-default commerce storefront built on Next.js.",
   docsDir: "content/docs",
   theme: "dark",
   sidebar: {
