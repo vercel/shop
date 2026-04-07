@@ -1,4 +1,7 @@
+"use cache";
+
 import type { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
@@ -12,48 +15,26 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, resolvedSearchParams, locale] = await Promise.all([
-    params,
-    searchParams,
-    getLocale(),
-  ]);
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === "__placeholder__") {
     notFound();
   }
 
-  const variantId = resolvedSearchParams?.variantId;
-  const canonicalPath = variantId
-    ? `/products/${handle}?variantId=${variantId}`
-    : `/products/${handle}`;
-
-  return buildProductMetadata(handle, locale, canonicalPath);
+  return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: PageProps<"/products/[handle]">) {
-  const [{ handle }, resolvedSearchParams, locale] = await Promise.all([
-    params,
-    searchParams,
-    getLocale(),
-  ]);
+export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
+  cacheLife("max");
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  cacheTag("products", `product:${handle}`);
 
   if (handle === "__placeholder__") {
     notFound();
   }
 
   const product = await getProductDetails(handle, locale);
-  const variantId = resolvedSearchParams?.variantId;
 
-  return (
-    <ProductDetailPage
-      product={product}
-      locale={locale}
-      variantId={typeof variantId === "string" ? variantId : undefined}
-    />
-  );
+  return <ProductDetailPage product={product} locale={locale} />;
 }

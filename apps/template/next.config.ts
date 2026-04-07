@@ -16,6 +16,13 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
+  rewrites: async () => [
+    {
+      source: "/products/:handle",
+      has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
+      destination: "/products/:handle/:variantId",
+    },
+  ],
 };
 
 const withNextIntl = createNextIntlPlugin({

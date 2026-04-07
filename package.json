@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "next": "16.2.2",
+    "next-intl": "4.9.0",
     "turbo": "2.8.17",
     "vercel": "^50.39.0"
   },
