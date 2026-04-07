@@ -1,16 +1,12 @@
-import { Suspense } from "react";
-
 import { Container } from "@/components/layout/container";
 import { Breadcrumb } from "@/components/product/breadcrumb";
-import { ImageGrid } from "@/components/product/pdp/image-grid";
-import { MobileBuyButtons } from "@/components/product/pdp/mobile-buy-buttons";
-import { MobileCarousel } from "@/components/product/pdp/mobile-carousel";
+import { BuyButtons } from "@/components/product/pdp/buy-buttons";
 import {
-  ProductInfo,
   ProductInfoDescription,
   ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
+import { ProductMedia } from "@/components/product/pdp/product-media";
 import {
   computeInitialSelectedOptions,
   getImagesForSelectedColor,
@@ -60,60 +56,40 @@ export async function ProductDetailPage({
 
   return (
     <Container className="bg-background">
-      <Suspense>
-        <ProductSchema
-          product={{
-            id: product.id,
-            handle,
-            title,
-            description: product.description,
-            images,
-            manufacturerName: product.manufacturerName,
-            currencyCode: product.currencyCode,
-            priceRange: product.priceRange,
-            variants,
-            availableForSale: product.availableForSale,
-          }}
-        />
-      </Suspense>
+      <ProductSchema
+        product={{
+          id: product.id,
+          handle,
+          title,
+          description: product.description,
+          images,
+          manufacturerName: product.manufacturerName,
+          currencyCode: product.currencyCode,
+          priceRange: product.priceRange,
+          variants,
+          availableForSale: product.availableForSale,
+        }}
+      />
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      {/* Desktop Layout — breadcrumbs span full width, then 2-column (50/50 images + info) */}
-      <div className="hidden lg:block space-y-8">
+      <div className="space-y-8">
         <Breadcrumb title={title} handle={handle} />
-        <div className="grid grid-cols-2 items-start gap-4">
-          <div>
-            <ImageGrid images={filteredImages} videos={videos} title={title} />
-          </div>
+
+        <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
+          <ProductMedia images={filteredImages} videos={videos} title={title} />
 
           <div className="space-y-8">
             <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
-            <ProductInfoOptions variants={variants} options={options} selectedOptions={selectedOptions} handle={handle} />
-            <MobileBuyButtons {...buyButtonProps} />
+            <ProductInfoOptions
+              variants={variants}
+              options={options}
+              selectedOptions={selectedOptions}
+              handle={handle}
+            />
+            <BuyButtons {...buyButtonProps} />
             <ProductInfoDescription descriptionHtml={descriptionHtml} />
           </div>
         </div>
-      </div>
-
-      {/* Mobile Layout — breadcrumbs first, then gallery, then product info */}
-      <div className="lg:hidden space-y-8">
-        <Breadcrumb title={title} handle={handle} />
-
-        <MobileCarousel images={filteredImages} videos={videos} title={title} />
-
-        <MobileBuyButtons {...buyButtonProps} />
-
-        <ProductInfo
-          variants={variants}
-          options={options}
-          selectedVariant={selectedVariant}
-          selectedOptions={selectedOptions}
-          handle={handle}
-          title={title}
-          descriptionHtml={descriptionHtml}
-          locale={locale}
-          size="sm"
-        />
       </div>
 
       <div className="mt-16">

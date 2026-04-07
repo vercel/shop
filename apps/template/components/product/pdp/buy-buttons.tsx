@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { ShopLogo } from "./shop-logo";
 
-export function MobileBuyButtons({
+export function BuyButtons({
   selectedVariant,
   title,
   handle,
