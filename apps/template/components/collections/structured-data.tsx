@@ -5,8 +5,6 @@ import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 
 async function Render({
   locale,
@@ -17,37 +15,20 @@ async function Render({
   handlePromise: Promise<string>;
   collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
 }) {
-  const [handle, collection, t, menu] = await Promise.all([
+  const [handle, collection, t] = await Promise.all([
     handlePromise,
     collectionPromise,
     getTranslations("collections.breadcrumb"),
-    getMegamenuData(locale),
   ]);
 
   if (!collection) return null;
 
   const { title, description, updatedAt } = collection;
-  const ancestorPath = buildCollectionAncestorPath(handle, menu);
 
-  const breadcrumbItems = ancestorPath
-    ? [
-        { name: t("home"), path: "/" },
-        ...ancestorPath.map((segment) => ({
-          name: segment.label,
-          path: segment.href || "/",
-        })),
-        {
-          name: title,
-          path: `/collections/${handle}`,
-        },
-      ]
-    : [
-        { name: t("home"), path: "/" },
-        {
-          name: title,
-          path: `/collections/${handle}`,
-        },
-      ];
+  const breadcrumbItems = [
+    { name: t("home"), path: "/" },
+    { name: title, path: `/collections/${handle}` },
+  ];
 
   return (
     <>

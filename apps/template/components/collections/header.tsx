@@ -2,7 +2,7 @@ import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Fragment, Suspense } from "react";
+import { Suspense } from "react";
 
 import {
   MobileFilterSortBar,
@@ -20,8 +20,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
-import { getMegamenuData } from "@/lib/shopify/operations/megamenu";
-import { buildCollectionAncestorPath } from "@/lib/utils/breadcrumbs";
 
 import type { CollectionResultsData } from "./data";
 import { FilterPendingScope } from "./filter-pending-context";
@@ -53,12 +51,11 @@ async function Render({
   collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [handle, collection, t, tSearch, menu] = await Promise.all([
+  const [, collection, t, tSearch] = await Promise.all([
     handlePromise,
     collectionPromise,
     getTranslations("collections.breadcrumb"),
     getTranslations("search"),
-    getMegamenuData(locale),
   ]);
 
   if (!collection) {
@@ -66,25 +63,16 @@ async function Render({
   }
 
   const { title, description } = collection;
-  const ancestorPath = buildCollectionAncestorPath(handle, menu);
-  const parentHref =
-    ancestorPath && ancestorPath.length > 0
-      ? ancestorPath[ancestorPath.length - 1]?.href || "/"
-      : "/";
-  const parentLabel =
-    ancestorPath && ancestorPath.length > 0
-      ? ancestorPath[ancestorPath.length - 1]?.label || t("home")
-      : t("home");
 
   return (
     <>
       <div className="mb-3 flex items-center justify-between md:hidden">
         <Link
-          href={parentHref}
+          href="/"
           className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ChevronLeftIcon className="size-4" />
-          <span>{parentLabel}</span>
+          <span>{t("home")}</span>
         </Link>
         <CollectionResultCount collectionResultsDataPromise={collectionResultsDataPromise} />
       </div>
@@ -96,22 +84,6 @@ async function Render({
               <Link href="/">{t("home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
-          {ancestorPath?.length
-            ? ancestorPath.map((segment) => (
-                <Fragment key={segment.label}>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    {segment.href ? (
-                      <BreadcrumbLink asChild>
-                        <Link href={segment.href}>{segment.label}</Link>
-                      </BreadcrumbLink>
-                    ) : (
-                      <span>{segment.label}</span>
-                    )}
-                  </BreadcrumbItem>
-                </Fragment>
-              ))
-            : null}
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>{title}</BreadcrumbPage>
