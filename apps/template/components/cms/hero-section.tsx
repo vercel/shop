@@ -9,7 +9,7 @@ interface HeroSectionProps {
 
 export function HeroSection({ hero }: HeroSectionProps) {
   return (
-    <section className="relative w-full rounded-lg overflow-hidden">
+    <section className="relative w-full overflow-hidden">
       <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900">
         {hero.backgroundImage && (
           <>
@@ -25,7 +25,7 @@ export function HeroSection({ hero }: HeroSectionProps) {
           </>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 md:p-10">
+        <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:pb-8 md:pb-10 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight">
               {hero.headline}

@@ -25,27 +25,23 @@ function ProductInfoHeader({
 }: ProductInfoHeaderProps) {
   return (
     <div data-slot="product-info-header" className={className} {...props}>
-      <div>
-        <div>
-          <h1
-            className={cn(
-              "font-semibold text-foreground lg:leading-[1.25] leading-tight tracking-tight",
-              "text-xl lg:text-[30px]",
-            )}
-          >
-            {title}
-          </h1>
-        </div>
-
-        {selectedVariant && (
-          <ProductPrice
-            amount={selectedVariant.price.amount}
-            currencyCode={selectedVariant.price.currencyCode}
-            compareAtAmount={selectedVariant.compareAtPrice?.amount}
-            locale={locale}
-          />
+      <h1
+        className={cn(
+          "font-semibold text-foreground lg:leading-[1.25] leading-tight tracking-tight",
+          "text-xl lg:text-[30px]",
         )}
-      </div>
+      >
+        {title}
+      </h1>
+
+      {selectedVariant && (
+        <ProductPrice
+          amount={selectedVariant.price.amount}
+          currencyCode={selectedVariant.price.currencyCode}
+          compareAtAmount={selectedVariant.compareAtPrice?.amount}
+          locale={locale}
+        />
+      )}
     </div>
   );
 }

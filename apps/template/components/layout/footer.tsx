@@ -57,7 +57,7 @@ async function Copyright() {
   const t = await getTranslations("footer");
 
   return (
-    <p className="text-xs text-muted-foreground">
+    <p className="text-sm text-muted-foreground">
       {t("copyright", { year: String(new Date().getFullYear()) })}
     </p>
   );

@@ -111,7 +111,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   return (
     <div
       data-slot="product-card-content"
-      className={cn("flex flex-col flex-1 p-3 gap-1.5", className)}
+      className={cn("flex flex-col flex-1 p-3", className)}
       {...props}
     >
       {children}
@@ -124,7 +124,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
     <h3
       data-slot="product-card-title"
       className={cn(
-        "text-sm sm:text-base font-medium text-main-foreground group-hover:underline line-clamp-2 leading-tight min-h-[2lh]",
+        "text-sm sm:text-base font-medium text-main-foreground group-hover:underline line-clamp-2 leading-tight",
         className,
       )}
       {...props}
@@ -163,7 +163,7 @@ function ProductCardPrice({
   const discountPercent = getDiscountPercent(priceNum, compareAtNum);
 
   return (
-    <div data-slot="product-card-price" className={cn("mt-auto pt-2", className)}>
+    <div data-slot="product-card-price" className={cn(className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <Price
           amount={amount}
@@ -194,11 +194,10 @@ function ProductCardSkeleton({ className }: { className?: string }) {
       className={cn("flex flex-col bg-white rounded-lg overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="p-3 space-y-2">
-        <div className="h-3 w-16 bg-muted rounded animate-pulse" />
+      <div className="p-3">
         <div className="h-4 w-full bg-muted rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
+        <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-1" />
+        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-1" />
       </div>
     </div>
   );

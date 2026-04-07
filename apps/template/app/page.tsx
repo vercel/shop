@@ -32,45 +32,47 @@ export default async function HomePage() {
   const featuredProductsResult = await getProducts({ limit: 10, locale });
 
   return (
-    <Container>
-      <div className="flex flex-col gap-16 pb-16">
-        <HeroSection
-          hero={{
-            id: "homepage-hero",
-            headline: `Start selling with ${siteConfig.name}`,
-            subheadline: "A clean Shopify storefront you can shape as you go.",
-            ctaText: "Browse the catalog",
-            ctaLink: "/search",
-          }}
-        />
+    <>
+      <HeroSection
+        hero={{
+          id: "homepage-hero",
+          headline: `Start selling with ${siteConfig.name}`,
+          subheadline: "A clean Shopify storefront you can shape as you go.",
+          ctaText: "Browse the catalog",
+          ctaLink: "/search",
+        }}
+      />
 
-        <section>
-          <div className="grid items-start gap-4 md:grid-cols-2">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Built to launch first, customize later
-            </h2>
-            <div className="prose prose-neutral max-w-2xl">
-              <p>
-                A Shopify storefront built with Next.js. Connect your store and you get product
-                pages, collections, a cart, and search. It works out of the box, and every part of
-                it is yours to change.
-              </p>
-              <p>
-                Swap components, restyle things, wire in a CMS. The code is written to be read and
-                modified, not worked around.
-              </p>
+      <Container>
+        <div className="flex flex-col gap-16 pb-16">
+          <section>
+            <div className="grid items-start gap-4 md:grid-cols-2">
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Built to launch first, customize later
+              </h2>
+              <div className="prose prose-neutral">
+                <p>
+                  A Shopify storefront built with Next.js. Connect your store and you get product
+                  pages, collections, a cart, and search. It works out of the box, and every part of
+                  it is yours to change.
+                </p>
+                <p>
+                  Swap components, restyle things, wire in a CMS. The code is written to be read and
+                  modified, not worked around.
+                </p>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {featuredProductsResult.products.length > 0 && (
-          <TopProductsCarousel
-            title="Featured products"
-            products={featuredProductsResult.products}
-            locale={locale}
-          />
-        )}
-      </div>
-    </Container>
+          {featuredProductsResult.products.length > 0 && (
+            <TopProductsCarousel
+              title="Featured products"
+              products={featuredProductsResult.products}
+              locale={locale}
+            />
+          )}
+        </div>
+      </Container>
+    </>
   );
 }
