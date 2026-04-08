@@ -7,6 +7,53 @@ const log = (message: string) => {
   console.log(`🤖 [fromsrc] ${message}`);
 };
 
+const normalizeSearchText = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const lexicalFallbackSearch = async (query: string, limit = 8) => {
+  const queryNormalized = normalizeSearchText(query);
+  const terms = queryNormalized.split(" ").filter((term) => term.length >= 3);
+
+  if (!queryNormalized) {
+    return [];
+  }
+
+  const searchDocs = await docs.getSearchDocs();
+  const ranked = searchDocs
+    .map((doc) => {
+      const title = normalizeSearchText(doc.title);
+      const description = normalizeSearchText(doc.description ?? "");
+      const content = normalizeSearchText(doc.content);
+      let score = 0;
+
+      if (title.includes(queryNormalized)) score += 20;
+      if (description.includes(queryNormalized)) score += 12;
+      if (content.includes(queryNormalized)) score += 6;
+
+      for (const term of terms) {
+        if (title.includes(term)) score += 6;
+        if (description.includes(term)) score += 4;
+        if (content.includes(term)) score += 1;
+      }
+
+      return { doc, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  return ranked.map(({ doc }) => ({
+    doc,
+    anchor: undefined,
+    heading: undefined,
+    snippet: doc.content.slice(0, 320),
+  }));
+};
+
 const search_docs = (writer: UIMessageStreamWriter) =>
   tool({
     description: "Search through documentation content by query",
@@ -18,7 +65,11 @@ const search_docs = (writer: UIMessageStreamWriter) =>
         log(`Searching docs for: ${query}`);
 
         const searchDocs = await docs.getSearchDocs();
-        const results = await localSearch.search(query, searchDocs, 8);
+        let results = await localSearch.search(query, searchDocs, 8);
+        if (results.length === 0) {
+          log(`No localSearch results for "${query}", running lexical fallback`);
+          results = await lexicalFallbackSearch(query, 8);
+        }
         log(`Found ${results.length} results`);
 
         if (results.length === 0) {
