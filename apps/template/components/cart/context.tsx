@@ -264,6 +264,7 @@ export function CartProvider({
     merchandise: {
       id: variantId,
       title: info.variantTitle,
+      image: info.image,
       price: info.price,
       selectedOptions: info.selectedOptions,
       product: {

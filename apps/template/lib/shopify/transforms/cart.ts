@@ -22,6 +22,7 @@ interface ShopifyCartLine {
   merchandise: {
     id: string;
     title: string;
+    image?: ShopifyImage | null;
     price?: ShopifyMoney;
     selectedOptions: Array<{ name: string; value: string }>;
     product: {
@@ -83,6 +84,7 @@ function transformCartLine(line: ShopifyCartLine): CartLine {
     merchandise: {
       id: line.merchandise.id,
       title: line.merchandise.title,
+      image: line.merchandise.image ? transformImage(line.merchandise.image) : undefined,
       price: line.merchandise.price,
       selectedOptions: line.merchandise.selectedOptions,
       product: transformCartProduct(line.merchandise.product),

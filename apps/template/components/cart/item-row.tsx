@@ -41,8 +41,8 @@ export function ItemRow({ item, locale }: ItemRowProps) {
         className="shrink-0 relative size-30 lg:size-38 bg-muted rounded-xl overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
-          src={item.merchandise.product.featuredImage.url}
-          alt={item.merchandise.product.featuredImage.altText}
+          src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}
+          alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
           fill
           className="object-cover"
           sizes="(max-width: 1024px) 120px, 152px"
