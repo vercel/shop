@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getMenu } from "@/lib/shopify/operations/menu";
 
 export async function QuickLinks({ locale }: { locale: string }) {
-  const menu = await getMenu("quick-links", locale);
+  const menu = await getMenu("main-menu", locale);
 
   if (!menu || menu.items.length === 0) {
     return null;
