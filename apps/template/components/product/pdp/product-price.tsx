@@ -30,14 +30,14 @@ export function ProductPrice({
         amount={amount}
         currencyCode={currencyCode}
         locale={locale}
-        className="text-xl lg:text-3xl font-medium"
+        className="text-base font-medium"
       />
       {compareAtAmount && Number(compareAtAmount) > Number(amount) && (
         <Price
           amount={compareAtAmount}
           currencyCode={currencyCode}
           locale={locale}
-          className="text-xl lg:text-3xl font-medium line-through text-foreground/35"
+          className="text-base font-medium line-through text-foreground/35"
         />
       )}
       {discountPercent && <DiscountBadge percent={discountPercent} />}

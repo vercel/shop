@@ -40,6 +40,7 @@ function ProductInfoHeader({
           currencyCode={selectedVariant.price.currencyCode}
           compareAtAmount={selectedVariant.compareAtPrice?.amount}
           locale={locale}
+          className="mt-3"
         />
       )}
     </div>
