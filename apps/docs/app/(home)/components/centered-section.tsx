@@ -13,7 +13,7 @@ export const CenteredSection = ({
 }: CenteredSectionProps) => (
   <div className="grid items-center gap-10 overflow-hidden px-4 py-8 sm:px-12 sm:py-12">
     <div className="mx-auto grid max-w-lg gap-4 text-center">
-      <h2 className="font-sans font-normal text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl lg:text-[40px]">
+      <h2 className="font-sans font-semibold text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl lg:text-[40px]">
         {title}
       </h2>
       <p className="text-balance text-lg text-muted-foreground">
