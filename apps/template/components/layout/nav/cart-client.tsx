@@ -35,7 +35,7 @@ export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
           </Badge>
         )}
       </span>
-      <span className="text-sm">{t("cart")}</span>
+      <span className="sr-only">{t("cart")}</span>
     </button>
   );
 }
