@@ -32,6 +32,12 @@ const CART_FRAGMENT = `
                 name
                 value
               }
+              image {
+                url
+                altText
+                width
+                height
+              }
               price {
                 amount
                 currencyCode

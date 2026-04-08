@@ -161,6 +161,7 @@ export interface CartLine {
 export interface CartMerchandise {
   id: string;
   title: string;
+  image?: Image;
   price?: Money;
   selectedOptions: SelectedOption[];
   product: CartProduct;

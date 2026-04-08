@@ -28,7 +28,7 @@ function ProductInfoHeader({
       <h1
         className={cn(
           "font-semibold text-foreground lg:leading-[1.25] leading-tight tracking-tight",
-          "text-xl lg:text-[30px]",
+          "text-xl lg:text-3xl",
         )}
       >
         {title}
@@ -40,6 +40,7 @@ function ProductInfoHeader({
           currencyCode={selectedVariant.price.currencyCode}
           compareAtAmount={selectedVariant.compareAtPrice?.amount}
           locale={locale}
+          className="mt-3"
         />
       )}
     </div>
