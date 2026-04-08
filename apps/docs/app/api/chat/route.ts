@@ -5,6 +5,7 @@ import {
   stepCountIs,
   streamText,
 } from "ai";
+import { localSearch } from "fromsrc";
 import { createTools } from "./tools";
 import type { MyUIMessage } from "./types";
 import { createSystemPrompt } from "./utils";
@@ -23,6 +24,7 @@ interface RequestBody {
 }
 
 const MAX_PAGE_CONTEXT_CHARS = 8000;
+const MAX_SEARCH_CONTEXT_RESULTS = 3;
 
 const trimPageContext = (value: string) => {
   const normalized = value
@@ -62,19 +64,79 @@ const getPageContextFromRoute = async (
   };
 };
 
+const getLastUserQuestion = (messages: MyUIMessage[]) => {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "user") {
+      continue;
+    }
+    const text = message.parts
+      .filter((part) => part.type === "text")
+      .map((part) => part.text)
+      .join("\n")
+      .trim();
+    if (text.length > 0) {
+      return text;
+    }
+  }
+  return "";
+};
+
+const getPageContextFromQuery = async (
+  query: string
+): Promise<RequestBody["pageContext"] | undefined> => {
+  if (!query) {
+    return undefined;
+  }
+
+  const searchDocs = await docs.getSearchDocs();
+  const results = await localSearch.search(
+    query,
+    searchDocs,
+    MAX_SEARCH_CONTEXT_RESULTS
+  );
+
+  if (results.length === 0) {
+    return undefined;
+  }
+
+  const content = results
+    .map(({ doc, heading, snippet, anchor }) => {
+      const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
+      const sourceUrl = anchor ? `${url}#${anchor}` : url;
+      return [
+        `Title: ${doc.title}`,
+        `URL: ${sourceUrl}`,
+        heading ? `Heading: ${heading}` : undefined,
+        doc.description ? `Description: ${doc.description}` : undefined,
+        `Snippet: ${snippet}`,
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n\n---\n\n");
+
+  return {
+    title: "Relevant docs context",
+    url: "/docs",
+    content: trimPageContext(content),
+  };
+};
+
 export async function POST(req: Request) {
   try {
-    const { messages, currentRoute, pageContext }: RequestBody =
-      await req.json();
-    const resolvedPageContext =
-      pageContext ?? (await getPageContextFromRoute(currentRoute));
-
+    const { messages, currentRoute, pageContext }: RequestBody = await req.json();
     // Filter out UI-only page context messages (they're just visual feedback)
     const actualMessages = messages.filter(
       (msg) => !msg.metadata?.isPageContext
     );
+    const latestUserQuestion = getLastUserQuestion(actualMessages);
+    const resolvedPageContext =
+      pageContext ??
+      (await getPageContextFromRoute(currentRoute)) ??
+      (await getPageContextFromQuery(latestUserQuestion));
 
-    // Prepend page context (client-provided or route-derived) to the latest user message.
+    // Prepend docs context (client-provided, route-derived, or query-derived) to the latest user message.
     let processedMessages = actualMessages;
 
     if (resolvedPageContext && actualMessages.length > 0) {
@@ -103,9 +165,9 @@ export async function POST(req: Request) {
             parts: [
               {
                 type: "text",
-                text: `Here's the content from the current page:
+                text: `Here's documentation context to help answer the question:
 
-**Page:** ${resolvedPageContext.title}
+**Context:** ${resolvedPageContext.title}
 **URL:** ${resolvedPageContext.url}
 
 ---
