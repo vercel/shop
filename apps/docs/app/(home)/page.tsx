@@ -8,6 +8,7 @@ import { AssistantDemo } from "./components/assistant-demo";
 import { CartDemo } from "./components/cart-demo";
 import { CenteredSection } from "./components/centered-section";
 import { CTA } from "./components/cta";
+import { ExamplePrompts } from "./components/example-prompts";
 import { FakeBrowser } from "./components/fake-browser";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
@@ -77,6 +78,7 @@ const HomePage = () => (
 			>
 				<ContentNegotiationDemo />
 			</OneTwoSection>
+			<ExamplePrompts />
 			<CTA cta="Get started" href="/docs" title="Start your shop today" />
 		</div>
 	</div>
