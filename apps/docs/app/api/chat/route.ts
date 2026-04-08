@@ -37,6 +37,13 @@ const trimPageContext = (value: string) => {
   return `${normalized.slice(0, MAX_PAGE_CONTEXT_CHARS)}...`;
 };
 
+const normalizeSearchText = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
 const getPageContextFromRoute = async (
   currentRoute: string
 ): Promise<RequestBody["pageContext"] | undefined> => {
@@ -90,11 +97,45 @@ const getPageContextFromQuery = async (
   }
 
   const searchDocs = await docs.getSearchDocs();
-  const results = await localSearch.search(
+  let results = await localSearch.search(
     query,
     searchDocs,
     MAX_SEARCH_CONTEXT_RESULTS
   );
+  if (results.length === 0) {
+    const queryNormalized = normalizeSearchText(query);
+    const terms = queryNormalized.split(" ").filter((term) => term.length >= 3);
+
+    const ranked = searchDocs
+      .map((doc) => {
+        const title = normalizeSearchText(doc.title);
+        const description = normalizeSearchText(doc.description ?? "");
+        const content = normalizeSearchText(doc.content);
+        let score = 0;
+
+        if (title.includes(queryNormalized)) score += 20;
+        if (description.includes(queryNormalized)) score += 12;
+        if (content.includes(queryNormalized)) score += 6;
+
+        for (const term of terms) {
+          if (title.includes(term)) score += 6;
+          if (description.includes(term)) score += 4;
+          if (content.includes(term)) score += 1;
+        }
+
+        return { doc, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, MAX_SEARCH_CONTEXT_RESULTS);
+
+    results = ranked.map(({ doc }) => ({
+      doc,
+      anchor: undefined,
+      heading: undefined,
+      snippet: doc.content.slice(0, 320),
+    }));
+  }
 
   if (results.length === 0) {
     return undefined;
