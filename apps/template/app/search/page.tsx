@@ -1,7 +1,6 @@
-import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import {
@@ -18,14 +17,6 @@ import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection
 import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
 import { Container } from "@/components/layout/container";
 import { Results, ResultsSkeleton } from "@/components/search/results";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -104,51 +95,11 @@ async function SearchHeader({
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
 
-  const sort = resolvedSearchParams.sort as string | undefined;
-  const cursor = resolvedSearchParams.cursor as string | undefined;
   const collection = resolvedSearchParams.collection as string | undefined;
 
   return (
     <>
-      {/* Mobile: back breadcrumb + result count */}
-      <div className="flex items-center justify-between mb-3 md:hidden">
-        <Link
-          href="/"
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronLeftIcon className="size-4" />
-          <span>{t("breadcrumb.home")}</span>
-        </Link>
-        <Suspense fallback={<Skeleton className="h-4 w-24" />}>
-          <SearchResultCount
-            query={q}
-            sort={sort}
-            collection={collection}
-            cursor={cursor}
-            locale={locale}
-            activeFilters={activeFilters}
-          />
-        </Suspense>
-      </div>
-
-      {/* Desktop: full breadcrumb */}
-      <Breadcrumb className="mb-3 hidden md:block">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">{t("breadcrumb.home")}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>
-              {q ? t("breadcrumb.searchQuery", { query: q }) : t("breadcrumb.search")}
-            </BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      {/* Mobile: filter/sort bar (gray band between breadcrumb and title) */}
+      {/* Mobile: filter/sort bar */}
       <MobileFilterSortBar
         filterSheet={
           <FilterSidebarSheet
@@ -245,47 +196,9 @@ async function SearchFilterContent({
   );
 }
 
-async function SearchResultCount({
-  query,
-  sort,
-  collection,
-  cursor,
-  locale,
-  activeFilters,
-}: {
-  query?: string;
-  sort?: string;
-  collection?: string;
-  cursor?: string;
-  locale: Locale;
-  activeFilters: Record<string, string | string[] | undefined>;
-}) {
-  const t = await getTranslations("search");
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
-    query,
-    collection,
-    sortKey: sort,
-    limit: RESULTS_PER_PAGE,
-    cursor,
-    filters: shopifyFilters,
-    locale,
-  });
-
-  if (result.products.length === 0) return null;
-
-  return (
-    <p className="text-sm text-muted-foreground">{t("resultCount", { count: result.total })}</p>
-  );
-}
-
 function SearchHeaderSkeleton() {
   return (
     <>
-      <div className="flex items-center justify-between mb-3">
-        <Skeleton className="h-4 w-24 md:w-48" />
-        <Skeleton className="h-4 w-24 md:hidden" />
-      </div>
       <MobileFilterSortBarSkeleton />
       <Skeleton className="mt-4 md:mt-0 mb-8 h-10 w-72" />
     </>
