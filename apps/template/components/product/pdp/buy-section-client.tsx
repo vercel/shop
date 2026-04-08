@@ -13,7 +13,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { QuantitySelector } from "./quantity-selector";
-import { ShopLogo } from "./shop-logo";
 import { resolveSelectedVariant } from "./variants";
 import type { SelectedOptions } from "./variants";
 
@@ -96,17 +95,14 @@ function Content({
             <div className="space-y-2">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-1.5 rounded-full h-12 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-1.5 rounded-full h-12 bg-foreground text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50"
                 disabled={isOutOfStock || isBuyingNow}
                 onClick={handleBuyNow}
               >
                 {isBuyingNow ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : (
-                  <>
-                    <span className="text-sm font-medium">{t("buyWithShop")}</span>
-                    <ShopLogo className="h-[18px] w-auto" />
-                  </>
+                  <span className="text-sm font-medium">{t("buyNow")}</span>
                 )}
               </button>
               <Button

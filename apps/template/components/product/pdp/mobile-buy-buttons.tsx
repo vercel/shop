@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import type { Image, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { ShopLogo } from "./shop-logo";
 
 export function MobileBuyButtons({
   selectedVariant,
@@ -75,7 +74,7 @@ export function MobileBuyButtons({
       <button
         type="button"
         className={cn(
-          "flex flex-1 items-center justify-center gap-1.5 rounded-full h-11 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50",
+          "flex flex-1 items-center justify-center gap-1.5 rounded-full h-11 bg-foreground text-background transition-all hover:bg-foreground/90 disabled:pointer-events-none disabled:opacity-50",
           !availableForSale && "invisible",
         )}
         disabled={isOutOfStock || isBuyingNow}
@@ -84,10 +83,7 @@ export function MobileBuyButtons({
         {isBuyingNow ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <>
-            <span className="text-sm font-medium">{t("buyWithShop")}</span>
-            <ShopLogo className="h-4 w-auto" />
-          </>
+          <span className="text-sm font-medium">{t("buyNow")}</span>
         )}
       </button>
       <Button

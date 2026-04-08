@@ -66,7 +66,7 @@ If a product has only one color or no color option, all images are shown.
 
 The buy section includes stock status, a quantity selector, and two action buttons:
 
-- **Buy with Shop** - creates a checkout and redirects to it
+- **Buy Now** — adds the item to cart and redirects to checkout
 - **Add to Cart** - adds the item optimistically to the cart drawer
 
 On desktop, the full buy section includes a quantity selector (1–99). On mobile, a simplified two-button row adds a quantity of 1.
@@ -111,9 +111,8 @@ The page emits two JSON-LD schemas:
 | `components/product/pdp/product-info.tsx` | Header, options, and description composition |
 | `components/product/pdp/image-grid.tsx` | Desktop thumbnail + main image gallery |
 | `components/product/pdp/mobile-carousel.tsx` | Mobile horizontal snap-scroll carousel |
-| `components/product/pdp/buy-section-client.tsx` | Quantity selector, Buy with Shop, add to cart |
-| `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons (Buy with Shop + add to cart) |
-| `components/product/pdp/shop-logo.tsx` | Shop wordmark SVG for the Buy with Shop button |
+| `components/product/pdp/buy-section-client.tsx` | Quantity selector, Buy Now, add to cart |
+| `components/product/pdp/mobile-buy-buttons.tsx` | Simplified mobile buy buttons (Buy Now + add to cart) |
 | `app/products/[handle]/page.tsx` | Base product route |
 | `app/products/[handle]/[variantId]/page.tsx` | Variant-specific route |
 | `next.config.ts` | `?variantId` → route segment rewrite |
