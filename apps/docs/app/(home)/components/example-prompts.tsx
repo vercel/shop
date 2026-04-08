@@ -10,25 +10,25 @@ const COPY_TIMEOUT = 2000;
 
 const EXAMPLE_PROMPTS = [
   {
-    id: "shopping-assistant",
-    title: "Build a shopping assistant",
-    description: "Add an AI-powered assistant that recommends products and updates cart state.",
+    id: "single-product-drop",
+    title: "Single-product drop store",
+    description: "Launch a fast hype-drop storefront for one hero product with urgency built in.",
     prompt:
-      "Add an AI shopping assistant to the template storefront using AI SDK and AI Gateway. It should answer product questions from our catalog, recommend products by intent, and support add-to-cart actions with optimistic UI. Include server route changes, UI updates, and a short test plan.",
+      "Turn this project into a single-product drop store for a limited sneaker release. Replace homepage demos with a launch countdown, product story section, social proof strip, and a sticky buy panel. Keep checkout flow intact, add tasteful motion, and include a concise README on how to swap in a new drop later.",
   },
   {
-    id: "agent-readable-pages",
-    title: "Make product pages agent-readable",
-    description: "Serve structured markdown from product pages for LLM agents via Accept headers.",
+    id: "subscription-coffee",
+    title: "Subscription coffee store",
+    description: "Create a cozy DTC coffee shop with one-time and subscription purchase paths.",
     prompt:
-      "Implement content negotiation for product detail routes so browser requests return HTML while agent requests can receive structured markdown. Reuse our existing catalog data, include SEO-safe defaults, and add docs explaining how clients request markdown responses.",
+      "Create an example coffee subscription storefront with three blends, delivery cadence options, and a simple build-a-box experience. Update copy, imagery placeholders, and merchandising blocks so it feels like a complete vertical store, not a generic template. Keep the code modular so this example can be reused as a starter.",
   },
   {
-    id: "skills-and-recipe",
-    title: "Ship a new skill recipe",
-    description: "Extend agent workflows with a reusable skill and docs for one-command setup.",
+    id: "b2b-wholesale-catalog",
+    title: "B2B wholesale catalog",
+    description: "Model a wholesale-first store experience with MOQ and tiered pricing patterns.",
     prompt:
-      "Create a new skill recipe that helps merchants launch a localized market experience (currency, locale copy, and region-specific merchandising). Add implementation steps for apps/template and corresponding docs updates in apps/docs so the feature can be installed with one command.",
+      "Build a B2B wholesale example store for boutique retailers. Add collection pages with case-pack quantities, tiered price messaging, and a request-a-quote flow for large orders. Rework homepage and product page structure to highlight wholesale trust signals and operational details while preserving existing architecture.",
   },
 ] as const;
 
@@ -50,10 +50,10 @@ export const ExamplePrompts = () => {
     <section className="grid gap-10 px-4 py-8 sm:px-12 sm:py-12">
       <div className="mx-auto grid max-w-2xl gap-4 text-center">
         <h2 className="font-pixel-square font-normal text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl lg:text-[40px]">
-          Build with AI prompt examples
+          Build example stores with prompts
         </h2>
         <p className="text-balance text-lg text-muted-foreground">
-          Start common Vercel Shop workflows with ready-to-copy prompts tailored for your coding agent.
+          Use ready-to-copy prompts to generate complete example storefronts you can use like demos or template starting points.
         </p>
       </div>
 
@@ -81,7 +81,7 @@ export const ExamplePrompts = () => {
                 variant="outline"
               >
                 <Icon className="size-3.5" size={14} />
-                {isCopied ? "Copied" : "Copy install prompt"}
+                {isCopied ? "Copied" : "Copy store prompt"}
               </Button>
             </article>
           );
