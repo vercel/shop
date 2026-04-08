@@ -31,7 +31,12 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     notFound();
   }
 
-  const product = await getProduct(handle, locale);
+  let product;
+  try {
+    product = await getProduct(handle, locale);
+  } catch {
+    notFound();
+  }
 
   return <ProductDetailPage product={product} locale={locale} />;
 }

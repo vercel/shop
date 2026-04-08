@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getProduct } from "@/lib/shopify/operations/products";
@@ -8,7 +9,12 @@ export async function buildProductMetadata(
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const product = await getProduct(handle, locale);
+  let product;
+  try {
+    product = await getProduct(handle, locale);
+  } catch {
+    notFound();
+  }
   const images = product.featuredImage
     ? [
         {

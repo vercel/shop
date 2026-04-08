@@ -33,7 +33,12 @@ export default async function ProductVariantPage({
     notFound();
   }
 
-  const product = await getProduct(handle, locale);
+  let product;
+  try {
+    product = await getProduct(handle, locale);
+  } catch {
+    notFound();
+  }
 
   return <ProductDetailPage product={product} locale={locale} variantId={variantId} />;
 }
