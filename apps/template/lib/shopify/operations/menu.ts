@@ -91,11 +91,15 @@ export async function getMenu(
   cacheLife("max");
   cacheTag("menus");
 
-  const data = await shopifyFetch<ShopifyMenuResponse>({
-    operation: "getMenu",
-    query: GET_MENU_QUERY,
-    variables: { handle },
-  });
+  try {
+    const data = await shopifyFetch<ShopifyMenuResponse>({
+      operation: "getMenu",
+      query: GET_MENU_QUERY,
+      variables: { handle },
+    });
 
-  return transformMenu(data.menu);
+    return transformMenu(data.menu);
+  } catch {
+    return null;
+  }
 }
