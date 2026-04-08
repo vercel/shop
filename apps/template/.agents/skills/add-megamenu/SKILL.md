@@ -25,11 +25,11 @@ Wait for the user to provide the menu handle before proceeding. Use that handle 
 
 The megamenu transforms a Shopify 3-level nested menu into this hierarchy:
 
-| Type | Level | Description |
-| --- | --- | --- |
-| `MegamenuItem` | 1 | Top-level nav trigger (e.g. "Clothing") |
-| `MegamenuPanel` | 2 | Subcategory grouping (e.g. "Tops") |
-| `MegamenuCategory` | 3 | Leaf link (e.g. "T-Shirts") |
+| Type               | Level | Description                             |
+| ------------------ | ----- | --------------------------------------- |
+| `MegamenuItem`     | 1     | Top-level nav trigger (e.g. "Clothing") |
+| `MegamenuPanel`    | 2     | Subcategory grouping (e.g. "Tops")      |
+| `MegamenuCategory` | 3     | Leaf link (e.g. "T-Shirts")             |
 
 ```ts
 // MegamenuData
@@ -308,6 +308,7 @@ The desktop megamenu client component. This is the largest component and include
 - **Full-height overlay** — backdrop blur with gradient
 
 Key behavior:
+
 - Top-level items render as `Link` (internal), `<a>` (external), or `<button>` (no href)
 - Each item uses `data-active` attribute for styling the active indicator dot
 - Active item's panels render in the right column
@@ -316,6 +317,7 @@ Key behavior:
 The component accepts `items: MegamenuItem[]` and optional `children` (rendered in a footer below the nav list).
 
 It uses translation keys from the `nav` namespace:
+
 - `categories` — trigger button label
 - `exploreCategories` — heading above the nav list
 - `showAllCategory` — "Show all {category}" link text (with `{category}` interpolation)
@@ -433,7 +435,7 @@ import { Megamenu } from "./megamenu";
 // Inside the nav bar, after the logo link:
 <Suspense fallback={null}>
   <Megamenu locale={locale} />
-</Suspense>
+</Suspense>;
 ```
 
 Place it between the logo and any quick-links/search components.
@@ -480,6 +482,7 @@ To show rich breadcrumbs on collection pages (e.g. Home / Clothing / Tops / T-Sh
 - `buildProductCategoryPath(category, menu, collectionHandles?)` — finds the deepest menu path for a product by matching its collection handles against megamenu hrefs
 
 Then update `components/collections/header.tsx` and `components/collections/structured-data.tsx` to:
+
 1. Import `getMegamenuData` and `buildCollectionAncestorPath`
 2. Add `getMegamenuData(locale)` to their `Promise.all` calls
 3. Use `buildCollectionAncestorPath(handle, menu)` to render ancestor breadcrumb segments before the current collection title
