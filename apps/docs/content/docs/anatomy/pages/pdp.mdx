@@ -81,16 +81,16 @@ Recommendations display as a horizontally scrollable carousel of product cards -
 
 The page uses a single responsive layout wrapped in a `Container`:
 
-- Breadcrumbs span full width
 - Below the `lg:` breakpoint, content stacks vertically: carousel, buy buttons, product info
 - At `lg:` and up, a two-column grid places the image gallery on the left and product info (title/price, option pickers, buy buttons, description) on the right
+- The product info column is sticky on desktop, staying visible while the gallery scrolls
 
 ## Structured data
 
 The page emits two JSON-LD schemas:
 
 - **Product schema** - name, description, images, brand, price range, availability, and variant count
-- **Breadcrumb schema** - Home → Product Title
+- **Breadcrumb schema** - Home → Product Title (JSON-LD only, no visible breadcrumb UI)
 
 ## Key files
 

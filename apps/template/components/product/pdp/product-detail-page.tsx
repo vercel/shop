@@ -1,5 +1,4 @@
 import { Container } from "@/components/layout/container";
-import { Breadcrumb } from "@/components/product/breadcrumb";
 import { BuyButtons } from "@/components/product/pdp/buy-buttons";
 import {
   ProductInfoDescription,
@@ -73,12 +72,10 @@ export async function ProductDetailPage({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="space-y-8">
-        <Breadcrumb title={title} handle={handle} />
-
         <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
           <ProductMedia images={filteredImages} videos={videos} title={title} />
 
-          <div className="space-y-8">
+          <div className="space-y-8 lg:sticky lg:top-20">
             <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
             <ProductInfoOptions
               variants={variants}

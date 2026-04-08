@@ -174,8 +174,7 @@ function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string })
               </LightboxTrigger>
             )}
           </div>
-        ))}
-      </div>
+        ))}      </div>
     </Lightbox>
   );
 }
