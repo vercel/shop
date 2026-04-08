@@ -96,7 +96,7 @@ function Content({
             <div className="space-y-2">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-1.5 rounded-full h-12 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg h-12 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50"
                 disabled={isOutOfStock || isBuyingNow}
                 onClick={handleBuyNow}
               >
