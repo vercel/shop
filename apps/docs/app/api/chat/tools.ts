@@ -46,11 +46,12 @@ const lexicalFallbackSearch = async (query: string, limit = 8) => {
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 
-  return ranked.map(({ doc }) => ({
+  return ranked.map(({ doc, score }) => ({
     doc,
     anchor: undefined,
     heading: undefined,
     snippet: doc.content.slice(0, 320),
+    score,
   }));
 };
 

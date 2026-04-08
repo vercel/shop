@@ -129,11 +129,12 @@ const getPageContextFromQuery = async (
       .sort((a, b) => b.score - a.score)
       .slice(0, MAX_SEARCH_CONTEXT_RESULTS);
 
-    results = ranked.map(({ doc }) => ({
+    results = ranked.map(({ doc, score }) => ({
       doc,
       anchor: undefined,
       heading: undefined,
       snippet: doc.content.slice(0, 320),
+      score,
     }));
   }
 
