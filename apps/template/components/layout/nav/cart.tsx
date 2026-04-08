@@ -16,7 +16,7 @@ export function CartIconFallback() {
   return (
     <span className="flex items-center justify-center gap-1.5 text-foreground">
       <ShoppingBagIcon className="size-5" />
-      <span className="text-sm">Cart</span>
+      <span className="sr-only">Cart</span>
     </span>
   );
 }
