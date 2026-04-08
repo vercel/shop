@@ -50,7 +50,7 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   );
 }
 
-export function Recommendations({ handle, locale }: { handle: string; locale: Locale }) {
+export async function Recommendations({ handle, locale }: { handle: string; locale: Locale }) {
   return (
     <Suspense fallback={<Fallback />}>
       <Render handle={handle} locale={locale} />

@@ -1,29 +1,20 @@
 import type { Metadata } from "next";
-import { cacheLife, cacheTag } from "next/cache";
 import { notFound } from "next/navigation";
 
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getProduct } from "@/lib/shopify/operations/products";
-
-export async function getProductDetails(handle: string, locale: string) {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product:${handle}`);
-  const product = await getProduct(handle, locale);
-
-  if (!product) {
-    notFound();
-  }
-
-  return product;
-}
 
 export async function buildProductMetadata(
   handle: string,
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const product = await getProductDetails(handle, locale);
+  let product;
+  try {
+    product = await getProduct(handle, locale);
+  } catch {
+    notFound();
+  }
   const images = product.featuredImage
     ? [
         {

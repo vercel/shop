@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
 
-import { buildProductMetadata, getProductDetails } from "./shared";
+import { getProduct } from "@/lib/shopify/operations/products";
+
+import { buildProductMetadata } from "./shared";
 
 export async function generateStaticParams() {
   return [{ handle: "__placeholder__" }];
@@ -29,7 +31,12 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     notFound();
   }
 
-  const product = await getProductDetails(handle, locale);
+  let product;
+  try {
+    product = await getProduct(handle, locale);
+  } catch {
+    notFound();
+  }
 
   return <ProductDetailPage product={product} locale={locale} />;
 }
