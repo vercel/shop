@@ -1,9 +1,58 @@
 import { type ToolSet, tool, type UIMessageStreamWriter } from "ai";
+import { localSearch } from "fromsrc";
 import z from "zod";
 import { docs } from "@/lib/fromsrc/content";
 
 const log = (message: string) => {
   console.log(`🤖 [fromsrc] ${message}`);
+};
+
+const normalizeSearchText = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const lexicalFallbackSearch = async (query: string, limit = 8) => {
+  const queryNormalized = normalizeSearchText(query);
+  const terms = queryNormalized.split(" ").filter((term) => term.length >= 3);
+
+  if (!queryNormalized) {
+    return [];
+  }
+
+  const searchDocs = await docs.getSearchDocs();
+  const ranked = searchDocs
+    .map((doc) => {
+      const title = normalizeSearchText(doc.title);
+      const description = normalizeSearchText(doc.description ?? "");
+      const content = normalizeSearchText(doc.content);
+      let score = 0;
+
+      if (title.includes(queryNormalized)) score += 20;
+      if (description.includes(queryNormalized)) score += 12;
+      if (content.includes(queryNormalized)) score += 6;
+
+      for (const term of terms) {
+        if (title.includes(term)) score += 6;
+        if (description.includes(term)) score += 4;
+        if (content.includes(term)) score += 1;
+      }
+
+      return { doc, score };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  return ranked.map(({ doc, score }) => ({
+    doc,
+    anchor: undefined,
+    heading: undefined,
+    snippet: doc.content.slice(0, 320),
+    score,
+  }));
 };
 
 const search_docs = (writer: UIMessageStreamWriter) =>
@@ -17,57 +66,38 @@ const search_docs = (writer: UIMessageStreamWriter) =>
         log(`Searching docs for: ${query}`);
 
         const searchDocs = await docs.getSearchDocs();
-        const queryLower = query.toLowerCase();
+        let results = await localSearch.search(query, searchDocs, 8);
+        if (results.length === 0) {
+          log(`No localSearch results for "${query}", running lexical fallback`);
+          results = await lexicalFallbackSearch(query, 8);
+        }
+        log(`Found ${results.length} results`);
 
-        // Simple relevance scoring: title match > description match > content match
-        const scored = searchDocs
-          .map((doc) => {
-            let score = 0;
-            const titleLower = doc.title.toLowerCase();
-            const descLower = (doc.description ?? "").toLowerCase();
-            const contentLower = doc.content.toLowerCase();
-
-            if (titleLower.includes(queryLower)) score += 10;
-            if (descLower.includes(queryLower)) score += 5;
-            if (contentLower.includes(queryLower)) score += 1;
-
-            // Boost for individual query words
-            for (const word of queryLower.split(/\s+/)) {
-              if (titleLower.includes(word)) score += 3;
-              if (descLower.includes(word)) score += 2;
-              if (contentLower.includes(word)) score += 1;
-            }
-
-            return { doc, score };
-          })
-          .filter((item) => item.score > 0)
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 8);
-
-        log(`Found ${scored.length} results`);
-
-        if (scored.length === 0) {
+        if (results.length === 0) {
           return `No documentation found for query: "${query}"`;
         }
 
-        for (const [index, { doc }] of scored.entries()) {
+        for (const [index, result] of results.entries()) {
+          const { doc, anchor } = result;
           const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
+          const sourceUrl = anchor ? `${url}#${anchor}` : url;
           writer.write({
             type: "source-url",
-            sourceId: `doc-${index}-${url}`,
-            url,
+            sourceId: `doc-${index}-${sourceUrl}`,
+            url: sourceUrl,
             title: doc.title,
           });
         }
 
-        const formatted = scored
-          .map(({ doc }) => {
+        const formatted = results
+          .map(({ doc, snippet, heading, anchor }) => {
             const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
-            return `**${doc.title}**\nURL: ${url}\n${doc.description ?? ""}\n\n${doc.content.slice(0, 1500)}${doc.content.length > 1500 ? "..." : ""}\n\n---\n`;
+            const sourceUrl = anchor ? `${url}#${anchor}` : url;
+            return `**${doc.title}**\nURL: ${sourceUrl}\n${heading ? `Heading: ${heading}\n` : ""}${doc.description ?? ""}\n\n${snippet}\n\n---\n`;
           })
           .join("\n");
 
-        return `Found ${scored.length} documentation pages for "${query}":\n\n${formatted}`;
+        return `Found ${results.length} documentation pages for "${query}":\n\n${formatted}`;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Unknown error";
