@@ -1,6 +1,5 @@
-import { ChevronLeftIcon, SlidersHorizontalIcon } from "lucide-react";
+import { SlidersHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -9,14 +8,6 @@ import {
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
 import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
@@ -24,16 +15,11 @@ import type { getCollection } from "@/lib/shopify/operations/collections";
 import type { CollectionResultsData } from "./data";
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
-import { CollectionResultCount } from "./result-count";
 import { CollectionsSortSelect } from "./sort-select";
 
 function Fallback() {
   return (
     <>
-      <div className="mb-3 flex items-center justify-between">
-        <Skeleton className="h-4 w-32 md:w-56" />
-        <Skeleton className="h-4 w-24 md:hidden" />
-      </div>
       <MobileFilterSortBarSkeleton />
       <Skeleton className="mt-4 mb-8 h-10 w-72 md:mt-0" />
     </>
@@ -51,10 +37,9 @@ async function Render({
   collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [, collection, t, tSearch] = await Promise.all([
+  const [, collection, tSearch] = await Promise.all([
     handlePromise,
     collectionPromise,
-    getTranslations("collections.breadcrumb"),
     getTranslations("search"),
   ]);
 
@@ -66,31 +51,6 @@ async function Render({
 
   return (
     <>
-      <div className="mb-3 flex items-center justify-between md:hidden">
-        <Link
-          href="/"
-          className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ChevronLeftIcon className="size-4" />
-          <span>{t("home")}</span>
-        </Link>
-        <CollectionResultCount collectionResultsDataPromise={collectionResultsDataPromise} />
-      </div>
-
-      <Breadcrumb className="mb-3 hidden md:block">
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link href="/">{t("home")}</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{title}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
       <MobileFilterSortBar
         filterSheet={
           <FilterSidebarSheet
