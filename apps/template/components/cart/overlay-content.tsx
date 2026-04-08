@@ -130,7 +130,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
-          className="w-full h-12 rounded-full text-base font-semibold justify-between pl-6 pr-2"
+          className="w-full h-12 rounded-lg text-base font-semibold justify-between pl-6 pr-2"
           size="lg"
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}

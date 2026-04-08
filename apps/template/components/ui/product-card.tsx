@@ -87,7 +87,7 @@ function ProductCardImage({
           src={src}
           alt={alt}
           fill
-          className="object-cover scale-105 group-hover:scale-110 transition-transform duration-300"
+          className="object-cover scale-[1.02] group-hover:scale-105 transition-transform duration-300 ease-out"
           sizes={sizes}
         />
       ) : (
