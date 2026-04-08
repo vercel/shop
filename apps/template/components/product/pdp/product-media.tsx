@@ -175,6 +175,15 @@ function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string })
             )}
           </div>
         ))}
+        {/* TODO: remove — temporary placeholders to test sticky scroll */}
+        {Array.from({ length: 12 }, (_, i) => (
+          <div
+            key={`placeholder-${i}`}
+            className="relative aspect-square w-full overflow-hidden rounded-xl bg-accent flex items-center justify-center text-muted-foreground text-sm"
+          >
+            Placeholder {i + 1}
+          </div>
+        ))}
       </div>
     </Lightbox>
   );
