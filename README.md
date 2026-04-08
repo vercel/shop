@@ -2,7 +2,7 @@
 
 A Next.js storefront template and reference architecture for Shopify, built with Next.js 16, React 19, Tailwind CSS 4, and the Shopify Storefront API.
 
-See [shop.vercel.dev](https://shop.vercel.dev) for full documentation.
+See [docs.vercel.shop](https://docs.vercel.shop) for full documentation.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps/template&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app)
 
@@ -61,12 +61,12 @@ This is a monorepo managed with [Turborepo](https://turbo.build/) and pnpm.
 | App | Description |
 |-----|-------------|
 | `apps/template` | The Next.js storefront template |
-| `apps/docs` | Documentation site at [shop.vercel.dev](https://shop.vercel.dev) |
+| `apps/docs` | Documentation site at [docs.vercel.shop](https://docs.vercel.shop) |
 | `apps/cli` | `create-vercel-shop` scaffolding CLI |
 
 ## Documentation
 
-Full documentation is available at [shop.vercel.dev](https://shop.vercel.dev).
+Full documentation is available at [docs.vercel.shop](https://docs.vercel.shop).
 
 ## Contributing
 
