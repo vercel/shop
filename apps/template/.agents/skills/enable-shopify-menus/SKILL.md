@@ -1,27 +1,241 @@
 ---
-name: add-megamenu
-description: Add a megamenu to the site navigation powered by a Shopify menu. Prompts for the menu handle, then creates the megamenu component (desktop + mobile), data operation, types, and wires it into the nav header.
+name: enable-shopify-menus
+description: Replace hardcoded nav and footer menus with Shopify-powered menus. Optionally add a megamenu component for multi-level navigation.
 ---
 
-# Add Megamenu
+# Enable Shopify Menus
 
-Add a full-featured megamenu to the site navigation, powered by a Shopify Navigation menu. The megamenu supports 3 levels of hierarchy, responsive desktop/mobile layouts, hover intent detection, keyboard navigation, and BroadcastChannel cross-tab sync.
+By default, the storefront uses hardcoded navigation links and an empty footer. This skill replaces them with dynamic menus fetched from Shopify, and optionally adds a full-featured megamenu component.
 
 ## Before you start
 
-Ask the user:
+Ask the user three questions in order:
 
-> This skill will add a megamenu to your navigation bar powered by a Shopify menu. What is the **handle** of the Shopify menu you'd like to use? (e.g. `main-menu`)
+### 1. Which menus do you want to fetch from Shopify?
 
-Wait for the user to provide the menu handle before proceeding. Use that handle as `MENU_HANDLE` in the steps below.
+- **Nav menu** — replaces the hardcoded quick links in the header
+- **Footer menu** — adds Shopify-powered footer columns
+- **Both**
 
-## Prerequisites
+### 2. What are the Shopify menu handles?
 
-- A Shopify Navigation menu exists with the handle the user provides
-- The menu should have up to 3 levels of nesting (top-level items → subcategories → leaf links)
+Ask for each selected menu. Defaults: `main-menu` for nav, `footer` for footer.
+
+### 3. Do you want to add a megamenu component?
+
+A megamenu adds a multi-level category browser to the nav bar with:
+- 3-level hierarchy (top-level items → subcategories → leaf links)
+- Desktop hover interaction with mouse direction tracking
+- Mobile accordion overlay via the bottom bar
+- BroadcastChannel cross-tab sync
+
+This requires a Shopify menu with up to 3 levels of nesting. The user can use the same nav menu handle or a separate one.
+
+Wait for the user to answer all questions before proceeding.
+
+---
+
+## Part A: Enable Shopify nav menu
+
+Skip this section if the user did not select the nav menu.
+
+### A1. Update `components/layout/nav/quick-links.tsx`
+
+Replace the hardcoded links array with a Shopify menu fetch. Make the component async:
+
+```tsx
+import Link from "next/link";
+
+import { getMenu } from "@/lib/shopify/operations/menu";
+
+export async function QuickLinks({ locale }: { locale: string }) {
+  const menu = await getMenu("NAV_HANDLE", locale);
+
+  if (!menu || menu.items.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="hidden md:flex items-center gap-6">
+      {menu.items.map((item) => {
+        const isExternal = item.url.startsWith("http");
+
+        if (isExternal) {
+          return (
+            <a
+              key={item.id}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm hover:opacity-70 focus-visible:opacity-70 transition-opacity outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:rounded-sm"
+            >
+              {item.title}
+            </a>
+          );
+        }
+
+        return (
+          <Link
+            key={item.id}
+            href={item.url}
+            className="flex items-center gap-1 text-sm hover:opacity-70 transition-opacity"
+          >
+            {item.title}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+```
+
+Replace `"NAV_HANDLE"` with the handle the user provided.
+
+### A2. Update `components/layout/nav/index.tsx`
+
+Since `QuickLinks` is now async, wrap it in `<Suspense>` and pass `locale`:
+
+```tsx
+<Suspense fallback={null}>
+  <QuickLinks locale={locale} />
+</Suspense>
+```
+
+---
+
+## Part B: Enable Shopify footer menu
+
+Skip this section if the user did not select the footer menu.
+
+### B1. Update `components/layout/footer.tsx`
+
+Add the Shopify menu fetch back to the footer. Create a `FooterContent` async component:
+
+```tsx
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
+
+import { getMenu } from "@/lib/shopify/operations/menu";
+
+const LINK_CLASS = "text-sm text-muted-foreground transition-colors hover:text-foreground";
+
+function FooterLink({ title, url }: { title: string; url: string }) {
+  const isExternal = url.startsWith("http");
+
+  if (isExternal) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className={LINK_CLASS}>
+        {title}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={url} className={LINK_CLASS}>
+      {title}
+    </Link>
+  );
+}
+
+function FooterHeading({ title, url }: { title: string; url: string }) {
+  const isLinkable = url !== "/";
+  if (isLinkable) {
+    const isExternal = url.startsWith("http");
+
+    if (isExternal) {
+      return (
+        <h3 className="text-sm font-semibold text-foreground">
+          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            {title}
+          </a>
+        </h3>
+      );
+    }
+
+    return (
+      <h3 className="text-sm font-semibold text-foreground">
+        <Link href={url} className="hover:underline">
+          {title}
+        </Link>
+      </h3>
+    );
+  }
+
+  return <h3 className="text-sm font-semibold text-foreground">{title}</h3>;
+}
+
+async function Copyright() {
+  await connection();
+  const t = await getTranslations("footer");
+
+  return (
+    <p className="text-sm text-muted-foreground">
+      {t("copyright", { year: String(new Date().getFullYear()) })}
+    </p>
+  );
+}
+
+async function FooterContent({ locale }: { locale: string }) {
+  const menu = await getMenu("FOOTER_HANDLE", locale);
+  const hasMenu = menu && menu.items.length > 0;
+
+  return (
+    <footer className="bg-muted/30">
+      <div className="mx-auto px-4 py-12 lg:px-8">
+        {hasMenu ? (
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-4">
+            {menu.items.map((column) => (
+              <div key={column.id}>
+                <FooterHeading title={column.title} url={column.url} />
+                {column.items.length > 0 ? (
+                  <ul className="mt-4 space-y-3">
+                    {column.items.map((item) => (
+                      <li key={item.id}>
+                        <FooterLink title={item.title} url={item.url} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        <div className={hasMenu ? "mt-12 border-t border-border/40 pt-8" : ""}>
+          <Suspense>
+            <Copyright />
+          </Suspense>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export function Footer({ locale }: { locale: string }) {
+  return (
+    <Suspense fallback={null}>
+      <FooterContent locale={locale} />
+    </Suspense>
+  );
+}
+```
+
+Replace `"FOOTER_HANDLE"` with the handle the user provided.
+
+---
+
+## Part C: Add megamenu component
+
+Skip this section if the user did not want a megamenu.
+
+### Prerequisites
+
+- A Shopify Navigation menu exists with up to 3 levels of nesting
 - `react-remove-scroll` is installed (`pnpm add react-remove-scroll`)
 
-## Data model
+### Data model
 
 The megamenu transforms a Shopify 3-level nested menu into this hierarchy:
 
@@ -60,19 +274,17 @@ The megamenu transforms a Shopify 3-level nested menu into this hierarchy:
 }
 ```
 
-## Implementation steps
-
-### 1. Install dependency
+### C1. Install dependency
 
 ```bash
 pnpm add react-remove-scroll
 ```
 
-### 2. Create `lib/shopify/types/megamenu.ts`
+### C2. Create `lib/shopify/types/megamenu.ts`
 
 Define the four types (`MegamenuCategory`, `MegamenuPanel`, `MegamenuItem`, `MegamenuData`) exactly as shown in the data model above.
 
-### 3. Create `lib/shopify/operations/megamenu.ts`
+### C3. Create `lib/shopify/operations/megamenu.ts`
 
 Fetch the Shopify menu by handle and transform it into `MegamenuData`:
 
@@ -117,15 +329,15 @@ export async function getMegamenuData(locale: string = defaultLocale): Promise<M
 }
 ```
 
-Replace `"MENU_HANDLE"` with the handle the user provided.
+Replace `"MENU_HANDLE"` with the megamenu handle the user provided.
 
 This relies on `getMenu()` from `lib/shopify/operations/menu.ts` which already exists and supports 3-level nesting with `"use cache: remote"`, `cacheLife("max")`, and `cacheTag("menus")`.
 
-### 4. Create megamenu components
+### C4. Create megamenu components
 
 Create a directory `components/layout/nav/megamenu/` with the following files:
 
-#### 4a. `menu-trigger-icon.tsx`
+#### C4a. `menu-trigger-icon.tsx`
 
 A simple SVG hamburger icon component:
 
@@ -155,7 +367,7 @@ export function MenuTriggerIcon(props: SVGProps<SVGSVGElement>) {
 }
 ```
 
-#### 4b. `mouse-safe-area.tsx`
+#### C4b. `mouse-safe-area.tsx`
 
 A UX utility that prevents accidental menu switches when moving diagonally toward the content panel. It creates an invisible clipped polygon between the trigger column and the panel:
 
@@ -216,7 +428,7 @@ export function MouseSafeArea({ parentRef }: Props) {
 }
 ```
 
-#### 4c. `megamenu-panel.tsx`
+#### C4c. `megamenu-panel.tsx`
 
 Renders a single panel's header and category links. Supports both internal (Next.js `Link`) and external (`<a>`) links:
 
@@ -297,7 +509,7 @@ export function MegamenuPanel({ panel, fallbackHeader, onLinkClick }: Props) {
 }
 ```
 
-#### 4d. `megamenu-client.tsx`
+#### C4d. `megamenu-client.tsx`
 
 The desktop megamenu client component. This is the largest component and includes:
 
@@ -322,7 +534,7 @@ It uses translation keys from the `nav` namespace:
 
 Export both `MegamenuClient` and `MegamenuFallback` from this file. The fallback renders a disabled-looking trigger with the hamburger icon and "Browse" label.
 
-#### 4e. `megamenu-desktop.tsx`
+#### C4e. `megamenu-desktop.tsx`
 
 A thin server component wrapper that renders `MegamenuClient` only when items are non-empty:
 
@@ -345,7 +557,7 @@ export function MegamenuDesktop({ items, children }: Props) {
 }
 ```
 
-#### 4f. `megamenu-mobile.tsx`
+#### C4f. `megamenu-mobile.tsx`
 
 The mobile megamenu component using the shadcn `Accordion` component. Key differences from desktop:
 
@@ -359,7 +571,7 @@ The component accepts `data: MegamenuData` and optional `children`.
 
 Export both `MegamenuMobile` and `MegamenuMobileFallback` (renders `null`).
 
-#### 4g. `index.tsx` (barrel)
+#### C4g. `index.tsx` (barrel)
 
 The main entry point. A server component that fetches data and renders both layouts:
 
@@ -409,7 +621,7 @@ export function Megamenu({ locale }: MegamenuProps) {
 }
 ```
 
-### 5. Add translation keys
+### C5. Add translation keys
 
 Add the following keys to **all** locale files under `lib/i18n/messages/` in the `nav` namespace (if not already present):
 
@@ -423,7 +635,7 @@ Add the following keys to **all** locale files under `lib/i18n/messages/` in the
 }
 ```
 
-### 6. Wire into the nav
+### C6. Wire into the nav
 
 Import and render the `Megamenu` component in `components/layout/nav/index.tsx`, passing `locale`:
 
@@ -436,9 +648,9 @@ import { Megamenu } from "./megamenu";
 </Suspense>
 ```
 
-Place it between the logo and any quick-links/search components.
+Place it between the logo and the quick-links.
 
-### 7. Ensure the Accordion component exists
+### C7. Ensure the Accordion component exists
 
 The mobile megamenu requires the shadcn `Accordion` component. If it doesn't exist yet:
 
@@ -446,7 +658,7 @@ The mobile megamenu requires the shadcn `Accordion` component. If it doesn't exi
 npx shadcn@latest add accordion
 ```
 
-### 8. Add Browse toggle to the bottom bar
+### C8. Add Browse toggle to the bottom bar
 
 The bottom bar (`components/layout/bottom-bar.tsx`) should include a Browse button that toggles the megamenu on mobile. Add:
 
@@ -472,7 +684,7 @@ The bottom bar (`components/layout/bottom-bar.tsx`) should include a Browse butt
 <div className="w-px h-5 bg-border/50 md:hidden" />
 ```
 
-### 9. Add collection breadcrumb ancestor paths (optional)
+### C9. Add collection breadcrumb ancestor paths (optional)
 
 To show rich breadcrumbs on collection pages (e.g. Home / Clothing / Tops / T-Shirts), create `lib/utils/breadcrumbs.ts` with:
 

@@ -21,16 +21,7 @@ export function Nav({ locale }: { locale: string }) {
           <span className="text-xl font-semibold leading-4 tracking-tight">Shop</span>
         </Link>
 
-        <Suspense fallback={null}>
-          <QuickLinks locale={locale} />
-        </Suspense>
-
-        <Link
-          href="/about"
-          className="hidden md:flex items-center gap-1 text-sm hover:opacity-70 transition-opacity"
-        >
-          About
-        </Link>
+        <QuickLinks />
 
         <div className="flex items-center gap-4 ml-auto">
           <Suspense fallback={<CartIconFallback />}>

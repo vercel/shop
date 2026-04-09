@@ -316,7 +316,7 @@ export async function ShippingAddress({
 +          </Suspense>
 ```
 
-**`components/layout/nav/megamenu/index.tsx`** — add to mobile menu (requires the `add-megamenu` skill):
+**`components/layout/nav/megamenu/index.tsx`** — add to mobile menu (requires the `enable-shopify-menus` skill):
 
 ```diff
 +import { ShippingAddress } from "../shipping-address";

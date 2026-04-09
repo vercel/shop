@@ -324,7 +324,7 @@ export default getRequestConfig(async () => {
 
 ### Scope menu queries for markets
 
-The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/operations/menu.ts) unscoped so menus load before Shopify Markets is configured. When enabling markets, update `getMenu` to derive `country` and `language` from the active locale and query `menu` with `@inContext(country: $country, language: $language)`. Without that change, quick links and footer menu stay pinned to the default market. If the `add-megamenu` skill has been run, the megamenu will also need this scoping.
+The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/operations/menu.ts) unscoped so menus load before Shopify Markets is configured. When enabling markets, update `getMenu` to derive `country` and `language` from the active locale and query `menu` with `@inContext(country: $country, language: $language)`. Without that change, quick links and footer menu stay pinned to the default market. If the `enable-shopify-menus` skill has been run, the megamenu will also need this scoping.
 
 ---
 
@@ -413,7 +413,7 @@ Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navig
 
 ## Step 10: Wire Locale/Currency Selector into Megamenu
 
-> **Prerequisite:** This step requires the `add-megamenu` skill to have been run first. If the megamenu has not been added, skip this step.
+> **Prerequisite:** This step requires the `enable-shopify-menus` skill to have been run first. If the megamenu has not been added, skip this step.
 
 **File:** `components/layout/nav/megamenu/index.tsx`
 

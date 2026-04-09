@@ -47,7 +47,7 @@ Vercel Shop includes a skill system for extending the storefront with common com
 
 | Skill | Description |
 |-------|-------------|
-| `add-megamenu` | Shopify menu-powered mega navigation |
+| `enable-shopify-menus` | Replace hardcoded nav/footer with Shopify menus, optional megamenu |
 | `enable-shopify-cms` | Use Shopify metaobjects as a CMS |
 | `enable-content-negotiation` | Serve product pages as markdown to LLM agents |
 | `add-locale-url-prefix` | Locale-prefixed URL routing |
