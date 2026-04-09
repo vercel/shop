@@ -12,7 +12,6 @@ import { BottomBar } from "@/components/layout/bottom-bar";
 import { Footer } from "@/components/layout/footer";
 import { Nav } from "@/components/layout/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { ScrollToTop } from "@/components/scroll-top";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -49,9 +48,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
-            <Suspense>
-              <ScrollToTop />
-            </Suspense>
             <Nav locale={locale} />
             <main id="main-content" className="flex-1 min-w-0">
               {children}

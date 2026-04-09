@@ -8,28 +8,25 @@ import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
 
-export async function generateStaticParams() {
-  return [{ handle: "__placeholder__" }];
-}
-
 export async function generateMetadata({
   params,
+  searchParams,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const [{ handle }, sp, locale] = await Promise.all([params, searchParams, getLocale()]);
 
-  if (handle === "__placeholder__") {
-    notFound();
-  }
+  const variantId = sp.variantId as string | undefined;
+  const canonicalPath = variantId
+    ? `/products/${handle}?variantId=${variantId}`
+    : `/products/${handle}`;
 
-  return buildProductMetadata(handle, locale, `/products/${handle}`);
+  return buildProductMetadata(handle, locale, canonicalPath);
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: PageProps<"/products/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
-  if (handle === "__placeholder__") {
-    notFound();
-  }
 
   let product;
   try {
@@ -38,5 +35,11 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     notFound();
   }
 
-  return <ProductDetailPage product={product} locale={locale} />;
+  return (
+    <ProductDetailPage
+      product={product}
+      locale={locale}
+      searchParamsPromise={searchParams}
+    />
+  );
 }
