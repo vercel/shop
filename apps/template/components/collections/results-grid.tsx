@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { toProductCard } from "@/lib/utils/product-card";
 
 import { type CollectionResultsData, getExactCollectionResultCount } from "./data";
 import { ProductGridPendingOverlay } from "./filter-pending-context";
@@ -62,18 +61,14 @@ async function Render({
 
       <ProductGridPendingOverlay>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => {
-            const card = toProductCard(product);
-
-            return (
-              <ProductCard
-                key={product.id}
-                product={card}
-                locale={locale}
-                outOfStockText={tProduct("outOfStock")}
-              />
-            );
-          })}
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              locale={locale}
+              outOfStockText={tProduct("outOfStock")}
+            />
+          ))}
         </div>
       </ProductGridPendingOverlay>
 

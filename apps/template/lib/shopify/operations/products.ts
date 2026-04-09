@@ -1,11 +1,16 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { PageInfo, ProductDetails } from "@/lib/types";
+import type { PageInfo, ProductCard, ProductDetails } from "@/lib/types";
 
 import { shopifyFetch } from "../client";
-import { PRODUCT_FRAGMENT } from "../fragments";
-import { type ShopifyProduct, transformShopifyProductDetails } from "../transforms/product";
+import { PRODUCT_CARD_FRAGMENT, PRODUCT_FRAGMENT } from "../fragments";
+import {
+  type ShopifyProduct,
+  type ShopifyProductCard,
+  transformShopifyProductCard,
+  transformShopifyProductDetails,
+} from "../transforms/product";
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
@@ -64,7 +69,7 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
 }
 
 const PRODUCTS_SEARCH_QUERY = `
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_CARD_FRAGMENT}
   query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
@@ -91,7 +96,7 @@ const PRODUCTS_SEARCH_QUERY = `
         cursor
         node {
           ... on Product {
-            ...ProductFields
+            ...ProductCardFields
           }
         }
       }
@@ -215,7 +220,7 @@ export async function getProducts(params: {
   filters?: ProductFilter[];
   locale?: string;
 }): Promise<{
-  products: ProductDetails[];
+  products: ProductCard[];
   total: number;
   pageInfo: PageInfo;
   filters: ShopifyFilter[];
@@ -243,7 +248,7 @@ export async function getProducts(params: {
     search: {
       totalCount: number;
       productFilters: ShopifyFilter[];
-      edges: Array<{ node: ShopifyProduct | null }>;
+      edges: Array<{ node: ShopifyProductCard | null }>;
       pageInfo: PageInfo;
     };
   }>({
@@ -263,11 +268,11 @@ export async function getProducts(params: {
 
   const shopifyProducts = data.search.edges
     .map((edge) => edge.node)
-    .filter((node): node is ShopifyProduct => node !== null);
+    .filter((node): node is ShopifyProductCard => node !== null);
 
   tagProducts(shopifyProducts);
 
-  const products = shopifyProducts.map(transformShopifyProductDetails);
+  const products = shopifyProducts.map(transformShopifyProductCard);
 
   return {
     products,
@@ -278,7 +283,7 @@ export async function getProducts(params: {
 }
 
 const COLLECTION_PRODUCTS_QUERY = `
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_CARD_FRAGMENT}
   query collectionProducts($handle: String!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean, $filters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, filters: $filters) {
@@ -296,7 +301,7 @@ const COLLECTION_PRODUCTS_QUERY = `
         edges {
           cursor
           node {
-            ...ProductFields
+            ...ProductCardFields
           }
         }
         pageInfo {
@@ -333,7 +338,7 @@ export async function getCollectionProducts(params: {
   filters?: ProductFilter[];
   locale?: string;
 }): Promise<{
-  products: ProductDetails[];
+  products: ProductCard[];
   pageInfo: PageInfo;
   filters: ShopifyFilter[];
 }> {
@@ -357,7 +362,7 @@ export async function getCollectionProducts(params: {
   const data = await shopifyFetch<{
     collection: {
       products: {
-        edges: Array<{ node: ShopifyProduct }>;
+        edges: Array<{ node: ShopifyProductCard }>;
         pageInfo: PageInfo;
         filters: ShopifyFilter[];
       };
@@ -394,7 +399,7 @@ export async function getCollectionProducts(params: {
 
   tagProducts(shopifyProducts);
 
-  const products = shopifyProducts.map(transformShopifyProductDetails);
+  const products = shopifyProducts.map(transformShopifyProductCard);
 
   return {
     products,
@@ -404,10 +409,10 @@ export async function getCollectionProducts(params: {
 }
 
 const PRODUCT_RECOMMENDATIONS_QUERY = `
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_CARD_FRAGMENT}
   query productRecommendations($productId: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productRecommendations(productId: $productId) {
-      ...ProductFields
+      ...ProductCardFields
     }
   }
 `;
@@ -415,7 +420,7 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `
 export async function getProductRecommendations(
   handle: string,
   locale: string = defaultLocale,
-): Promise<ProductDetails[]> {
+): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", `recommendations-${handle}`);
@@ -428,7 +433,7 @@ export async function getProductRecommendations(
     return [];
   }
 
-  const data = await shopifyFetch<{ productRecommendations: ShopifyProduct[] }>({
+  const data = await shopifyFetch<{ productRecommendations: ShopifyProductCard[] }>({
     operation: "productRecommendations",
     query: PRODUCT_RECOMMENDATIONS_QUERY,
     variables: { productId: product.id, country, language },
@@ -440,28 +445,39 @@ export async function getProductRecommendations(
 
   tagProducts(data.productRecommendations);
 
-  return data.productRecommendations.map(transformShopifyProductDetails);
+  return data.productRecommendations.map(transformShopifyProductCard);
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_CARD_FRAGMENT}
   query getProductsByHandles($query: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     products(first: $first, query: $query) {
       edges {
         node {
-          ...ProductFields
+          ...ProductCardFields
         }
       }
     }
   }
 `;
 
-const GET_PRODUCTS_BY_IDS_QUERY = `
+const GET_PRODUCT_BY_ID_QUERY = `
   ${PRODUCT_FRAGMENT}
+  query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    node(id: $id) {
+      ... on Product {
+        ...ProductFields
+      }
+    }
+  }
+`;
+
+const GET_PRODUCTS_BY_IDS_QUERY = `
+  ${PRODUCT_CARD_FRAGMENT}
   query getProductsByIds($ids: [ID!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
       ... on Product {
-        ...ProductFields
+        ...ProductCardFields
       }
     }
   }
@@ -493,13 +509,13 @@ export async function getProductById(
   const language = getLanguageCode(locale);
   const gid = decodeShopifyId(id);
 
-  const data = await shopifyFetch<{ nodes: (ShopifyProduct | null)[] }>({
-    operation: "getProductsByIds",
-    query: GET_PRODUCTS_BY_IDS_QUERY,
-    variables: { ids: [gid], country, language },
+  const data = await shopifyFetch<{ node: ShopifyProduct | null }>({
+    operation: "getProductById",
+    query: GET_PRODUCT_BY_ID_QUERY,
+    variables: { id: gid, country, language },
   });
 
-  const product = data.nodes[0];
+  const product = data.node;
   if (!product) {
     throw new Error(`Product not found: ${id}`);
   }
@@ -516,7 +532,7 @@ export async function getProductById(
 export async function getProductsByIds(
   ids: string[],
   locale: string = defaultLocale,
-): Promise<ProductDetails[]> {
+): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
@@ -529,18 +545,17 @@ export async function getProductsByIds(
   const language = getLanguageCode(locale);
   const gids = ids.map(decodeShopifyId);
 
-  const data = await shopifyFetch<{ nodes: (ShopifyProduct | null)[] }>({
+  const data = await shopifyFetch<{ nodes: (ShopifyProductCard | null)[] }>({
     operation: "getProductsByIds",
     query: GET_PRODUCTS_BY_IDS_QUERY,
     variables: { ids: gids, country, language },
   });
 
-  // Filter out nulls and transform, preserving order
-  const shopifyProducts = data.nodes.filter((node): node is ShopifyProduct => node !== null);
+  const shopifyProducts = data.nodes.filter((node): node is ShopifyProductCard => node !== null);
 
   tagProducts(shopifyProducts);
 
-  return shopifyProducts.map(transformShopifyProductDetails);
+  return shopifyProducts.map(transformShopifyProductCard);
 }
 
 /**
@@ -551,7 +566,7 @@ export async function getProductsByIds(
 export async function getProductsByHandles(
   handles: string[],
   locale: string = defaultLocale,
-): Promise<ProductDetails[]> {
+): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
@@ -567,7 +582,7 @@ export async function getProductsByHandles(
   const searchQuery = handles.map((h) => `handle:${h}`).join(" OR ");
 
   const data = await shopifyFetch<{
-    products: { edges: Array<{ node: ShopifyProduct }> };
+    products: { edges: Array<{ node: ShopifyProductCard }> };
   }>({
     operation: "getProductsByHandles",
     query: GET_PRODUCTS_BY_HANDLES_QUERY,
@@ -575,7 +590,7 @@ export async function getProductsByHandles(
   });
 
   // Create a map for O(1) lookup by handle
-  const productMap = new Map<string, ShopifyProduct>();
+  const productMap = new Map<string, ShopifyProductCard>();
   for (const edge of data.products.edges) {
     productMap.set(edge.node.handle, edge.node);
   }
@@ -583,9 +598,9 @@ export async function getProductsByHandles(
   // Return products in the original handle order, filtering out missing
   const shopifyProducts = handles
     .map((handle) => productMap.get(handle))
-    .filter((product): product is ShopifyProduct => product !== undefined);
+    .filter((product): product is ShopifyProductCard => product !== undefined);
 
   tagProducts(shopifyProducts);
 
-  return shopifyProducts.map(transformShopifyProductDetails);
+  return shopifyProducts.map(transformShopifyProductCard);
 }
