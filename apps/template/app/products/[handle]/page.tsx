@@ -16,10 +16,7 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: PageProps<"/products/[handle]">) {
+export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   let product;
@@ -29,11 +26,5 @@ export default async function ProductPage({
     notFound();
   }
 
-  return (
-    <ProductDetailPage
-      product={product}
-      locale={locale}
-      searchParamsPromise={searchParams}
-    />
-  );
+  return <ProductDetailPage product={product} locale={locale} />;
 }

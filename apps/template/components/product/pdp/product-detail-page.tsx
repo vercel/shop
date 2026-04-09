@@ -1,18 +1,6 @@
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
-import { BuyButtons } from "@/components/product/pdp/buy-buttons";
-import {
-  ProductInfoDescription,
-  ProductInfoHeader,
-  ProductInfoOptions,
-} from "@/components/product/pdp/product-info";
-import { ProductMedia } from "@/components/product/pdp/product-media";
-import {
-  computeInitialSelectedOptions,
-  getImagesForSelectedColor,
-  resolveSelectedVariant,
-} from "@/components/product/pdp/variants";
 import { Recommendations } from "@/components/product/recommendations";
 import { ProductSchema } from "@/components/product/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -20,6 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
+
+import { VariantSection } from "./variant-section";
 
 function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: string }) {
   return (
@@ -35,12 +25,9 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 function VariantSectionFallback() {
   return (
     <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-      {/* Media placeholder */}
       <div className="space-y-2">
         <Skeleton className="aspect-square w-full rounded-xl" />
       </div>
-
-      {/* Info placeholder */}
       <div className="space-y-8 lg:sticky lg:top-20">
         <div>
           <Skeleton className="h-8 w-3/4" />
@@ -63,59 +50,12 @@ function VariantSectionFallback() {
   );
 }
 
-async function VariantSection({
+export function ProductDetailPage({
   product,
   locale,
-  searchParamsPromise,
 }: {
   product: ProductDetails;
   locale: Locale;
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParamsPromise;
-  const variantId = typeof sp.variantId === "string" ? sp.variantId : undefined;
-
-  const { handle, title, featuredImage, images, videos, variants, options } = product;
-
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
-
-  const buyButtonProps = {
-    selectedVariant,
-    title,
-    handle,
-    featuredImage,
-    availableForSale: product.availableForSale,
-  };
-
-  return (
-    <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-      <ProductMedia images={filteredImages} videos={videos} title={title} />
-
-      <div className="space-y-8 lg:sticky lg:top-20">
-        <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
-        <ProductInfoOptions
-          variants={variants}
-          options={options}
-          selectedOptions={selectedOptions}
-          handle={handle}
-        />
-        <BuyButtons {...buyButtonProps} />
-        <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
-      </div>
-    </div>
-  );
-}
-
-export async function ProductDetailPage({
-  product,
-  locale,
-  searchParamsPromise,
-}: {
-  product: ProductDetails;
-  locale: Locale;
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { handle, title } = product;
 
@@ -139,11 +79,7 @@ export async function ProductDetailPage({
 
       <div className="space-y-8">
         <Suspense fallback={<VariantSectionFallback />}>
-          <VariantSection
-            product={product}
-            locale={locale}
-            searchParamsPromise={searchParamsPromise}
-          />
+          <VariantSection product={product} locale={locale} />
         </Suspense>
       </div>
 
