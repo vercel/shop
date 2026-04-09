@@ -56,7 +56,7 @@ function MediaVideo({
     <AutoPlayVideo
       src={item.video.url}
       poster={item.video.previewImage?.url}
-      className={cn("h-full w-full object-cover", className)}
+      className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
 }
@@ -195,10 +195,10 @@ export function ProductMedia({
 
   if (mediaItems.length === 0) return null;
 
-  // Desktop grid has images before videos (original ImageGrid order)
+  // Desktop grid has videos before images (matches mobile carousel order)
   const desktopItems: MediaItem[] = [
-    ...images.map((image): MediaItem => ({ type: "image", image })),
     ...videos.map((video): MediaItem => ({ type: "video", video })),
+    ...images.map((image): MediaItem => ({ type: "image", image })),
   ];
 
   return (
