@@ -1,3 +1,4 @@
+import { getNumericShopifyId } from "@/components/product/pdp/variants";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -302,6 +303,7 @@ export function transformShopifyProductCard(product: ShopifyCategoryProduct): Pr
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
+    defaultVariantNumericId: defaultVariant ? (getNumericShopifyId(defaultVariant.id) ?? undefined) : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }

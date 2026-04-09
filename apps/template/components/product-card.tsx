@@ -36,7 +36,7 @@ export function ProductCard({
   const isFeatured = variant === "featured";
 
   return (
-    <Link href={`/products/${product.handle}`} className={className}>
+    <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && (
           <ProductCardBadge>

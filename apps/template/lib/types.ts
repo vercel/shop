@@ -62,6 +62,7 @@ export interface ProductCard {
   vendor?: string;
   availableForSale: boolean;
   defaultVariantId?: string;
+  defaultVariantNumericId?: string;
   defaultVariantSelectedOptions?: SelectedOption[];
 }
 

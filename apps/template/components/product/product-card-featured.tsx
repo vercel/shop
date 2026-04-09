@@ -31,7 +31,7 @@ export function ProductCardFeatured({
   className,
 }: ProductCardFeaturedProps) {
   return (
-    <Link href={`/products/${product.handle}`} className={className}>
+    <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
       <ProductCard variant="featured">
         <ProductCardBadge>
           <FeaturedBadge />
