@@ -16,6 +16,20 @@ Link columns are sourced from `getMenu("footer", locale)`. The menu supports a t
 
 The grid is responsive: 2 columns on mobile, 3 on tablet (`md`), and 4 on desktop (`lg`).
 
+## Social links
+
+Social media icons are driven by the `socialLinks` array in `lib/config.ts`. Each entry has a `platform` (one of `facebook`, `instagram`, `x`, `youtube`, `tiktok`, `pinterest`, `linkedin`, `github`) and a `url`. When the array is non-empty, icons render on the right side of the footer opposite the copyright.
+
+```ts
+// lib/config.ts
+socialLinks: [
+  { platform: "x", url: "https://x.com/mystore" },
+  { platform: "instagram", url: "https://instagram.com/mystore" },
+],
+```
+
+The default is an empty array, which hides the social links section entirely.
+
 ## Copyright
 
 The copyright line is a server component that reads the current year and the `footer.copyright` translation key. It is wrapped in a `Suspense` boundary so the rest of the footer can render without waiting for the translation lookup.
@@ -25,4 +39,6 @@ The copyright line is a server component that reads the current year and the `fo
 | File | Purpose |
 |------|---------|
 | `components/layout/footer.tsx` | Footer composition, link columns, copyright |
+| `components/layout/social-links.tsx` | Social media icon links |
+| `lib/config.ts` | `siteConfig.socialLinks` array |
 | `lib/shopify/operations/menu.ts` | Shopify menu data fetching |
