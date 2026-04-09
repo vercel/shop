@@ -44,6 +44,10 @@ async function resolvePageContext(
   locale: Locale,
   refererUrl: string | null,
 ): Promise<PageContext> {
+  if (segments.length === 0) {
+    return { type: "home" };
+  }
+
   // segments[0] = page type, segments[1] = handle/id
   const pageType = segments[0];
 
