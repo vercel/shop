@@ -9,12 +9,7 @@ export async function buildProductMetadata(
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  let product;
-  try {
-    product = await getProduct(handle, locale);
-  } catch {
-    notFound();
-  }
+  const product = await getProduct(handle, locale).catch(() => notFound());
   const images = product.featuredImage
     ? [
         {
