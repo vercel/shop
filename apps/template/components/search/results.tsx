@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import { RESULTS_PER_PAGE, toProductCard } from "@/lib/utils/product-card";
+import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 
 const RESULTS_SKELETON_KEYS = Array.from(
   { length: 10 },
@@ -102,17 +102,14 @@ export async function Results({
 
               <ProductGridPendingOverlay>
                 <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {products.map((product) => {
-                    const card = toProductCard(product);
-                    return (
-                      <ProductCard
-                        key={product.id}
-                        product={card}
-                        locale={locale}
-                        outOfStockText={tProduct("outOfStock")}
-                      />
-                    );
-                  })}
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      locale={locale}
+                      outOfStockText={tProduct("outOfStock")}
+                    />
+                  ))}
                 </div>
               </ProductGridPendingOverlay>
 

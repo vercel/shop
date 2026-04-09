@@ -173,11 +173,10 @@ export const PRODUCT_FRAGMENT = `
   }
 `;
 
-export const CATEGORY_PRODUCT_FRAGMENT = `
+export const PRODUCT_CARD_FRAGMENT = `
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
-  ${TAXONOMY_CATEGORY_FRAGMENT}
-  fragment CategoryProductFields on Product {
+  fragment ProductCardFields on Product {
     id
     title
     handle
@@ -190,31 +189,18 @@ export const CATEGORY_PRODUCT_FRAGMENT = `
       minVariantPrice {
         ...MoneyFields
       }
-      maxVariantPrice {
-        ...MoneyFields
-      }
     }
     compareAtPriceRange {
       minVariantPrice {
         ...MoneyFields
       }
-      maxVariantPrice {
-        ...MoneyFields
-      }
     }
-    category {
-      ...TaxonomyCategoryFields
-    }
-    variants(first: 1) {
-      edges {
-        node {
-          id
-          availableForSale
-          selectedOptions {
-            name
-            value
-          }
-        }
+    selectedOrFirstAvailableVariant {
+      id
+      availableForSale
+      selectedOptions {
+        name
+        value
       }
     }
   }

@@ -122,7 +122,7 @@ export interface ShopifyProduct {
   metafields?: (ShopifyMetafield | null)[];
 }
 
-export interface ShopifyCategoryProduct {
+export interface ShopifyProductCard {
   id: string;
   title: string;
   handle: string;
@@ -131,22 +131,15 @@ export interface ShopifyCategoryProduct {
   featuredImage: ShopifyImage | null;
   priceRange: {
     minVariantPrice: ShopifyMoney;
-    maxVariantPrice: ShopifyMoney;
   };
   compareAtPriceRange?: {
     minVariantPrice: ShopifyMoney;
-    maxVariantPrice: ShopifyMoney;
   } | null;
-  category?: ShopifyCategory | null;
-  variants?: {
-    edges: Array<{
-      node: {
-        id: string;
-        availableForSale: boolean;
-        selectedOptions?: Array<{ name: string; value: string }>;
-      };
-    }>;
-  };
+  selectedOrFirstAvailableVariant?: {
+    id: string;
+    availableForSale: boolean;
+    selectedOptions: Array<{ name: string; value: string }>;
+  } | null;
 }
 
 function transformImage(image: ShopifyImage | null): Image | null {
@@ -291,8 +284,8 @@ function formatKey(key: string): string {
   return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export function transformShopifyProductCard(product: ShopifyCategoryProduct): ProductCard {
-  const defaultVariant = product.variants?.edges.map((e) => e.node).find((v) => v.availableForSale);
+export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
+  const defaultVariant = product.selectedOrFirstAvailableVariant;
   return {
     id: product.id,
     handle: product.handle,
@@ -344,6 +337,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
   };
 }
 
-export function transformShopifyProductCards(products: ShopifyCategoryProduct[]): ProductCard[] {
+export function transformShopifyProductCards(products: ShopifyProductCard[]): ProductCard[] {
   return products.map(transformShopifyProductCard);
 }
