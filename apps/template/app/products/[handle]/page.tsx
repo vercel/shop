@@ -10,16 +10,10 @@ import { buildProductMetadata } from "./shared";
 
 export async function generateMetadata({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, sp, locale] = await Promise.all([params, searchParams, getLocale()]);
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
-  const variantId = sp.variantId as string | undefined;
-  const canonicalPath = variantId
-    ? `/products/${handle}?variantId=${variantId}`
-    : `/products/${handle}`;
-
-  return buildProductMetadata(handle, locale, canonicalPath);
+  return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
 export default async function ProductPage({
