@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 
 import { buyNowAction } from "@/components/cart/actions";
 import { useCart } from "@/components/cart/context";
@@ -29,8 +29,18 @@ export function BuyButtons({
   const selectedVariantId = selectedVariant?.id;
 
   const t = useTranslations("product");
-  const [isBuyingNow, startBuyNowTransition] = useTransition();
+  const [, startBuyNowTransition] = useTransition();
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
+
+  // Reset pending state when returning from checkout (bfcache / back navigation)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsBuyingNow(false);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   const handleAddToCart = () => {
     if (selectedVariantId && selectedVariant) {
@@ -48,10 +58,17 @@ export function BuyButtons({
 
   const handleBuyNow = () => {
     if (!selectedVariantId) return;
+    setIsBuyingNow(true);
     startBuyNowTransition(async () => {
-      const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
+      try {
+        const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else {
+          setIsBuyingNow(false);
+        }
+      } catch {
+        setIsBuyingNow(false);
       }
     });
   };
