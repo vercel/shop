@@ -8,13 +8,13 @@ See [docs.vercel.shop](https://docs.vercel.shop) for full documentation.
 
 ## Getting Started
 
-Scaffold a new project using the CLI:
+1. Scaffold a new project using the CLI:
 
 ```sh
-npx create-vercel-shop
+npx create-vercel-shop@latest
 ```
 
-Then add your Shopify credentials:
+2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
 
 ```sh
 cp .env.example .env.local
@@ -23,13 +23,19 @@ cp .env.example .env.local
 ```
 SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 SHOPIFY_STOREFRONT_ACCESS_TOKEN=your-token
+NEXT_PUBLIC_SITE_NAME="Your Store Name"
 ```
 
-Start the development server:
+3. Start the development server with the same package manager you used to scaffold the project:
 
 ```sh
+pnpm dev
 npm run dev
+yarn dev
+bun dev
 ```
+
+See [docs.vercel.shop/docs/getting-started](https://docs.vercel.shop/docs/getting-started) for the full setup guide and [Storefront API Permissions](https://docs.vercel.shop/docs/reference/storefront-api-permissions) for the complete scope reference.
 
 ## Features
 

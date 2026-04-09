@@ -6,15 +6,7 @@ type: troubleshooting
 
 ## Products not showing up
 
-The most common cause is missing Storefront API permissions. In your Shopify admin, go to **Settings → Apps and sales channels → Headless → your storefront** and verify these scopes are enabled:
-
-| Scope | Required for |
-|---|---|
-| `unauthenticated_read_product_listings` | Product pages and search |
-| `unauthenticated_read_product_inventory` | Stock availability |
-| `unauthenticated_read_collection_listings` | Collection pages |
-| `unauthenticated_write_checkouts` | Cart and checkout |
-| `unauthenticated_read_content` | Shopify pages |
+The most common cause is missing Storefront API permissions. In your Shopify admin, go to **Settings → Apps and sales channels → Headless → your storefront** and compare your token scopes against [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
 Also check that your products are set to the **Online Store** and **Headless** sales channels in Shopify admin.
 
