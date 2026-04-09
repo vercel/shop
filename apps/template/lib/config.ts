@@ -24,10 +24,5 @@ export interface SocialLink {
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
   url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
-  // TODO: remove placeholders before shipping
-  socialLinks: [
-    { platform: "x", url: "https://x.com" },
-    { platform: "instagram", url: "https://instagram.com" },
-    { platform: "github", url: "https://github.com" },
-  ] as SocialLink[],
+  socialLinks: [] as SocialLink[],
 } as const;
