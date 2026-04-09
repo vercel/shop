@@ -298,6 +298,7 @@ declare const messages: {
     "openAssistant": "Open shopping assistant",
     "assistantLabel": "Shopping assistant",
     "minimizeAssistant": "Minimize assistant",
+    "clearChat": "Clear chat",
     "greeting": "Hi, how can I help?",
     "dropFiles": "Drop files here",
     "retry": "Retry",

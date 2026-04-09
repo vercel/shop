@@ -442,7 +442,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     onOpenChange(false);
   }, [pathname, onOpenChange]);
 
-  const { messages, sendMessage, status, regenerate } = useChat({
+  const { messages, sendMessage, setMessages, status, regenerate, stop } = useChat({
     id: persistedChat.chatId,
     generateId: () => nanoid(),
     messages: persistedChat.messages,
@@ -543,6 +543,22 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     [sendMessage],
   );
 
+  const handleClear = useCallback(() => {
+    if (status === "streaming" || status === "submitted") {
+      stop();
+    }
+
+    setInput("");
+    setMessages([]);
+    writePersistedAgentChat({
+      version: 1,
+      chatId: persistedChat.chatId,
+      input: "",
+      messages: [],
+    });
+  }, [persistedChat.chatId, setMessages, status, stop]);
+
+  const canClear = messages.length > 0 || input.trim().length > 0;
   const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant");
 
   return (
@@ -575,14 +591,25 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 <span className="font-semibold text-sm">{t("name")}</span>
                 <span className="text-muted-foreground text-sm">{t("title")}</span>
               </div>
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                aria-label={t("minimizeAssistant")}
-              >
-                <MinusIcon className="size-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  disabled={!canClear}
+                  className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+                  aria-label={t("clearChat")}
+                >
+                  <Trash2Icon className="size-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  aria-label={t("minimizeAssistant")}
+                >
+                  <MinusIcon className="size-4" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}

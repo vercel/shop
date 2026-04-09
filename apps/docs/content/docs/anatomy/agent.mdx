@@ -84,12 +84,13 @@ A `CartReconciler` component watches the agent's tool results for cart mutations
 
 The agent panel is toggled from a button in the bottom bar. The panel includes:
 
+- Header controls to clear the conversation or minimize the panel
 - Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
 - Generative UI rendering via `useJsonRenderMessage()` and a component registry
 - File attachment support via drag-and-drop
 - Speech input
 - Regenerate and copy message actions
-- Chat history persisted to localStorage (`template-agent-chat:v1`)
+- Chat history and draft input persisted to localStorage (`template-agent-chat:v1`) until cleared
 - Click-outside and Escape to minimize
 
 ## Configuration

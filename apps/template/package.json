@@ -1,6 +1,6 @@
 {
   "name": "template",
-  "version": "0.20260409.0",
+  "version": "0.20260409.1",
   "private": true,
   "scripts": {
     "build": "next build",
