@@ -1,4 +1,4 @@
-import { Suspense } from "react";
+import { Suspense, use } from "react";
 
 import { Container } from "@/components/layout/container";
 import { Recommendations } from "@/components/product/recommendations";
@@ -50,17 +50,18 @@ function VariantSectionFallback() {
   );
 }
 
-export function ProductDetailPage({
-  product,
+function ProductContent({
+  productPromise,
   locale,
 }: {
-  product: ProductDetails;
+  productPromise: Promise<ProductDetails>;
   locale: Locale;
 }) {
+  const product = use(productPromise);
   const { handle, title } = product;
 
   return (
-    <Container className="bg-background">
+    <>
       <ProductSchema
         product={{
           id: product.id,
@@ -78,14 +79,28 @@ export function ProductDetailPage({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="space-y-8">
-        <Suspense fallback={<VariantSectionFallback />}>
-          <VariantSection product={product} locale={locale} />
-        </Suspense>
+        <VariantSection product={product} locale={locale} />
       </div>
 
       <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
       </div>
+    </>
+  );
+}
+
+export function ProductDetailPage({
+  productPromise,
+  locale,
+}: {
+  productPromise: Promise<ProductDetails>;
+  locale: Locale;
+}) {
+  return (
+    <Container className="bg-background">
+      <Suspense fallback={<VariantSectionFallback />}>
+        <ProductContent productPromise={productPromise} locale={locale} />
+      </Suspense>
     </Container>
   );
 }

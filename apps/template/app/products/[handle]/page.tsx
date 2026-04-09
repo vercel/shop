@@ -17,14 +17,12 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const locale = await getLocale();
+  const handlePromise = params.then(({ handle }) => handle);
 
-  let product;
-  try {
-    product = await getProduct(handle, locale);
-  } catch {
-    notFound();
-  }
+  const productPromise = handlePromise.then((handle) =>
+    getProduct(handle, locale).catch(() => notFound()),
+  );
 
-  return <ProductDetailPage product={product} locale={locale} />;
+  return <ProductDetailPage productPromise={productPromise} locale={locale} />;
 }
