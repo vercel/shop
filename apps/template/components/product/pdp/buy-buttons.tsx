@@ -60,10 +60,14 @@ export function BuyButtons({
     if (!selectedVariantId) return;
     setIsBuyingNow(true);
     startBuyNowTransition(async () => {
-      const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else {
+      try {
+        const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else {
+          setIsBuyingNow(false);
+        }
+      } catch {
         setIsBuyingNow(false);
       }
     });
