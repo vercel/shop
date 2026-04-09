@@ -1,0 +1,61 @@
+---
+title: Shopify Menus
+description: Replace hardcoded nav and footer menus with Shopify-powered menus, and optionally add a megamenu component.
+type: guide
+---
+
+## How to use
+
+```bash
+/enable-shopify-menus
+```
+
+<div className="pb-6" />
+
+{/* BEGIN SKILL CONTENT: enable-shopify-menus */}
+
+# Enable Shopify Menus
+
+By default, the storefront uses hardcoded navigation links and an empty footer. This skill replaces them with dynamic menus fetched from Shopify, and optionally adds a full-featured megamenu component.
+
+## Before you start
+
+The skill will ask three questions:
+
+1. **Which menus?** — Nav menu, footer menu, or both
+2. **Menu handles** — The Shopify admin menu handles (e.g. `main-menu`, `footer`)
+3. **Megamenu?** — Whether to add a multi-level category browser component
+
+## What it does
+
+### Nav menu
+
+Replaces the hardcoded quick links (`Shop`, `Collections`, `About`) with items fetched from a Shopify Navigation menu. The existing `getMenu()` operation supports 3-level nesting with remote caching.
+
+### Footer menu
+
+Replaces the empty footer with a column-based link grid powered by a Shopify menu. Each top-level menu item becomes a column header, with nested items as links.
+
+### Megamenu (optional)
+
+Adds a full-featured navigation megamenu with:
+
+- **3-level hierarchy** — top-level items → subcategories → leaf links
+- **Desktop hover interaction** — mouse direction tracking with 150ms intent delay
+- **Mobile accordion** — full-screen overlay triggered from the bottom bar
+- **Keyboard navigation** — Escape to close
+- **BroadcastChannel sync** — cross-tab coordination between desktop and mobile components
+
+The megamenu creates 7 component files in `components/layout/nav/megamenu/`, a types file, and a data operation.
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `components/layout/nav/quick-links.tsx` | Nav links (hardcoded by default, Shopify after skill) |
+| `components/layout/footer.tsx` | Footer (copyright only by default, Shopify columns after skill) |
+| `lib/shopify/operations/menu.ts` | Shared menu fetch with 3-level nesting and remote cache |
+| `components/layout/nav/megamenu/` | Megamenu components (created by skill) |
+| `lib/shopify/operations/megamenu.ts` | Megamenu data transform (created by skill) |
+
+{/* END SKILL CONTENT: enable-shopify-menus */}

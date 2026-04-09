@@ -23,15 +23,16 @@ For the API client and query patterns, see [Storefront API](/docs/reference/stor
 
 ## Required menus
 
-The template fetches three menus from Shopify by handle. These must exist in your Shopify admin under **Online Store → Navigation** with the exact handles below:
+By default, the template uses hardcoded navigation links and an empty footer. Use the [`/enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to replace them with dynamic menus fetched from Shopify.
+
+When enabled, the template fetches menus by handle from **Online Store → Navigation** in Shopify admin. Common handles:
 
 | Menu handle | Where it renders | Structure |
 |---|---|---|
-| `main-menu` | Top navigation megamenu | 3-level hierarchy: top items → panels → categories |
+| `main-menu` | Top navigation links (or megamenu) | Flat list or 3-level hierarchy |
 | `footer` | Footer link columns | 2-level: column headings → links |
-| `quick-links` | Secondary nav bar below the megamenu trigger | Flat list of links |
 
-If a menu doesn't exist, the corresponding UI section renders empty. Menu items can link to collections, products, pages, or custom URLs.
+Menu items can link to collections, products, pages, or custom URLs.
 
 ## Webhooks and cache invalidation
 
@@ -90,6 +91,5 @@ This means a product update in Shopify invalidates only that product's cache and
 | File | Purpose |
 |------|---------|
 | `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification |
-| `lib/shopify/operations/menu.ts` | Menu fetching by handle |
-| `lib/shopify/operations/megamenu.ts` | Megamenu data fetching from `main-menu` |
+| `lib/shopify/operations/menu.ts` | Menu fetching by handle (used after `enable-shopify-menus` skill) |
 | `lib/shopify/client.ts` | Core Storefront API client |

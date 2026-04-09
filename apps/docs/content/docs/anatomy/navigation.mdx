@@ -1,58 +1,49 @@
 ---
 title: Navigation
-description: The storefront navigation system - navbar, megamenu, mobile bottom bar, and responsive layout.
+description: The storefront navigation system - navbar, quick links, mobile bottom bar, and responsive layout.
 type: guide
 ---
 
-> **Important:** The template expects three menus in Shopify admin with exact handles: `main-menu`, `footer`, and `quick-links`. If a menu doesn't exist, the corresponding section renders empty.
-
-The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. Both share a megamenu component that renders Shopify menu data as a multi-level category browser.
+The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. By default, navigation links are hardcoded. Use the [`/enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to fetch menus from Shopify and optionally add a megamenu component.
 
 ## Navbar
 
-A sticky header (`z-30`) that composes the logo/brand link, megamenu trigger, quick links, an about link (hidden on mobile), and the cart icon. On mobile, only the logo and cart icon are visible - the rest of the navigation moves to the bottom bar.
-
-## Megamenu
-
-The megamenu has a server component that fetches Shopify menu data via `getMenu("main-menu", locale)` and a client component that handles interaction.
-
-The menu supports a 3-level hierarchy: top-level items, panels, and categories. On desktop, panels activate on hover with mouse direction tracking - the close delay increases when the cursor moves toward the open panel, preventing accidental dismissal. On mobile, the menu renders as a full-screen overlay with keyboard escape support.
-
-Communication between the mobile bottom bar's browse button and the megamenu uses the `BroadcastChannel` API, allowing the two independent component trees to coordinate open/close state without shared React context.
+A sticky header (`z-30`) that composes the logo/brand link, quick links, and the cart icon. On mobile, only the logo and cart icon are visible - the rest of the navigation moves to the bottom bar.
 
 ## Quick links
 
-A secondary horizontal link bar sourced from the Shopify menu with ID `"quick-links"`. Supports both internal and external URLs. Hidden on mobile (`md:flex`).
+A horizontal link bar with hardcoded defaults: `Shop`, `Collections`, `About`. Hidden on mobile (`md:flex`). The `enable-shopify-menus` skill replaces these with items from a Shopify Navigation menu.
 
 ## Cart icon
 
 The cart icon is a server/client component pair. The server component reads the `shopify_cartId` cookie and fetches the initial cart. The client component renders a quantity badge with an animation for pending additions and opens the cart overlay on click.
 
+## Footer
+
+By default the footer renders only a copyright notice. The `enable-shopify-menus` skill adds Shopify-powered footer columns with headings and links.
+
 ## Mobile bottom bar
 
 A fixed bar at the bottom of the viewport, visible below the `md` breakpoint. It contains:
 
-- **Browse button** - toggles the megamenu via `BroadcastChannel`
 - **Search button** - expands an animated search input
 - **Agent button** - optional slot, rendered when enabled
 
-Transitions between states use Framer Motion for smooth animation.
+Transitions between states use Framer Motion for smooth animation. The `enable-shopify-menus` skill can add a **Browse button** that toggles a megamenu.
 
 ## Responsive behavior
 
-**Desktop** (`md` and up) - full horizontal navbar with megamenu hover interaction, quick links, about link, and cart sheet.
+**Desktop** (`md` and up) - full horizontal navbar with quick links and cart sheet.
 
-**Mobile** (below `md`) - minimal top bar with logo and cart icon. Primary navigation moves to the fixed bottom bar with browse, search, and agent buttons.
+**Mobile** (below `md`) - minimal top bar with logo and cart icon. Primary navigation moves to the fixed bottom bar with search and agent buttons.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
 | `components/layout/nav/index.tsx` | Main navbar composition |
-| `components/layout/nav/megamenu/index.tsx` | Megamenu server component, fetches Shopify menu |
-| `components/layout/nav/megamenu/megamenu-client.tsx` | Megamenu client interaction and mouse tracking |
-| `components/layout/nav/quick-links.tsx` | Quick links from Shopify menu |
+| `components/layout/nav/quick-links.tsx` | Quick links (hardcoded by default) |
 | `components/layout/nav/cart.tsx` | Cart icon server component |
 | `components/layout/nav/cart-client.tsx` | Cart icon with quantity badge |
-| `components/layout/bottom-bar.tsx` | Mobile bottom bar with browse and search |
-| `lib/shopify/operations/megamenu.ts` | Shopify menu data fetching |
+| `components/layout/footer.tsx` | Footer (copyright only by default) |
+| `components/layout/bottom-bar.tsx` | Mobile bottom bar with search |

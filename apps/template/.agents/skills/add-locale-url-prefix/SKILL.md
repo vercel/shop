@@ -255,7 +255,7 @@ export const generateStaticParams = async () => {
 
 ### Step 12: Re-enable the Locale & Currency Selector in the Megamenu
 
-> **Prerequisite:** This step requires the `add-megamenu` skill to have been run first. If the megamenu has not been added, skip this step.
+> **Prerequisite:** This step requires the `enable-shopify-menus` skill to have been run first. If the megamenu has not been added, skip this step.
 
 The browse menu previously included a `LocaleCurrencySelector` that let users switch language and see their currency. It was removed when locale URL prefixes were removed (since there's only one locale without them). To restore it:
 
