@@ -51,14 +51,12 @@ interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
   variants: ProductVariant[];
   options: ProductOption[];
   selectedOptions: SelectedOptions;
-  handle: string;
 }
 
 function ProductInfoOptions({
   variants,
   options,
   selectedOptions,
-  handle,
   className,
   ...props
 }: ProductInfoOptionsProps) {
@@ -83,8 +81,6 @@ function ProductInfoOptions({
               option={colorOption}
               selectedValue={selectedOptions[colorOption.name]}
               variants={variants}
-              handle={handle}
-              selectedOptions={selectedOptions}
             />
           ) : null,
         )}
@@ -96,8 +92,6 @@ function ProductInfoOptions({
             option={option}
             selectedValue={selectedOptions[option.name] ?? ""}
             variants={variants}
-            handle={handle}
-            selectedOptions={selectedOptions}
           />
         ))}
       </div>

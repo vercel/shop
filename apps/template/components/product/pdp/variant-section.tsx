@@ -1,7 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
 import { BuyButtons } from "@/components/product/pdp/buy-buttons";
 import {
   ProductInfoDescription,
@@ -9,11 +5,7 @@ import {
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
 import { ProductMedia } from "@/components/product/pdp/product-media";
-import {
-  computeInitialSelectedOptions,
-  getImagesForSelectedColor,
-  resolveSelectedVariant,
-} from "@/components/product/pdp/variants";
+import { getInitialSelectedOptions } from "@/components/product/pdp/variants";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
 
@@ -24,18 +16,14 @@ export function VariantSection({
   product: ProductDetails;
   locale: Locale;
 }) {
-  const searchParams = useSearchParams();
-  const variantId = searchParams.get("variantId") ?? undefined;
-
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
+  const selectedOptions = getInitialSelectedOptions(variants);
+  const selectedVariant = variants[0];
 
   return (
     <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-      <ProductMedia images={filteredImages} videos={videos} title={title} />
+      <ProductMedia images={images} videos={videos} title={title} />
 
       <div className="space-y-8 lg:sticky lg:top-20">
         <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
@@ -43,7 +31,6 @@ export function VariantSection({
           variants={variants}
           options={options}
           selectedOptions={selectedOptions}
-          handle={handle}
         />
         <BuyButtons
           selectedVariant={selectedVariant}
