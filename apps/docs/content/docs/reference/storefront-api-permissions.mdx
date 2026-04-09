@@ -1,0 +1,42 @@
+---
+title: Storefront API Permissions
+description: Shopify Storefront API scopes required by Vercel Shop and its optional skills.
+type: reference
+prerequisites:
+  - /docs/getting-started
+---
+
+After you create a storefront in Shopify Headless, open **Settings → Apps and sales channels → Headless → your storefront** and review the **Storefront API permissions** for that token.
+
+## Required for the default storefront
+
+| Scope | Purpose |
+|---|---|
+| `unauthenticated_read_product_listings` | Product pages, search, and recommendations |
+| `unauthenticated_read_product_inventory` | Stock availability on product and collection pages |
+| `unauthenticated_read_collection_listings` | Collection pages and navigation |
+| `unauthenticated_write_checkouts` | Cart operations and checkout |
+| `unauthenticated_read_content` | Shopify pages and metaobjects |
+
+## Optional skills
+
+Enable these only when you add the corresponding feature:
+
+| Scope | Required by |
+|---|---|
+| `unauthenticated_read_customer_tags` | [Enable Shopify Auth](/docs/skills/enable-shopify-auth) |
+| `unauthenticated_read_metaobjects` | [Enable Shopify CMS](/docs/skills/enable-shopify-cms) |
+
+## Related docs
+
+<Cards>
+  <Card title="Getting Started" href="/docs/getting-started">
+    The shortest path from Shopify token to a local storefront.
+  </Card>
+  <Card title="Environment Variables" href="/docs/reference/env-vars">
+    Required and optional environment variables for local development and deploys.
+  </Card>
+  <Card title="Storefront API" href="/docs/reference/storefront-api">
+    Query patterns, caching, and the shared Shopify client used by the template.
+  </Card>
+</Cards>
