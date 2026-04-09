@@ -42,7 +42,14 @@ export const createSystemPrompt = (ctx: AgentContext) => {
   `;
 
   // Add page-specific context
-  if (page?.type === "product") {
+  if (page?.type === "home") {
+    prompt += dedent`\n
+      ## Current Page Context
+
+      The user is on the home page.
+      Help them discover products, browse collections, or get started shopping.
+    `;
+  } else if (page?.type === "product") {
     const { product } = page;
     const variantInfo = product.variants
       .map((v) => {

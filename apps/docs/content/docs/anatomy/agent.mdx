@@ -17,7 +17,7 @@ AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → Shopify to
 ```
 
 1. The client sends conversation history and a `chatId` to `/api/chat`
-2. The server resolves page context from the `Referer` header (product, collection, search, or cart page)
+2. The server resolves page context from the `Referer` header (home, product, collection, search, or cart page)
 3. A Shopify cart is created or retrieved from a cookie before the agent runs
 4. The agent calls tools to search products, manage the cart, or generate navigation links
 5. Tool results include json-render specs that the client renders as product cards, cart summaries, and variant pickers
@@ -30,6 +30,7 @@ The agent adapts its instructions based on where the user is browsing. Page cont
 - **Collection page** - the collection handle and title are included
 - **Search page** - the active search query is passed through
 - **Cart page** - the agent knows the user is viewing their cart
+- **Home page** - the agent knows the user is landing on the storefront and can help them start browsing
 
 The system prompt also includes the user's locale so the agent responds in the correct language.
 

@@ -8,6 +8,7 @@ export type User = {
 
 // Page context resolved from Referer header with trusted data
 export type PageContext =
+  | { type: "home" }
   | { type: "product"; product: ProductDetails }
   | { type: "collection"; handle: string; title: string }
   | { type: "search"; query: string }
