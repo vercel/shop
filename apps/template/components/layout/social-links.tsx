@@ -13,7 +13,7 @@ const PLATFORM_LABELS: Record<string, string> = {
 
 export function SocialLinks({ links }: { links: readonly SocialLink[] }) {
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-4 leading-5">
       {links.map((link) => (
         <a
           key={link.platform}
