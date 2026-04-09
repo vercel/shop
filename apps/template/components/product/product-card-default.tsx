@@ -29,7 +29,7 @@ export function ProductCardDefault({
   className,
 }: ProductCardDefaultProps) {
   return (
-    <Link href={`/products/${product.handle}`} className={className}>
+    <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
       <ProductCard variant="default">
         <ProductCardImageContainer variant="default">
           <ProductCardImage

@@ -1,3 +1,4 @@
+import { getNumericShopifyId } from "@/components/product/pdp/variants";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -302,11 +303,14 @@ export function transformShopifyProductCard(product: ShopifyCategoryProduct): Pr
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
+    defaultVariantNumericId: defaultVariant ? (getNumericShopifyId(defaultVariant.id) ?? undefined) : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }
 
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
+  const variants = flattenEdges(product.variants).map(transformVariant);
+  const defaultVariant = variants.find((v) => v.availableForSale);
   return {
     id: product.id,
     handle: product.handle,
@@ -316,10 +320,13 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
+    defaultVariantId: defaultVariant?.id,
+    defaultVariantNumericId: defaultVariant ? (getNumericShopifyId(defaultVariant.id) ?? undefined) : undefined,
+    defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,
     ...extractMediaFromProduct(product),
-    variants: flattenEdges(product.variants).map(transformVariant),
+    variants,
     options: product.options.map(transformOption),
     tags: product.tags,
     seo: {
