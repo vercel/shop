@@ -2,7 +2,7 @@
 
 import { ArrowRightIcon, InfoIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useOptimistic, useState, useTransition } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -26,6 +26,16 @@ function CheckoutLink({
   checkoutText: string;
 }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+
+  // Reset pending state when returning from checkout (bfcache / back navigation)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsCheckingOut(false);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
+
   const baseClassName =
     "flex items-center justify-between w-full bg-primary text-primary-foreground font-medium py-4 px-6 rounded-lg transition-colors";
 

@@ -4,7 +4,7 @@ import { ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -64,6 +64,15 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   const { cart, cartWithPending, setOverlayOpen, isUpdatingCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
+
+  // Reset pending state when returning from checkout (bfcache / back navigation)
+  useEffect(() => {
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setIsCheckingOut(false);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   const handleCheckout = async () => {
     if (!cart?.checkoutUrl && !displayCart?.checkoutUrl) return;
