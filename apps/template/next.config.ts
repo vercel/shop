@@ -4,6 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
+    partialFallbacks: true,
     turbopackFileSystemCacheForDev: true,
   },
   async rewrites() {
