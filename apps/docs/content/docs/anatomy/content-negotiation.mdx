@@ -1,0 +1,63 @@
+---
+title: Content Negotiation
+description: Product pages serve structured markdown to AI agents via Accept header content negotiation.
+type: guide
+---
+
+# Content Negotiation
+
+Product pages serve structured markdown when clients send `Accept: text/markdown`. Browsers continue to receive HTML; AI agents and crawlers get clean, parseable markdown from the same URL.
+
+This is a built-in feature that requires no configuration.
+
+## How it works
+
+```
+GET /products/speaker  (Accept: text/markdown)
+    ↓
+next.config.ts rewrite  →  /products/md/speaker
+    ↓
+app/products/md/[handle]/route.ts
+    ↓
+Response: text/markdown
+```
+
+Browsers that don't send `Accept: text/markdown` are unaffected — the rewrite only fires when the header matches.
+
+## Testing
+
+```bash
+# Returns structured markdown
+curl -H "Accept: text/markdown" http://localhost:3000/products/speaker
+
+# Returns the normal HTML page
+curl http://localhost:3000/products/speaker
+```
+
+The `Vary: Accept` header ensures CDNs cache markdown and HTML responses separately.
+
+## What's included in the markdown
+
+The markdown representation includes:
+
+- **Product information** — handle, brand, category, availability
+- **Pricing** — current price, compare-at price, savings, price range
+- **Description** — plain text product description
+- **Options** — available options (e.g. Color, Size) with their values
+- **Variants** — full table of all variants with prices and availability
+- **Specifications** — metafield-based product specs
+- **Images** — direct URLs to product images
+- **Tags** and **SEO** metadata
+
+## Key files
+
+| File | Purpose |
+|------|---------|
+| `next.config.ts` | Rewrite rule matching `Accept: text/markdown` |
+| `app/products/md/[handle]/route.ts` | Route handler returning markdown |
+| `lib/markdown/product.ts` | `productToMarkdown()` converter |
+| `lib/markdown/utils.ts` | Formatting helpers (prices, tables, escaping) |
+
+## Multi-locale
+
+If you have enabled Shopify Markets, the rewrite fires before locale routing — no additional configuration is needed. Pass a `?locale=` query parameter to the markdown endpoint for locale-specific pricing.
