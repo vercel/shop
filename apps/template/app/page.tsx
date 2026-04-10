@@ -36,7 +36,7 @@ export default async function HomePage() {
       <HeroSection
         hero={{
           id: "homepage-hero",
-          headline: `Ship fast with ${siteConfig.name}`,
+          headline: "Agentic Infrastructure for Commerce",
           subheadline:
             "A production-ready Shopify storefront built on Next.js. Extend it with AI agents.",
           ctaText: "Browse the catalog",
