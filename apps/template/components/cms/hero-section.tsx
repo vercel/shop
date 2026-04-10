@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
@@ -25,24 +26,25 @@ export function HeroSection({ hero }: HeroSectionProps) {
           </>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:pb-8 md:pb-10 lg:px-8">
-          <div className="grid items-end gap-4 md:grid-cols-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight">
+        <div className="absolute inset-0 flex items-center justify-center px-4 lg:px-8">
+          <div className="flex flex-col items-center text-center gap-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight max-w-3xl">
               {hero.headline}
             </h1>
-            {(hero.subheadline || hero.ctaText) && (
-              <div className="flex flex-col justify-end gap-2 text-sm sm:text-base text-white/90 md:pb-1">
-                {hero.subheadline && <p>{hero.subheadline}</p>}
-                {hero.ctaText && hero.ctaLink && (
-                  <Link
-                    href={hero.ctaLink}
-                    className="font-medium hover:underline inline-flex items-center gap-1"
-                  >
-                    {hero.ctaText}
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                )}
-              </div>
+            {hero.subheadline && (
+              <p className="text-sm sm:text-base text-white/90 max-w-xl">
+                {hero.subheadline}
+              </p>
+            )}
+            {hero.ctaText && hero.ctaLink && (
+              <Button
+                variant="outline"
+                size="lg"
+                asChild
+                className="border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
+              >
+                <Link href={hero.ctaLink}>{hero.ctaText}</Link>
+              </Button>
             )}
           </div>
         </div>
