@@ -6,6 +6,19 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/products/:handle",
+          destination: "/products/md/:handle",
+          has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
+        },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   images: {
     minimumCacheTTL: 31536000,
     remotePatterns: [
