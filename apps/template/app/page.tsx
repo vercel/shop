@@ -39,7 +39,7 @@ export default async function HomePage() {
           headline: "Agentic Infrastructure for Commerce",
           subheadline:
             "A production-ready Shopify storefront built on Next.js. Extend it with AI agents.",
-          ctaText: "Browse the catalog",
+          ctaText: "Browse the Catalog",
           ctaLink: "/search",
         }}
       />
