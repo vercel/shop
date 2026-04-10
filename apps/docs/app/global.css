@@ -362,8 +362,21 @@ figure[role="group"] button {
 
 .fromsrc aside[aria-label="sidebar navigation"] {
   background: var(--background) !important;
-  /* fromsrc uses `text-muted` for inactive sidebar items; keep it readable here. */
-  --color-muted: var(--muted-foreground);
+}
+
+.fromsrc aside[aria-label="sidebar navigation"] section > h3 {
+  color: var(--muted-foreground) !important;
+}
+
+.fromsrc aside[aria-label="sidebar navigation"] nav a:not([aria-current="page"]):not(:hover),
+.fromsrc aside[aria-label="sidebar navigation"] nav button:not(:hover) {
+  color: var(--muted-foreground) !important;
+  opacity: 1;
+}
+
+.fromsrc aside[aria-label="sidebar navigation"] nav a:not([aria-current="page"]):hover,
+.fromsrc aside[aria-label="sidebar navigation"] nav button:hover {
+  color: var(--foreground) !important;
 }
 
 .fromsrc aside[aria-label="sidebar navigation"] > div:first-child {
