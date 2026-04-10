@@ -16,16 +16,13 @@ import type { ProductDetails } from "@/lib/types";
 export function VariantSection({
   product,
   locale,
-  variantId,
 }: {
   product: ProductDetails;
   locale: Locale;
-  variantId?: string;
 }) {
-
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const selectedOptions = computeInitialSelectedOptions(variants);
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
   const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
 
