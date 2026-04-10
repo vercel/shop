@@ -3,15 +3,22 @@ import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
-
 import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
+
+export async function generateStaticParams() {
+  return [{ handle: "__placeholder__" }];
+}
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+
+  if (handle === "__placeholder__") {
+    notFound();
+  }
 
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
@@ -20,15 +27,16 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => handle);
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
-  const productPromise = handlePromise.then((handle) =>
-    getProduct(handle, locale).catch(() => notFound()),
-  );
+  if (handle === "__placeholder__") {
+    notFound();
+  }
+
+  const productPromise = getProduct(handle, locale).catch(() => notFound());
 
   const variantIdPromise = searchParams.then(
-    (sp) => (sp?.variantId as string | undefined),
+    (sp) => sp?.variantId as string | undefined,
   );
 
   return (
