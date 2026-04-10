@@ -48,9 +48,17 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
+            <Nav />
             <main id="main-content" className="flex-1 min-w-0">
               {children}
             </main>
+            <Footer />
+            <Suspense>
+              <CartOverlayWithAddress locale={locale} />
+            </Suspense>
+            <Suspense>
+              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
+            </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
       </body>

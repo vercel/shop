@@ -48,24 +48,26 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
+  // const country = getCountryCode(locale);
+  // const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
-    productByHandle: ShopifyProduct;
-  }>({
-    operation: "getProductByHandle",
-    query: GET_PRODUCT_BY_HANDLE_QUERY,
-    variables: { handle, country, language },
-  });
+  return { testing: true }
 
-  if (!data.productByHandle) {
-    throw new Error(`Product not found: ${handle}`);
-  }
+  // const data = await shopifyFetch<{
+  //   productByHandle: ShopifyProduct;
+  // }>({
+  //   operation: "getProductByHandle",
+  //   query: GET_PRODUCT_BY_HANDLE_QUERY,
+  //   variables: { handle, country, language },
+  // });
 
-  tagProducts([data.productByHandle]);
+  // if (!data.productByHandle) {
+  //   throw new Error(`Product not found: ${handle}`);
+  // }
 
-  return transformShopifyProductDetails(data.productByHandle);
+  // tagProducts([data.productByHandle]);
+
+  // return transformShopifyProductDetails(data.productByHandle);
 }
 
 const PRODUCTS_SEARCH_QUERY = `
