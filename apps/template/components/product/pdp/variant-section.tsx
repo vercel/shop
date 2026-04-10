@@ -1,8 +1,3 @@
-"use client";
-
-// DEBUG: useSearchParams disabled to test static PDP rendering
-// import { useSearchParams } from "next/navigation";
-
 import { BuyButtons } from "@/components/product/pdp/buy-buttons";
 import {
   ProductInfoDescription,
@@ -21,14 +16,12 @@ import type { ProductDetails } from "@/lib/types";
 export function VariantSection({
   product,
   locale,
+  variantId,
 }: {
   product: ProductDetails;
   locale: Locale;
+  variantId?: string;
 }) {
-  // DEBUG: hardcode variantId to undefined to skip useSearchParams
-  // const searchParams = useSearchParams();
-  // const variantId = searchParams.get("variantId") ?? undefined;
-  const variantId = undefined;
 
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
