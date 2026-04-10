@@ -91,7 +91,7 @@ async function ProductContent({
   );
 }
 
-export function ProductDetailPage({
+export async function ProductDetailPage({
   productPromise,
   locale,
 }: {
