@@ -8,6 +8,10 @@ import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
 
+export function generateStaticParams() {
+  return [{ handle: "__placeholder__" }];
+}
+
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
