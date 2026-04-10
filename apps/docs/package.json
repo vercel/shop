@@ -52,5 +52,5 @@
 		"start": "next start",
 		"typecheck": "tsc --noEmit"
 	},
-	"version": "0.20260409.2"
+	"version": "0.20260410.2"
 }
