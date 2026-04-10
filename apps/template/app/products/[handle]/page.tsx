@@ -8,6 +8,16 @@ import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
 
+export const unstable_instant = {
+  prefetch: "static" as const,
+  samples: [
+    {
+      cookies: [{ name: "shopify_cartId", value: null }],
+      searchParams: { variantId: null },
+    },
+  ],
+};
+
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
