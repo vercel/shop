@@ -19,7 +19,7 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
   );
 }
 
-export function ProductDetailPage({
+export async function ProductDetailPage({
   product,
   locale,
 }: {
