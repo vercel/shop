@@ -25,7 +25,6 @@ export async function generateMetadata({
 
 export default async function ProductPage({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
@@ -35,15 +34,10 @@ export default async function ProductPage({
 
   const productPromise = getProduct(handle, locale).catch(() => notFound());
 
-  const variantIdPromise = searchParams.then(
-    (sp) => sp?.variantId as string | undefined,
-  );
-
   return (
     <ProductDetailPage
       productPromise={productPromise}
       locale={locale}
-      variantIdPromise={variantIdPromise}
     />
   );
 }

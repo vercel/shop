@@ -55,13 +55,11 @@ function ProductPageFallback() {
 async function ProductContent({
   productPromise,
   locale,
-  variantIdPromise,
 }: {
   productPromise: Promise<ProductDetails>;
   locale: Locale;
-  variantIdPromise: Promise<string | undefined>;
 }) {
-  const [product, variantId] = await Promise.all([productPromise, variantIdPromise]);
+  const product = await productPromise;
   const { handle, title } = product;
 
   return (
@@ -83,7 +81,7 @@ async function ProductContent({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="space-y-8">
-        <VariantSection product={product} locale={locale} variantId={variantId} />
+        <VariantSection product={product} locale={locale} />
       </div>
 
       <div className="mt-16">
@@ -96,16 +94,14 @@ async function ProductContent({
 export async function ProductDetailPage({
   productPromise,
   locale,
-  variantIdPromise,
 }: {
   productPromise: Promise<ProductDetails>;
   locale: Locale;
-  variantIdPromise: Promise<string | undefined>;
 }) {
   return (
     <Container className="bg-background">
       <Suspense fallback={<ProductPageFallback />}>
-        <ProductContent productPromise={productPromise} locale={locale} variantIdPromise={variantIdPromise} />
+        <ProductContent productPromise={productPromise} locale={locale} />
       </Suspense>
     </Container>
   );
