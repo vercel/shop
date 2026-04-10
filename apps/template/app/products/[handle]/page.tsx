@@ -17,11 +17,20 @@ export async function generateMetadata({
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
+  if (handle === "__placeholder__") {
+    notFound();
+  }
+
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
 export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+
+  if (handle === "__placeholder__") {
+    notFound();
+  }
+
   const product = await getProduct(handle, locale).catch(() => notFound());
 
   // return <ProductDetailPage product={product} locale={locale} />;
