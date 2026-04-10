@@ -293,8 +293,8 @@ declare const messages: {
     "cartItemsLabel": "Cart items"
   },
   "agent": {
-    "name": "Ecto",
-    "title": "Personal assistant",
+    "name": "Agent",
+    "title": "",
     "openAssistant": "Open shopping assistant",
     "assistantLabel": "Shopping assistant",
     "minimizeAssistant": "Minimize assistant",

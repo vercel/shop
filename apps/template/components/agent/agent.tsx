@@ -589,7 +589,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-3">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{t("name")}</span>
-                <span className="text-muted-foreground text-sm">{t("title")}</span>
+                {t("title") && <span className="text-muted-foreground text-sm">{t("title")}</span>}
               </div>
               <div className="flex items-center gap-1">
                 <button
