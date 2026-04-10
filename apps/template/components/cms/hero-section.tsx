@@ -27,11 +27,11 @@ export function HeroSection({ hero }: HeroSectionProps) {
 
         <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:pb-8 md:pb-10 lg:px-8">
           <div className="grid items-end gap-4 md:grid-cols-2">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight">
               {hero.headline}
             </h1>
             {(hero.subheadline || hero.ctaText) && (
-              <div className="flex flex-col gap-2 text-sm sm:text-base text-white/90">
+              <div className="flex flex-col justify-end gap-2 text-sm sm:text-base text-white/90 md:pb-1">
                 {hero.subheadline && <p>{hero.subheadline}</p>}
                 {hero.ctaText && hero.ctaLink && (
                   <Link
