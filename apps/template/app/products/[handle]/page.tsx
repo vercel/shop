@@ -20,5 +20,6 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   const product = await getProduct(handle, locale).catch(() => notFound());
 
-  return <ProductDetailPage product={product} locale={locale} />;
+  // return <ProductDetailPage product={product} locale={locale} />;
+  return <pre>{JSON.stringify(product, null, 2)}</pre>;
 }
