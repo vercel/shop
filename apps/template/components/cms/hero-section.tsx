@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
 import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
@@ -10,7 +11,7 @@ interface HeroSectionProps {
 export function HeroSection({ hero }: HeroSectionProps) {
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-r from-slate-900 via-slate-800 to-slate-900">
+      <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-b from-black via-neutral-950 to-neutral-900">
         {hero.backgroundImage && (
           <>
             <Image
@@ -25,25 +26,24 @@ export function HeroSection({ hero }: HeroSectionProps) {
           </>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 px-4 pb-6 sm:pb-8 md:pb-10 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight">
+        <div className="absolute inset-0 flex items-center justify-center px-4 lg:px-8">
+          <div className="flex flex-col items-center text-center gap-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
               {hero.headline}
             </h1>
-            {(hero.subheadline || hero.ctaText) && (
-              <div className="hidden sm:flex items-center gap-2 text-sm sm:text-base text-white/90">
-                {hero.subheadline && <span>{hero.subheadline}</span>}
-                {hero.subheadline && hero.ctaText && <span>|</span>}
-                {hero.ctaText && hero.ctaLink && (
-                  <Link
-                    href={hero.ctaLink}
-                    className="font-medium hover:underline inline-flex items-center gap-1"
-                  >
-                    {hero.ctaText}
-                    <span aria-hidden="true">→</span>
-                  </Link>
-                )}
-              </div>
+            {hero.subheadline && (
+              <p className="text-sm sm:text-base text-white/90 max-w-xl">
+                {hero.subheadline}
+              </p>
+            )}
+            {hero.ctaText && hero.ctaLink && (
+              <Button
+                variant="outline"
+                asChild
+                className="h-11 px-6 border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
+              >
+                <Link href={hero.ctaLink}>{hero.ctaText}</Link>
+              </Button>
             )}
           </div>
         </div>
