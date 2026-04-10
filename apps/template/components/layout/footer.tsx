@@ -17,7 +17,7 @@ async function Copyright() {
   );
 }
 
-export function Footer({ locale }: { locale: string }) {
+export async function Footer() {
   const { socialLinks } = siteConfig;
 
   return (

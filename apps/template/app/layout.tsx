@@ -48,11 +48,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
-            <Nav locale={locale} />
+            <Nav />
             <main id="main-content" className="flex-1 min-w-0">
               {children}
             </main>
-            <Footer locale={locale} />
+            <Footer />
             <Suspense>
               <CartOverlayWithAddress locale={locale} />
             </Suspense>

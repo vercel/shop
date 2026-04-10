@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { CartIcon, CartIconFallback } from "./cart";
 import { QuickLinks } from "./quick-links";
 
-export function Nav({ locale }: { locale: string }) {
+export async function Nav() {
   return (
     <nav
       className="sticky top-0 z-30 w-full bg-white pt-[env(safe-area-inset-top,0px)] transition-shadow duration-250"
