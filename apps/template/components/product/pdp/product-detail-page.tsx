@@ -86,9 +86,9 @@ async function ProductContent({
         <VariantSection product={product} locale={locale} variantId={variantId} />
       </div>
 
-      {/* <div className="mt-16">
+      <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
-      </div> */}
+      </div>
     </>
   );
 }
