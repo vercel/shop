@@ -16,7 +16,10 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({ params }: PageProps<"/products/[handle]">) {
+export default async function ProductPage({
+  params,
+  searchParams,
+}: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
   const handlePromise = params.then(({ handle }) => handle);
 
@@ -24,5 +27,15 @@ export default async function ProductPage({ params }: PageProps<"/products/[hand
     getProduct(handle, locale).catch(() => notFound()),
   );
 
-  return <ProductDetailPage productPromise={productPromise} locale={locale} />;
+  const variantIdPromise = searchParams.then(
+    (sp) => (sp?.variantId as string | undefined),
+  );
+
+  return (
+    <ProductDetailPage
+      productPromise={productPromise}
+      locale={locale}
+      variantIdPromise={variantIdPromise}
+    />
+  );
 }
