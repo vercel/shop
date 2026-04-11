@@ -14,7 +14,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full group bg-white rounded-lg overflow-hidden", className)}
+      className={cn("flex flex-col h-full group bg-white overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -124,7 +124,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
     <h3
       data-slot="product-card-title"
       className={cn(
-        "text-sm sm:text-base font-semibold text-main-foreground line-clamp-2 leading-tight",
+        "text-base font-semibold text-main-foreground line-clamp-2 leading-tight",
         className,
       )}
       {...props}
@@ -191,7 +191,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
-      className={cn("flex flex-col bg-white rounded-lg overflow-hidden", className)}
+      className={cn("flex flex-col bg-white overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="p-3">

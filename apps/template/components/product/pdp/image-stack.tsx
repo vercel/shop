@@ -21,12 +21,12 @@ function ImageStackContent({ images, title, className, ...props }: ImageStackCon
   return (
     <div className={cn("flex flex-col gap-3", className)} {...props}>
       {images.map((image, idx) => (
-        <div key={image.url} className="relative aspect-square w-full overflow-hidden rounded-xl">
+        <div key={image.url} className="relative aspect-square w-full overflow-hidden ">
           <Image
             src={image.url}
             alt={image.altText || `${title} image ${idx + 1}`}
             fill
-            className="object-contain rounded-xl"
+            className="object-contain "
             sizes="(min-width: 1280px) 33vw, 100vw"
             priority={idx === 0}
             loading={idx === 0 ? "eager" : "lazy"}
@@ -40,8 +40,8 @@ function ImageStackContent({ images, title, className, ...props }: ImageStackCon
 function Fallback() {
   return (
     <div className="space-y-3">
-      <Skeleton className="w-full aspect-square rounded-xl" />
-      <Skeleton className="w-full aspect-square rounded-xl" />
+      <Skeleton className="w-full aspect-square " />
+      <Skeleton className="w-full aspect-square " />
     </div>
   );
 }

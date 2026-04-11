@@ -10,11 +10,11 @@ import { cn } from "@/lib/utils";
 function Fallback() {
   return (
     <div className="space-y-3">
-      <Skeleton className="w-full aspect-square rounded-xl" />
+      <Skeleton className="w-full aspect-square " />
       <div className="flex gap-2">
-        <Skeleton className="size-16 rounded-lg" />
-        <Skeleton className="size-16 rounded-lg" />
-        <Skeleton className="size-16 rounded-lg" />
+        <Skeleton className="size-16 " />
+        <Skeleton className="size-16 " />
+        <Skeleton className="size-16 " />
       </div>
     </div>
   );
@@ -32,7 +32,7 @@ function Content({ productPromise }: { productPromise: Promise<ProductDetails> }
   return (
     <div className="@container space-y-3">
       {/* Main image */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl">
+      <div className="relative aspect-[4/3] w-full overflow-hidden ">
         <Image
           src={selectedImage.url}
           alt={selectedImage.altText || `${product.title} image ${selectedIndex + 1}`}
@@ -52,7 +52,7 @@ function Content({ productPromise }: { productPromise: Promise<ProductDetails> }
               type="button"
               onClick={() => setSelectedIndex(idx)}
               className={cn(
-                "relative shrink-0 size-16 @sm:size-20 rounded-lg overflow-hidden border-2 transition-colors",
+                "relative shrink-0 size-16 @sm:size-20  overflow-hidden border-2 transition-colors",
                 idx === selectedIndex
                   ? "border-foreground"
                   : "border-transparent hover:border-foreground/30",

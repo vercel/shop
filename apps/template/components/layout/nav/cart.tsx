@@ -1,4 +1,4 @@
-import { ShoppingBagIcon } from "lucide-react";
+import { HandbagIcon } from "lucide-react";
 import { cookies } from "next/headers";
 
 import { getCart } from "@/lib/shopify/operations/cart";
@@ -15,7 +15,7 @@ export async function CartIcon() {
 export function CartIconFallback() {
   return (
     <span className="flex items-center justify-center gap-1.5 text-foreground">
-      <ShoppingBagIcon className="size-5" />
+      <HandbagIcon className="size-5" />
       <span className="sr-only">Cart</span>
     </span>
   );

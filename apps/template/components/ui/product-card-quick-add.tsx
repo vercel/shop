@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, LoaderCircleIcon, ShoppingBagIcon } from "lucide-react";
+import { CheckIcon, LoaderCircleIcon, HandbagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -78,7 +78,7 @@ export function ProductCardQuickAdd({
         className,
       )}
     >
-      {state === "idle" && <ShoppingBagIcon className="size-4" />}
+      {state === "idle" && <HandbagIcon className="size-4" />}
       {state === "adding" && <LoaderCircleIcon className="size-4 animate-spin" />}
       {state === "success" && <CheckIcon className="size-4 text-positive" />}
     </button>
