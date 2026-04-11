@@ -42,7 +42,7 @@ export default async function HomePage() {
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
           backgroundImage: {
-            url: "/hero.png",
+            url: "/hero.jpg",
             alt: "Hero background",
             width: 1920,
             height: 1080,
