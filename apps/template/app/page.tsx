@@ -41,6 +41,12 @@ export default async function HomePage() {
             "A production-ready Shopify storefront built on Next.js. Extend it with AI agents.",
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
+          backgroundImage: {
+            url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/2807f917-1e08-4709-b95b-a03a2db7a040-1-xEHqjfM2hUiRkanSMhyr4k2LQD8Iko_68ce0fc9-4928-431d-8130-2b9a102cb544.png?v=1772281257",
+            alt: "Hero background",
+            width: 1920,
+            height: 1080,
+          },
         }}
       />
 
