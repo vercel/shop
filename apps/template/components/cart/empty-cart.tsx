@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingBagIcon } from "lucide-react";
+import { HandbagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
@@ -12,7 +12,7 @@ export function Empty() {
       <div className="text-center">
         <div className="mb-6 flex justify-center">
           <div className="rounded-full bg-muted p-4">
-            <ShoppingBagIcon className="h-12 w-12 text-muted-foreground" />
+            <HandbagIcon className="h-12 w-12 text-muted-foreground" />
           </div>
         </div>
 

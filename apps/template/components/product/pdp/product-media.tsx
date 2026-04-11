@@ -158,7 +158,7 @@ function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string })
         {mediaItems.map((item, idx) => (
           <div
             key={mediaKey(item)}
-            className="relative aspect-square w-full overflow-hidden rounded-xl bg-accent"
+            className="relative aspect-square w-full overflow-hidden bg-accent"
           >
             {item.type === "video" ? (
               <MediaVideo item={item} />

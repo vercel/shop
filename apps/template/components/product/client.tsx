@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, MinusIcon, PlusCircleIcon, PlusIcon, ShoppingBagIcon } from "lucide-react";
+import { Loader2, MinusIcon, PlusCircleIcon, PlusIcon, HandbagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
@@ -133,7 +133,7 @@ export function AddToCartClient({ product }: AddToCartSectionProps) {
           ) : (
             <>
               {t("buyNow")}
-              <ShoppingBagIcon className="size-4" />
+              <HandbagIcon className="size-4" />
             </>
           )}
         </Button>

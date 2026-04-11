@@ -38,9 +38,15 @@ export default async function HomePage() {
           id: "homepage-hero",
           headline: "Agentic Infrastructure for Commerce",
           subheadline:
-            "A production-ready Shopify storefront built on Next.js. Extend it with AI agents.",
+            "A production-ready, agent-friendly Shopify storefront built on Next.js.",
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
+          backgroundImage: {
+            url: "/hero.jpg",
+            alt: "Hero background",
+            width: 1920,
+            height: 1080,
+          },
         }}
       />
 
@@ -49,7 +55,7 @@ export default async function HomePage() {
           <section>
             <div className="grid items-start gap-4 md:grid-cols-2">
               <h2 className="text-3xl font-semibold tracking-tight">
-                Your store, ready in days
+                Your store, ready to go
               </h2>
               <div className="prose prose-neutral">
                 <p>
