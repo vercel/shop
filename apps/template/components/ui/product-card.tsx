@@ -124,7 +124,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
     <h3
       data-slot="product-card-title"
       className={cn(
-        "text-sm sm:text-base font-semibold text-main-foreground group-hover:underline line-clamp-2 leading-tight",
+        "text-sm sm:text-base font-semibold text-main-foreground line-clamp-2 leading-tight",
         className,
       )}
       {...props}
