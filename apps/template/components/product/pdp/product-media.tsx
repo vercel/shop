@@ -90,7 +90,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const handleScroll = () => {
+    const syncIndex = () => {
       const newIndex = Math.min(
         Math.max(0, Math.round(container.scrollLeft / container.offsetWidth)),
         mediaItems.length - 1,
@@ -98,8 +98,11 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
       setSelectedIndex(newIndex);
     };
 
-    container.addEventListener("scroll", handleScroll, { passive: true });
-    return () => container.removeEventListener("scroll", handleScroll);
+    // Sync indicator from actual scroll position on mount / Activity re-activation
+    syncIndex();
+
+    container.addEventListener("scroll", syncIndex, { passive: true });
+    return () => container.removeEventListener("scroll", syncIndex);
   }, [mediaItems.length]);
 
   return (
