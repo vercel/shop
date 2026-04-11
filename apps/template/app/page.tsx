@@ -42,7 +42,7 @@ export default async function HomePage() {
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
           backgroundImage: {
-            url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/ad6d7874-8731-4baa-842b-8b8f30d3af02-regenerated-1772120780758-1_8e191e88-d8b9-4136-80b8-4005127f4f60.png?v=1772281265",
+            url: "/hero.png",
             alt: "Hero background",
             width: 1920,
             height: 1080,
