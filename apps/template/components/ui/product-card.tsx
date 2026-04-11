@@ -46,7 +46,7 @@ function ProductCardImageContainer({
       data-variant={variant}
       className={cn(
         "flex flex-col",
-        "data-[variant=featured]:-mt-px data-[variant=featured]:rounded-tl-none data-[variant=featured]:bg-linear-to-b/oklch data-[variant=featured]:from-primary data-[variant=featured]:from-0% data-[variant=featured]:to-45% data-[variant=featured]:to-primary/10",
+        "data-[variant=featured]:-mt-px data-[variant=featured]:bg-linear-to-b/oklch data-[variant=featured]:from-primary data-[variant=featured]:from-0% data-[variant=featured]:to-45% data-[variant=featured]:to-primary/10",
         className,
       )}
       {...props}

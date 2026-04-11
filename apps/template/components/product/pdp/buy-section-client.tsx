@@ -20,8 +20,8 @@ import type { SelectedOptions } from "./variants";
 function Fallback() {
   return (
     <div className="space-y-4">
-      <Skeleton className="h-64 w-full rounded-xl" />
-      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full" />
+      <Skeleton className="h-32 w-full" />
     </div>
   );
 }
