@@ -180,26 +180,24 @@ function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string })
 }
 
 export function ProductMedia({
-  images,
+  colorImages,
+  otherImages,
   videos,
   title,
 }: {
-  images: ImageType[];
+  colorImages: ImageType[];
+  otherImages: ImageType[];
   videos: Video[];
   title: string;
 }) {
+  // Order: color images → videos → other images
   const mediaItems: MediaItem[] = [
+    ...colorImages.map((image): MediaItem => ({ type: "image", image })),
     ...videos.map((video): MediaItem => ({ type: "video", video })),
-    ...images.map((image): MediaItem => ({ type: "image", image })),
+    ...otherImages.map((image): MediaItem => ({ type: "image", image })),
   ];
 
   if (mediaItems.length === 0) return null;
-
-  // Desktop grid has videos before images (matches mobile carousel order)
-  const desktopItems: MediaItem[] = [
-    ...videos.map((video): MediaItem => ({ type: "video", video })),
-    ...images.map((image): MediaItem => ({ type: "image", image })),
-  ];
 
   return (
     <>
@@ -207,7 +205,7 @@ export function ProductMedia({
         <Carousel mediaItems={mediaItems} title={title} />
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={desktopItems} title={title} />
+        <Grid mediaItems={mediaItems} title={title} />
       </div>
     </>
   );

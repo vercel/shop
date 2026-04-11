@@ -7,7 +7,7 @@ import {
 import { ProductMedia } from "@/components/product/pdp/product-media";
 import {
   computeInitialSelectedOptions,
-  getImagesForSelectedColor,
+  getPartitionedImagesForSelectedColor,
   resolveSelectedVariant,
 } from "@/components/product/pdp/variants";
 import type { Locale } from "@/lib/i18n";
@@ -27,11 +27,11 @@ export function VariantSection({
 
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const filteredImages = getImagesForSelectedColor(images, options, variants, selectedOptions);
+  const { colorImages, otherImages } = getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions);
 
   return (
     <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-      <ProductMedia images={filteredImages} videos={videos} title={title} />
+      <ProductMedia colorImages={colorImages} otherImages={otherImages} videos={videos} title={title} />
 
       <div className="space-y-8 lg:sticky lg:top-20">
         <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
