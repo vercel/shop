@@ -106,7 +106,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
     <div className="space-y-4">
       <div
         ref={scrollContainerRef}
-        className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide"
+        className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 w-[calc(100%+2rem)]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {mediaItems.map((item, idx) => (
@@ -121,7 +121,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
                 item={item}
                 title={title}
                 idx={idx}
-                sizes="calc(100vw - 2rem)"
+                sizes="100vw"
                 priority={idx === 0}
               />
             )}
