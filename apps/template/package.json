@@ -1,6 +1,6 @@
 {
   "name": "template",
-  "version": "0.20260410.0",
+  "version": "0.20260411.0",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -28,7 +28,7 @@
     "lucide-react": "1.8.0",
     "motion": "12.38.0",
     "nanoid": "5.1.7",
-    "next": "16.2.3",
+    "next": "16.2.1-canary.32",
     "next-intl": "4.9.0",
     "oxfmt": "0.44.0",
     "oxlint": "1.59.0",
