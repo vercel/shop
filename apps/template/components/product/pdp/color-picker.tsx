@@ -75,7 +75,7 @@ export function ColorPicker({
           const label = (
             <span
               className={cn(
-                "text-sm font-medium transition-opacity",
+                "text-sm font-medium transition-opacity text-center",
                 isSelected ? "text-foreground" : "text-foreground/50",
               )}
             >
