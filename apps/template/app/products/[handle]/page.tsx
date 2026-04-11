@@ -17,7 +17,7 @@ export async function generateMetadata({
 }
 
 export const unstable_instant = {
-  prefetch: "runtime" as const,
+  prefetch: "runtime",
   samples: [
     {
       params: { handle: "sample-product" },
