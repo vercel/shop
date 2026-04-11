@@ -205,3 +205,99 @@ export function getImagesForSelectedColor(
 
   return [...colorImages, ...sharedImages];
 }
+
+/**
+ * Returns partitioned images for the currently selected color variant.
+ * 
+ * Returns an object with:
+ * - colorImages: Images specific to the selected color variant
+ * - otherImages: Shared/unassigned images
+ */
+export function getPartitionedImagesForSelectedColor(
+  images: Image[],
+  options: ProductOption[],
+  variants: ProductVariant[],
+  selectedOptions: SelectedOptions,
+): { colorImages: Image[]; otherImages: Image[] } {
+  // Find the color option using swatch data (locale-agnostic) first, then
+  // fall back to the English name for stores without swatches configured.
+  const colorOption = options.find(
+    (opt) =>
+      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.name.toLowerCase().includes("color"),
+  );
+
+  if (!colorOption) return { colorImages: [], otherImages: images };
+
+  const selectedColor = selectedOptions[colorOption.name];
+  if (!selectedColor) return { colorImages: [], otherImages: images };
+
+  // Only one color means all images belong to it
+  if (colorOption.values.length <= 1) return { colorImages: images, otherImages: [] };
+
+  // Collect variant image URLs for each color
+  const colorToImageUrls = new Map<string, Set<string>>();
+  for (const variant of variants) {
+    if (!variant.image) continue;
+    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
+    if (!colorOpt) continue;
+
+    let urls = colorToImageUrls.get(colorOpt.value);
+    if (!urls) {
+      urls = new Set<string>();
+      colorToImageUrls.set(colorOpt.value, urls);
+    }
+    urls.add(variant.image.url);
+  }
+
+  // No variant images assigned — all are "other"
+  if (colorToImageUrls.size === 0) return { colorImages: [], otherImages: images };
+
+  // Collect image URLs belonging to other colors (not the selected one)
+  const otherColorImageUrls = new Set<string>();
+  for (const [color, urls] of colorToImageUrls) {
+    if (color !== selectedColor) {
+      for (const url of urls) {
+        otherColorImageUrls.add(url);
+      }
+    }
+  }
+
+  // Don't exclude images that are shared with the selected color
+  const selectedColorUrls = colorToImageUrls.get(selectedColor);
+  if (selectedColorUrls) {
+    for (const url of selectedColorUrls) {
+      otherColorImageUrls.delete(url);
+    }
+  }
+
+  const filtered = images.filter((img) => !otherColorImageUrls.has(img.url));
+
+  if (filtered.length === 0) return { colorImages: [], otherImages: images };
+
+  // Partition: color-specific images vs shared/unassigned images
+  const colorImages: Image[] = [];
+  const otherImages: Image[] = [];
+
+  for (const img of filtered) {
+    if (selectedColorUrls?.has(img.url)) {
+      colorImages.push(img);
+    } else {
+      otherImages.push(img);
+    }
+  }
+
+  // Within color images, move the selected variant's image to the front
+  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const variantImageUrl = selectedVariant?.image?.url;
+
+  if (variantImageUrl) {
+    const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
+    if (variantIdx > 0) {
+      const [variantImage] = colorImages.splice(variantIdx, 1);
+      colorImages.unshift(variantImage);
+    }
+  }
+
+  return { colorImages, otherImages };
+}

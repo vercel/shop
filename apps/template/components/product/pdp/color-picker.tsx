@@ -30,7 +30,7 @@ export function ColorPicker({
       <p className="text-sm font-medium text-foreground/70">
         {option.name}: <span className="text-foreground">{selectedValue}</span>
       </p>
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-4 lg:grid-cols-5 gap-3">
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
 
@@ -75,7 +75,7 @@ export function ColorPicker({
           const label = (
             <span
               className={cn(
-                "text-sm font-medium transition-opacity",
+                "text-sm font-medium transition-opacity text-center",
                 isSelected ? "text-foreground" : "text-foreground/50",
               )}
             >
