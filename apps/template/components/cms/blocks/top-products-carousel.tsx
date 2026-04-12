@@ -14,13 +14,13 @@ import {
 import type { Locale } from "@/lib/i18n";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
-interface TopProductsCarouselProps {
+interface ProductsCarouselProps {
   title: string;
   products: ProductCardType[];
   locale: Locale;
 }
 
-export function TopProductsCarousel({ title, products, locale }: TopProductsCarouselProps) {
+export function ProductsCarousel({ title, products, locale }: ProductsCarouselProps) {
   const t = useTranslations("product");
   return (
     <ScrollCarousel>
@@ -28,7 +28,7 @@ export function TopProductsCarousel({ title, products, locale }: TopProductsCaro
         <ScrollCarouselTitle>{title}</ScrollCarouselTitle>
         <ScrollCarouselNav />
       </ScrollCarouselHeader>
-      <ScrollCarouselContent fullBleed>
+      <ScrollCarouselContent>
         {products.map((product) => (
           <ScrollCarouselItem key={product.id}>
             <ProductCard product={product} locale={locale} outOfStockText={t("outOfStock")} />

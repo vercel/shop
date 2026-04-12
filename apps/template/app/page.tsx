@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { TopProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
+import { ProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
 import { HeroSection } from "@/components/cms/hero-section";
 import { Container } from "@/components/layout/container";
 import { siteConfig } from "@/lib/config";
@@ -53,7 +53,7 @@ export default async function HomePage() {
       <Container>
         <div className="flex flex-col gap-12">
           {featuredProductsResult.products.length > 0 && (
-            <TopProductsCarousel
+            <ProductsCarousel
               title="Featured products"
               products={featuredProductsResult.products}
               locale={locale}

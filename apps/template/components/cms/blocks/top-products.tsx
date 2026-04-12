@@ -1,7 +1,7 @@
 import { getLocale } from "@/lib/params";
 import type { ContentSection } from "@/lib/types";
 
-import { TopProductsCarousel } from "./top-products-carousel";
+import { ProductsCarousel } from "./top-products-carousel";
 
 interface TopProductsSectionProps {
   section: ContentSection;
@@ -16,7 +16,7 @@ export async function TopProductsSection({ section }: TopProductsSectionProps) {
   if (resolvedProducts.length === 0) return null;
 
   return (
-    <TopProductsCarousel
+    <ProductsCarousel
       title={title || "Top Products"}
       products={resolvedProducts}
       locale={locale}
