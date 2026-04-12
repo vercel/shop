@@ -8,11 +8,15 @@ The navigation system is split into a sticky top navbar for desktop and a fixed 
 
 ## Navbar
 
-A sticky header (`z-30`) that composes the logo/brand link, quick links, and the cart icon. On mobile, only the logo and cart icon are visible - the rest of the navigation moves to the bottom bar.
+A sticky header (`z-30`) that composes the logo/brand link, quick links, and the cart icon. On mobile, a hamburger menu appears to the left of the logo and the quick links are hidden.
 
 ## Quick links
 
 A horizontal link bar with hardcoded defaults: `Shop`, `Collections`, `About`. Hidden on mobile (`md:flex`). The `enable-shopify-menus` skill replaces these with items from a Shopify Navigation menu.
+
+## Mobile menu
+
+A hamburger icon to the left of the logo, visible below the `md` breakpoint. Tapping it opens a `Sheet` sliding in from the left with the same navigation links as the desktop quick links. The sheet closes automatically when a link is tapped. The same hardcoded links are used by default; the `enable-shopify-menus` skill can replace them with Shopify-powered menus.
 
 ## Cart icon
 
@@ -35,13 +39,14 @@ Transitions between states use Framer Motion for smooth animation. The `enable-s
 
 **Desktop** (`md` and up) - full horizontal navbar with quick links and cart sheet.
 
-**Mobile** (below `md`) - minimal top bar with logo and cart icon. Primary navigation moves to the fixed bottom bar with search and agent buttons.
+**Mobile** (below `md`) - hamburger menu to the left of the logo opens a left-sliding sheet with navigation links. The cart icon remains in the top bar. Search and agent buttons live in the fixed bottom bar.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
 | `components/layout/nav/index.tsx` | Main navbar composition |
+| `components/layout/nav/mobile-menu.tsx` | Hamburger menu with left sheet (mobile) |
 | `components/layout/nav/quick-links.tsx` | Quick links (hardcoded by default) |
 | `components/layout/nav/cart.tsx` | Cart icon server component |
 | `components/layout/nav/cart-client.tsx` | Cart icon with quantity badge |
