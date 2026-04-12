@@ -122,7 +122,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         aria-label="Scroll left"
         className="text-foreground disabled:text-foreground/30"
       >
-        <ChevronLeft className="size-5" aria-hidden="true" />
+        <ChevronLeft className="size-6" aria-hidden="true" />
       </button>
       <button
         type="button"
@@ -131,7 +131,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         aria-label="Scroll right"
         className="text-foreground disabled:text-foreground/30"
       >
-        <ChevronRight className="size-5" aria-hidden="true" />
+        <ChevronRight className="size-6" aria-hidden="true" />
       </button>
     </div>
   );
