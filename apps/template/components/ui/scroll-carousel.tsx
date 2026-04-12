@@ -107,14 +107,14 @@ function ScrollCarouselTitle({ className, children, ...props }: React.ComponentP
 
 function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">) {
   const { canScrollLeft, canScrollRight, scroll } = useScrollCarousel();
-
-  // Hide arrows entirely when there aren't enough items to scroll
-  if (!canScrollLeft && !canScrollRight) {
-    return null;
-  }
+  const hidden = !canScrollLeft && !canScrollRight;
 
   return (
-    <div data-slot="scroll-carousel-nav" className={cn("flex gap-2", className)} {...props}>
+    <div
+      data-slot="scroll-carousel-nav"
+      className={cn("flex gap-2", hidden && "invisible", className)}
+      {...props}
+    >
       <button
         type="button"
         onClick={() => scroll("left")}
