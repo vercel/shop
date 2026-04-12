@@ -51,7 +51,7 @@ export default async function HomePage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-12 pb-12">
+        <div className="flex flex-col gap-12">
           {featuredProductsResult.products.length > 0 && (
             <TopProductsCarousel
               title="Featured products"
