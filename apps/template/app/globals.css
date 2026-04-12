@@ -58,7 +58,7 @@
     4rem + var(--safe-area-top)
   ); /* 64px = h-16 single nav row + safe area */
   --radius: 0.625rem;
-  --background: #fafafa;
+  --background: #ffffff;
   --foreground: #010101;
   --card: #ffffff;
   --card-foreground: #010101;

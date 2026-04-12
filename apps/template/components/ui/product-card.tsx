@@ -14,7 +14,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full group bg-white overflow-hidden", className)}
+      className={cn("flex flex-col h-full group overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -111,7 +111,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   return (
     <div
       data-slot="product-card-content"
-      className={cn("flex flex-col flex-1 p-3", className)}
+      className={cn("flex flex-col flex-1 py-3", className)}
       {...props}
     >
       {children}
@@ -191,10 +191,10 @@ function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
-      className={cn("flex flex-col bg-white overflow-hidden", className)}
+      className={cn("flex flex-col overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="p-3">
+      <div className="py-3">
         <div className="h-4 w-full bg-muted rounded animate-pulse" />
         <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-1" />
         <div className="h-4 w-12 bg-muted rounded animate-pulse mt-1" />

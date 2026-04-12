@@ -21,7 +21,7 @@ export function Footer({ locale }: { locale: string }) {
   const { socialLinks } = siteConfig;
 
   return (
-    <footer className="bg-white">
+    <footer>
       <div className="mx-auto px-4 py-12 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <Suspense>
