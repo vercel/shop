@@ -27,8 +27,8 @@ function ProductInfoHeader({
     <div data-slot="product-info-header" className={className} {...props}>
       <h1
         className={cn(
-          "font-semibold text-foreground lg:leading-[1.25] leading-tight tracking-tight",
-          "text-xl lg:text-3xl",
+          "font-semibold text-foreground tracking-tight",
+          "text-3xl",
         )}
       >
         {title}

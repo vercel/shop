@@ -82,11 +82,8 @@ async function ProductContent({
       />
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      <div className="space-y-8">
+      <div className="flex flex-col gap-12">
         <VariantSection product={product} locale={locale} variantId={variantId} />
-      </div>
-
-      <div className="mt-16">
         <Recommendations handle={handle} locale={locale} />
       </div>
     </>

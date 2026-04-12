@@ -17,7 +17,7 @@ interface MarketingPageRendererProps {
 
 export function MarketingPageRenderer({ page }: MarketingPageRendererProps) {
   return (
-    <div className="flex flex-col gap-8 pb-16">
+    <div className="flex flex-col gap-12 pb-12">
       {page.heroSection && <HeroSection hero={page.heroSection} />}
 
       {page.sections.map((section) => (

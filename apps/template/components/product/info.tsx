@@ -34,7 +34,7 @@ async function Render({ productPromise }: { productPromise: Promise<ProductDetai
   return (
     <div className="flex flex-col gap-y-2">
       <div>
-        <h1 className="text-3xl text-main-foreground font-semibold leading-9">{product.title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{product.title}</h1>
         {product.tags.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {product.tags.slice(0, 3).map((tag) => (

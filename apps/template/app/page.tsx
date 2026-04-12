@@ -51,7 +51,7 @@ export default async function HomePage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-16 pb-16">
+        <div className="flex flex-col gap-12 pb-12">
           <section>
             <div className="grid items-start gap-4 md:grid-cols-2">
               <h2 className="text-3xl font-semibold tracking-tight">

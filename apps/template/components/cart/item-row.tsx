@@ -55,7 +55,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
             href={`/products/${item.merchandise.product.handle}`}
             className="block hover:opacity-70 transition-opacity"
           >
-            <h3 className="text-lg lg:text-xl font-semibold tracking-[-0.3px] text-foreground line-clamp-2">
+            <h3 className="text-lg lg:text-xl font-semibold tracking-tight text-foreground line-clamp-2">
               {item.merchandise.product.title}
             </h3>
           </Link>
@@ -112,7 +112,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
           </button>
         </div>
 
-        <p className="text-xl lg:text-2xl font-semibold tracking-[-0.48px]">
+        <p className="text-xl lg:text-2xl font-semibold tracking-tight">
           {formatPrice(unitPrice * quantity, currencyCode, locale)}
         </p>
       </div>

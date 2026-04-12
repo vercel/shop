@@ -24,7 +24,7 @@ export function Header({ locale }: HeaderProps) {
   const formattedTotal = formatPrice(subtotal, cart.cost.subtotalAmount.currencyCode, locale);
 
   return (
-    <h1 className="text-4xl lg:text-[48px] font-semibold tracking-[-1.44px] mb-8 lg:mb-12">
+    <h1 className="text-3xl font-semibold tracking-tight mb-8 lg:mb-12">
       <span>
         {t("cartTotalIs")} {formattedTotal}
       </span>
