@@ -8,26 +8,45 @@ type: guide
 
 The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered - variant selection happens through navigation, not client-side state.
 
+## Rendering strategy
+
+The PDP uses a canary rendering strategy via `unstable_instant` with `experimental.partialFallbacks`:
+
+```ts
+// next.config.ts
+experimental: {
+  partialFallbacks: true,
+}
+
+// app/products/[handle]/page.tsx
+export const unstable_instant = {
+  prefetch: "runtime",
+  samples: [
+    {
+      params: { handle: "sample-product" },
+      searchParams: { variantId: "1" },
+      cookies: [{ name: "shopify_cartId", value: null }],
+    },
+  ],
+};
+```
+
+`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` with `prefetch: "runtime"` tells Next.js to prefetch the dynamic data at request time rather than statically. The `samples` array provides representative parameters so the framework can pre-render the static shell at build time.
+
 ## Variant selection
 
-Variants are selected via URL. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
+Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
 
 ```
 /products/classic-tee?variantId=123456
 ```
 
-> **Required:** The rewrite rule below in `next.config.ts` is essential - without it, variant selection appends a query parameter but the page won't re-render with the correct variant.
+The page component receives `searchParams` as a promise and extracts the `variantId`:
 
-A rewrite rule in `next.config.ts` maps this to the `/products/[handle]/[variantId]` route segment so the server can resolve the variant before rendering:
-
-```ts
-rewrites: async () => [
-  {
-    source: "/products/:handle",
-    has: [{ type: "query", key: "variantId", value: "(?<variantId>.+)" }],
-    destination: "/products/:handle/:variantId",
-  },
-],
+```tsx
+const variantIdPromise = searchParams.then(
+  (sp) => (sp?.variantId as string | undefined),
+);
 ```
 
 On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props - no client-side variant context or `useState` is involved. This means:
@@ -35,6 +54,7 @@ On the server, `computeInitialSelectedOptions()` matches the numeric variant ID 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
 - The page is fully server-rendered with zero layout shift
+- Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
 
 The `getVariantUrl()` helper in `variants.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
 
@@ -75,14 +95,14 @@ A single `BuyButtons` component renders identically on both mobile and desktop. 
 
 Below the product details, a `Recommendations` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
 
-Recommendations display as a horizontally scrollable carousel of product cards - 2 columns on mobile, 3 on tablet, 4 on desktop.
+Recommendations display as a horizontally scrollable carousel of product cards using the same `ProductsCarousel` component as the homepage. On mobile, cards are ~7/12 viewport width and scroll full-bleed. On desktop, the carousel shows 3-4+ columns with chevron navigation.
 
 ## Layout
 
 The page uses a single responsive layout wrapped in a `Container`:
 
 - Below the `lg:` breakpoint, content stacks vertically: carousel, buy buttons, product info
-- At `lg:` and up, a two-column grid places the image gallery on the left and product info (title/price, option pickers, buy buttons, description) on the right
+- At `lg:` and up, a 12-column grid places the image gallery in 7 columns on the left and product info (title/price, option pickers, buy buttons, description) in 5 columns on the right
 - The product info column is sticky on desktop, staying visible while the gallery scrolls
 
 ## Structured data
