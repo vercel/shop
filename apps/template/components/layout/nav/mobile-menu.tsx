@@ -2,8 +2,7 @@
 
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
@@ -13,12 +12,7 @@ const links = [
 ];
 
 export function MobileMenu() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -34,6 +28,7 @@ export function MobileMenu() {
             <Link
               key={link.href}
               href={link.href}
+              onClick={() => setOpen(false)}
               className="py-3 text-lg font-medium hover:opacity-70 transition-opacity"
             >
               {link.label}
