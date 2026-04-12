@@ -112,7 +112,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
   return (
     <div
       data-slot="scroll-carousel-nav"
-      className={cn("hidden lg:flex gap-2", hidden && "lg:invisible", className)}
+      className={cn("hidden lg:flex items-center gap-1", hidden && "lg:invisible", className)}
       {...props}
     >
       <button
@@ -120,18 +120,18 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         onClick={() => scroll("left")}
         disabled={!canScrollLeft}
         aria-label="Scroll left"
-        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="text-foreground disabled:text-foreground/30"
       >
-        <ChevronLeft className="size-6" aria-hidden="true" />
+        <ChevronLeft className="size-5" aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={() => scroll("right")}
         disabled={!canScrollRight}
         aria-label="Scroll right"
-        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="text-foreground disabled:text-foreground/30"
       >
-        <ChevronRight className="size-6" aria-hidden="true" />
+        <ChevronRight className="size-5" aria-hidden="true" />
       </button>
     </div>
   );
