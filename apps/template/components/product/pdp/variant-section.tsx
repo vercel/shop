@@ -30,10 +30,10 @@ export function VariantSection({
   const { colorImages, otherImages } = getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions);
 
   return (
-    <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-      <ProductMedia colorImages={colorImages} otherImages={otherImages} videos={videos} title={title} />
+    <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
+      <ProductMedia colorImages={colorImages} otherImages={otherImages} videos={videos} title={title} className="lg:col-span-7" />
 
-      <div className="space-y-8 lg:sticky lg:top-20">
+      <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
         <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
         <ProductInfoOptions
           variants={variants}

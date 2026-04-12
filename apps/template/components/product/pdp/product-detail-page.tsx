@@ -25,11 +25,11 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 function ProductPageFallback() {
   return (
     <div className="space-y-8">
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-        <div className="space-y-2">
+      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
+        <div className="space-y-2 lg:col-span-7">
           <Skeleton className="aspect-square w-full" />
         </div>
-        <div className="space-y-8 lg:sticky lg:top-20">
+        <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
           <div>
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-24 mt-3" />

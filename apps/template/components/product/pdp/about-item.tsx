@@ -1,6 +1,3 @@
-"use client";
-
-import { useTranslations } from "next-intl";
 import type { ComponentPropsWithoutRef } from "react";
 
 import { cn } from "@/lib/utils";
@@ -37,7 +34,6 @@ function getDescriptionBlocks(descriptionHtml: string): string[] {
 }
 
 export function AboutItem({ descriptionHtml, className, ...props }: AboutItemProps) {
-  const t = useTranslations("product");
   const descriptionBlocks = getDescriptionBlocks(descriptionHtml);
 
   if (descriptionBlocks.length === 0) return null;
@@ -45,11 +41,8 @@ export function AboutItem({ descriptionHtml, className, ...props }: AboutItemPro
   const seenBlocks = new Map<string, number>();
 
   return (
-    <div className={cn("space-y-3", className)} {...props}>
-      <h3 className="text-base font-semibold text-foreground tracking-tight">
-        {t("aboutThisItem")}
-      </h3>
-      <div className="space-y-2 text-sm font-normal leading-relaxed text-foreground">
+    <div className={cn("space-y-2", className)} {...props}>
+      <div className="text-sm font-normal leading-relaxed text-foreground">
         {descriptionBlocks.map((block) => {
           const occurrence = seenBlocks.get(block) ?? 0;
           seenBlocks.set(block, occurrence + 1);
