@@ -58,11 +58,9 @@ pnpm add @vercel/speed-insights
 
 ### A2. Create `components/analytics.tsx`
 
-Create a component that renders the selected analytics components. This is a client component because both libraries need browser APIs:
+Create a component that renders the selected analytics components. Each library handles its own client-side behavior internally, so this can be a server component:
 
 ```tsx
-"use client";
-
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -108,8 +106,6 @@ If the file was already created in Part A, add GTM to it. If Part A was skipped,
 With both Vercel Analytics and GTM:
 
 ```tsx
-"use client";
-
 import { GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -130,8 +126,6 @@ export function AnalyticsComponents() {
 With GTM only (no Vercel Analytics or Speed Insights):
 
 ```tsx
-"use client";
-
 import { GoogleTagManager } from "@next/third-parties/google";
 
 export function AnalyticsComponents() {
