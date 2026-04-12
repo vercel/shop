@@ -22,7 +22,7 @@ export function Footer({ locale }: { locale: string }) {
 
   return (
     <footer>
-      <div className="mx-auto px-4 py-12 lg:px-8">
+      <div className="mx-auto px-4 pt-12 pb-22 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <Suspense>
             <Copyright />
