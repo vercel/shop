@@ -25,9 +25,7 @@ export function TopProductsCarousel({ title, products, locale }: TopProductsCaro
   return (
     <ScrollCarousel>
       <ScrollCarouselHeader>
-        <ScrollCarouselTitle className="text-3xl font-semibold tracking-tight">
-          {title}
-        </ScrollCarouselTitle>
+        <ScrollCarouselTitle>{title}</ScrollCarouselTitle>
         <ScrollCarouselNav />
       </ScrollCarouselHeader>
       <ScrollCarouselContent fullBleed>
