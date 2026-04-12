@@ -100,6 +100,7 @@ export function ColorPicker({
             <Link
               key={value.id}
               href={href}
+              scroll={false}
               className="flex flex-col items-center gap-2"
               aria-label={`Select ${option.name}: ${value.name}`}
             >
