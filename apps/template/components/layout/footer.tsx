@@ -11,7 +11,7 @@ async function Copyright() {
   const t = await getTranslations("footer");
 
   return (
-    <p className="text-sm text-background/60 leading-5">
+    <p className="text-sm text-muted-foreground leading-5">
       {t("copyright", { year: String(new Date().getFullYear()) })}
     </p>
   );
@@ -21,7 +21,7 @@ export function Footer({ locale }: { locale: string }) {
   const { socialLinks } = siteConfig;
 
   return (
-    <footer className="bg-foreground text-background">
+    <footer className="bg-white">
       <div className="mx-auto px-4 py-12 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <Suspense>
