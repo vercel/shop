@@ -187,11 +187,13 @@ export function ProductMedia({
   otherImages,
   videos,
   title,
+  className,
 }: {
   colorImages: ImageType[];
   otherImages: ImageType[];
   videos: Video[];
   title: string;
+  className?: string;
 }) {
   // Order: color images → videos → other images
   const mediaItems: MediaItem[] = [
@@ -203,13 +205,13 @@ export function ProductMedia({
   if (mediaItems.length === 0) return null;
 
   return (
-    <>
+    <div className={className}>
       <div className="lg:hidden">
         <Carousel mediaItems={mediaItems} title={title} />
       </div>
       <div className="hidden lg:block">
         <Grid mediaItems={mediaItems} title={title} />
       </div>
-    </>
+    </div>
   );
 }
