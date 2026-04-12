@@ -52,24 +52,6 @@ export default async function HomePage() {
 
       <Container>
         <div className="flex flex-col gap-12 pb-12">
-          <section>
-            <div className="grid items-start gap-4 md:grid-cols-2">
-              <h2 className="text-3xl font-semibold tracking-tight">
-                Your store, ready to go
-              </h2>
-              <div className="prose prose-neutral">
-                <p>
-                  Connect your Shopify store and get product pages, cart, search, and collections
-                  out of the box. Add markets, CMS, auth, and more with a single command.
-                </p>
-                <p>
-                  Every component is yours to customize. Optimistic UI, cached responses, and
-                  AI-readable product pages are built in from the start.
-                </p>
-              </div>
-            </div>
-          </section>
-
           {featuredProductsResult.products.length > 0 && (
             <TopProductsCarousel
               title="Featured products"
