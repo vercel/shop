@@ -13,13 +13,7 @@
     "test": "turbo run test",
     "format": "turbo run format"
   },
-  "pnpm": {
-    "overrides": {
-      "path-to-regexp": ">=6.3.0"
-    }
-  },
   "workspaces": [
-    "apps/*",
-    "examples/*"
+    "apps/*"
   ]
 }
