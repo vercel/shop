@@ -72,7 +72,7 @@ function ScrollCarousel({ className, children, ...props }: React.ComponentProps<
     >
       <section
         data-slot="scroll-carousel"
-        className={cn("overflow-x-clip contain-[paint] py-4", className)}
+        className={cn("sm:overflow-x-clip sm:contain-[paint] py-4", className)}
         {...props}
       >
         <div className="mx-auto min-w-0">{children}</div>
@@ -107,20 +107,20 @@ function ScrollCarouselTitle({ className, children, ...props }: React.ComponentP
 
 function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">) {
   const { canScrollLeft, canScrollRight, scroll } = useScrollCarousel();
-
-  // Hide arrows entirely when there aren't enough items to scroll
-  if (!canScrollLeft && !canScrollRight) {
-    return null;
-  }
+  const hidden = !canScrollLeft && !canScrollRight;
 
   return (
-    <div data-slot="scroll-carousel-nav" className={cn("flex gap-2", className)} {...props}>
+    <div
+      data-slot="scroll-carousel-nav"
+      className={cn("hidden lg:flex items-center gap-1", hidden && "lg:invisible", className)}
+      {...props}
+    >
       <button
         type="button"
         onClick={() => scroll("left")}
         disabled={!canScrollLeft}
         aria-label="Scroll left"
-        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="text-foreground disabled:text-foreground/30"
       >
         <ChevronLeft className="size-6" aria-hidden="true" />
       </button>
@@ -129,7 +129,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         onClick={() => scroll("right")}
         disabled={!canScrollRight}
         aria-label="Scroll right"
-        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="text-foreground disabled:text-foreground/30"
       >
         <ChevronRight className="size-6" aria-hidden="true" />
       </button>
@@ -137,16 +137,11 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
   );
 }
 
-interface ScrollCarouselContentProps extends React.ComponentProps<"div"> {
-  fullBleed?: boolean;
-}
-
 function ScrollCarouselContent({
-  fullBleed = false,
   className,
   children,
   ...props
-}: ScrollCarouselContentProps) {
+}: React.ComponentProps<"div">) {
   const { scrollContainerRef, handleScroll } = useScrollCarousel();
 
   return (
@@ -156,10 +151,9 @@ function ScrollCarouselContent({
       data-slot="scroll-carousel-content"
       className={cn(
         "grid grid-flow-col gap-4 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scrollbar-hide",
+        "relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-4 scroll-px-4",
+        "sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 sm:scroll-px-0",
         "lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)] 2xl:auto-cols-[calc((100%-4rem)/5)] 3xl:auto-cols-[calc((100%-5rem)/6)] 4xl:auto-cols-[calc((100%-7rem)/8)]",
-        fullBleed
-          ? "relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[calc((100vw-3rem)/2)] px-4 scroll-px-4 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 sm:scroll-px-0"
-          : "w-full auto-cols-[calc((100%-1rem)/2)]",
         className,
       )}
       {...props}
