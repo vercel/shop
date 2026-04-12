@@ -58,7 +58,7 @@ export function OptionPicker({
           }
 
           return (
-            <Link key={value.id} href={href} className={classes}>
+            <Link key={value.id} href={href} scroll={false} className={classes}>
               {value.name}
             </Link>
           );
