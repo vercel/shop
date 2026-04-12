@@ -1,19 +1,19 @@
 {
-  "dependencies": {
-    "turbo": "2.9.6"
-  },
-  "name": "@vercel/shop",
-  "packageManager": "pnpm@10.32.1",
-  "private": true,
-  "scripts": {
-    "dev": "turbo run dev",
-    "build": "turbo run build",
-    "start": "turbo run start",
-    "lint": "turbo run lint",
-    "test": "turbo run test",
-    "format": "turbo run format"
-  },
-  "workspaces": [
-    "apps/*"
-  ]
+	"dependencies": {
+		"turbo": "2.9.6"
+	},
+	"name": "@vercel/shop",
+	"packageManager": "pnpm@10.32.1",
+	"private": true,
+	"scripts": {
+		"build": "turbo run build",
+		"dev": "turbo run dev",
+		"format": "turbo run format",
+		"lint": "turbo run lint",
+		"start": "turbo run start",
+		"test": "turbo run test"
+	},
+	"workspaces": [
+		"apps/*"
+	]
 }

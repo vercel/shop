@@ -1,8 +1,8 @@
 {
-  "name": "create-vercel-shop",
-  "version": "0.0.1",
-  "type": "module",
-  "bin": {
-    "create-vercel-shop": "index.mjs"
-  }
+	"bin": {
+		"create-vercel-shop": "index.mjs"
+	},
+	"name": "create-vercel-shop",
+	"type": "module",
+	"version": "0.0.1"
 }
