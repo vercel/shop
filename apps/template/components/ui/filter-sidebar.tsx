@@ -48,7 +48,7 @@ function FilterSidebarHeader({
       className={cn("flex items-center gap-2", className)}
       {...props}
     >
-      <h2 className="text-xl font-medium tracking-[-0.48px] text-foreground">
+      <h2 className="text-xl font-medium tracking-tight text-foreground">
         {title}
         {activeCount !== undefined && activeCount > 0 && (
           <span className="ml-1">({activeCount})</span>
@@ -79,7 +79,7 @@ function FilterSidebarResultsCount({
     <div
       data-slot="filter-sidebar-results-count"
       className={cn(
-        "flex items-center gap-1.5 text-sm tracking-[-0.14px] text-foreground/50",
+        "flex items-center gap-1.5 text-sm text-foreground/50",
         className,
       )}
       {...props}
@@ -126,7 +126,7 @@ function FilterBadge({
       data-slot="filter-badge"
       data-variant={variant}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold tracking-[-0.12px] transition-colors",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
         variant === "default" && "bg-foreground/60 text-background hover:bg-foreground/70",
         variant === "primary" && "bg-primary/15 text-primary hover:bg-primary/25",
         className,
@@ -160,7 +160,7 @@ function FilterSectionHeader({ title, className, children }: FilterSectionHeader
       data-slot="filter-section-header"
       className={cn("flex items-center justify-between", className)}
     >
-      <span className="text-base font-semibold tracking-[-0.27px] text-muted-foreground">
+      <span className="text-base font-semibold text-muted-foreground">
         {title}
       </span>
       {children}
@@ -203,7 +203,7 @@ function FilterOption({
   ...props
 }: FilterOptionProps) {
   const sharedClassName = cn(
-    "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
+    "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
     "data-[selected=true]:font-medium",
     className,
   );
@@ -332,7 +332,7 @@ function FilterPricePreset({
       data-slot="filter-price-preset"
       data-selected={selected}
       className={cn(
-        "text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
+        "text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
         "data-[selected=true]:font-medium",
         className,
       )}
@@ -371,7 +371,7 @@ function FilterSidebarCategoryBack({
       data-slot="filter-sidebar-category-back"
       data-pending={pending}
       className={cn(
-        "flex items-center gap-2 text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
+        "flex items-center gap-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
         className,
       )}
       {...props}
@@ -405,7 +405,7 @@ function FilterSidebarCategoryItem({
       data-slot="filter-sidebar-category-item"
       data-pending={pending}
       className={cn(
-        "flex items-center justify-between text-left text-sm tracking-[-0.24px] text-muted-foreground transition-colors hover:text-foreground",
+        "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
         className,
       )}
       {...props}

@@ -92,14 +92,14 @@ function MarketingPageSkeleton() {
   const skeletonSlots = [1, 2, 3, 4, 5] as const;
 
   return (
-    <div className="flex flex-col gap-8 pb-16">
-      <Skeleton className="h-100 w-full rounded-xl" />
+    <div className="flex flex-col gap-12 pb-12">
+      <Skeleton className="h-100 w-full" />
       <section className="py-12 px-4">
         <div className="container mx-auto">
           <Skeleton className="mb-8 h-8 w-48" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {skeletonSlots.map((slot) => (
-              <Skeleton key={`marketing-skeleton-${slot}`} className="aspect-square rounded-lg" />
+              <Skeleton key={`marketing-skeleton-${slot}`} className="aspect-square" />
             ))}
           </div>
         </div>

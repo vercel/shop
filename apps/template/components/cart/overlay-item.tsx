@@ -36,7 +36,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative w-16 h-16 bg-muted rounded-xl overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative w-16 h-16 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
           src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}

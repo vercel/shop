@@ -50,7 +50,7 @@ export function PredictiveSearchPanel({
           exit={{ opacity: 0, y: position === "above" ? 8 : -8 }}
           transition={{ duration: 0.2, ease: easing }}
           className={cn(
-            "absolute left-0 right-0 z-50 overflow-hidden rounded-xl bg-popover/90 backdrop-blur-xl border border-border/50 shadow-lg",
+            "absolute left-0 right-0 z-50 overflow-hidden bg-popover/90 backdrop-blur-xl border border-border/50 shadow-lg",
             position === "above" && "bottom-full mb-2",
             position === "below" && "top-full mt-2",
             className,
