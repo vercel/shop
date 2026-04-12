@@ -14,7 +14,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full group bg-white overflow-hidden", className)}
+      className={cn("flex flex-col h-full group bg-background overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -191,7 +191,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
-      className={cn("flex flex-col bg-white overflow-hidden", className)}
+      className={cn("flex flex-col bg-background overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="p-3">

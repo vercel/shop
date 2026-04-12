@@ -159,7 +159,7 @@ export function ImageGallery({
             type="button"
             onClick={() => scrollToImage(idx)}
             className={`
-              relative shrink-0 size-20 aspect-square overflow-hidden rounded-lg border-2 transition-all
+              relative shrink-0 size-20 aspect-square overflow-hidden border-2 transition-all
               ${
                 idx === selectedImageIndex
                   ? "border-foreground"
@@ -203,7 +203,7 @@ export function ImageGallery({
           {images.map((image, idx) => (
             <div
               key={image.url}
-              className="relative shrink-0 w-full aspect-3/4 snap-center snap-always overflow-hidden rounded-lg bg-muted border select-none"
+              className="relative shrink-0 w-full aspect-3/4 snap-center snap-always overflow-hidden bg-muted border select-none"
             >
               <Image
                 src={image.url}

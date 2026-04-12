@@ -2,7 +2,7 @@ export function ItemsSkeleton() {
   return (
     <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="border border-border rounded-lg p-4 lg:p-6 animate-pulse">
+        <div key={i} className="border border-border p-4 lg:p-6 animate-pulse">
           <div className="flex gap-4 lg:gap-6">
             <div className="w-20 lg:w-24 h-20 lg:h-24 bg-muted rounded-md shrink-0" />
 
@@ -25,7 +25,7 @@ export function ItemsSkeleton() {
 
 export function SummarySkeleton() {
   return (
-    <div className="border border-border rounded-lg p-6 animate-pulse sticky top-8">
+    <div className="border border-border p-6 animate-pulse sticky top-8">
       <div className="space-y-3 mb-6 pb-6 border-b border-border">
         {[1, 2].map((i) => (
           <div key={i} className="flex justify-between">

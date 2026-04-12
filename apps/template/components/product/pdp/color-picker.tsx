@@ -51,7 +51,7 @@ export function ColorPicker({
           const swatch = (
             <div
               className={cn(
-                "aspect-square w-full rounded-lg transition-all overflow-hidden",
+                "aspect-square w-full transition-all overflow-hidden",
                 isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
             >
@@ -61,11 +61,11 @@ export function ColorPicker({
                   width={200}
                   height={200}
                   alt={`${value.name} swatch`}
-                  className="size-full rounded-lg border border-foreground/10 object-cover"
+                  className="size-full border border-foreground/10 object-cover"
                 />
               ) : (
                 <div
-                  className="size-full rounded-lg border border-foreground/10"
+                  className="size-full border border-foreground/10"
                   style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
                 />
               )}

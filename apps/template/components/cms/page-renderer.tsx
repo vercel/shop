@@ -77,7 +77,7 @@ function SectionSkeleton({ blockType }: { blockType: string }) {
             <Skeleton className="mb-8 h-8 w-48" />
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {skeletonSlots.map((slot) => (
-                <Skeleton key={`product-skeleton-${slot}`} className="aspect-square rounded-lg" />
+                <Skeleton key={`product-skeleton-${slot}`} className="aspect-square" />
               ))}
             </div>
           </div>
@@ -91,13 +91,13 @@ function SectionSkeleton({ blockType }: { blockType: string }) {
             {skeletonSlots.map((slot) => (
               <Skeleton
                 key={`carousel-skeleton-${slot}`}
-                className="aspect-square w-50 shrink-0 rounded-lg"
+                className="aspect-square w-50 shrink-0"
               />
             ))}
           </div>
         </div>
       );
     default:
-      return <Skeleton className="h-48 w-full rounded-xl" />;
+      return <Skeleton className="h-48 w-full" />;
   }
 }

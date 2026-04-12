@@ -38,7 +38,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
     <div className="flex gap-6 p-2">
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative size-30 lg:size-38 bg-muted rounded-xl overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-30 lg:size-38 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
           src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}

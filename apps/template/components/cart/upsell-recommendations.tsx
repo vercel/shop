@@ -44,7 +44,7 @@ export function Upsells({ locale, firstItemHandle }: UpsellsProps) {
               <Skeleton className="h-9 w-48 mb-4" />
               <div className="grid grid-flow-col auto-cols-[calc((100%-1rem)/2)] lg:auto-cols-[calc((100%-2rem)/3)] gap-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-80 bg-muted rounded-lg animate-pulse" />
+                  <div key={i} className="h-80 bg-muted animate-pulse" />
                 ))}
               </div>
             </div>

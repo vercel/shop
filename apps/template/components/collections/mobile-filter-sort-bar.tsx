@@ -9,7 +9,7 @@ interface MobileFilterSortBarProps {
 
 export function MobileFilterSortBar({ filterSheet, sortSelect }: MobileFilterSortBarProps) {
   return (
-    <div className="md:hidden -mx-4 lg:-mx-8 px-4 lg:px-8 py-2 bg-accent/50 border-y border-border/50">
+    <div className="md:hidden -mx-4 lg:-mx-8 px-4 lg:px-8 py-2 bg-muted/50 border-y border-border/50">
       <div className="flex items-center justify-between">
         {filterSheet}
         {sortSelect}
@@ -20,7 +20,7 @@ export function MobileFilterSortBar({ filterSheet, sortSelect }: MobileFilterSor
 
 export function MobileFilterSortBarSkeleton() {
   return (
-    <div className="md:hidden -mx-4 lg:-mx-8 px-4 lg:px-8 py-2 bg-accent/50 border-y border-border/50">
+    <div className="md:hidden -mx-4 lg:-mx-8 px-4 lg:px-8 py-2 bg-muted/50 border-y border-border/50">
       <div className="flex items-center justify-between">
         <Skeleton className="h-5 w-20" />
         <Skeleton className="h-5 w-24" />

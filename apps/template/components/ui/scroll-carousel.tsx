@@ -120,7 +120,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         onClick={() => scroll("left")}
         disabled={!canScrollLeft}
         aria-label="Scroll left"
-        className="rounded-xl bg-black/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
       >
         <ChevronLeft className="size-6" aria-hidden="true" />
       </button>
@@ -129,7 +129,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
         onClick={() => scroll("right")}
         disabled={!canScrollRight}
         aria-label="Scroll right"
-        className="rounded-xl bg-black/10 p-2 backdrop-blur-sm disabled:opacity-30"
+        className="rounded-md bg-foreground/10 p-2 backdrop-blur-sm disabled:opacity-30"
       >
         <ChevronRight className="size-6" aria-hidden="true" />
       </button>
