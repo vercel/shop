@@ -72,7 +72,7 @@ function ScrollCarousel({ className, children, ...props }: React.ComponentProps<
     >
       <section
         data-slot="scroll-carousel"
-        className={cn("overflow-x-clip contain-[paint] py-4", className)}
+        className={cn("sm:overflow-x-clip sm:contain-[paint] py-4", className)}
         {...props}
       >
         <div className="mx-auto min-w-0">{children}</div>
