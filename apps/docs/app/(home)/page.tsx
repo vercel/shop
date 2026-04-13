@@ -17,7 +17,7 @@ const title = "Vercel Shop";
 const description =
 	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
 const starterPrompt =
-	"Set up a new Vercel Shop project for me. Use `npx create-vercel-shop@latest` to scaffold it. Then follow the Vercel Shop setup docs: if I do not already have Shopify credentials, tell me to go to Shopify Settings -> Apps and sales channels -> Develop apps, install or open the Headless channel, create a storefront, and copy the Storefront API access token. Ask me for `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`, and `NEXT_PUBLIC_SITE_NAME`, create `.env.local`, start the local dev server with the scaffolded package manager, and stop once it is running.";
+	"Set up a new Vercel Shop project by running `npx create-vercel-shop@latest`; if I do not already have Shopify Headless credentials, walk me through the setup docs to create them, then collect `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`, and `NEXT_PUBLIC_SITE_NAME`, create `.env.local`, start the scaffolded local dev server, and stop once it is running.";
 
 export const metadata: Metadata = {
 	title,
@@ -31,7 +31,7 @@ const HomePage = () => (
 			description={description}
 			title={title}
 		>
-			<div className="flex w-full max-w-3xl flex-col items-center gap-4">
+			<div className="flex w-full max-w-3xl flex-col items-center gap-3">
 				<PromptCopy command="npx create-vercel-shop@latest" prompt={starterPrompt} />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
