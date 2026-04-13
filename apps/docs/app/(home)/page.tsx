@@ -31,7 +31,7 @@ const HomePage = () => (
 			description={description}
 			title={title}
 		>
-			<div className="flex w-full max-w-3xl flex-col items-center gap-3">
+			<div className="flex w-full max-w-3xl flex-col items-center gap-4">
 				<PromptCopy command="npx create-vercel-shop@latest" prompt={starterPrompt} />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">

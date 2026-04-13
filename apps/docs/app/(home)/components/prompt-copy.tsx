@@ -68,8 +68,8 @@ export const PromptCopy = ({
   const Icon = copied ? CheckIcon : CopyIcon;
 
   return (
-    <div className={cn("w-full max-w-[42rem] space-y-2", className)}>
-      <div className="inline-flex rounded-full border bg-background/80 p-1 shadow-xs">
+    <div className={cn("mx-auto flex w-full max-w-[36rem] flex-col items-center gap-2", className)}>
+      <div className="flex items-center justify-center gap-6">
         {(["cli", "prompt"] as const).map((option) => {
           const isActive = option === mode;
 
@@ -78,10 +78,10 @@ export const PromptCopy = ({
               key={option}
               aria-pressed={isActive}
               className={cn(
-                "rounded-full px-3 py-1 text-sm transition-colors",
+                "border-b px-0 pb-1 text-sm transition-colors",
                 isActive
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground",
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
               )}
               onClick={() => setMode(option)}
               type="button"
@@ -91,7 +91,7 @@ export const PromptCopy = ({
           );
         })}
       </div>
-      <InputGroup className="h-10 bg-background shadow-none text-sm overflow-hidden">
+      <InputGroup className="mx-auto h-10 w-full bg-background shadow-none text-sm overflow-hidden">
         {activeOption.prefix ? (
           <InputGroupAddon>
             <InputGroupText className="font-mono font-normal text-muted-foreground">
