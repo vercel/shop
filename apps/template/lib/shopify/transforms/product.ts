@@ -36,7 +36,6 @@ interface ShopifyVariant {
 
 interface ShopifyOptionValueSwatch {
   color: string | null;
-  image: { previewImage: { url: string } } | null;
 }
 
 interface ShopifyOptionValue {
@@ -223,12 +222,8 @@ function transformVariant(variant: ShopifyVariant): ProductVariant {
 }
 
 function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSwatch | undefined {
-  if (!swatch) return undefined;
-  const result: OptionValueSwatch = {};
-  if (swatch.color) result.color = swatch.color;
-  if (swatch.image?.previewImage?.url) result.image = swatch.image.previewImage.url;
-  if (!result.color && !result.image) return undefined;
-  return result;
+  if (!swatch?.color) return undefined;
+  return { color: swatch.color };
 }
 
 function transformOption(option: ShopifyOption): ProductOption {

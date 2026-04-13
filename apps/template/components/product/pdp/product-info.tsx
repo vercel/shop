@@ -64,7 +64,7 @@ function ProductInfoOptions({
 }: ProductInfoOptionsProps) {
   // Separate color/swatch options from other options.
   const isColorOption = (opt: ProductOption) =>
-    opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+    opt.values.some((v) => v.swatch?.color) ||
     opt.name.toLowerCase().includes("color");
   const isDefaultOption = (opt: { values: { name: string }[] }) =>
     opt.values.length === 1 && opt.values[0].name === DEFAULT_OPTION;

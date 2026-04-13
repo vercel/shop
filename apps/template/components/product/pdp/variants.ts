@@ -127,7 +127,7 @@ export function getImagesForSelectedColor(
   // fall back to the English name for stores without swatches configured.
   const colorOption = options.find(
     (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.values.some((v) => v.swatch?.color) ||
       opt.name.toLowerCase().includes("color"),
   );
 
@@ -223,7 +223,7 @@ export function getPartitionedImagesForSelectedColor(
   // fall back to the English name for stores without swatches configured.
   const colorOption = options.find(
     (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.values.some((v) => v.swatch?.color) ||
       opt.name.toLowerCase().includes("color"),
   );
 

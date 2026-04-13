@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
@@ -40,12 +39,6 @@ export function ColorPicker({
               v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           );
 
-          const variantImage = variants.find((v) =>
-            v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          )?.image?.url;
-
-          const imageUrl = value.swatch?.image || variantImage;
-
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const swatch = (
@@ -55,20 +48,10 @@ export function ColorPicker({
                 isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
             >
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  width={200}
-                  height={200}
-                  alt={`${value.name} swatch`}
-                  className="size-full border border-foreground/10 object-cover"
-                />
-              ) : (
-                <div
-                  className="size-full border border-foreground/10"
-                  style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
-                />
-              )}
+              <div
+                className="size-full border border-foreground/10"
+                style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
+              />
             </div>
           );
 

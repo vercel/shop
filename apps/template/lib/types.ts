@@ -110,7 +110,6 @@ export interface ProductOption {
 
 export interface OptionValueSwatch {
   color?: string;
-  image?: string;
 }
 
 export interface OptionValue {

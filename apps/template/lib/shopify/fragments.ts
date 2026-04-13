@@ -130,11 +130,6 @@ export const PRODUCT_FRAGMENT = `
         name
         swatch {
           color
-          image {
-            previewImage {
-              url
-            }
-          }
         }
       }
     }
