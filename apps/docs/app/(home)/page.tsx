@@ -12,9 +12,13 @@ import { FakeBrowser } from "./components/fake-browser";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
+import { PromptCopy } from "./components/prompt-copy";
+
 const title = "Vercel Shop";
 const description =
 	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
+const starterPrompt =
+	"Create a new Vercel Shop storefront for me. Use the official create-vercel-shop starter, explain any Shopify or Vercel credentials you need, and stop once the local dev server is running.";
 
 export const metadata: Metadata = {
 	title,
@@ -28,8 +32,14 @@ const HomePage = () => (
 			description={description}
 			title={title}
 		>
-			<div className="flex flex-col items-center gap-4">
-				<Installer className="w-full max-w-[20rem]" command="npx create-vercel-shop@latest my-store" />
+			<div className="flex w-full max-w-3xl flex-col items-center gap-4">
+				<div className="w-full max-w-[20rem] space-y-2 text-left">
+					<p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+						CLI
+					</p>
+					<Installer className="w-full" command="npx create-vercel-shop@latest my-store" />
+				</div>
+				<PromptCopy className="max-w-3xl" prompt={starterPrompt} />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
 						Get Started
