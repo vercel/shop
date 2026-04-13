@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
     partialFallbacks: true,
     turbopackFileSystemCacheForDev: true,
   },
+  images: {
+    minimumCacheTTL: 31536000,
+    remotePatterns: [
+      {
+        hostname: "cdn.shopify.com",
+        protocol: "https",
+      },
+    ],
+    unoptimized: !!process.env.V0_CALLBACK_URL,
+  },
+  reactCompiler: true,
   async rewrites() {
     return {
       beforeFiles: [
@@ -19,16 +30,6 @@ const nextConfig: NextConfig = {
       afterFiles: [],
       fallback: [],
     };
-  },
-  images: {
-    minimumCacheTTL: 31536000,
-    remotePatterns: [
-      {
-        hostname: "cdn.shopify.com",
-        protocol: "https",
-      },
-    ],
-    unoptimized: !!process.env.V0_CALLBACK_URL,
   },
 };
 
