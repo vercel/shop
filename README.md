@@ -14,6 +14,13 @@ See [docs.vercel.shop](https://docs.vercel.shop) for full documentation.
 npx create-vercel-shop@latest
 ```
 
+`create-vercel-shop` also attempts to add the recommended agent plugins after scaffolding:
+
+```sh
+npx plugins add vercel/vercel-plugin
+npx plugins add shopify/shopify-ai-toolkit
+```
+
 2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
 
 ```sh

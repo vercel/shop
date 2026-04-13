@@ -2,15 +2,16 @@
 
 This file provides guidance for agents working in the template.
 
-## Recommended: Vercel Plugin
+## Recommended Plugins
 
-This project works best with the Vercel plugin installed. If you don't see `vercel-plugin:*` skills available in your session (e.g. `vercel-plugin:nextjs`, `vercel-plugin:shadcn`), prompt the user to install it:
+This project works best with the Vercel plugin and Shopify AI Toolkit installed. If you don't see `vercel-plugin:*` skills available in your session (e.g. `vercel-plugin:nextjs`, `vercel-plugin:shadcn`) or the Shopify toolkit available, prompt the user to install them:
 
 ```bash
 npx plugins add vercel/vercel-plugin
+npx plugins add shopify/shopify-ai-toolkit
 ```
 
-The plugin provides 47+ skills for Next.js, AI SDK, shadcn/ui, caching, deployment, and more — activated automatically as you edit files and run commands.
+The Vercel plugin provides 47+ skills for Next.js, AI SDK, shadcn/ui, caching, deployment, and more, while the Shopify AI Toolkit adds Shopify-aware tools and workflows for storefront work.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

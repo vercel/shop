@@ -20,13 +20,14 @@ Any agent that reads markdown context files will work. The ones we've tested mos
 
 ## Setting up
 
-After [creating your project](/docs/getting-started), install the Vercel plugin to give your agent access to 47+ skills for Next.js, AI SDK, shadcn/ui, caching, and more.
-
-### Claude Code
+If you created your storefront with `create-vercel-shop`, the CLI already attempts to install the recommended plugins for you. If you cloned manually, skipped that step, or want to re-run it, add them with the plugins CLI:
 
 ```bash
 npx plugins add vercel/vercel-plugin
+npx plugins add shopify/shopify-ai-toolkit
 ```
+
+The Vercel plugin gives your agent access to 47+ skills for Next.js, AI SDK, shadcn/ui, caching, and more. The Shopify AI Toolkit adds Shopify-specific guidance and tooling for storefront tasks.
 
 ### Cursor
 
