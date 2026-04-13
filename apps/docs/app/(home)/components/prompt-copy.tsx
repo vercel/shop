@@ -33,15 +33,12 @@ export const PromptCopy = ({
   const activeOption =
     mode === "cli"
       ? {
-          description: "Run the starter directly in your terminal.",
-          label: "CLI",
+          label: "For humans",
           prefix: "$",
           value: command,
         }
       : {
-          description:
-            "Paste into your coding agent. It tells the agent to use the CLI, collect Shopify env vars, and stop when local dev is running.",
-          label: "Prompt",
+          label: "For agents",
           prefix: null,
           value: prompt,
         };
@@ -71,7 +68,7 @@ export const PromptCopy = ({
   const Icon = copied ? CheckIcon : CopyIcon;
 
   return (
-    <div className={cn("w-full max-w-3xl space-y-3", className)}>
+    <div className={cn("w-full max-w-[42rem] space-y-2", className)}>
       <div className="inline-flex rounded-full border bg-background/80 p-1 shadow-xs">
         {(["cli", "prompt"] as const).map((option) => {
           const isActive = option === mode;
@@ -89,7 +86,7 @@ export const PromptCopy = ({
               onClick={() => setMode(option)}
               type="button"
             >
-              {option === "cli" ? "CLI" : "Prompt"}
+              {option === "cli" ? "For humans" : "For agents"}
             </button>
           );
         })}
@@ -120,7 +117,6 @@ export const PromptCopy = ({
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
-      <p className="text-sm text-muted-foreground">{activeOption.description}</p>
     </div>
   );
 };
