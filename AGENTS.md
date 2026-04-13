@@ -15,4 +15,5 @@ The docs app is in apps/docs using [fromsrc](https://www.fromsrc.com). It is lin
 
 ## Skills
 
-Skills to be used by the template and docs are written to apps/template/.agent/skills When a skill in that directory gets updated, you MUST ask if that skill should be updated in the docs as well via the docs skill sync script.
+Skills to be used by the template and docs are written to `apps/template/.agents/skills`.
+When a skill in that directory gets updated, you MUST ask if that skill should be updated in the docs as well via the docs skill sync script.
