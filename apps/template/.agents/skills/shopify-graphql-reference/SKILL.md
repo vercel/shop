@@ -42,7 +42,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 ### 3. Reuse fragments deliberately
 
 - Use `PRODUCT_FRAGMENT` for PDP-level product data.
-- Use `CATEGORY_PRODUCT_FRAGMENT` for listings, search results, and other lighter product cards.
+- Use `PRODUCT_CARD_FRAGMENT` for listings, search results, and other lighter product cards.
 - Extend `lib/shopify/fragments.ts` when several operations need the same fields.
 
 ### 4. Handle locale context correctly
@@ -74,7 +74,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 - Always reference `references/schemas/shopify-storefront.graphql` when writing GraphQL.
 - Never interpolate dynamic values directly into the query string when GraphQL variables can carry them.
-- Use `CATEGORY_PRODUCT_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless there is a clear reason not to.
+- Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless there is a clear reason not to.
 - Return domain types from operations, not raw Shopify response types.
 - Cart mutations must call `invalidateCartCache()`.
 

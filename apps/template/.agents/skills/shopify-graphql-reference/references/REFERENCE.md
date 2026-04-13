@@ -16,7 +16,7 @@ Refresh those bundled copies with `scripts/fetch-references.sh` when they are mi
 | `references/schemas/shopify-storefront.graphql` | Bundled Storefront API schema snapshot |
 | `references/schemas/shopify-customer.graphql` | Bundled Customer Account API schema snapshot |
 | `lib/shopify/client.ts` | `shopifyFetch()` GraphQL client |
-| `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `CATEGORY_PRODUCT_FRAGMENT`, money, images, metafields) |
+| `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
 | `lib/shopify/operations/*.ts` | Query and mutation entry points |
 | `lib/shopify/transforms/*.ts` | Shopify-to-domain mapping helpers |
@@ -71,7 +71,7 @@ METAFIELD_FRAGMENT
 PRODUCT_FRAGMENT
   -> full PDP data
 
-CATEGORY_PRODUCT_FRAGMENT
+PRODUCT_CARD_FRAGMENT
   -> lighter listing/search data
 ```
 
@@ -107,7 +107,7 @@ const products = flattenEdges(data.collection.products);
 
 - Always verify fields against `references/schemas/shopify-storefront.graphql`.
 - Read operations need `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
-- Use `CATEGORY_PRODUCT_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
+- Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
 - Transform Shopify responses to domain types before returning them from operations.
 - Cart mutations must call `invalidateCartCache()`.
 
