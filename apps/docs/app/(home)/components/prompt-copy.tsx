@@ -3,25 +3,48 @@
 import { track } from "@vercel/analytics";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
 const COPY_TIMEOUT = 2000;
 
+type CopyMode = "cli" | "prompt";
+
 interface PromptCopyProps {
   className?: string;
-  description?: string;
+  command: string;
   prompt: string;
-  title?: string;
 }
 
 export const PromptCopy = ({
   className,
-  description = "Paste into Codex, Claude Code, or Cursor.",
+  command,
   prompt,
-  title = "Agent prompt",
 }: PromptCopyProps) => {
+  const [mode, setMode] = useState<CopyMode>("cli");
   const [copied, setCopied] = useState(false);
+
+  const activeOption =
+    mode === "cli"
+      ? {
+          description: "Run the starter directly in your terminal.",
+          label: "CLI",
+          prefix: "$",
+          value: command,
+        }
+      : {
+          description:
+            "Paste into your coding agent. It tells the agent to use the CLI, collect Shopify env vars, and stop when local dev is running.",
+          label: "Prompt",
+          prefix: null,
+          value: prompt,
+        };
 
   useEffect(() => {
     if (!copied) {
@@ -35,31 +58,69 @@ export const PromptCopy = ({
     return () => window.clearTimeout(timeoutId);
   }, [copied]);
 
+  useEffect(() => {
+    setCopied(false);
+  }, [mode]);
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt);
+    await navigator.clipboard.writeText(activeOption.value);
     setCopied(true);
-    track("Copied starter prompt");
+    track(mode === "cli" ? "Copied installer command" : "Copied starter prompt");
   };
 
   const Icon = copied ? CheckIcon : CopyIcon;
 
   return (
-    <div className={cn("w-full rounded-xl border bg-background/90 p-3 text-left shadow-xs", className)}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            {title}
-          </p>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </div>
-        <Button className="shrink-0" onClick={handleCopy} size="sm" type="button" variant="outline">
-          <Icon className="size-3.5" />
-          <span>{copied ? "Copied" : "Copy prompt"}</span>
-        </Button>
+    <div className={cn("w-full max-w-3xl space-y-3", className)}>
+      <div className="inline-flex rounded-full border bg-background/80 p-1 shadow-xs">
+        {(["cli", "prompt"] as const).map((option) => {
+          const isActive = option === mode;
+
+          return (
+            <button
+              key={option}
+              aria-pressed={isActive}
+              className={cn(
+                "rounded-full px-3 py-1 text-sm transition-colors",
+                isActive
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              onClick={() => setMode(option)}
+              type="button"
+            >
+              {option === "cli" ? "CLI" : "Prompt"}
+            </button>
+          );
+        })}
       </div>
-      <pre className="mt-3 overflow-x-auto rounded-lg border bg-muted/20 p-3 font-mono text-sm leading-6 whitespace-pre-wrap">
-        {prompt}
-      </pre>
+      <InputGroup className="h-10 bg-background shadow-none text-sm overflow-hidden">
+        {activeOption.prefix ? (
+          <InputGroupAddon>
+            <InputGroupText className="font-mono font-normal text-muted-foreground">
+              {activeOption.prefix}
+            </InputGroupText>
+          </InputGroupAddon>
+        ) : null}
+        <InputGroupInput
+          className="min-w-0 font-mono text-sm"
+          readOnly
+          title={activeOption.value}
+          value={activeOption.value}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            aria-label={`Copy ${activeOption.label.toLowerCase()}`}
+            className="hover:bg-muted hover:text-foreground"
+            onClick={handleCopy}
+            size="icon-xs"
+            title={`Copy ${activeOption.label.toLowerCase()}`}
+          >
+            <Icon className="size-3.5" size={14} />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+      <p className="text-sm text-muted-foreground">{activeOption.description}</p>
     </div>
   );
 };
