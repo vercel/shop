@@ -169,7 +169,7 @@ function ProductCardPrice({
           amount={amount}
           currencyCode={currencyCode}
           locale={locale}
-          className="text-base font-medium text-main-foreground"
+          className="text-base text-main-foreground"
         />
         {discountPercent && compareAtAmount && compareAtCurrencyCode && (
           <>
@@ -177,7 +177,7 @@ function ProductCardPrice({
               amount={compareAtAmount}
               currencyCode={compareAtCurrencyCode}
               locale={locale}
-              className="text-sm font-medium text-muted-foreground line-through"
+              className="text-sm text-muted-foreground line-through"
             />
             <DiscountBadge percent={discountPercent} variant={discountVariant} />
           </>
