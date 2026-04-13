@@ -1,55 +1,13 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
-import { getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
-import { shopifyFetch } from "@/lib/shopify/client";
-import type { ShopifyCollection } from "@/lib/shopify/transforms/collection";
-import { transformShopifyCollections } from "@/lib/shopify/transforms/collection";
-
-type CollectionsResponse = {
-  collections: { edges: Array<{ node: ShopifyCollection }> };
-};
+import { getCollections } from "@/lib/shopify/operations/collections";
 
 async function CollectionsList() {
-  await connection();
-
   const locale = await getLocale();
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const data = await shopifyFetch<CollectionsResponse>({
-    operation: "getCollectionsUncached",
-    query: `
-      query getCollectionsUncached($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-        collections(first: 250) {
-          edges {
-            node {
-              handle
-              title
-              description
-              image {
-                url
-                altText
-                width
-                height
-              }
-              updatedAt
-              seo {
-                title
-                description
-              }
-            }
-          }
-        }
-      }
-    `,
-    variables: { first: 250, country, language },
-  });
-
-  const collections = transformShopifyCollections(data.collections.edges.map((e) => e.node));
+  const collections = await getCollections(locale);
 
   return (
     <div className="grid gap-4">
