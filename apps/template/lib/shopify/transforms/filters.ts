@@ -20,24 +20,9 @@ export interface ActiveFilterBadge {
 }
 
 export function getParamKeyFromShopifyId(filterId: string): string {
-  const id = filterId.toLowerCase();
-
-  if (id.includes("option.size")) return "size";
-  if (id.includes("option.color")) return "color";
-  if (id.includes("vendor")) return "vendor";
-  if (id.includes("availability")) return "available";
-  if (id.includes("price")) return "price";
-  if (id.includes("category")) return "category";
-  if (id.includes("product_type")) return "type";
-  if (id.includes("tag")) return "tag";
-
-  const metafieldMatch = filterId.match(/filter\.p\.m\.([^.]+)\.([^.]+)/i);
-  if (metafieldMatch) {
-    return `meta_${metafieldMatch[1]}_${metafieldMatch[2]}`;
-  }
-
-  const parts = filterId.split(".");
-  return parts[parts.length - 1];
+  // Shopify filter IDs already use the standard format (e.g. "filter.v.option.color",
+  // "filter.p.vendor", "filter.v.availability"). Return them as-is for URL params.
+  return filterId.toLowerCase();
 }
 
 function parseShopifyFilterValue(inputJson: string): string | null {
@@ -47,7 +32,7 @@ function parseShopifyFilterValue(inputJson: string): string | null {
     if (input.productVendor) return input.productVendor;
     if (input.productType) return input.productType;
     if (input.available !== undefined) {
-      return input.available ? "true" : "false";
+      return input.available ? "1" : "0";
     }
     if (input.tag) return input.tag;
     if (input.productMetafield) return input.productMetafield.value;
@@ -128,7 +113,7 @@ export function transformShopifyFilters(
 
   let filters = listFilters
     .map(transformFilter)
-    .filter((filter) => filter.paramKey !== "category" && filter.paramKey !== "price");
+    .filter((filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"));
 
   if (hideZeroCount) {
     filters = filters

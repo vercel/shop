@@ -143,69 +143,81 @@ function toArray(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
+function parsePrice(value: string | string[] | undefined): number | undefined {
+  if (!value || Array.isArray(value)) return undefined;
+  const parsed = Number.parseFloat(value);
+  return !Number.isNaN(parsed) && parsed >= 0 ? parsed : undefined;
+}
+
 export function buildProductFiltersFromParams(
   searchParams: Record<string, string | string[] | undefined>,
 ): ProductFilter[] {
   const filters: ProductFilter[] = [];
 
-  for (const size of toArray(searchParams.size)) {
-    filters.push({ variantOption: { name: "Size", value: size } });
-  }
-
-  for (const color of toArray(searchParams.color)) {
-    filters.push({ variantOption: { name: "Color", value: color } });
-  }
-
-  for (const vendor of toArray(searchParams.vendor)) {
-    filters.push({ productVendor: vendor });
-  }
-
-  for (const type of toArray(searchParams.type)) {
-    filters.push({ productType: type });
-  }
-
-  const priceMin = searchParams.price_min;
-  const priceMax = searchParams.price_max;
-
-  if (priceMin || priceMax) {
-    const parsePrice = (value: string | string[] | undefined): number | undefined => {
-      if (!value || Array.isArray(value)) return undefined;
-      const parsed = Number.parseFloat(value);
-      return !Number.isNaN(parsed) && parsed >= 0 ? parsed : undefined;
-    };
-
-    const min = parsePrice(priceMin);
-    const max = parsePrice(priceMax);
-
-    if (min !== undefined || max !== undefined) {
-      filters.push({ price: { min, max } });
-    }
-  }
-
-  const available = searchParams.available;
-  if (available === "true" || available === "false") {
-    filters.push({ available: available === "true" });
-  }
-
-  for (const tag of toArray(searchParams.tag)) {
-    filters.push({ tag });
-  }
-
   for (const [key, value] of Object.entries(searchParams)) {
-    if (!key.startsWith("meta_") || !value) continue;
+    if (!key.startsWith("filter.") || !value) continue;
 
-    const metaPart = key.slice(5);
-    const underscoreIdx = metaPart.indexOf("_");
-    if (underscoreIdx <= 0) continue;
-
-    const namespace = metaPart.substring(0, underscoreIdx);
-    const metaKey = metaPart.substring(underscoreIdx + 1);
-
-    for (const metafieldValue of toArray(value)) {
-      filters.push({
-        productMetafield: { namespace, key: metaKey, value: metafieldValue },
-      });
+    // filter.v.option.{name} → variantOption
+    const optionMatch = key.match(/^filter\.v\.option\.(.+)$/i);
+    if (optionMatch) {
+      const name = optionMatch[1];
+      for (const v of toArray(value)) {
+        filters.push({ variantOption: { name, value: v } });
+      }
+      continue;
     }
+
+    // filter.v.availability → available
+    if (key === "filter.v.availability") {
+      const v = Array.isArray(value) ? value[0] : value;
+      filters.push({ available: v === "1" });
+      continue;
+    }
+
+    // filter.v.price.gte / filter.v.price.lte → handled after loop
+    if (key.startsWith("filter.v.price.")) continue;
+
+    // filter.p.vendor → productVendor
+    if (key === "filter.p.vendor") {
+      for (const v of toArray(value)) {
+        filters.push({ productVendor: v });
+      }
+      continue;
+    }
+
+    // filter.p.product_type → productType
+    if (key === "filter.p.product_type") {
+      for (const v of toArray(value)) {
+        filters.push({ productType: v });
+      }
+      continue;
+    }
+
+    // filter.p.tag → tag
+    if (key === "filter.p.tag") {
+      for (const v of toArray(value)) {
+        filters.push({ tag: v });
+      }
+      continue;
+    }
+
+    // filter.p.m.{namespace}.{key} → productMetafield
+    const metaMatch = key.match(/^filter\.p\.m\.([^.]+)\.(.+)$/i);
+    if (metaMatch) {
+      for (const v of toArray(value)) {
+        filters.push({
+          productMetafield: { namespace: metaMatch[1], key: metaMatch[2], value: v },
+        });
+      }
+      continue;
+    }
+  }
+
+  // Combine price.gte and price.lte into a single price filter
+  const min = parsePrice(searchParams["filter.v.price.gte"]);
+  const max = parsePrice(searchParams["filter.v.price.lte"]);
+  if (min !== undefined || max !== undefined) {
+    filters.push({ price: { min, max } });
   }
 
   return filters;
