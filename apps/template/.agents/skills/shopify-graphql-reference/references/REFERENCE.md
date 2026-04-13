@@ -2,11 +2,19 @@
 
 Use this reference when the task needs detailed guidance beyond the workflow in `SKILL.md`.
 
+The canonical schema inputs for this skill live in:
+
+- `references/schemas/shopify-storefront.graphql`
+- `references/schemas/shopify-customer.graphql`
+
+Refresh those bundled copies with `scripts/fetch-references.sh` when they are missing or stale.
+
 ## Key files
 
 | File | Role |
 |------|------|
-| `.claude/schemas/shopify-storefront.graphql` | Storefront API schema snapshot |
+| `references/schemas/shopify-storefront.graphql` | Bundled Storefront API schema snapshot |
+| `references/schemas/shopify-customer.graphql` | Bundled Customer Account API schema snapshot |
 | `lib/shopify/client.ts` | `shopifyFetch()` GraphQL client |
 | `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `CATEGORY_PRODUCT_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
@@ -97,7 +105,7 @@ const products = flattenEdges(data.collection.products);
 
 ## Guardrails
 
-- Always verify fields against `.claude/schemas/shopify-storefront.graphql`.
+- Always verify fields against `references/schemas/shopify-storefront.graphql`.
 - Read operations need `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
 - Use `CATEGORY_PRODUCT_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
 - Transform Shopify responses to domain types before returning them from operations.
@@ -107,7 +115,7 @@ const products = flattenEdges(data.collection.products);
 
 ### Add a new field to product queries
 
-1. Check `.claude/schemas/shopify-storefront.graphql`.
+1. Check `references/schemas/shopify-storefront.graphql`.
 2. Add the field to the right fragment in `lib/shopify/fragments.ts`.
 3. Update the Shopify response type and transform in `lib/shopify/transforms/product.ts`.
 4. Add the mapped field to `lib/types.ts` if components need it.
@@ -129,7 +137,7 @@ const products = flattenEdges(data.collection.products);
 ### Debug GraphQL errors
 
 - Set `DEBUG_SHOPIFY=true` in `.env.local`.
-- Compare every field and argument against `.claude/schemas/shopify-storefront.graphql`.
+- Compare every field and argument against `references/schemas/shopify-storefront.graphql`.
 - Check whether the operation is using the wrong fragment for the surface.
 
 ## Related template references

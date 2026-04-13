@@ -73,7 +73,7 @@ Common entry points:
 - New pages: `recipes/guides/add-new-page.md`
 - Product fields: `recipes/guides/add-new-product-field.md`
 - UI primitives: `recipes/guides/add-ui-component.md`
-- Shopify GraphQL work: `.agents/skills/write-shopify-graphql/SKILL.md`
+- Shopify GraphQL work: `.agents/skills/shopify-graphql-reference/SKILL.md`
 - Translations: `recipes/i18n/translations.md`
 - Locale configuration: `recipes/architecture/locale-routing.md`
 - Cache behavior: `recipes/architecture/caching-strategy.md`

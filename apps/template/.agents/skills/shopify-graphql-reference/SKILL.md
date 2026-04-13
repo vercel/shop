@@ -1,35 +1,37 @@
 ---
-name: write-shopify-graphql
-description: Write or update Shopify Storefront API queries and mutations using the local schema snapshots, shared fragments, cache conventions, and transforms.
+name: shopify-graphql-reference
+description: Reference bundled Shopify GraphQL schemas, fragments, cache conventions, and transforms for any GraphQL work in the template.
 ---
 
-# Write Shopify GraphQL
+# Shopify GraphQL Reference
 
 ## Description
 
-Use this skill when adding, modifying, or debugging Shopify Storefront API queries and mutations in the template. It keeps GraphQL work aligned with the local schema snapshots, fragment boundaries, locale handling, caching rules, and transform conventions.
+Use this skill as the reference source for Shopify GraphQL work in the template. It keeps queries, mutations, schema lookups, fragment changes, locale handling, caching rules, and transforms aligned with the bundled reference schemas and established storefront patterns.
 
 ## When to Use This Skill
 
-- When the user wants a new Shopify query or mutation
-- When an existing Shopify operation needs more fields
+- When the user is doing any Shopify GraphQL work
+- When the user wants a new query or mutation
+- When an existing operation needs more fields
 - When a GraphQL response shape must be mapped into domain types
 - When debugging Shopify GraphQL errors, missing fields, or stale cache behavior
-- When invoked via `/write-shopify-graphql`
+- When invoked via `/shopify-graphql-reference`
 
 ## Read These First
 
 - Read [references/REFERENCE.md](references/REFERENCE.md) for the detailed technical reference: operation structure, fragment usage, locale context, cache rules, and common modifications.
-- Use `.claude/schemas/shopify-storefront.graphql` as the source of truth for Shopify fields and arguments.
-- If you want bundled schema copies under the skill directory, run `scripts/fetch-references.sh`.
+- Read `references/schemas/shopify-storefront.graphql` before writing or changing fields.
+- Read `references/schemas/shopify-customer.graphql` when customer account GraphQL is relevant.
+- If the bundled references are missing or stale, run `scripts/fetch-references.sh`.
 
 ## Workflow
 
 ### 1. Verify the schema first
 
-- Read `.claude/schemas/shopify-storefront.graphql` before writing or changing fields.
+- Read `references/schemas/shopify-storefront.graphql` before writing or changing fields.
 - Never guess Shopify field names, enum values, or argument shapes.
-- If the snapshot is stale, run `bun run .claude/scripts/fetch-shopify-schemas.ts` or use the `fetch-shopify-schema` skill first.
+- If the bundled schema is stale or missing, run `scripts/fetch-references.sh`.
 
 ### 2. Choose the right operation file
 
@@ -64,13 +66,13 @@ Use this skill when adding, modifying, or debugging Shopify Storefront API queri
 
 ### 7. Verify the change
 
-- Re-read the query against `.claude/schemas/shopify-storefront.graphql`.
+- Re-read the query against `references/schemas/shopify-storefront.graphql`.
 - Check that the operation name passed to `shopifyFetch` matches the GraphQL operation name.
 - Run the smallest relevant validation command for the touched area.
 
 ## Guardrails
 
-- Always reference `.claude/schemas/shopify-storefront.graphql` when writing GraphQL.
+- Always reference `references/schemas/shopify-storefront.graphql` when writing GraphQL.
 - Never interpolate dynamic values directly into the query string when GraphQL variables can carry them.
 - Use `CATEGORY_PRODUCT_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless there is a clear reason not to.
 - Return domain types from operations, not raw Shopify response types.
@@ -80,7 +82,7 @@ Use this skill when adding, modifying, or debugging Shopify Storefront API queri
 
 ### Add a field to an existing product query
 
-1. Confirm the field exists in `.claude/schemas/shopify-storefront.graphql`.
+1. Confirm the field exists in `references/schemas/shopify-storefront.graphql`.
 2. Add it to the appropriate fragment in `lib/shopify/fragments.ts`.
 3. Update the Shopify response type and transform in `lib/shopify/transforms/product.ts`.
 4. Add the mapped field to `lib/types.ts` if components need it.
@@ -102,11 +104,12 @@ Use this skill when adding, modifying, or debugging Shopify Storefront API queri
 ### Debug GraphQL errors
 
 - Set `DEBUG_SHOPIFY=true` in `.env.local` to log Shopify requests with timing and variables.
-- Compare every field and argument against `.claude/schemas/shopify-storefront.graphql`.
+- Compare every field and argument against `references/schemas/shopify-storefront.graphql`.
 - Check whether the wrong fragment is being reused for the surface.
 
 ## See also
 
+- `scripts/fetch-references.sh`
 - `.agents/skills/fetch-shopify-schema/SKILL.md`
 - `references/REFERENCE.md`
 - `.claude/recipes/architecture/type-seams.md`

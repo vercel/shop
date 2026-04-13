@@ -46,5 +46,5 @@
 		"lint": "oxlint . && oxfmt --check",
 		"start": "next start"
 	},
-	"version": "0.20260413.1"
+	"version": "0.20260413.3"
 }
