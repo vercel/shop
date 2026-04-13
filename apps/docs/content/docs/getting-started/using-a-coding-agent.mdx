@@ -20,7 +20,7 @@ The template ships with structured context files that agents read automatically:
 
 - **`AGENTS.md`** - architecture rules and constraints. This tells the agent things like "every cart mutation must call `invalidateCartCache()`" and "components in `ui/` must not import domain types."
 - **`.claude/schemas/`** - local Shopify GraphQL schema snapshots. The agent uses these to write type-safe queries without guessing field names.
-- **`.agents/skills/`** - step-by-step playbooks for common tasks like enabling Shopify Markets or adding customer auth.
+- **`.agents/skills/`** - step-by-step playbooks for common tasks like enabling Shopify Markets, adding customer auth, or writing Shopify GraphQL against the local schema snapshots.
 
 This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules - before you type a single prompt.
 

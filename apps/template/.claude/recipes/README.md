@@ -10,7 +10,7 @@
 | **Add a new page** | [Add New Page](guides/add-new-page.md), [Locale Routing](architecture/locale-routing.md) |
 | **Add a product field** (metafield, attribute) | [Add New Product Field](guides/add-new-product-field.md) |
 | **Create a UI component** | [Add UI Component](guides/add-ui-component.md), [Compound Components](architecture/compound-components.md) |
-| **Write a Shopify query** | [GraphQL Operations](shopify/graphql-operations.md) |
+| **Write a Shopify query** | [`write-shopify-graphql`](../../.agents/skills/write-shopify-graphql/SKILL.md) |
 | **Add translation strings** | [Translations](i18n/translations.md) |
 | **Understand the data flow** | [Data Flow](architecture/data-flow.md) |
 | **Understand caching** | [Caching Strategy](architecture/caching-strategy.md) |
@@ -43,7 +43,7 @@
 
 | Recipe | Purpose |
 |--------|---------|
-| [GraphQL Operations](shopify/graphql-operations.md) | Schema refs, fragments, transforms pipeline |
+| [`write-shopify-graphql`](../../.agents/skills/write-shopify-graphql/SKILL.md) | Schema refs, fragments, caching, transforms pipeline |
 
 ### i18n
 

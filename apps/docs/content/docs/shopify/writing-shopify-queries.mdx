@@ -8,6 +8,8 @@ prerequisites:
 
 This guide walks through adding a new Shopify Storefront API operation from scratch. We'll fetch a shop's privacy policy as a concrete example.
 
+If you're using a coding agent, run `/write-shopify-graphql` in Claude Code or ask the agent to use the `write-shopify-graphql` skill first. The skill follows the same workflow below and keeps the agent anchored to the local schema snapshots and template guardrails.
+
 ## 1. Check the schema
 
 Open `.claude/schemas/shopify-storefront.graphql` and find the field you need. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:

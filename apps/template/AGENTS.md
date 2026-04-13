@@ -65,7 +65,7 @@ For deeper guidance, start with [`.claude/recipes/README.md`](.claude/recipes/RE
 ## Skill Layout
 
 - Canonical storefront skills live in `.agents/skills/`.
-- `apps/shop/.claude/skills` is a compatibility symlink to that directory.
+- `apps/template/.claude/skills` is a compatibility symlink to that directory.
 
 Common entry points:
 
@@ -73,7 +73,7 @@ Common entry points:
 - New pages: `recipes/guides/add-new-page.md`
 - Product fields: `recipes/guides/add-new-product-field.md`
 - UI primitives: `recipes/guides/add-ui-component.md`
-- Shopify GraphQL work: `recipes/shopify/graphql-operations.md`
+- Shopify GraphQL work: `.agents/skills/write-shopify-graphql/SKILL.md`
 - Translations: `recipes/i18n/translations.md`
 - Locale configuration: `recipes/architecture/locale-routing.md`
 - Cache behavior: `recipes/architecture/caching-strategy.md`
