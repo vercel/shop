@@ -17,7 +17,7 @@ export function Price({ amount, currencyCode, locale, className, ...props }: Pri
   }).format(Number(amount));
 
   return (
-    <span className={cn("text-xl font-medium text-foreground", className)} {...props}>
+    <span className={cn("text-xl text-foreground", className)} {...props}>
       {price}
     </span>
   );

@@ -70,10 +70,10 @@ export function BottomBar({ children }: BottomBarProps) {
               className="flex items-center gap-1.5 px-2 py-1"
               onClick={openSearch}
             >
-              <Search className="size-4 text-foreground opacity-50" />
+              <Search className="size-4 text-foreground" />
               <span className="sr-only">Search</span>
             </button>
-            {children ? <div className="w-px h-5 bg-border/50" /> : null}
+            {children ? <div className="w-px h-5 bg-border" /> : null}
           </motion.div>
         )}
       </AnimatePresence>
