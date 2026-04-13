@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Installer } from "@/components/fromsrc/installer";
 import { Button } from "@/components/ui/button";
 import { nav } from "@/lib/constants";
 import { AgentDemo } from "./components/agent-demo";
@@ -18,7 +17,7 @@ const title = "Vercel Shop";
 const description =
 	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
 const starterPrompt =
-	"Create a new Vercel Shop storefront for me. Use the official create-vercel-shop starter, explain any Shopify or Vercel credentials you need, and stop once the local dev server is running.";
+	"Set up a new Vercel Shop project for me. Use `npx create-vercel-shop@latest` to scaffold it. Then follow the Vercel Shop setup docs: if I do not already have Shopify credentials, tell me to go to Shopify Settings -> Apps and sales channels -> Develop apps, install or open the Headless channel, create a storefront, and copy the Storefront API access token. Ask me for `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`, and `NEXT_PUBLIC_SITE_NAME`, create `.env.local`, start the local dev server with the scaffolded package manager, and stop once it is running.";
 
 export const metadata: Metadata = {
 	title,
@@ -33,13 +32,7 @@ const HomePage = () => (
 			title={title}
 		>
 			<div className="flex w-full max-w-3xl flex-col items-center gap-4">
-				<div className="w-full max-w-[20rem] space-y-2 text-left">
-					<p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-						CLI
-					</p>
-					<Installer className="w-full" command="npx create-vercel-shop@latest my-store" />
-				</div>
-				<PromptCopy className="max-w-3xl" prompt={starterPrompt} />
+				<PromptCopy command="npx create-vercel-shop@latest" prompt={starterPrompt} />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
 						Get Started
