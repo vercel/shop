@@ -71,7 +71,7 @@ export function BottomBar({ children }: BottomBarProps) {
               onClick={openSearch}
             >
               <Search className="size-4 text-foreground opacity-50" />
-              <span className="text-xs font-medium text-foreground opacity-50">Search</span>
+              <span className="sr-only">Search</span>
             </button>
             {children ? <div className="w-px h-5 bg-border/50" /> : null}
           </motion.div>

@@ -53,7 +53,11 @@ function ScrollCarousel({ className, children, ...props }: React.ComponentProps<
   const scroll = useCallback((direction: "left" | "right") => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    const scrollAmount = container.clientWidth * 0.8;
+    const firstItem = container.querySelector<HTMLElement>("[data-slot='scroll-carousel-item']");
+    const gap = Number.parseFloat(getComputedStyle(container).columnGap) || 0;
+    const itemWidth = firstItem ? firstItem.offsetWidth + gap : container.clientWidth * 0.8;
+    const visibleItems = Math.floor(container.clientWidth / itemWidth);
+    const scrollAmount = itemWidth * Math.max(visibleItems, 1);
     container.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",

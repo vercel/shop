@@ -1,6 +1,6 @@
 "use client";
 
-import { BotMessageSquare } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { AgentPanel } from "./client";
@@ -18,8 +18,8 @@ export function AgentButton() {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
-        <BotMessageSquare className="size-4 text-primary" />
-        <span className="text-xs font-medium text-primary">Agent</span>
+        <MessageCircle className="size-4 text-primary" />
+        <span className="sr-only">Agent</span>
       </button>
       {open && <AgentPanel open={open} onOpenChange={setOpen} triggerRef={triggerRef} />}
     </>
