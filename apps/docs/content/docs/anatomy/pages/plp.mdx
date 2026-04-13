@@ -21,7 +21,7 @@ A sidebar provides multi-select faceted filters for:
 - **Size, Color, Vendor, Product Type, Tags** - checkbox-based multi-select
 - **Price range** - slider with 4 presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
 
-Active filters appear as badges with remove buttons. Filter state is encoded in URL search params (`?color=red&price_min=10&price_max=100`) so filtered views are shareable.
+Active filters appear as badges with remove buttons. Filter state is encoded in URL search params using Shopify's standard format (`?filter.v.option.color=red&filter.v.price.gte=10&filter.v.price.lte=100`) so filtered views are shareable and compatible with Shopify themes.
 
 Filters use `useOptimistic` for instant UI feedback while the server request is in flight, coordinated through a `FilterTransitionProvider` context.
 

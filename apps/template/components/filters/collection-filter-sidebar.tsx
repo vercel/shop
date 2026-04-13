@@ -102,15 +102,15 @@ function parsePriceValue(value: string | null): number | null {
 
 function applyPriceParams(params: URLSearchParams, min: number | null, max: number | null): void {
   if (min === null) {
-    params.delete("price_min");
+    params.delete("filter.v.price.gte");
   } else {
-    params.set("price_min", min.toString());
+    params.set("filter.v.price.gte", min.toString());
   }
 
   if (max === null) {
-    params.delete("price_max");
+    params.delete("filter.v.price.lte");
   } else {
-    params.set("price_max", max.toString());
+    params.set("filter.v.price.lte", max.toString());
   }
 }
 
@@ -134,8 +134,8 @@ export function CollectionFilterSidebarClient({
   );
 
   const pendingFilterRef = useRef<string | null>(null);
-  const urlPriceMin = parsePriceValue(searchParams.get("price_min"));
-  const urlPriceMax = parsePriceValue(searchParams.get("price_max"));
+  const urlPriceMin = parsePriceValue(searchParams.get("filter.v.price.gte"));
+  const urlPriceMax = parsePriceValue(searchParams.get("filter.v.price.lte"));
   const hasPriceFilter = urlPriceMin !== null || urlPriceMax !== null;
 
   const computeFilterHref = (key: string, value: string) => {
@@ -187,8 +187,8 @@ export function CollectionFilterSidebarClient({
 
   const removePriceRange = () => {
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("price_min");
-    params.delete("price_max");
+    params.delete("filter.v.price.gte");
+    params.delete("filter.v.price.lte");
     params.delete("cursor");
 
     startFilterTransition(() => {
@@ -199,12 +199,10 @@ export function CollectionFilterSidebarClient({
   const clearAllFilters = () => {
     const params = new URLSearchParams(searchParams.toString());
 
-    for (const key of Object.keys(activeFilters)) {
-      params.delete(key);
+    for (const key of [...params.keys()]) {
+      if (key.startsWith("filter.")) params.delete(key);
     }
 
-    params.delete("price_min");
-    params.delete("price_max");
     params.delete("cursor");
 
     startFilterTransition(() => {
