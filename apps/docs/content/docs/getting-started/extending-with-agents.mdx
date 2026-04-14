@@ -8,7 +8,7 @@ prerequisites:
 
 Vercel Shop is built for agentic development. Instead of copy-pasting snippets from docs, you describe what you want and a coding agent handles the implementation - editing files, running commands, and validating the result.
 
-This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture, GraphQL schemas for type-safe queries, and project-scoped plugins that provide common storefront skills and platform-aware tooling.
+This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture and project-scoped plugins that provide common storefront skills, platform-aware tooling, and live Shopify schema access.
 
 ## Supported agents
 
@@ -86,6 +86,6 @@ You can also follow any skill manually from the docs, or inspect the `vercel-sho
 
 ## Going beyond skills
 
-Skills cover the most common extensions, but agents aren't limited to them. You can ask your agent to do anything - restyle the product page, add a wishlist, integrate a third-party review system. The `AGENTS.md` file and GraphQL schemas give it enough context to work with the codebase directly.
+Skills cover the most common extensions, but agents aren't limited to them. You can ask your agent to do anything - restyle the product page, add a wishlist, integrate a third-party review system. The `AGENTS.md` file plus the installed project plugins give it enough context to work with the codebase directly.
 
 For best results, be specific about what you want and let the agent propose an approach before it starts writing code.

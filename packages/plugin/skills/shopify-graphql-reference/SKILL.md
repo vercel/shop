@@ -1,13 +1,13 @@
 ---
 name: shopify-graphql-reference
-description: Reference bundled Shopify GraphQL schemas, fragments, cache conventions, and transforms for any GraphQL work in the template.
+description: Reference Vercel Shop GraphQL patterns, fragments, cache conventions, and transforms for any Shopify GraphQL work in the template.
 ---
 
 # Shopify GraphQL Reference
 
 ## Description
 
-Use this skill as the reference source for Shopify GraphQL work in the template. It keeps queries, mutations, schema lookups, fragment changes, locale handling, caching rules, and transforms aligned with the bundled reference schemas and established storefront patterns.
+Use this skill as the reference source for Shopify GraphQL work in the template. It keeps queries, mutations, schema validation, fragment changes, locale handling, caching rules, and transforms aligned with the live Shopify schema and established storefront patterns.
 
 ## When to Use This Skill
 
@@ -16,22 +16,20 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 - When an existing operation needs more fields
 - When a GraphQL response shape must be mapped into domain types
 - When debugging Shopify GraphQL errors, missing fields, or stale cache behavior
-- When invoked via `/shopify-graphql-reference`
+- When invoked via `/vercel-shop:shopify-graphql-reference`
 
 ## Read These First
 
 - Read [references/REFERENCE.md](references/REFERENCE.md) for the detailed technical reference: operation structure, fragment usage, locale context, cache rules, and common modifications.
-- Read `references/schemas/shopify-storefront.graphql` before writing or changing fields.
-- Read `references/schemas/shopify-customer.graphql` when customer account GraphQL is relevant.
-- If the bundled references are missing or stale, run `scripts/fetch-references.sh`.
+- Use `shopify-ai-toolkit` or the `vercel-shop:fetch-shopify-schema` skill when you need authoritative schema facts for the Storefront or Customer Account APIs.
 
 ## Workflow
 
 ### 1. Verify the schema first
 
-- Read `references/schemas/shopify-storefront.graphql` before writing or changing fields.
+- Verify fields, types, enum values, and arguments with `shopify-ai-toolkit` before writing or changing GraphQL.
 - Never guess Shopify field names, enum values, or argument shapes.
-- If the bundled schema is stale or missing, run `scripts/fetch-references.sh`.
+- Do not add repo-local schema snapshots or `.claude` folders to the template.
 
 ### 2. Choose the right operation file
 
@@ -66,13 +64,13 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 ### 7. Verify the change
 
-- Re-read the query against `references/schemas/shopify-storefront.graphql`.
+- Re-check the query against the live schema with `shopify-ai-toolkit`.
 - Check that the operation name passed to `shopifyFetch` matches the GraphQL operation name.
 - Run the smallest relevant validation command for the touched area.
 
 ## Guardrails
 
-- Always reference `references/schemas/shopify-storefront.graphql` when writing GraphQL.
+- Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit`.
 - Never interpolate dynamic values directly into the query string when GraphQL variables can carry them.
 - Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless there is a clear reason not to.
 - Return domain types from operations, not raw Shopify response types.
@@ -82,7 +80,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 ### Add a field to an existing product query
 
-1. Confirm the field exists in `references/schemas/shopify-storefront.graphql`.
+1. Confirm the field exists in the live Storefront API schema with `shopify-ai-toolkit`.
 2. Add it to the appropriate fragment in `lib/shopify/fragments.ts`.
 3. Update the Shopify response type and transform in `lib/shopify/transforms/product.ts`.
 4. Add the mapped field to `lib/types.ts` if components need it.
@@ -104,14 +102,12 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 ### Debug GraphQL errors
 
 - Set `DEBUG_SHOPIFY=true` in `.env.local` to log Shopify requests with timing and variables.
-- Compare every field and argument against `references/schemas/shopify-storefront.graphql`.
+- Compare every field and argument against the live schema with `shopify-ai-toolkit`.
 - Check whether the wrong fragment is being reused for the surface.
 
 ## See also
 
-- `scripts/fetch-references.sh`
 - the `vercel-shop:fetch-shopify-schema` skill
 - `references/REFERENCE.md`
-- `.claude/recipes/architecture/type-seams.md`
-- `.claude/recipes/architecture/caching-strategy.md`
-- `.claude/recipes/guides/add-new-product-field.md`
+- `vercel-shop:enable-shopify-auth`
+- `vercel-shop:enable-shopify-cms`

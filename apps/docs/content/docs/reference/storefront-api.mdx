@@ -65,7 +65,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
 
 The `@inContext` directive passes country and language for localized pricing and content. Use `getCountryCode(locale)` and `getLanguageCode(locale)` from `lib/i18n` to extract these from a locale string.
 
-Always reference the local schema snapshots in `.claude/schemas/shopify-storefront.graphql` when adding or modifying queries - don't guess field names.
+Always verify fields against the live Storefront API schema with `shopify-ai-toolkit` or [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) when adding or modifying queries - don't guess field names.
 
 ## Fragments
 
@@ -183,9 +183,9 @@ Every operation converts the Shopify response to a domain type before returning.
 
 Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
 
-## Key files
+## Key files and tools
 
-| File | Purpose |
+| Resource | Purpose |
 |------|---------|
 | `lib/shopify/client.ts` | Core fetch wrapper with variable hashing and error handling |
 | `lib/shopify/fragments.ts` | Reusable GraphQL fragment definitions |
@@ -197,4 +197,4 @@ Domain types are defined in `lib/types.ts` and are provider-agnostic. Components
 | `lib/shopify/transforms/product.ts` | Shopify product → domain type |
 | `lib/shopify/transforms/cart.ts` | Shopify cart → domain type |
 | `lib/cart-cache.ts` | `invalidateCartCache()` for mutation cache busting |
-| `.claude/schemas/shopify-storefront.graphql` | Local Storefront API schema snapshot |
+| `shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |

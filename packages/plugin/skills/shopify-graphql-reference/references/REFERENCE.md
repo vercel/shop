@@ -2,19 +2,13 @@
 
 Use this reference when the task needs detailed guidance beyond the workflow in `SKILL.md`.
 
-The canonical schema inputs for this skill live in:
+Schema validation for this skill comes from the installed `Shopify/shopify-ai-toolkit` plugin. Use it to confirm fields, arguments, enum values, and API boundaries before editing queries or mutations.
 
-- `references/schemas/shopify-storefront.graphql`
-- `references/schemas/shopify-customer.graphql`
+## Key files and tools
 
-Refresh those bundled copies with `scripts/fetch-references.sh` when they are missing or stale.
-
-## Key files
-
-| File | Role |
+| Resource | Role |
 |------|------|
-| `references/schemas/shopify-storefront.graphql` | Bundled Storefront API schema snapshot |
-| `references/schemas/shopify-customer.graphql` | Bundled Customer Account API schema snapshot |
+| `Shopify/shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
 | `lib/shopify/client.ts` | `shopifyFetch()` GraphQL client |
 | `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
@@ -105,7 +99,7 @@ const products = flattenEdges(data.collection.products);
 
 ## Guardrails
 
-- Always verify fields against `references/schemas/shopify-storefront.graphql`.
+- Always verify fields against the live schema with `shopify-ai-toolkit`.
 - Read operations need `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
 - Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
 - Transform Shopify responses to domain types before returning them from operations.
@@ -115,7 +109,7 @@ const products = flattenEdges(data.collection.products);
 
 ### Add a new field to product queries
 
-1. Check `references/schemas/shopify-storefront.graphql`.
+1. Check the live Storefront API schema with `shopify-ai-toolkit`.
 2. Add the field to the right fragment in `lib/shopify/fragments.ts`.
 3. Update the Shopify response type and transform in `lib/shopify/transforms/product.ts`.
 4. Add the mapped field to `lib/types.ts` if components need it.
@@ -137,11 +131,5 @@ const products = flattenEdges(data.collection.products);
 ### Debug GraphQL errors
 
 - Set `DEBUG_SHOPIFY=true` in `.env.local`.
-- Compare every field and argument against `references/schemas/shopify-storefront.graphql`.
+- Compare every field and argument against the live schema with `shopify-ai-toolkit`.
 - Check whether the operation is using the wrong fragment for the surface.
-
-## Related template references
-
-- `.claude/recipes/architecture/type-seams.md`
-- `.claude/recipes/architecture/caching-strategy.md`
-- `.claude/recipes/guides/add-new-product-field.md`

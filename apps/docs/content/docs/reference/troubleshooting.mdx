@@ -47,12 +47,14 @@ images: {
 
 ## Build fails with GraphQL errors
 
-The template includes a local Shopify schema snapshot at `.claude/schemas/shopify-storefront.graphql`. If the schema is outdated relative to the API version in use, queries may reference fields that don't exist.
+This usually means the query references a field, argument, or enum value that doesn't exist on the live Shopify API version your store is using.
 
-Refresh the schema:
+Re-check the operation with `shopify-ai-toolkit` or the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) and confirm each field against the live schema before changing the query.
+
+If the Shopify plugin is missing, reinstall it:
 
 ```bash
-pnpm run .claude/scripts/fetch-shopify-schemas.ts
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
 ## Changes in Shopify not appearing on the site

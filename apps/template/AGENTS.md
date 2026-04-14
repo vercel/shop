@@ -29,7 +29,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 1. **Every cart mutation MUST call `invalidateCartCache()`** (from `@/lib/cart-cache`) or cache goes stale.
 2. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
-4. **Always reference `.claude/schemas/` when writing GraphQL**. Never guess Shopify field names.
+4. **Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`**. Never guess Shopify field names.
 
 ## Overview
 
@@ -62,24 +62,25 @@ pnpm format
 Request → Page → Operation → shopifyFetch → Shopify API → Transform → Domain type → Component
 ```
 
-## Recipes
-
-For deeper guidance, start with [`.claude/recipes/README.md`](.claude/recipes/README.md).
-
 ## Storefront Skills
 
 Storefront skills are provided by the project-scoped `vercel-shop` plugin rather than local repo files.
 
 Common entry points:
 
-- Cart changes: `recipes/cart/optimistic-cart.md`, `recipes/cart/cart-actions.md`
-- New pages: `recipes/guides/add-new-page.md`
-- Product fields: `recipes/guides/add-new-product-field.md`
-- UI primitives: `recipes/guides/add-ui-component.md`
 - Shopify GraphQL work: `/vercel-shop:shopify-graphql-reference`
-- Translations: `recipes/i18n/translations.md`
-- Locale configuration: `recipes/architecture/locale-routing.md`
-- Cache behavior: `recipes/architecture/caching-strategy.md`
+- Customer auth and account pages: `/vercel-shop:enable-shopify-auth`
+- Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
+- Locale-prefixed routing only: `/vercel-shop:add-locale-url-prefix`
+- Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
+- Navigation menus: `/vercel-shop:enable-shopify-menus`
+- Analytics: `/vercel-shop:enable-analytics`
+
+## Shopify GraphQL Workflow
+
+- Use the installed `Shopify/shopify-ai-toolkit` plugin to inspect the live Storefront or Customer Account schema before changing fields.
+- Use `/vercel-shop:shopify-graphql-reference` for template-specific GraphQL conventions: fragments, locale context, caching, transforms, and operation placement.
+- Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns
 
@@ -89,19 +90,6 @@ Common entry points:
 - Components import domain types from `@/lib/types`, not Shopify response types.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
-
-## Shopify Schemas
-
-Reference these local schema snapshots when writing or reviewing GraphQL:
-
-- `.claude/schemas/shopify-storefront.graphql`
-- `.claude/schemas/shopify-customer.graphql`
-
-Refresh them with:
-
-```bash
-pnpm run .claude/scripts/fetch-shopify-schemas.ts
-```
 
 ## Configuration
 

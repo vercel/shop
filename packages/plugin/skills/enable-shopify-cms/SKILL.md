@@ -83,7 +83,7 @@ export async function getAllMarketingPageSlugs(): Promise<
 
 ### 2. Write GraphQL queries
 
-Reference `.claude/schemas/shopify-storefront.graphql` for field names. Use `metaobjects(type: "cms_homepage")` and `metaobjects(type: "cms_page")` queries with `@inContext` locale directives.
+Validate field names with `shopify-ai-toolkit` or `vercel-shop:fetch-shopify-schema`. Use `metaobjects(type: "cms_homepage")` and `metaobjects(type: "cms_page")` queries with `@inContext` locale directives.
 
 ### 3. Transform metaobject responses
 
