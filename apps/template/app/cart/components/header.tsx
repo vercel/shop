@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { formatPrice } from "@/lib/utils";
 
-import { useCartRender } from "./context-sync";
+import { useCartRender } from "@/components/cart/context-sync";
 
 interface HeaderProps {
   locale: string;
