@@ -43,8 +43,8 @@ function ProductPageFallback() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Skeleton className="h-11 flex-1" />
-            <Skeleton className="h-11 flex-1" />
+            <Skeleton className="h-12 flex-1" />
+            <Skeleton className="h-12 flex-1" />
           </div>
         </div>
       </div>

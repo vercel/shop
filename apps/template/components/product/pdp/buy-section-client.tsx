@@ -114,7 +114,7 @@ function Content({
                 variant="secondary"
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className="w-full justify-center h-11"
+                className="w-full justify-center h-12"
               >
                 {getButtonText()}
               </Button>
