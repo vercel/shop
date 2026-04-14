@@ -15,7 +15,7 @@ import {
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
-import { useCart } from "@/components/cart/context";
+import { useCart } from "./context";
 
 interface ItemRowProps {
   item: CartLine;

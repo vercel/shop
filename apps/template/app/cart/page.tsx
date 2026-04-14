@@ -4,13 +4,12 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { CartContextSync } from "@/components/cart/context-sync";
-
-import { Empty } from "./components/empty-cart";
-import { Header } from "./components/header";
-import { ItemsSection } from "./components/items-section";
-import { PageSkeleton } from "./components/skeletons";
-import { Summary } from "./components/summary";
-import { Upsells } from "./components/upsell-recommendations";
+import { Empty } from "@/components/cart/empty-cart";
+import { Header } from "@/components/cart/header";
+import { ItemsSection } from "@/components/cart/items-section";
+import { PageSkeleton } from "@/components/cart/skeletons";
+import { Summary } from "@/components/cart/summary";
+import { Upsells } from "@/components/cart/upsell-recommendations";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { getCart } from "@/lib/shopify/operations/cart";
