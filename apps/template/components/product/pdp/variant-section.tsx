@@ -123,7 +123,7 @@ export function VariantSection({
         <Suspense
           fallback={
             <div className="grid grid-cols-2 gap-2">
-              <div className="h-11 rounded-lg bg-[#5A31F4]/50" />
+              <div className="h-11 rounded-lg bg-shop/50" />
               <div className="h-11 rounded-lg bg-foreground/50" />
             </div>
           }
