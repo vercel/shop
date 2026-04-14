@@ -28,7 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const locale = await getLocale();
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("content.homepage"),
+  ]);
   const featuredProductsResult = await getProducts({ limit: 10, locale });
 
   return (
@@ -54,7 +57,7 @@ export default async function HomePage() {
         <div className="flex flex-col gap-12">
           {featuredProductsResult.products.length > 0 && (
             <ProductsCarousel
-              title="Featured products"
+              title={t("featuredProducts.title")}
               products={featuredProductsResult.products}
               locale={locale}
             />

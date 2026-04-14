@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRightIcon, InfoIcon, Loader2 } from "lucide-react";
+import { ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -132,18 +132,9 @@ export function Summary({ locale }: SummaryProps) {
               onCheckedChange={handleGiftToggle}
               disabled={isPending}
             />
-            <div className="flex-1">
-              <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
-                {t("isThisAGift")}
-              </label>
-              <button
-                type="button"
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mt-0.5"
-              >
-                <InfoIcon className="size-3" />
-                {t("moreInfo")}
-              </button>
-            </div>
+            <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
+              {t("isThisAGift")}
+            </label>
           </div>
         </CardFooter>
       </Card>

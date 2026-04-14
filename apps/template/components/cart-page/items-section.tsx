@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCartRender } from "@/components/cart/context-sync";
 import { ItemRow } from "./item-row";
 
@@ -9,13 +11,14 @@ interface ItemsSectionProps {
 
 export function ItemsSection({ locale }: ItemsSectionProps) {
   const cart = useCartRender();
+  const t = useTranslations("cart");
   const lines = cart?.lines ?? [];
 
   return (
     <div className="space-y-4">
       {lines.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">No items in your cart</p>
+          <p className="text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
         <div className="space-y-4">
