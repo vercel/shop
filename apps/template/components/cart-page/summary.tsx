@@ -8,9 +8,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { cn, formatPrice } from "@/lib/utils";
 
-import { prepareCheckoutAction, updateCartNoteAction } from "./actions";
-import { useCart } from "./context";
-import { useCartRender } from "./context-sync";
+import { prepareCheckoutAction, updateCartNoteAction } from "@/components/cart/actions";
+import { useCart } from "@/components/cart/context";
+import { useCartRender } from "@/components/cart/context-sync";
 
 const GIFT_NOTE_MARKER = "🎁 This is a gift";
 

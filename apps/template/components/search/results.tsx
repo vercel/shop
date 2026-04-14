@@ -5,8 +5,8 @@ import {
   ProductGridPendingOverlay,
 } from "@/components/collections/filter-pending-context";
 import { CollectionsPagination } from "@/components/collections/pagination";
-import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
-import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
+import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
+import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";

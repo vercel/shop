@@ -12,9 +12,9 @@ import {
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { CollectionFilterSidebarClient } from "@/components/filters/collection-filter-sidebar";
-import { CollectionFilterSidebarSkeleton } from "@/components/filters/collection-filter-sidebar-skeleton";
-import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
+import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
+import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
+import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { Container } from "@/components/layout/container";
 import { Results, ResultsSkeleton } from "@/components/search/results";
 import { Skeleton } from "@/components/ui/skeleton";

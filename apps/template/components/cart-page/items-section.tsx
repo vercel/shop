@@ -1,6 +1,6 @@
 "use client";
 
-import { useCartRender } from "./context-sync";
+import { useCartRender } from "@/components/cart/context-sync";
 import { ItemRow } from "./item-row";
 
 interface ItemsSectionProps {
