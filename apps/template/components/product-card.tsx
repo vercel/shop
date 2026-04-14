@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
-import { FeaturedBadge } from "@/components/featured-badge";
 import {
   ProductCardBadge,
   ProductCardContent,
@@ -25,7 +25,7 @@ export interface ProductCardProps {
   className?: string;
 }
 
-export function ProductCard({
+export async function ProductCard({
   product,
   locale,
   variant = "default",
@@ -34,13 +34,16 @@ export function ProductCard({
   className,
 }: ProductCardProps) {
   const isFeatured = variant === "featured";
+  const t = isFeatured ? await getTranslations("product") : null;
 
   return (
     <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
       <ProductCardRoot variant={variant}>
-        {isFeatured && (
+        {isFeatured && t && (
           <ProductCardBadge>
-            <FeaturedBadge />
+            <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
+              {t("featuredBadge")}
+            </span>
           </ProductCardBadge>
         )}
         <ProductCardImageContainer variant={variant}>
