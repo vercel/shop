@@ -4,12 +4,12 @@
     "correctness": "warn",
     "suspicious": "warn"
   },
-  "rules": {
-    "react/react-in-jsx-scope": "off",
-    "no-unused-vars": "off"
-  },
-  "plugins": ["typescript", "react", "nextjs"],
   "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**", "app/.well-known/**"],
+  "plugins": ["typescript", "react", "nextjs"],
+  "rules": {
+    "no-unused-vars": "off",
+    "react/react-in-jsx-scope": "off"
+  },
   "settings": {
     "jsx-a11y": {
       "components": {

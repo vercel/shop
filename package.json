@@ -1,20 +1,20 @@
 {
-	"dependencies": {
-		"turbo": "2.9.6"
-	},
-	"name": "@vercel/shop",
-	"packageManager": "pnpm@10.32.1",
-	"private": true,
-	"scripts": {
-		"build": "turbo run build",
-		"dev": "turbo run dev",
-		"format": "turbo run format",
-		"lint": "turbo run lint",
-		"plugin:install:local": "npx plugins add ./packages/plugin --scope project --yes",
-		"start": "turbo run start",
-		"test": "turbo run test"
-	},
-	"workspaces": [
-		"apps/*"
-	]
+  "dependencies": {
+    "turbo": "2.9.6"
+  },
+  "name": "@vercel/shop",
+  "packageManager": "pnpm@10.33.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "format": "turbo run format",
+    "lint": "turbo run lint",
+    "plugin:install:local": "npx plugins add ./packages/plugin --scope project --yes",
+    "start": "turbo run start",
+    "test": "turbo run test"
+  },
+  "workspaces": [
+    "apps/*"
+  ]
 }
