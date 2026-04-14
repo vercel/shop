@@ -57,7 +57,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlayWithAddress locale={locale} />
             </Suspense>
             <Suspense>
-              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
+              <BottomBar>
+                {process.env.AI_AGENT_DISABLED ? null : <AgentButton />}
+              </BottomBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
