@@ -10,7 +10,7 @@ export const nav = [
   },
   {
     label: "Demo",
-    href: "https://shop-template.labs.vercel.dev",
+    href: "https://template.vercel.shop",
     target: "_blank",
   },
   {
