@@ -8,14 +8,18 @@ import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
 
+const PLACEHOLDER_HANDLE = "__placeholder__";
+
 export async function generateStaticParams() {
-  return [{ handle: "vellura-interiors-arceau-lounge-chair-srenit-collection-1f4z" }];
+  return [{ handle: PLACEHOLDER_HANDLE }];
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+
+  if (handle === PLACEHOLDER_HANDLE) return {};
 
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
@@ -36,7 +40,10 @@ export default async function ProductPage({
   searchParams,
 }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => handle);
+  const handlePromise = params.then(({ handle }) => {
+    if (handle === PLACEHOLDER_HANDLE) notFound();
+    return handle;
+  });
 
   const productPromise = handlePromise.then((handle) =>
     getProduct(handle, locale).catch(() => notFound()),
