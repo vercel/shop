@@ -492,14 +492,13 @@ All account pages must call `requireSession()` or `requireCustomerSession()` bef
 
 ### Step 11. Wire nav account component
 
-Create `components/layout/nav/account.tsx`:
+Create `components/layout/nav/account.tsx` — a server component that renders an icon-only account link matching the spartan style of the cart icon:
 
 ```tsx
-import { AccountClient } from "./account-client";
 import { getCustomerSession } from "@/lib/auth/server";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { UserIcon } from "lucide-react";
+import { UserRoundIcon, UserRoundCheckIcon } from "lucide-react";
 
 export async function NavAccount() {
   const [session, t] = await Promise.all([getCustomerSession(), getTranslations("nav")]);
@@ -508,41 +507,40 @@ export async function NavAccount() {
     return (
       <Link
         href="/login"
-        className="flex items-center gap-2 px-3 py-2 hover:opacity-70 focus-visible:opacity-70 transition-opacity outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:rounded-full"
+        className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-          <UserIcon className="w-4 h-4" />
-        </div>
-        <div className="hidden lg:flex flex-col leading-tight w-18">
-          <span className="text-xs font-semibold text-foreground">{t("account")}</span>
-          <span className="text-xs text-muted-foreground">{t("signIn")}</span>
-        </div>
+        <UserRoundIcon className="size-5" />
+        <span className="sr-only">{t("signIn")}</span>
       </Link>
     );
   }
 
   return (
-    <AccountClient
-      email={session.email}
-      translations={{
-        account: t("account"),
-        profile: t("profile"),
-        orders: t("orders"),
-        signOut: t("signOut"),
-      }}
-    />
+    <Link
+      href="/account"
+      className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
+    >
+      <UserRoundCheckIcon className="size-5" />
+      <span className="sr-only">{t("account")}</span>
+    </Link>
+  );
+}
+
+export function NavAccountFallback() {
+  return (
+    <div className="flex items-center justify-center text-foreground">
+      <UserRoundIcon className="size-5" />
+    </div>
   );
 }
 ```
 
-Create `components/layout/nav/account-client.tsx` with a dropdown menu showing profile/orders links and sign-out. Create `components/layout/nav/sign-out-button.tsx` as a standalone sign-out button.
-
 Then add to `components/layout/nav/index.tsx`:
 
 ```tsx
-import { NavAccount } from "./account";
+import { NavAccount, NavAccountFallback } from "./account";
 // ... in the nav bar, inside the actions div:
-<Suspense fallback={<AccountFallback />}>
+<Suspense fallback={<NavAccountFallback />}>
   <NavAccount />
 </Suspense>;
 ```
