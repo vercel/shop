@@ -30,7 +30,15 @@ const nextConfig: NextConfig = {
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],
-      afterFiles: [],
+      afterFiles: [
+        {
+          source: "/products/:handle",
+          has: [
+            { type: "query", key: "variantId", value: "(?<variantId>.+)" },
+          ],
+          destination: "/products/:handle/variants/:variantId",
+        },
+      ],
       fallback: [],
     };
   },
