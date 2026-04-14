@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     cachedNavigations: true,
+    dynamicOnHover: true,
     optimisticRouting: true,
     partialFallbacks: true,
     turbopackFileSystemCacheForDev: true,
