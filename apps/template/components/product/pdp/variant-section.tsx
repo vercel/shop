@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Suspense } from "react";
 
 import { BuyButtons } from "@/components/product/pdp/buy-buttons";
@@ -8,6 +7,7 @@ import {
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
 import { ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
@@ -35,9 +35,6 @@ export function VariantSection({
 
   const needsPartitioning = hasColorImagePartitioning(options, variants);
 
-  // First image for the Suspense fallback
-  const fallbackImage = images[0];
-
   return (
     <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
       {needsPartitioning ? (
@@ -48,20 +45,7 @@ export function VariantSection({
           className="lg:col-span-7"
         >
           <Suspense
-            fallback={
-              fallbackImage ? (
-                <div className="relative aspect-square w-full overflow-hidden bg-accent">
-                  <Image
-                    src={fallbackImage.url}
-                    alt={fallbackImage.altText || `${title} image`}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 1024px) 25vw, 100vw"
-                    priority
-                  />
-                </div>
-              ) : null
-            }
+            fallback={<Skeleton className="aspect-square w-full" />}
           >
             <ResolvedColorImages
               images={images}
