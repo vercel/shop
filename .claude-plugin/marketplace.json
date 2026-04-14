@@ -4,7 +4,7 @@
     "name": "Vercel"
   },
   "metadata": {
-    "description": "Vercel-maintained plugins for storefront and platform-focused agent workflows.",
+    "description": "Official Vercel Shop agent plugins for building, extending, and modernizing Shopify storefronts on Next.js.",
     "version": "0.1.0"
   },
   "plugins": [
