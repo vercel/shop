@@ -61,7 +61,7 @@ async function ProductContent({
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
-  const [product, variantId] = await Promise.all([productPromise, variantIdPromise]);
+  const product = await productPromise;
   const { handle, title } = product;
 
   return (
@@ -83,7 +83,7 @@ async function ProductContent({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="flex flex-col gap-12">
-        <VariantSection product={product} locale={locale} variantId={variantId} />
+        <VariantSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
         <Recommendations handle={handle} locale={locale} />
       </div>
     </>
