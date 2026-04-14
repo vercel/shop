@@ -265,14 +265,6 @@ export interface PredictiveSearchResult {
   queries: SearchSuggestion[];
 }
 
-export type ContentBlockType =
-  | "featured-products"
-  | "promo-banner"
-  | "rich-text"
-  | "image-gallery"
-  | "product-grid"
-  | "products";
-
 export interface MarketingImage {
   url: string;
   alt: string;
@@ -288,58 +280,3 @@ export interface HeroSection {
   ctaText: string | null;
   ctaLink: string | null;
 }
-
-export interface CmsRichTextNode {
-  type?: string;
-  nodeType?: string;
-  children?: CmsRichTextNode[];
-  content?: CmsRichTextNode[];
-  value?: string;
-  marks?: Array<{ type: string }>;
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-  code?: boolean;
-  url?: string;
-  data?: Record<string, unknown>;
-  level?: number;
-  listType?: "ordered" | "unordered";
-}
-
-export type CmsRichText = CmsRichTextNode;
-
-export interface ContentSection {
-  id: string;
-  blockType: ContentBlockType;
-  title: string | null;
-  content: CmsRichText | null;
-  media: MarketingImage[];
-  products: ProductCard[];
-  collectionProducts?: ProductCard[];
-  settings: Record<string, unknown>;
-}
-
-export interface MarketingPage {
-  id: string;
-  locale: string;
-  slug: string;
-  title: string;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  alternates: LocalizedSlugs;
-  heroSection: HeroSection | null;
-  sections: ContentSection[];
-  publishedAt: string;
-}
-
-export interface Homepage {
-  id: string;
-  title: string;
-  metaTitle: string | null;
-  metaDescription: string | null;
-  heroSection: HeroSection | null;
-  sections: ContentSection[];
-  publishedAt: string;
-}
-
-export type LocalizedSlugs = Record<Locale, string | null>;

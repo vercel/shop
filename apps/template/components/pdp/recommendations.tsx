@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
-import { ProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
+import { ProductsCarousel } from "@/components/product/products-carousel";
 
 function Fallback() {
   return (

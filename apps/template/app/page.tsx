@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { ProductsCarousel } from "@/components/cms/blocks/top-products-carousel";
-import { HeroSection } from "@/components/cms/hero-section";
+import { HeroSection } from "@/components/hero-section";
+import { ProductsCarousel } from "@/components/product/products-carousel";
 import { Container } from "@/components/layout/container";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
