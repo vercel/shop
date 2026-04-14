@@ -18,7 +18,7 @@
 | `lib/params.ts` | Current deployment locale helper used by pages and operations |
 | `lib/i18n/request.ts` | `next-intl` request config and message loading |
 | `lib/i18n/messages/*.json` | Translation files (en.json, de-DE.json, fr-FR.json, nl-NL.json, es-ES.json) |
-| `.claude/skills/add-locale-url-prefix.md` | Documented migration path to locale-prefixed URLs |
+| `/vercel-shop:add-locale-url-prefix` | Documented migration path to locale-prefixed URLs |
 
 ## How it works
 
@@ -65,7 +65,7 @@ Page files live directly under `app/...` and links should use clean, unprefixed 
 
 When you are ready to add true multi-locale routing:
 
-- Start with `.claude/skills/add-locale-url-prefix.md`.
+- Start with `/vercel-shop:add-locale-url-prefix`.
 - Move routes under `app/[locale]/`.
 - Teach `getLocale()` and `lib/i18n/request.ts` to resolve locale from the request instead of always using the deployment default.
 - Add locale-aware navigation and SEO alternates.
@@ -92,7 +92,7 @@ When you are ready to add true multi-locale routing:
 3. Add the locale to `enabledLocales` only when that locale is actually ready to ship
 4. Create `lib/i18n/messages/ja-JP.json` with all translation keys (copy from `en.json` as starting point)
 5. If Shopify has the market, update `getCountryCode`/`getLanguageCode` helpers if needed
-6. If you want locale-prefixed URLs, follow `.claude/skills/add-locale-url-prefix.md` instead of patching routing ad hoc
+6. If you want locale-prefixed URLs, follow `/vercel-shop:add-locale-url-prefix` instead of patching routing ad hoc
 
 ### Constructing links
 

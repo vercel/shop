@@ -1,9 +1,9 @@
 # Recipe: GraphQL Operations
 
-> The canonical agent workflow now lives in
-> [`../../.agents/skills/write-shopify-graphql/SKILL.md`](../../.agents/skills/write-shopify-graphql/SKILL.md).
+> The canonical agent workflow now lives in the
+> `/vercel-shop:shopify-graphql-reference` plugin skill.
 
-Use the `write-shopify-graphql` skill when you are adding, modifying, or debugging
+Use `/vercel-shop:shopify-graphql-reference` when you are adding, modifying, or debugging
 Shopify Storefront API queries and mutations. This recipe remains as a compatibility
 pointer for older links inside the template.
 
