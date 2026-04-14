@@ -33,7 +33,6 @@ export const unstable_instant = {
 
 export default async function ProductPage({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
   const handlePromise = params.then(({ handle }) => handle);
@@ -42,9 +41,8 @@ export default async function ProductPage({
     getProduct(handle, locale).catch(() => notFound()),
   );
 
-  const variantIdPromise = searchParams.then(
-    (sp) => (sp?.variantId as string | undefined),
-  );
+  // TEMP: searchParams disabled for debugging Chrome fallback flash
+  const variantIdPromise = Promise.resolve(undefined);
 
   return (
     <ProductDetailPage
