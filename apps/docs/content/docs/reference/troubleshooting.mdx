@@ -74,7 +74,13 @@ Coding agents rely on `AGENTS.md` in the project root plus the expected project-
 - Verify you cloned from the correct template (`vercel/shop`, `apps/template` path)
 - The `AGENTS.md` file should be at the project root, not nested in a subdirectory
 - Check that `.claude/settings.json` exists and that the project plugins are enabled
-- Rerun the project plugin installs if needed:
+- Rerun the project plugin setup from the project root if needed:
+
+```bash
+npx create-vercel-shop@latest --no-template
+```
+
+If that still fails, rerun the plugin installs individually:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes

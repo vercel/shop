@@ -54,7 +54,20 @@ const HomePage = () => (
 				<FakeBrowser />
 			</CenteredSection>
 			<OneTwoSection
-				description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+				description={
+					<>
+						<p>
+							The vercel-shop plugin and template recipes let agents extend your
+							store with a single command. Add markets, CMS, auth, and more.
+						</p>
+						<div className="mt-4 max-w-[22rem]">
+							<Installer
+								className="w-full"
+								command="npx create-vercel-shop@latest --no-template"
+							/>
+						</div>
+					</>
+				}
 				title="Agentic development"
 				reverse
 			>

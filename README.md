@@ -20,6 +20,12 @@ The scaffold also installs these project-scoped agent plugins:
 - `vercel-plugin`
 - `shopify-ai-toolkit`
 
+To install only the agent plugins into an existing project, run this from that project's root:
+
+```sh
+npx create-vercel-shop@latest --no-template
+```
+
 2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
 
 ```sh
