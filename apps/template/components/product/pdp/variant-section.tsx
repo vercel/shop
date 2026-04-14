@@ -92,16 +92,56 @@ export function VariantSection({
           selectedOptions={defaultOptions}
           handle={handle}
         />
-        <BuyButtons
-          selectedVariant={selectedVariant}
-          title={title}
-          handle={handle}
-          featuredImage={featuredImage}
-          availableForSale={product.availableForSale}
-        />
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 gap-2">
+              <div className="h-11 rounded-lg bg-[#5A31F4]/50" />
+              <div className="h-11 rounded-lg bg-foreground/50" />
+            </div>
+          }
+        >
+          <ResolvedBuyButtons
+            variants={variants}
+            title={title}
+            handle={handle}
+            featuredImage={featuredImage}
+            availableForSale={product.availableForSale}
+            variantIdPromise={variantIdPromise}
+          />
+        </Suspense>
         <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
       </div>
     </div>
+  );
+}
+
+async function ResolvedBuyButtons({
+  variants,
+  title,
+  handle,
+  featuredImage,
+  availableForSale,
+  variantIdPromise,
+}: {
+  variants: ProductVariant[];
+  title: string;
+  handle: string;
+  featuredImage: ImageType | null;
+  availableForSale: boolean;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+
+  return (
+    <BuyButtons
+      selectedVariant={selectedVariant}
+      title={title}
+      handle={handle}
+      featuredImage={featuredImage}
+      availableForSale={availableForSale}
+    />
   );
 }
 
