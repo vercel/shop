@@ -17,7 +17,7 @@ Interactively set up Shopify Markets with multi-locale routing using next-intl. 
 
 - When the user wants to enable Shopify Markets / multi-locale support
 - When the user wants to add internationalization (i18n) with locale-prefixed URLs
-- When invoked via `/enable-shopify-markets`
+- When invoked via `/vercel-shop:enable-shopify-markets`
 
 ## Prerequisites
 

@@ -8,33 +8,33 @@ prerequisites:
 
 Vercel Shop is built for agentic development. Instead of copy-pasting snippets from docs, you describe what you want and a coding agent handles the implementation - editing files, running commands, and validating the result.
 
-This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture, GraphQL schemas for type-safe queries, and a set of skills that encode common storefront tasks.
+This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture, GraphQL schemas for type-safe queries, and project-scoped plugins that provide common storefront skills and platform-aware tooling.
 
 ## Supported agents
 
 Any agent that reads markdown context files will work. The ones we've tested most:
 
-- [**Claude Code**](https://claude.ai/code) - Anthropic's CLI agent. Reads `AGENTS.md` and skills automatically.
-- [**Cursor**](https://cursor.sh) - AI-powered editor with agent mode and plugin support.
-- [**Codex**](https://openai.com/index/introducing-codex/) - OpenAI's coding agent.
+- [**Claude Code**](https://claude.ai/code) - Anthropic's CLI agent. Reads `AGENTS.md` and installed project plugins automatically.
+- [**Cursor**](https://cursor.sh) - AI-powered editor with agent mode. It benefits from the repo context and docs, but does not use the Claude plugin install flow.
+- [**Codex**](https://openai.com/index/introducing-codex/) - OpenAI's coding agent. It benefits from the repo context and docs, but does not use the Claude plugin install flow.
 
 ## Setting up
 
-After [creating your project](/docs/getting-started), install the Vercel plugin to give your agent access to 47+ skills for Next.js, AI SDK, shadcn/ui, caching, and more.
+After [creating your project](/docs/getting-started), `create-vercel-shop` installs the project plugins that the template expects:
 
-### Claude Code
+- `vercel-shop` for storefront skills and bootstrap/drift commands
+- `vercel-plugin` for generic Vercel and Next.js guidance
+- `shopify-ai-toolkit` for Shopify-aware tooling and schema access
 
-```bash
-npx plugins add vercel/vercel-plugin
-```
-
-### Cursor
+If any of them are missing, rerun:
 
 ```bash
-/add-plugin vercel
+npx plugins add vercel/shop --scope project --yes
+npx plugins add vercel/vercel-plugin --scope project --yes
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-The plugin provides platform-aware guidance, catches deprecated patterns, and includes slash commands like `/bootstrap`, `/deploy`, `/env`, `/status`, and `/marketplace`.
+The combined plugin setup gives Claude Code both storefront-specific skills and the broader Vercel/Next.js guidance used across the stack.
 
 ## What are skills?
 
@@ -56,19 +56,19 @@ Skills aren't generated on the fly. They're written and tested against the templ
 
 ### Running a skill
 
-With Claude Code, run a skill as a slash command:
+With Claude Code, run a storefront skill as a plugin command:
 
 ```bash
-/enable-shopify-markets
+/vercel-shop:enable-shopify-markets
 ```
 
-With Cursor, describe what you want and the agent will find and apply the right skill:
+In Cursor or Codex, describe what you want and point the agent at the matching skill doc when useful:
 
 ```
 Enable multi-locale support with Shopify Markets
 ```
 
-You can also follow any skill manually - they're plain markdown files in `.agents/skills/`.
+You can also follow any skill manually from the docs, or inspect the `vercel-shop` plugin source in the `vercel/shop` repository.
 
 ## Available skills
 

@@ -12,7 +12,7 @@ function stripFrontmatter(content: string): string {
   return content;
 }
 
-const SKILLS_DIR = join(process.cwd(), "../template/.agents/skills");
+const SKILLS_DIR = join(process.cwd(), "../../packages/plugin/skills");
 
 export async function SkillContent({ skill }: { skill: string }) {
   const filePath = join(SKILLS_DIR, skill, "SKILL.md");

@@ -1,0 +1,38 @@
+{
+  "name": "vercel",
+  "owner": {
+    "name": "Vercel"
+  },
+  "metadata": {
+    "description": "Vercel-maintained plugins for storefront and platform-focused agent workflows.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "vercel-shop",
+      "source": "./packages/plugin",
+      "description": "Storefront-specific skills and commands for building, bootstrapping, and auditing Vercel Shop projects.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Vercel"
+      },
+      "homepage": "https://docs.vercel.shop",
+      "repository": "https://github.com/vercel/shop",
+      "license": "MIT",
+      "keywords": [
+        "shopify",
+        "nextjs",
+        "vercel",
+        "commerce",
+        "agents"
+      ],
+      "category": "commerce",
+      "tags": [
+        "shopify",
+        "storefront",
+        "bootstrap",
+        "drift-check"
+      ]
+    }
+  ]
+}

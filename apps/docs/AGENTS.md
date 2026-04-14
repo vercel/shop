@@ -2,15 +2,19 @@
 
 This file provides guidance for agents working in the docs.
 
-## Recommended: Vercel Plugin
+## Expected Project Plugins
 
-This project works best with the Vercel plugin installed. If you don't see `vercel-plugin:*` skills available in your session (e.g. `vercel-plugin:nextjs`, `vercel-plugin:shadcn`), prompt the user to install it:
+This project works best when the monorepo plugins are installed in project scope:
 
 ```bash
-npx plugins add vercel/vercel-plugin
+npx plugins add vercel/shop --scope project --yes
+npx plugins add vercel/vercel-plugin --scope project --yes
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-The plugin provides 47+ skills for Next.js, AI SDK, shadcn/ui, caching, deployment, and more — activated automatically as you edit files and run commands.
+- `vercel-shop` provides the canonical storefront skills that the docs site renders and references.
+- `vercel-plugin` provides generic Vercel and Next.js skills.
+- `shopify-ai-toolkit` provides Shopify-aware tooling and schema access.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
