@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
-import { BuyButtons } from "@/components/product/pdp/buy-buttons";
+import { BuyButtons } from "@/components/pdp/buy-buttons";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
-} from "@/components/product/pdp/product-info";
-import { ColorImageCarouselItems, ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
-import { ProductPrice } from "@/components/product/pdp/product-price";
+} from "@/components/pdp/product-info";
+import { ColorImageCarouselItems, ColorImageGrid, ProductMedia } from "@/components/pdp/product-media";
+import { ProductPrice } from "@/components/pdp/product-price";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   computeInitialSelectedOptions,
@@ -15,7 +15,7 @@ import {
   hasColorImagePartitioning,
   hasUniformPricing,
   resolveSelectedVariant,
-} from "@/components/product/pdp/variants";
+} from "@/components/pdp/variants";
 import type { Locale } from "@/lib/i18n";
 import type { Image as ImageType, ProductDetails, ProductOption, ProductVariant } from "@/lib/types";
 

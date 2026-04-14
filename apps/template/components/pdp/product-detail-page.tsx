@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
-import { Recommendations } from "@/components/product/recommendations";
-import { ProductSchema } from "@/components/product/schema";
+import { Recommendations } from "@/components/pdp/recommendations";
+import { ProductSchema } from "@/components/pdp/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
