@@ -3,16 +3,17 @@ import { Suspense } from "react";
 import { BuyButtons } from "@/components/product/pdp/buy-buttons";
 import {
   ProductInfoDescription,
-  ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
 import { ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
+import { ProductPrice } from "@/components/product/pdp/product-price";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
   getSharedImages,
   hasColorImagePartitioning,
+  hasUniformPricing,
   resolveSelectedVariant,
 } from "@/components/product/pdp/variants";
 import type { Locale } from "@/lib/i18n";
@@ -34,6 +35,7 @@ export function VariantSection({
   const selectedVariant = resolveSelectedVariant(variants, defaultOptions);
 
   const needsPartitioning = hasColorImagePartitioning(options, variants);
+  const uniformPrice = hasUniformPricing(variants);
 
   return (
     <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
@@ -66,7 +68,24 @@ export function VariantSection({
       )}
 
       <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
-        <ProductInfoHeader selectedVariant={selectedVariant} title={title} locale={locale} />
+        <div data-slot="product-info-header">
+          <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
+          {uniformPrice ? (
+            selectedVariant && (
+              <ProductPrice
+                amount={selectedVariant.price.amount}
+                currencyCode={selectedVariant.price.currencyCode}
+                compareAtAmount={selectedVariant.compareAtPrice?.amount}
+                locale={locale}
+                className="mt-3"
+              />
+            )
+          ) : (
+            <Suspense fallback={<Skeleton className="h-6 w-24 mt-3" />}>
+              <ResolvedPrice variants={variants} locale={locale} variantIdPromise={variantIdPromise} />
+            </Suspense>
+          )}
+        </div>
         <ProductInfoOptions
           variants={variants}
           options={options}
@@ -83,6 +102,32 @@ export function VariantSection({
         <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
       </div>
     </div>
+  );
+}
+
+async function ResolvedPrice({
+  variants,
+  locale,
+  variantIdPromise,
+}: {
+  variants: ProductVariant[];
+  locale: string;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+
+  if (!selectedVariant) return null;
+
+  return (
+    <ProductPrice
+      amount={selectedVariant.price.amount}
+      currencyCode={selectedVariant.price.currencyCode}
+      compareAtAmount={selectedVariant.compareAtPrice?.amount}
+      locale={locale}
+      className="mt-3"
+    />
   );
 }
 

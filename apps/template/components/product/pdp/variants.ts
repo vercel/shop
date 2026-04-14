@@ -303,6 +303,22 @@ export function getPartitionedImagesForSelectedColor(
 }
 
 /**
+ * Returns true when all variants share the same price and compareAtPrice.
+ * When true, we can render the price immediately without waiting for
+ * searchParams to resolve the selected variant.
+ */
+export function hasUniformPricing(variants: ProductVariant[]): boolean {
+  if (variants.length <= 1) return true;
+  const first = variants[0];
+  return variants.every(
+    (v) =>
+      v.price.amount === first.price.amount &&
+      v.price.currencyCode === first.price.currencyCode &&
+      v.compareAtPrice?.amount === first.compareAtPrice?.amount,
+  );
+}
+
+/**
  * Returns true when the product has multiple color variants with
  * distinct images — meaning the gallery would change based on
  * the selected color (i.e. based on searchParams).
