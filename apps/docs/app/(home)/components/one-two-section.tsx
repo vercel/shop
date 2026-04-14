@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface OneTwoSectionProps {
   children?: ReactNode;
-  description: string;
+  description: ReactNode;
   reverse?: boolean;
   title: string;
 }
@@ -18,9 +18,9 @@ export const OneTwoSection = ({
       <h2 className="font-sans font-semibold text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl">
         {title}
       </h2>
-      <p className="mt-2 text-balance text-lg text-muted-foreground">
+      <div className="mt-2 text-balance text-lg text-muted-foreground">
         {description}
-      </p>
+      </div>
     </div>
     <div className="sm:col-span-2 sm:p-12">{children}</div>
   </div>

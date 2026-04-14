@@ -36,6 +36,16 @@ npx create-vercel-shop@latest my-store
 
 `create-vercel-shop` also installs the `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` plugins in project scope so a coding agent can start working with the project immediately.
 
+### Add the agent setup to an existing project
+
+If you already have a repo and only want the project-scoped agent plugins, run this from the project root:
+
+```bash
+npx create-vercel-shop@latest --no-template
+```
+
+This skips the storefront scaffold and only installs the `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` plugins in project scope.
+
 ### Start from v0
 
 You can also use [v0](https://v0.dev) to generate a storefront and iterate on the design before connecting it to Shopify.
@@ -54,7 +64,7 @@ You can find the storefront token in **Settings → Apps and sales channels → 
 
 ## Step 4: Run locally
 
-`create-vercel-shop` uses the package manager you used to scaffold the project. Start the dev server with the matching command:
+If you scaffolded the storefront, `create-vercel-shop` uses the package manager you used to scaffold the project. Start the dev server with the matching command:
 
 ```bash
 pnpm dev
