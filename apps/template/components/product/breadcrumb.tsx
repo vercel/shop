@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import {
   BreadcrumbItem,
@@ -8,6 +7,7 @@ import {
   BreadcrumbSeparator,
   Breadcrumb as BreadcrumbUI,
 } from "@/components/ui/breadcrumb";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 export async function Breadcrumb({ title, handle }: { title: string; handle: string }) {
   const t = await getTranslations("product.breadcrumb");

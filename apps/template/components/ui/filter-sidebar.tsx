@@ -8,10 +8,10 @@ import {
   SearchIcon,
   XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import type * as React from "react";
 
 import { Input } from "@/components/ui/input";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import { cn } from "@/lib/utils";
 
 function FilterSidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
@@ -78,10 +78,7 @@ function FilterSidebarResultsCount({
   return (
     <div
       data-slot="filter-sidebar-results-count"
-      className={cn(
-        "flex items-center gap-1.5 text-sm text-foreground/50",
-        className,
-      )}
+      className={cn("flex items-center gap-1.5 text-sm text-foreground/50", className)}
       {...props}
     >
       <SearchIcon className="size-3.5" />
@@ -160,9 +157,7 @@ function FilterSectionHeader({ title, className, children }: FilterSectionHeader
       data-slot="filter-section-header"
       className={cn("flex items-center justify-between", className)}
     >
-      <span className="text-base font-semibold text-muted-foreground">
-        {title}
-      </span>
+      <span className="text-base font-semibold text-muted-foreground">{title}</span>
       {children}
     </div>
   );

@@ -4,7 +4,6 @@ import { defineRegistry } from "@json-render/react";
 import { CheckCircleIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 
 import { Price } from "@/components/product/price";
 import {
@@ -15,6 +14,7 @@ import {
   ProductCardPrice,
   ProductCardTitle,
 } from "@/components/ui/product-card";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

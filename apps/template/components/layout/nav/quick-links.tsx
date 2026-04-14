@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 const links = [
   { label: "Shop", href: "/search" },

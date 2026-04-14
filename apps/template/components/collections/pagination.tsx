@@ -2,7 +2,6 @@
 
 import { ChevronLeftIcon, ChevronRightIcon, LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -10,6 +9,7 @@ import {
   useFilterTransition,
 } from "@/components/collections/filter-pending-context";
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 export function CollectionsPagination({
   hasNextPage,

@@ -3,9 +3,9 @@
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 

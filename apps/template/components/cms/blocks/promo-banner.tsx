@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { ContentSection } from "@/lib/types";
 
 interface PromoBannerSectionProps {

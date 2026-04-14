@@ -2,9 +2,9 @@
 
 import { AlertCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 export function ErrorBoundaryContent({ reset }: { reset: () => void }) {
   const t = useTranslations("common");

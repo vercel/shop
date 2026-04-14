@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

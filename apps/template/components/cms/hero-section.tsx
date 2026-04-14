@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
@@ -32,9 +32,7 @@ export function HeroSection({ hero }: HeroSectionProps) {
               {hero.headline}
             </h1>
             {hero.subheadline && (
-              <p className="text-sm sm:text-base text-white/90 max-w-xl">
-                {hero.subheadline}
-              </p>
+              <p className="text-sm sm:text-base text-white/90 max-w-xl">{hero.subheadline}</p>
             )}
             {hero.ctaText && hero.ctaLink && (
               <Button

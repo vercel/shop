@@ -4,9 +4,9 @@ import { Search, Tag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 
 import { Price } from "@/components/product/price";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type {
   PredictiveSearchCollection,
   PredictiveSearchProduct,

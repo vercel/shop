@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { Suspense } from "react";
+
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";

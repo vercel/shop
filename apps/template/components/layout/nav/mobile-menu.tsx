@@ -1,10 +1,10 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 const links = [
   { label: "Shop", href: "/search" },

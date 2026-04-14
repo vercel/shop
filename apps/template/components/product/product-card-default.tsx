@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { productCardToOptimisticInfo } from "@/components/cart/optimistic-info";
 import {
   ProductCard,
@@ -10,6 +8,7 @@ import {
   ProductCardTitle,
 } from "@/components/ui/product-card";
 import { ProductCardQuickAdd } from "@/components/ui/product-card-quick-add";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 import type { Locale } from "@/lib/i18n";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
@@ -29,7 +28,14 @@ export function ProductCardDefault({
   className,
 }: ProductCardDefaultProps) {
   return (
-    <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
+    <Link
+      href={
+        product.defaultVariantNumericId
+          ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}`
+          : `/products/${product.handle}`
+      }
+      className={className}
+    >
       <ProductCard variant="default">
         <ProductCardImageContainer variant="default">
           <ProductCardImage

@@ -2,7 +2,8 @@
 
 import { HandbagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
+
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 export function Empty() {
   const t = useTranslations("cart");

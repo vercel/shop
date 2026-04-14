@@ -2,11 +2,11 @@
 
 import { ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { ShopLink as Link } from "@/components/ui/shop-link";
 
 import { prepareCheckoutAction } from "./actions";
 import { useCart } from "./context";
