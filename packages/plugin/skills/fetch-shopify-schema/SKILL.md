@@ -1,13 +1,13 @@
 ---
 name: fetch-shopify-schema
-description: Fetch local Shopify Storefront and Customer Account GraphQL schema snapshots for the shop app.
+description: Use Shopify AI Toolkit to inspect live Storefront and Customer Account GraphQL schemas for Vercel Shop work.
 ---
 
 # Fetch Shopify GraphQL Schema
 
 ## Description
 
-Fetches the latest Shopify GraphQL schemas (Storefront API and Customer Account API) for reference when working with Shopify operations.
+Use this skill when you need authoritative Shopify GraphQL schema details while working on Vercel Shop. The schema source of truth is the installed `Shopify/shopify-ai-toolkit` plugin, not committed snapshot files in the repo.
 
 ## When to Use This Skill
 
@@ -19,86 +19,58 @@ Fetches the latest Shopify GraphQL schemas (Storefront API and Customer Account 
 
 ## How to Use
 
-### 1. Fetch the Storefront API schema
+### 1. Use `shopify-ai-toolkit` as the schema source of truth
+
+- Use the installed `Shopify/shopify-ai-toolkit` plugin to inspect the live schema for the relevant API.
+- Prefer live type lookup, field lookup, argument validation, and API exploration there over local `.graphql` snapshots.
+- Do not create or update repo-local schema snapshot files for this template.
+
+### 2. Pick the right Shopify API
+
+- **Storefront API** for products, collections, menus, carts, search, and storefront-facing metaobjects
+- **Customer Account API** for customer profile, orders, addresses, and authenticated account data
+
+Never treat the Storefront API and Customer Account API schemas as interchangeable.
+
+### 3. Hand off to the template workflow
+
+- After confirming the schema details, use `/vercel-shop:shopify-graphql-reference` for the template's GraphQL patterns: file placement, fragments, locale context, caching, and transforms.
+- If the task is specifically about authentication or metaobjects, use the matching Vercel Shop skill after the schema check.
+
+### 4. If the toolkit is unavailable
+
+- Ask the user to install or re-install the project-scoped Shopify plugin:
 
 ```bash
-bun run .claude/scripts/fetch-shopify-schemas.ts
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-This automatically fetches the Storefront API schema using the configured `SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
-
-### 2. Fetch the Customer Account API schema
-
-The Customer Account API requires a user's access token (obtained via OAuth login). To fetch it:
-
-**Option A: Use the debug endpoint (recommended)**
-
-1. Start the dev server: `bun dev`
-2. Log in to the app at http://localhost:3000/login
-3. Visit http://localhost:3000/api/auth/debug-token
-4. Copy the command from the response and run it:
-
-```bash
-SHOPIFY_CUSTOMER_ACCESS_TOKEN="<token>" bun run .claude/scripts/fetch-shopify-schemas.ts
-```
-
-**Option B: Set the token in environment**
-
-Add to `.env.local`:
-
-```
-SHOPIFY_CUSTOMER_ACCESS_TOKEN=<your-token>
-```
-
-Then run the script normally.
-
-### 3. Reference the schemas
-
-After fetching, read the schema files:
-
-- **Storefront API**: `.claude/schemas/shopify-storefront.graphql`
-- **Customer Account API**: `.claude/schemas/shopify-customer.graphql`
-
-The schemas are in SDL (Schema Definition Language) format.
-
-## Schema Locations
-
-| API                  | Schema File                                  | Auth Required                              |
-| -------------------- | -------------------------------------------- | ------------------------------------------ |
-| Storefront API       | `.claude/schemas/shopify-storefront.graphql` | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` (public) |
-| Customer Account API | `.claude/schemas/shopify-customer.graphql`   | User access token via OAuth                |
+- If live toolkit access is blocked, fall back to official Shopify API docs or schema explorers instead of adding committed snapshot files to the repo.
 
 ## Notes
 
 ### Storefront API
 
-- Uses the public Storefront Access Token (already in `.env`)
+- Uses the public Storefront Access Token
 - Provides read access to products, collections, cart operations
 - Most common API for storefront implementations
 
 ### Customer Account API
 
-- Requires a logged-in user's OAuth access token
+- Requires customer authentication and a customer-scoped access token
 - Provides access to customer data, orders, addresses
-- Token expires after a period (use refresh flow for long-term access)
-- Debug endpoint at `/api/auth/debug-token` helps extract tokens (dev only)
+- Token handling stays inside the auth flow and server-side helpers
 
-## Environment Variables
+## Guardrails
 
-```
-# Required for Storefront API
-SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-SHOPIFY_STOREFRONT_ACCESS_TOKEN=your_token
-
-# Required for Customer Account API schema
-SHOPIFY_CUSTOMER_ACCESS_TOKEN=<user-token>  # From OAuth login
-```
+- Never guess Shopify field names, enum values, or argument shapes.
+- Never add `.claude/schemas`, checked-in schema snapshots, or other agent-only schema caches to the template.
+- Use `/vercel-shop:shopify-graphql-reference` for template conventions after the live schema check.
 
 ## Example Workflow
 
 1. User asks: "What fields are available on the Customer type?"
-2. Ensure you're logged in and get token via `/api/auth/debug-token`
-3. Run: `SHOPIFY_CUSTOMER_ACCESS_TOKEN="..." bun run .claude/scripts/fetch-shopify-schemas.ts`
-4. Read: `.claude/schemas/shopify-customer.graphql`
-5. Search for `type Customer` in the schema
-6. List available fields for the user
+2. Use `shopify-ai-toolkit` to inspect the live Customer Account schema
+3. Search for the `Customer` type and confirm the fields and nested objects
+4. Use `/vercel-shop:shopify-graphql-reference` if you need to place a new operation in the template
+5. Answer the user with the validated fields

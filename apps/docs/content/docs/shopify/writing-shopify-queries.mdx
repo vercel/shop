@@ -8,11 +8,11 @@ prerequisites:
 
 This guide walks through adding a new Shopify Storefront API operation from scratch. We'll fetch a shop's privacy policy as a concrete example.
 
-If you're using a coding agent, run `/shopify-graphql-reference` in Claude Code or ask the agent to use the `shopify-graphql-reference` skill first. The skill is the reference source for Shopify GraphQL work and keeps the agent anchored to the bundled schema snapshots and template guardrails.
+If you're using a coding agent, run `/vercel-shop:shopify-graphql-reference` in Claude Code or ask the agent to use the `shopify-graphql-reference` skill first. The skill is the reference source for Shopify GraphQL work and uses `shopify-ai-toolkit` for live schema checks while keeping the agent anchored to the template guardrails.
 
 ## 1. Check the schema
 
-Open `.claude/schemas/shopify-storefront.graphql` and find the field you need. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:
+Use `shopify-ai-toolkit`, Shopify's GraphQL docs, or your preferred GraphQL explorer to confirm the field exists before writing the query. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:
 
 ```graphql
 type ShopPolicy {
@@ -23,7 +23,7 @@ type ShopPolicy {
 }
 ```
 
-Never guess field names - the local schema is the source of truth. Refresh it with `pnpm run .claude/scripts/fetch-shopify-schemas.ts` if it's outdated.
+Never guess field names. The live Shopify schema is the source of truth.
 
 ## 2. Write the query
 
@@ -171,7 +171,7 @@ Expose mutations to the client through server actions in `components/cart/action
 
 ## Checklist
 
-- [ ] Verified field names against `.claude/schemas/shopify-storefront.graphql`
+- [ ] Verified field names against the live Storefront API schema
 - [ ] Operation name in the query string matches the `operation` parameter
 - [ ] Variables passed as an object, never interpolated into the query
 - [ ] `@inContext` directive included if data is locale-sensitive

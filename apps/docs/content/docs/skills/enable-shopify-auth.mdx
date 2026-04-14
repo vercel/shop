@@ -352,7 +352,7 @@ export const { GET, POST } = toNextJsHandler(auth);
 
 - Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
 - Always call `requireSession()` before any customer API operation
-- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — always reference `.claude/schemas/shopify-customer.graphql`
+- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — validate fields with `shopify-ai-toolkit` or `vercel-shop:fetch-shopify-schema`
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - PKCE is enabled for the OAuth flow — never disable it
 
@@ -463,7 +463,7 @@ Create `lib/shopify/operations/customer.ts` with:
 - `deleteAddress(accessToken, addressId)` — remove address
 - `setDefaultAddress(accessToken, addressId)` — set default
 
-Reference `.claude/schemas/shopify-customer.graphql` for field names. All operations use the Customer Account API (separate from Storefront API) with OAuth Bearer tokens.
+Validate field names with `shopify-ai-toolkit` or `vercel-shop:fetch-shopify-schema`. All operations use the Customer Account API (separate from Storefront API) with OAuth Bearer tokens.
 
 ### Step 10. Create account pages and components
 

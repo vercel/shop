@@ -19,8 +19,7 @@ The key shift: instead of searching docs for how to do something, you describe w
 The template ships with structured context files that agents read automatically:
 
 - **`AGENTS.md`** - architecture rules and constraints. This tells the agent things like "every cart mutation must call `invalidateCartCache()`" and "components in `ui/` must not import domain types."
-- **`.claude/schemas/`** - local Shopify GraphQL schema snapshots. The agent uses these to write type-safe queries without guessing field names.
-- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills and tooling for common storefront and platform tasks.
+- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills, platform guidance, and live Shopify schema tooling for common storefront tasks.
 
 This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules - before you type a single prompt.
 
@@ -65,7 +64,7 @@ When reviewing what the agent produces, check the architectural decisions:
 - Does it use server components where possible?
 - Does it follow the domain type boundary (components import from `lib/types`, not Shopify types)?
 - Does it respect the `ui/` → `product/` wrapper pattern from `AGENTS.md`?
-- For GraphQL changes, did it check the schema in `.claude/schemas/`?
+- For GraphQL changes, did it validate the schema with `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`?
 
 ### Iterate with follow-ups
 
@@ -132,7 +131,7 @@ Show "No reviews yet" when the metafield is empty.
 - Read and modify any file in your project
 - Run build and test commands
 - Follow skills step by step
-- Write GraphQL queries validated against the local schema
+- Write GraphQL queries validated against the live Shopify schema
 - Install dependencies and update configs
 
 **Agents can't:**

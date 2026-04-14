@@ -10,6 +10,7 @@
 		"dev": "turbo run dev",
 		"format": "turbo run format",
 		"lint": "turbo run lint",
+		"plugin:install:local": "npx plugins add ./packages/plugin --scope project --yes",
 		"start": "turbo run start",
 		"test": "turbo run test"
 	},
