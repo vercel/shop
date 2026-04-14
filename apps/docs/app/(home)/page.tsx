@@ -11,6 +11,7 @@ import { FakeBrowser } from "./components/fake-browser";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
+import { Installer } from "@/components/fromsrc/installer";
 import { PromptCopy } from "./components/prompt-copy";
 
 const title = "Vercel Shop";
