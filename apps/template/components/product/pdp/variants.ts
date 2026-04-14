@@ -98,11 +98,7 @@ export function getVariantUrl(
     );
   }
 
-  const numericId = variant ? getNumericShopifyId(variant.id) : null;
-  if (numericId) {
-    return `/products/${handle}?variantId=${numericId}`;
-  }
-
+  // TEMP: disable searchParams to test Chrome fallback hypothesis
   return `/products/${handle}`;
 }
 

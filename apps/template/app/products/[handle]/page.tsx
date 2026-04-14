@@ -16,12 +16,12 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
+// TEMP: removed searchParams from samples to match disabled searchParams
 export const unstable_instant = {
   prefetch: "runtime",
   samples: [
     {
       params: { handle: "sample-product" },
-      searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
@@ -29,7 +29,6 @@ export const unstable_instant = {
 
 export default async function ProductPage({
   params,
-  searchParams,
 }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
   const handlePromise = params.then(({ handle }) => handle);
@@ -38,9 +37,8 @@ export default async function ProductPage({
     getProduct(handle, locale).catch(() => notFound()),
   );
 
-  const variantIdPromise = searchParams.then(
-    (sp) => (sp?.variantId as string | undefined),
-  );
+  // TEMP: disable searchParams to test Chrome fallback hypothesis
+  const variantIdPromise = Promise.resolve(undefined);
 
   return (
     <ProductDetailPage

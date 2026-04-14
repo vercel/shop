@@ -25,9 +25,10 @@ export function VariantSection({
 
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  // TEMP: disable searchParams-driven variant/image selection to test Chrome fallback hypothesis
+  const selectedOptions = computeInitialSelectedOptions(variants, undefined);
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const { colorImages, otherImages } = getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions);
+  const { colorImages, otherImages } = { colorImages: [] as typeof images, otherImages: images };
 
   return (
     <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
