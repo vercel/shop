@@ -1,6 +1,6 @@
 {
 	"dependencies": {
-		"@ai-sdk/react": "3.0.160",
+		"@ai-sdk/react": "3.0.161",
 		"@icons-pack/react-simple-icons": "13.13.0",
 		"@streamdown/cjk": "1.0.3",
 		"@streamdown/code": "1.1.1",
@@ -12,7 +12,7 @@
 		"@types/react-dom": "19.2.3",
 		"@vercel/analytics": "2.0.1",
 		"@vercel/speed-insights": "2.0.0",
-		"ai": "6.0.158",
+		"ai": "6.0.159",
 		"class-variance-authority": "0.7.1",
 		"clsx": "2.1.1",
 		"cmdk": "1.1.1",
@@ -25,7 +25,7 @@
 		"lucide-react": "1.8.0",
 		"motion": "12.38.0",
 		"nanoid": "5.1.7",
-		"next": "16.2.1-canary.33",
+		"next": "16.2.1-canary.38",
 		"next-mdx-remote": "6.0.0",
 		"next-themes": "0.4.6",
 		"postcss": "8.5.9",
