@@ -98,7 +98,11 @@ export function getVariantUrl(
     );
   }
 
-  // TEMP: disable searchParams to test Chrome fallback hypothesis
+  const numericId = variant ? getNumericShopifyId(variant.id) : null;
+  if (numericId) {
+    return `/products/${handle}?variantId=${numericId}`;
+  }
+
   return `/products/${handle}`;
 }
 
@@ -296,4 +300,32 @@ export function getPartitionedImagesForSelectedColor(
   }
 
   return { colorImages, otherImages };
+}
+
+/**
+ * Returns true when the product has multiple color variants with
+ * distinct images — meaning the gallery would change based on
+ * the selected color (i.e. based on searchParams).
+ *
+ * When this returns false, there's no reason to suspend on
+ * searchParams for the media gallery.
+ */
+export function hasColorImagePartitioning(
+  options: ProductOption[],
+  variants: ProductVariant[],
+): boolean {
+  const colorOption = options.find(
+    (opt) =>
+      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.name.toLowerCase().includes("color"),
+  );
+
+  if (!colorOption || colorOption.values.length <= 1) return false;
+
+  // Check if any variants have images assigned to the color option
+  return variants.some(
+    (v) =>
+      v.image &&
+      v.selectedOptions.some((opt) => opt.name === colorOption.name),
+  );
 }
