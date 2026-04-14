@@ -55,13 +55,16 @@ function ProductPageFallback() {
 async function ProductContent({
   productPromise,
   locale,
-  variantId,
+  variantIdPromise,
 }: {
   productPromise: Promise<ProductDetails>;
   locale: Locale;
-  variantId?: string;
+  variantIdPromise?: Promise<string | undefined>;
 }) {
-  const product = await productPromise;
+  const [product, variantId] = await Promise.all([
+    productPromise,
+    variantIdPromise,
+  ]);
   const { handle, title } = product;
 
   return (
@@ -90,7 +93,7 @@ async function ProductContent({
   );
 }
 
-export async function ProductDetailPage({
+export function ProductDetailPage({
   productPromise,
   locale,
   variantIdPromise,
@@ -99,12 +102,10 @@ export async function ProductDetailPage({
   locale: Locale;
   variantIdPromise?: Promise<string | undefined>;
 }) {
-  const variantId = await variantIdPromise;
-
   return (
     <Container className="bg-background pt-0 lg:pt-8">
       <Suspense fallback={<ProductPageFallback />}>
-        <ProductContent productPromise={productPromise} locale={locale} variantId={variantId} />
+        <ProductContent productPromise={productPromise} locale={locale} variantIdPromise={variantIdPromise} />
       </Suspense>
     </Container>
   );
