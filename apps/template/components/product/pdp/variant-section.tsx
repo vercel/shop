@@ -5,7 +5,7 @@ import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
-import { ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
+import { ColorImageCarouselItems, ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
 import { ProductPrice } from "@/components/product/pdp/product-price";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -45,19 +45,35 @@ export function VariantSection({
           videos={videos}
           title={title}
           className="lg:col-span-7"
-        >
-          <Suspense
-            fallback={<Skeleton className="aspect-square w-full" />}
-          >
-            <ResolvedColorImages
-              images={images}
-              options={options}
-              variants={variants}
-              title={title}
-              variantIdPromise={variantIdPromise}
-            />
-          </Suspense>
-        </ProductMedia>
+          desktopSlot={
+            <Suspense fallback={<Skeleton className="aspect-square w-full" />}>
+              <ResolvedColorImages
+                images={images}
+                options={options}
+                variants={variants}
+                title={title}
+                variantIdPromise={variantIdPromise}
+              />
+            </Suspense>
+          }
+          mobileSlot={
+            <Suspense
+              fallback={
+                <div className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden">
+                  <Skeleton className="size-full" />
+                </div>
+              }
+            >
+              <ResolvedColorCarouselImages
+                images={images}
+                options={options}
+                variants={variants}
+                title={title}
+                variantIdPromise={variantIdPromise}
+              />
+            </Suspense>
+          }
+        />
       ) : (
         <ProductMedia
           otherImages={images}
@@ -232,4 +248,31 @@ async function ResolvedColorImages({
   if (colorImages.length === 0) return null;
 
   return <ColorImageGrid images={colorImages} title={title} />;
+}
+
+async function ResolvedColorCarouselImages({
+  images,
+  options,
+  variants,
+  title,
+  variantIdPromise,
+}: {
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  title: string;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const { colorImages } = getPartitionedImagesForSelectedColor(
+    images,
+    options,
+    variants,
+    selectedOptions,
+  );
+
+  if (colorImages.length === 0) return null;
+
+  return <ColorImageCarouselItems images={colorImages} title={title} />;
 }
