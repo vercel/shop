@@ -1,4 +1,4 @@
-import { getNumericShopifyId } from "@/components/product/pdp/variants";
+import { getNumericShopifyId } from "@/components/pdp/variants";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,

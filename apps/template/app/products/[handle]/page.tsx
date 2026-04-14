@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ProductDetailPage } from "@/components/product/pdp/product-detail-page";
+import { ProductDetailPage } from "@/components/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
 
 import { getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
+
+export async function generateStaticParams() {
+  return [{ handle: "vellura-interiors-arceau-lounge-chair-srenit-collection-1f4z" }];
+}
 
 export async function generateMetadata({
   params,

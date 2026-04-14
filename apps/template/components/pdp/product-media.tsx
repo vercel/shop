@@ -62,7 +62,15 @@ function MediaVideo({
 }
 
 /** Snap-scroll carousel for mobile viewports. */
-function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: string }) {
+function Carousel({
+  mediaItems,
+  title,
+  children,
+}: {
+  mediaItems: MediaItem[];
+  title: string;
+  children?: React.ReactNode;
+}) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevMediaRef = useRef<string>("");
@@ -112,6 +120,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
         className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 w-[calc(100%+2rem)]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
+        {children}
         {mediaItems.map((item, idx) => (
           <div
             key={mediaKey(item)}
@@ -125,7 +134,7 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
                 title={title}
                 idx={idx}
                 sizes="100vw"
-                priority={idx === 0}
+                priority={!children && idx === 0}
               />
             )}
           </div>
@@ -153,64 +162,117 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
   );
 }
 
+/** Single grid item — extracted for reuse. */
+function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: number }) {
+  return (
+    <div className="relative aspect-square w-full overflow-hidden bg-accent">
+      {item.type === "video" ? (
+        <MediaVideo item={item} />
+      ) : (
+        <LightboxTrigger item={item}>
+          <MediaImage
+            item={item}
+            title={title}
+            idx={idx}
+            sizes="(min-width: 1024px) 25vw, 50vw"
+            priority={idx < 2}
+          />
+        </LightboxTrigger>
+      )}
+    </div>
+  );
+}
+
 /** 2-column grid with lightbox for desktop viewports. */
-function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string }) {
+function Grid({
+  mediaItems,
+  title,
+  children,
+}: {
+  mediaItems: MediaItem[];
+  title: string;
+  children?: React.ReactNode;
+}) {
   return (
     <Lightbox label={title}>
       <div className="grid grid-cols-2 gap-2">
+        {children}
         {mediaItems.map((item, idx) => (
-          <div
-            key={mediaKey(item)}
-            className="relative aspect-square w-full overflow-hidden bg-accent"
-          >
-            {item.type === "video" ? (
-              <MediaVideo item={item} />
-            ) : (
-              <LightboxTrigger item={item}>
-                <MediaImage
-                  item={item}
-                  title={title}
-                  idx={idx}
-                  sizes="(min-width: 1024px) 25vw, 50vw"
-                  priority={idx < 2}
-                />
-              </LightboxTrigger>
-            )}
-          </div>
-        ))}      </div>
+          <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
+        ))}
+      </div>
     </Lightbox>
   );
 }
 
+/**
+ * Renders color-specific images as grid items (desktop).
+ * Designed to be used inside a Suspense boundary as children of ProductMedia.
+ */
+export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
+  return images.map((image, idx) => (
+    <GridItem key={image.url} item={{ type: "image", image }} title={title} idx={idx} />
+  ));
+}
+
+/**
+ * Renders color-specific images as carousel items (mobile).
+ * Matches the Carousel item structure for consistent snap-scroll behavior.
+ */
+export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
+  return images.map((image, idx) => (
+    <div
+      key={image.url}
+      className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
+    >
+      <Image
+        src={image.url}
+        alt={image.altText || `${title} image ${idx + 1}`}
+        fill
+        className="object-cover"
+        sizes="100vw"
+        priority={idx === 0}
+        draggable={false}
+      />
+    </div>
+  ));
+}
+
 export function ProductMedia({
-  colorImages,
   otherImages,
   videos,
   title,
   className,
+  desktopSlot,
+  mobileSlot,
 }: {
-  colorImages: ImageType[];
   otherImages: ImageType[];
   videos: Video[];
   title: string;
   className?: string;
+  /** Color images rendered as grid items (desktop). */
+  desktopSlot?: React.ReactNode;
+  /** Color images rendered as carousel items (mobile). */
+  mobileSlot?: React.ReactNode;
 }) {
-  // Order: color images → videos → other images
-  const mediaItems: MediaItem[] = [
-    ...colorImages.map((image): MediaItem => ({ type: "image", image })),
+  const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),
     ...otherImages.map((image): MediaItem => ({ type: "image", image })),
   ];
 
-  if (mediaItems.length === 0) return null;
+  if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) return null;
 
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={mediaItems} title={title} />
+        <Carousel mediaItems={sharedMediaItems} title={title}>
+          {mobileSlot}
+        </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={mediaItems} title={title} />
+        <Grid mediaItems={sharedMediaItems} title={title}>
+          {desktopSlot}
+        </Grid>
       </div>
     </div>
   );

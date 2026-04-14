@@ -96,7 +96,7 @@ function Content({
             <div className="space-y-2">
               <button
                 type="button"
-                className="flex w-full items-center justify-center gap-1.5 rounded-lg h-12 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50"
                 disabled={isOutOfStock || isBuyingNow}
                 onClick={handleBuyNow}
               >
@@ -114,7 +114,7 @@ function Content({
                 variant="secondary"
                 disabled={isOutOfStock}
                 onClick={handleAddToCart}
-                className="w-full justify-center h-11"
+                className="w-full justify-center h-12"
               >
                 {getButtonText()}
               </Button>

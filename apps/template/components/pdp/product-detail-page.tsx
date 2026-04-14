@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
-import { Recommendations } from "@/components/product/recommendations";
-import { ProductSchema } from "@/components/product/schema";
+import { Recommendations } from "@/components/pdp/recommendations";
+import { ProductSchema } from "@/components/pdp/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
@@ -43,8 +43,8 @@ function ProductPageFallback() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Skeleton className="h-11 flex-1" />
-            <Skeleton className="h-11 flex-1" />
+            <Skeleton className="h-12 flex-1" />
+            <Skeleton className="h-12 flex-1" />
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@ async function ProductContent({
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
-  const [product, variantId] = await Promise.all([productPromise, variantIdPromise]);
+  const product = await productPromise;
   const { handle, title } = product;
 
   return (
@@ -83,7 +83,7 @@ async function ProductContent({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="flex flex-col gap-12">
-        <VariantSection product={product} locale={locale} variantId={variantId} />
+        <VariantSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
         <Recommendations handle={handle} locale={locale} />
       </div>
     </>

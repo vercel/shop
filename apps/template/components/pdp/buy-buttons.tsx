@@ -92,7 +92,7 @@ export function BuyButtons({
       <button
         type="button"
         className={cn(
-          "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-11 bg-[#5A31F4] text-white transition-all hover:bg-[#4B27CC] disabled:pointer-events-none disabled:opacity-50",
+          "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
           !availableForSale && "invisible",
         )}
         disabled={isOutOfStock || isBuyingNow}
@@ -111,7 +111,7 @@ export function BuyButtons({
         type="button"
         disabled={isOutOfStock}
         onClick={handleAddToCart}
-        className="flex-1 justify-center h-11 bg-foreground text-background hover:bg-foreground/90"
+        className="flex-1 justify-center h-12 bg-foreground text-background hover:bg-foreground/90"
       >
         {getButtonText()}
       </Button>

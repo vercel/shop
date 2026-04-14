@@ -52,6 +52,7 @@ interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
   options: ProductOption[];
   selectedOptions: SelectedOptions;
   handle: string;
+  hideImages?: boolean;
 }
 
 function ProductInfoOptions({
@@ -59,6 +60,7 @@ function ProductInfoOptions({
   options,
   selectedOptions,
   handle,
+  hideImages,
   className,
   ...props
 }: ProductInfoOptionsProps) {
@@ -85,6 +87,7 @@ function ProductInfoOptions({
               variants={variants}
               handle={handle}
               selectedOptions={selectedOptions}
+              hideImages={hideImages}
             />
           ) : null,
         )}
