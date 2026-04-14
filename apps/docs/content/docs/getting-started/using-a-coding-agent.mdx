@@ -20,7 +20,7 @@ The template ships with structured context files that agents read automatically:
 
 - **`AGENTS.md`** - architecture rules and constraints. This tells the agent things like "every cart mutation must call `invalidateCartCache()`" and "components in `ui/` must not import domain types."
 - **`.claude/schemas/`** - local Shopify GraphQL schema snapshots. The agent uses these to write type-safe queries without guessing field names.
-- **`.agents/skills/`** - step-by-step playbooks for common tasks like enabling Shopify Markets, adding customer auth, or writing Shopify GraphQL against the local schema snapshots.
+- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills and tooling for common storefront and platform tasks.
 
 This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules - before you type a single prompt.
 
@@ -28,13 +28,13 @@ This context means the agent starts with deep knowledge of the codebase conventi
 
 Skills are markdown files that describe exactly how to complete a specific task. Each skill includes what files to touch, what patterns to follow, and how to verify the result.
 
-To run a skill in Claude Code:
+To run a storefront skill in Claude Code:
 
 ```bash
-/enable-shopify-markets
+/vercel-shop:enable-shopify-markets
 ```
 
-In Cursor, describe the task and the agent finds the matching skill:
+In Cursor or Codex, describe the task and reference the matching skill doc when helpful:
 
 ```
 Enable multi-locale support with Shopify Markets
@@ -42,7 +42,7 @@ Enable multi-locale support with Shopify Markets
 
 When you run a skill, the agent reads the playbook and executes each step - writing files, installing dependencies, updating configs. Then it runs the verification steps to confirm everything works.
 
-Skills aren't black boxes. They're plain markdown files in `.agents/skills/` that you can read, modify, or use as a reference for manual implementation.
+Skills aren't black boxes. They live in the `vercel-shop` plugin source and are mirrored in the docs so you can inspect or follow them manually.
 
 ## The feedback loop
 

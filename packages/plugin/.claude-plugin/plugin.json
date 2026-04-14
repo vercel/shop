@@ -1,0 +1,17 @@
+{
+  "name": "vercel-shop",
+  "description": "Storefront-specific skills and commands for building, bootstrapping, and auditing Vercel Shop projects.",
+  "author": {
+    "name": "Vercel"
+  },
+  "homepage": "https://docs.vercel.shop",
+  "repository": "https://github.com/vercel/shop",
+  "license": "MIT",
+  "keywords": [
+    "shopify",
+    "nextjs",
+    "vercel",
+    "commerce",
+    "agents"
+  ]
+}

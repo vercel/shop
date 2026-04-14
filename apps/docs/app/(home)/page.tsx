@@ -29,7 +29,7 @@ const HomePage = () => (
 			title={title}
 		>
 			<div className="flex flex-col items-center gap-4">
-				<Installer className="w-full max-w-[20rem]" command="npx create-vercel-shop@latest" />
+				<Installer className="w-full max-w-[20rem]" command="npx create-vercel-shop@latest my-store" />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
 						Get Started
@@ -52,7 +52,7 @@ const HomePage = () => (
 				<FakeBrowser />
 			</CenteredSection>
 			<OneTwoSection
-				description="Skills and recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+				description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
 				title="Agentic development"
 				reverse
 			>

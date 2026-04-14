@@ -63,12 +63,19 @@ To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/s
 
 ## Locale or currency not changing
 
-Multi-locale support requires Shopify Markets to be enabled. The template ships as single-locale by default. Run the [Enable Shopify Markets](/docs/skills/enable-shopify-markets) skill to add multi-locale and multi-currency routing.
+Multi-locale support requires Shopify Markets to be enabled. The template ships as single-locale by default. Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) to add multi-locale and multi-currency routing.
 
 ## Agent can't find context files
 
-Coding agents rely on `AGENTS.md` in the project root for architecture context and `.agents/skills/` for task playbooks. If these files are missing:
+Coding agents rely on `AGENTS.md` in the project root plus the expected project-scoped plugins. If an agent is missing context or commands:
 
 - Verify you cloned from the correct template (`vercel/shop`, `apps/template` path)
-- Check that `.agents/` isn't in your `.gitignore`
 - The `AGENTS.md` file should be at the project root, not nested in a subdirectory
+- Check that `.claude/settings.json` exists and that the project plugins are enabled
+- Rerun the project plugin installs if needed:
+
+```bash
+npx plugins add vercel/shop --scope project --yes
+npx plugins add vercel/vercel-plugin --scope project --yes
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
+```

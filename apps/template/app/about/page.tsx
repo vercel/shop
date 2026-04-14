@@ -17,9 +17,10 @@ export default function AboutPage() {
           collections, a cart, and search out of the box. Point it at your store and you're selling.
         </p>
         <p>
-          The template is built for agents. It includes context files, structured skills, and
-          recipes that describe common tasks so a coding agent can pick them up and run. Enable
-          Shopify Markets, swap your CMS, add customer accounts: each one is a single command.
+          The template is built for agents. It ships with context files and recipes, and the
+          scaffold installs project-scoped plugins that provide storefront skills and Shopify
+          tooling. Enable Shopify Markets, swap your CMS, add customer accounts: each one is a
+          single command.
         </p>
         <p>
           Pages render on the server and stream by default. The cart is optimistic. Collection

@@ -12,7 +12,7 @@ interface Skill {
 const skills: Skill[] = [
 	{
 		label: "Markets",
-		command: "/enable-shopify-markets",
+		command: "/vercel-shop:enable-shopify-markets",
 		logs: [
 			{ icon: "edit", text: "Updated next.config.ts with i18n routing" },
 			{ icon: "add", text: "Added locale files: de-DE, fr-FR, es-ES, nl-NL" },
@@ -22,7 +22,7 @@ const skills: Skill[] = [
 	},
 	{
 		label: "Auth",
-		command: "/enable-shopify-auth",
+		command: "/vercel-shop:enable-shopify-auth",
 		logs: [
 			{ icon: "add", text: "Installed better-auth with Shopify OIDC" },
 			{ icon: "add", text: "Created account pages: profile, orders, addresses" },
@@ -32,7 +32,7 @@ const skills: Skill[] = [
 	},
 	{
 		label: "CMS",
-		command: "/enable-shopify-cms",
+		command: "/vercel-shop:enable-shopify-cms",
 		logs: [
 			{ icon: "add", text: "Created cms_homepage metaobject definition" },
 			{ icon: "add", text: "Added GraphQL queries for metaobjects" },

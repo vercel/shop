@@ -1,4 +1,4 @@
-// Syncs skill content from apps/template/.agents/skills/SKILL.md
+// Syncs skill content from packages/plugin/skills/SKILL.md
 // into the corresponding docs MDX pages at content/docs/skills/*.mdx.
 //
 // Usage:
@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOCS_DIR = join(__dirname, "../content/docs/skills");
-const SKILLS_DIR = join(__dirname, "../../template/.agents/skills");
+const SKILLS_DIR = join(__dirname, "../../../packages/plugin/skills");
 
 function stripFrontmatter(content: string): string {
   if (content.startsWith("---")) {

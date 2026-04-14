@@ -11,8 +11,14 @@ See [docs.vercel.shop](https://docs.vercel.shop) for full documentation.
 1. Scaffold a new project using the CLI:
 
 ```sh
-npx create-vercel-shop@latest
+npx create-vercel-shop@latest my-store
 ```
+
+The scaffold also installs these project-scoped agent plugins:
+
+- `vercel-shop`
+- `vercel-plugin`
+- `shopify-ai-toolkit`
 
 2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
 
@@ -49,7 +55,7 @@ See [docs.vercel.shop/docs/getting-started](https://docs.vercel.shop/docs/gettin
 
 ## Skills
 
-Vercel Shop includes a skill system for extending the storefront with common commerce patterns:
+Vercel Shop includes a `vercel-shop` plugin with skills for extending the storefront with common commerce patterns. In Claude Code, these are exposed as `/vercel-shop:<skill>` commands:
 
 | Skill | Description |
 |-------|-------------|

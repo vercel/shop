@@ -110,7 +110,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 ## See also
 
 - `scripts/fetch-references.sh`
-- `.agents/skills/fetch-shopify-schema/SKILL.md`
+- the `vercel-shop:fetch-shopify-schema` skill
 - `references/REFERENCE.md`
 - `.claude/recipes/architecture/type-seams.md`
 - `.claude/recipes/architecture/caching-strategy.md`
