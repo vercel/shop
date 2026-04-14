@@ -68,8 +68,8 @@ export const PromptCopy = ({
   const Icon = copied ? CheckIcon : CopyIcon;
 
   return (
-    <div className={cn("mx-auto w-full max-w-[36rem] space-y-2", className)}>
-      <div className="flex w-fit items-center gap-6">
+    <div className={cn("mx-auto flex w-full max-w-[34rem] flex-col items-center gap-2", className)}>
+      <div className="flex w-full items-center justify-center gap-6">
         {(["cli", "prompt"] as const).map((option) => {
           const isActive = option === mode;
 
