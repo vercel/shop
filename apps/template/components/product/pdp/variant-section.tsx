@@ -6,15 +6,17 @@ import {
   ProductInfoHeader,
   ProductInfoOptions,
 } from "@/components/product/pdp/product-info";
-import { ProductMedia } from "@/components/product/pdp/product-media";
+import { ColorImageGrid, ProductMedia } from "@/components/product/pdp/product-media";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
+  getSharedImages,
   hasColorImagePartitioning,
   resolveSelectedVariant,
 } from "@/components/product/pdp/variants";
 import type { Locale } from "@/lib/i18n";
-import type { Image, ProductDetails, ProductOption, ProductVariant, Video } from "@/lib/types";
+import type { Image, ProductDetails, ProductOption, ProductVariant } from "@/lib/types";
 
 export function VariantSection({
   product,
@@ -36,29 +38,28 @@ export function VariantSection({
   return (
     <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
       {needsPartitioning ? (
-        <Suspense
-          fallback={
-            <ProductMedia
-              colorImages={images.slice(0, 1)}
-              otherImages={[]}
-              videos={videos}
-              title={title}
-              className="lg:col-span-7"
-            />
-          }
+        <ProductMedia
+          otherImages={getSharedImages(images, options, variants)}
+          videos={videos}
+          title={title}
+          className="lg:col-span-7"
         >
-          <ColorAwareMedia
-            images={images}
-            options={options}
-            variants={variants}
-            videos={videos}
-            title={title}
-            variantIdPromise={variantIdPromise}
-          />
-        </Suspense>
+          <Suspense
+            fallback={
+              <Skeleton className="aspect-square w-full col-span-2" />
+            }
+          >
+            <ResolvedColorImages
+              images={images}
+              options={options}
+              variants={variants}
+              title={title}
+              variantIdPromise={variantIdPromise}
+            />
+          </Suspense>
+        </ProductMedia>
       ) : (
         <ProductMedia
-          colorImages={[]}
           otherImages={images}
           videos={videos}
           title={title}
@@ -87,37 +88,29 @@ export function VariantSection({
   );
 }
 
-async function ColorAwareMedia({
+async function ResolvedColorImages({
   images,
   options,
   variants,
-  videos,
   title,
   variantIdPromise,
 }: {
   images: Image[];
   options: ProductOption[];
   variants: ProductVariant[];
-  videos: Video[];
   title: string;
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const { colorImages, otherImages } = getPartitionedImagesForSelectedColor(
+  const { colorImages } = getPartitionedImagesForSelectedColor(
     images,
     options,
     variants,
     selectedOptions,
   );
 
-  return (
-    <ProductMedia
-      colorImages={colorImages}
-      otherImages={otherImages}
-      videos={videos}
-      title={title}
-      className="lg:col-span-7"
-    />
-  );
+  if (colorImages.length === 0) return null;
+
+  return <ColorImageGrid images={colorImages} title={title} />;
 }

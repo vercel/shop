@@ -153,33 +153,76 @@ function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: strin
   );
 }
 
+/** Single grid item — extracted for reuse between Grid and ColorImageGrid. */
+function GridItem({
+  item,
+  title,
+  idx,
+}: {
+  item: MediaItem;
+  title: string;
+  idx: number;
+}) {
+  return (
+    <div className="relative aspect-square w-full overflow-hidden bg-accent">
+      {item.type === "video" ? (
+        <MediaVideo item={item} />
+      ) : (
+        <LightboxTrigger item={item}>
+          <MediaImage
+            item={item}
+            title={title}
+            idx={idx}
+            sizes="(min-width: 1024px) 25vw, 50vw"
+            priority={idx < 2}
+          />
+        </LightboxTrigger>
+      )}
+    </div>
+  );
+}
+
 /** 2-column grid with lightbox for desktop viewports. */
-function Grid({ mediaItems, title }: { mediaItems: MediaItem[]; title: string }) {
+function Grid({
+  mediaItems,
+  title,
+  children,
+}: {
+  mediaItems: MediaItem[];
+  title: string;
+  children?: React.ReactNode;
+}) {
   return (
     <Lightbox label={title}>
       <div className="grid grid-cols-2 gap-2">
+        {children}
         {mediaItems.map((item, idx) => (
-          <div
-            key={mediaKey(item)}
-            className="relative aspect-square w-full overflow-hidden bg-accent"
-          >
-            {item.type === "video" ? (
-              <MediaVideo item={item} />
-            ) : (
-              <LightboxTrigger item={item}>
-                <MediaImage
-                  item={item}
-                  title={title}
-                  idx={idx}
-                  sizes="(min-width: 1024px) 25vw, 50vw"
-                  priority={idx < 2}
-                />
-              </LightboxTrigger>
-            )}
-          </div>
-        ))}      </div>
+          <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
+        ))}
+      </div>
     </Lightbox>
   );
+}
+
+/**
+ * Renders color-specific images as grid items.
+ * Designed to be used inside a Suspense boundary as children of ProductMedia.
+ */
+export function ColorImageGrid({
+  images,
+  title,
+}: {
+  images: ImageType[];
+  title: string;
+}) {
+  return images.map((image, idx) => (
+    <GridItem
+      key={image.url}
+      item={{ type: "image", image }}
+      title={title}
+      idx={idx}
+    />
+  ));
 }
 
 export function ProductMedia({
@@ -188,29 +231,44 @@ export function ProductMedia({
   videos,
   title,
   className,
+  children,
 }: {
-  colorImages: ImageType[];
+  colorImages?: ImageType[];
   otherImages: ImageType[];
   videos: Video[];
   title: string;
   className?: string;
+  children?: React.ReactNode;
 }) {
-  // Order: color images → videos → other images
-  const mediaItems: MediaItem[] = [
-    ...colorImages.map((image): MediaItem => ({ type: "image", image })),
+  // Non-color media — always available immediately
+  const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),
     ...otherImages.map((image): MediaItem => ({ type: "image", image })),
   ];
 
-  if (mediaItems.length === 0) return null;
+  // Color images passed as data (non-suspended path)
+  const colorMediaItems: MediaItem[] = (colorImages ?? []).map(
+    (image): MediaItem => ({ type: "image", image }),
+  );
+
+  // Carousel uses all resolved items; color images from children aren't in the carousel
+  const carouselItems: MediaItem[] = [...colorMediaItems, ...sharedMediaItems];
+
+  if (carouselItems.length === 0 && !children) return null;
 
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={mediaItems} title={title} />
+        {children && <div className="mb-4">{children}</div>}
+        <Carousel mediaItems={carouselItems} title={title} />
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={mediaItems} title={title} />
+        <Grid mediaItems={sharedMediaItems} title={title}>
+          {colorMediaItems.map((item, idx) => (
+            <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
+          ))}
+          {children}
+        </Grid>
       </div>
     </div>
   );

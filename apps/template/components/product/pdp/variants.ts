@@ -329,3 +329,37 @@ export function hasColorImagePartitioning(
       v.selectedOptions.some((opt) => opt.name === colorOption.name),
   );
 }
+
+/**
+ * Returns images not assigned to any color variant.
+ * These "shared" images (e.g. lifestyle shots) can render
+ * without waiting for searchParams to resolve.
+ */
+export function getSharedImages(
+  images: Image[],
+  options: ProductOption[],
+  variants: ProductVariant[],
+): Image[] {
+  const colorOption = options.find(
+    (opt) =>
+      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.name.toLowerCase().includes("color"),
+  );
+
+  if (!colorOption || colorOption.values.length <= 1) return images;
+
+  const allColorImageUrls = new Set<string>();
+  for (const variant of variants) {
+    if (!variant.image) continue;
+    const colorOpt = variant.selectedOptions.find(
+      (opt) => opt.name === colorOption.name,
+    );
+    if (colorOpt) {
+      allColorImageUrls.add(variant.image.url);
+    }
+  }
+
+  if (allColorImageUrls.size === 0) return images;
+
+  return images.filter((img) => !allColorImageUrls.has(img.url));
+}
