@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { docs } from "@/lib/fromsrc/content";
-import { DocsSidebar, type DocsSidebarSection } from "@/components/fromsrc/docs-sidebar";
+import { Sidebar } from "fromsrc/client";
 
 export default async function Layout({ children }: { children: ReactNode }) {
   const navigation = await docs.getNavigation();
@@ -22,32 +22,17 @@ export default async function Layout({ children }: { children: ReactNode }) {
       return { ...section, title: "", items: [...section.items, ...extras] };
     });
 
-  const comingSoonBySlug = new Map([
-    ["skills/enable-content-summarization", "Coming soon"],
-    ["skills/enable-virtual-try-on", "Coming soon"],
-  ]);
-
-  const sidebarNavigation: DocsSidebarSection[] = merged.map((section) => ({
-    ...section,
-    items: section.items.flatMap((item) => {
-      if (typeof item.slug !== "string" || typeof item.title !== "string") {
-        return [];
-      }
-
-      return [
-        {
-          title: item.title,
-          href: item.slug ? `/docs/${item.slug}` : "/docs",
-          badge: comingSoonBySlug.get(item.slug),
-        },
-      ];
-    }),
-  }));
+  const sidebarNavigation = merged;
 
   return (
     <>
       <div className="fromsrc flex min-h-[calc(100vh-4rem)]">
-        <DocsSidebar collapsible navigation={sidebarNavigation} title="Shop" />
+        <Sidebar
+          basePath="/docs"
+          defaultOpenLevel={2}
+          navigation={sidebarNavigation}
+          title="Shop"
+        />
         <main className="flex-1 min-w-0">{children}</main>
       </div>
     </>

@@ -379,6 +379,30 @@ figure[role="group"] button {
   color: var(--foreground) !important;
 }
 
+.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-content-summarization"],
+.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-virtual-try-on"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-content-summarization"]::after,
+.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-virtual-try-on"]::after {
+  content: "Coming soon";
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 74%, transparent);
+  color: var(--muted-foreground);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .fromsrc aside[aria-label="sidebar navigation"] > div:first-child {
   display: none;
 }
