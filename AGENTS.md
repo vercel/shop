@@ -2,8 +2,6 @@
 
 This is a monorepo for developing a template, docs site, and skills for using Next.js with Shopify and deploying to Vercel.
 
-* When updates happen in apps/docs OR apps/template, the version in package.json MUST be bumped to "0.YYYYMMDD.x" where x iterates if a value for that day already exists.
-
 ## Docs
 
 The docs app is in apps/docs using [fromsrc](https://www.fromsrc.com). It is linked to the vercel-labs/shop-docs project on Vercel.
