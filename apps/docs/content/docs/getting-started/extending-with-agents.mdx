@@ -22,7 +22,7 @@ Any agent that reads markdown context files will work. The ones we've tested mos
 
 After [creating your project](/docs/getting-started), `create-vercel-shop` installs the project plugins that the template expects:
 
-- `vercel-shop` for storefront skills and bootstrap/drift commands
+- `vercel-shop` for storefront skills plus bootstrap, drift, and upgrade-planning commands
 - `vercel-plugin` for generic Vercel and Next.js guidance
 - `shopify-ai-toolkit` for Shopify-aware tooling and schema access
 
@@ -43,6 +43,8 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
 The combined plugin setup gives Claude Code both storefront-specific skills and the broader Vercel/Next.js guidance used across the stack.
+
+For upgrade work, the `vercel-shop` plugin also carries a template rollout log. That gives agents change-level context about template updates that downstream storefronts may want to adopt, instead of forcing them to guess from a single scaffold version. New scaffolds also record bootstrap metadata so agents can compare rollout entries against when a project was created.
 
 ## What are skills?
 

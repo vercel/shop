@@ -164,14 +164,18 @@ export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
 
-export async function writeBootstrapMetadata(projectDir, templateVersion) {
+export async function writeBootstrapMetadata(
+  projectDir,
+  templateVersion,
+  scaffoldedAt = new Date().toISOString(),
+) {
   const metadataDir = join(projectDir, '.vercel-shop');
   const metadataPath = join(metadataDir, 'bootstrap.json');
 
   await mkdir(metadataDir, { recursive: true });
   await writeFile(
     metadataPath,
-    `${JSON.stringify({ templateVersion }, null, 2)}\n`,
+    `${JSON.stringify({ scaffoldedAt, templateVersion }, null, 2)}\n`,
     'utf8',
   );
 }

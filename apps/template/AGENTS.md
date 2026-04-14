@@ -30,6 +30,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 2. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`**. Never guess Shopify field names.
+5. **If a template change should be considered for existing storefronts, add a rollout entry in `packages/plugin/template-rollout-log/`**. Do not rely on the template version number alone.
 
 ## Overview
 
@@ -75,6 +76,16 @@ Common entry points:
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
+
+## Template Rollout Log
+
+The `vercel-shop` plugin includes a template rollout log in `packages/plugin/template-rollout-log/` for downstream adoption work.
+
+- Add one append-only markdown entry for each template change that downstream storefronts may want to review or adopt.
+- Keep entries change-scoped. Do not batch unrelated work into one log item.
+- Include what changed, why it matters, when it applies, safe skip cases, and validation steps.
+- Prefer `changeKey`, `introducedOn`, and any bootstrap `scaffoldedAt` metadata over version math when reasoning about rollout order.
+- Treat the log as the source of truth for rollout planning. The template version is only a hint.
 
 ## Shopify GraphQL Workflow
 

@@ -85,6 +85,8 @@ test('main scaffolds the template and writes bootstrap metadata by default', asy
     );
 
     assert.equal(bootstrapMetadata.templateVersion, await readTemplateVersion());
+    assert.equal(typeof bootstrapMetadata.scaffoldedAt, 'string');
+    assert.ok(Number.isFinite(Date.parse(bootstrapMetadata.scaffoldedAt)));
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }
