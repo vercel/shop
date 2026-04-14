@@ -7,7 +7,7 @@ import {
   MobileFilterSortBar,
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
-import { FilterSidebarSheet } from "@/components/filters/filter-sidebar-sheet";
+import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
