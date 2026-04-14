@@ -19,13 +19,13 @@ type CopyMode = "cli" | "prompt";
 interface PromptCopyProps {
   className?: string;
   command: string;
-  prompt: string;
+  agentCommand: string;
 }
 
 export const PromptCopy = ({
   className,
   command,
-  prompt,
+  agentCommand,
 }: PromptCopyProps) => {
   const [mode, setMode] = useState<CopyMode>("cli");
   const [copied, setCopied] = useState(false);
@@ -39,8 +39,8 @@ export const PromptCopy = ({
         }
       : {
           label: "For agents",
-          prefix: null,
-          value: prompt,
+          prefix: "$",
+          value: agentCommand,
         };
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export const PromptCopy = ({
   const handleCopy = async () => {
     await navigator.clipboard.writeText(activeOption.value);
     setCopied(true);
-    track(mode === "cli" ? "Copied installer command" : "Copied starter prompt");
+    track(mode === "cli" ? "Copied installer command" : "Copied agent install command");
   };
 
   const Icon = copied ? CheckIcon : CopyIcon;

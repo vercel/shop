@@ -16,8 +16,7 @@ import { PromptCopy } from "./components/prompt-copy";
 const title = "Vercel Shop";
 const description =
 	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
-const starterPrompt =
-	"Set up a new Vercel Shop project by running `npx create-vercel-shop@latest`; if I do not already have Shopify Headless credentials, walk me through the setup docs to create them, then collect `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`, and `NEXT_PUBLIC_SITE_NAME`, create `.env.local`, start the scaffolded local dev server, and stop once it is running.";
+const agentCommand = "npx plugins add vercel/shop";
 
 export const metadata: Metadata = {
 	title,
@@ -32,7 +31,7 @@ const HomePage = () => (
 			title={title}
 		>
 			<div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4">
-				<PromptCopy command="npx create-vercel-shop@latest" prompt={starterPrompt} />
+				<PromptCopy agentCommand={agentCommand} command="npx create-vercel-shop@latest" />
 				<Button asChild className="px-4" size="lg">
 					<Link href="/docs/getting-started">
 						Get Started
