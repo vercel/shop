@@ -86,12 +86,24 @@ export function VariantSection({
             </Suspense>
           )}
         </div>
-        <ProductInfoOptions
-          variants={variants}
-          options={options}
-          selectedOptions={defaultOptions}
-          handle={handle}
-        />
+        <Suspense
+          fallback={
+            <ProductInfoOptions
+              variants={variants}
+              options={options}
+              selectedOptions={defaultOptions}
+              handle={handle}
+              hideImages
+            />
+          }
+        >
+          <ResolvedOptions
+            variants={variants}
+            options={options}
+            handle={handle}
+            variantIdPromise={variantIdPromise}
+          />
+        </Suspense>
         <Suspense
           fallback={
             <div className="grid grid-cols-2 gap-2">
@@ -112,6 +124,30 @@ export function VariantSection({
         <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
       </div>
     </div>
+  );
+}
+
+async function ResolvedOptions({
+  variants,
+  options,
+  handle,
+  variantIdPromise,
+}: {
+  variants: ProductVariant[];
+  options: ProductOption[];
+  handle: string;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+
+  return (
+    <ProductInfoOptions
+      variants={variants}
+      options={options}
+      selectedOptions={selectedOptions}
+      handle={handle}
+    />
   );
 }
 

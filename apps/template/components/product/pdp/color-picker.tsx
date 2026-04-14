@@ -14,6 +14,7 @@ interface ColorPickerProps extends ComponentPropsWithoutRef<"div"> {
   variants: ProductVariant[];
   handle: string;
   selectedOptions: SelectedOptions;
+  hideImages?: boolean;
 }
 
 export function ColorPicker({
@@ -22,6 +23,7 @@ export function ColorPicker({
   variants,
   handle,
   selectedOptions,
+  hideImages,
   className,
   ...props
 }: ColorPickerProps) {
@@ -44,7 +46,7 @@ export function ColorPicker({
             v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           )?.image?.url;
 
-          const imageUrl = value.swatch?.image || variantImage;
+          const imageUrl = hideImages ? undefined : (value.swatch?.image || variantImage);
 
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
@@ -65,7 +67,7 @@ export function ColorPicker({
                 />
               ) : (
                 <div
-                  className="size-full border border-foreground/10"
+                  className="size-full border border-foreground/10 bg-accent"
                   style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
                 />
               )}
