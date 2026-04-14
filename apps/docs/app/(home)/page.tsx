@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Installer } from "@/components/fromsrc/installer";
 import { Button } from "@/components/ui/button";
 import { nav } from "@/lib/constants";
+import { homeDescription, siteName } from "@/lib/site";
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
 import { CartDemo } from "./components/cart-demo";
@@ -10,18 +12,36 @@ import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
-import { OneTwoSection } from "./components/one-two-section";
-import { Installer } from "@/components/fromsrc/installer";
 import { PromptCopy } from "./components/prompt-copy";
+import { OneTwoSection } from "./components/one-two-section";
 
-const title = "Vercel Shop";
-const description =
-	"Ship a production-ready Shopify storefront in days. Customize everything with AI agents. Built on Next.js.";
+const title = siteName;
+const description = homeDescription;
 const agentCommand = "npx plugins add vercel/shop";
 
 export const metadata: Metadata = {
 	title,
 	description,
+	openGraph: {
+		title,
+		description,
+		type: "website",
+		url: "/",
+		siteName,
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 628,
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title,
+		description,
+		images: ["/opengraph-image"],
+	},
 };
 
 const HomePage = () => (

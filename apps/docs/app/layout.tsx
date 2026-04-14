@@ -2,6 +2,7 @@ import "./global.css";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AdapterProvider, nextAdapter } from "fromsrc/client";
+import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Chat } from "@/components/fromsrc/chat";
@@ -10,12 +11,32 @@ import { Search } from "@/components/fromsrc/search";
 import { Toaster } from "@/components/ui/sonner";
 import { docs } from "@/lib/fromsrc/content";
 import { mono, pixel, pixelSquare, pixelTriangle, sans } from "@/lib/geistdocs/fonts";
+import { docsDescription, docsTitle, getBaseUrl, siteName } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export const metadata = {
-  title: "Vercel Shop Documentation",
-  description:
-    "Documentation for Vercel Shop — an agent-native, fast-by-default Shopify storefront built on Next.js.",
+export const metadata: Metadata = {
+  metadataBase: getBaseUrl(),
+  title: docsTitle,
+  description: docsDescription,
+  openGraph: {
+    title: docsTitle,
+    description: docsDescription,
+    siteName,
+    type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 628,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: docsTitle,
+    description: docsDescription,
+    images: ["/opengraph-image"],
+  },
 };
 
 function flatitems(items: unknown[]): { title: string; href: string }[] {
