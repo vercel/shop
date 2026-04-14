@@ -100,6 +100,10 @@ function runCommand(command, args, options = {}) {
       ...options,
     });
 
+    child.on('error', () => {
+      resolveRun(1);
+    });
+
     child.on('close', (code) => {
       resolveRun(code ?? 1);
     });
