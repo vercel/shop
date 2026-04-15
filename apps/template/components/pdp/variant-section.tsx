@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BuyButtons } from "@/components/pdp/buy-buttons";
@@ -5,21 +6,24 @@ import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/pdp/product-info";
+import { ShopLogo } from "@/components/pdp/shop-logo";
 import { ColorImageCarouselItems, ColorImageGrid, ProductMedia } from "@/components/pdp/product-media";
 import { ProductPrice } from "@/components/pdp/product-price";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
   getSharedImages,
   hasColorImagePartitioning,
   hasUniformPricing,
+  hasUniformStock,
   resolveSelectedVariant,
 } from "@/lib/product";
 import type { Locale } from "@/lib/i18n";
 import type { Image as ImageType, ProductDetails, ProductOption, ProductVariant } from "@/lib/types";
 
-export function VariantSection({
+export async function VariantSection({
   product,
   locale,
   variantIdPromise,
@@ -32,6 +36,20 @@ export function VariantSection({
 
   const needsPartitioning = hasColorImagePartitioning(options, variants);
   const uniformPrice = hasUniformPricing(variants);
+  const singleVariant = variants.length === 1;
+  const uniformStock = hasUniformStock(variants);
+
+  // Pre-resolve for single-variant products (no searchParam needed)
+  const eagerSelectedOptions = singleVariant
+    ? computeInitialSelectedOptions(variants, undefined)
+    : null;
+  const eagerSelectedVariant = eagerSelectedOptions
+    ? resolveSelectedVariant(variants, eagerSelectedOptions)
+    : null;
+
+  // Translations for stock-aware buy button fallback
+  const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
+  const allInStock = variants[0]?.availableForSale ?? true;
 
   return (
     <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
@@ -98,41 +116,77 @@ export function VariantSection({
             </Suspense>
           )}
         </div>
-        <Suspense
-          fallback={
-            <ProductInfoOptions
-              variants={variants}
-              options={options}
-              selectedOptions={{}}
-              handle={handle}
-              hideImages
-            />
-          }
-        >
-          <ResolvedOptions
+        {singleVariant && eagerSelectedOptions ? (
+          <ProductInfoOptions
             variants={variants}
             options={options}
+            selectedOptions={eagerSelectedOptions}
             handle={handle}
-            variantIdPromise={variantIdPromise}
           />
-        </Suspense>
-        <Suspense
-          fallback={
-            <div className="grid grid-cols-2 gap-2">
-              <div className="h-12 rounded-lg bg-shop" />
-              <div className="h-12 rounded-lg bg-foreground" />
-            </div>
-          }
-        >
-          <ResolvedBuyButtons
-            variants={variants}
+        ) : (
+          <Suspense
+            fallback={
+              <ProductInfoOptions
+                variants={variants}
+                options={options}
+                selectedOptions={{}}
+                handle={handle}
+                hideImages
+              />
+            }
+          >
+            <ResolvedOptions
+              variants={variants}
+              options={options}
+              handle={handle}
+              variantIdPromise={variantIdPromise}
+            />
+          </Suspense>
+        )}
+        {singleVariant && eagerSelectedVariant ? (
+          <BuyButtons
+            selectedVariant={eagerSelectedVariant}
             title={title}
             handle={handle}
             featuredImage={featuredImage}
             availableForSale={product.availableForSale}
-            variantIdPromise={variantIdPromise}
           />
-        </Suspense>
+        ) : (
+          <Suspense
+            fallback={
+              t ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <div
+                    className={cn(
+                      "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
+                      !allInStock && "invisible",
+                    )}
+                  >
+                    <span className="text-sm font-medium">{t("buyWithShop")}</span>
+                    <ShopLogo className="h-4 w-auto" />
+                  </div>
+                  <div className="flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
+                    {allInStock ? t("addToCart") : t("outOfStock")}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="h-12 rounded-lg bg-shop" />
+                  <div className="h-12 rounded-lg bg-foreground" />
+                </div>
+              )
+            }
+          >
+            <ResolvedBuyButtons
+              variants={variants}
+              title={title}
+              handle={handle}
+              featuredImage={featuredImage}
+              availableForSale={product.availableForSale}
+              variantIdPromise={variantIdPromise}
+            />
+          </Suspense>
+        )}
         <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
       </div>
     </div>
