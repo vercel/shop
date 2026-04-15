@@ -42,7 +42,7 @@ export function VariantSection({
           title={title}
           className="lg:col-span-7"
           desktopSlot={
-            <Suspense fallback={<Skeleton className="aspect-square w-full" />}>
+            <Suspense fallback={<><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /></>}>
               <ResolvedColorImages
                 images={images}
                 options={options}

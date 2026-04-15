@@ -26,8 +26,13 @@ function ProductPageFallback() {
   return (
     <div className="space-y-8">
       <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
-        <div className="space-y-2 lg:col-span-7">
-          <Skeleton className="aspect-square w-full" />
+        <div className="lg:col-span-7">
+          <div className="grid grid-cols-2 gap-2">
+            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="aspect-square w-full" />
+          </div>
         </div>
         <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
           <div>
