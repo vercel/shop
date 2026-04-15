@@ -50,6 +50,7 @@ declare const messages: {
     "selectVariantLabel": "Select {name}: {value}",
     "viewImage": "View image {current} of {total}",
     "goToImage": "Go to image {number}",
+    "viewAll": "View all",
     "recommendations": "You May Also Like",
     "inStock": "In Stock",
     "buyNow": "Buy now",

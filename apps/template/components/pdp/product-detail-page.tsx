@@ -37,7 +37,7 @@ function ProductPageFallback() {
         <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
           <div>
             <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-24 mt-3" />
+            <Skeleton className="h-6 w-24" />
           </div>
           <div className="space-y-3">
             <Skeleton className="h-4 w-20" />

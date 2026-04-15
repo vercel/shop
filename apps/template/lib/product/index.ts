@@ -301,6 +301,17 @@ export function hasUniformPricing(variants: ProductVariant[]): boolean {
 }
 
 /**
+ * Returns true when every variant shares the same availableForSale value.
+ * When true, we can eagerly show the correct buy-button labels in the
+ * Suspense fallback without waiting for variant resolution.
+ */
+export function hasUniformStock(variants: ProductVariant[]): boolean {
+  if (variants.length <= 1) return true;
+  const first = variants[0];
+  return variants.every((v) => v.availableForSale === first.availableForSale);
+}
+
+/**
  * Returns true when the product has multiple color variants with
  * distinct images — meaning the gallery would change based on
  * the selected color (i.e. based on searchParams).

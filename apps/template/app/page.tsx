@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { HeroSection } from "@/components/hero-section";
-import { ProductsCarousel } from "@/components/product/products-carousel";
+import { ProductsGrid } from "@/components/product/products-grid";
 import { Container } from "@/components/layout/container";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
@@ -32,7 +32,7 @@ export default async function HomePage() {
     getLocale(),
     getTranslations("content.homepage"),
   ]);
-  const featuredProductsResult = await getProducts({ limit: 10, locale });
+  const featuredProductsResult = await getProducts({ limit: 8, locale });
 
   return (
     <>
@@ -56,10 +56,11 @@ export default async function HomePage() {
       <Container>
         <div className="flex flex-col gap-12">
           {featuredProductsResult.products.length > 0 && (
-            <ProductsCarousel
+            <ProductsGrid
               title={t("featuredProducts.title")}
               products={featuredProductsResult.products}
               locale={locale}
+              collectionUrl="/collections/all-products"
             />
           )}
         </div>
