@@ -4,12 +4,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
-    cachedNavigations: true,
     inlineCss: true,
-    optimisticRouting: true,
     partialFallbacks: true,
     turbopackFileSystemCacheForDev: true,
-    varyParams: true,
   },
   images: {
     minimumCacheTTL: 31536000,
