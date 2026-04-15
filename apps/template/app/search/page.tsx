@@ -81,27 +81,19 @@ export const unstable_instant = {
 export const unstable_prefetch = "runtime";
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const [locale, resolvedSearchParams, t] = await Promise.all([
-    getLocale(),
-    searchParams,
-    getTranslations("search"),
-  ]);
-  const q = resolvedSearchParams.q as string | undefined;
+  const locale = await getLocale();
 
   return (
     <Container className="pt-3 md:pt-8">
       <FilterTransitionProvider>
-        <div className="mb-6">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-            {q ? t("titleQuery", { query: q }) : t("title")}
-          </h1>
-          {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
-        </div>
+        <Suspense>
+          <SearchTitle searchParamsPromise={searchParams} />
+        </Suspense>
 
         <Suspense fallback={<ResultsSkeleton />}>
           <SearchContent
             locale={locale}
-            resolvedSearchParams={resolvedSearchParams}
+            searchParamsPromise={searchParams}
           />
         </Suspense>
       </FilterTransitionProvider>
@@ -109,16 +101,40 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   );
 }
 
+async function SearchTitle({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [resolvedSearchParams, t] = await Promise.all([
+    searchParamsPromise,
+    getTranslations("search"),
+  ]);
+  const q = resolvedSearchParams.q as string | undefined;
+
+  return (
+    <div className="mb-6">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+        {q ? t("titleQuery", { query: q }) : t("title")}
+      </h1>
+      {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
+    </div>
+  );
+}
+
 async function SearchContent({
   locale,
-  resolvedSearchParams,
+  searchParamsPromise,
 }: {
   locale: Locale;
-  resolvedSearchParams: Record<string, string | string[] | undefined>;
+  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const [resolvedSearchParams, t] = await Promise.all([
+    searchParamsPromise,
+    getTranslations("search"),
+  ]);
   const { q, sort, collection, cursor } = resolvedSearchParams;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
-  const t = await getTranslations("search");
 
   return (
     <>
