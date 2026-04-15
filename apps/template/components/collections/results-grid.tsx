@@ -8,6 +8,7 @@ import type { Locale } from "@/lib/i18n";
 import { type CollectionResultsData, getExactCollectionResultCount } from "@/lib/collections/server";
 import { ProductGridPendingOverlay } from "./filter-pending-context";
 import { CollectionsPagination } from "./pagination";
+import { CollectionsSortSelect } from "./sort-select";
 
 const RESULTS_SKELETON_KEYS = Array.from(
   { length: 10 },
@@ -17,7 +18,10 @@ const RESULTS_SKELETON_KEYS = Array.from(
 function Fallback() {
   return (
     <>
-      <Skeleton className="mb-6 h-4 w-40" />
+      <div className="mb-6 hidden md:flex md:items-center md:justify-between">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-5 w-24" />
+      </div>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
         {RESULTS_SKELETON_KEYS.map((key) => (
           <ProductCardSkeleton key={key} />
@@ -53,11 +57,14 @@ async function Render({
 
   return (
     <>
-      {exactCount !== undefined && exactCount > 0 && (
-        <div className="mb-6 hidden md:block">
+      <div className="mb-6 hidden md:flex md:items-center md:justify-between">
+        {exactCount !== undefined && exactCount > 0 ? (
           <p className="text-sm text-muted-foreground">{t("resultCount", { count: exactCount })}</p>
-        </div>
-      )}
+        ) : (
+          <div />
+        )}
+        <CollectionsSortSelect />
+      </div>
 
       <ProductGridPendingOverlay>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">

@@ -7,6 +7,7 @@ import {
 import { CollectionsPagination } from "@/components/collections/pagination";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
+import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
@@ -27,7 +28,10 @@ export function ResultsSkeleton() {
       </aside>
 
       <div className="flex-1">
-        <Skeleton className="mb-6 h-4 w-40" />
+        <div className="mb-6 hidden md:flex md:items-center md:justify-between">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-5 w-24" />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
           {RESULTS_SKELETON_KEYS.map((key) => (
             <ProductCardSkeleton key={key} />
@@ -94,10 +98,11 @@ export async function Results({
             </div>
           ) : (
             <>
-              <div className="mb-6 hidden md:block">
+              <div className="mb-6 hidden md:flex md:items-center md:justify-between">
                 <p className="text-sm text-muted-foreground">
                   {t("resultCount", { count: result.total })}
                 </p>
+                <CollectionsSortSelect />
               </div>
 
               <ProductGridPendingOverlay>

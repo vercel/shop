@@ -11,9 +11,9 @@ import {
   MobileFilterSortBar,
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
+import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { Container } from "@/components/layout/container";
 import { Results, ResultsSkeleton } from "@/components/search/results";
@@ -87,8 +87,12 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <Container className="pt-3 md:pt-8">
       <FilterTransitionProvider>
-        <Suspense fallback={<SearchHeaderSkeleton />}>
-          <SearchHeader locale={locale} searchParamsPromise={searchParams} />
+        <Suspense fallback={<TitleSkeleton />}>
+          <SearchTitle searchParamsPromise={searchParams} />
+        </Suspense>
+
+        <Suspense fallback={<MobileFilterSortBarSkeleton />}>
+          <SearchMobileBar locale={locale} searchParamsPromise={searchParams} />
         </Suspense>
 
         <Suspense fallback={<ResultsSkeleton />}>
@@ -99,7 +103,28 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   );
 }
 
-async function SearchHeader({
+async function SearchTitle({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [resolvedSearchParams, t] = await Promise.all([
+    searchParamsPromise,
+    getTranslations("search"),
+  ]);
+  const q = resolvedSearchParams.q as string | undefined;
+
+  return (
+    <div className="mt-4 md:mt-0 mb-6">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+        {q ? t("titleQuery", { query: q }) : t("title")}
+      </h1>
+      {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
+    </div>
+  );
+}
+
+async function SearchMobileBar({
   locale,
   searchParamsPromise,
 }: {
@@ -114,47 +139,31 @@ async function SearchHeader({
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
 
   return (
-    <>
-      {/* Mobile: filter/sort bar */}
-      <MobileFilterSortBar
-        filterSheet={
-          <FilterSidebarSheet
-            label={t("filters")}
-            trigger={
-              <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                <SlidersHorizontalIcon className="size-4" />
-                <span>{t("filters")}</span>
-              </button>
-            }
-          >
-            <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
-              <FilterPendingScope>
-                <SearchFilterContent
-                  query={q}
-                  collection={resolvedSearchParams.collection as string | undefined}
-                  locale={locale}
-                  activeFilters={activeFilters}
-                />
-              </FilterPendingScope>
-            </Suspense>
-          </FilterSidebarSheet>
-        }
-        sortSelect={<CollectionsSortSelect />}
-      />
-
-      {/* Title + desktop sort */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-4 md:mt-0 mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {q ? t("titleQuery", { query: q }) : t("title")}
-          </h1>
-          {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
-        </div>
-        <div className="hidden md:block">
-          <CollectionsSortSelect />
-        </div>
-      </div>
-    </>
+    <MobileFilterSortBar
+      filterSheet={
+        <FilterSidebarSheet
+          label={t("filters")}
+          trigger={
+            <button type="button" className="flex items-center gap-2 text-sm font-medium">
+              <SlidersHorizontalIcon className="size-4" />
+              <span>{t("filters")}</span>
+            </button>
+          }
+        >
+          <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
+            <FilterPendingScope>
+              <SearchFilterContent
+                query={q}
+                collection={resolvedSearchParams.collection as string | undefined}
+                locale={locale}
+                activeFilters={activeFilters}
+              />
+            </FilterPendingScope>
+          </Suspense>
+        </FilterSidebarSheet>
+      }
+      sortSelect={<CollectionsSortSelect />}
+    />
   );
 }
 
@@ -212,11 +221,10 @@ async function SearchFilterContent({
   );
 }
 
-function SearchHeaderSkeleton() {
+function TitleSkeleton() {
   return (
-    <>
-      <MobileFilterSortBarSkeleton />
-      <Skeleton className="mt-4 md:mt-0 mb-6 h-10 w-72" />
-    </>
+    <div className="mt-4 md:mt-0 mb-6">
+      <Skeleton className="h-10 sm:h-11 md:h-13 w-72" />
+    </div>
   );
 }
