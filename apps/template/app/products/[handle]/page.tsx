@@ -24,9 +24,8 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export const unstable_prefetch = "runtime";
-
 export const unstable_instant = {
+  prefetch: "runtime",
   samples: [
     {
       params: { handle: PLACEHOLDER_HANDLE },
