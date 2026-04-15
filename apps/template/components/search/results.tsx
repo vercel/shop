@@ -16,7 +16,7 @@ import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 const RESULTS_SKELETON_KEYS = Array.from(
-  { length: 10 },
+  { length: 12 },
   (_, index) => `search-results-skeleton-${index}`,
 );
 

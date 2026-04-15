@@ -11,7 +11,7 @@ import { CollectionsPagination } from "./pagination";
 import { CollectionsSortSelect } from "./sort-select";
 
 const RESULTS_SKELETON_KEYS = Array.from(
-  { length: 10 },
+  { length: 12 },
   (_, index) => `collection-results-skeleton-${index}`,
 );
 
