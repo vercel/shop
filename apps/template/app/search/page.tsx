@@ -11,13 +11,12 @@ import {
   MobileFilterSortBar,
   MobileFilterSortBarSkeleton,
 } from "@/components/collections/mobile-filter-sort-bar";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
+import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { Container } from "@/components/layout/container";
 import { Results, ResultsSkeleton } from "@/components/search/results";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -82,40 +81,47 @@ export const unstable_instant = {
 export const unstable_prefetch = "runtime";
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const locale = await getLocale();
+  const [locale, resolvedSearchParams, t] = await Promise.all([
+    getLocale(),
+    searchParams,
+    getTranslations("search"),
+  ]);
+  const q = resolvedSearchParams.q as string | undefined;
 
   return (
     <Container className="pt-3 md:pt-8">
       <FilterTransitionProvider>
-        <Suspense fallback={<SearchHeaderSkeleton />}>
-          <SearchHeader locale={locale} searchParamsPromise={searchParams} />
-        </Suspense>
+        <div className="mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+            {q ? t("titleQuery", { query: q }) : t("title")}
+          </h1>
+          {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
+        </div>
 
         <Suspense fallback={<ResultsSkeleton />}>
-          <SearchResults searchParamsPromise={searchParams} />
+          <SearchContent
+            locale={locale}
+            resolvedSearchParams={resolvedSearchParams}
+          />
         </Suspense>
       </FilterTransitionProvider>
     </Container>
   );
 }
 
-async function SearchHeader({
+async function SearchContent({
   locale,
-  searchParamsPromise,
+  resolvedSearchParams,
 }: {
   locale: Locale;
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+  resolvedSearchParams: Record<string, string | string[] | undefined>;
 }) {
-  const [resolvedSearchParams, t] = await Promise.all([
-    searchParamsPromise,
-    getTranslations("search"),
-  ]);
-  const q = resolvedSearchParams.q as string | undefined;
+  const { q, sort, collection, cursor } = resolvedSearchParams;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
+  const t = await getTranslations("search");
 
   return (
     <>
-      {/* Mobile: filter/sort bar */}
       <MobileFilterSortBar
         filterSheet={
           <FilterSidebarSheet
@@ -130,8 +136,8 @@ async function SearchHeader({
             <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
               <FilterPendingScope>
                 <SearchFilterContent
-                  query={q}
-                  collection={resolvedSearchParams.collection as string | undefined}
+                  query={q as string | undefined}
+                  collection={collection as string | undefined}
                   locale={locale}
                   activeFilters={activeFilters}
                 />
@@ -142,40 +148,15 @@ async function SearchHeader({
         sortSelect={<CollectionsSortSelect />}
       />
 
-      {/* Title + desktop sort */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mt-4 md:mt-0 mb-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            {q ? t("titleQuery", { query: q }) : t("title")}
-          </h1>
-          {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
-        </div>
-        <div className="hidden md:block">
-          <CollectionsSortSelect />
-        </div>
-      </div>
+      <Results
+        query={q as string | undefined}
+        sort={sort as string | undefined}
+        collection={collection as string | undefined}
+        locale={locale}
+        cursor={cursor as string | undefined}
+        activeFilters={activeFilters}
+      />
     </>
-  );
-}
-
-async function SearchResults({
-  searchParamsPromise,
-}: {
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [locale, resolvedSearchParams] = await Promise.all([getLocale(), searchParamsPromise]);
-  const { q, sort, collection, cursor } = resolvedSearchParams;
-  const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
-
-  return (
-    <Results
-      query={q as string | undefined}
-      sort={sort as string | undefined}
-      collection={collection as string | undefined}
-      locale={locale}
-      cursor={cursor as string | undefined}
-      activeFilters={activeFilters}
-    />
   );
 }
 
@@ -209,14 +190,5 @@ async function SearchFilterContent({
       priceRange={transformedFilters.priceRange}
       activeFilters={activeFilters}
     />
-  );
-}
-
-function SearchHeaderSkeleton() {
-  return (
-    <>
-      <MobileFilterSortBarSkeleton />
-      <Skeleton className="mt-4 md:mt-0 mb-6 h-10 w-72" />
-    </>
   );
 }

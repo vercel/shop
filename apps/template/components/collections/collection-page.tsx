@@ -1,8 +1,11 @@
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
-import { CollectionHeader } from "@/components/collections/header";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/layout/container";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 
@@ -35,12 +38,9 @@ export function CollectionDetailPage({
           collectionPromise={collectionPromise}
         />
 
-        <CollectionHeader
-          handlePromise={handlePromise}
-          locale={locale}
-          collectionPromise={collectionPromise}
-          collectionResultsDataPromise={collectionResultsDataPromise}
-        />
+        <Suspense fallback={<CollectionTitleSkeleton />}>
+          <CollectionTitle collectionPromise={collectionPromise} />
+        </Suspense>
 
         <CollectionResultsSection
           locale={locale}
@@ -48,5 +48,34 @@ export function CollectionDetailPage({
         />
       </Container>
     </FilterTransitionProvider>
+  );
+}
+
+async function CollectionTitle({
+  collectionPromise,
+}: {
+  collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
+}) {
+  const collection = await collectionPromise;
+
+  if (!collection) {
+    notFound();
+  }
+
+  const { title, description } = collection;
+
+  return (
+    <div className="mb-6">
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
+      {description && <p className="mt-1 text-muted-foreground">{description}</p>}
+    </div>
+  );
+}
+
+function CollectionTitleSkeleton() {
+  return (
+    <div className="mb-6">
+      <Skeleton className="h-10 sm:h-11 md:h-13 w-72" />
+    </div>
   );
 }

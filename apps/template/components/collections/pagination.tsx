@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon, LoaderCircleIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -9,7 +9,6 @@ import {
   useFilterPending,
   useFilterTransition,
 } from "@/components/collections/filter-pending-context";
-import { Button } from "@/components/ui/button";
 
 export function CollectionsPagination({
   hasNextPage,
@@ -52,35 +51,43 @@ export function CollectionsPagination({
   };
 
   return (
-    <div className="flex items-center justify-end gap-2 mt-8 pt-8 border-t">
+    <div className="flex items-center justify-end gap-1 mt-8">
       {isFirstPage ? (
-        <Button variant="outline" size="sm" disabled>
-          <ChevronLeftIcon className="h-4 w-4 mr-1" />
-          {t("first")}
-        </Button>
+        <button type="button" disabled aria-label={t("first")} className="text-foreground/30">
+          <ChevronLeft className="size-6" aria-hidden="true" />
+        </button>
       ) : (
-        <Button variant="outline" size="sm" disabled={isPending} asChild>
-          <Link href={firstPageHref} onClick={(e) => navigate(e, firstPageHref)}>
-            <ChevronLeftIcon className="h-4 w-4 mr-1" />
-            {t("first")}
-            {isPending && <LoaderCircleIcon className="size-4 animate-spin" />}
-          </Link>
-        </Button>
+        <Link
+          href={firstPageHref}
+          onClick={(e) => navigate(e, firstPageHref)}
+          aria-label={t("first")}
+          className={isPending ? "pointer-events-none text-foreground/30" : "text-foreground"}
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-6 animate-spin" />
+          ) : (
+            <ChevronLeft className="size-6" aria-hidden="true" />
+          )}
+        </Link>
       )}
 
       {!hasNextPage || !nextPageHref ? (
-        <Button variant="outline" size="sm" disabled>
-          {t("next")}
-          <ChevronRightIcon className="h-4 w-4 ml-1" />
-        </Button>
+        <button type="button" disabled aria-label={t("next")} className="text-foreground/30">
+          <ChevronRight className="size-6" aria-hidden="true" />
+        </button>
       ) : (
-        <Button variant="outline" size="sm" disabled={isPending} asChild>
-          <Link href={nextPageHref} onClick={(e) => navigate(e, nextPageHref)}>
-            {t("next")}
-            {isPending && <LoaderCircleIcon className="size-4 animate-spin" />}
-            {!isPending && <ChevronRightIcon className="h-4 w-4 ml-1" />}
-          </Link>
-        </Button>
+        <Link
+          href={nextPageHref}
+          onClick={(e) => navigate(e, nextPageHref)}
+          aria-label={t("next")}
+          className={isPending ? "pointer-events-none text-foreground/30" : "text-foreground"}
+        >
+          {isPending ? (
+            <LoaderCircleIcon className="size-6 animate-spin" />
+          ) : (
+            <ChevronRight className="size-6" aria-hidden="true" />
+          )}
+        </Link>
       )}
     </div>
   );
