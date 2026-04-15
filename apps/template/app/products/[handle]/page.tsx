@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductDetailPage } from "@/components/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProduct, getProducts } from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -48,7 +48,9 @@ async function buildProductMetadata(
 }
 
 export async function generateStaticParams() {
-  return [{ handle: 'vellura-interiors-arceau-lounge-chair-srenit-collection-1f4z' }];
+  const { products } = await getProducts({ limit: 1 });
+  const first = products[0];
+  return first ? [{ handle: first.handle }] : [];
 }
 
 export async function generateMetadata({
