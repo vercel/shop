@@ -1,6 +1,5 @@
 import type { ComponentPropsWithoutRef } from "react";
 
-import { DEFAULT_OPTION } from "@/lib/constants";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -69,7 +68,7 @@ function ProductInfoOptions({
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
   const isDefaultOption = (opt: { values: { name: string }[] }) =>
-    opt.values.length === 1 && opt.values[0].name === DEFAULT_OPTION;
+    opt.values.length === 1;
 
   const colorOptions = options.filter((opt) => isColorOption(opt) && !isDefaultOption(opt));
   const otherOptions = options.filter((opt) => !isColorOption(opt) && !isDefaultOption(opt));

@@ -23,7 +23,6 @@ Every read operation should follow this pattern:
 ```tsx
 import { cacheLife, cacheTag } from "next/cache";
 import { getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { TAGS } from "@/lib/constants";
 import { shopifyFetch } from "@/lib/shopify/client";
 import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
 import { transformShopifyProductDetails } from "@/lib/shopify/transforms/product";
@@ -31,7 +30,7 @@ import { transformShopifyProductDetails } from "@/lib/shopify/transforms/product
 export async function getProduct(handle: string, locale: string) {
   "use cache: remote";
   cacheLife("max");
-  cacheTag(TAGS.products);
+  cacheTag("products");
 
   const data = await shopifyFetch<{ product: ShopifyProduct }>({
     operation: "GetProduct",
