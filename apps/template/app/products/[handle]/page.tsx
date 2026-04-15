@@ -48,7 +48,7 @@ async function buildProductMetadata(
 }
 
 export async function generateStaticParams() {
-  return [{ handle: PLACEHOLDER_HANDLE }];
+  return [{ handle: 'vellura-interiors-arceau-lounge-chair-srenit-collection-1f4z' }];
 }
 
 export async function generateMetadata({
