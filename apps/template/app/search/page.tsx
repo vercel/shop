@@ -199,7 +199,7 @@ function SearchHeaderSkeleton() {
   return (
     <>
       <MobileFilterSortBarSkeleton />
-      <Skeleton className="mt-4 md:mt-0 mb-8 h-10 w-72" />
+      <Skeleton className="mt-4 md:mt-0 mb-6 h-10 w-72" />
     </>
   );
 }

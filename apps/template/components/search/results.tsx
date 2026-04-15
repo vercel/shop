@@ -7,7 +7,7 @@ import {
 import { CollectionsPagination } from "@/components/collections/pagination";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
-import { ProductCard } from "@/components/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
@@ -30,7 +30,7 @@ export function ResultsSkeleton() {
         <Skeleton className="mb-6 h-4 w-40" />
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
           {RESULTS_SKELETON_KEYS.map((key) => (
-            <Skeleton key={key} className="h-80 rounded-md" />
+            <ProductCardSkeleton key={key} />
           ))}
         </div>
       </div>
