@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 
-import type { CollectionResultsData } from "./data";
+import type { CollectionResultsData } from "@/lib/collections/server";
 
 function Fallback() {
   return <CollectionFilterSidebarSkeleton />;

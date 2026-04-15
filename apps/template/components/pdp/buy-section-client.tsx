@@ -4,9 +4,9 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense, use, useState, useTransition } from "react";
 
-import { buyNowAction } from "@/components/cart/actions";
+import { buyNowAction } from "@/lib/cart/action";
 import { useCart } from "@/components/cart/context";
-import { variantToOptimisticInfo } from "@/components/cart/optimistic-info";
+import { variantToOptimisticInfo } from "@/lib/product";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,8 +14,7 @@ import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { QuantitySelector } from "./quantity-selector";
 import { ShopLogo } from "./shop-logo";
-import { resolveSelectedVariant } from "./variants";
-import type { SelectedOptions } from "./variants";
+import { type SelectedOptions, resolveSelectedVariant } from "@/lib/product";
 
 function Fallback() {
   return (

@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { cn, formatPrice } from "@/lib/utils";
 
-import { prepareCheckoutAction, updateCartNoteAction } from "@/components/cart/actions";
+import { prepareCheckoutAction, updateCartNoteAction } from "@/lib/cart/action";
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
 

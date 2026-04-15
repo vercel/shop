@@ -5,8 +5,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import type { SelectedOptions } from "./variants";
-import { getVariantUrl } from "./variants";
+import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 
 interface ColorPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;

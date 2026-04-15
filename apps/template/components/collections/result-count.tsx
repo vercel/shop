@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { type CollectionResultsData, getExactCollectionResultCount } from "./data";
+import { type CollectionResultsData, getExactCollectionResultCount } from "@/lib/collections/server";
 
 function Fallback() {
   return <Skeleton className="h-4 w-24" />;

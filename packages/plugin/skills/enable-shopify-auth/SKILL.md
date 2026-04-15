@@ -547,7 +547,7 @@ import { NavAccount, NavAccountFallback } from "./account";
 
 ### Step 12. Wire cart actions for authenticated checkout
 
-In `components/cart/actions.ts`, import `getSession` and update:
+In `lib/cart/action.ts`, import `getSession` and update:
 
 - `buyNowAction`: Run `addToCart` and `getSession` in parallel. If authenticated, call `linkCartToCustomer(session.accessToken)` before returning checkout URL.
 - `prepareCheckoutAction`: Check session, if authenticated call `linkCartToCustomer(session.accessToken)`, fall back to plain cart checkout URL.

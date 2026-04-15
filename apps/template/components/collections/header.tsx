@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 
-import type { CollectionResultsData } from "./data";
+import type { CollectionResultsData } from "@/lib/collections/server";
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionsSortSelect } from "./sort-select";

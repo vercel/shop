@@ -1,29 +1,9 @@
-import type { Image, ProductOption, ProductVariant } from "@/lib/types";
+import type { Image, Money, ProductOption, ProductVariant, SelectedOption } from "@/lib/types";
+import { getNumericShopifyId } from "@/lib/shopify/utils";
+
+// ── Variant selection ────────────────────────────────────────────────
 
 export type SelectedOptions = Record<string, string>;
-
-/**
- * Extract the numeric ID from a Shopify GID string.
- * e.g. "gid://shopify/ProductVariant/1234567890" → "1234567890"
- *
- * Handles both raw GID strings and base64-encoded GIDs.
- * Returns `null` if the ID cannot be extracted.
- */
-export function getNumericShopifyId(gid: string): string | null {
-  let decoded = gid;
-
-  // If it doesn't look like a GID, try base64 decoding
-  if (!decoded.startsWith("gid://")) {
-    try {
-      decoded = atob(decoded);
-    } catch {
-      return null;
-    }
-  }
-
-  const match = decoded.match(/gid:\/\/shopify\/\w+\/(\d+)/);
-  return match?.[1] ?? null;
-}
 
 /**
  * Compute initial selected options based on variantId and available variants.
@@ -105,6 +85,8 @@ export function getVariantUrl(
 
   return `/products/${handle}`;
 }
+
+// ── Color image partitioning ─────────────────────────────────────────
 
 /**
  * Returns filtered images for the currently selected color variant.
@@ -208,7 +190,7 @@ export function getImagesForSelectedColor(
 
 /**
  * Returns partitioned images for the currently selected color variant.
- * 
+ *
  * Returns an object with:
  * - colorImages: Images specific to the selected color variant
  * - otherImages: Shared/unassigned images
@@ -373,4 +355,66 @@ export function getSharedImages(
   if (allColorImageUrls.size === 0) return images;
 
   return images.filter((img) => !allColorImageUrls.has(img.url));
+}
+
+// ── Optimistic cart info ─────────────────────────────────────────────
+
+// Product info needed to construct an optimistic CartLine
+export type OptimisticProductInfo = {
+  variantTitle: string;
+  productTitle: string;
+  productHandle: string;
+  price: Money;
+  image: Image;
+  selectedOptions: SelectedOption[];
+};
+
+// Build OptimisticProductInfo from a ProductCard (grid/carousel quick-add)
+export function productCardToOptimisticInfo(product: {
+  title: string;
+  handle: string;
+  price: Money;
+  featuredImage: Image | null;
+  defaultVariantSelectedOptions?: SelectedOption[];
+}): OptimisticProductInfo {
+  const opts = product.defaultVariantSelectedOptions ?? [];
+  return {
+    variantTitle: opts.map((o) => o.value).join(" / ") || "Default Title",
+    productTitle: product.title,
+    productHandle: product.handle,
+    price: product.price,
+    image: product.featuredImage || {
+      url: "",
+      altText: product.title,
+      width: 0,
+      height: 0,
+    },
+    selectedOptions: opts,
+  };
+}
+
+// Build OptimisticProductInfo from a PDP variant + product
+export function variantToOptimisticInfo(
+  variant: {
+    title: string;
+    price: Money;
+    image: Image | null;
+    selectedOptions: SelectedOption[];
+  },
+  product: { title: string; handle: string; featuredImage: Image | null },
+): OptimisticProductInfo {
+  return {
+    variantTitle: variant.title,
+    productTitle: product.title,
+    productHandle: product.handle,
+    price: variant.price,
+    image: variant.image ||
+      product.featuredImage || {
+        url: "",
+        altText: product.title,
+        width: 0,
+        height: 0,
+      },
+    selectedOptions: variant.selectedOptions,
+  };
 }

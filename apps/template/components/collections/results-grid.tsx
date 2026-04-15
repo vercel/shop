@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 
-import { type CollectionResultsData, getExactCollectionResultCount } from "./data";
+import { type CollectionResultsData, getExactCollectionResultCount } from "@/lib/collections/server";
 import { ProductGridPendingOverlay } from "./filter-pending-context";
 import { CollectionsPagination } from "./pagination";
 

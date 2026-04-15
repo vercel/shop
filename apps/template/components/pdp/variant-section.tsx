@@ -15,7 +15,7 @@ import {
   hasColorImagePartitioning,
   hasUniformPricing,
   resolveSelectedVariant,
-} from "@/components/pdp/variants";
+} from "@/lib/product";
 import type { Locale } from "@/lib/i18n";
 import type { Image as ImageType, ProductDetails, ProductOption, ProductVariant } from "@/lib/types";
 

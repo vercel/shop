@@ -7,8 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { getImagesForSelectedColor } from "./variants";
-import type { SelectedOptions } from "./variants";
+import { type SelectedOptions, getImagesForSelectedColor } from "@/lib/product";
 
 interface ImageStackContentProps extends ComponentPropsWithoutRef<"div"> {
   images: Array<{ url: string; altText: string }>;

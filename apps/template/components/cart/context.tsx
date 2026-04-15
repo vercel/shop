@@ -10,12 +10,13 @@ import {
   useTransition,
 } from "react";
 
-import { addToCartAction } from "@/components/cart/actions";
+import { addToCartAction } from "@/lib/cart/action";
 import type { Cart, CartLine } from "@/lib/types";
 
-import { removeFromCartAction, updateCartQuantityAction } from "./actions";
-import { DEBOUNCE_MS } from "./constants";
-import type { OptimisticProductInfo } from "./optimistic-info";
+import { removeFromCartAction, updateCartQuantityAction } from "@/lib/cart/action";
+import type { OptimisticProductInfo } from "@/lib/product";
+
+const DEBOUNCE_MS = 400;
 
 // Internal utility functions (moved from utils.ts)
 function createOptimisticCart(cart: Cart, lineId: string, newQuantity: number): Cart {

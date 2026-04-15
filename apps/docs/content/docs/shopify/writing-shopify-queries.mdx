@@ -153,7 +153,7 @@ export default async function PrivacyPolicyPage() {
 Mutations follow the same pattern but without caching directives. If the mutation modifies cart state, you must call `invalidateCartCache()` afterward:
 
 ```ts
-import { invalidateCartCache } from "@/lib/cart-cache";
+import { invalidateCartCache } from "@/lib/cart/server";
 
 export async function updateCartNote(note: string, cartId: string) {
   const data = await shopifyFetch<{ cartNoteUpdate: { cart: ShopifyCart } }>({

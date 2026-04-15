@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 
-import { defaultLocale, resolveLocale } from "../i18n";
+import { defaultLocale, resolveLocale } from ".";
 import type enMessages from "./messages/en.json";
 
 const messageLoaders = {

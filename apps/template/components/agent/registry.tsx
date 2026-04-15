@@ -18,7 +18,7 @@ import {
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { catalog } from "./catalog";
+import { catalog } from "@/lib/agent/ui/catalog";
 
 function parsePriceString(price: string): Money {
   const parts = price.split(" ");
