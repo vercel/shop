@@ -124,7 +124,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
     <h3
       data-slot="product-card-title"
       className={cn(
-        "text-base font-semibold text-main-foreground line-clamp-2 leading-tight",
+        "text-base font-semibold text-main-foreground line-clamp-2",
         className,
       )}
       {...props}
@@ -194,10 +194,10 @@ function ProductCardSkeleton({ className }: { className?: string }) {
       className={cn("flex flex-col overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="py-3">
+      <div className="py-3 h-18 box-content">
         <div className="h-4 w-full bg-muted rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-1" />
-        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-1" />
+        <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-2" />
+        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
       </div>
     </div>
   );
