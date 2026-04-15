@@ -33,7 +33,7 @@ All cart mutations update the UI before the server responds. The implementation 
 
 Each cart line tracks a request ID that increments on every mutation. When a server response arrives, it is only applied if its request ID matches the latest - stale responses from earlier requests are discarded. This prevents race conditions where a slow response overwrites a newer state.
 
-> **Hard requirement:** Every cart mutation must call `invalidateCartCache()` from `@/lib/cart-cache`. Without it, the cached cart data goes stale and the UI shows outdated state after the next page navigation.
+> **Hard requirement:** Every cart mutation must call `invalidateCartCache()` from `@/lib/cart/server`. Without it, the cached cart data goes stale and the UI shows outdated state after the next page navigation.
 
 ## Server actions
 

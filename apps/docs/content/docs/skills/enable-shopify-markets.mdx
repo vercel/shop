@@ -411,7 +411,7 @@ app/not-found.tsx (now app/[locale]/not-found.tsx)
 app/collections/page.tsx (now app/[locale]/collections/page.tsx)
 app/account/orders/page.tsx
 app/account/orders/[id]/page.tsx
-lib/agent/ui/registry.tsx
+components/agent/registry.tsx
 ```
 
 Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navigation"`. The locale-aware `Link` automatically prefixes URLs with the current locale. Its API is the same as `next/link` — no other changes needed in the JSX.
