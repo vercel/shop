@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { ProductCard } from "@/components/product-card";
@@ -8,13 +9,24 @@ interface ProductsGridProps {
   title: string;
   products: ProductCardType[];
   locale: Locale;
+  collectionUrl?: string;
 }
 
-export async function ProductsGrid({ title, products, locale }: ProductsGridProps) {
+export async function ProductsGrid({ title, products, locale, collectionUrl }: ProductsGridProps) {
   const t = await getTranslations("product");
   return (
     <div>
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter mb-4">{title}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
+        {collectionUrl && (
+          <Link
+            href={collectionUrl}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {t("viewAll")}
+          </Link>
+        )}
+      </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard
