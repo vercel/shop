@@ -17,9 +17,9 @@ function Fallback() {
           {["a", "b", "c", "d"].map((key) => (
             <div key={key}>
               <Skeleton className="aspect-square" />
-              <div className="py-3 space-y-2">
+              <div className="py-3 h-18 box-content">
                 <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-3/4 mt-2" />
                 <Skeleton className="h-4 w-16 mt-2" />
               </div>
             </div>
