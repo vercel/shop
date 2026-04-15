@@ -13,6 +13,18 @@ export function formatPrice(amount: number, currencyCode: string, locale: string
   }).format(amount);
 }
 
+export function getCurrencySymbol(currencyCode: string, locale: string): string {
+  return (
+    new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyCode,
+      currencyDisplay: "narrowSymbol",
+    })
+      .formatToParts(0)
+      .find((part) => part.type === "currency")?.value ?? currencyCode
+  );
+}
+
 export function parseFiltersFromSearchParams(
   searchParams: Record<string, string | string[] | undefined>,
 ): Record<string, string | string[] | undefined> {

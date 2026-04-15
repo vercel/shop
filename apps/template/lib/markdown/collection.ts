@@ -14,6 +14,7 @@ export function collectionToMarkdown({
   products,
   filters,
   priceRange,
+  currencyCode,
   activeFilters,
   pageInfo,
   locale,
@@ -23,6 +24,7 @@ export function collectionToMarkdown({
   products: ProductCard[];
   filters: Filter[];
   priceRange?: PriceRange;
+  currencyCode: string;
   activeFilters: Record<string, string | string[] | undefined>;
   pageInfo: PageInfo;
   locale: string;
@@ -50,7 +52,7 @@ export function collectionToMarkdown({
   }
 
   appendAppliedFiltersSection(sections, { activeFilters, filters });
-  appendAvailableFiltersSection(sections, { filters, priceRange, locale });
+  appendAvailableFiltersSection(sections, { filters, priceRange, currencyCode, locale });
   appendProductsSection(sections, { products, locale });
   appendPaginationSection(sections, pageInfo);
 

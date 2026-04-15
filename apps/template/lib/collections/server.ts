@@ -3,6 +3,7 @@ import {
   buildProductFiltersFromParams,
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
+import { getShopDefaultCurrencyCode } from "@/lib/shopify/operations/shop";
 import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ export interface CollectionSearchState {
 export interface CollectionResultsData {
   activeFilters: Record<string, string | string[] | undefined>;
   cursor?: string;
+  currencyCode: string;
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
   transformedFilters: TransformedFilters;
 }
@@ -57,6 +59,7 @@ export async function getCollectionResultsData({
   return {
     activeFilters,
     cursor,
+    currencyCode: result.products[0]?.price.currencyCode ?? (await getShopDefaultCurrencyCode()),
     result,
     transformedFilters: transformShopifyFilters(result.filters, {
       activeFilters,

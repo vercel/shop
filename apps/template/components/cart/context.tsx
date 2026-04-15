@@ -96,15 +96,23 @@ function computeCartWithPending(
   }
 
   if (pendingQuantity > 0) {
+    const currencyCode =
+      pendingLines[0]?.cost.totalAmount.currencyCode ??
+      pendingLines[0]?.merchandise.price?.currencyCode;
+
+    if (!currencyCode) {
+      return null;
+    }
+
     return {
       id: undefined,
       checkoutUrl: "",
       totalQuantity: pendingQuantity,
       note: null,
       cost: {
-        subtotalAmount: { amount: "0", currencyCode: "USD" },
-        totalAmount: { amount: "0", currencyCode: "USD" },
-        totalTaxAmount: { amount: "0", currencyCode: "USD" },
+        subtotalAmount: { amount: "0", currencyCode },
+        totalAmount: { amount: "0", currencyCode },
+        totalTaxAmount: { amount: "0", currencyCode },
       },
       lines: pendingLines,
       shippingCost: null,

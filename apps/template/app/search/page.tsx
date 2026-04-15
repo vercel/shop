@@ -22,6 +22,7 @@ import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import { getShopDefaultCurrencyCode } from "@/lib/shopify/operations/shop";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
@@ -202,11 +203,13 @@ async function SearchFilterContent({
   const transformedFilters = transformShopifyFilters(result.filters, {
     activeFilters,
   });
+  const currencyCode = result.products[0]?.price.currencyCode ?? (await getShopDefaultCurrencyCode());
 
   return (
     <CollectionFilterSidebarClient
       filters={transformedFilters.filters}
       priceRange={transformedFilters.priceRange}
+      currencyCode={currencyCode}
       activeFilters={activeFilters}
     />
   );

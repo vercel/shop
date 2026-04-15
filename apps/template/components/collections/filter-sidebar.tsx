@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
@@ -24,30 +24,64 @@ import {
 } from "@/components/ui/filter-sidebar";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
+import { getCurrencySymbol } from "@/lib/utils";
 
 interface CollectionFilterSidebarClientProps {
   filters: Filter[];
   priceRange?: PriceRange;
+  currencyCode: string;
   activeFilters: Record<string, string | string[] | undefined>;
 }
 
 type FilterState = Record<string, string | string[] | undefined>;
 
 const PRICE_PRESETS = [
-  { label: "Under $50", min: 0, max: 50 },
-  { label: "$50 - $100", min: 50, max: 100 },
-  { label: "$100 - $200", min: 100, max: 200 },
-  { label: "Over $200", min: 200, max: undefined },
+  { min: 0, max: 50 },
+  { min: 50, max: 100 },
+  { min: 100, max: 200 },
+  { min: 200, max: undefined },
 ];
 
-function formatPriceRangeLabel(min: number | null, max: number | null): string {
+function formatCurrencyAmount(amount: number, locale: string, currencyCode: string): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currencyCode,
+    currencyDisplay: "narrowSymbol",
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+  }).format(amount);
+}
+
+function formatPriceRangeLabel(
+  min: number | null,
+  max: number | null,
+  locale: string,
+  currencyCode: string,
+): string {
   if (min !== null && max !== null) {
-    return `$${min} - $${max}`;
+    return `${formatCurrencyAmount(min, locale, currencyCode)} - ${formatCurrencyAmount(max, locale, currencyCode)}`;
   }
   if (min !== null) {
-    return `From $${min}`;
+    return `From ${formatCurrencyAmount(min, locale, currencyCode)}`;
   }
-  return `Up to $${max}`;
+  return `Up to ${formatCurrencyAmount(max ?? 0, locale, currencyCode)}`;
+}
+
+function formatPricePresetLabel(
+  min: number,
+  max: number | undefined,
+  locale: string,
+  currencyCode: string,
+): string {
+  if (max === undefined) {
+    return `Over ${formatCurrencyAmount(min, locale, currencyCode)}`;
+  }
+
+  if (min === 0) {
+    return `Under ${formatCurrencyAmount(max, locale, currencyCode)}`;
+  }
+
+  return `${formatCurrencyAmount(min, locale, currencyCode)} - ${formatCurrencyAmount(max, locale, currencyCode)}`;
 }
 
 function getFilterValues(value: string | string[] | undefined): string[] {
@@ -117,8 +151,10 @@ function applyPriceParams(params: URLSearchParams, min: number | null, max: numb
 export function CollectionFilterSidebarClient({
   filters,
   priceRange,
+  currencyCode,
   activeFilters,
 }: CollectionFilterSidebarClientProps) {
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -236,7 +272,7 @@ export function CollectionFilterSidebarClient({
             ))}
             {hasPriceFilter && (
               <FilterBadge variant="primary" onRemove={removePriceRange}>
-                {formatPriceRangeLabel(urlPriceMin, urlPriceMax)}
+                {formatPriceRangeLabel(urlPriceMin, urlPriceMax, locale, currencyCode)}
               </FilterBadge>
             )}
           </FilterSidebarActiveFilters>
@@ -252,6 +288,7 @@ export function CollectionFilterSidebarClient({
                 onMinChange={setMinInput}
                 onMaxChange={setMaxInput}
                 onApply={applyPriceRange}
+                currencySymbol={getCurrencySymbol(currencyCode, locale)}
               >
                 <FilterOptionList>
                   {PRICE_PRESETS.map((preset) => {
@@ -263,11 +300,11 @@ export function CollectionFilterSidebarClient({
 
                     return (
                       <FilterPricePreset
-                        key={preset.label}
+                        key={`${preset.min}-${preset.max ?? "plus"}`}
                         selected={isSelected}
                         onClick={() => applyPricePreset(preset.min, preset.max)}
                       >
-                        {preset.label}
+                        {formatPricePresetLabel(preset.min, preset.max, locale, currencyCode)}
                       </FilterPricePreset>
                     );
                   })}
