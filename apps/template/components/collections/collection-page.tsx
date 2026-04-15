@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
-import { CollectionHeader } from "@/components/collections/header";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/layout/container";
@@ -43,12 +42,6 @@ export function CollectionDetailPage({
           <CollectionTitle collectionPromise={collectionPromise} />
         </Suspense>
 
-        <CollectionHeader
-          handlePromise={handlePromise}
-          locale={locale}
-          collectionResultsDataPromise={collectionResultsDataPromise}
-        />
-
         <CollectionResultsSection
           locale={locale}
           collectionResultsDataPromise={collectionResultsDataPromise}
@@ -72,7 +65,7 @@ async function CollectionTitle({
   const { title, description } = collection;
 
   return (
-    <div className="mt-4 md:mt-0 mb-6">
+    <div className="mb-6">
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
       {description && <p className="mt-1 text-muted-foreground">{description}</p>}
     </div>
@@ -81,7 +74,7 @@ async function CollectionTitle({
 
 function CollectionTitleSkeleton() {
   return (
-    <div className="mt-4 md:mt-0 mb-6">
+    <div className="mb-6">
       <Skeleton className="h-10 sm:h-11 md:h-13 w-72" />
     </div>
   );

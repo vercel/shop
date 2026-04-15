@@ -7,6 +7,7 @@ import {
 import { CollectionsPagination } from "@/components/collections/pagination";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
+import { MobileFilterSortBarSkeleton } from "@/components/collections/mobile-filter-sort-bar";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,23 +23,26 @@ const RESULTS_SKELETON_KEYS = Array.from(
 
 export function ResultsSkeleton() {
   return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <aside className="hidden md:block w-64 shrink-0">
-        <CollectionFilterSidebarSkeleton />
-      </aside>
+    <>
+      <MobileFilterSortBarSkeleton />
+      <div className="flex flex-col md:flex-row gap-8">
+        <aside className="hidden md:block w-64 shrink-0">
+          <CollectionFilterSidebarSkeleton />
+        </aside>
 
-      <div className="flex-1">
-        <div className="mb-6 hidden md:flex md:items-center md:justify-between">
-          <Skeleton className="h-4 w-40" />
-          <Skeleton className="h-5 w-24" />
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-          {RESULTS_SKELETON_KEYS.map((key) => (
-            <ProductCardSkeleton key={key} />
-          ))}
+        <div className="flex-1">
+          <div className="mb-6 hidden md:flex md:items-center md:justify-between">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
+            {RESULTS_SKELETON_KEYS.map((key) => (
+              <ProductCardSkeleton key={key} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
