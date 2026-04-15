@@ -66,7 +66,14 @@ export const unstable_instant = {
   prefetch: "runtime",
   samples: [
     {
-      searchParams: { q: "__placeholder__", collection: null, sort: null, cursor: null },
+      searchParams: {
+        q: "__placeholder__",
+        collection: null,
+        sort: null,
+        cursor: null,
+        "filter.v.price.gte": null,
+        "filter.v.price.lte": null,
+      },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
