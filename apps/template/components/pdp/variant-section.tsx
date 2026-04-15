@@ -107,11 +107,10 @@ export async function VariantSection({
                 currencyCode={variants[0].price.currencyCode}
                 compareAtAmount={variants[0].compareAtPrice?.amount}
                 locale={locale}
-                className="mt-3"
               />
             )
           ) : (
-            <Suspense fallback={<Skeleton className="h-6 w-24 mt-3" />}>
+            <Suspense fallback={<Skeleton className="h-6 w-24" />}>
               <ResolvedPrice variants={variants} locale={locale} variantIdPromise={variantIdPromise} />
             </Suspense>
           )}
@@ -268,7 +267,6 @@ async function ResolvedPrice({
       currencyCode={selectedVariant.price.currencyCode}
       compareAtAmount={selectedVariant.compareAtPrice?.amount}
       locale={locale}
-      className="mt-3"
     />
   );
 }
