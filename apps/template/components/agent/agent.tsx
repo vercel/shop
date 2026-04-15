@@ -37,7 +37,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { registry } from "@/lib/agent/ui/registry";
+import { registry } from "./registry";
 
 import {
   ChainOfThought,
