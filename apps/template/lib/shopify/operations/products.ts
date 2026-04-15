@@ -616,3 +616,31 @@ export async function getProductsByHandles(
 
   return shopifyProducts.map(transformShopifyProductCard);
 }
+
+const GET_FIRST_PRODUCT_HANDLE_QUERY = `
+  query getFirstProductHandle {
+    products(first: 1) {
+      edges {
+        node {
+          handle
+        }
+      }
+    }
+  }
+`;
+
+export async function getFirstProductHandle(): Promise<string | null> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  const data = await shopifyFetch<{
+    products: { edges: Array<{ node: { handle: string } }> };
+  }>({
+    operation: "getFirstProductHandle",
+    query: GET_FIRST_PRODUCT_HANDLE_QUERY,
+    variables: {},
+  });
+
+  return data.products.edges[0]?.node.handle ?? null;
+}

@@ -4,22 +4,19 @@ import { notFound } from "next/navigation";
 import { ProductDetailPage } from "@/components/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
 
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getFirstProductHandle, getProduct } from "@/lib/shopify/operations/products";
 
 import { buildProductMetadata } from "./shared";
 
-const PLACEHOLDER_HANDLE = "__placeholder__";
-
 export async function generateStaticParams() {
-  return [{ handle: PLACEHOLDER_HANDLE }];
+  const handle = await getFirstProductHandle();
+  return handle ? [{ handle }] : [];
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
-  if (handle === PLACEHOLDER_HANDLE) return {};
 
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
@@ -28,7 +25,7 @@ export const unstable_instant = {
   prefetch: "runtime",
   samples: [
     {
-      params: { handle: "__placeholder__" },
+      params: { handle: "sample-product" },
       searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
@@ -40,10 +37,7 @@ export default async function ProductPage({
   searchParams,
 }: PageProps<"/products/[handle]">) {
   const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => {
-    if (handle === PLACEHOLDER_HANDLE) notFound();
-    return handle;
-  });
+  const handlePromise = params.then(({ handle }) => handle);
 
   const productPromise = handlePromise.then((handle) =>
     getProduct(handle, locale).catch(() => notFound()),
