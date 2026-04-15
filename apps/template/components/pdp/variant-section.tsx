@@ -30,10 +30,6 @@ export function VariantSection({
 }) {
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
-  // Default selection (first variant) — no searchParams needed
-  const defaultOptions = computeInitialSelectedOptions(variants, undefined);
-  const selectedVariant = resolveSelectedVariant(variants, defaultOptions);
-
   const needsPartitioning = hasColorImagePartitioning(options, variants);
   const uniformPrice = hasUniformPricing(variants);
 
@@ -87,11 +83,11 @@ export function VariantSection({
         <div data-slot="product-info-header">
           <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
           {uniformPrice ? (
-            selectedVariant && (
+            variants[0] && (
               <ProductPrice
-                amount={selectedVariant.price.amount}
-                currencyCode={selectedVariant.price.currencyCode}
-                compareAtAmount={selectedVariant.compareAtPrice?.amount}
+                amount={variants[0].price.amount}
+                currencyCode={variants[0].price.currencyCode}
+                compareAtAmount={variants[0].compareAtPrice?.amount}
                 locale={locale}
                 className="mt-3"
               />
@@ -107,7 +103,7 @@ export function VariantSection({
             <ProductInfoOptions
               variants={variants}
               options={options}
-              selectedOptions={defaultOptions}
+              selectedOptions={{}}
               handle={handle}
               hideImages
             />
@@ -123,8 +119,8 @@ export function VariantSection({
         <Suspense
           fallback={
             <div className="grid grid-cols-2 gap-2">
-              <div className="h-12 rounded-lg bg-shop/50" />
-              <div className="h-12 rounded-lg bg-foreground/50" />
+              <div className="h-12 rounded-lg bg-shop" />
+              <div className="h-12 rounded-lg bg-foreground" />
             </div>
           }
         >

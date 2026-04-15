@@ -28,7 +28,7 @@ export const unstable_instant = {
   prefetch: "runtime",
   samples: [
     {
-      params: { handle: "sample-product" },
+      params: { handle: "__placeholder__" },
       searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
