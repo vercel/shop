@@ -4,23 +4,9 @@ import { notFound } from "next/navigation";
 import { ProductDetailPage } from "@/components/pdp/product-detail-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProduct, getProducts } from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
-
-export async function generateStaticParams() {
-  return [{ handle: PLACEHOLDER_HANDLE }];
-}
-
-export async function generateMetadata({
-  params,
-}: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
-  if (handle === PLACEHOLDER_HANDLE) return {};
-
-  return buildProductMetadata(handle, locale, `/products/${handle}`);
-}
 
 async function buildProductMetadata(
   handle: string,
@@ -61,6 +47,22 @@ async function buildProductMetadata(
   };
 }
 
+export async function generateStaticParams() {
+  const { products } = await getProducts({ limit: 1 });
+  const first = products[0];
+  return first ? [{ handle: first.handle }] : [];
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/products/[handle]">): Promise<Metadata> {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+
+  if (handle === PLACEHOLDER_HANDLE) return {};
+
+  return buildProductMetadata(handle, locale, `/products/${handle}`);
+}
+
 export const unstable_instant = {
   prefetch: "runtime",
   samples: [
@@ -71,6 +73,8 @@ export const unstable_instant = {
     },
   ],
 };
+
+export const unstable_prefetch = 'runtime'
 
 export default async function ProductPage({
   params,
