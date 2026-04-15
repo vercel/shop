@@ -78,19 +78,17 @@ function ProductInfoOptions({
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="space-y-8">
         {/* Color Pickers (with images or swatches) */}
-        {colorOptions.map((colorOption) =>
-          selectedOptions[colorOption.name] ? (
-            <ColorPicker
-              key={colorOption.id}
-              option={colorOption}
-              selectedValue={selectedOptions[colorOption.name]}
-              variants={variants}
-              handle={handle}
-              selectedOptions={selectedOptions}
-              hideImages={hideImages}
-            />
-          ) : null,
-        )}
+        {colorOptions.map((colorOption) => (
+          <ColorPicker
+            key={colorOption.id}
+            option={colorOption}
+            selectedValue={selectedOptions[colorOption.name] ?? ""}
+            variants={variants}
+            handle={handle}
+            selectedOptions={selectedOptions}
+            hideImages={hideImages}
+          />
+        ))}
 
         {/* Other Options (text buttons) */}
         {otherOptions.map((option) => (

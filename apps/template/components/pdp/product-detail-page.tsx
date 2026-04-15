@@ -42,9 +42,9 @@ function ProductPageFallback() {
               ))}
             </div>
           </div>
-          <div className="flex gap-2">
-            <Skeleton className="h-12 flex-1" />
-            <Skeleton className="h-12 flex-1" />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="h-12 rounded-lg bg-shop" />
+            <div className="h-12 rounded-lg bg-foreground" />
           </div>
         </div>
       </div>
