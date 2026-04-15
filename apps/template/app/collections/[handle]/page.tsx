@@ -74,6 +74,24 @@ export async function generateMetadata({
   };
 }
 
+export const unstable_instant = {
+  prefetch: "runtime",
+  samples: [
+    {
+      params: { handle: "__placeholder__" },
+      searchParams: {
+        sort: null,
+        cursor: null,
+        "filter.v.price.gte": null,
+        "filter.v.price.lte": null,
+      },
+      cookies: [{ name: "shopify_cartId", value: null }],
+    },
+  ],
+};
+
+export const unstable_prefetch = "runtime";
+
 export default async function CollectionPage({
   params,
   searchParams,

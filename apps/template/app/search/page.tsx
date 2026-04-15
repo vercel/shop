@@ -62,6 +62,25 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
+export const unstable_instant = {
+  prefetch: "runtime",
+  samples: [
+    {
+      searchParams: {
+        q: "__placeholder__",
+        collection: null,
+        sort: null,
+        cursor: null,
+        "filter.v.price.gte": null,
+        "filter.v.price.lte": null,
+      },
+      cookies: [{ name: "shopify_cartId", value: null }],
+    },
+  ],
+};
+
+export const unstable_prefetch = "runtime";
+
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const locale = await getLocale();
 
@@ -93,8 +112,6 @@ async function SearchHeader({
   ]);
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
-
-  const collection = resolvedSearchParams.collection as string | undefined;
 
   return (
     <>
@@ -199,7 +216,7 @@ function SearchHeaderSkeleton() {
   return (
     <>
       <MobileFilterSortBarSkeleton />
-      <Skeleton className="mt-4 md:mt-0 mb-8 h-10 w-72" />
+      <Skeleton className="mt-4 md:mt-0 mb-6 h-10 w-72" />
     </>
   );
 }

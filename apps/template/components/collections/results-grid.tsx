@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { ProductCard } from "@/components/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 
@@ -20,7 +20,7 @@ function Fallback() {
       <Skeleton className="mb-6 h-4 w-40" />
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
         {RESULTS_SKELETON_KEYS.map((key) => (
-          <Skeleton key={key} className="h-80 rounded-md" />
+          <ProductCardSkeleton key={key} />
         ))}
       </div>
     </>
