@@ -23,13 +23,13 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="left">
         <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <nav className="flex flex-col gap-1 px-2">
+        <nav className="mt-14 flex flex-col gap-2 px-3 pb-4">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="py-3 text-lg font-medium hover:opacity-70 transition-opacity"
+              className="rounded-md px-3 py-3.5 text-lg font-medium transition-colors hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none"
             >
               {link.label}
             </Link>
