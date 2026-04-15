@@ -1,6 +1,4 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { ProductCard } from "@/components/product-card";
 import {
@@ -20,8 +18,8 @@ interface ProductsCarouselProps {
   locale: Locale;
 }
 
-export function ProductsCarousel({ title, products, locale }: ProductsCarouselProps) {
-  const t = useTranslations("product");
+export async function ProductsCarousel({ title, products, locale }: ProductsCarouselProps) {
+  const t = await getTranslations("product");
   return (
     <ScrollCarousel>
       <ScrollCarouselHeader>
