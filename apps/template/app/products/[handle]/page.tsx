@@ -8,20 +8,6 @@ import { getProduct } from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
-export async function generateStaticParams() {
-  return [{ handle: PLACEHOLDER_HANDLE }];
-}
-
-export async function generateMetadata({
-  params,
-}: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
-  if (handle === PLACEHOLDER_HANDLE) return {};
-
-  return buildProductMetadata(handle, locale, `/products/${handle}`);
-}
-
 async function buildProductMetadata(
   handle: string,
   locale: string,
@@ -61,6 +47,20 @@ async function buildProductMetadata(
   };
 }
 
+export async function generateStaticParams() {
+  return [{ handle: PLACEHOLDER_HANDLE }];
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/products/[handle]">): Promise<Metadata> {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+
+  if (handle === PLACEHOLDER_HANDLE) return {};
+
+  return buildProductMetadata(handle, locale, `/products/${handle}`);
+}
+
 export const unstable_instant = {
   prefetch: "runtime",
   samples: [
@@ -71,6 +71,8 @@ export const unstable_instant = {
     },
   ],
 };
+
+export const unstable_prefetch = 'runtime'
 
 export default async function ProductPage({
   params,
