@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import type { OptimisticProductInfo } from "@/components/cart/optimistic-info";
+import type { OptimisticProductInfo } from "@/lib/product";
 import { cn } from "@/lib/utils";
 
 type QuickAddState = "idle" | "adding" | "success";

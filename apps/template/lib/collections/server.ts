@@ -4,8 +4,7 @@ import {
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
 import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
-import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
+import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
 export interface CollectionSearchState {
   activeFilters: Record<string, string | string[] | undefined>;

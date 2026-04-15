@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { ProductDetails } from "@/lib/types";
 
 import { BuySectionClient } from "./buy-section-client";
-import type { SelectedOptions } from "./variants";
+import type { SelectedOptions } from "@/lib/product";
 
 function Fallback() {
   return (

@@ -8,7 +8,7 @@ import { AboutItem } from "./about-item";
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { ProductPrice } from "./product-price";
-import type { SelectedOptions } from "./variants";
+import type { SelectedOptions } from "@/lib/product";
 
 interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
   selectedVariant: ProductVariant | undefined;

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { invalidateCartCache } from "@/lib/cart-cache";
+import { invalidateCartCache } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 

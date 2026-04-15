@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
-import { predictiveSearchAction } from "@/components/layout/predictive-search-action";
+import { predictiveSearchAction } from "@/lib/search/action";
 import type { PredictiveSearchResult } from "@/lib/types";
 
 const DEBOUNCE_MS = 300;

@@ -1,4 +1,4 @@
-import { getCollectionResultsData, getCollectionSearchState } from "@/components/collections/data";
+import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { CollectionHeader } from "@/components/collections/header";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";

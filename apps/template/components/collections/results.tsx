@@ -1,6 +1,6 @@
 import type { Locale } from "@/lib/i18n";
 
-import type { CollectionResultsData } from "./data";
+import type { CollectionResultsData } from "@/lib/collections/server";
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionResultsGrid } from "./results-grid";

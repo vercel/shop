@@ -23,8 +23,7 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
-import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
+import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
 export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;

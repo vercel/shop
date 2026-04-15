@@ -1,4 +1,3 @@
-import { RESULTS_PER_PAGE } from "@/lib/utils/product-card";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { getCollection } from "@/lib/shopify/operations/collections";
@@ -7,8 +6,7 @@ import {
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import { parseFiltersFromSearchParams } from "@/lib/utils/filter-params";
-import { searchParamsToRecord } from "@/lib/utils/url-search-params";
+import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 function markdownHeaders(cacheControl: string): HeadersInit {
   return {
