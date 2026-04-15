@@ -80,6 +80,7 @@ export function appendAvailableFiltersSection(
   {
     filters,
     priceRange,
+    currencyCode,
     locale,
   }: {
     filters: Filter[];
