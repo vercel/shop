@@ -62,6 +62,18 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
+export const unstable_instant = {
+  prefetch: "runtime",
+  samples: [
+    {
+      searchParams: { q: "__placeholder__" },
+      cookies: [{ name: "shopify_cartId", value: null }],
+    },
+  ],
+};
+
+export const unstable_prefetch = "runtime";
+
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const locale = await getLocale();
 
@@ -93,8 +105,6 @@ async function SearchHeader({
   ]);
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
-
-  const collection = resolvedSearchParams.collection as string | undefined;
 
   return (
     <>
