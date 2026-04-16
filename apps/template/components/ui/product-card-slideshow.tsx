@@ -73,7 +73,7 @@ export function ProductCardSlideshow({
       data-slot="product-card-slideshow"
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "absolute inset-0 opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-opacity duration-200",
+        "absolute inset-0 opacity-0 [@media(hover:hover)]:group-hover/image:opacity-100 transition-opacity duration-200",
         className,
       )}
     >
