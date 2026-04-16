@@ -35,7 +35,7 @@ export default function AboutPage() {
           Read the{" "}
           <a href="https://shop-docs.labs.vercel.dev/docs">documentation</a>, browse the{" "}
           <a href="https://github.com/vercel/shop">source on GitHub</a>, or visit the{" "}
-          <a href="https://shop-docs.labs.vercel.dev">docs site</a> for the full picture.
+          <a href="https://shop-docs.labs.vercel.dev">project's landing page</a> for an overview.
         </p>
       </article>
     </Container>
