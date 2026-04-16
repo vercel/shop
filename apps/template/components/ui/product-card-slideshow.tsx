@@ -59,19 +59,11 @@ export function ProductCardSlideshow({
     setCurrentIndex(index);
   }, []);
 
-  const handleMouseLeave = useCallback(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-    container.scrollTo({ left: 0 });
-    setCurrentIndex(0);
-  }, []);
-
   if (count === 0) return null;
 
   return (
     <div
       data-slot="product-card-slideshow"
-      onMouseLeave={handleMouseLeave}
       className={cn(
         "absolute inset-0 opacity-0 [@media(hover:hover)]:group-hover/image:opacity-100 transition-opacity duration-200",
         className,
