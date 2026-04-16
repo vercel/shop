@@ -65,7 +65,7 @@ export function ProductCardSlideshow({
     <div
       data-slot="product-card-slideshow"
       className={cn(
-        "absolute inset-0 opacity-0 [@media(hover:hover)]:group-hover/image:opacity-100 transition-opacity duration-200",
+        "absolute inset-0 hidden lg:block opacity-0 [@media(hover:hover)]:group-hover/image:opacity-100 transition-opacity duration-200",
         className,
       )}
     >

@@ -27,7 +27,13 @@ function ProductPageFallback() {
     <div className="space-y-8">
       <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
         <div className="lg:col-span-7">
-          <div className="grid grid-cols-2 gap-2">
+          {/* Mobile: single full-bleed square + pagination space */}
+          <div className="space-y-4 lg:hidden -mx-4">
+            <Skeleton className="aspect-square w-full" />
+            <div className="h-1.5" />
+          </div>
+          {/* Desktop: 2×2 grid */}
+          <div className="hidden lg:grid grid-cols-2 gap-2">
             <Skeleton className="aspect-square w-full" />
             <Skeleton className="aspect-square w-full" />
             <Skeleton className="aspect-square w-full" />

@@ -57,7 +57,7 @@ export default async function HomePage() {
               title={t("featuredProducts.title")}
               products={featuredProductsResult.products}
               locale={locale}
-              collectionUrl="/collections/all-products"
+              collectionUrl="/search"
             />
           )}
         </div>

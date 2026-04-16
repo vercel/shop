@@ -8,11 +8,11 @@ import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
 import { ProductsCarousel } from "@/components/product/products-carousel";
 
-function Fallback() {
+function Fallback({ title }: { title: string }) {
   return (
     <div className="overflow-x-clip py-4">
       <div className="mx-auto min-w-0">
-        <Skeleton className="h-9 w-64 mb-4" />
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter mb-4">{title}</h2>
         <div className="grid grid-flow-col gap-4 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-4 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]">
           {["a", "b", "c", "d"].map((key) => (
             <div key={key}>
@@ -49,8 +49,9 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
 }
 
 export async function Recommendations({ handle, locale }: { handle: string; locale: Locale }) {
+  const t = await getTranslations("product");
   return (
-    <Suspense fallback={<Fallback />}>
+    <Suspense fallback={<Fallback title={t("recommendations")} />}>
       <Render handle={handle} locale={locale} />
     </Suspense>
   );
