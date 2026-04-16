@@ -21,9 +21,14 @@ const RESULTS_SKELETON_KEYS = Array.from(
   (_, index) => `search-results-skeleton-${index}`,
 );
 
-export function ResultsSkeleton() {
+export function ResultsSkeleton({ title }: { title: string }) {
   return (
     <>
+      <div className="mb-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+          {title}
+        </h1>
+      </div>
       <MobileFilterSortBarSkeleton />
       <div className="flex flex-col md:flex-row gap-8">
         <aside className="hidden md:block w-64 shrink-0">
