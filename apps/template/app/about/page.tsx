@@ -31,6 +31,12 @@ export default function AboutPage() {
           The code is yours. Change the layout, pull out components, restyle things, wire in a
           different CMS. It's written to be read and modified, not worked around.
         </p>
+        <p>
+          Read the{" "}
+          <a href="https://shop-docs.labs.vercel.dev/docs">documentation</a>, browse the{" "}
+          <a href="https://github.com/vercel/shop">source on GitHub</a>, or visit the{" "}
+          <a href="https://shop-docs.labs.vercel.dev">docs site</a> for the full picture.
+        </p>
       </article>
     </Container>
   );
