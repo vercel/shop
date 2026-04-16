@@ -81,19 +81,16 @@ export const unstable_instant = {
 export const unstable_prefetch = "runtime";
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const locale = await getLocale();
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   return (
     <Container className="pt-3 md:pt-8">
       <FilterTransitionProvider>
-        <Suspense>
-          <SearchTitle searchParamsPromise={searchParams} />
-        </Suspense>
-
-        <Suspense fallback={<ResultsSkeleton />}>
+        <Suspense fallback={<ResultsSkeleton title={t("title")} />}>
           <SearchContent
             locale={locale}
             searchParamsPromise={searchParams}
+            defaultTitle={t("title")}
           />
         </Suspense>
       </FilterTransitionProvider>
@@ -101,43 +98,32 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   );
 }
 
-async function SearchTitle({
-  searchParamsPromise,
-}: {
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [resolvedSearchParams, t] = await Promise.all([
-    searchParamsPromise,
-    getTranslations("search"),
-  ]);
-  const q = resolvedSearchParams.q as string | undefined;
-
-  return (
-    <div className="mb-6">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-        {q ? t("titleQuery", { query: q }) : t("title")}
-      </h1>
-      {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
-    </div>
-  );
-}
-
 async function SearchContent({
   locale,
   searchParamsPromise,
+  defaultTitle,
 }: {
   locale: Locale;
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+  defaultTitle: string;
 }) {
   const [resolvedSearchParams, t] = await Promise.all([
     searchParamsPromise,
     getTranslations("search"),
   ]);
-  const { q, sort, collection, cursor } = resolvedSearchParams;
+  const { sort, collection, cursor } = resolvedSearchParams;
+  const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
 
   return (
     <>
+      <div className="mb-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+          {q ? t("titleQuery", { query: q }) : defaultTitle}
+        </h1>
+        {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
+      </div>
+
       <MobileFilterSortBar
         filterSheet={
           <FilterSidebarSheet

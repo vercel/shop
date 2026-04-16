@@ -1,21 +1,6 @@
-import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
-import { Suspense } from "react";
-
 import { siteConfig } from "@/lib/config";
 
 import { SocialLinks } from "./social-links";
-
-async function Copyright() {
-  await connection();
-  const t = await getTranslations("footer");
-
-  return (
-    <p className="text-sm text-muted-foreground leading-5">
-      {t("copyright", { year: String(new Date().getFullYear()) })}
-    </p>
-  );
-}
 
 export function Footer({ locale }: { locale: string }) {
   const { socialLinks } = siteConfig;
@@ -24,9 +9,9 @@ export function Footer({ locale }: { locale: string }) {
     <footer>
       <div className="mx-auto px-4 pt-12 pb-22 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Suspense>
-            <Copyright />
-          </Suspense>
+          <p className="text-sm text-muted-foreground leading-5">
+            &copy; Vercel Shop. All rights reserved.
+          </p>
           {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
         </div>
       </div>
