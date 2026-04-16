@@ -12,6 +12,8 @@ The home page is a server component that renders a hero banner, a featured produ
 
 A full-width banner with a background image, gradient overlay, headline, subheadline, and a CTA link. The hero scales responsively - 300px tall on mobile, 400px on small screens, and 500px on medium and up.
 
+By default the hero uses a statically imported image from `public/hero.jpg`, which enables automatic blur placeholders and prevents layout shift. To use a custom image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`) or a remote URL object (`{ url: "https://...", alt: "...", width: 1920, height: 1080 }`).
+
 The headline and CTA are configurable through the `HeroSection` type. By default the CTA links to `/search` to browse the catalog.
 
 On mobile, the subheadline and CTA text are hidden to keep the banner compact.
@@ -39,7 +41,7 @@ Products are fetched server-side with `getProducts({ limit: 10, locale })`, whic
 | File | Purpose |
 |------|---------|
 | `app/page.tsx` | Root page, metadata generation, product fetch |
-| `components/cms/hero-section.tsx` | Full-width hero banner with image, headline, CTA |
+| `components/hero-section.tsx` | Full-width hero banner with image, headline, CTA |
 | `components/cms/blocks/top-products-carousel.tsx` | Horizontally scrollable product carousel |
 | `components/product-card.tsx` | Product card with image, price, quick-add |
 | `lib/shopify/operations/products.ts` | Shopify product fetching with caching |

@@ -1,7 +1,9 @@
+import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import heroDefault from "@/public/hero.jpg";
 import type { HeroSection as HeroSectionType } from "@/lib/types";
 
 interface HeroSectionProps {
@@ -9,21 +11,39 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ hero }: HeroSectionProps) {
+  const image = hero.backgroundImage ?? heroDefault;
+  const isStatic = typeof image === "object" && "src" in image;
+
   return (
     <section className="relative w-full overflow-hidden">
       <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-b from-black via-neutral-950 to-neutral-900">
-        {hero.backgroundImage && (
+        {isStatic ? (
           <>
             <Image
-              src={hero.backgroundImage.url}
-              alt={hero.backgroundImage.alt}
+              src={image as StaticImageData}
+              alt="Hero background"
               fill
               className="object-cover"
+              placeholder="blur"
               priority
               sizes="100vw"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
           </>
+        ) : (
+          image && (
+            <>
+              <Image
+                src={(image as { url: string }).url}
+                alt={(image as { alt: string }).alt}
+                fill
+                className="object-cover"
+                priority
+                sizes="100vw"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+            </>
+          )
         )}
 
         <div className="absolute inset-0 flex items-center justify-center px-4 lg:px-8">
