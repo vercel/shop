@@ -141,8 +141,8 @@ function Carousel({
         ))}
       </div>
 
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-2">
+      {/* Dot indicators – reserve space but hide when there's only one image */}
+      <div className={cn("flex justify-center gap-2", mediaItems.length <= 1 && "invisible")}>
         {mediaItems.map((item, idx) => (
           <button
             type="button"

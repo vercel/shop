@@ -47,7 +47,7 @@
     "selectVariantLabel": "Select {name}: {value}",
     "viewImage": "View image {current} of {total}",
     "goToImage": "Go to image {number}",
-    "viewAll": "View all",
+    "viewAll": "View All",
     "recommendations": "You May Also Like",
     "inStock": "In Stock",
     "buyNow": "Buy now",
@@ -224,7 +224,7 @@
         "title": "From {collectionTitle}"
       },
       "featuredProducts": {
-        "title": "Featured products"
+        "title": "Featured Products"
       }
     }
   },

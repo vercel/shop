@@ -227,7 +227,7 @@ declare const messages: {
         "title": "From {collectionTitle}"
       },
       "featuredProducts": {
-        "title": "Featured products"
+        "title": "Featured Products"
       }
     }
   },
