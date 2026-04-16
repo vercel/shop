@@ -36,6 +36,9 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* To use a custom hero image, pass a backgroundImage prop:
+          backgroundImage: { url: "https://...", alt: "...", width: 1920, height: 1080 }
+          or import a local image: import myHero from "@/public/my-hero.jpg" */}
       <HeroSection
         hero={{
           id: "homepage-hero",
@@ -44,12 +47,6 @@ export default async function HomePage() {
             "A production-ready, agent-friendly Shopify storefront built on Next.js.",
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
-          backgroundImage: {
-            url: "/hero.jpg",
-            alt: "Hero background",
-            width: 1920,
-            height: 1080,
-          },
         }}
       />
 

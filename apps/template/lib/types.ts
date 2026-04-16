@@ -1,3 +1,5 @@
+import type { StaticImageData } from "next/image";
+
 import type { Locale } from "@/lib/i18n";
 
 export type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>>;
@@ -276,7 +278,7 @@ export interface HeroSection {
   id: string;
   headline: string;
   subheadline: string | null;
-  backgroundImage?: MarketingImage | null;
+  backgroundImage?: MarketingImage | StaticImageData | null;
   ctaText: string | null;
   ctaLink: string | null;
 }
