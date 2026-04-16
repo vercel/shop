@@ -129,6 +129,7 @@ export interface ShopifyProductCard {
   vendor: string;
   availableForSale: boolean;
   featuredImage: ShopifyImage | null;
+  images?: ShopifyEdges<ShopifyImage>;
   priceRange: {
     minVariantPrice: ShopifyMoney;
   };
@@ -291,12 +292,19 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     handle: product.handle,
     title: product.title,
     featuredImage: transformImage(product.featuredImage),
+    images: product.images
+      ? (flattenEdges(product.images)
+          .map((img) => transformImage(img))
+          .filter(Boolean) as Image[])
+      : [],
     price: product.priceRange.minVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant ? (getNumericShopifyId(defaultVariant.id) ?? undefined) : undefined,
+    defaultVariantNumericId: defaultVariant
+      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
+      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }
@@ -314,7 +322,9 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant ? (getNumericShopifyId(defaultVariant.id) ?? undefined) : undefined,
+    defaultVariantNumericId: defaultVariant
+      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
+      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,

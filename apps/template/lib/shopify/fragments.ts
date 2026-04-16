@@ -185,6 +185,13 @@ export const PRODUCT_CARD_FRAGMENT = `
     featuredImage {
       ...ImageFields
     }
+    images(first: 10) {
+      edges {
+        node {
+          ...ImageFields
+        }
+      }
+    }
     priceRange {
       minVariantPrice {
         ...MoneyFields

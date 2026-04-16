@@ -3,6 +3,7 @@ import type * as React from "react";
 
 import { Price } from "@/components/product/price";
 import { DiscountBadge } from "@/components/ui/discount-badge";
+import { ProductCardSlideshow } from "@/components/ui/product-card-slideshow";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
@@ -59,6 +60,7 @@ function ProductCardImageContainer({
 interface ProductCardImageProps {
   src?: string | null;
   alt: string;
+  images?: Array<{ url: string; altText: string; width: number; height: number }>;
   sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
@@ -70,6 +72,7 @@ interface ProductCardImageProps {
 function ProductCardImage({
   src,
   alt,
+  images,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
@@ -77,6 +80,8 @@ function ProductCardImage({
   className,
   children,
 }: ProductCardImageProps) {
+  const hasSlideshow = images && images.length > 1;
+
   return (
     <div
       data-slot="product-card-image"
@@ -87,7 +92,12 @@ function ProductCardImage({
           src={src}
           alt={alt}
           fill
-          className="object-cover scale-[1.02] group-hover:scale-105 transition-transform duration-300 ease-out"
+          className={cn(
+            "object-cover",
+            hasSlideshow
+              ? "scale-[1.02] transition-transform duration-300 ease-out"
+              : "scale-[1.02] group-hover:scale-105 transition-transform duration-300 ease-out",
+          )}
           sizes={sizes}
         />
       ) : (
@@ -95,6 +105,7 @@ function ProductCardImage({
           {fallbackTitle}
         </div>
       )}
+      {hasSlideshow && <ProductCardSlideshow images={images} sizes={sizes} />}
       {outOfStock && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
           <span className="text-destructive-foreground font-medium text-xs px-2 py-1 bg-destructive rounded">
@@ -123,10 +134,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
   return (
     <h3
       data-slot="product-card-title"
-      className={cn(
-        "text-base font-semibold text-main-foreground line-clamp-2",
-        className,
-      )}
+      className={cn("text-base font-semibold text-main-foreground line-clamp-2", className)}
       {...props}
     >
       {children}

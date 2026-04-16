@@ -59,6 +59,7 @@ export interface ProductCard {
   handle: string;
   title: string;
   featuredImage: Image | null;
+  images: Image[];
   price: Money;
   compareAtPrice?: Money;
   vendor?: string;
