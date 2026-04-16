@@ -96,7 +96,7 @@ export function ProductCardSlideshow({
         ))}
       </div>
 
-      {/* Chevron arrows — onMouseDown prevents parent link navigation */}
+      {/* Chevron arrows */}
       <button
         type="button"
         onClick={handlePrev}
@@ -104,18 +104,18 @@ export function ProductCardSlideshow({
           e.preventDefault();
           e.stopPropagation();
         }}
+        disabled={currentIndex === 0}
         aria-label="Previous image"
         className={cn(
-          "absolute left-1.5 top-1/2 -translate-y-1/2 z-[5]",
-          "flex items-center justify-center size-7 rounded-full",
-          "bg-white/80 backdrop-blur-sm shadow-sm border border-black/5",
-          "hover:bg-white hover:scale-110",
-          "transition-all duration-150",
+          "absolute left-1.5 top-1/2 -translate-y-1/2 z-5",
+          "text-white/90 hover:text-white",
+          "drop-shadow-md",
+          "transition-opacity duration-150",
           "cursor-pointer",
-          currentIndex === 0 && "invisible",
+          "disabled:opacity-30 disabled:cursor-default",
         )}
       >
-        <ChevronLeft className="size-4 text-neutral-700" />
+        <ChevronLeft className="size-6" />
       </button>
       <button
         type="button"
@@ -124,34 +124,19 @@ export function ProductCardSlideshow({
           e.preventDefault();
           e.stopPropagation();
         }}
+        disabled={currentIndex >= count - 1}
         aria-label="Next image"
         className={cn(
-          "absolute right-1.5 top-1/2 -translate-y-1/2 z-[5]",
-          "flex items-center justify-center size-7 rounded-full",
-          "bg-white/80 backdrop-blur-sm shadow-sm border border-black/5",
-          "hover:bg-white hover:scale-110",
-          "transition-all duration-150",
+          "absolute right-1.5 top-1/2 -translate-y-1/2 z-5",
+          "text-white/90 hover:text-white",
+          "drop-shadow-md",
+          "transition-opacity duration-150",
           "cursor-pointer",
-          currentIndex >= count - 1 && "invisible",
+          "disabled:opacity-30 disabled:cursor-default",
         )}
       >
-        <ChevronRight className="size-4 text-neutral-700" />
+        <ChevronRight className="size-6" />
       </button>
-
-      {/* Dot indicators */}
-      {count > 1 && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-[5] flex gap-1">
-          {slideshowImages.map((image, i) => (
-            <span
-              key={image.url}
-              className={cn(
-                "size-1.5 rounded-full transition-colors duration-150",
-                i === currentIndex ? "bg-white" : "bg-white/50",
-              )}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

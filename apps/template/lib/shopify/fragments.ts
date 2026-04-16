@@ -205,9 +205,21 @@ export const PRODUCT_CARD_FRAGMENT = `
     selectedOrFirstAvailableVariant {
       id
       availableForSale
+      image {
+        url
+      }
       selectedOptions {
         name
         value
+      }
+    }
+    variants(first: 50) {
+      edges {
+        node {
+          image {
+            url
+          }
+        }
       }
     }
   }

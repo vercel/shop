@@ -88,18 +88,7 @@ function ProductCardImage({
       className={cn("relative aspect-square overflow-hidden bg-muted", className)}
     >
       {src ? (
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          className={cn(
-            "object-cover",
-            hasSlideshow
-              ? "scale-[1.02] transition-transform duration-300 ease-out"
-              : "scale-[1.02] group-hover:scale-105 transition-transform duration-300 ease-out",
-          )}
-          sizes={sizes}
-        />
+        <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
       ) : (
         <div className="w-full h-full flex items-center justify-center text-muted-foreground font-medium text-xl p-2 text-center">
           {fallbackTitle}
