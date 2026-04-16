@@ -185,7 +185,7 @@ export const PRODUCT_CARD_FRAGMENT = `
     featuredImage {
       ...ImageFields
     }
-    images(first: 10) {
+    images(first: 5) {
       edges {
         node {
           ...ImageFields
