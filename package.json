@@ -11,10 +11,15 @@
     "format": "turbo run format",
     "lint": "turbo run lint",
     "plugin:install:local": "npx plugins add ./packages/plugin --scope project --yes",
+    "release": "changeset publish",
     "start": "turbo run start",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "version": "changeset version"
   },
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "devDependencies": {
+    "@changesets/cli": "^2.30.0"
+  }
 }
