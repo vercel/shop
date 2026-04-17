@@ -86,10 +86,6 @@ This is a monorepo managed with [Turborepo](https://turbo.build/) and pnpm.
 
 Full documentation is available at [docs.vercel.shop](https://docs.vercel.shop).
 
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup and guidelines.
-
 ## License
 
 MIT
