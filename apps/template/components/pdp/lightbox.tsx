@@ -50,7 +50,9 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             {activeItem?.type === "video" && (
               <AutoPlayVideo
                 src={activeItem.video.url}
-                poster={activeItem.video.previewImage?.url}
+                previewImage={activeItem.video.previewImage}
+                sizes="90vw"
+                priorityImage
                 className="max-h-full max-w-full object-contain"
               />
             )}

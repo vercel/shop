@@ -47,15 +47,21 @@ function MediaImage({
 
 function MediaVideo({
   item,
+  sizes,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
+  sizes: string;
+  priority: boolean;
   className?: string;
 }) {
   return (
     <AutoPlayVideo
       src={item.video.url}
-      poster={item.video.previewImage?.url}
+      previewImage={item.video.previewImage}
+      sizes={sizes}
+      priorityImage={priority}
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
@@ -127,7 +133,7 @@ function Carousel({
             className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
           >
             {item.type === "video" ? (
-              <MediaVideo item={item} />
+              <MediaVideo item={item} sizes="100vw" priority={!children && idx === 0} />
             ) : (
               <MediaImage
                 item={item}
@@ -167,7 +173,7 @@ function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: n
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-accent">
       {item.type === "video" ? (
-        <MediaVideo item={item} />
+        <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={idx < 2} />
       ) : (
         <LightboxTrigger item={item}>
           <MediaImage
