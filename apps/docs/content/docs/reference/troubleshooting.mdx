@@ -65,7 +65,7 @@ To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/s
 
 ## Locale or currency not changing
 
-Multi-locale support requires Shopify Markets to be enabled. The template ships as single-locale by default. Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) to add multi-locale and multi-currency routing.
+Single-locale storefronts use Shopify pricing data where available, but empty search/collection states rely on `SHOPIFY_DEFAULT_CURRENCY` for filter chrome and markdown fallbacks. Set that env var to your shop currency, for example `GBP`, if your store is not USD. Multi-locale support still requires Shopify Markets to be enabled. Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) to add multi-locale and multi-currency routing.
 
 ## Agent can't find context files
 

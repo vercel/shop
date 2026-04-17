@@ -13,6 +13,7 @@ import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import { getShopDefaultCurrencyCode } from "@/lib/shopify/operations/shop";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
@@ -82,6 +83,7 @@ export async function Results({
   const transformedFilters = transformShopifyFilters(result.filters, {
     activeFilters,
   });
+  const currencyCode = result.products[0]?.price.currencyCode ?? (await getShopDefaultCurrencyCode());
   const products = result.products;
 
   return (
@@ -91,6 +93,7 @@ export async function Results({
           <CollectionFilterSidebarClient
             filters={transformedFilters.filters}
             priceRange={transformedFilters.priceRange}
+            currencyCode={currencyCode}
             activeFilters={activeFilters}
           />
         </FilterPendingScope>

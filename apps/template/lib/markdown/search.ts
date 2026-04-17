@@ -16,6 +16,7 @@ export function searchResultsToMarkdown({
   total,
   filters,
   priceRange,
+  currencyCode,
   activeFilters,
   pageInfo,
   locale,
@@ -27,6 +28,7 @@ export function searchResultsToMarkdown({
   total: number;
   filters: Filter[];
   priceRange?: PriceRange;
+  currencyCode: string;
   activeFilters: Record<string, string | string[] | undefined>;
   pageInfo: PageInfo;
   locale: string;
@@ -50,7 +52,7 @@ export function searchResultsToMarkdown({
   sections.push("");
 
   appendAppliedFiltersSection(sections, { activeFilters, filters });
-  appendAvailableFiltersSection(sections, { filters, priceRange, locale });
+  appendAvailableFiltersSection(sections, { filters, priceRange, currencyCode, locale });
   appendProductsSection(sections, { products, locale });
   appendPaginationSection(sections, pageInfo);
 

@@ -4,6 +4,7 @@ import {
   buildProductFiltersFromParams,
   getProducts,
 } from "@/lib/shopify/operations/products";
+import { getShopDefaultCurrencyCode } from "@/lib/shopify/operations/shop";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
 
     const transformedFilters = transformShopifyFilters(result.filters, { activeFilters });
     const hasPriceRange = result.filters.some((filter) => filter.type === "PRICE_RANGE");
+    const currencyCode = result.products[0]?.price.currencyCode ?? (await getShopDefaultCurrencyCode());
     const markdown = searchResultsToMarkdown({
       query,
       collection,
@@ -47,6 +49,7 @@ export async function GET(request: Request) {
       total: result.total,
       filters: transformedFilters.filters,
       priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
+      currencyCode,
       activeFilters,
       pageInfo: result.pageInfo,
       locale,

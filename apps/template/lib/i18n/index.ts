@@ -34,7 +34,8 @@ export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
 
-// Currency data per locale
+// Explicit locale → currency mappings are only for configured multi-locale
+// storefronts. Single-locale pricing should come from Shopify responses.
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
   "en-US": { currency: "USD", symbol: "$" },
 };
