@@ -2,6 +2,9 @@
   "dependencies": {
     "turbo": "2.9.6"
   },
+  "devDependencies": {
+    "@changesets/cli": "2.30.0"
+  },
   "name": "@vercel/shop",
   "packageManager": "pnpm@10.33.0",
   "private": true,
@@ -18,8 +21,5 @@
   },
   "workspaces": [
     "apps/*"
-  ],
-  "devDependencies": {
-    "@changesets/cli": "^2.30.0"
-  }
+  ]
 }
