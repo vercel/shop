@@ -47,10 +47,22 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
               </div>
             )}
 
-            {activeItem?.type === "video" && (
+            {activeItem?.type === "video" && activeItem.video.previewImage && (
+              <div className="relative h-full w-full">
+                <Image
+                  src={activeItem.video.previewImage.url}
+                  alt={activeItem.video.previewImage.altText || `${label} video enlarged`}
+                  fill
+                  className="object-contain"
+                  sizes="90vw"
+                  priority
+                />
+              </div>
+            )}
+
+            {activeItem?.type === "video" && !activeItem.video.previewImage && (
               <AutoPlayVideo
                 src={activeItem.video.url}
-                poster={activeItem.video.previewImage?.url}
                 className="max-h-full max-w-full object-contain"
               />
             )}

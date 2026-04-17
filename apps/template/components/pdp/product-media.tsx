@@ -47,15 +47,37 @@ function MediaImage({
 
 function MediaVideo({
   item,
+  title,
+  idx,
+  sizes,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
+  title: string;
+  idx: number;
+  sizes: string;
+  priority: boolean;
   className?: string;
 }) {
+  if (item.video.previewImage) {
+    return (
+      <Image
+        src={item.video.previewImage.url}
+        alt={item.video.previewImage.altText || `${title} video ${idx + 1}`}
+        fill
+        className={cn("object-cover", className)}
+        sizes={sizes}
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        draggable={false}
+      />
+    );
+  }
+
   return (
     <AutoPlayVideo
       src={item.video.url}
-      poster={item.video.previewImage?.url}
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
@@ -127,7 +149,7 @@ function Carousel({
             className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
           >
             {item.type === "video" ? (
-              <MediaVideo item={item} />
+              <MediaVideo item={item} title={title} idx={idx} sizes="100vw" priority={!children && idx === 0} />
             ) : (
               <MediaImage
                 item={item}
@@ -167,7 +189,7 @@ function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: n
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-accent">
       {item.type === "video" ? (
-        <MediaVideo item={item} />
+        <MediaVideo item={item} title={title} idx={idx} sizes="(min-width: 1024px) 25vw, 50vw" priority={idx < 2} />
       ) : (
         <LightboxTrigger item={item}>
           <MediaImage
