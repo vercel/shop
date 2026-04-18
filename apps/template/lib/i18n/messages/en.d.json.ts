@@ -171,10 +171,13 @@ declare const messages: {
     },
     "sort": {
       "bestMatches": "Best Matches",
+      "bestSelling": "Best Selling",
       "priceLowToHigh": "Price: Low to High",
       "priceHighToLow": "Price: High to Low",
       "nameAscending": "Name: A-Z",
-      "nameDescending": "Name: Z-A"
+      "nameDescending": "Name: Z-A",
+      "dateOldToNew": "Date: Old to New",
+      "dateNewToOld": "Date: New to Old"
     },
     "pagination": {
       "resultsPerPage": "Showing {startResult}-{endResult} of {totalResults} products",

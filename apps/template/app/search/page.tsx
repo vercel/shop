@@ -187,7 +187,7 @@ async function SearchToolbar({
       }
       sortSelect={
         <CollectionsSortSelect
-          exclude={["product-name-ascending", "product-name-descending"]}
+          exclude={["product-name-ascending", "product-name-descending", "best-selling", "date-old-to-new", "date-new-to-old"]}
         />
       }
     />

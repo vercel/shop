@@ -359,10 +359,13 @@ const COLLECTION_PRODUCTS_QUERY = `
 
 const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
+  "best-selling": { sortKey: "BEST_SELLING", reverse: false },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
   "product-name-ascending": { sortKey: "TITLE", reverse: false },
   "product-name-descending": { sortKey: "TITLE", reverse: true },
+  "date-old-to-new": { sortKey: "CREATED", reverse: false },
+  "date-new-to-old": { sortKey: "CREATED", reverse: true },
   TITLE: { sortKey: "TITLE", reverse: false },
   PRICE: { sortKey: "PRICE", reverse: false },
   BEST_SELLING: { sortKey: "BEST_SELLING", reverse: false },
