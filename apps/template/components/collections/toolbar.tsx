@@ -14,26 +14,26 @@ export function CollectionToolbar({
   resultCount,
 }: CollectionToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 mb-2">
-      <div className="flex items-center gap-4">
-        {filterSheet}
+    <div className="flex items-center gap-4 py-3 mb-2">
+      {filterSheet}
+      <div className="flex items-center gap-4 ml-auto">
         {resultCount && (
           <span className="text-sm text-muted-foreground hidden sm:inline">{resultCount}</span>
         )}
+        {sortSelect}
       </div>
-      {sortSelect}
     </div>
   );
 }
 
 export function CollectionToolbarSkeleton() {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 mb-2">
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-9 w-24" />
+    <div className="flex items-center gap-4 py-3 mb-2">
+      <Skeleton className="h-9 w-24" />
+      <div className="flex items-center gap-4 ml-auto">
         <Skeleton className="h-4 w-32 hidden sm:block" />
+        <Skeleton className="h-5 w-24" />
       </div>
-      <Skeleton className="h-5 w-24" />
     </div>
   );
 }
