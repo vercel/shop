@@ -76,6 +76,7 @@ export async function Results({
     limit: RESULTS_PER_PAGE,
     cursor,
     filters: shopifyFilters,
+    _filterCacheKey: JSON.stringify(shopifyFilters),
     locale,
   });
 

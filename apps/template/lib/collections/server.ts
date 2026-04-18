@@ -51,6 +51,7 @@ export async function getCollectionResultsData({
     limit: RESULTS_PER_PAGE,
     cursor,
     filters: shopifyFilters,
+    _filterCacheKey: JSON.stringify(shopifyFilters),
     locale,
   });
 

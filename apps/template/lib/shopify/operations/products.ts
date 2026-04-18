@@ -217,7 +217,10 @@ export function buildProductFiltersFromParams(
   const min = parsePrice(searchParams["filter.v.price.gte"]);
   const max = parsePrice(searchParams["filter.v.price.lte"]);
   if (min !== undefined || max !== undefined) {
-    filters.push({ price: { min, max } });
+    const priceFilter: { min?: number; max?: number } = {};
+    if (min !== undefined) priceFilter.min = min;
+    if (max !== undefined) priceFilter.max = max;
+    filters.push({ price: priceFilter });
   }
 
   return filters;
@@ -230,6 +233,7 @@ export async function getProducts(params: {
   limit?: number;
   cursor?: string;
   filters?: ProductFilter[];
+  _filterCacheKey?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];
@@ -348,6 +352,7 @@ export async function getCollectionProducts(params: {
   sortKey?: string;
   cursor?: string;
   filters?: ProductFilter[];
+  _filterCacheKey?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];

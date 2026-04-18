@@ -179,6 +179,7 @@ async function SearchFilterContent({
     collection,
     limit: RESULTS_PER_PAGE,
     filters: shopifyFilters,
+    _filterCacheKey: JSON.stringify(shopifyFilters),
     locale,
   });
 
