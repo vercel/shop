@@ -14,7 +14,7 @@ export function CollectionToolbar({
   resultCount,
 }: CollectionToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 mb-4 border-b border-border/50">
+    <div className="flex items-center justify-between gap-4 py-3 mb-4 mb-2">
       <div className="flex items-center gap-4">
         {filterSheet}
         {resultCount && (
@@ -28,7 +28,7 @@ export function CollectionToolbar({
 
 export function CollectionToolbarSkeleton() {
   return (
-    <div className="flex items-center justify-between gap-4 py-3 mb-4 border-b border-border/50">
+    <div className="flex items-center justify-between gap-4 py-3 mb-4 mb-2">
       <div className="flex items-center gap-4">
         <Skeleton className="h-9 w-24" />
         <Skeleton className="h-4 w-32 hidden sm:block" />

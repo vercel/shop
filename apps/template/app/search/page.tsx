@@ -66,6 +66,8 @@ export const unstable_instant = {
         q: "__placeholder__",
         collection: null,
         sort: null,
+        "filter.v.price.gte": null,
+        "filter.v.price.lte": null,
       },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
@@ -108,6 +110,10 @@ async function SearchContent({
   const { sort, collection } = resolvedSearchParams;
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
+  const activeFilterCount = Object.values(activeFilters).reduce((count, v) => {
+    if (!v) return count;
+    return count + (Array.isArray(v) ? v.length : 1);
+  }, 0);
 
   return (
     <>
@@ -122,10 +128,16 @@ async function SearchContent({
         filterSheet={
           <FilterSidebarSheet
             label={t("filters")}
+            activeCount={activeFilterCount}
             trigger={
               <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
                 <span>{t("filters")}</span>
+                {activeFilterCount > 0 && (
+                  <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+                    {activeFilterCount}
+                  </span>
+                )}
               </button>
             }
           >

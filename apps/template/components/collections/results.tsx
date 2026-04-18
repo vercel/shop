@@ -6,9 +6,9 @@ import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-shee
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { ProductCardSkeleton } from "@/components/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
+import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
@@ -33,6 +33,14 @@ function Fallback() {
   );
 }
 
+function getActiveFilterCount(data: CollectionResultsData): number {
+  const badges = getActiveFilterBadges(data.transformedFilters.filters, data.activeFilters);
+  const hasPriceFilter =
+    data.activeFilters["filter.v.price.gte"] !== undefined ||
+    data.activeFilters["filter.v.price.lte"] !== undefined;
+  return badges.length + (hasPriceFilter ? 1 : 0);
+}
+
 async function Render({
   locale,
   collectionResultsDataPromise,
@@ -40,7 +48,12 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const tSearch = await getTranslations("search");
+  const [data, tSearch] = await Promise.all([
+    collectionResultsDataPromise,
+    getTranslations("search"),
+  ]);
+
+  const activeCount = getActiveFilterCount(data);
 
   return (
     <>
@@ -48,10 +61,16 @@ async function Render({
         filterSheet={
           <FilterSidebarSheet
             label={tSearch("filters")}
+            activeCount={activeCount}
             trigger={
               <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
                 <span>{tSearch("filters")}</span>
+                {activeCount > 0 && (
+                  <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+                    {activeCount}
+                  </span>
+                )}
               </button>
             }
           >
