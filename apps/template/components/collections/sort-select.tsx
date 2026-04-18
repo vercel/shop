@@ -8,10 +8,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 
 const SORT_OPTIONS = [
   { value: "best-matches", key: "bestMatches" },
-  { value: "price-low-to-high", key: "priceLowToHigh" },
-  { value: "price-high-to-low", key: "priceHighToLow" },
+  { value: "best-selling", key: "bestSelling" },
   { value: "product-name-ascending", key: "nameAscending" },
   { value: "product-name-descending", key: "nameDescending" },
+  { value: "price-low-to-high", key: "priceLowToHigh" },
+  { value: "price-high-to-low", key: "priceHighToLow" },
+  { value: "date-old-to-new", key: "dateOldToNew" },
+  { value: "date-new-to-old", key: "dateNewToOld" },
 ] as const;
 
 export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {

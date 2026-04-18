@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -66,7 +67,9 @@ async function CollectionTitle({
 
   return (
     <div className="mb-6">
-      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+        <Link href={`/collections/${collection.handle}`}>{title}</Link>
+      </h1>
       {description && <p className="mt-1 text-muted-foreground">{description}</p>}
     </div>
   );

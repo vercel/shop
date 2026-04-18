@@ -1,5 +1,6 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
@@ -123,7 +124,7 @@ async function SearchContent({
     <>
       <div className="mb-6">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-          {q ? t("titleQuery", { query: q }) : defaultTitle}
+          <Link href="/search">{q ? t("titleQuery", { query: q }) : defaultTitle}</Link>
         </h1>
         {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
       </div>
@@ -187,7 +188,7 @@ async function SearchToolbar({
       }
       sortSelect={
         <CollectionsSortSelect
-          exclude={["product-name-ascending", "product-name-descending"]}
+          exclude={["product-name-ascending", "product-name-descending", "best-selling", "date-old-to-new", "date-new-to-old"]}
         />
       }
     />
