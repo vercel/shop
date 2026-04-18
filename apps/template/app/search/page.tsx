@@ -66,13 +66,13 @@ export const unstable_instant = {
   samples: [
     {
       searchParams: {
-        q: null,
-        collection: null,
-        sort: null,
+        q: "bed",
+        collection: "all",
+        sort: "best-matches",
         cursor:
           "eyJwYWdlIjoyLCJsYXN0X2lkIjoxNTkwMzcyMjYzNTY1MSwicmV2ZXJzZSI6dHJ1ZSwib2Zmc2V0Ijo0N30%3D",
-        "filter.v.price.gte": null,
-        "filter.v.price.lte": null,
+        "filter.v.price.gte": "100",
+        "filter.v.price.lte": "500",
       },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
