@@ -7,7 +7,7 @@ const links = [
 
 export function QuickLinks() {
   return (
-    <div className="hidden md:flex items-center gap-6">
+    <div className="hidden md:flex items-center gap-5">
       {links.map((item) => (
         <Link
           key={item.href}
