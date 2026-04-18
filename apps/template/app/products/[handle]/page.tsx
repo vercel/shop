@@ -64,7 +64,6 @@ export async function generateMetadata({
 }
 
 export const unstable_instant = {
-  prefetch: "runtime",
   samples: [
     {
       params: { handle: "__placeholder__" },
@@ -74,7 +73,7 @@ export const unstable_instant = {
   ],
 };
 
-export const unstable_prefetch = "runtime";
+export const unstable_prefetch = "force-runtime";
 
 export default async function ProductPage({
   params,
