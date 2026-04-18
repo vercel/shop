@@ -62,7 +62,6 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
 }
 
 export const unstable_instant = {
-  prefetch: "runtime",
   samples: [
     {
       searchParams: {
@@ -75,7 +74,7 @@ export const unstable_instant = {
   ],
 };
 
-export const unstable_prefetch = "runtime";
+export const unstable_prefetch = "force-runtime";
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
