@@ -112,7 +112,7 @@ export async function VariantSection({
         />
       )}
 
-      <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5 lg:pt-4">
+      <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
         <div data-slot="product-info-header">
           <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
           {uniformPrice ? (
