@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import {
   FilterPendingScope,
@@ -11,6 +12,8 @@ import { loadMoreSearchProducts } from "@/lib/collections/actions";
 import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
+import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 const RESULTS_SKELETON_KEYS = Array.from(
@@ -34,7 +37,19 @@ export function ResultsSkeleton({ title }: { title: string }) {
   );
 }
 
-export async function Results({
+export interface SearchResultsData {
+  products: ProductCardType[];
+  total: number;
+  pageInfo: PageInfo;
+  transformedFilters: TransformedFilters;
+  activeFilters: Record<string, string | string[] | undefined>;
+  filtersJson?: string;
+  query?: string;
+  collection?: string;
+  sort?: string;
+}
+
+export async function getSearchResultsData({
   query,
   sort,
   collection,
@@ -46,9 +61,7 @@ export async function Results({
   collection?: string;
   locale: Locale;
   activeFilters: Record<string, string | string[] | undefined>;
-}) {
-  const [t, tProduct] = await Promise.all([getTranslations("search"), getTranslations("product")]);
-
+}): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const filtersJson = shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined;
   const result = await getProducts({
@@ -60,7 +73,58 @@ export async function Results({
     locale,
   });
 
-  const products = result.products;
+  return {
+    products: result.products,
+    total: result.total,
+    pageInfo: result.pageInfo,
+    transformedFilters: transformShopifyFilters(result.filters, { activeFilters }),
+    activeFilters,
+    filtersJson,
+    query,
+    collection,
+    sort,
+  };
+}
+
+export async function SearchResultsGrid({
+  locale,
+  searchResultsDataPromise,
+}: {
+  locale: Locale;
+  searchResultsDataPromise: Promise<SearchResultsData>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {RESULTS_SKELETON_KEYS.map((key) => (
+            <ProductCardSkeleton key={key} />
+          ))}
+        </div>
+      }
+    >
+      <SearchResultsGridRender
+        locale={locale}
+        searchResultsDataPromise={searchResultsDataPromise}
+      />
+    </Suspense>
+  );
+}
+
+async function SearchResultsGridRender({
+  locale,
+  searchResultsDataPromise,
+}: {
+  locale: Locale;
+  searchResultsDataPromise: Promise<SearchResultsData>;
+}) {
+  const [data, t, tProduct] = await Promise.all([
+    searchResultsDataPromise,
+    getTranslations("search"),
+    getTranslations("product"),
+  ]);
+
+  const { products, query } = data;
 
   if (products.length === 0) {
     return (
@@ -76,24 +140,21 @@ export async function Results({
   const boundLoadMore = async (cursor: string) => {
     "use server";
     return loadMoreSearchProducts({
-      query,
-      collection,
+      query: data.query,
+      collection: data.collection,
       cursor,
-      sortKey: sort,
-      filtersJson,
+      sortKey: data.sort,
+      filtersJson: data.filtersJson,
       locale,
     });
   };
 
   return (
     <FilterPendingScope>
-      <p className="text-sm text-muted-foreground mb-4">
-        {t("resultCount", { count: result.total })}
-      </p>
       <ProductGridPendingOverlay>
         <InfiniteProductGrid
           initialProducts={products}
-          initialPageInfo={result.pageInfo}
+          initialPageInfo={data.pageInfo}
           locale={locale}
           outOfStockText={tProduct("outOfStock")}
           loadMore={boundLoadMore}

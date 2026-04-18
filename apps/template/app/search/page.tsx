@@ -11,15 +11,18 @@ import { CollectionFilterSidebarClient } from "@/components/collections/filter-s
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { CollectionToolbar } from "@/components/collections/toolbar";
+import { CollectionToolbar, CollectionToolbarSkeleton } from "@/components/collections/toolbar";
 import { Container } from "@/components/layout/container";
-import { Results, ResultsSkeleton } from "@/components/search/results";
+import {
+  type SearchResultsData,
+  ResultsSkeleton,
+  SearchResultsGrid,
+  getSearchResultsData,
+} from "@/components/search/results";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
+import { parseFiltersFromSearchParams } from "@/lib/utils";
 
 export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
@@ -110,10 +113,14 @@ async function SearchContent({
   const { sort, collection } = resolvedSearchParams;
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
-  const activeFilterCount = Object.values(activeFilters).reduce((count, v) => {
-    if (!v) return count;
-    return count + (Array.isArray(v) ? v.length : 1);
-  }, 0);
+
+  const searchResultsDataPromise = getSearchResultsData({
+    query: q,
+    sort: sort as string | undefined,
+    collection: collection as string | undefined,
+    locale,
+    activeFilters,
+  });
 
   return (
     <>
@@ -124,78 +131,64 @@ async function SearchContent({
         {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
       </div>
 
-      <CollectionToolbar
-        filterSheet={
-          <FilterSidebarSheet
-            label={t("filters")}
-            activeCount={activeFilterCount}
-            trigger={
-              <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                <SlidersHorizontalIcon className="size-4" />
-                <span>{t("filters")}</span>
-                {activeFilterCount > 0 && (
-                  <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </button>
-            }
-          >
-            <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
-              <FilterPendingScope>
-                <SearchFilterContent
-                  query={q as string | undefined}
-                  collection={collection as string | undefined}
-                  locale={locale}
-                  activeFilters={activeFilters}
-                />
-              </FilterPendingScope>
-            </Suspense>
-          </FilterSidebarSheet>
-        }
-        sortSelect={<CollectionsSortSelect />}
-      />
+      <Suspense fallback={<CollectionToolbarSkeleton />}>
+        <SearchToolbar
+          locale={locale}
+          searchResultsDataPromise={searchResultsDataPromise}
+          filtersLabel={t("filters")}
+        />
+      </Suspense>
 
-      <Results
-        query={q as string | undefined}
-        sort={sort as string | undefined}
-        collection={collection as string | undefined}
-        locale={locale}
-        activeFilters={activeFilters}
-      />
+      <SearchResultsGrid locale={locale} searchResultsDataPromise={searchResultsDataPromise} />
     </>
   );
 }
 
-async function SearchFilterContent({
-  query,
-  collection,
+async function SearchToolbar({
   locale,
-  activeFilters,
+  searchResultsDataPromise,
+  filtersLabel,
 }: {
-  query?: string;
-  collection?: string;
   locale: Locale;
-  activeFilters: Record<string, string | string[] | undefined>;
+  searchResultsDataPromise: Promise<SearchResultsData>;
+  filtersLabel: string;
 }) {
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
-    query,
-    collection,
-    limit: RESULTS_PER_PAGE,
-    filtersJson: shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined,
-    locale,
-  });
+  const [data, t] = await Promise.all([searchResultsDataPromise, getTranslations("search")]);
 
-  const transformedFilters = transformShopifyFilters(result.filters, {
-    activeFilters,
-  });
+  const activeFilterCount = Object.values(data.activeFilters).reduce((count, v) => {
+    if (!v) return count;
+    return count + (Array.isArray(v) ? v.length : 1);
+  }, 0);
 
   return (
-    <CollectionFilterSidebarClient
-      filters={transformedFilters.filters}
-      priceRange={transformedFilters.priceRange}
-      activeFilters={activeFilters}
+    <CollectionToolbar
+      resultCount={data.total > 0 ? t("resultCount", { count: data.total }) : undefined}
+      filterSheet={
+        <FilterSidebarSheet
+          label={filtersLabel}
+          activeCount={activeFilterCount}
+          trigger={
+            <button type="button" className="flex items-center gap-2 text-sm font-medium">
+              <SlidersHorizontalIcon className="size-4" />
+              <span>{filtersLabel}</span>
+              {activeFilterCount > 0 && (
+                <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          }
+        >
+          <FilterPendingScope>
+            <CollectionFilterSidebarClient
+              filters={data.transformedFilters.filters}
+              priceRange={data.transformedFilters.priceRange}
+              activeFilters={data.activeFilters}
+            />
+          </FilterPendingScope>
+        </FilterSidebarSheet>
+      }
+      sortSelect={<CollectionsSortSelect />}
     />
   );
 }
