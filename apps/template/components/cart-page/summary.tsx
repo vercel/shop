@@ -4,13 +4,12 @@ import { ArrowRightIcon, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { cn, formatPrice } from "@/lib/utils";
-
-import { prepareCheckoutAction, updateCartNoteAction } from "@/lib/cart/action";
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { prepareCheckoutAction, updateCartNoteAction } from "@/lib/cart/action";
+import { cn, formatPrice } from "@/lib/utils";
 
 const GIFT_NOTE_MARKER = "🎁 This is a gift";
 

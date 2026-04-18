@@ -113,7 +113,11 @@ export async function ProductDetailPage({
   return (
     <Container className="bg-background pt-0 lg:pt-8">
       <Suspense fallback={<ProductPageFallback />}>
-        <ProductContent productPromise={productPromise} locale={locale} variantIdPromise={variantIdPromise} />
+        <ProductContent
+          productPromise={productPromise}
+          locale={locale}
+          variantIdPromise={variantIdPromise}
+        />
       </Suspense>
     </Container>
   );

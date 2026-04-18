@@ -1,5 +1,5 @@
-import type { Image, Money, ProductOption, ProductVariant, SelectedOption } from "@/lib/types";
 import { getNumericShopifyId } from "@/lib/shopify/utils";
+import type { Image, Money, ProductOption, ProductVariant, SelectedOption } from "@/lib/types";
 
 // ── Variant selection ────────────────────────────────────────────────
 
@@ -329,9 +329,7 @@ export function hasColorImagePartitioning(
   if (!colorOption || colorOption.values.length <= 1) return false;
 
   return variants.some(
-    (v) =>
-      v.image &&
-      v.selectedOptions.some((opt) => opt.name === colorOption.name),
+    (v) => v.image && v.selectedOptions.some((opt) => opt.name === colorOption.name),
   );
 }
 
@@ -355,9 +353,7 @@ export function getSharedImages(
   const allColorImageUrls = new Set<string>();
   for (const variant of variants) {
     if (!variant.image) continue;
-    const colorOpt = variant.selectedOptions.find(
-      (opt) => opt.name === colorOption.name,
-    );
+    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
     if (colorOpt) {
       allColorImageUrls.add(variant.image.url);
     }

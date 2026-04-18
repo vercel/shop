@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-
 import { prepareCheckoutAction } from "@/lib/cart/action";
+
 import { useCart } from "./context";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";

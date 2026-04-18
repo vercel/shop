@@ -4,10 +4,10 @@ import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
-import { buyNowAction } from "@/lib/cart/action";
 import { useCart } from "@/components/cart/context";
-import { variantToOptimisticInfo } from "@/lib/product";
 import { Button } from "@/components/ui/button";
+import { buyNowAction } from "@/lib/cart/action";
+import { variantToOptimisticInfo } from "@/lib/product";
 import type { Image, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { useCartRender } from "@/components/cart/context-sync";
+
 import { ItemRow } from "./item-row";
 
 interface ItemsSectionProps {

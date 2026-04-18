@@ -3,13 +3,13 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { CartContextSync } from "@/components/cart/context-sync";
 import { Empty } from "@/components/cart-page/empty-cart";
 import { Header } from "@/components/cart-page/header";
 import { ItemsSection } from "@/components/cart-page/items-section";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
 import { Upsells } from "@/components/cart-page/upsell-recommendations";
+import { CartContextSync } from "@/components/cart/context-sync";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { getCart } from "@/lib/shopify/operations/cart";

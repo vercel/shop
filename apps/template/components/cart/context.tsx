@@ -11,10 +11,9 @@ import {
 } from "react";
 
 import { addToCartAction } from "@/lib/cart/action";
-import type { Cart, CartLine } from "@/lib/types";
-
 import { removeFromCartAction, updateCartQuantityAction } from "@/lib/cart/action";
 import type { OptimisticProductInfo } from "@/lib/product";
+import type { Cart, CartLine } from "@/lib/types";
 
 const DEBOUNCE_MS = 400;
 

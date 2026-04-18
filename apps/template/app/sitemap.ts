@@ -9,10 +9,7 @@ function toAbsoluteUrl(pathname: string): string {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [collections, products] = await Promise.all([
-    getCollections(),
-    getAllProductHandles(),
-  ]);
+  const [collections, products] = await Promise.all([getCollections(), getAllProductHandles()]);
 
   const homeEntry: MetadataRoute.Sitemap = [
     {

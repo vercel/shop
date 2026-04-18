@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 
-import { productCardToOptimisticInfo } from "@/lib/product";
 import {
   ProductCardBadge,
   ProductCardContent,
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/product-card";
 import { ProductCardQuickAdd } from "@/components/ui/product-card-quick-add";
 import type { Locale } from "@/lib/i18n";
+import { productCardToOptimisticInfo } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 export interface ProductCardProps {
@@ -37,7 +37,14 @@ export async function ProductCard({
   const t = isFeatured ? await getTranslations("product") : null;
 
   return (
-    <Link href={product.defaultVariantNumericId ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}` : `/products/${product.handle}`} className={className}>
+    <Link
+      href={
+        product.defaultVariantNumericId
+          ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}`
+          : `/products/${product.handle}`
+      }
+      className={className}
+    >
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>

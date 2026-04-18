@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import type { SelectedOptions } from "@/lib/product";
 import type { ProductDetails } from "@/lib/types";
 
 import { BuySectionClient } from "./buy-section-client";
-import type { SelectedOptions } from "@/lib/product";
 
 function Fallback() {
   return (

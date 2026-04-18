@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { HeroSection } from "@/components/hero-section";
-import { ProductsGrid } from "@/components/product/products-grid";
 import { Container } from "@/components/layout/container";
+import { ProductsGrid } from "@/components/product/products-grid";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -28,10 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [locale, t] = await Promise.all([
-    getLocale(),
-    getTranslations("content.homepage"),
-  ]);
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("content.homepage")]);
   const featuredProductsResult = await getProducts({ limit: 8, locale });
 
   return (
@@ -43,8 +40,7 @@ export default async function HomePage() {
         hero={{
           id: "homepage-hero",
           headline: "Agentic Infrastructure for Commerce",
-          subheadline:
-            "A production-ready, agent-friendly Shopify storefront built on Next.js.",
+          subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
           ctaText: "Browse the Catalog",
           ctaLink: "/search",
         }}

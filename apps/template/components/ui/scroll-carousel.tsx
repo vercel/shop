@@ -141,11 +141,7 @@ function ScrollCarouselNav({ className, ...props }: React.ComponentProps<"div">)
   );
 }
 
-function ScrollCarouselContent({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function ScrollCarouselContent({ className, children, ...props }: React.ComponentProps<"div">) {
   const { scrollContainerRef, handleScroll } = useScrollCarousel();
 
   return (
