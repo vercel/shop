@@ -123,6 +123,29 @@ const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }>
   RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
 };
 
+/**
+ * Shopify's search query `productFilters` only affects facet counts, not actual
+ * results. Apply filters in memory after fetching to match collection behavior.
+ */
+function applyFiltersInMemory(products: ProductCard[], filters: ProductFilter[]): ProductCard[] {
+  return products.filter((product) => {
+    for (const filter of filters) {
+      if (filter.price) {
+        const price = Number.parseFloat(product.price.amount);
+        if (filter.price.min !== undefined && price < filter.price.min) return false;
+        if (filter.price.max !== undefined && price > filter.price.max) return false;
+      }
+      if (filter.productVendor && product.vendor !== filter.productVendor) {
+        return false;
+      }
+      if (filter.available !== undefined && product.availableForSale !== filter.available) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
 function buildShopifySearchQuery(query?: string, collection?: string): string {
   const queryParts: string[] = [];
 
@@ -217,7 +240,10 @@ export function buildProductFiltersFromParams(
   const min = parsePrice(searchParams["filter.v.price.gte"]);
   const max = parsePrice(searchParams["filter.v.price.lte"]);
   if (min !== undefined || max !== undefined) {
-    filters.push({ price: { min, max } });
+    const priceFilter: { min?: number; max?: number } = {};
+    if (min !== undefined) priceFilter.min = min;
+    if (max !== undefined) priceFilter.max = max;
+    filters.push({ price: priceFilter });
   }
 
   return filters;
@@ -268,8 +294,8 @@ export async function getProducts(params: {
     query: PRODUCTS_SEARCH_QUERY,
     variables: {
       query: searchQuery,
-      first: limit,
-      after: cursor,
+      first: filters.length > 0 ? 250 : limit,
+      after: filters.length > 0 ? undefined : cursor,
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
       productFilters: filters.length > 0 ? filters : undefined,
@@ -284,12 +310,19 @@ export async function getProducts(params: {
 
   tagProducts(shopifyProducts);
 
-  const products = shopifyProducts.map(transformShopifyProductCard);
+  let products = shopifyProducts.map(transformShopifyProductCard);
+
+  // Shopify's search query productFilters only affect facet counts, not actual
+  // results. Apply filters in memory to match the collection products behavior.
+  if (filters.length > 0) {
+    products = applyFiltersInMemory(products, filters);
+  }
 
   return {
     products,
-    total: data.search.totalCount,
-    pageInfo: data.search.pageInfo,
+    total: filters.length > 0 ? products.length : data.search.totalCount,
+    pageInfo:
+      filters.length > 0 ? { ...data.search.pageInfo, hasNextPage: false } : data.search.pageInfo,
     filters: data.search.productFilters,
   };
 }

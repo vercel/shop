@@ -141,7 +141,7 @@ export function CollectionFilterSidebarClient({
   const computeFilterHref = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     toggleFilterParam(params, key, value);
-    params.delete("cursor");
+
     return buildHref(pathname, params);
   };
 
@@ -172,7 +172,6 @@ export function CollectionFilterSidebarClient({
 
     const params = new URLSearchParams(searchParams.toString());
     applyPriceParams(params, validMin, validMax);
-    params.delete("cursor");
 
     startFilterTransition(() => {
       router.push(buildHref(pathname, params));
@@ -189,7 +188,6 @@ export function CollectionFilterSidebarClient({
     const params = new URLSearchParams(searchParams.toString());
     params.delete("filter.v.price.gte");
     params.delete("filter.v.price.lte");
-    params.delete("cursor");
 
     startFilterTransition(() => {
       router.push(buildHref(pathname, params));
@@ -202,8 +200,6 @@ export function CollectionFilterSidebarClient({
     for (const key of [...params.keys()]) {
       if (key.startsWith("filter.")) params.delete(key);
     }
-
-    params.delete("cursor");
 
     startFilterTransition(() => {
       router.push(buildHref(pathname, params));

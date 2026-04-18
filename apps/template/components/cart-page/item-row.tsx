@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useCart } from "@/components/cart/context";
 import {
   Select,
   SelectContent,
@@ -14,8 +15,6 @@ import {
 } from "@/components/ui/select";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
-
-import { useCart } from "@/components/cart/context";
 
 interface ItemRowProps {
   item: CartLine;

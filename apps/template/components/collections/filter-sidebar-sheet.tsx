@@ -4,8 +4,7 @@ import { SlidersHorizontalIcon } from "lucide-react";
 import type * as React from "react";
 
 import { Button } from "@/components/ui/button";
-import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface FilterSidebarSheetProps {
   activeCount?: number;
@@ -21,15 +20,15 @@ export function FilterSidebarSheet({
   trigger,
 }: FilterSidebarSheetProps) {
   return (
-    <Drawer>
+    <Sheet>
       {trigger ? (
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
+        <SheetTrigger asChild>{trigger}</SheetTrigger>
       ) : (
-        <DrawerTrigger asChild>
+        <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden h-9 gap-2 border border-input bg-transparent shadow-xs hover:bg-accent"
+            className="h-9 gap-2 border border-input bg-transparent shadow-xs hover:bg-accent"
           >
             <SlidersHorizontalIcon className="size-4" />
             <span>{label}</span>
@@ -39,16 +38,15 @@ export function FilterSidebarSheet({
               </span>
             )}
           </Button>
-        </DrawerTrigger>
+        </SheetTrigger>
       )}
-      <DrawerContent className="max-h-[85vh] px-4 pb-4 [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-auto [&_[data-slot=filter-sidebar]>div]:!pb-0">
-        <DrawerTitle className="sr-only">{label}</DrawerTitle>
+      <SheetContent
+        side="left"
+        className="px-6 pt-10 pb-6 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0"
+      >
+        <SheetTitle className="sr-only">{label}</SheetTitle>
         {children}
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
-}
-
-export function FilterSidebarSheetSkeleton() {
-  return <Skeleton className="h-9 w-24" />;
 }

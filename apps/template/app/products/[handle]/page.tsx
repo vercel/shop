@@ -74,7 +74,7 @@ export const unstable_instant = {
   ],
 };
 
-export const unstable_prefetch = 'runtime'
+export const unstable_prefetch = "runtime";
 
 export default async function ProductPage({
   params,
@@ -90,9 +90,7 @@ export default async function ProductPage({
     getProduct(handle, locale).catch(() => notFound()),
   );
 
-  const variantIdPromise = searchParams.then(
-    (sp) => (sp?.variantId as string | undefined),
-  );
+  const variantIdPromise = searchParams.then((sp) => sp?.variantId as string | undefined);
 
   return (
     <ProductDetailPage

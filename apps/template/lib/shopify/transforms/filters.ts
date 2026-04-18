@@ -113,7 +113,9 @@ export function transformShopifyFilters(
 
   let filters = listFilters
     .map(transformFilter)
-    .filter((filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"));
+    .filter(
+      (filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"),
+    );
 
   if (hideZeroCount) {
     filters = filters

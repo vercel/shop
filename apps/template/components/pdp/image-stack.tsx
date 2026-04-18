@@ -4,10 +4,9 @@ import Image from "next/image";
 import { type ComponentPropsWithoutRef, Suspense, use } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { type SelectedOptions, getImagesForSelectedColor } from "@/lib/product";
 import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import { type SelectedOptions, getImagesForSelectedColor } from "@/lib/product";
 
 interface ImageStackContentProps extends ComponentPropsWithoutRef<"div"> {
   images: Array<{ url: string; altText: string }>;

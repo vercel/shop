@@ -1,6 +1,6 @@
 import { getCurrencyCode } from "@/lib/i18n";
-import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
+import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
 import { createTable, escapeMarkdown, formatPrice } from "./utils";
 

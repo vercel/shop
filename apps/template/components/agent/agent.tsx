@@ -37,7 +37,6 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { registry } from "./registry";
 
 import {
   ChainOfThought,
@@ -66,6 +65,7 @@ import { Shimmer } from "../ai-elements/shimmer";
 import { SpeechInput } from "../ai-elements/speech-input";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { CartReconciler } from "./cart-reconciler";
+import { registry } from "./registry";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 const AUTO_CLOSE_DELAY = 1000;

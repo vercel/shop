@@ -1,9 +1,6 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
-import {
-  buildProductFiltersFromParams,
-  getProducts,
-} from "@/lib/shopify/operations/products";
+import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 

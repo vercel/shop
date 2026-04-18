@@ -50,7 +50,7 @@ declare const messages: {
     "selectVariantLabel": "Select {name}: {value}",
     "viewImage": "View image {current} of {total}",
     "goToImage": "Go to image {number}",
-    "viewAll": "View all",
+    "viewAll": "View All",
     "recommendations": "You May Also Like",
     "inStock": "In Stock",
     "buyNow": "Buy now",
@@ -138,14 +138,14 @@ declare const messages: {
     "pages": "pages",
     "firstPage": "First",
     "nextPage": "Next",
-    "sortBy": "Sort By",
+    "sortBy": "Sort",
     "sortRelevance": "Relevance",
     "sortPriceLow": "Price: Low to High",
     "sortPriceHigh": "Price: High to Low",
     "sortNewest": "Newest"
   },
   "search": {
-    "sortBy": "Sort By",
+    "sortBy": "Sort",
     "category": "Collection",
     "allCategories": "All Collections",
     "filters": "Filters",
@@ -187,7 +187,8 @@ declare const messages: {
       "goToPage": "Page {page}",
       "first": "First",
       "next": "Next"
-    }
+    },
+    "loadingMore": "Loading more products..."
   },
   "collections": {
     "title": "Collections",

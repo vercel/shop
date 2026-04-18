@@ -2,10 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
+import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 
 interface ColorPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;
@@ -45,7 +44,7 @@ export function ColorPicker({
             v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
           )?.image?.url;
 
-          const imageUrl = hideImages ? undefined : (value.swatch?.image || variantImage);
+          const imageUrl = hideImages ? undefined : value.swatch?.image || variantImage;
 
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 

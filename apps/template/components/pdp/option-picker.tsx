@@ -1,10 +1,9 @@
 import Link from "next/link";
 import type { ComponentPropsWithoutRef } from "react";
 
+import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 
 interface OptionPickerProps extends ComponentPropsWithoutRef<"div"> {
   option: ProductOption;

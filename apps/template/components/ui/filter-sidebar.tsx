@@ -78,10 +78,7 @@ function FilterSidebarResultsCount({
   return (
     <div
       data-slot="filter-sidebar-results-count"
-      className={cn(
-        "flex items-center gap-1.5 text-sm text-foreground/50",
-        className,
-      )}
+      className={cn("flex items-center gap-1.5 text-sm text-foreground/50", className)}
       {...props}
     >
       <SearchIcon className="size-3.5" />
@@ -160,9 +157,7 @@ function FilterSectionHeader({ title, className, children }: FilterSectionHeader
       data-slot="filter-section-header"
       className={cn("flex items-center justify-between", className)}
     >
-      <span className="text-base font-semibold text-muted-foreground">
-        {title}
-      </span>
+      <span className="text-base font-semibold text-muted-foreground">{title}</span>
       {children}
     </div>
   );

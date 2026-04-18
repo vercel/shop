@@ -2,15 +2,16 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BuyButtons } from "@/components/pdp/buy-buttons";
+import { ProductInfoDescription, ProductInfoOptions } from "@/components/pdp/product-info";
 import {
-  ProductInfoDescription,
-  ProductInfoOptions,
-} from "@/components/pdp/product-info";
-import { ShopLogo } from "@/components/pdp/shop-logo";
-import { ColorImageCarouselItems, ColorImageGrid, ProductMedia } from "@/components/pdp/product-media";
+  ColorImageCarouselItems,
+  ColorImageGrid,
+  ProductMedia,
+} from "@/components/pdp/product-media";
 import { ProductPrice } from "@/components/pdp/product-price";
+import { ShopLogo } from "@/components/pdp/shop-logo";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
+import type { Locale } from "@/lib/i18n";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
@@ -20,8 +21,13 @@ import {
   hasUniformStock,
   resolveSelectedVariant,
 } from "@/lib/product";
-import type { Locale } from "@/lib/i18n";
-import type { Image as ImageType, ProductDetails, ProductOption, ProductVariant } from "@/lib/types";
+import type {
+  Image as ImageType,
+  ProductDetails,
+  ProductOption,
+  ProductVariant,
+} from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export async function VariantSection({
   product,
@@ -60,7 +66,16 @@ export async function VariantSection({
           title={title}
           className="lg:col-span-7"
           desktopSlot={
-            <Suspense fallback={<><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /><Skeleton className="aspect-square w-full" /></>}>
+            <Suspense
+              fallback={
+                <>
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="aspect-square w-full" />
+                </>
+              }
+            >
               <ResolvedColorImages
                 images={images}
                 options={options}
@@ -111,7 +126,11 @@ export async function VariantSection({
             )
           ) : (
             <Suspense fallback={<Skeleton className="h-6 w-24" />}>
-              <ResolvedPrice variants={variants} locale={locale} variantIdPromise={variantIdPromise} />
+              <ResolvedPrice
+                variants={variants}
+                locale={locale}
+                variantIdPromise={variantIdPromise}
+              />
             </Suspense>
           )}
         </div>

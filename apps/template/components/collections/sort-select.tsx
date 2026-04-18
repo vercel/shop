@@ -4,13 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 
 const SORT_OPTIONS = [
   { value: "best-matches", key: "bestMatches" },
@@ -23,7 +17,8 @@ const SORT_OPTIONS = [
 export function CollectionsSortSelect() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useTranslations("search.sort");
+  const tSort = useTranslations("search.sort");
+  const tSearch = useTranslations("search");
   const [isPending, startTransition] = useTransition();
 
   const currentSort = searchParams.get("sort") || "best-matches";
@@ -37,8 +32,6 @@ export function CollectionsSortSelect() {
       params.set("sort", value);
     }
 
-    params.delete("cursor");
-
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
@@ -47,12 +40,12 @@ export function CollectionsSortSelect() {
   return (
     <Select value={currentSort} onValueChange={handleSortChange} disabled={isPending}>
       <SelectTrigger className="border-0 shadow-none bg-transparent px-0">
-        <SelectValue placeholder={t("bestMatches")} />
+        <span>{tSearch("sortBy")}</span>
       </SelectTrigger>
       <SelectContent>
         {SORT_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {t(option.key)}
+            {tSort(option.key)}
           </SelectItem>
         ))}
       </SelectContent>

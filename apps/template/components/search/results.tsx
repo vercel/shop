@@ -1,23 +1,24 @@
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import {
   FilterPendingScope,
   ProductGridPendingOverlay,
 } from "@/components/collections/filter-pending-context";
-import { CollectionsPagination } from "@/components/collections/pagination";
-import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
-import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
-import { MobileFilterSortBarSkeleton } from "@/components/collections/mobile-filter-sort-bar";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
+import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
+import { CollectionToolbarSkeleton } from "@/components/collections/toolbar";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { loadMoreSearchProducts } from "@/lib/collections/actions";
 import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
+import type { ProductFilter } from "@/lib/shopify/types/filters";
+import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 const RESULTS_SKELETON_KEYS = Array.from(
-  { length: 12 },
+  { length: 15 },
   (_, index) => `search-results-skeleton-${index}`,
 );
 
@@ -25,117 +26,149 @@ export function ResultsSkeleton({ title }: { title: string }) {
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-          {title}
-        </h1>
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
       </div>
-      <MobileFilterSortBarSkeleton />
-      <div className="flex flex-col md:flex-row gap-8">
-        <aside className="hidden md:block w-64 shrink-0">
-          <CollectionFilterSidebarSkeleton />
-        </aside>
-
-        <div className="flex-1">
-          <div className="mb-6 hidden md:flex md:items-center md:justify-between">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-5 w-24" />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-            {RESULTS_SKELETON_KEYS.map((key) => (
-              <ProductCardSkeleton key={key} />
-            ))}
-          </div>
-        </div>
+      <CollectionToolbarSkeleton />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {RESULTS_SKELETON_KEYS.map((key) => (
+          <ProductCardSkeleton key={key} />
+        ))}
       </div>
     </>
   );
 }
 
-export async function Results({
+export interface SearchResultsData {
+  products: ProductCardType[];
+  total: number;
+  pageInfo: PageInfo;
+  transformedFilters: TransformedFilters;
+  activeFilters: Record<string, string | string[] | undefined>;
+  filters: ProductFilter[];
+  query?: string;
+  collection?: string;
+  sort?: string;
+}
+
+export async function getSearchResultsData({
   query,
   sort,
   collection,
   locale,
-  cursor,
   activeFilters,
 }: {
   query?: string;
   sort?: string;
   collection?: string;
   locale: Locale;
-  cursor?: string;
   activeFilters: Record<string, string | string[] | undefined>;
-}) {
-  const [t, tProduct] = await Promise.all([getTranslations("search"), getTranslations("product")]);
-
+}): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const result = await getProducts({
     query,
     collection,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
-    cursor,
     filters: shopifyFilters,
     locale,
   });
 
-  const transformedFilters = transformShopifyFilters(result.filters, {
+  return {
+    products: result.products,
+    total: result.total,
+    pageInfo: result.pageInfo,
+    transformedFilters: transformShopifyFilters(result.filters, { activeFilters }),
     activeFilters,
-  });
-  const products = result.products;
+    filters: shopifyFilters,
+    query,
+    collection,
+    sort,
+  };
+}
+
+export async function SearchResultsGrid({
+  locale,
+  searchResultsDataPromise,
+}: {
+  locale: Locale;
+  searchResultsDataPromise: Promise<SearchResultsData>;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {RESULTS_SKELETON_KEYS.map((key) => (
+            <ProductCardSkeleton key={key} />
+          ))}
+        </div>
+      }
+    >
+      <SearchResultsGridRender
+        locale={locale}
+        searchResultsDataPromise={searchResultsDataPromise}
+      />
+    </Suspense>
+  );
+}
+
+async function SearchResultsGridRender({
+  locale,
+  searchResultsDataPromise,
+}: {
+  locale: Locale;
+  searchResultsDataPromise: Promise<SearchResultsData>;
+}) {
+  const [data, t, tProduct] = await Promise.all([
+    searchResultsDataPromise,
+    getTranslations("search"),
+    getTranslations("product"),
+  ]);
+
+  const { products, query } = data;
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-semibold mb-2">{t("noResults")}</h2>
+        <p className="text-muted-foreground">
+          {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}
+        </p>
+      </div>
+    );
+  }
+
+  const boundLoadMore = async (cursor: string) => {
+    "use server";
+    return loadMoreSearchProducts({
+      query: data.query,
+      collection: data.collection,
+      cursor,
+      sortKey: data.sort,
+      filters: data.filters,
+      locale,
+    });
+  };
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
-      <aside className="hidden md:block w-64 shrink-0">
-        <FilterPendingScope>
-          <CollectionFilterSidebarClient
-            filters={transformedFilters.filters}
-            priceRange={transformedFilters.priceRange}
-            activeFilters={activeFilters}
-          />
-        </FilterPendingScope>
-      </aside>
-
-      <FilterPendingScope>
-        <div className="flex-1">
-          {products.length === 0 ? (
-            <div className="text-center py-12">
-              <h2 className="text-2xl font-semibold mb-2">{t("noResults")}</h2>
-              <p className="text-muted-foreground">
-                {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="mb-6 hidden md:flex md:items-center md:justify-between">
-                <p className="text-sm text-muted-foreground">
-                  {t("resultCount", { count: result.total })}
-                </p>
-                <CollectionsSortSelect />
-              </div>
-
-              <ProductGridPendingOverlay>
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {products.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      locale={locale}
-                      outOfStockText={tProduct("outOfStock")}
-                    />
-                  ))}
-                </div>
-              </ProductGridPendingOverlay>
-
-              <CollectionsPagination
-                hasNextPage={result.pageInfo.hasNextPage}
-                endCursor={result.pageInfo.endCursor}
-                isFirstPage={!cursor}
-              />
-            </>
-          )}
-        </div>
-      </FilterPendingScope>
-    </div>
+    <FilterPendingScope>
+      <ProductGridPendingOverlay>
+        <InfiniteProductGrid
+          initialProducts={products}
+          initialPageInfo={data.pageInfo}
+          locale={locale}
+          outOfStockText={tProduct("outOfStock")}
+          loadMore={boundLoadMore}
+        >
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              locale={locale}
+              outOfStockText={tProduct("outOfStock")}
+            />
+          ))}
+        </InfiniteProductGrid>
+      </ProductGridPendingOverlay>
+    </FilterPendingScope>
   );
 }

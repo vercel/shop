@@ -1,5 +1,6 @@
 import type { ComponentPropsWithoutRef } from "react";
 
+import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -7,7 +8,6 @@ import { AboutItem } from "./about-item";
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { ProductPrice } from "./product-price";
-import type { SelectedOptions } from "@/lib/product";
 
 interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
   selectedVariant: ProductVariant | undefined;
@@ -24,14 +24,7 @@ function ProductInfoHeader({
 }: ProductInfoHeaderProps) {
   return (
     <div data-slot="product-info-header" className={className} {...props}>
-      <h1
-        className={cn(
-          "font-semibold text-foreground tracking-tight",
-          "text-3xl",
-        )}
-      >
-        {title}
-      </h1>
+      <h1 className={cn("font-semibold text-foreground tracking-tight", "text-3xl")}>{title}</h1>
 
       {selectedVariant && (
         <ProductPrice
@@ -67,8 +60,7 @@ function ProductInfoOptions({
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
-  const isDefaultOption = (opt: { values: { name: string }[] }) =>
-    opt.values.length === 1;
+  const isDefaultOption = (opt: { values: { name: string }[] }) => opt.values.length === 1;
 
   const colorOptions = options.filter((opt) => isColorOption(opt) && !isDefaultOption(opt));
   const otherOptions = options.filter((opt) => !isColorOption(opt) && !isDefaultOption(opt));

@@ -2,11 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
+import { ProductsCarousel } from "@/components/product/products-carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
-
-import { ProductsCarousel } from "@/components/product/products-carousel";
 
 function Fallback({ title }: { title: string }) {
   return (
@@ -40,11 +39,7 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   if (recommendations.length === 0) return null;
 
   return (
-    <ProductsCarousel
-      title={t("recommendations")}
-      products={recommendations}
-      locale={locale}
-    />
+    <ProductsCarousel title={t("recommendations")} products={recommendations} locale={locale} />
   );
 }
 

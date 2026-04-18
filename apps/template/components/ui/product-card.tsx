@@ -123,7 +123,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
   return (
     <h3
       data-slot="product-card-title"
-      className={cn("text-base font-semibold text-main-foreground line-clamp-2", className)}
+      className={cn("text-sm font-semibold text-main-foreground line-clamp-2", className)}
       {...props}
     >
       {children}
@@ -166,7 +166,7 @@ function ProductCardPrice({
           amount={amount}
           currencyCode={currencyCode}
           locale={locale}
-          className="text-base text-main-foreground"
+          className="text-sm text-main-foreground"
         />
         {discountPercent && compareAtAmount && compareAtCurrencyCode && (
           <>
@@ -174,7 +174,7 @@ function ProductCardPrice({
               amount={compareAtAmount}
               currencyCode={compareAtCurrencyCode}
               locale={locale}
-              className="text-sm text-muted-foreground line-through"
+              className="text-xs text-muted-foreground line-through"
             />
             <DiscountBadge percent={discountPercent} variant={discountVariant} />
           </>
@@ -191,9 +191,8 @@ function ProductCardSkeleton({ className }: { className?: string }) {
       className={cn("flex flex-col overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="py-3 h-18 box-content">
+      <div className="py-3">
         <div className="h-4 w-full bg-muted rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-2" />
         <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
       </div>
     </div>
