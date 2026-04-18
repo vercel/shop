@@ -55,13 +55,13 @@ export function BannerSection({ hero }: BannerSectionProps) {
               {hero.headline}
             </h1>
             {hero.subheadline && (
-              <p className="text-sm md:text-base text-white/90 max-w-xl">{hero.subheadline}</p>
+              <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
             )}
             {hero.ctaText && hero.ctaLink && (
               <Button
                 variant="outline"
                 asChild
-                className="h-11 px-5 border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
+                className="h-11 px-5 border-white text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
               >
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>
