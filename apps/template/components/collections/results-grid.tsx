@@ -30,7 +30,7 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ result, filtersJson, collection, sort }, t, tProduct] = await Promise.all([
+  const [{ result, filters, collection, sort }, t, tProduct] = await Promise.all([
     collectionResultsDataPromise,
     getTranslations("search"),
     getTranslations("product"),
@@ -52,7 +52,7 @@ async function Render({
       collection,
       cursor,
       sortKey: sort,
-      filtersJson,
+      filters,
       locale,
     });
   };

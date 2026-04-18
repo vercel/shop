@@ -69,8 +69,6 @@ export const unstable_instant = {
         q: "__placeholder__",
         collection: null,
         sort: null,
-        "filter.v.price.gte": null,
-        "filter.v.price.lte": null,
       },
       cookies: [{ name: "shopify_cartId", value: null }],
     },

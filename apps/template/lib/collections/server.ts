@@ -4,6 +4,7 @@ import {
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
 import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
+import type { ProductFilter } from "@/lib/shopify/types/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
 export interface CollectionSearchState {
@@ -15,7 +16,7 @@ export interface CollectionResultsData {
   activeFilters: Record<string, string | string[] | undefined>;
   collection: string;
   sort?: string;
-  filtersJson?: string;
+  filters: ProductFilter[];
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
   transformedFilters: TransformedFilters;
 }
@@ -42,12 +43,11 @@ export async function getCollectionResultsData({
 }): Promise<CollectionResultsData> {
   const [handle, { activeFilters, sort }] = await Promise.all([handlePromise, searchStatePromise]);
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const filtersJson = shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined;
   const result = await getCollectionProducts({
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
-    filtersJson,
+    filters: shopifyFilters,
     locale,
   });
 
@@ -55,7 +55,7 @@ export async function getCollectionResultsData({
     activeFilters,
     collection: handle,
     sort,
-    filtersJson,
+    filters: shopifyFilters,
     result,
     transformedFilters: transformShopifyFilters(result.filters, {
       activeFilters,

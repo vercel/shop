@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       sortKey: sort,
       limit: RESULTS_PER_PAGE,
       cursor,
-      filtersJson: shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined,
+      filters: shopifyFilters,
       locale,
     });
 

@@ -13,6 +13,7 @@ import type { Locale } from "@/lib/i18n";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
+import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
@@ -43,7 +44,7 @@ export interface SearchResultsData {
   pageInfo: PageInfo;
   transformedFilters: TransformedFilters;
   activeFilters: Record<string, string | string[] | undefined>;
-  filtersJson?: string;
+  filters: ProductFilter[];
   query?: string;
   collection?: string;
   sort?: string;
@@ -63,13 +64,12 @@ export async function getSearchResultsData({
   activeFilters: Record<string, string | string[] | undefined>;
 }): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const filtersJson = shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined;
   const result = await getProducts({
     query,
     collection,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
-    filtersJson,
+    filters: shopifyFilters,
     locale,
   });
 
@@ -79,7 +79,7 @@ export async function getSearchResultsData({
     pageInfo: result.pageInfo,
     transformedFilters: transformShopifyFilters(result.filters, { activeFilters }),
     activeFilters,
-    filtersJson,
+    filters: shopifyFilters,
     query,
     collection,
     sort,
@@ -144,7 +144,7 @@ async function SearchResultsGridRender({
       collection: data.collection,
       cursor,
       sortKey: data.sort,
-      filtersJson: data.filtersJson,
+      filters: data.filters,
       locale,
     });
   };
