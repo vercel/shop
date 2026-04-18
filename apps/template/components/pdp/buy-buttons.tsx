@@ -88,7 +88,7 @@ export function BuyButtons({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-2.5">
       <button
         type="button"
         className={cn(
