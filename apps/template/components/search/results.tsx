@@ -87,6 +87,9 @@ export async function Results({
 
   return (
     <FilterPendingScope>
+      <p className="text-sm text-muted-foreground mb-4">
+        {t("resultCount", { count: result.total })}
+      </p>
       <ProductGridPendingOverlay>
         <InfiniteProductGrid
           initialProducts={products}

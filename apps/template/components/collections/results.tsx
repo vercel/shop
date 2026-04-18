@@ -6,7 +6,10 @@ import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-shee
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { ProductCardSkeleton } from "@/components/product-card";
-import type { CollectionResultsData } from "@/lib/collections/server";
+import {
+  type CollectionResultsData,
+  getExactCollectionResultCount,
+} from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 
@@ -54,10 +57,16 @@ async function Render({
   ]);
 
   const activeCount = getActiveFilterCount(data);
+  const exactCount = getExactCollectionResultCount({ result: data.result });
 
   return (
     <>
       <CollectionToolbar
+        resultCount={
+          exactCount !== undefined && exactCount > 0
+            ? tSearch("resultCount", { count: exactCount })
+            : undefined
+        }
         filterSheet={
           <FilterSidebarSheet
             label={tSearch("filters")}
