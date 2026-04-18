@@ -8,10 +8,10 @@ export function Empty() {
   const t = useTranslations("cart");
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 lg:py-24 px-4">
+    <div className="flex flex-col items-center justify-center py-10 lg:py-10 px-5">
       <div className="text-center">
         <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-muted p-4">
+          <div className="rounded-full bg-muted p-5">
             <HandbagIcon className="h-12 w-12 text-muted-foreground" />
           </div>
         </div>
@@ -21,7 +21,7 @@ export function Empty() {
 
         <Link
           href="/"
-          className="inline-block px-8 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
+          className="inline-block px-10 py-2.5 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors"
         >
           {t("continueShopping")}
         </Link>

@@ -18,7 +18,7 @@ import { ShopLogo } from "./shop-logo";
 
 function Fallback() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Skeleton className="h-64 w-full" />
       <Skeleton className="h-32 w-full" />
     </div>
@@ -77,9 +77,9 @@ function Content({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <Card className="backdrop-blur bg-card/90 border-border/90 shadow-[0_0_0_2px_rgba(90,90,90,0.05)] overflow-hidden py-0">
-        <CardContent className="pt-6 pb-4 space-y-6">
+        <CardContent className="pt-5 pb-5 space-y-5">
           {/* Stock Status */}
           <div className="space-y-1">
             <h3 className="text-xl font-semibold text-foreground">
@@ -91,7 +91,7 @@ function Content({
           {!isOutOfStock && <QuantitySelector quantity={quantity} onQuantityChange={setQuantity} />}
 
           {/* Action Buttons */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <div className="space-y-2">
               <button
                 type="button"

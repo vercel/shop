@@ -16,13 +16,13 @@ export function ItemsSection({ locale }: ItemsSectionProps) {
   const lines = cart?.lines ?? [];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {lines.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-10">
           <p className="text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {lines.map((item) => (
             <ItemRow key={item.id} item={item} locale={locale} />
           ))}

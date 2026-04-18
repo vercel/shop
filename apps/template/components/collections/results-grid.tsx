@@ -15,7 +15,7 @@ const RESULTS_SKELETON_KEYS = Array.from(
 
 function Fallback() {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {RESULTS_SKELETON_KEYS.map((key) => (
         <ProductCardSkeleton key={key} />
       ))}
@@ -39,7 +39,7 @@ async function Render({
 
   if (products.length === 0) {
     return (
-      <div className="py-12 text-center">
+      <div className="py-10 text-center">
         <h2 className="mb-2 text-2xl font-semibold">{t("noResults")}</h2>
         <p className="text-muted-foreground">{t("noResultsAvailable")}</p>
       </div>

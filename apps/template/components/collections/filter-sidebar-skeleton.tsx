@@ -16,9 +16,9 @@ export function CollectionFilterSidebarSkeleton() {
       <div className="flex flex-col gap-10 pb-[166px]">
         <Skeleton className="h-8 w-28" />
         {FILTER_SECTION_SKELETON_KEYS.map((sectionKey) => (
-          <div key={sectionKey} className="space-y-4">
+          <div key={sectionKey} className="space-y-5">
             <Skeleton className="h-6 w-24" />
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {FILTER_OPTION_SKELETON_KEYS.map((optionKey) => (
                 <Skeleton key={`${sectionKey}-${optionKey}`} className="h-5 w-full" />
               ))}

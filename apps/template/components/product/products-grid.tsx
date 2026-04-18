@@ -27,7 +27,7 @@ export async function ProductsGrid({ title, products, locale, collectionUrl }: P
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard
             key={product.id}

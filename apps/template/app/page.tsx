@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { HeroSection } from "@/components/hero-section";
+import { BannerSection } from "@/components/banner-section";
 import { Container } from "@/components/layout/container";
 import { ProductsGrid } from "@/components/product/products-grid";
 import { siteConfig } from "@/lib/config";
@@ -36,7 +36,7 @@ export default async function HomePage() {
       {/* To use a custom hero image, pass a backgroundImage prop:
           backgroundImage: { url: "https://...", alt: "...", width: 1920, height: 1080 }
           or import a local image: import myHero from "@/public/my-hero.jpg" */}
-      <HeroSection
+      <BannerSection
         hero={{
           id: "homepage-hero",
           headline: "Agentic Infrastructure for Commerce",
@@ -47,7 +47,7 @@ export default async function HomePage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-10">
           {featuredProductsResult.products.length > 0 && (
             <ProductsGrid
               title={t("featuredProducts.title")}

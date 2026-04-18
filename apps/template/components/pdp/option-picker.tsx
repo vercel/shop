@@ -23,7 +23,7 @@ export function OptionPicker({
   ...props
 }: OptionPickerProps) {
   return (
-    <div className={cn("space-y-3", className)} {...props}>
+    <div className={cn("space-y-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
         {option.name}: <span className="text-foreground">{selectedValue}</span>
       </p>
@@ -40,7 +40,7 @@ export function OptionPicker({
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "px-4 py-2 text-sm font-medium rounded-lg border transition-all",
+            "px-5 py-2 text-sm font-medium rounded-lg border transition-all",
             isSelected
               ? "border-foreground text-foreground"
               : "border-border text-foreground/50 hover:border-foreground/50",

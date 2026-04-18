@@ -81,7 +81,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   return (
-    <Container className="pt-3 md:pt-8">
+    <Container className="pt-2.5 md:pt-10">
       <FilterTransitionProvider>
         <Suspense fallback={<ResultsSkeleton title={t("title")} />}>
           <SearchContent

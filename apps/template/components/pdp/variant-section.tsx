@@ -58,7 +58,7 @@ export async function VariantSection({
   const allInStock = variants[0]?.availableForSale ?? true;
 
   return (
-    <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
+    <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 space-y-10 lg:space-y-0">
       {needsPartitioning ? (
         <ProductMedia
           otherImages={getSharedImages(images, options, variants)}
@@ -112,7 +112,7 @@ export async function VariantSection({
         />
       )}
 
-      <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
+      <div className="space-y-10 lg:sticky lg:top-20 lg:col-span-5">
         <div data-slot="product-info-header">
           <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
           {uniformPrice ? (

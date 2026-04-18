@@ -9,9 +9,9 @@ export default async function NotFoundError() {
   const t = await getTranslations("common");
 
   return (
-    <Container className="flex flex-col items-center justify-center py-16 text-center lg:py-24">
+    <Container className="flex flex-col items-center justify-center py-10 text-center lg:py-10">
       <div className="mb-6 flex justify-center">
-        <div className="rounded-full bg-muted p-4">
+        <div className="rounded-full bg-muted p-5">
           <FileQuestionIcon className="h-12 w-12 text-muted-foreground" />
         </div>
       </div>

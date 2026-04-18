@@ -26,11 +26,11 @@ export function ColorPicker({
   ...props
 }: ColorPickerProps) {
   return (
-    <div className={cn("space-y-3", className)} {...props}>
+    <div className={cn("space-y-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
         {option.name}: <span className="text-foreground">{selectedValue}</span>
       </p>
-      <div className="grid grid-cols-4 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
 

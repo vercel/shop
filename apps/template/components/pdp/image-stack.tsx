@@ -17,7 +17,7 @@ function ImageStackContent({ images, title, className, ...props }: ImageStackCon
   if (images.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-col gap-3", className)} {...props}>
+    <div className={cn("flex flex-col gap-2.5", className)} {...props}>
       {images.map((image, idx) => (
         <div key={image.url} className="relative aspect-square w-full overflow-hidden ">
           <Image
@@ -37,7 +37,7 @@ function ImageStackContent({ images, title, className, ...props }: ImageStackCon
 
 function Fallback() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Skeleton className="w-full aspect-square " />
       <Skeleton className="w-full aspect-square " />
     </div>

@@ -109,7 +109,7 @@ function SelectPanelContent({
 
 function SelectPanelSection({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="select-panel-section" className={cn("p-6", className)} {...props}>
+    <div data-slot="select-panel-section" className={cn("p-5", className)} {...props}>
       {children}
     </div>
   );
@@ -251,7 +251,7 @@ function SelectPanelRow({
       data-slot="select-panel-row"
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-2 px-6 py-3 bg-input/80 border-t border-border/50",
+        "w-full flex items-center gap-2 px-5 py-2.5 bg-input/80 border-t border-border/50",
         "text-left hover:bg-input transition-colors outline-none focus-visible:bg-input focus-visible:ring-3 focus-visible:ring-ring/50",
         className,
       )}

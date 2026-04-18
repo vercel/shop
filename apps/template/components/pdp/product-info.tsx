@@ -67,7 +67,7 @@ function ProductInfoOptions({
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
-      <div className="space-y-8">
+      <div className="space-y-10">
         {/* Color Pickers (with images or swatches) */}
         {colorOptions.map((colorOption) => (
           <ColorPicker

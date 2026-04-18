@@ -42,7 +42,7 @@ export function FilterSidebarSheet({
       )}
       <SheetContent
         side="left"
-        className="px-6 pt-10 pb-6 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0"
+        className="px-5 pt-10 pb-5 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0"
       >
         <SheetTitle className="sr-only">{label}</SheetTitle>
         {children}

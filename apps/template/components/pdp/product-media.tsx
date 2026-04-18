@@ -120,7 +120,7 @@ function Carousel({
   }, [mediaItems.length]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div
         ref={scrollContainerRef}
         className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 w-[calc(100%+2rem)]"
@@ -201,7 +201,7 @@ function Grid({
 }) {
   return (
     <Lightbox label={title}>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         {children}
         {mediaItems.map((item, idx) => (
           <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />

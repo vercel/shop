@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 function Fallback() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       <Skeleton className="w-full aspect-square " />
       <div className="flex gap-2">
         <Skeleton className="size-16 " />
@@ -30,7 +30,7 @@ function Content({ productPromise }: { productPromise: Promise<ProductDetails> }
   const selectedImage = images[selectedIndex];
 
   return (
-    <div className="@container space-y-3">
+    <div className="@container space-y-2.5">
       {/* Main image */}
       <div className="relative aspect-[4/3] w-full overflow-hidden ">
         <Image

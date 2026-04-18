@@ -3,20 +3,23 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import type { HeroSection as HeroSectionType } from "@/lib/types";
+import type { BannerSection as BannerSectionType } from "@/lib/types";
 import heroDefault from "@/public/hero.jpg";
 
-interface HeroSectionProps {
-  hero: HeroSectionType;
+interface BannerSectionProps {
+  hero: BannerSectionType;
 }
 
-export function HeroSection({ hero }: HeroSectionProps) {
+export function BannerSection({ hero }: BannerSectionProps) {
   const image = hero.backgroundImage ?? heroDefault;
   const isStatic = typeof image === "object" && "src" in image;
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative h-75 sm:h-100 md:h-125 bg-linear-to-b from-black via-neutral-950 to-neutral-900">
+      <div className="relative grid bg-linear-to-b from-black via-neutral-950 to-neutral-900">
+        {/* Aspect-ratio spacer: sets the minimum height */}
+        <div className="col-start-1 row-start-1 aspect-[16/9] md:aspect-[3/1]" />
+
         {isStatic ? (
           <>
             <Image
@@ -46,19 +49,19 @@ export function HeroSection({ hero }: HeroSectionProps) {
           )
         )}
 
-        <div className="absolute inset-0 flex items-center justify-center px-4 lg:px-8">
-          <div className="flex flex-col items-center text-center gap-3">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
+        <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-10 lg:px-10">
+          <div className="flex flex-col items-center text-center gap-2.5">
+            <h1 className="text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
               {hero.headline}
             </h1>
             {hero.subheadline && (
-              <p className="text-sm sm:text-base text-white/90 max-w-xl">{hero.subheadline}</p>
+              <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
             )}
             {hero.ctaText && hero.ctaLink && (
               <Button
                 variant="outline"
                 asChild
-                className="h-11 px-6 border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
+                className="h-11 px-5 border-white text-white bg-transparent hover:bg-white/10 hover:text-white"
               >
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>

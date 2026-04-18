@@ -60,7 +60,7 @@ export function PredictiveSearchPanel({
           aria-label={t("suggestions")}
         >
           {isLoading && !results && (
-            <div className="px-4 py-3">
+            <div className="px-5 py-2.5">
               <LoadingSkeleton />
             </div>
           )}
@@ -109,7 +109,7 @@ export function PredictiveSearchPanel({
               {results.products.length === 0 &&
                 results.collections.length === 0 &&
                 results.queries.length === 0 && (
-                  <div className="px-4 py-3 text-sm text-muted-foreground">
+                  <div className="px-5 py-2.5 text-sm text-muted-foreground">
                     {t("noResults", { query })}
                   </div>
                 )}
@@ -118,7 +118,7 @@ export function PredictiveSearchPanel({
                 <Link
                   href={`/search?q=${encodeURIComponent(query.trim())}`}
                   onClick={onNavigate}
-                  className="block px-4 py-3 text-sm font-medium text-primary hover:bg-accent/50 border-t border-border/30 transition-colors"
+                  className="block px-5 py-2.5 text-sm font-medium text-primary hover:bg-accent/50 border-t border-border/30 transition-colors"
                 >
                   {t("viewAll", { query: query.trim() })}
                 </Link>
@@ -134,7 +134,7 @@ export function PredictiveSearchPanel({
 function SearchSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-border/30 last:border-b-0">
-      <div className="px-4 pt-3 pb-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+      <div className="px-5 pt-2.5 pb-1 text-xs font-medium text-muted-foreground uppercase tracking-wider">
         {title}
       </div>
       <div>{children}</div>
@@ -158,7 +158,7 @@ function SuggestionItem({
       aria-selected={active}
       data-active={active}
       onClick={onClick}
-      className="flex w-full items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors cursor-pointer"
+      className="flex w-full items-center gap-2.5 px-5 py-2 text-sm text-foreground hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors cursor-pointer"
     >
       <Search className="size-3.5 shrink-0 text-muted-foreground" />
       <span
@@ -188,7 +188,7 @@ function ProductItem({
       aria-selected={active}
       data-active={active}
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-2 hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors"
+      className="flex items-center gap-2.5 px-5 py-2 hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors"
     >
       {product.featuredImage ? (
         <Image
@@ -233,7 +233,7 @@ function CollectionItem({
       aria-selected={active}
       data-active={active}
       onClick={onClick}
-      className="flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors"
+      className="flex items-center gap-2.5 px-5 py-2 text-sm text-foreground hover:bg-accent/50 data-[active=true]:bg-accent/50 transition-colors"
     >
       <Tag className="size-3.5 shrink-0 text-muted-foreground" />
       <span className="truncate">{collection.title}</span>
@@ -243,9 +243,9 @@ function CollectionItem({
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
-        <div key={key} className="flex items-center gap-3">
+        <div key={key} className="flex items-center gap-2.5">
           <div className="size-10 rounded-md bg-muted animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3.5 w-3/4 rounded bg-muted animate-pulse" />

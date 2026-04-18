@@ -84,7 +84,7 @@ export const { registry } = defineRegistry(catalog, {
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
-          <div className="border-b bg-muted/50 px-3 py-2">
+          <div className="border-b bg-muted/50 px-2.5 py-2">
             <h4 className="font-medium text-sm">
               Cart ({props.totalQuantity} {props.totalQuantity === 1 ? "item" : "items"})
             </h4>
@@ -93,7 +93,7 @@ export const { registry } = defineRegistry(catalog, {
             {props.items.map((item) => {
               const itemPrice = parsePriceString(item.totalPrice);
               return (
-                <div key={`${item.handle}-${item.options}`} className="flex gap-3 p-3">
+                <div key={`${item.handle}-${item.options}`} className="flex gap-2.5 p-2.5">
                   {item.image ? (
                     <Link href={`/products/${item.handle}`} className="shrink-0">
                       <Image
@@ -129,7 +129,7 @@ export const { registry } = defineRegistry(catalog, {
               );
             })}
           </div>
-          <div className="border-t bg-muted/50 px-3 py-2">
+          <div className="border-t bg-muted/50 px-2.5 py-2">
             <div className="flex justify-between text-muted-foreground text-sm">
               <span>Subtotal</span>
               <Price
@@ -147,10 +147,10 @@ export const { registry } = defineRegistry(catalog, {
               <Price amount={total.amount} currencyCode={total.currencyCode} locale={locale} />
             </div>
           </div>
-          <div className="border-t px-3 py-2">
+          <div className="border-t px-2.5 py-2">
             <a
               href={props.checkoutUrl}
-              className="block w-full rounded-md bg-primary px-4 py-2 text-center font-medium text-primary-foreground text-sm hover:bg-primary/90"
+              className="block w-full rounded-md bg-primary px-5 py-2 text-center font-medium text-primary-foreground text-sm hover:bg-primary/90"
             >
               Checkout
             </a>
@@ -165,11 +165,11 @@ export const { registry } = defineRegistry(catalog, {
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border border-positive/30 bg-positive/5">
-          <div className="flex items-center gap-2 border-b border-positive/30 px-3 py-2">
+          <div className="flex items-center gap-2 border-b border-positive/30 px-2.5 py-2">
             <CheckCircleIcon className="size-4 text-positive" />
             <span className="font-medium text-positive text-sm">Added to cart</span>
           </div>
-          <div className="flex gap-3 p-3">
+          <div className="flex gap-2.5 p-2.5">
             {props.image ? (
               <Link href={`/products/${props.handle}`} className="shrink-0">
                 <Image
@@ -211,7 +211,7 @@ export const { registry } = defineRegistry(catalog, {
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
-          <div className="flex gap-3 border-b p-3">
+          <div className="flex gap-2.5 border-b p-2.5">
             {props.image ? (
               <Link href={`/products/${props.handle}`} className="shrink-0">
                 <Image
@@ -236,7 +236,7 @@ export const { registry } = defineRegistry(catalog, {
             </div>
           </div>
           {props.options.length > 0 && (
-            <div className="space-y-2 border-b p-3">
+            <div className="space-y-2 border-b p-2.5">
               {props.options.map((option) => (
                 <div key={option.name}>
                   <span className="mb-1 block font-medium text-muted-foreground text-xs">
@@ -260,7 +260,7 @@ export const { registry } = defineRegistry(catalog, {
                 <div
                   key={variant.id}
                   className={cn(
-                    "flex items-center justify-between px-3 py-2",
+                    "flex items-center justify-between px-2.5 py-2",
                     !variant.available && "opacity-50",
                   )}
                 >
