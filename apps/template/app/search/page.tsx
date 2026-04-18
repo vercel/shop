@@ -66,7 +66,7 @@ export const unstable_instant = {
   samples: [
     {
       searchParams: {
-        q: "__placeholder__",
+        q: null,
         collection: null,
         sort: null,
         cursor: null,
