@@ -40,7 +40,7 @@ function ProductPageFallback() {
             <Skeleton className="aspect-square w-full" />
           </div>
         </div>
-        <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
+        <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5 lg:pt-4">
           <div>
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-24" />
@@ -111,7 +111,7 @@ export async function ProductDetailPage({
   variantIdPromise: Promise<string | undefined>;
 }) {
   return (
-    <Container className="bg-background pt-0 lg:pt-8">
+    <Container className="bg-background pt-0">
       <Suspense fallback={<ProductPageFallback />}>
         <ProductContent
           productPromise={productPromise}
