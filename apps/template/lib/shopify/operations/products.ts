@@ -233,7 +233,6 @@ export async function getProducts(params: {
   limit?: number;
   cursor?: string;
   filters?: ProductFilter[];
-  _filterCacheKey?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];
@@ -254,6 +253,10 @@ export async function getProducts(params: {
     filters = [],
     locale = defaultLocale,
   } = params;
+
+  if (filters.length > 0) {
+    cacheTag(`filters-${JSON.stringify(filters)}`);
+  }
 
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
@@ -352,7 +355,6 @@ export async function getCollectionProducts(params: {
   sortKey?: string;
   cursor?: string;
   filters?: ProductFilter[];
-  _filterCacheKey?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];
@@ -371,6 +373,10 @@ export async function getCollectionProducts(params: {
     filters = [],
     locale = defaultLocale,
   } = params;
+
+  if (filters.length > 0) {
+    cacheTag(`filters-${JSON.stringify(filters)}`);
+  }
 
   const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
