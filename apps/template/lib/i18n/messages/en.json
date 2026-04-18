@@ -135,14 +135,14 @@
     "pages": "pages",
     "firstPage": "First",
     "nextPage": "Next",
-    "sortBy": "Sort By",
+    "sortBy": "Sort",
     "sortRelevance": "Relevance",
     "sortPriceLow": "Price: Low to High",
     "sortPriceHigh": "Price: High to Low",
     "sortNewest": "Newest"
   },
   "search": {
-    "sortBy": "Sort By",
+    "sortBy": "Sort",
     "category": "Collection",
     "allCategories": "All Collections",
     "filters": "Filters",
