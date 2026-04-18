@@ -31,7 +31,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
 
   return (
     <li
-      className="flex gap-4"
+      className="flex gap-5"
       aria-label={`${item.merchandise.product.title} - ${formatPrice(unitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
@@ -78,7 +78,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             <MinusIcon className="size-3" />
           </Button>
 
-          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-[42px] h-7 px-3 text-xs font-medium text-foreground">
+          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-[42px] h-7 px-2.5 text-xs font-medium text-foreground">
             {quantity}
           </span>
 

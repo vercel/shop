@@ -213,7 +213,7 @@ function AttachmentChips() {
   if (!files.length) return null;
 
   return (
-    <div className="flex w-full flex-wrap gap-1.5 px-3 pb-1.5 pt-2.5">
+    <div className="flex w-full flex-wrap gap-1.5 px-2.5 pb-1.5 pt-2.5">
       {files.map((file) => {
         const imageUrl = typeof file.url === "string" ? file.url : null;
         const isImage = Boolean(file.mediaType?.startsWith("image/") && imageUrl);
@@ -586,7 +586,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             )}
 
             {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-3">
+            <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{t("name")}</span>
                 {t("title") && <span className="text-muted-foreground text-sm">{t("title")}</span>}
@@ -617,7 +617,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
               <Conversation>
                 <ConversationContent>
                   {messages.length === 0 && (
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-2.5">
                       <BotMessageSquareIcon className="size-5 shrink-0 text-primary mt-0.5" />
                       <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
                     </div>
@@ -639,7 +639,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             {/* Input */}
             <PromptInput
               onSubmit={handleSubmit}
-              className="px-4 py-3 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
+              className="px-5 py-2.5 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
               globalDrop
               multiple
             >
@@ -649,7 +649,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 <PromptInputBody>
                   <PromptInputTextarea
                     autoFocus
-                    className="min-h-0 py-3 text-sm"
+                    className="min-h-0 py-2.5 text-sm"
                     onChange={(e) => setInput(e.target.value)}
                     value={input}
                   />

@@ -24,36 +24,36 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 
 function ProductPageFallback() {
   return (
-    <div className="space-y-8">
-      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-4 space-y-8 lg:space-y-0">
+    <div className="space-y-10">
+      <div className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-5 space-y-10 lg:space-y-0">
         <div className="lg:col-span-7">
           {/* Mobile: single full-bleed square + pagination space */}
-          <div className="space-y-4 lg:hidden -mx-4">
+          <div className="space-y-5 lg:hidden -mx-4">
             <Skeleton className="aspect-square w-full" />
             <div className="h-1.5" />
           </div>
           {/* Desktop: 2×2 grid */}
-          <div className="hidden lg:grid grid-cols-2 gap-2">
+          <div className="hidden lg:grid grid-cols-2 gap-2.5">
             <Skeleton className="aspect-square w-full" />
             <Skeleton className="aspect-square w-full" />
             <Skeleton className="aspect-square w-full" />
             <Skeleton className="aspect-square w-full" />
           </div>
         </div>
-        <div className="space-y-8 lg:sticky lg:top-20 lg:col-span-5">
+        <div className="space-y-10 lg:sticky lg:top-20 lg:col-span-5">
           <div>
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-24" />
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <Skeleton className="h-4 w-20" />
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-2.5">
               {["a", "b", "c", "d"].map((k) => (
                 <Skeleton key={k} className="aspect-square" />
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2.5">
             <div className="h-12 rounded-lg bg-shop" />
             <div className="h-12 rounded-lg bg-foreground" />
           </div>
@@ -93,7 +93,7 @@ async function ProductContent({
       />
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      <div className="flex flex-col gap-12">
+      <div className="flex flex-col gap-10">
         <VariantSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
         <Recommendations handle={handle} locale={locale} />
       </div>

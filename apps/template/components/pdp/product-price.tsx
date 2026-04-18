@@ -25,7 +25,7 @@ export function ProductPrice({
       : null;
 
   return (
-    <div className={cn("flex items-center gap-3 flex-wrap", className)} {...props}>
+    <div className={cn("flex items-center gap-2.5 flex-wrap", className)} {...props}>
       <Price amount={amount} currencyCode={currencyCode} locale={locale} className="text-xl" />
       {compareAtAmount && Number(compareAtAmount) > Number(amount) && (
         <Price

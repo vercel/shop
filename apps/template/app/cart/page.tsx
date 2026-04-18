@@ -48,7 +48,7 @@ async function CartContent({ locale }: { locale: Locale }) {
         ) : (
           <>
             <div className="flex min-h-screen overflow-x-clip">
-              <div className="flex-1 min-w-0 px-4 sm:px-6 lg:px-12 xl:px-16 py-8 lg:py-12">
+              <div className="flex-1 min-w-0 px-5 sm:px-5 lg:px-10 xl:px-10 py-10 lg:py-10">
                 <Header locale={locale} />
                 <ItemsSection locale={locale} />
                 <Upsells
@@ -59,14 +59,14 @@ async function CartContent({ locale }: { locale: Locale }) {
 
               <aside className="hidden lg:block shrink-0">
                 <div className="w-95 xl:w-105 2xl:w-120 min-h-full bg-input/50 rounded-tl-3xl shadow-[100vw_0_0_0_rgba(236,236,236,0.5)]">
-                  <div className="sticky top-0 p-8">
+                  <div className="sticky top-0 p-10">
                     <Summary locale={locale} />
                   </div>
                 </div>
               </aside>
             </div>
 
-            <div className="lg:hidden bg-input/50 px-4 py-6">
+            <div className="lg:hidden bg-input/50 px-5 py-5">
               <Summary locale={locale} />
             </div>
           </>

@@ -7,8 +7,8 @@ export function Footer({ locale }: { locale: string }) {
 
   return (
     <footer>
-      <div className="mx-auto px-4 pt-12 pb-22 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="mx-auto px-5 pt-10 pb-22 lg:px-10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
           <p className="text-sm text-muted-foreground leading-5">
             &copy; Vercel Shop. All rights reserved.
           </p>

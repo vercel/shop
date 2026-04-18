@@ -52,7 +52,7 @@ export function BottomBar({ children }: BottomBarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex w-full items-center gap-2 pl-4 pr-1"
+            className="flex w-full items-center gap-2 pl-5 pr-1"
           >
             <BottomBarSearch onClose={closeSearch} />
           </motion.div>
@@ -63,7 +63,7 @@ export function BottomBar({ children }: BottomBarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center gap-1 pl-3 pr-1"
+            className="flex items-center gap-1 pl-2.5 pr-1"
           >
             <button
               type="button"

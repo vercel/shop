@@ -101,7 +101,7 @@ export function SearchClient() {
           name="q"
           role="combobox"
           placeholder={t("searchPlaceholder")}
-          className="w-full h-10 pl-10 pr-4 rounded-full bg-muted border-0 text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
+          className="w-full h-10 pl-10 pr-5 rounded-full bg-muted border-0 text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
           maxLength={100}
           autoComplete="off"
           onChange={(e) => {

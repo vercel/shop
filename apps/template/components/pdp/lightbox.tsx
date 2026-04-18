@@ -26,13 +26,13 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-60 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <DialogPrimitive.Content
-            className="fixed inset-0 z-60 flex items-center justify-center p-8 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+            className="fixed inset-0 z-60 flex items-center justify-center p-10 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             aria-label={`${label} enlarged`}
             onClick={(e) => {
               if (e.target === e.currentTarget) close();
             }}
           >
-            <DialogPrimitive.Close className="pointer-events-auto absolute top-4 right-4 z-10 rounded-full bg-black/50 p-2 text-white transition-opacity hover:opacity-80 focus:ring-2 focus:ring-white focus:outline-hidden">
+            <DialogPrimitive.Close className="pointer-events-auto absolute top-5 right-4 z-10 rounded-full bg-black/50 p-2 text-white transition-opacity hover:opacity-80 focus:ring-2 focus:ring-white focus:outline-hidden">
               <XIcon className="size-5" />
               <span className="sr-only">Close</span>
             </DialogPrimitive.Close>

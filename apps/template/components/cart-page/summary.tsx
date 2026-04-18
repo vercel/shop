@@ -36,7 +36,7 @@ function CheckoutLink({
   }, []);
 
   const baseClassName =
-    "flex items-center justify-between w-full bg-primary text-primary-foreground font-medium py-4 px-6 transition-colors";
+    "flex items-center justify-between w-full bg-primary text-primary-foreground font-medium py-5 px-5 transition-colors";
 
   if (isUpdatingCart || isCheckingOut) {
     return (
@@ -103,9 +103,9 @@ export function Summary({ locale }: SummaryProps) {
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <Card className="overflow-hidden py-0 gap-0">
-        <CardContent className="px-6 pt-6 pb-4 space-y-3">
+        <CardContent className="px-5 pt-5 pb-5 space-y-2.5">
           <h2 className="text-lg font-semibold">{t("orderTotal")}</h2>
 
           <div className="space-y-2">
@@ -123,8 +123,8 @@ export function Summary({ locale }: SummaryProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="flex-col items-stretch gap-4 bg-muted/30 px-6 py-4">
-          <div className="flex items-center gap-3">
+        <CardFooter className="flex-col items-stretch gap-5 bg-muted/30 px-5 py-5">
+          <div className="flex items-center gap-2.5">
             <Switch
               id="gift-toggle"
               checked={optimisticIsGift}

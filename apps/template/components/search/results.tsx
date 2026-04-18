@@ -29,7 +29,7 @@ export function ResultsSkeleton({ title }: { title: string }) {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
       </div>
       <CollectionToolbarSkeleton />
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {RESULTS_SKELETON_KEYS.map((key) => (
           <ProductCardSkeleton key={key} />
         ))}
@@ -96,7 +96,7 @@ export async function SearchResultsGrid({
   return (
     <Suspense
       fallback={
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {RESULTS_SKELETON_KEYS.map((key) => (
             <ProductCardSkeleton key={key} />
           ))}
@@ -128,7 +128,7 @@ async function SearchResultsGridRender({
 
   if (products.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-10">
         <h2 className="text-2xl font-semibold mb-2">{t("noResults")}</h2>
         <p className="text-muted-foreground">
           {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}

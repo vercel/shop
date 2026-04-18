@@ -82,7 +82,7 @@ export function InfiniteProductGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {children}
         {additionalProducts.map((product) => (
           <ClientProductCard
@@ -95,7 +95,7 @@ export function InfiniteProductGrid({
       </div>
 
       {pageInfo.hasNextPage && (
-        <div ref={sentinelRef} className="flex justify-center py-8">
+        <div ref={sentinelRef} className="flex justify-center py-10">
           {isLoading && <LoaderCircleIcon className="size-6 animate-spin text-muted-foreground" />}
         </div>
       )}

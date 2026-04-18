@@ -111,7 +111,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   return (
     <div
       data-slot="product-card-content"
-      className={cn("flex flex-col flex-1 py-3", className)}
+      className={cn("flex flex-col flex-1 py-2.5", className)}
       {...props}
     >
       {children}
@@ -191,7 +191,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
       className={cn("flex flex-col overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="py-3">
+      <div className="py-2.5">
         <div className="h-4 w-full bg-muted rounded animate-pulse" />
         <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
       </div>

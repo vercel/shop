@@ -43,7 +43,7 @@ export function QuantitySelector({
         <NativeSelect
           value={quantity}
           onChange={(e) => onQuantityChange(Number(e.target.value))}
-          className="rounded-full bg-muted border-0 min-w-[70px] h-8 pr-6"
+          className="rounded-full bg-muted border-0 min-w-[70px] h-8 pr-5"
           size="sm"
         >
           {Array.from({ length: max }, (_, i) => i + 1).map((num) => (

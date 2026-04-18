@@ -34,7 +34,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
   const variantText = item.merchandise.selectedOptions.map((opt) => opt.value).join(" / ");
 
   return (
-    <div className="flex gap-6 p-2">
+    <div className="flex gap-5 p-2">
       <Link
         href={`/products/${item.merchandise.product.handle}`}
         className="shrink-0 relative size-30 lg:size-38 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
@@ -48,7 +48,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
         />
       </Link>
 
-      <div className="flex flex-1 justify-between items-start px-2 py-4">
+      <div className="flex flex-1 justify-between items-start px-2 py-5">
         <div className="max-w-[297px]">
           <Link
             href={`/products/${item.merchandise.product.handle}`}
@@ -62,7 +62,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
           {variantText && <p className="mt-1 text-sm font-semibold opacity-30">{variantText}</p>}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -78,7 +78,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
               value={quantity.toString()}
               onValueChange={(value) => updateItemOptimistic(item.id || "", Number(value))}
             >
-              <SelectTrigger className="h-8 w-[70px] rounded-full bg-secondary border-0 px-3 text-sm font-medium shadow-none">
+              <SelectTrigger className="h-8 w-[70px] rounded-full bg-secondary border-0 px-2.5 text-sm font-medium shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

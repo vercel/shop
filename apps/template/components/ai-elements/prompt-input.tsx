@@ -317,7 +317,7 @@ export function PromptInputAttachment({ data, className, ...props }: PromptInput
         </div>
       </HoverCardTrigger>
       <PromptInputHoverCardContent className="w-auto p-2">
-        <div className="w-auto space-y-3">
+        <div className="w-auto space-y-2.5">
           {isImage && (
             <div className="flex max-h-96 w-96 items-center justify-center overflow-hidden rounded-md border">
               <Image
@@ -362,7 +362,7 @@ export function PromptInputAttachments({
   }
 
   return (
-    <div className={cn("flex flex-wrap items-center gap-2 p-3 w-full", className)} {...props}>
+    <div className={cn("flex flex-wrap items-center gap-2 p-2.5 w-full", className)} {...props}>
       {attachments.files.map((file) => (
         <Fragment key={file.id}>{children(file)}</Fragment>
       ))}
@@ -1144,7 +1144,7 @@ export const PromptInputTab = ({ className, ...props }: PromptInputTabProps) => 
 export type PromptInputTabLabelProps = HTMLAttributes<HTMLHeadingElement>;
 
 export const PromptInputTabLabel = ({ className, ...props }: PromptInputTabLabelProps) => (
-  <h3 className={cn("mb-2 px-3 font-medium text-muted-foreground text-xs", className)} {...props} />
+  <h3 className={cn("mb-2 px-2.5 font-medium text-muted-foreground text-xs", className)} {...props} />
 );
 
 export type PromptInputTabBodyProps = HTMLAttributes<HTMLDivElement>;
@@ -1157,7 +1157,7 @@ export type PromptInputTabItemProps = HTMLAttributes<HTMLDivElement>;
 
 export const PromptInputTabItem = ({ className, ...props }: PromptInputTabItemProps) => (
   <div
-    className={cn("flex items-center gap-2 px-3 py-2 text-xs hover:bg-accent", className)}
+    className={cn("flex items-center gap-2 px-2.5 py-2 text-xs hover:bg-accent", className)}
     {...props}
   />
 );

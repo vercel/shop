@@ -27,7 +27,7 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
 
   return (
     <Card className="overflow-hidden py-0 gap-0" aria-label="Order summary">
-      <CardContent className="px-4 pt-4 pb-3 space-y-3">
+      <CardContent className="px-5 pt-5 pb-2.5 space-y-2.5">
         {/* Order Summary Title */}
         <h3 className="text-base font-semibold text-foreground">Order total</h3>
 
@@ -55,7 +55,7 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex-col items-stretch gap-3 bg-muted/30 px-4 py-3">
+      <CardFooter className="flex-col items-stretch gap-2.5 bg-muted/30 px-5 py-2.5">
         {/* Gift Toggle */}
         <div className="flex items-center gap-2">
           <Switch id="gift-toggle" checked={isGift} onCheckedChange={setIsGift} />

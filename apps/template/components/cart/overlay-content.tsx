@@ -87,8 +87,8 @@ export function OverlayContent({ locale }: OverlayContentProps) {
 
   if (!displayCart || displayCart.lines.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
-        <div className="rounded-full bg-muted p-4 mb-4">
+      <div className="flex flex-col items-center justify-center h-full py-10 px-5 text-center">
+        <div className="rounded-full bg-muted p-5 mb-4">
           <svg
             className="size-8 text-muted-foreground"
             fill="none"
@@ -121,25 +121,25 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <header className="px-5 pt-4 md:pt-8 pb-4">
+      <header className="px-5 pt-5 md:pt-10 pb-5">
         <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
       </header>
 
       {/* Items List - Scrollable */}
-      <ul className="flex-1 overflow-y-auto px-5 space-y-4" aria-label={t("cartItemsLabel")}>
+      <ul className="flex-1 overflow-y-auto px-5 space-y-5" aria-label={t("cartItemsLabel")}>
         {displayCart.lines.map((item) => (
           <OverlayItem key={item.id} item={item} locale={locale} />
         ))}
       </ul>
 
       {/* Summary Section */}
-      <footer className="px-5 py-4 space-y-4">
+      <footer className="px-5 py-5 space-y-5">
         <OverlaySummary cart={displayCart} locale={locale} />
 
         {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
-          className="w-full h-12 text-base font-semibold justify-between pl-6 pr-2"
+          className="w-full h-12 text-base font-semibold justify-between pl-5 pr-2"
           size="lg"
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}

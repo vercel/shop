@@ -47,7 +47,7 @@ export default async function HomePage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col gap-10">
           {featuredProductsResult.products.length > 0 && (
             <ProductsGrid
               title={t("featuredProducts.title")}

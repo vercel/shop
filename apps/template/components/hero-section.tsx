@@ -46,8 +46,8 @@ export function HeroSection({ hero }: HeroSectionProps) {
           )
         )}
 
-        <div className="absolute inset-0 flex items-center justify-center px-4 lg:px-8">
-          <div className="flex flex-col items-center text-center gap-3">
+        <div className="absolute inset-0 flex items-center justify-center px-5 lg:px-10">
+          <div className="flex flex-col items-center text-center gap-2.5">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
               {hero.headline}
             </h1>
@@ -58,7 +58,7 @@ export function HeroSection({ hero }: HeroSectionProps) {
               <Button
                 variant="outline"
                 asChild
-                className="h-11 px-6 border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
+                className="h-11 px-5 border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white mt-2"
               >
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>

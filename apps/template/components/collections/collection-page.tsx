@@ -32,7 +32,7 @@ export function CollectionDetailPage({
 
   return (
     <FilterTransitionProvider>
-      <Container className="pt-3 md:pt-8">
+      <Container className="pt-2.5 md:pt-10">
         <CollectionStructuredData
           locale={locale}
           handlePromise={handlePromise}

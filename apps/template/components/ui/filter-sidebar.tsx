@@ -173,7 +173,7 @@ function FilterSectionContent({ className, children, ...props }: React.Component
 
 function FilterOptionList({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="filter-option-list" className={cn("flex flex-col gap-3", className)} {...props}>
+    <div data-slot="filter-option-list" className={cn("flex flex-col gap-2.5", className)} {...props}>
       {children}
     </div>
   );
@@ -271,9 +271,9 @@ function FilterPriceRange({
   ...props
 }: FilterPriceRangeProps) {
   return (
-    <div data-slot="filter-price-range" className={cn("flex flex-col gap-3", className)} {...props}>
+    <div data-slot="filter-price-range" className={cn("flex flex-col gap-2.5", className)} {...props}>
       <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
+        <div className="flex flex-1 items-center rounded-full bg-input px-2.5 h-8">
           <span className="text-sm text-muted-foreground">{currencySymbol}</span>
           <Input
             type="number"
@@ -286,7 +286,7 @@ function FilterPriceRange({
           />
         </div>
         <span className="text-muted-foreground">–</span>
-        <div className="flex flex-1 items-center rounded-full bg-input px-3 h-8">
+        <div className="flex flex-1 items-center rounded-full bg-input px-2.5 h-8">
           <span className="text-sm text-muted-foreground">{currencySymbol}</span>
           <Input
             type="number"
@@ -342,7 +342,7 @@ function FilterSidebarCategories({ className, children, ...props }: React.Compon
   return (
     <div
       data-slot="filter-sidebar-categories"
-      className={cn("flex flex-col gap-3", className)}
+      className={cn("flex flex-col gap-2.5", className)}
       {...props}
     >
       {children}
