@@ -275,7 +275,7 @@ export interface MarketingImage {
   height: number;
 }
 
-export interface HeroSection {
+export interface BannerSection {
   id: string;
   headline: string;
   subheadline: string | null;

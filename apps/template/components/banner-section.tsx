@@ -3,14 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import type { HeroSection as HeroSectionType } from "@/lib/types";
+import type { BannerSection as BannerSectionType } from "@/lib/types";
 import heroDefault from "@/public/hero.jpg";
 
-interface HeroSectionProps {
-  hero: HeroSectionType;
+interface BannerSectionProps {
+  hero: BannerSectionType;
 }
 
-export function HeroSection({ hero }: HeroSectionProps) {
+export function BannerSection({ hero }: BannerSectionProps) {
   const image = hero.backgroundImage ?? heroDefault;
   const isStatic = typeof image === "object" && "src" in image;
 
