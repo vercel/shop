@@ -28,14 +28,17 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
           <DialogPrimitive.Content
             className="fixed inset-0 z-60 flex items-center justify-center p-8 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
             aria-label={`${label} enlarged`}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) close();
+            }}
           >
-            <DialogPrimitive.Close className="absolute top-4 right-4 z-10 rounded-full bg-black/50 p-2 text-white transition-opacity hover:opacity-80 focus:ring-2 focus:ring-white focus:outline-hidden">
+            <DialogPrimitive.Close className="pointer-events-auto absolute top-4 right-4 z-10 rounded-full bg-black/50 p-2 text-white transition-opacity hover:opacity-80 focus:ring-2 focus:ring-white focus:outline-hidden">
               <XIcon className="size-5" />
               <span className="sr-only">Close</span>
             </DialogPrimitive.Close>
 
             {activeItem?.type === "image" && (
-              <div className="relative h-full w-full">
+              <div className="pointer-events-none relative h-full w-full">
                 <Image
                   src={activeItem.image.url}
                   alt={activeItem.image.altText || `${label} enlarged`}
@@ -48,13 +51,15 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             )}
 
             {activeItem?.type === "video" && (
-              <AutoPlayVideo
-                src={activeItem.video.url}
-                previewImage={activeItem.video.previewImage}
-                sizes="90vw"
-                priorityImage
-                className="max-h-full max-w-full object-contain"
-              />
+              <div className="pointer-events-none flex h-full w-full items-center justify-center">
+                <AutoPlayVideo
+                  src={activeItem.video.url}
+                  previewImage={activeItem.video.previewImage}
+                  sizes="90vw"
+                  priorityImage
+                  className="pointer-events-auto max-h-full max-w-full object-contain"
+                />
+              </div>
             )}
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>

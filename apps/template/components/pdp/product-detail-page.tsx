@@ -111,7 +111,7 @@ export async function ProductDetailPage({
   variantIdPromise: Promise<string | undefined>;
 }) {
   return (
-    <Container className="bg-background pt-0 lg:pt-8">
+    <Container className="bg-background pt-0">
       <Suspense fallback={<ProductPageFallback />}>
         <ProductContent
           productPromise={productPromise}
