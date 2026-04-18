@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
     optimisticRouting: true,
     partialFallbacks: true,
     turbopackFileSystemCacheForDev: true,
-    // varyParams: true,
   },
   images: {
     minimumCacheTTL: 31536000,
