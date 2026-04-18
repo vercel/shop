@@ -186,7 +186,11 @@ async function SearchToolbar({
           </FilterPendingScope>
         </FilterSidebarSheet>
       }
-      sortSelect={<CollectionsSortSelect />}
+      sortSelect={
+        <CollectionsSortSelect
+          exclude={["product-name-ascending", "product-name-descending"]}
+        />
+      }
     />
   );
 }

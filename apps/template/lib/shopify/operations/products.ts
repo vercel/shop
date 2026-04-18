@@ -111,14 +111,11 @@ const PRODUCTS_SEARCH_QUERY = `
 `;
 
 // SearchSortKeys only supports PRICE and RELEVANCE.
-// TITLE is not a valid SearchSortKeys value, so name-based sorts fall back to RELEVANCE.
+// Name-based sort options are excluded from the search UI.
 const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "product-name-ascending": { sortKey: "RELEVANCE", reverse: false },
-  "product-name-descending": { sortKey: "RELEVANCE", reverse: false },
-  TITLE: { sortKey: "RELEVANCE", reverse: false },
   PRICE: { sortKey: "PRICE", reverse: false },
   RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
 };

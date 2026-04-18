@@ -29,13 +29,15 @@ On mobile, filters are accessible through a sheet overlay rather than a persiste
 
 ## Sorting
 
-A select dropdown offers five sort options:
+A select dropdown offers sort options. Collection pages support all five:
 
 - Best Matches (default)
 - Price: Low to High
 - Price: High to Low
 - Name: A to Z
 - Name: Z to A
+
+The search page only shows Best Matches and the two price sorts because Shopify's `SearchSortKeys` does not support sorting by title.
 
 Sort changes use `useTransition` for non-blocking navigation. On mobile, the sort control renders as a bottom sheet.
 

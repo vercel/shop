@@ -158,7 +158,7 @@ declare const messages: {
     "noResults": "No products found",
     "noResultsQuery": "We couldn't find any products matching \"{query}\"",
     "noResultsAvailable": "No products available",
-    "resultCount": "{count, plural, one {# Result} other {# Results}}",
+    "resultCount": "{count, plural, one {# Item} other {# Items}}",
     "resultRange": "(showing {start}-{end})",
     "priceUpTo": "up to",
     "title": "All Products",

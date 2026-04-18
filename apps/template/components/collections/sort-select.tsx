@@ -14,13 +14,14 @@ const SORT_OPTIONS = [
   { value: "product-name-descending", key: "nameDescending" },
 ] as const;
 
-export function CollectionsSortSelect() {
+export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tSort = useTranslations("search.sort");
   const tSearch = useTranslations("search");
   const [isPending, startTransition] = useTransition();
 
+  const options = exclude ? SORT_OPTIONS.filter((o) => !exclude.includes(o.value)) : SORT_OPTIONS;
   const currentSort = searchParams.get("sort") || "best-matches";
 
   const handleSortChange = (value: string) => {
@@ -43,7 +44,7 @@ export function CollectionsSortSelect() {
         <span>{tSearch("sortBy")}</span>
       </SelectTrigger>
       <SelectContent>
-        {SORT_OPTIONS.map((option) => (
+        {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {tSort(option.key)}
           </SelectItem>
