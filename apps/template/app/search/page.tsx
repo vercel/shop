@@ -69,7 +69,8 @@ export const unstable_instant = {
         q: null,
         collection: null,
         sort: null,
-        cursor: null,
+        cursor:
+          "eyJwYWdlIjoyLCJsYXN0X2lkIjoxNTkwMzcyMjYzNTY1MSwicmV2ZXJzZSI6dHJ1ZSwib2Zmc2V0Ijo0N30%3D",
         "filter.v.price.gte": null,
         "filter.v.price.lte": null,
       },
