@@ -81,7 +81,6 @@ export const unstable_instant = {
       params: { handle: "__placeholder__" },
       searchParams: {
         sort: null,
-        cursor: null,
         "filter.v.price.gte": null,
         "filter.v.price.lte": null,
       },

@@ -7,14 +7,11 @@ import {
   FilterPendingScope,
   FilterTransitionProvider,
 } from "@/components/collections/filter-pending-context";
-import {
-  MobileFilterSortBar,
-  MobileFilterSortBarSkeleton,
-} from "@/components/collections/mobile-filter-sort-bar";
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
+import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
+import { CollectionToolbar } from "@/components/collections/toolbar";
 import { Container } from "@/components/layout/container";
 import { Results, ResultsSkeleton } from "@/components/search/results";
 import type { Locale } from "@/lib/i18n";
@@ -69,9 +66,6 @@ export const unstable_instant = {
         q: "__placeholder__",
         collection: null,
         sort: null,
-        cursor: null,
-        "filter.v.price.gte": null,
-        "filter.v.price.lte": null,
       },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
@@ -111,7 +105,7 @@ async function SearchContent({
     searchParamsPromise,
     getTranslations("search"),
   ]);
-  const { sort, collection, cursor } = resolvedSearchParams;
+  const { sort, collection } = resolvedSearchParams;
   const q = resolvedSearchParams.q as string | undefined;
   const activeFilters = parseFiltersFromSearchParams(resolvedSearchParams);
 
@@ -124,7 +118,7 @@ async function SearchContent({
         {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
       </div>
 
-      <MobileFilterSortBar
+      <CollectionToolbar
         filterSheet={
           <FilterSidebarSheet
             label={t("filters")}
@@ -155,7 +149,6 @@ async function SearchContent({
         sort={sort as string | undefined}
         collection={collection as string | undefined}
         locale={locale}
-        cursor={cursor as string | undefined}
         activeFilters={activeFilters}
       />
     </>
@@ -178,7 +171,7 @@ async function SearchFilterContent({
     query,
     collection,
     limit: RESULTS_PER_PAGE,
-    filters: shopifyFilters,
+    filtersJson: shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined,
     locale,
   });
 

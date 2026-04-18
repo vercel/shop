@@ -37,8 +37,6 @@ export function CollectionsSortSelect() {
       params.set("sort", value);
     }
 
-    params.delete("cursor");
-
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });

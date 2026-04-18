@@ -8,13 +8,14 @@ import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
 export interface CollectionSearchState {
   activeFilters: Record<string, string | string[] | undefined>;
-  cursor?: string;
   sort?: string;
 }
 
 export interface CollectionResultsData {
   activeFilters: Record<string, string | string[] | undefined>;
-  cursor?: string;
+  collection: string;
+  sort?: string;
+  filtersJson?: string;
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
   transformedFilters: TransformedFilters;
 }
@@ -26,7 +27,6 @@ export async function getCollectionSearchState(
 
   return {
     activeFilters: parseFiltersFromSearchParams(searchParams),
-    cursor: getSingleSearchParam(searchParams.cursor),
     sort: getSingleSearchParam(searchParams.sort),
   };
 }
@@ -40,23 +40,22 @@ export async function getCollectionResultsData({
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const [handle, { activeFilters, cursor, sort }] = await Promise.all([
-    handlePromise,
-    searchStatePromise,
-  ]);
+  const [handle, { activeFilters, sort }] = await Promise.all([handlePromise, searchStatePromise]);
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+  const filtersJson = shopifyFilters.length > 0 ? JSON.stringify(shopifyFilters) : undefined;
   const result = await getCollectionProducts({
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
-    cursor,
-    filters: shopifyFilters,
+    filtersJson,
     locale,
   });
 
   return {
     activeFilters,
-    cursor,
+    collection: handle,
+    sort,
+    filtersJson,
     result,
     transformedFilters: transformShopifyFilters(result.filters, {
       activeFilters,
@@ -65,13 +64,11 @@ export async function getCollectionResultsData({
 }
 
 export function getExactCollectionResultCount({
-  cursor,
   result,
 }: {
-  cursor?: string;
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
 }): number | undefined {
-  if (cursor || result.pageInfo.hasNextPage) {
+  if (result.pageInfo.hasNextPage) {
     return undefined;
   }
 

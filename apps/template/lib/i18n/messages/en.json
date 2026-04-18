@@ -184,7 +184,8 @@
       "goToPage": "Page {page}",
       "first": "First",
       "next": "Next"
-    }
+    },
+    "loadingMore": "Loading more products..."
   },
   "collections": {
     "title": "Collections",

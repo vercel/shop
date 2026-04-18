@@ -217,7 +217,10 @@ export function buildProductFiltersFromParams(
   const min = parsePrice(searchParams["filter.v.price.gte"]);
   const max = parsePrice(searchParams["filter.v.price.lte"]);
   if (min !== undefined || max !== undefined) {
-    filters.push({ price: { min, max } });
+    const priceFilter: { min?: number; max?: number } = {};
+    if (min !== undefined) priceFilter.min = min;
+    if (max !== undefined) priceFilter.max = max;
+    filters.push({ price: priceFilter });
   }
 
   return filters;
@@ -229,7 +232,7 @@ export async function getProducts(params: {
   sortKey?: string;
   limit?: number;
   cursor?: string;
-  filters?: ProductFilter[];
+  filtersJson?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];
@@ -247,9 +250,10 @@ export async function getProducts(params: {
     sortKey: rawSortKey = "best-matches",
     limit = 50,
     cursor,
-    filters = [],
+    filtersJson,
     locale = defaultLocale,
   } = params;
+  const filters: ProductFilter[] = filtersJson ? JSON.parse(filtersJson) : [];
 
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
@@ -347,7 +351,7 @@ export async function getCollectionProducts(params: {
   limit?: number;
   sortKey?: string;
   cursor?: string;
-  filters?: ProductFilter[];
+  filtersJson?: string;
   locale?: string;
 }): Promise<{
   products: ProductCard[];
@@ -363,9 +367,10 @@ export async function getCollectionProducts(params: {
     sortKey: rawSortKey = "best-matches",
     limit = 50,
     cursor,
-    filters = [],
+    filtersJson,
     locale = defaultLocale,
   } = params;
+  const filters: ProductFilter[] = filtersJson ? JSON.parse(filtersJson) : [];
 
   const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);

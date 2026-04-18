@@ -2,46 +2,32 @@ import { SlidersHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import {
-  MobileFilterSortBar,
-  MobileFilterSortBarSkeleton,
-} from "@/components/collections/mobile-filter-sort-bar";
+import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { ProductCardSkeleton } from "@/components/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 
-import type { CollectionResultsData } from "@/lib/collections/server";
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionResultsGrid } from "./results-grid";
+import { CollectionToolbar, CollectionToolbarSkeleton } from "./toolbar";
 
 const FALLBACK_SKELETON_KEYS = Array.from(
-  { length: 12 },
+  { length: 15 },
   (_, index) => `collection-section-skeleton-${index}`,
 );
 
 function Fallback() {
   return (
     <>
-      <MobileFilterSortBarSkeleton />
-      <div className="flex flex-col md:flex-row gap-8">
-        <aside className="hidden md:block w-64 shrink-0">
-          <CollectionFilterSidebarSkeleton />
-        </aside>
-        <div className="flex-1">
-          <div className="mb-6 hidden md:flex md:items-center md:justify-between">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-5 w-24" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
-            {FALLBACK_SKELETON_KEYS.map((key) => (
-              <ProductCardSkeleton key={key} />
-            ))}
-          </div>
-        </div>
+      <CollectionToolbarSkeleton />
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {FALLBACK_SKELETON_KEYS.map((key) => (
+          <ProductCardSkeleton key={key} />
+        ))}
       </div>
     </>
   );
@@ -58,7 +44,7 @@ async function Render({
 
   return (
     <>
-      <MobileFilterSortBar
+      <CollectionToolbar
         filterSheet={
           <FilterSidebarSheet
             label={tSearch("filters")}
@@ -77,22 +63,12 @@ async function Render({
         sortSelect={<CollectionsSortSelect />}
       />
 
-      <div className="flex flex-col md:flex-row gap-8">
-        <aside className="hidden md:block w-64 shrink-0">
-          <FilterPendingScope>
-            <CollectionFilters collectionResultsDataPromise={collectionResultsDataPromise} />
-          </FilterPendingScope>
-        </aside>
-
-        <div className="flex-1">
-          <FilterPendingScope>
-            <CollectionResultsGrid
-              locale={locale}
-              collectionResultsDataPromise={collectionResultsDataPromise}
-            />
-          </FilterPendingScope>
-        </div>
-      </div>
+      <FilterPendingScope>
+        <CollectionResultsGrid
+          locale={locale}
+          collectionResultsDataPromise={collectionResultsDataPromise}
+        />
+      </FilterPendingScope>
     </>
   );
 }

@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/layout/container";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 
