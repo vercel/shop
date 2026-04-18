@@ -111,7 +111,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   return (
     <div
       data-slot="product-card-content"
-      className={cn("flex flex-col flex-1 py-3", className)}
+      className={cn("flex items-baseline gap-2 py-3", className)}
       {...props}
     >
       {children}
@@ -123,7 +123,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
   return (
     <h3
       data-slot="product-card-title"
-      className={cn("text-base font-semibold text-main-foreground line-clamp-2", className)}
+      className={cn("text-sm font-medium text-main-foreground truncate min-w-0 flex-1", className)}
       {...props}
     >
       {children}
@@ -160,13 +160,13 @@ function ProductCardPrice({
   const discountPercent = getDiscountPercent(priceNum, compareAtNum);
 
   return (
-    <div data-slot="product-card-price" className={cn(className)}>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+    <div data-slot="product-card-price" className={cn("shrink-0", className)}>
+      <div className="flex items-center gap-1.5">
         <Price
           amount={amount}
           currencyCode={currencyCode}
           locale={locale}
-          className="text-base text-main-foreground"
+          className="text-sm text-muted-foreground"
         />
         {discountPercent && compareAtAmount && compareAtCurrencyCode && (
           <>
@@ -174,7 +174,7 @@ function ProductCardPrice({
               amount={compareAtAmount}
               currencyCode={compareAtCurrencyCode}
               locale={locale}
-              className="text-sm text-muted-foreground line-through"
+              className="text-xs text-muted-foreground/60 line-through"
             />
             <DiscountBadge percent={discountPercent} variant={discountVariant} />
           </>
@@ -191,10 +191,9 @@ function ProductCardSkeleton({ className }: { className?: string }) {
       className={cn("flex flex-col overflow-hidden", className)}
     >
       <div className="aspect-square bg-muted animate-pulse" />
-      <div className="py-3 h-18 box-content">
-        <div className="h-4 w-full bg-muted rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-muted rounded animate-pulse mt-2" />
-        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
+      <div className="flex items-baseline gap-2 py-3">
+        <div className="h-4 flex-1 bg-muted rounded animate-pulse" />
+        <div className="h-4 w-12 bg-muted rounded animate-pulse shrink-0" />
       </div>
     </div>
   );
