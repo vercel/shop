@@ -267,74 +267,43 @@ function FilterPriceRange({
   onApply,
   currencySymbol = "$",
   className,
-  children,
   ...props
 }: FilterPriceRangeProps) {
   return (
-    <div data-slot="filter-price-range" className={cn("flex flex-col gap-2.5", className)} {...props}>
-      <div className="flex items-center gap-2">
-        <div className="flex flex-1 items-center rounded-full bg-input px-2.5 h-8">
-          <span className="text-sm text-muted-foreground">{currencySymbol}</span>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="From"
-            value={minValue}
-            onChange={(e) => onMinChange?.(e.target.value)}
-            className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          />
-        </div>
-        <span className="text-muted-foreground">–</span>
-        <div className="flex flex-1 items-center rounded-full bg-input px-2.5 h-8">
-          <span className="text-sm text-muted-foreground">{currencySymbol}</span>
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="To"
-            value={maxValue}
-            onChange={(e) => onMaxChange?.(e.target.value)}
-            className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={() => onApply?.(minValue, maxValue)}
-          className="flex size-8 items-center justify-center rounded-full bg-foreground text-background transition-colors hover:bg-foreground/90"
-        >
-          <CheckIcon className="size-4" />
-        </button>
+    <div data-slot="filter-price-range" className={cn("flex items-center gap-2", className)} {...props}>
+      <div className="flex flex-1 items-center rounded-lg bg-input px-2.5 h-8">
+        <span className="text-sm text-muted-foreground">{currencySymbol}</span>
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="From"
+          value={minValue}
+          onChange={(e) => onMinChange?.(e.target.value)}
+          className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
       </div>
-      {children}
+      <span className="text-muted-foreground">–</span>
+      <div className="flex flex-1 items-center rounded-lg bg-input px-2.5 h-8">
+        <span className="text-sm text-muted-foreground">{currencySymbol}</span>
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="To"
+          value={maxValue}
+          onChange={(e) => onMaxChange?.(e.target.value)}
+          className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={() => onApply?.(minValue, maxValue)}
+        className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background transition-colors hover:bg-foreground/90"
+      >
+        <CheckIcon className="size-4" />
+      </button>
     </div>
-  );
-}
-
-interface FilterPricePresetProps extends React.ComponentProps<"button"> {
-  selected?: boolean;
-}
-
-function FilterPricePreset({
-  selected = false,
-  className,
-  children,
-  ...props
-}: FilterPricePresetProps) {
-  return (
-    <button
-      type="button"
-      data-slot="filter-price-preset"
-      data-selected={selected}
-      className={cn(
-        "text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-        "data-[selected=true]:font-medium",
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -443,7 +412,6 @@ export {
   FilterOptionList,
   FilterOption,
   FilterPriceRange,
-  FilterPricePreset,
   FilterSidebarCategories,
   FilterSidebarCategoryBack,
   FilterSidebarCategoryItem,
