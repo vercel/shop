@@ -8,7 +8,7 @@ import { Header } from "@/components/cart-page/header";
 import { CartItemsList } from "@/components/cart-page/cart-items-list";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
-import { RelatedProductsSection } from "@/components/pdp/related-products-section";
+import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { CartContextSync } from "@/components/cart/context-sync";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -52,12 +52,10 @@ async function CartContent({ locale }: { locale: Locale }) {
                 <Header locale={locale} />
                 <CartItemsList locale={locale} />
                 {cart.lines[0]?.merchandise.product.handle ? (
-                  <div className="mt-12 pt-10 border-t border-border">
-                    <RelatedProductsSection
-                      handle={cart.lines[0].merchandise.product.handle}
-                      locale={locale}
-                    />
-                  </div>
+                  <RelatedProductsSection
+                    handle={cart.lines[0].merchandise.product.handle}
+                    locale={locale}
+                  />
                 ) : null}
               </div>
 
