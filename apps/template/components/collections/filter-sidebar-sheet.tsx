@@ -44,13 +44,13 @@ export function FilterSidebarSheet({
         side="left"
         className="gap-0 px-5 pb-5 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0 [&_[data-slot=filter-sidebar-header]]:hidden"
       >
-        <div className="flex h-16 shrink-0 items-center">
-          <SheetTitle className="text-lg font-semibold">
-            {label}
-            {activeCount !== undefined && activeCount > 0 && (
-              <span className="ml-1">({activeCount})</span>
-            )}
-          </SheetTitle>
+        <div className="flex h-16 shrink-0 items-center gap-2">
+          <SheetTitle className="text-lg font-semibold">{label}</SheetTitle>
+          {activeCount !== undefined && activeCount > 0 && (
+            <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+              {activeCount}
+            </span>
+          )}
         </div>
         {children}
       </SheetContent>
