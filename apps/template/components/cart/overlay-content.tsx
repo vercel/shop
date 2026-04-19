@@ -120,11 +120,6 @@ export function OverlayContent({ locale }: OverlayContentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <header className="px-5 pt-5 md:pt-10 pb-5">
-        <h2 className="text-2xl font-bold text-foreground">{t("title")}</h2>
-      </header>
-
       {/* Items List - Scrollable */}
       <ul className="flex-1 overflow-y-auto px-5 space-y-5" aria-label={t("cartItemsLabel")}>
         {displayCart.lines.map((item) => (
