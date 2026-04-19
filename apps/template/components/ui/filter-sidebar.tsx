@@ -139,7 +139,7 @@ function FilterBadge({
 
 function FilterSection({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="filter-section" className={cn("flex flex-col gap-5", className)} {...props}>
+    <div data-slot="filter-section" className={cn("flex flex-col gap-2.5", className)} {...props}>
       {children}
     </div>
   );
