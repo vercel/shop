@@ -1,25 +1,27 @@
-import { FileQuestionIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/container";
-import { Button } from "@/components/ui/button";
 
 export default async function NotFoundError() {
   const t = await getTranslations("common");
 
   return (
-    <Container className="flex flex-col items-center justify-center py-10 text-center lg:py-10">
-      <div className="mb-6 flex justify-center">
-        <div className="rounded-full bg-muted p-5">
-          <FileQuestionIcon className="h-12 w-12 text-muted-foreground" />
-        </div>
+    <Container className="flex flex-1 flex-col items-center justify-center py-10 text-center lg:py-10">
+      <div className="flex flex-col items-center text-center gap-2.5">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+          {t("notFound")}
+        </h1>
+        <p className="text-sm md:text-base text-muted-foreground max-w-xl">
+          {t("notFoundDesc")}
+        </p>
+        <Link
+          href="/search"
+          className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+        >
+          {t("continueShopping")}
+        </Link>
       </div>
-      <h1 className="mb-2 text-2xl font-semibold tracking-tight lg:text-3xl">{t("notFound")}</h1>
-      <p className="mb-8 max-w-md text-muted-foreground">{t("notFoundDesc")}</p>
-      <Button asChild>
-        <Link href="/">{t("goHome")}</Link>
-      </Button>
     </Container>
   );
 }
