@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
-import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { ProductCardSkeleton } from "@/components/product-card";
 import {

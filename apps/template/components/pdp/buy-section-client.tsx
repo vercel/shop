@@ -104,7 +104,7 @@ function Content({
                 ) : (
                   <>
                     <span className="text-sm font-medium">{t("buyWithShop")}</span>
-                    <ShopLogo className="h-[18px] w-auto" />
+                    <ShopLogo className="h-4.5 w-auto" />
                   </>
                 )}
               </button>
