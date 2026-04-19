@@ -415,7 +415,7 @@ export function variantToOptimisticInfo(
     productTitle: product.title,
     productHandle: product.handle,
     price: variant.price,
-    image: variant.image ||
+    image: (variant.image?.url ? variant.image : null) ||
       product.featuredImage || {
         url: "",
         altText: product.title,
