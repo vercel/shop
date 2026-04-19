@@ -42,9 +42,16 @@ export function FilterSidebarSheet({
       )}
       <SheetContent
         side="left"
-        className="px-5 pt-10 pb-5 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0"
+        className="gap-0 px-5 pb-5 overflow-y-auto [&_[data-slot=filter-sidebar-scroll-fade]]:hidden [&_[data-slot=filter-sidebar]]:overflow-y-visible [&_[data-slot=filter-sidebar]>div]:!pb-0 [&_[data-slot=filter-sidebar-header]]:hidden"
       >
-        <SheetTitle className="sr-only">{label}</SheetTitle>
+        <div className="flex h-16 shrink-0 items-center">
+          <SheetTitle className="text-lg font-semibold">
+            {label}
+            {activeCount !== undefined && activeCount > 0 && (
+              <span className="ml-1">({activeCount})</span>
+            )}
+          </SheetTitle>
+        </div>
         {children}
       </SheetContent>
     </Sheet>

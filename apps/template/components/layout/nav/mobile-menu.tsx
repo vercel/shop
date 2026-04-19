@@ -21,15 +21,17 @@ export function MobileMenu() {
           <Menu className="size-5" />
         </button>
       </SheetTrigger>
-      <SheetContent side="left">
-        <SheetTitle className="sr-only">Navigation</SheetTitle>
-        <nav className="mt-14 flex flex-col gap-2 px-2.5 pb-5">
+      <SheetContent side="left" className="gap-0">
+        <div className="flex h-16 items-center px-5">
+          <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+        </div>
+        <nav className="flex flex-col gap-2.5 px-5">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="rounded-md px-2.5 py-3.5 text-lg font-medium transition-colors hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none"
+              className="text-base transition-colors hover:text-muted-foreground"
             >
               {link.label}
             </Link>

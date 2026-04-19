@@ -123,7 +123,7 @@ function Carousel({
     <div className="space-y-5">
       <div
         ref={scrollContainerRef}
-        className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-4 w-[calc(100%+2rem)]"
+        className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-5 w-[calc(100%+2.5rem)]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
