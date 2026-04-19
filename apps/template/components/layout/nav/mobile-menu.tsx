@@ -22,16 +22,16 @@ export function MobileMenu() {
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="gap-0">
-        <div className="px-5 pt-5">
+        <div className="flex items-center justify-between px-5 pt-4 pr-12">
           <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
         </div>
-        <nav className="flex flex-col px-2.5">
+        <nav className="flex flex-col px-5 pt-2.5">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="rounded-md px-2.5 py-2.5 text-lg font-medium transition-colors hover:bg-secondary focus-visible:bg-secondary focus-visible:outline-none"
+              className="text-lg font-medium transition-colors hover:text-muted-foreground"
             >
               {link.label}
             </Link>
