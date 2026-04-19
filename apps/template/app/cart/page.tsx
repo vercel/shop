@@ -9,6 +9,7 @@ import { CartItemsList } from "@/components/cart-page/cart-items-list";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
+import { Container } from "@/components/layout/container";
 import { CartContextSync } from "@/components/cart/context-sync";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -29,7 +30,7 @@ export default async function CartPage() {
   const locale = await getLocale();
 
   return (
-    <main className="min-h-screen">
+    <main>
       <Suspense fallback={<PageSkeleton />}>
         <CartContent locale={locale} />
       </Suspense>
@@ -46,32 +47,25 @@ async function CartContent({ locale }: { locale: Locale }) {
         {!cart || cart.totalQuantity === 0 ? (
           <Empty />
         ) : (
-          <>
-            <div className="flex min-h-screen overflow-x-clip">
-              <div className="flex-1 min-w-0 px-5 sm:px-5 lg:px-10 xl:px-10 py-10 lg:py-10">
-                <Header locale={locale} />
+          <Container>
+            <Header locale={locale} />
+            <div className="lg:grid lg:grid-cols-12 lg:gap-10">
+              <div className="lg:col-span-9">
                 <CartItemsList locale={locale} />
-                {cart.lines[0]?.merchandise.product.handle ? (
-                  <RelatedProductsSection
-                    handle={cart.lines[0].merchandise.product.handle}
-                    locale={locale}
-                  />
-                ) : null}
               </div>
-
-              <aside className="hidden lg:block shrink-0">
-                <div className="w-95 xl:w-105 2xl:w-120 min-h-full bg-input/50 rounded-tl-3xl shadow-[100vw_0_0_0_rgba(236,236,236,0.5)]">
-                  <div className="sticky top-0 p-10">
-                    <Summary locale={locale} />
-                  </div>
+              <aside className="lg:col-span-3 mt-10 lg:mt-0">
+                <div className="lg:sticky lg:top-20">
+                  <Summary locale={locale} />
                 </div>
               </aside>
             </div>
-
-            <div className="lg:hidden bg-input/50 px-5 py-5">
-              <Summary locale={locale} />
-            </div>
-          </>
+            {cart.lines[0]?.merchandise.product.handle ? (
+              <RelatedProductsSection
+                handle={cart.lines[0].merchandise.product.handle}
+                locale={locale}
+              />
+            ) : null}
+          </Container>
         )}
       </CartContextSync>
     </NextIntlClientProvider>
