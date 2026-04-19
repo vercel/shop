@@ -73,30 +73,14 @@ export function OverlayContent({ locale }: OverlayContentProps) {
 
   if (!displayCart || displayCart.lines.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-10 px-5 text-center">
-        <div className="rounded-full bg-muted p-5 mb-4">
-          <svg
-            className="size-8 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <title>{t("shoppingBagTitle")}</title>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-1">{t("empty")}</h3>
-        <p className="text-sm text-muted-foreground mb-6">{t("startAdding")}</p>
+      <div className="flex flex-col items-center justify-center h-full px-5 text-center">
+        <h3 className="text-2xl font-semibold tracking-tighter mb-6">{t("empty")}</h3>
         <Button
           onClick={() => {
             setOverlayOpen(false);
             router.push("/");
           }}
+          className="h-12 px-8 bg-foreground text-background hover:bg-foreground/90"
         >
           {t("continueShopping")}
         </Button>
