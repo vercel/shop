@@ -6,11 +6,11 @@ import { useCartRender } from "@/components/cart/context-sync";
 
 import { ItemRow } from "./item-row";
 
-interface ItemsSectionProps {
+interface CartItemsListProps {
   locale: string;
 }
 
-export function ItemsSection({ locale }: ItemsSectionProps) {
+export function CartItemsList({ locale }: CartItemsListProps) {
   const cart = useCartRender();
   const t = useTranslations("cart");
   const lines = cart?.lines ?? [];

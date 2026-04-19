@@ -5,10 +5,10 @@ import { Suspense } from "react";
 
 import { Empty } from "@/components/cart-page/empty-cart";
 import { Header } from "@/components/cart-page/header";
-import { ItemsSection } from "@/components/cart-page/items-section";
+import { CartItemsList } from "@/components/cart-page/cart-items-list";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
-import { Upsells } from "@/components/cart-page/upsell-recommendations";
+import { CartRelatedProductsSection } from "@/components/cart-page/cart-related-products-section";
 import { CartContextSync } from "@/components/cart/context-sync";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -50,8 +50,8 @@ async function CartContent({ locale }: { locale: Locale }) {
             <div className="flex min-h-screen overflow-x-clip">
               <div className="flex-1 min-w-0 px-5 sm:px-5 lg:px-10 xl:px-10 py-10 lg:py-10">
                 <Header locale={locale} />
-                <ItemsSection locale={locale} />
-                <Upsells
+                <CartItemsList locale={locale} />
+                <CartRelatedProductsSection
                   locale={locale}
                   firstItemHandle={cart.lines[0]?.merchandise.product.handle}
                 />

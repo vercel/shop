@@ -6,12 +6,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
-interface UpsellsProps {
+interface CartRelatedProductsSectionProps {
   locale: Locale;
   firstItemHandle?: string;
 }
 
-async function UpsellsContent({ locale, firstItemHandle }: UpsellsProps) {
+async function CartRelatedProductsSectionContent({ locale, firstItemHandle }: CartRelatedProductsSectionProps) {
   const t = await getTranslations("cart.upsell");
 
   if (!firstItemHandle) {
@@ -34,7 +34,7 @@ async function UpsellsContent({ locale, firstItemHandle }: UpsellsProps) {
   );
 }
 
-export function Upsells({ locale, firstItemHandle }: UpsellsProps) {
+export function CartRelatedProductsSection({ locale, firstItemHandle }: CartRelatedProductsSectionProps) {
   return (
     <Suspense
       fallback={
@@ -52,7 +52,7 @@ export function Upsells({ locale, firstItemHandle }: UpsellsProps) {
         </div>
       }
     >
-      <UpsellsContent locale={locale} firstItemHandle={firstItemHandle} />
+      <CartRelatedProductsSectionContent locale={locale} firstItemHandle={firstItemHandle} />
     </Suspense>
   );
 }
