@@ -152,8 +152,8 @@ function ScrollCarouselContent({ className, children, ...props }: React.Componen
       className={cn(
         "grid grid-flow-col gap-5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory scrollbar-hide",
         "relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 scroll-px-5",
-        "sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 sm:scroll-px-0",
-        "lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)] 2xl:auto-cols-[calc((100%-4rem)/5)] 3xl:auto-cols-[calc((100%-5rem)/6)] 4xl:auto-cols-[calc((100%-7rem)/8)]",
+        "sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1.25rem)/2)] sm:px-0 sm:scroll-px-0",
+        "lg:auto-cols-[calc((100%-2.5rem)/3)] xl:auto-cols-[calc((100%-3.75rem)/4)] 2xl:auto-cols-[calc((100%-5rem)/5)] 3xl:auto-cols-[calc((100%-6.25rem)/6)] 4xl:auto-cols-[calc((100%-8.75rem)/8)]",
         className,
       )}
       {...props}
