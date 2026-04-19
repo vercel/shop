@@ -1,10 +1,8 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-export function Empty() {
-  const t = useTranslations("cart");
+export async function Empty() {
+  const t = await getTranslations("cart");
 
   return (
     <div className="flex flex-col items-center justify-center py-10 lg:py-10 px-5">

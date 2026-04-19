@@ -237,9 +237,10 @@ declare const messages: {
     }
   },
   "common": {
-    "notFound": "Not Found",
-    "notFoundDesc": "The page you are looking for does not exist.",
+    "notFound": "Page Not Found",
+    "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "goHome": "Go back to the home page",
+    "continueShopping": "Continue Shopping",
     "error": "Something went wrong",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "tryAgain": "Try again"
