@@ -48,7 +48,7 @@ async function CartContent({ locale }: { locale: Locale }) {
           <Empty />
         ) : (
           <Container>
-            <Header locale={locale} />
+            <Header />
             <div className="lg:grid lg:grid-cols-12 lg:gap-10">
               <div className="lg:col-span-9">
                 <CartItemsList locale={locale} />

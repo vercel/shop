@@ -2,15 +2,12 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
-import { Switch } from "@/components/ui/switch";
-import { prepareCheckoutAction, updateCartNoteAction } from "@/lib/cart/action";
+import { prepareCheckoutAction } from "@/lib/cart/action";
 import { cn, formatPrice } from "@/lib/utils";
-
-const GIFT_NOTE_MARKER = "🎁 This is a gift";
 
 function CheckoutLink({
   checkoutUrl,
@@ -69,23 +66,8 @@ interface SummaryProps {
 
 export function Summary({ locale }: SummaryProps) {
   const t = useTranslations("cart");
-  const { setCart, isUpdatingCart } = useCart();
+  const { isUpdatingCart } = useCart();
   const cart = useCartRender();
-  const [isPending, startTransition] = useTransition();
-
-  const isGiftFromNote = cart?.note?.includes(GIFT_NOTE_MARKER) ?? false;
-  const [optimisticIsGift, setOptimisticIsGift] = useOptimistic(isGiftFromNote);
-
-  function handleGiftToggle(checked: boolean) {
-    setOptimisticIsGift(checked);
-    startTransition(async () => {
-      const newNote = checked ? GIFT_NOTE_MARKER : "";
-      const result = await updateCartNoteAction(newNote);
-      if (result.success && result.cart) {
-        setCart(result.cart);
-      }
-    });
-  }
 
   if (!cart) return null;
 
@@ -105,18 +87,6 @@ export function Summary({ locale }: SummaryProps) {
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
-
-        <div className="flex items-center gap-2.5 mt-5">
-          <Switch
-            id="gift-toggle"
-            checked={optimisticIsGift}
-            onCheckedChange={handleGiftToggle}
-            disabled={isPending}
-          />
-          <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
-            {t("isThisAGift")}
-          </label>
-        </div>
       </div>
 
       <CheckoutLink
