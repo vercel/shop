@@ -78,7 +78,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
               value={quantity.toString()}
               onValueChange={(value) => updateItemOptimistic(item.id || "", Number(value))}
             >
-              <SelectTrigger className="h-8 w-[70px] rounded-full bg-secondary border-0 px-2.5 text-sm font-medium shadow-none">
+              <SelectTrigger className="h-8 w-17.5 rounded-full bg-secondary border-0 px-2.5 text-sm font-medium shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

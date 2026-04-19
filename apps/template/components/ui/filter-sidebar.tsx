@@ -48,7 +48,7 @@ function FilterSidebarHeader({
       className={cn("flex items-center gap-2", className)}
       {...props}
     >
-      <h2 className="text-xl font-medium tracking-tight text-foreground">
+      <h2 className="text-xl font-semibold tracking-tight text-foreground">
         {title}
         {activeCount !== undefined && activeCount > 0 && (
           <span className="ml-1">({activeCount})</span>
@@ -392,7 +392,7 @@ function FilterSidebarScrollFade({ className, ...props }: React.ComponentProps<"
     <div
       data-slot="filter-sidebar-scroll-fade"
       className={cn(
-        "pointer-events-none absolute inset-x-0 bottom-0 h-[166px] bg-gradient-to-t from-background to-transparent",
+        "pointer-events-none absolute inset-x-0 bottom-0 h-41.5 bg-gradient-to-t from-background to-transparent",
         className,
       )}
       {...props}

@@ -15,7 +15,7 @@ export default async function NotFoundError() {
           <FileQuestionIcon className="h-12 w-12 text-muted-foreground" />
         </div>
       </div>
-      <h1 className="mb-2 text-2xl font-medium lg:text-3xl">{t("notFound")}</h1>
+      <h1 className="mb-2 text-2xl font-semibold tracking-tight lg:text-3xl">{t("notFound")}</h1>
       <p className="mb-8 max-w-md text-muted-foreground">{t("notFoundDesc")}</p>
       <Button asChild>
         <Link href="/">{t("goHome")}</Link>

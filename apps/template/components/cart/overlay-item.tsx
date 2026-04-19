@@ -78,7 +78,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             <MinusIcon className="size-3" />
           </Button>
 
-          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-[42px] h-7 px-2.5 text-xs font-medium text-foreground">
+          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-10.5 h-7 px-2.5 text-xs font-medium text-foreground">
             {quantity}
           </span>
 

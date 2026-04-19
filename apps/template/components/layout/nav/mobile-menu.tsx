@@ -1,6 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,6 +13,7 @@ const links = [
 ];
 
 export function MobileMenu() {
+  const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
 
   return (
@@ -23,7 +25,7 @@ export function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="left" className="gap-0">
         <div className="flex h-16 items-center px-5">
-          <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
+          <SheetTitle className="text-lg font-semibold">{t("menu")}</SheetTitle>
         </div>
         <nav className="flex flex-col gap-2.5 px-5">
           {links.map((link) => (

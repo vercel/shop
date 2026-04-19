@@ -78,6 +78,7 @@ export const { registry } = defineRegistry(catalog, {
 
     AgentCartSummary: ({ props }) => {
       const locale = useLocale();
+      const tCart = useTranslations("cart");
       const subtotal = parsePriceString(props.subtotal);
       const tax = parsePriceString(props.tax);
       const total = parsePriceString(props.total);
@@ -150,9 +151,9 @@ export const { registry } = defineRegistry(catalog, {
           <div className="border-t px-2.5 py-2">
             <a
               href={props.checkoutUrl}
-              className="block w-full rounded-md bg-primary px-5 py-2 text-center font-medium text-primary-foreground text-sm hover:bg-primary/90"
+              className="block w-full rounded-lg bg-foreground px-5 py-2 text-center font-medium text-background text-sm hover:bg-foreground/90"
             >
-              Checkout
+              {tCart("checkout")}
             </a>
           </div>
         </div>
@@ -161,13 +162,14 @@ export const { registry } = defineRegistry(catalog, {
 
     AgentCartConfirmation: ({ props }) => {
       const locale = useLocale();
+      const tCart = useTranslations("cart");
       const price = parsePriceString(props.price);
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border border-positive/30 bg-positive/5">
           <div className="flex items-center gap-2 border-b border-positive/30 px-2.5 py-2">
             <CheckCircleIcon className="size-4 text-positive" />
-            <span className="font-medium text-positive text-sm">Added to cart</span>
+            <span className="font-medium text-positive text-sm">{tCart("addedToCart")}</span>
           </div>
           <div className="flex gap-2.5 p-2.5">
             {props.image ? (

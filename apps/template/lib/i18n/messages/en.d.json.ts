@@ -34,7 +34,8 @@ declare const messages: {
       "suggestions": "Suggestions",
       "noResults": "No results for \"{query}\"",
       "viewAll": "View all results for \"{query}\""
-    }
+    },
+    "menu": "Menu"
   },
   "product": {
     "addToCart": "Add to Cart",
@@ -256,7 +257,9 @@ declare const messages: {
     "emptyDescription": "Looks like you haven't added anything yet. Let's explore our products and find something great!",
     "continueShopping": "Continue Shopping",
     "addToCart": "Add to Cart",
+    "addedToCart": "Added to cart",
     "adding": "Adding...",
+    "checkout": "Checkout",
     "removeItem": "Remove item",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity",
