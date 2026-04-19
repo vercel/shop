@@ -197,7 +197,7 @@ export function CollectionFilterSidebarClient({
 
   return (
     <FilterSidebar>
-      <div className="flex flex-col gap-10 pb-[166px]">
+      <div className="flex flex-col gap-5 pb-[166px]">
         <FilterSidebarHeader
           title={tSearch("filters")}
           resetLabel={tSearch("reset")}
