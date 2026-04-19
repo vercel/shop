@@ -34,7 +34,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
   const variantText = item.merchandise.selectedOptions.map((opt) => opt.value).join(" / ");
 
   return (
-    <div className="flex gap-5 p-2">
+    <div className="flex gap-2.5 p-2">
       <Link
         href={`/products/${item.merchandise.product.handle}`}
         className="shrink-0 relative size-30 lg:size-38 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
@@ -49,7 +49,7 @@ export function ItemRow({ item, locale }: ItemRowProps) {
       </Link>
 
       <div className="flex flex-1 justify-between items-start px-2 py-5">
-        <div className="max-w-[297px]">
+        <div className="flex-1 min-w-0">
           <Link
             href={`/products/${item.merchandise.product.handle}`}
             className="block hover:opacity-70 transition-opacity"

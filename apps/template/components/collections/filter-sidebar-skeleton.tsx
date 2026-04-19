@@ -13,7 +13,7 @@ const FILTER_OPTION_SKELETON_KEYS = Array.from(
 export function CollectionFilterSidebarSkeleton() {
   return (
     <FilterSidebar>
-      <div className="flex flex-col gap-10 pb-[166px]">
+      <div className="flex flex-col gap-5 pb-[166px]">
         <Skeleton className="h-8 w-28" />
         {FILTER_SECTION_SKELETON_KEYS.map((sectionKey) => (
           <div key={sectionKey} className="space-y-5">
