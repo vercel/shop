@@ -669,15 +669,15 @@ The mobile megamenu requires the shadcn `Accordion` component. If it doesn't exi
 npx shadcn@latest add accordion
 ```
 
-### C8. Add Browse toggle to the bottom bar
+### C8. Add Browse toggle to the action bar
 
-The bottom bar (`components/layout/bottom-bar.tsx`) should include a Browse button that toggles the megamenu on mobile. Add:
+The action bar (`components/layout/action-bar.tsx`) should include a Browse button that toggles the megamenu on mobile. Add:
 
 1. Import `MenuTriggerIcon` from `./nav/megamenu/menu-trigger-icon` and `X` from `lucide-react`
 2. Add state: `const [menuOpen, setMenuOpen] = useState(false)`
 3. Add BroadcastChannel listener for `"megamenu"` close events (in a `useEffect`)
 4. Add a `toggleMenu` function that posts `{ type: "toggle" }` on the `"megamenu"` BroadcastChannel
-5. Add the toggle button before the search button in the bottom bar:
+5. Add the toggle button before the search button in the action bar:
 
 ```tsx
 <button

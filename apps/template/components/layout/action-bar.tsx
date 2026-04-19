@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
-import { BottomBarSearch } from "./bottom-bar-search";
+import { ActionBarSearch } from "./action-bar-search";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 
@@ -17,11 +17,11 @@ function vibrate(): void {
   }
 }
 
-interface BottomBarProps {
+interface ActionBarProps {
   children?: ReactNode;
 }
 
-export function BottomBar({ children }: BottomBarProps) {
+export function ActionBar({ children }: ActionBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   function openSearch() {
@@ -54,7 +54,7 @@ export function BottomBar({ children }: BottomBarProps) {
             transition={{ duration: 0.2 }}
             className="flex w-full items-center gap-2 pl-5 pr-1"
           >
-            <BottomBarSearch onClose={closeSearch} />
+            <ActionBarSearch onClose={closeSearch} />
           </motion.div>
         ) : (
           <motion.div

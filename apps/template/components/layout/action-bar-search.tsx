@@ -10,11 +10,11 @@ import { usePredictiveSearch } from "@/hooks/use-predictive-search";
 
 import { PredictiveSearchPanel } from "./predictive-search-results";
 
-interface BottomBarSearchProps {
+interface ActionBarSearchProps {
   onClose: () => void;
 }
 
-export function BottomBarSearch({ onClose }: BottomBarSearchProps) {
+export function ActionBarSearch({ onClose }: ActionBarSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const locale = useLocale();

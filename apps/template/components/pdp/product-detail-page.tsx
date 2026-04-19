@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { Container } from "@/components/layout/container";
-import { Recommendations } from "@/components/pdp/recommendations";
+import { RelatedProductsSection } from "@/components/pdp/related-products-section";
 import { ProductSchema } from "@/components/pdp/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +9,7 @@ import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
 
-import { VariantSection } from "./variant-section";
+import { ProductDetailSection } from "./product-detail-section";
 
 function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: string }) {
   return (
@@ -94,8 +94,8 @@ async function ProductContent({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="flex flex-col gap-10">
-        <VariantSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
-        <Recommendations handle={handle} locale={locale} />
+        <ProductDetailSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
+        <RelatedProductsSection handle={handle} locale={locale} />
       </div>
     </>
   );
