@@ -30,7 +30,7 @@ export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
       <span className="relative">
         <HandbagIcon className="size-5" />
         {quantity > 0 && (
-          <Badge className="absolute -top-2 -right-1 size-4 p-0 text-[10px] leading-none flex items-center justify-center">
+          <Badge className="absolute -top-2 -right-1 size-4 p-0 text-xxs leading-none flex items-center justify-center">
             {quantity}
           </Badge>
         )}
