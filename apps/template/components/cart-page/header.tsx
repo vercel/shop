@@ -3,31 +3,20 @@
 import { useTranslations } from "next-intl";
 
 import { useCartRender } from "@/components/cart/context-sync";
-import { formatPrice } from "@/lib/utils";
 
-interface HeaderProps {
-  locale: string;
-}
-
-export function Header({ locale }: HeaderProps) {
+export function Header() {
   const t = useTranslations("cart");
   const cart = useCartRender();
-
-  if (!cart) return null;
-
-  const subtotal = cart.lines.reduce(
-    (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
-    0,
-  );
-  const itemCount = cart.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const formattedTotal = formatPrice(subtotal, cart.cost.subtotalAmount.currencyCode, locale);
+  const count = cart?.totalQuantity ?? 0;
 
   return (
-    <h1 className="text-3xl font-semibold tracking-tight mb-8 lg:mb-12">
-      <span>
-        {t("cartTotalIs")} {formattedTotal}
-      </span>
-      <span className="opacity-30 ml-2">({t("itemCount", { count: itemCount })})</span>
-    </h1>
+    <div className="flex items-center gap-2.5 mb-8 lg:mb-12">
+      <h1 className="text-3xl font-semibold tracking-tight">{t("shoppingCart")}</h1>
+      {count > 0 && (
+        <span className="flex size-7 items-center justify-center rounded-full bg-foreground text-sm text-background">
+          {count}
+        </span>
+      )}
+    </div>
   );
 }
