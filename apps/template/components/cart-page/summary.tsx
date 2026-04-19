@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowRightIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { prepareCheckoutAction, updateCartNoteAction } from "@/lib/cart/action";
 import { cn, formatPrice } from "@/lib/utils";
@@ -36,7 +35,7 @@ function CheckoutLink({
   }, []);
 
   const baseClassName =
-    "flex items-center justify-between w-full bg-primary text-primary-foreground font-medium py-5 px-5 transition-colors";
+    "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-foreground text-background transition-colors";
 
   if (isUpdatingCart || isCheckingOut) {
     return (
@@ -45,7 +44,6 @@ function CheckoutLink({
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
           <span>{isCheckingOut ? checkoutText : updatingText}</span>
         </span>
-        <span className="size-8" />
       </span>
     );
   }
@@ -53,7 +51,7 @@ function CheckoutLink({
   return (
     <button
       type="button"
-      className={cn(baseClassName, "hover:bg-primary/90 cursor-pointer")}
+      className={cn(baseClassName, "hover:bg-foreground/90 cursor-pointer")}
       onClick={async () => {
         setIsCheckingOut(true);
         const { checkoutUrl: url } = await prepareCheckoutAction();
@@ -61,9 +59,6 @@ function CheckoutLink({
       }}
     >
       <span>{checkoutText}</span>
-      <span className="flex items-center justify-center size-8 rounded-full bg-white/20">
-        <ArrowRightIcon className="size-4" />
-      </span>
     </button>
   );
 }
@@ -98,45 +93,31 @@ export function Summary({ locale }: SummaryProps) {
     (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
     0,
   );
-  const itemCount = cart.lines.reduce((sum, line) => sum + line.quantity, 0);
-  const tax = cart.cost.totalTaxAmount ? parseFloat(cart.cost.totalTaxAmount.amount) : 0;
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
   return (
     <div className="space-y-5">
-      <Card className="overflow-hidden py-0 gap-0">
-        <CardContent className="px-5 pt-5 pb-5 space-y-2.5">
-          <h2 className="text-lg font-semibold">{t("orderTotal")}</h2>
+      <div>
+        <div className="flex items-baseline justify-between">
+          <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
+          <span className="text-xl font-medium text-foreground">
+            {formatPrice(subtotal, currencyCode, locale)}
+          </span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
 
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">
-                {t("items")} ({itemCount})
-              </span>
-              <span>{formatPrice(subtotal, currencyCode, locale)}</span>
-            </div>
-
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{t("estimatedTax")}</span>
-              <span>{formatPrice(tax, currencyCode, locale)}</span>
-            </div>
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex-col items-stretch gap-5 bg-muted/30 px-5 py-5">
-          <div className="flex items-center gap-2.5">
-            <Switch
-              id="gift-toggle"
-              checked={optimisticIsGift}
-              onCheckedChange={handleGiftToggle}
-              disabled={isPending}
-            />
-            <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
-              {t("isThisAGift")}
-            </label>
-          </div>
-        </CardFooter>
-      </Card>
+        <div className="flex items-center gap-2.5 mt-5">
+          <Switch
+            id="gift-toggle"
+            checked={optimisticIsGift}
+            onCheckedChange={handleGiftToggle}
+            disabled={isPending}
+          />
+          <label htmlFor="gift-toggle" className="text-sm font-medium cursor-pointer">
+            {t("isThisAGift")}
+          </label>
+        </div>
+      </div>
 
       <CheckoutLink
         checkoutUrl={cart.checkoutUrl}

@@ -1,8 +1,7 @@
 "use client";
 
-import { ArrowRightIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -27,36 +26,23 @@ function CheckoutButtonContent({
   const t = useTranslations("cart");
   if (isCheckingOut) {
     return (
-      <>
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span>{t("redirecting")}</span>
-        </span>
-        <span className="size-8" />
-      </>
+      <span className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <span>{t("redirecting")}</span>
+      </span>
     );
   }
 
   if (isUpdatingCart) {
     return (
-      <>
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span>{t("updatingCart")}</span>
-        </span>
-        <span className="size-8" />
-      </>
+      <span className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <span>{t("updatingCart")}</span>
+      </span>
     );
   }
 
-  return (
-    <>
-      <span>{t("completeCheckout")}</span>
-      <span className="flex items-center justify-center size-8 rounded-full bg-background text-primary">
-        <ArrowRightIcon className="size-4" />
-      </span>
-    </>
-  );
+  return <span>{t("completeCheckout")}</span>;
 }
 
 export function OverlayContent({ locale }: OverlayContentProps) {
@@ -134,22 +120,12 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
-          className="w-full h-12 text-base font-semibold justify-between pl-5 pr-2"
-          size="lg"
+          className="w-full h-12 justify-center bg-foreground text-background hover:bg-foreground/90"
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}
         >
           <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />
         </Button>
-
-        {/* View Full Cart Link */}
-        <Link
-          href="/cart"
-          onClick={() => setOverlayOpen(false)}
-          className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4"
-        >
-          {t("viewFullCart")}
-        </Link>
       </footer>
     </div>
   );
