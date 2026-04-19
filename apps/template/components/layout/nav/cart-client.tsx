@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { Badge } from "@/components/ui/badge";
 import type { Cart } from "@/lib/types";
 
 export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
@@ -30,9 +29,9 @@ export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
       <span className="relative">
         <HandbagIcon className="size-5" />
         {quantity > 0 && (
-          <Badge className="absolute -top-2 -right-1 size-4 p-0 text-xxs leading-none flex items-center justify-center">
+          <span className="absolute -top-2 -right-1 flex size-4 items-center justify-center rounded-full bg-foreground text-xxs leading-none text-background">
             {quantity}
-          </Badge>
+          </span>
         )}
       </span>
       <span className="sr-only">{t("cart")}</span>
