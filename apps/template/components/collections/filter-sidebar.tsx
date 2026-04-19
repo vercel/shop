@@ -12,7 +12,6 @@ import {
   FilterBadge,
   FilterOption,
   FilterOptionList,
-  FilterPricePreset,
   FilterPriceRange,
   FilterSection,
   FilterSectionContent,
@@ -32,13 +31,6 @@ interface CollectionFilterSidebarClientProps {
 }
 
 type FilterState = Record<string, string | string[] | undefined>;
-
-const PRICE_PRESETS = [
-  { label: "Under $50", min: 0, max: 50 },
-  { label: "$50 - $100", min: 50, max: 100 },
-  { label: "$100 - $200", min: 100, max: 200 },
-  { label: "Over $200", min: 200, max: undefined },
-];
 
 function formatPriceRangeLabel(min: number | null, max: number | null): string {
   if (min !== null && max !== null) {
@@ -178,12 +170,6 @@ export function CollectionFilterSidebarClient({
     });
   };
 
-  const applyPricePreset = (min: number, max: number | undefined) => {
-    setMinInput(min.toString());
-    setMaxInput(max?.toString() ?? "");
-    applyPriceRange(min.toString(), max?.toString() ?? "");
-  };
-
   const removePriceRange = () => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("filter.v.price.gte");
@@ -248,27 +234,7 @@ export function CollectionFilterSidebarClient({
                 onMinChange={setMinInput}
                 onMaxChange={setMaxInput}
                 onApply={applyPriceRange}
-              >
-                <FilterOptionList>
-                  {PRICE_PRESETS.map((preset) => {
-                    const isSelected =
-                      urlPriceMin === preset.min &&
-                      (preset.max === undefined
-                        ? urlPriceMax === null
-                        : urlPriceMax === preset.max);
-
-                    return (
-                      <FilterPricePreset
-                        key={preset.label}
-                        selected={isSelected}
-                        onClick={() => applyPricePreset(preset.min, preset.max)}
-                      >
-                        {preset.label}
-                      </FilterPricePreset>
-                    );
-                  })}
-                </FilterOptionList>
-              </FilterPriceRange>
+              />
             </FilterSectionContent>
           </FilterSection>
         )}
