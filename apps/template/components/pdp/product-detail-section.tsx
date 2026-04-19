@@ -29,7 +29,7 @@ import type {
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export async function VariantSection({
+export async function ProductDetailSection({
   product,
   locale,
   variantIdPromise,

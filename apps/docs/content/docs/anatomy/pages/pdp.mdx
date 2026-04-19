@@ -91,11 +91,11 @@ The buy section includes stock status and two action buttons:
 
 A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity.
 
-## Recommendations
+## Related Products
 
-Below the product details, a `Recommendations` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
+Below the product details, a `RelatedProductsSection` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
 
-Recommendations display as a horizontally scrollable carousel of product cards using the same `ProductsCarousel` component as the homepage. On mobile, cards are ~7/12 viewport width and scroll full-bleed. On desktop, the carousel shows 3-4+ columns with chevron navigation.
+Related products display as a horizontally scrollable carousel of product cards using the same `ProductsCarousel` component as the homepage. On mobile, cards are ~7/12 viewport width and scroll full-bleed. On desktop, the carousel shows 3-4+ columns with chevron navigation.
 
 ## Layout
 

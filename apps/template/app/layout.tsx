@@ -8,7 +8,7 @@ import { Suspense } from "react";
 import { AgentButton } from "@/components/agent/agent-button";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
-import { BottomBar } from "@/components/layout/bottom-bar";
+import { ActionBar } from "@/components/layout/action-bar";
 import { Footer } from "@/components/layout/footer";
 import { Nav } from "@/components/layout/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
@@ -57,7 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlayWithAddress locale={locale} />
             </Suspense>
             <Suspense>
-              <BottomBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</BottomBar>
+              <ActionBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
