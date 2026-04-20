@@ -9,5 +9,5 @@ async function getTimestamp() {
 
 export async function CachedTimestamp() {
   const timestamp = await getTimestamp();
-  return <span className="text-xs text-muted-foreground">{timestamp}</span>;
+  return <span className="text-sm">{timestamp}</span>;
 }
