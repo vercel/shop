@@ -1,15 +1,15 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { BuyButtons } from "@/components/pdp/buy-buttons";
-import { ProductInfoDescription, ProductInfoOptions } from "@/components/pdp/product-info";
+import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { ProductInfoDescription, ProductInfoOptions } from "@/components/product-detail/product-info";
 import {
   ColorImageCarouselItems,
   ColorImageGrid,
   ProductMedia,
-} from "@/components/pdp/product-media";
-import { ProductPrice } from "@/components/pdp/product-price";
-import { ShopLogo } from "@/components/pdp/shop-logo";
+} from "@/components/product-detail/product-media";
+import { ProductPrice } from "@/components/product-detail/product-price";
+import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import {

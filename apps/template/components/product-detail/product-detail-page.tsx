@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
-import { ProductSchema } from "@/components/pdp/schema";
+import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
