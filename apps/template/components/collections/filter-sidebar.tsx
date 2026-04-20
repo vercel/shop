@@ -20,7 +20,7 @@ import {
   FilterSidebarActiveFilters,
   FilterSidebarHeader,
   FilterSidebarScrollFade,
-} from "@/components/ui/filter-sidebar";
+} from "./filter-primitives";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
 

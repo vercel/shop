@@ -8,13 +8,13 @@ import Link from "next/link";
 
 import { Price } from "@/components/product/price";
 import {
-  ProductCard,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
   ProductCardPrice,
+  ProductCardRoot as ProductCard,
   ProductCardTitle,
-} from "@/components/ui/product-card";
+} from "@/components/product-card";
 import { catalog } from "@/lib/agent/ui/catalog";
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";

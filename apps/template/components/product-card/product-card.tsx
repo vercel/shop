@@ -10,8 +10,8 @@ import {
   ProductCard as ProductCardRoot,
   ProductCardSkeleton,
   ProductCardTitle,
-} from "@/components/ui/product-card";
-import { ProductCardQuickAdd } from "@/components/ui/product-card-quick-add";
+} from "./primitives";
+import { ProductCardQuickAdd } from "./quick-add";
 import type { Locale } from "@/lib/i18n";
 import { productCardToOptimisticInfo } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";

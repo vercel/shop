@@ -10,10 +10,10 @@ import {
   ProductCardImage,
   ProductCardImageContainer,
   ProductCardPrice,
-  ProductCard as ProductCardRoot,
+  ProductCardQuickAdd,
+  ProductCardRoot,
   ProductCardTitle,
-} from "@/components/ui/product-card";
-import { ProductCardQuickAdd } from "@/components/ui/product-card-quick-add";
+} from "@/components/product-card";
 import { productCardToOptimisticInfo } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
 

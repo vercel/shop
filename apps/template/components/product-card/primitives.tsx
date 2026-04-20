@@ -2,8 +2,8 @@ import Image from "next/image";
 import type * as React from "react";
 
 import { Price } from "@/components/product/price";
-import { DiscountBadge } from "@/components/ui/discount-badge";
-import { ProductCardSlideshow } from "@/components/ui/product-card-slideshow";
+import { DiscountBadge } from "@/components/product/discount-badge";
+import { ProductCardSlideshow } from "./slideshow";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
