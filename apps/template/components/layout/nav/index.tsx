@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CachedTimestamp } from "./cached-timestamp";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
@@ -19,6 +20,9 @@ export function Nav({ locale }: { locale: string }) {
         </Link>
 
         <QuickLinks />
+        <Suspense>
+          <CachedTimestamp />
+        </Suspense>
 
         <div className="flex items-center gap-5 ml-auto">
           <Suspense fallback={<CartIconFallback />}>
