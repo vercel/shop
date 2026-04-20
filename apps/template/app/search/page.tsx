@@ -13,7 +13,7 @@ import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-shee
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { CollectionToolbar, CollectionToolbarSkeleton } from "@/components/collections/toolbar";
-import { Container } from "@/components/layout/container";
+import { Container } from "@/components/ui/container";
 import {
   type SearchResultsData,
   ResultsSkeleton,

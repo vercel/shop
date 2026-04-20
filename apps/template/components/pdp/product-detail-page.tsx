@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { Container } from "@/components/layout/container";
+import { Container } from "@/components/ui/container";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { ProductSchema } from "@/components/pdp/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";

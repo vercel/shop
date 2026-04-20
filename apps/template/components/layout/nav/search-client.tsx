@@ -7,7 +7,7 @@ import { startTransition, useRef, useState } from "react";
 
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
 
-import { PredictiveSearchPanel } from "../predictive-search-results";
+import { PredictiveSearchPanel } from "../action-bar/predictive-search-results";
 
 export function SearchClient() {
   const router = useRouter();
