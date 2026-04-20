@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { BannerSection } from "@/components/banner-section";
-import { Container } from "@/components/layout/container";
+import { BannerSection } from "@/components/sections/banner-section";
+import { Container } from "@/components/ui/container";
 import { ProductsGrid } from "@/components/product/products-grid";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";

@@ -9,7 +9,7 @@ import { CartItemsList } from "@/components/cart-page/cart-items-list";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
-import { Container } from "@/components/layout/container";
+import { Container } from "@/components/ui/container";
 import { CartContextSync } from "@/components/cart/context-sync";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { Container } from "@/components/layout/container";
+import { Container } from "@/components/ui/container";
 
 export const metadata: Metadata = {
   title: "About",

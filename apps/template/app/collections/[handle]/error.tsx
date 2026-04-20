@@ -1,6 +1,6 @@
 "use client";
 
-import { ErrorBoundaryContent } from "@/components/error-boundary-content";
+import { ErrorBoundaryContent } from "@/components/ui/error-boundary-content";
 
 export default function CollectionError({
   reset,

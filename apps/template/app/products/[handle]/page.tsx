@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ProductDetailPage } from "@/components/pdp/product-detail-page";
+import { ProductDetailPage } from "@/components/product-detail/product-detail-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getProduct, getProducts } from "@/lib/shopify/operations/products";
