@@ -2,7 +2,7 @@ import Image from "next/image";
 import type * as React from "react";
 
 import { Price } from "@/components/product/price";
-import { DiscountBadge } from "@/components/ui/discount-badge";
+import { DiscountBadge } from "@/components/product/discount-badge";
 import { ProductCardSlideshow } from "./slideshow";
 import { cn } from "@/lib/utils";
 
