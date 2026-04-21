@@ -21,7 +21,7 @@
     "@types/react-dom": "19.2.3",
     "ai": "6.0.168",
     "babel-plugin-react-compiler": "1.0.0",
-    "better-auth": "^1.6.6",
+    "better-auth": "1.6.6",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
