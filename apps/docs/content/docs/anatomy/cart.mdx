@@ -37,7 +37,7 @@ Each cart line tracks a request ID that increments on every mutation. When a ser
 
 ## Server actions
 
-All cart mutations are defined in `actions.ts` with `"use server"`:
+All cart mutations are defined in `lib/cart/action.ts` with `"use server"`:
 
 - `addToCartAction()` - adds line items and returns the updated cart
 - `updateCartQuantityAction()` - validates quantity (1–99) and updates the line
@@ -59,7 +59,14 @@ Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect opt
 
 ## Cart page
 
-The full cart page at `/cart` renders a two-column layout on large screens: items on the left, a sticky summary sidebar on the right. Below the items, an upsell section shows product recommendations. When the cart is empty, a continue-shopping prompt replaces the items list.
+The full cart page at `/cart` uses a 12-column grid layout on large screens: 9 columns for the items list and 3 columns for a sticky summary sidebar. The page is wrapped in a `Suspense` boundary with a skeleton fallback. Components live in the `components/cart-page/` directory:
+
+- `Header` - page title with item count badge
+- `CartItemsList` - renders cart line items (reuses `OverlayItem` from the overlay)
+- `Summary` - order subtotal, taxes/shipping note, and checkout button
+- `Empty` - a server component shown when the cart has no items
+
+Below the items, a `RelatedProductsSection` shows product recommendations based on the first cart item. When the cart is empty, the `Empty` component replaces the entire grid.
 
 ## Shopify integration
 
@@ -72,13 +79,18 @@ The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's Graph
 | File | Purpose |
 |------|---------|
 | `components/cart/context.tsx` | Cart state, optimistic updates, debouncing |
-| `components/cart/actions.ts` | Server actions for cart mutations |
 | `components/cart/overlay.tsx` | Cart drawer (mobile) and sheet (desktop) |
 | `components/cart/overlay-content.tsx` | Cart overlay content and layout |
-| `components/cart/overlay-item.tsx` | Individual cart line item UI |
+| `components/cart/overlay-item.tsx` | Individual cart line item UI (shared with cart page) |
+| `components/cart/overlay-summary.tsx` | Overlay summary with estimated total |
 | `components/cart/context-sync.tsx` | Server-to-client cart initialization |
-| `components/product/add-to-cart.tsx` | Product page add-to-cart server wrapper |
-| `components/product/client.tsx` | Add-to-cart client with quantity selector |
+| `components/cart-page/header.tsx` | Cart page header with item count badge |
+| `components/cart-page/cart-items-list.tsx` | Full page cart items list |
+| `components/cart-page/summary.tsx` | Cart page summary sidebar with checkout button |
+| `components/cart-page/empty-cart.tsx` | Empty cart state (server component) |
+| `components/cart-page/skeletons.tsx` | Loading skeleton for cart page |
 | `app/cart/page.tsx` | Full cart page route |
+| `lib/cart/action.ts` | Server actions for cart mutations |
+| `lib/cart/server.ts` | `invalidateCartCache()` utility |
 | `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations |
 | `lib/shopify/transforms/cart.ts` | Shopify response to domain type transform |

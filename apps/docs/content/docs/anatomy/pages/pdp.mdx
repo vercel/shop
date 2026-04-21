@@ -10,7 +10,7 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP uses a canary rendering strategy via `unstable_instant` with `experimental.partialFallbacks`:
+The PDP uses a rendering strategy combining `unstable_instant`, `unstable_prefetch`, and `experimental.partialFallbacks`:
 
 ```ts
 // next.config.ts
@@ -20,18 +20,19 @@ experimental: {
 
 // app/products/[handle]/page.tsx
 export const unstable_instant = {
-  prefetch: "runtime",
   samples: [
     {
-      params: { handle: "sample-product" },
+      params: { handle: "__placeholder__" },
       searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
 };
+
+export const unstable_prefetch = "force-runtime";
 ```
 
-`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` with `prefetch: "runtime"` tells Next.js to prefetch the dynamic data at request time rather than statically. The `samples` array provides representative parameters so the framework can pre-render the static shell at build time.
+`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` provides `samples` with representative parameters so the framework can pre-render the static shell at build time. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
 
 ## Variant selection
 
@@ -56,7 +57,7 @@ On the server, `computeInitialSelectedOptions()` matches the numeric variant ID 
 - The page is fully server-rendered with zero layout shift
 - Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
 
-The `getVariantUrl()` helper in `variants.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
+The `getVariantUrl()` helper in `lib/product/index.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
 
 Unavailable options render as inert `<span>` elements instead of links.
 
@@ -72,7 +73,7 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. The `getImagesForSelectedColor()` function in `variants.ts`:
+When a product has color variants, the gallery shows only images relevant to the selected color. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
 
 1. Identifies the color option via swatch data or option name
 2. Collects variant images assigned to each color
@@ -116,14 +117,18 @@ The page emits two JSON-LD schemas:
 
 | File | Purpose |
 |------|---------|
-| `components/product/pdp/product-detail-page.tsx` | Server component entry point, computes variant state and threads props |
-| `components/product/pdp/variants.ts` | Variant resolution, URL generation, image filtering |
-| `components/product/pdp/color-picker.tsx` | Color swatch Links with variant images |
-| `components/product/pdp/option-picker.tsx` | Text option Links (size, material, etc.) |
-| `components/product/pdp/product-info.tsx` | Header, options, and description composition |
-| `components/product/pdp/product-media.tsx` | Responsive image gallery (carousel on mobile, grid with lightbox on desktop) |
-| `components/product/pdp/buy-buttons.tsx` | Buy with Shop + add to cart buttons |
-| `components/product/pdp/shop-logo.tsx` | Shop wordmark SVG for the Buy with Shop button |
-| `app/products/[handle]/page.tsx` | Base product route |
-| `app/products/[handle]/[variantId]/page.tsx` | Variant-specific route |
-| `next.config.ts` | `?variantId` → route segment rewrite |
+| `app/products/[handle]/page.tsx` | Product route, metadata, and rendering config |
+| `components/product-detail/product-detail-page.tsx` | Server component entry point, fetches related products and emits structured data |
+| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with Suspense boundaries |
+| `components/product-detail/color-picker.tsx` | Color swatch Links with variant images |
+| `components/product-detail/option-picker.tsx` | Text option Links (size, material, etc.) |
+| `components/product-detail/product-info.tsx` | Header, options, and description composition (exports `ProductInfoHeader`, `ProductInfoOptions`, `ProductInfoDescription`) |
+| `components/product-detail/product-media.tsx` | Responsive image gallery (carousel on mobile, grid with lightbox on desktop) |
+| `components/product-detail/lightbox.tsx` | Full-screen image viewer with click-outside to close |
+| `components/product-detail/product-price.tsx` | Price display with discount badge, handles variant-specific pricing |
+| `components/product-detail/buy-buttons.tsx` | Buy with Shop + add to cart buttons |
+| `components/product-detail/auto-play-video.tsx` | Inline video player with preview image fallback |
+| `components/product-detail/about-item.tsx` | Product description rendered from HTML |
+| `components/product-detail/schema.tsx` | JSON-LD Product and Breadcrumb structured data |
+| `components/product-detail/shop-logo.tsx` | Shop wordmark SVG for the Buy with Shop button |
+| `lib/product/index.ts` | Variant resolution, URL generation, image partitioning, pricing/stock helpers |

@@ -6,7 +6,7 @@ type: guide
 
 <HomeBrowser />
 
-The home page is a server component that renders a hero banner, a featured products carousel, and an informational section. Product data is fetched server-side from Shopify.
+The home page is a server component that renders a hero banner and a featured products grid. Product data is fetched server-side from Shopify.
 
 ## Hero section
 
@@ -14,35 +14,32 @@ A full-width banner with a background image, gradient overlay, headline, subhead
 
 By default the hero uses a statically imported image from `public/hero.jpg`, which enables automatic blur placeholders and prevents layout shift. To use a custom image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`) or a remote URL object (`{ url: "https://...", alt: "...", width: 1920, height: 1080 }`).
 
-The headline and CTA are configurable through the `HeroSection` type. By default the CTA links to `/search` to browse the catalog.
+The headline and CTA are configurable through the `BannerSection` component's `hero` prop. By default the CTA links to `/search` to browse the catalog.
 
 On mobile, the subheadline and CTA text are hidden to keep the banner compact.
 
-## Featured products carousel
+## Featured products grid
 
-A horizontally scrollable carousel showing up to 10 products fetched via `getProducts()`. Each item is a product card with:
+A responsive grid showing up to 8 products fetched via `getProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a product card with:
 
 - Featured image with hover slideshow — on desktop, hovering the image area reveals a CSS snap-scroll slideshow starting at the second image with chevron navigation (up to 5 images fetched per product card, variant-specific color images are excluded)
 - Out-of-stock overlay when unavailable
 - Title and price (with compare-at price for discounts)
 - Quick-add button for in-stock items
 
-The carousel uses CSS snap scrolling with chevron navigation arrows on desktop. On mobile, cards are approximately 7/12 of the viewport width and scroll full-bleed past the viewport edge. Items per view scale with screen size: ~1.7 on mobile, 2 on small screens, 3 on tablet, 4 on desktop, 5+ on wide screens. Navigation arrows are hidden on mobile.
-
-## Information section
-
-A two-column grid (stacked on mobile) with a heading and descriptive prose. This is static content explaining the template's capabilities.
+The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. The `ProductsCarousel` component is also available for a horizontally scrollable layout (used on the PDP for related products).
 
 ## Data fetching
 
-Products are fetched server-side with `getProducts({ limit: 10, locale })`, which queries the Shopify Storefront API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
+Products are fetched server-side with `getProducts({ limit: 8, locale })`, which queries the Shopify Storefront API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
 | `app/page.tsx` | Root page, metadata generation, product fetch |
-| `components/hero-section.tsx` | Full-width hero banner with image, headline, CTA |
-| `components/cms/blocks/top-products-carousel.tsx` | Horizontally scrollable product carousel |
-| `components/product-card.tsx` | Product card with image, price, quick-add |
+| `components/sections/banner-section.tsx` | Full-width hero banner with image, headline, CTA |
+| `components/product/products-grid.tsx` | Responsive product grid with section title |
+| `components/product/products-carousel.tsx` | Horizontally scrollable product carousel (used on PDP) |
+| `components/product-card/product-card.tsx` | Product card with image, hover slideshow, price, quick-add |
 | `lib/shopify/operations/products.ts` | Shopify product fetching with caching |

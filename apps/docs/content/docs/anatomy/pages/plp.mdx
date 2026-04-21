@@ -1,49 +1,62 @@
 ---
 title: Product Listing Page (PLP)
-description: Collection and search results pages with filtering, sorting, and pagination.
+description: Collection and search results pages with filtering, sorting, and infinite scroll.
 type: guide
 ---
 
 <PLPBrowser />
 
-The PLP covers two routes - `/collections/[handle]` for browsing a collection and `/search` for query-based product search. Both share the same grid, filtering, sorting, and pagination components.
+The PLP covers two routes - `/collections/[handle]` for browsing a collection and `/search` for query-based product search. Both share the same grid, filtering, sorting, and infinite scroll components.
 
 ## Product grid
 
-Products display in a responsive grid: 2 columns on mobile, 3 on tablet, 4 on desktop. Each page shows up to 50 products. During filter or sort transitions, a `ProductGridPendingOverlay` dims the grid to signal loading.
+Products display in a responsive grid: 2 columns on mobile, 3 on tablet, 4 on desktop. During filter or sort transitions, a pending overlay dims the grid to signal loading.
 
-Each product renders as a card with the featured image, title, price, compare-at price, availability status, and a quick-add button for in-stock items.
+Each product renders as a card with the featured image (with hover slideshow on desktop), title, price, compare-at price, availability status, and a quick-add button for in-stock items.
 
 ## Filtering
 
-A sidebar provides multi-select faceted filters for:
+A filter sidebar provides multi-select faceted filters for:
 
 - **Size, Color, Vendor, Product Type, Tags** - checkbox-based multi-select
-- **Price range** - slider with 4 presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
+- **Price range** - slider with presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
 
 Active filters appear as badges with remove buttons. Filter state is encoded in URL search params using Shopify's standard format (`?filter.v.option.color=red&filter.v.price.gte=10&filter.v.price.lte=100`) so filtered views are shareable and compatible with Shopify themes.
 
-Filters use `useOptimistic` for instant UI feedback while the server request is in flight, coordinated through a `FilterTransitionProvider` context.
+Filters use `useOptimistic` for instant UI feedback while the server request is in flight, coordinated through a `FilterTransitionProvider` context. On mobile, filters are accessible through a sheet overlay triggered from the toolbar.
 
-On mobile, filters are accessible through a sheet overlay rather than a persistent sidebar.
+The filter UI primitives (checkboxes, price slider, section headers) are extracted into `filter-primitives.tsx` for reuse, while the async server-side filter data fetching lives in `filter-sidebar.tsx`.
 
 ## Sorting
 
-A select dropdown offers sort options. Collection pages support all five:
+A select dropdown offers sort options. Collection pages support all eight:
 
 - Best Matches (default)
-- Price: Low to High
-- Price: High to Low
+- Best Selling
 - Name: A to Z
 - Name: Z to A
+- Price: Low to High
+- Price: High to Low
+- Date: Old to New
+- Date: New to Old
 
-The search page only shows Best Matches and the two price sorts because Shopify's `SearchSortKeys` does not support sorting by title.
+The search page excludes name and date sorts because Shopify's `SearchSortKeys` does not support them.
 
-Sort changes use `useTransition` for non-blocking navigation. On mobile, the sort control renders as a bottom sheet.
+Sort changes use `useTransition` for non-blocking navigation.
 
-## Pagination
+## Infinite scroll
 
-Pagination is cursor-based using Shopify's `endCursor` rather than page numbers. A First/Next button pair navigates between pages, with loading indicators and disabled states at boundaries. The cursor resets automatically when filters or sort change.
+Products load progressively using an `InfiniteProductGrid` component backed by `IntersectionObserver`. When the user scrolls near the bottom, a server action fetches the next page using Shopify's cursor-based pagination (`endCursor`). A loading indicator appears while the next batch loads.
+
+The cursor resets automatically when filters or sort change. Each batch renders product cards inline using the same card primitives as the initial grid.
+
+## Toolbar
+
+A `CollectionToolbar` component sits above the grid and contains:
+
+- **Filter sheet trigger** — opens the filter sidebar (with active filter count badge)
+- **Result count** — visible on desktop, hidden on mobile
+- **Sort dropdown** — the sort select control
 
 ## Collection pages
 
@@ -55,9 +68,7 @@ Products within a collection are fetched via `getCollectionProducts()`, which ac
 
 ## Search page
 
-The `/search` route accepts a `q` query parameter and combines it with the same filter and sort controls. `getProducts()` builds a Shopify search query from the text input and active filters, mapping UI sort keys to Shopify's `RELEVANCE` and `PRICE` sort keys.
-
-The search page displays a custom header with the query and result count, and shows a "no results" message with i18n support when the query returns empty.
+The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. The search page displays a custom header with the query and result count, and shows a "no results" message with i18n support when the query returns empty.
 
 ## Key files
 
@@ -65,11 +76,18 @@ The search page displays a custom header with the query and result count, and sh
 |------|---------|
 | `app/collections/[handle]/page.tsx` | Collection route with parallel data fetching |
 | `app/search/page.tsx` | Search route with query param handling |
+| `components/collections/collection-page.tsx` | Root wrapper with `FilterTransitionProvider` |
+| `components/collections/results.tsx` | Orchestrates toolbar, filter sidebar, and results grid |
 | `components/collections/results-grid.tsx` | Responsive product grid with loading overlay |
-| `components/filters/collection-filter-sidebar.tsx` | Faceted filter sidebar with optimistic UI |
-| `components/collections/sort-select.tsx` | Sort dropdown (desktop) / bottom sheet (mobile) |
-| `components/collections/pagination.tsx` | Cursor-based pagination controls |
-| `components/product-card.tsx` | Product card with image, hover slideshow, price, quick-add |
+| `components/collections/infinite-product-grid.tsx` | Infinite scroll with `IntersectionObserver` and server action |
+| `components/collections/toolbar.tsx` | Toolbar with filter trigger, result count, and sort |
+| `components/collections/filter-sidebar.tsx` | Async faceted filter sidebar with Shopify filter data |
+| `components/collections/filter-primitives.tsx` | Filter UI primitives (checkboxes, price slider, section headers) |
+| `components/collections/filter-sidebar-sheet.tsx` | Mobile sheet overlay for filters |
+| `components/collections/filter-pending-context.tsx` | Context provider for optimistic filter transitions |
+| `components/collections/sort-select.tsx` | Sort dropdown with transition-based navigation |
+| `components/collections/structured-data.tsx` | JSON-LD structured data for collections |
+| `components/product-card/product-card.tsx` | Product card with image, hover slideshow, price, quick-add |
 | `components/search/results.tsx` | Search results layout with no-results state |
 | `lib/shopify/operations/products.ts` | Product search with caching and filter mapping |
 | `lib/shopify/operations/collections.ts` | Collection metadata fetching |

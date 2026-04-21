@@ -1,20 +1,14 @@
 ---
 title: Footer
-description: The storefront footer - copyright, link columns from Shopify menus, and responsive layout.
+description: The storefront footer - copyright, social links, and optional Shopify menu columns.
 type: guide
 ---
 
-The footer renders at the bottom of every page. It always displays a copyright notice and optionally renders link columns sourced from a Shopify menu.
+The footer renders at the bottom of every page. By default it displays a copyright notice and optional social media links.
 
 ## Default behavior
 
-The footer always renders, even when no footer menu exists in Shopify. At minimum it shows the copyright line with the current year. When a `"footer"` menu is configured in Shopify, the footer also displays a grid of link columns above the copyright.
-
-## Link columns
-
-Link columns are sourced from `getMenu("footer", locale)`. The menu supports a two-level hierarchy: top-level items become column headings and their children become the links. Column headings can optionally link to a URL.
-
-The grid is responsive: 2 columns on mobile, 3 on tablet (`md`), and 4 on desktop (`lg`).
+The footer always renders. By default it shows a static copyright line ("Vercel Shop. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
 
 ## Social links
 
@@ -32,13 +26,12 @@ The default is an empty array, which hides the social links section entirely.
 
 ## Copyright
 
-The copyright line is a server component that reads the current year and the `footer.copyright` translation key. It is wrapped in a `Suspense` boundary so the rest of the footer can render without waiting for the translation lookup.
+The copyright line is a static string. To customize it, edit the `<p>` tag in `components/layout/footer/footer.tsx`.
 
 ## Key files
 
 | File | Purpose |
 |------|---------|
-| `components/layout/footer.tsx` | Footer composition, link columns, copyright |
-| `components/layout/social-links.tsx` | Social media icon links |
+| `components/layout/footer/footer.tsx` | Footer composition, copyright, social links slot |
+| `components/layout/footer/social-links.tsx` | Social media icon links |
 | `lib/config.ts` | `siteConfig.socialLinks` array |
-| `lib/shopify/operations/menu.ts` | Shopify menu data fetching |
