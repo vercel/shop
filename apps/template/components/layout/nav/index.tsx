@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
+import { SearchModal } from "./search-modal";
 
 export function Nav({ locale }: { locale: string }) {
   return (
@@ -21,6 +22,7 @@ export function Nav({ locale }: { locale: string }) {
         <QuickLinks />
 
         <div className="flex items-center gap-5 ml-auto">
+          <SearchModal />
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>
