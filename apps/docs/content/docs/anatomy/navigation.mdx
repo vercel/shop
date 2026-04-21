@@ -18,6 +18,10 @@ A horizontal link bar with hardcoded defaults: `Shop` and `About`. Hidden on mob
 
 A hamburger icon to the left of the logo, visible below the `md` breakpoint. Tapping it opens a `Sheet` sliding in from the left with the same navigation links as the desktop quick links. The sheet closes automatically when a link is tapped. By default the mobile sheet leaves breathing room below the close button and renders each link as a padded touch target instead of plain text rows. The same hardcoded links are used by default; the `enable-shopify-menus` skill can replace them with Shopify-powered menus.
 
+## Search
+
+A search icon in the navbar opens a centered modal dialog. The modal contains a search input with predictive results powered by Shopify's `predictiveSearch` API. When the user types, suggestion chips and matching products appear below the input. Clicking a product navigates to its page; a "View all" button navigates to the full search results page. The modal closes on navigation, Escape, or clicking outside.
+
 ## Cart icon
 
 The cart icon is a server/client component pair. The server component reads the `shopify_cartId` cookie and fetches the initial cart. The client component renders a quantity badge with an animation for pending additions and opens the cart overlay on click.
@@ -28,18 +32,13 @@ By default the footer renders only a copyright notice. The `enable-shopify-menus
 
 ## Mobile bottom bar
 
-A fixed bar at the bottom of the viewport, visible below the `md` breakpoint. It contains:
-
-- **Search button** - expands an animated search input
-- **Agent button** - optional slot, rendered when enabled
-
-Transitions between states use Framer Motion for smooth animation. The `enable-shopify-menus` skill can add a **Browse button** that toggles a megamenu.
+A fixed bar at the bottom of the viewport. It renders only when it has children (e.g. the optional agent button). The `enable-shopify-menus` skill can add a **Browse button** that toggles a megamenu.
 
 ## Responsive behavior
 
 **Desktop** (`md` and up) - full horizontal navbar with quick links and cart sheet.
 
-**Mobile** (below `md`) - hamburger menu to the left of the logo opens a left-sliding sheet with navigation links. The cart icon remains in the top bar. Search and agent buttons live in the fixed bottom bar.
+**Mobile** (below `md`) - hamburger menu to the left of the logo opens a left-sliding sheet with navigation links. The cart and search icons remain in the top bar. The agent button (when enabled) lives in the fixed bottom bar.
 
 ## Key files
 
@@ -50,9 +49,7 @@ Transitions between states use Framer Motion for smooth animation. The `enable-s
 | `components/layout/nav/quick-links.tsx` | Quick links (hardcoded by default) |
 | `components/layout/nav/cart.tsx` | Cart icon server component |
 | `components/layout/nav/cart-client.tsx` | Cart icon with quantity badge |
-| `components/layout/nav/search-client.tsx` | Search input client component |
+| `components/layout/nav/search-modal.tsx` | Search icon and modal dialog |
 | `components/layout/footer/footer.tsx` | Footer (copyright only by default) |
 | `components/layout/footer/social-links.tsx` | Social media icon links |
-| `components/layout/action-bar/action-bar.tsx` | Mobile bottom action bar |
-| `components/layout/action-bar/action-bar-search.tsx` | Animated search input in action bar |
-| `components/layout/action-bar/predictive-search-results.tsx` | Predictive search results dropdown |
+| `components/layout/action-bar/action-bar.tsx` | Bottom action bar (agent button slot) |

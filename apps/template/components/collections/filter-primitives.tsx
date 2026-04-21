@@ -173,7 +173,11 @@ function FilterSectionContent({ className, children, ...props }: React.Component
 
 function FilterOptionList({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="filter-option-list" className={cn("flex flex-col gap-2.5", className)} {...props}>
+    <div
+      data-slot="filter-option-list"
+      className={cn("flex flex-col gap-2.5", className)}
+      {...props}
+    >
       {children}
     </div>
   );
@@ -270,7 +274,11 @@ function FilterPriceRange({
   ...props
 }: FilterPriceRangeProps) {
   return (
-    <div data-slot="filter-price-range" className={cn("flex items-center gap-2", className)} {...props}>
+    <div
+      data-slot="filter-price-range"
+      className={cn("flex items-center gap-2", className)}
+      {...props}
+    >
       <div className="flex flex-1 items-center rounded-lg bg-input px-2.5 h-8">
         <span className="text-sm text-muted-foreground">{currencySymbol}</span>
         <Input

@@ -1,7 +1,7 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
 import { Suspense } from "react";
 
 import {
@@ -13,13 +13,13 @@ import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-shee
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { CollectionToolbar, CollectionToolbarSkeleton } from "@/components/collections/toolbar";
-import { Container } from "@/components/ui/container";
 import {
   type SearchResultsData,
   ResultsSkeleton,
   SearchResultsGrid,
   getSearchResultsData,
 } from "@/components/search/results";
+import { Container } from "@/components/ui/container";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -126,7 +126,6 @@ async function SearchContent({
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
           <Link href="/search">{q ? t("titleQuery", { query: q }) : defaultTitle}</Link>
         </h1>
-        {q && <p className="text-muted-foreground mt-1">{t("titleSubtext")}</p>}
       </div>
 
       <Suspense fallback={<CollectionToolbarSkeleton />}>
@@ -188,7 +187,13 @@ async function SearchToolbar({
       }
       sortSelect={
         <CollectionsSortSelect
-          exclude={["product-name-ascending", "product-name-descending", "best-selling", "date-old-to-new", "date-new-to-old"]}
+          exclude={[
+            "product-name-ascending",
+            "product-name-descending",
+            "best-selling",
+            "date-old-to-new",
+            "date-new-to-old",
+          ]}
         />
       }
     />

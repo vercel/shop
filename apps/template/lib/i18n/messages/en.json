@@ -25,12 +25,14 @@
     "city": "City",
     "zipCode": "ZIP code",
     "country": "Country",
+    "searchClear": "Clear",
     "predictiveSearch": {
       "products": "Products",
       "collections": "Collections",
       "suggestions": "Suggestions",
       "noResults": "No results for \"{query}\"",
-      "viewAll": "View all results for \"{query}\""
+      "viewAll": "View all results for \"{query}\"",
+      "viewAllShort": "View All"
     },
     "menu": "Menu"
   },

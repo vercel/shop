@@ -1,6 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import type { Locale } from "@/lib/i18n";
+import { productCardToOptimisticInfo } from "@/lib/product";
+import type { ProductCard as ProductCardType } from "@/lib/types";
+
 import {
   ProductCardBadge,
   ProductCardContent,
@@ -12,9 +16,6 @@ import {
   ProductCardTitle,
 } from "./primitives";
 import { ProductCardQuickAdd } from "./quick-add";
-import type { Locale } from "@/lib/i18n";
-import { productCardToOptimisticInfo } from "@/lib/product";
-import type { ProductCard as ProductCardType } from "@/lib/types";
 
 export interface ProductCardProps {
   product: ProductCardType;
