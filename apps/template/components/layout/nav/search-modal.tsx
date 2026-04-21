@@ -114,16 +114,19 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
 
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-60 bg-black/30" />
+      <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-60 bg-black/30 backdrop-blur-sm" />
       <DialogPrimitive.Content
         aria-describedby={undefined}
-        className="fixed inset-0 z-60 flex justify-center pt-[15vh] px-4 pointer-events-none outline-none"
+        className="fixed inset-0 z-60 flex justify-center pt-[15vh] px-4 outline-none"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
           requestAnimationFrame(() => inputRef.current?.focus());
         }}
       >
-        <div className="pointer-events-auto w-full max-w-lg h-fit">
+        <div className="w-full max-w-lg h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
             {/* Search input */}
