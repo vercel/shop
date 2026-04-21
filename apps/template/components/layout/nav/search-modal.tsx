@@ -123,7 +123,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
           requestAnimationFrame(() => inputRef.current?.focus());
         }}
       >
-        <div className="pointer-events-auto w-full max-w-md h-fit">
+        <div className="pointer-events-auto w-full max-w-lg h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
             {/* Search input */}
@@ -226,7 +226,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                             onClick={() =>
                               navigate(`/search?q=${encodeURIComponent(query.trim())}`)
                             }
-                            className="inline-flex items-center justify-center rounded-full bg-foreground text-background text-sm font-medium px-6 py-2.5 hover:bg-foreground/90 transition-colors"
+                            className="inline-flex items-center justify-center rounded-lg bg-foreground text-background text-sm font-medium h-9 px-5 hover:bg-foreground/90 transition-colors"
                           >
                             {t("predictiveSearch.viewAllShort")}
                           </button>
@@ -297,10 +297,10 @@ function ProductResult({
           alt={product.featuredImage.altText}
           width={56}
           height={56}
-          className="size-14 rounded-lg object-cover bg-muted shrink-0"
+          className="size-14 object-cover bg-muted shrink-0"
         />
       ) : (
-        <div className="size-14 rounded-lg bg-muted shrink-0" />
+        <div className="size-14 bg-muted shrink-0" />
       )}
       <div className="flex-1 min-w-0">
         <div className="text-sm text-foreground truncate">{product.title}</div>
@@ -320,7 +320,7 @@ function LoadingSkeleton() {
     <div className="px-4 py-3 space-y-3">
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
         <div key={key} className="flex items-center gap-3">
-          <div className="size-14 rounded-lg bg-muted animate-pulse shrink-0" />
+          <div className="size-14 bg-muted animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3.5 w-3/4 rounded bg-muted animate-pulse" />
             <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
