@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { ProductCardSkeleton } from "@/components/product-card";
+import { ProductCardSkeleton } from "@/components/product-card/product-card";
 import {
   type CollectionResultsData,
   getExactCollectionResultCount,

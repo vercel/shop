@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { ProductCard } from "@/components/product-card";
+import { ProductCard } from "@/components/product-card/product-card";
 import {
   ScrollCarousel,
   ScrollCarouselContent,
