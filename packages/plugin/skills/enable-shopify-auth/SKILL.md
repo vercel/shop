@@ -5,6 +5,8 @@ description: Add customer authentication to the shop template using better-auth 
 
 # Enable Authentication
 
+> **Note**: As of 2026-04-21, Part 1 (core auth plumbing) and the nav account icon are built into the template by default. Run this skill only if you need the full account pages (profile, orders, addresses) from Part 2.
+
 Add customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API OIDC. This enables customer login, profile management, order history, and address book.
 
 ## Prerequisites

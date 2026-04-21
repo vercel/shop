@@ -22,6 +22,10 @@ A hamburger icon to the left of the logo, visible below the `md` breakpoint. Tap
 
 A search icon in the navbar opens a centered modal dialog. The modal contains a search input with predictive results powered by Shopify's `predictiveSearch` API. When the user types, suggestion chips and matching products appear below the input. Clicking a product navigates to its page; a "View all" button navigates to the full search results page. The modal closes on navigation, Escape, or clicking outside.
 
+## Account icon
+
+A server component that checks the customer session and renders an icon-only link. When the user is not logged in, it shows a `UserRoundIcon` linking to `/login`. When logged in, it shows a `UserRoundCheckIcon` linking to `/account`. The icon sits between Search and Cart in the navbar actions. A `NavAccountFallback` component is used as the Suspense fallback.
+
 ## Cart icon
 
 The cart icon is a server/client component pair. The server component reads the `shopify_cartId` cookie and fetches the initial cart. The client component renders a quantity badge with an animation for pending additions and opens the cart overlay on click.
@@ -47,6 +51,7 @@ A fixed bar at the bottom of the viewport. It renders only when it has children 
 | `components/layout/nav/index.tsx` | Main navbar composition |
 | `components/layout/nav/mobile-menu.tsx` | Hamburger menu with left sheet (mobile) |
 | `components/layout/nav/quick-links.tsx` | Quick links (hardcoded by default) |
+| `components/layout/nav/account.tsx` | Account icon (login/account link) |
 | `components/layout/nav/cart.tsx` | Cart icon server component |
 | `components/layout/nav/cart-client.tsx` | Cart icon with quantity badge |
 | `components/layout/nav/search-modal.tsx` | Search icon and modal dialog |

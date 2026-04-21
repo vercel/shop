@@ -15,6 +15,7 @@ type: reference
 | `/search` | `app/search/page.tsx` | Search results (same grid as collections) |
 | `/cart` | `app/cart/page.tsx` | Full cart page with upsells |
 | `/pages/[slug]` | `app/pages/[slug]/page.tsx` | CMS-driven marketing pages |
+| `/login` | `app/login/page.tsx` | OAuth login redirect (auto-redirects to Shopify OIDC) |
 | `/about` | `app/about/page.tsx` | About page |
 
 ## API routes
@@ -23,6 +24,7 @@ type: reference
 |---|---|---|
 | `POST /api/webhooks/shopify` | `app/api/webhooks/shopify/route.ts` | Shopify webhook handler for cache invalidation |
 | `POST /api/chat` | `app/api/chat/route.ts` | AI shopping assistant endpoint |
+| `GET,POST /api/auth/[...all]` | `app/api/auth/[...all]/route.ts` | better-auth handler (OAuth callbacks, sessions) |
 | `GET /api/draft` | `app/api/draft/route.ts` | Draft mode toggle for content preview |
 
 ## URL rewrites

@@ -12,11 +12,18 @@ type: reference
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token. Found in **Settings → Apps and sales channels → Headless**. |
 | `NEXT_PUBLIC_SITE_NAME` | The name displayed in your storefront's header and metadata. |
 
+## Authentication
+
+| Variable | Description |
+|----------|-------------|
+| `AUTH_SECRET` | Secret for signing sessions. Generate with `openssl rand -base64 32`. |
+| `SHOPIFY_CUSTOMER_CLIENT_ID` | Shopify Customer Account API client ID. |
+| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret. |
+| `BETTER_AUTH_BASE_URL` | App base URL, e.g. `http://localhost:3000` for dev. |
+
 ## Optional
 
 | Variable | Description |
 |----------|-------------|
 | `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Private Storefront API token for server-side requests. Enables higher rate limits and access to draft content. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_URL` | Customer Account API URL. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Required when using the enable-shopify-auth skill. |
+| `SHOPIFY_CUSTOMER_ACCOUNT_URL` | Customer Account API URL. Used by better-auth for OIDC discovery. |

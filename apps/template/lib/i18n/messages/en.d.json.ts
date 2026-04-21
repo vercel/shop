@@ -10,6 +10,8 @@ declare const messages: {
     toggleAiSearch: "Toggle AI Search";
     cart: "Cart";
     account: "Account";
+    signIn: "Sign in";
+    signOut: "Sign out";
     switchLanguage: "Switch language";
     categories: "Browse";
     exploreCategories: "Explore categories";
@@ -217,6 +219,7 @@ declare const messages: {
     searchDescription: "Search for products in our store";
     searchTitleQuery: 'Search results for "{query}"';
     searchDescriptionQuery: 'Find products matching "{query}"';
+    loginTitle: "Sign In";
   };
   content: {
     homepage: {
@@ -246,6 +249,9 @@ declare const messages: {
     error: "Something went wrong";
     errorDesc: "An unexpected error occurred. Please try again.";
     tryAgain: "Try again";
+    loginRedirecting: "Redirecting to sign in...";
+    loginNotRedirected: "Not redirected?";
+    loginClickHere: "Click here";
   };
   home: {
     title: "Enterprise Commerce Template";

@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 
 import { createAgent } from "@/lib/agent/agent";
 import { type PageContext, type User, withAgentContext } from "@/lib/agent/context";
+import { getSession } from "@/lib/auth/server";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
@@ -33,6 +34,26 @@ function parseReferer(referer: string | null): {
   } catch {
     return { locale: defaultLocale, segments: [] };
   }
+}
+
+async function resolveUser(locale: Locale): Promise<User> {
+  try {
+    const session = await getSession();
+    if (session?.accessToken) {
+      return {
+        type: "user",
+        locale,
+        id: session.customerId,
+        email: session.email,
+        name: [session.firstName, session.lastName].filter(Boolean).join(" "),
+        accessToken: session.accessToken,
+      };
+    }
+  } catch {
+    // Fall through to guest
+  }
+
+  return { type: "guest", locale };
 }
 
 /**
@@ -109,7 +130,7 @@ export async function POST(request: Request) {
   // Resolve context from Referer header (server-side, not client-sent)
   const referer = request.headers.get("referer");
   const { locale, segments } = parseReferer(referer);
-  const user: User = { type: "guest", locale };
+  const user = await resolveUser(locale);
   const page = await resolvePageContext(segments, locale, referer);
 
   // Get or create cart before streaming (cookies can't be set during stream)
