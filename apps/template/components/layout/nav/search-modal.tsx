@@ -46,7 +46,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
   const locale = useLocale();
   const t = useTranslations("nav");
 
-  const { query, setQuery, results, isLoading, totalItems, activeIndex, setActiveIndex, reset } =
+  const { query, setQuery, results, isLoading, activeIndex, setActiveIndex, reset } =
     usePredictiveSearch(locale);
 
   useEffect(() => {
@@ -68,11 +68,13 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     navigate(`/search?q=${encodeURIComponent(q)}`);
   }
 
+  // Only queries and products are rendered — exclude collections from keyboard nav
+  const visibleItems = (results?.queries.length ?? 0) + (results?.products.length ?? 0);
+
   function navigateToActiveItem() {
     if (!results || activeIndex < 0) return;
 
     const queriesLen = results.queries.length;
-    const productsLen = results.products.length;
 
     if (activeIndex < queriesLen) {
       const suggestion = results.queries[activeIndex];
@@ -81,25 +83,19 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       return;
     }
 
-    if (activeIndex < queriesLen + productsLen) {
-      const product = results.products[activeIndex - queriesLen];
+    const product = results.products[activeIndex - queriesLen];
+    if (product) {
       navigate(`/products/${product.handle}`);
-      return;
-    }
-
-    const collection = results.collections[activeIndex - queriesLen - productsLen];
-    if (collection) {
-      navigate(`/collections/${collection.handle}`);
     }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown" && totalItems > 0) {
+    if (e.key === "ArrowDown" && visibleItems > 0) {
       e.preventDefault();
-      setActiveIndex(Math.min(activeIndex + 1, totalItems - 1));
+      setActiveIndex(Math.min(activeIndex + 1, visibleItems - 1));
       return;
     }
-    if (e.key === "ArrowUp" && totalItems > 0) {
+    if (e.key === "ArrowUp" && visibleItems > 0) {
       e.preventDefault();
       setActiveIndex(Math.max(activeIndex - 1, -1));
       return;
@@ -128,7 +124,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       >
         <div className="w-full max-w-lg h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
-          <div className="bg-white rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
+          <div className="bg-background rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
             {/* Search input */}
             <form onSubmit={handleSubmit} className="flex items-center gap-3 px-4 py-3">
               <Search className="size-4 shrink-0 text-foreground/40" />
