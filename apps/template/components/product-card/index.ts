@@ -1,4 +1,3 @@
-export { ProductCard, type ProductCardProps, ProductCardSkeleton } from "./product-card";
 export {
   ProductCard as ProductCardRoot,
   ProductCardBadge,
@@ -8,5 +7,6 @@ export {
   ProductCardPrice,
   ProductCardTitle,
 } from "./primitives";
+export { ProductCard, type ProductCardProps, ProductCardSkeleton } from "./product-card";
 export { ProductCardQuickAdd } from "./quick-add";
 export { ProductCardSlideshow } from "./slideshow";

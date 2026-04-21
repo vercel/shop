@@ -203,10 +203,10 @@ function ProductCardSkeleton({ className }: { className?: string }) {
 export {
   ProductCard,
   ProductCardBadge,
-  ProductCardImageContainer,
-  ProductCardImage,
   ProductCardContent,
-  ProductCardTitle,
+  ProductCardImage,
+  ProductCardImageContainer,
   ProductCardPrice,
   ProductCardSkeleton,
+  ProductCardTitle,
 };
