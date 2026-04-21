@@ -1,17 +1,17 @@
 export type MenuItemType =
-  | "FRONTPAGE"
+  | "ARTICLE"
+  | "BLOG"
+  | "CATALOG"
   | "COLLECTION"
   | "COLLECTIONS"
-  | "PRODUCT"
-  | "CATALOG"
-  | "PAGE"
-  | "BLOG"
-  | "ARTICLE"
-  | "SEARCH"
-  | "SHOP_POLICY"
+  | "CUSTOMER_ACCOUNT_PAGE"
+  | "FRONTPAGE"
   | "HTTP"
   | "METAOBJECT"
-  | "CUSTOMER_ACCOUNT_PAGE";
+  | "PAGE"
+  | "PRODUCT"
+  | "SEARCH"
+  | "SHOP_POLICY";
 
 export type MenuItem = {
   id: string;
