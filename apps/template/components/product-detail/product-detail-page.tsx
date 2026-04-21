@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 
-import { Container } from "@/components/ui/container";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { ProductSchema } from "@/components/product-detail/schema";
+import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
@@ -94,7 +94,11 @@ async function ProductContent({
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
       <div className="flex flex-col gap-10">
-        <ProductDetailSection product={product} locale={locale} variantIdPromise={variantIdPromise} />
+        <ProductDetailSection
+          product={product}
+          locale={locale}
+          variantIdPromise={variantIdPromise}
+        />
         <RelatedProductsSection handle={handle} locale={locale} />
       </div>
     </>

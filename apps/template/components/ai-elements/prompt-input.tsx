@@ -1144,7 +1144,10 @@ export const PromptInputTab = ({ className, ...props }: PromptInputTabProps) => 
 export type PromptInputTabLabelProps = HTMLAttributes<HTMLHeadingElement>;
 
 export const PromptInputTabLabel = ({ className, ...props }: PromptInputTabLabelProps) => (
-  <h3 className={cn("mb-2 px-2.5 font-medium text-muted-foreground text-xs", className)} {...props} />
+  <h3
+    className={cn("mb-2 px-2.5 font-medium text-muted-foreground text-xs", className)}
+    {...props}
+  />
 );
 
 export type PromptInputTabBodyProps = HTMLAttributes<HTMLDivElement>;

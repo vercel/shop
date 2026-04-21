@@ -2,7 +2,10 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
-import { ProductInfoDescription, ProductInfoOptions } from "@/components/product-detail/product-info";
+import {
+  ProductInfoDescription,
+  ProductInfoOptions,
+} from "@/components/product-detail/product-info";
 import {
   ColorImageCarouselItems,
   ColorImageGrid,

@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
-import { Price } from "@/components/product/price";
 import {
   ProductCardContent,
   ProductCardImage,
@@ -15,6 +14,7 @@ import {
   ProductCardRoot as ProductCard,
   ProductCardTitle,
 } from "@/components/product-card";
+import { Price } from "@/components/product/price";
 import { catalog } from "@/lib/agent/ui/catalog";
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";

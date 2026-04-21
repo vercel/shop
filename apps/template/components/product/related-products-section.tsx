@@ -43,7 +43,13 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   );
 }
 
-export async function RelatedProductsSection({ handle, locale }: { handle: string; locale: Locale }) {
+export async function RelatedProductsSection({
+  handle,
+  locale,
+}: {
+  handle: string;
+  locale: Locale;
+}) {
   const t = await getTranslations("product");
   return (
     <Suspense fallback={<Fallback title={t("recommendations")} />}>
