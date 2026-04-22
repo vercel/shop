@@ -30,7 +30,7 @@ function decodeIdTokenPayload(idToken: string): {
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET,
 
   session: {
     expiresIn: 7 * 24 * 60 * 60,
