@@ -13,7 +13,7 @@ import {
   ProductCardImageContainer,
   ProductCardPrice,
   ProductCardTitle,
-} from "@/components/product-card/primitives";
+} from "@/components/product-card/components";
 import { Price } from "@/components/product/price";
 import { catalog } from "@/lib/agent/ui/catalog";
 import type { Money } from "@/lib/types";

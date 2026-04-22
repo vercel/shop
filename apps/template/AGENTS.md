@@ -50,7 +50,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### File Organization
 
 - Keep sub-components in the same file as their consumer when they share the same directive (or lack one). Only split into a separate file when the components need different directives (e.g., one is `"use client"` and the other is a server component) or when the file becomes unwieldy.
-- Do not create `primitives.tsx` files by default. A single file per logical component is preferred.
+- A single file per logical component is preferred.
+- When a split is necessary, name the file by its role: `components.tsx` for directive-free sub-components, `client-components.tsx` for `"use client"` sub-components, `server-components.tsx` for server-only sub-components.
 
 ### Naming
 

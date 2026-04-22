@@ -12,7 +12,7 @@ import {
   ProductCardPrice,
   ProductCardTitle,
   ProductCard as ProductCardRoot,
-} from "@/components/product-card/primitives";
+} from "@/components/product-card/components";
 import { ProductCardQuickAdd } from "@/components/product-card/quick-add";
 import { productCardToOptimisticInfo } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
