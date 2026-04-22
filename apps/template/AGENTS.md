@@ -46,7 +46,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Push `"use client"` as far down the tree as possible. Pages, layouts, and data-fetching wrappers stay as server components.
 - Fetch data in server components or server actions; pass promises or resolved data down to client children.
-- One primary component per file. Co-locate closely related sub-components in a `primitives.tsx` file within the same directory.
+
+### File Organization
+
+- Keep sub-components in the same file as their consumer when they share the same directive (or lack one). Only split into a separate file when the components need different directives (e.g., one is `"use client"` and the other is a server component) or when the file becomes unwieldy.
+- Do not create `primitives.tsx` files by default. A single file per logical component is preferred.
 
 ### Naming
 
