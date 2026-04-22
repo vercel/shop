@@ -23,6 +23,31 @@ The template ships with structured context files that agents read automatically:
 
 This context means the agent starts with deep knowledge of the codebase conventions. It knows the data flow, the file structure, and the rules - before you type a single prompt.
 
+### Custom blocks in AGENTS.md
+
+Some sections of `AGENTS.md` are managed by external tools and wrapped in HTML comment markers:
+
+```md
+<!-- BEGIN:nextjs-agent-rules -->
+## This is NOT the Next.js you know
+...
+<!-- END:nextjs-agent-rules -->
+```
+
+These markers serve two purposes:
+
+1. **Safe updates.** The content between `BEGIN` and `END` markers can be overwritten by the tool that owns it (for example, Next.js updates the `nextjs-agent-rules` block when you upgrade) without touching your custom instructions outside the markers.
+2. **Easy removal.** If you disagree with an opinionated block, delete everything from `BEGIN` to `END` and the rest of the file stays intact.
+
+The template ships with two blocks:
+
+| Block | Owner | What it contains |
+| --- | --- | --- |
+| `nextjs-agent-rules` | Next.js | Reminds agents that this Next.js version has breaking changes and to read bundled docs before writing code. Updated automatically when you upgrade Next.js. |
+| `vercel-shop-style` | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. These are the template's opinionated defaults — remove the block if your team prefers different conventions. |
+
+Everything outside these markers is yours. Add project-specific rules, team conventions, or domain constraints anywhere else in the file and no upgrade will overwrite them.
+
 ## Skills: the agent's playbooks
 
 Skills are markdown files that describe exactly how to complete a specific task. Each skill includes what files to touch, what patterns to follow, and how to verify the result.

@@ -14,7 +14,7 @@ import {
   ProductCard as ProductCardRoot,
   ProductCardSkeleton,
   ProductCardTitle,
-} from "./primitives";
+} from "./components";
 import { ProductCardQuickAdd } from "./quick-add";
 
 export interface ProductCardProps {

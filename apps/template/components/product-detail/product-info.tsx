@@ -114,4 +114,4 @@ function ProductInfoDescription({
   );
 }
 
-export { ProductInfoHeader, ProductInfoOptions, ProductInfoDescription };
+export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions };

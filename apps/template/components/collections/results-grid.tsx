@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { loadMoreCollectionProducts } from "@/lib/collections/actions";
 import type { CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
