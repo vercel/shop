@@ -7,13 +7,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+  ProductCard,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
   ProductCardPrice,
-  ProductCardRoot as ProductCard,
   ProductCardTitle,
-} from "@/components/product-card";
+} from "@/components/product-card/components";
 import { Price } from "@/components/product/price";
 import { catalog } from "@/lib/agent/ui/catalog";
 import type { Money } from "@/lib/types";

@@ -8,13 +8,13 @@ const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export type SocialPlatform =
   | "facebook"
+  | "github"
   | "instagram"
-  | "x"
-  | "youtube"
-  | "tiktok"
-  | "pinterest"
   | "linkedin"
-  | "github";
+  | "pinterest"
+  | "tiktok"
+  | "x"
+  | "youtube";
 
 export interface SocialLink {
   platform: SocialPlatform;

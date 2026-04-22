@@ -268,13 +268,13 @@ function SelectPanelRow({
 
 export {
   SelectPanel,
-  SelectPanelTrigger,
   SelectPanelContent,
-  SelectPanelSection,
-  SelectPanelHeader,
-  SelectPanelGrid,
-  SelectPanelItem,
-  SelectPanelShowMore,
   SelectPanelDivider,
+  SelectPanelGrid,
+  SelectPanelHeader,
+  SelectPanelItem,
   SelectPanelRow,
+  SelectPanelSection,
+  SelectPanelShowMore,
+  SelectPanelTrigger,
 };

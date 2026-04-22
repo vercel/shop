@@ -409,19 +409,19 @@ function FilterSidebarScrollFade({ className, ...props }: React.ComponentProps<"
 }
 
 export {
-  FilterSidebar,
-  FilterSidebarHeader,
-  FilterSidebarResultsCount,
-  FilterSidebarActiveFilters,
   FilterBadge,
-  FilterSection,
-  FilterSectionHeader,
-  FilterSectionContent,
-  FilterOptionList,
   FilterOption,
+  FilterOptionList,
   FilterPriceRange,
+  FilterSection,
+  FilterSectionContent,
+  FilterSectionHeader,
+  FilterSidebar,
+  FilterSidebarActiveFilters,
   FilterSidebarCategories,
   FilterSidebarCategoryBack,
   FilterSidebarCategoryItem,
+  FilterSidebarHeader,
+  FilterSidebarResultsCount,
   FilterSidebarScrollFade,
 };

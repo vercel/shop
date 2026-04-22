@@ -32,6 +32,49 @@ This version has breaking changes — APIs, conventions, and file structure may 
 4. **Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`**. Never guess Shopify field names.
 5. **If a template change should be considered for existing storefronts, add a rollout entry in `packages/plugin/template-rollout-log/`**. Do not rely on the template version number alone.
 
+<!-- BEGIN:vercel-shop-style -->
+
+## Code Style
+
+### Ordering & Organization
+
+- Alphabetize named export specifiers, i18n JSON keys (within each section and at the top level), string union type members, and config object keys.
+- No barrel files — never create an `index.ts` that only re-exports. Import from the source file directly.
+- oxfmt handles import sorting automatically via `pnpm format`.
+
+### Component Boundaries
+
+- Push `"use client"` as far down the tree as possible. Pages, layouts, and data-fetching wrappers stay as server components.
+- Fetch data in server components or server actions; pass promises or resolved data down to client children.
+
+### File Organization
+
+- Keep sub-components in the same file as their consumer when they share the same directive (or lack one). Only split into a separate file when the components need different directives (e.g., one is `"use client"` and the other is a server component) or when the file becomes unwieldy.
+- A single file per logical component is preferred.
+- When a split is necessary, name the file by its role: `components.tsx` for directive-free sub-components, `client-components.tsx` for `"use client"` sub-components, `server-components.tsx` for server-only sub-components.
+
+### Naming
+
+- Files: `kebab-case.tsx`
+- Components: `PascalCase`
+- Server actions: verb + `Action` suffix (`addToCartAction`)
+- Props interfaces: `{ComponentName}Props`
+- Constants: `SCREAMING_SNAKE_CASE`
+
+### Tailwind & Styling
+
+- Prefer `data-[attr=value]` selectors over conditional class assembly.
+- Use `cn()` (from `@/lib/utils`) when classes must be conditional.
+- Use `data-slot` attributes as stable styling hooks on compound components.
+- Use CVA (`cva`) for multi-variant component APIs.
+
+### Exports
+
+- Named exports only in component files. Pages use default exports per Next.js convention.
+- Alphabetize specifiers in export statements.
+
+<!-- END:vercel-shop-style -->
+
 ## Overview
 
 This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm.
