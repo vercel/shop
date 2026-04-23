@@ -11,13 +11,13 @@ Add customer authentication using [better-auth](https://www.better-auth.com/) wi
 
 - Shopify store with **Customer Account API** enabled (Shopify Admin → Settings → Customer accounts)
 - Customer Account API credentials (client ID + client secret)
-- A `AUTH_SECRET` value for session signing (generate with `openssl rand -base64 32`)
+- A `BETTER_AUTH_SECRET` value for session signing (generate with `openssl rand -base64 32`)
 
 ## Required environment variables
 
 | Variable                         | Description                                                      |
 | -------------------------------- | ---------------------------------------------------------------- |
-| `AUTH_SECRET`                    | Secret for signing sessions (also known as `BETTER_AUTH_SECRET`) |
+| `BETTER_AUTH_SECRET`             | Secret for signing sessions                                      |
 | `SHOPIFY_CUSTOMER_CLIENT_ID`     | Shopify Customer Account API client ID                           |
 | `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Shopify Customer Account API client secret                       |
 | `BETTER_AUTH_BASE_URL`           | App base URL (e.g. `http://localhost:3000` for dev)              |
@@ -67,10 +67,6 @@ import { genericOAuth } from "better-auth/plugins";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
-if (!SHOPIFY_STORE_DOMAIN) {
-  console.warn("[better-auth] SHOPIFY_STORE_DOMAIN not set - auth will not work");
-}
-
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
 
 function decodeIdTokenPayload(idToken: string): {
@@ -94,7 +90,7 @@ function decodeIdTokenPayload(idToken: string): {
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL,
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.BETTER_AUTH_SECRET,
 
   session: {
     expiresIn: 7 * 24 * 60 * 60,
