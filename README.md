@@ -2,7 +2,7 @@
 
 A Next.js storefront template and reference architecture for Shopify, built with Next.js 16, React 19, Tailwind CSS 4, and the Shopify Storefront API.
 
-See [docs.vercel.shop](https://docs.vercel.shop) for full documentation.
+See [vercel.shop](https://vercel.shop) for full documentation.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps/template&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app)
 
@@ -47,7 +47,7 @@ yarn dev
 bun dev
 ```
 
-See [docs.vercel.shop/docs/getting-started](https://docs.vercel.shop/docs/getting-started) for the full setup guide and [Storefront API Permissions](https://docs.vercel.shop/docs/reference/storefront-api-permissions) for the complete scope reference.
+See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started) for the full setup guide and [Storefront API Permissions](https://vercel.shop/docs/reference/storefront-api-permissions) for the complete scope reference.
 
 ## Features
 
@@ -65,12 +65,12 @@ Vercel Shop includes a `vercel-shop` plugin with skills for extending the storef
 
 | Skill | Description |
 |-------|-------------|
-| `enable-shopify-menus` | Replace hardcoded nav/footer with Shopify menus, optional megamenu |
-| `enable-shopify-cms` | Use Shopify metaobjects as a CMS |
-| `enable-content-negotiation` | Serve product pages as markdown to LLM agents |
-| `add-locale-url-prefix` | Locale-prefixed URL routing |
-| `enable-shopify-auth` | Customer authentication with Shopify OIDC |
-| `enable-shopify-markets` | Multi-locale support with Shopify Markets |
+| `add-locale-url-prefix` | Locale-prefixed URL routing with next-intl |
+| `enable-analytics` | Add Vercel Analytics, Speed Insights, and Google Tag Manager |
+| `enable-shopify-auth` | Customer authentication using better-auth with Shopify OIDC |
+| `enable-shopify-cms` | Wire Shopify metaobjects as a CMS for homepage and marketing pages |
+| `enable-shopify-markets` | Multi-locale support with Shopify Markets and next-intl |
+| `enable-shopify-menus` | Replace hardcoded nav/footer with Shopify-powered menus, optional megamenu |
 
 ## Project Structure
 
@@ -79,12 +79,12 @@ This is a monorepo managed with [Turborepo](https://turbo.build/) and pnpm.
 | App | Description |
 |-----|-------------|
 | `apps/template` | The Next.js storefront template |
-| `apps/docs` | Documentation site at [docs.vercel.shop](https://docs.vercel.shop) |
+| `apps/docs` | Documentation site at [vercel.shop](https://vercel.shop) |
 | `apps/cli` | `create-vercel-shop` scaffolding CLI |
 
 ## Documentation
 
-Full documentation is available at [docs.vercel.shop](https://docs.vercel.shop).
+Full documentation is available at [vercel.shop](https://vercel.shop).
 
 ## License
 
