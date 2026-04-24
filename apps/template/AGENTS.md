@@ -67,6 +67,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Use `cn()` (from `@/lib/utils`) when classes must be conditional.
 - Use `data-slot` attributes as stable styling hooks on compound components.
 - Use CVA (`cva`) for multi-variant component APIs.
+- Interactive elements (buttons, clickable links, CTAs) must use `cursor-pointer`. Disabled interactive elements must use `cursor-not-allowed`.
 
 ### Exports
 
