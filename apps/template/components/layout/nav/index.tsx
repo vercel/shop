@@ -26,9 +26,9 @@ export async function Nav({ locale }: { locale: string }) {
 
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
-          {/* {isAuthConfigured && (
+          {isAuthConfigured && (
             <div className="size-5 bg-[red]" />
-          )} */}
+          )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>

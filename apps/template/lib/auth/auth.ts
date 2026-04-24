@@ -1,6 +1,7 @@
 // Core better-auth configuration with Shopify Customer Account API OIDC.
 // Auth is opt-in: when the three required env vars are missing, isAuthConfigured
 // is false and all auth UI is hidden. See .env.example for setup.
+import "server-only";
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 
