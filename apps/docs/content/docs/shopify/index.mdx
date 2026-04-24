@@ -46,7 +46,7 @@ All read operations are cached with `"use cache"` and `cacheLife("max")`. Withou
 POST /api/webhooks/shopify
 ```
 
-The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` environment variable, then calls `revalidateTag()` for the affected cache tags.
+The handler requires the `SHOPIFY_WEBHOOK_SECRET` environment variable, verifies the HMAC signature, then calls `revalidateTag()` for the affected cache tags.
 
 ### Supported topics
 
@@ -74,7 +74,7 @@ In your Shopify admin, go to **Settings → Notifications → Webhooks**:
 SHOPIFY_WEBHOOK_SECRET="your-webhook-signing-secret"
 ```
 
-> **Important:** Without `SHOPIFY_WEBHOOK_SECRET`, the handler skips signature verification. Always set this in production.
+> **Required:** `SHOPIFY_WEBHOOK_SECRET` must be set with a non-empty value. Requests hitting the endpoint without the secret configured return `500`; requests with a bad or missing `x-shopify-hmac-sha256` header return `401`.
 
 ### How it works
 

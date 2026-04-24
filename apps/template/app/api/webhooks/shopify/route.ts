@@ -4,22 +4,29 @@ import { revalidateTag } from "next/cache";
 
 import { getNumericShopifyId } from "@/lib/shopify/utils";
 
-const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
-
 /**
  * Verify Shopify webhook HMAC signature
  */
-async function verifyWebhook(body: string, hmacHeader: string | null): Promise<boolean> {
-  if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
+async function verifyWebhook(
+  secret: string,
+  body: string,
+  hmacHeader: string | null,
+): Promise<boolean> {
+  if (!hmacHeader) {
     return false;
   }
 
-  const hash = crypto
-    .createHmac("sha256", SHOPIFY_WEBHOOK_SECRET)
-    .update(body, "utf8")
-    .digest("base64");
+  const expected = Buffer.from(
+    crypto.createHmac("sha256", secret).update(body, "utf8").digest("base64"),
+    "base64",
+  );
+  const received = Buffer.from(hmacHeader, "base64");
 
-  return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
+  if (expected.length !== received.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expected, received);
 }
 
 /**
@@ -33,17 +40,20 @@ async function verifyWebhook(body: string, hmacHeader: string | null): Promise<b
  * Settings > Notifications > Webhooks
  */
 export async function POST(request: Request) {
+  const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error("SHOPIFY_WEBHOOK_SECRET is not set");
+    return Response.json({ error: "Webhook secret not configured" }, { status: 500 });
+  }
+
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const topic = request.headers.get("x-shopify-topic");
 
-  // Verify webhook signature in production
-  if (SHOPIFY_WEBHOOK_SECRET) {
-    const isValid = await verifyWebhook(body, hmacHeader);
-    if (!isValid) {
-      console.error("Invalid Shopify webhook signature");
-      return Response.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  const isValid = await verifyWebhook(secret, body, hmacHeader);
+  if (!isValid) {
+    console.error("Invalid Shopify webhook signature");
+    return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   if (!topic) {
