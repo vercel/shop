@@ -25,7 +25,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <Suspense fallback={<UserInfoSkeleton />}>
             <UserInfo />
           </Suspense>
-          <AccountSidebar />
+          <Suspense fallback={<SidebarSkeleton />}>
+            <AccountSidebar />
+          </Suspense>
           <SignOutButton />
         </div>
       </aside>
@@ -37,7 +39,9 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           </Suspense>
           <SignOutButton />
         </div>
-        <AccountMobileTabs />
+        <Suspense>
+          <AccountMobileTabs />
+        </Suspense>
         <div className="pt-6 md:pt-0">
           <Suspense>
             <AccountGate>{children}</AccountGate>
@@ -69,6 +73,16 @@ function UserInfoSkeleton() {
     <div className="space-y-1.5">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-3 w-32" />
+    </div>
+  );
+}
+
+function SidebarSkeleton() {
+  return (
+    <div className="flex flex-col gap-1">
+      <Skeleton className="h-9 w-full rounded-lg" />
+      <Skeleton className="h-9 w-full rounded-lg" />
+      <Skeleton className="h-9 w-full rounded-lg" />
     </div>
   );
 }
