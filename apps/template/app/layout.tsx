@@ -49,7 +49,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
             <Nav locale={locale} />
-            <main id="main-content" className="flex-1 min-w-0">
+            <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
             </main>
             <Footer locale={locale} />

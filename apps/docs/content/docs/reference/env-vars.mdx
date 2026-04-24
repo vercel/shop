@@ -12,11 +12,20 @@ type: reference
 | `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token. Found in **Settings → Apps and sales channels → Headless**. |
 | `NEXT_PUBLIC_SITE_NAME` | The name displayed in your storefront's header and metadata. |
 
+## Customer Authentication
+
+These variables enable built-in customer authentication with [better-auth](https://www.better-auth.com/) and Shopify Customer Account API OIDC. When all three are set, the account icon appears in the nav and customers can sign in, view their profile, orders, and addresses. Without them, the auth UI is hidden.
+
+| Variable | Description |
+|----------|-------------|
+| `BETTER_AUTH_SECRET` | Secret for signing sessions. Generate with `openssl rand -base64 32`. |
+| `SHOPIFY_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Found in **Shopify Admin → Settings → Customer accounts → API clients**. |
+| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Found in the same location as the client ID. |
+
 ## Optional
 
 | Variable | Description |
 |----------|-------------|
 | `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Private Storefront API token for server-side requests. Enables higher rate limits and access to draft content. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_URL` | Customer Account API URL. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Required when using the enable-shopify-auth skill. |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Required when using the enable-shopify-auth skill. |
+| `BETTER_AUTH_BASE_URL` | Override the base URL for auth callbacks. Defaults to `NEXT_PUBLIC_BASE_URL` or the Vercel production URL. |
+| `BETTER_AUTH_TRUSTED_ORIGINS` | Comma-separated list of trusted origins for auth callbacks. |

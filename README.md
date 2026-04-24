@@ -53,6 +53,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 - **Next.js 16 App Router** with React 19 and React Compiler
 - **Shopify Storefront API** via GraphQL with type-safe operations
+- **Customer authentication** with better-auth and Shopify Customer Account API OIDC — opt-in via env vars
 - **Tailwind CSS 4** and shadcn/ui components
 - **Internationalization-ready** with next-intl
 - **AI-ready** with Vercel AI SDK integration
@@ -67,7 +68,6 @@ Vercel Shop includes a `vercel-shop` plugin with skills for extending the storef
 |-------|-------------|
 | `add-locale-url-prefix` | Locale-prefixed URL routing with next-intl |
 | `enable-analytics` | Add Vercel Analytics, Speed Insights, and Google Tag Manager |
-| `enable-shopify-auth` | Customer authentication using better-auth with Shopify OIDC |
 | `enable-shopify-cms` | Wire Shopify metaobjects as a CMS for homepage and marketing pages |
 | `enable-shopify-markets` | Multi-locale support with Shopify Markets and next-intl |
 | `enable-shopify-menus` | Replace hardcoded nav/footer with Shopify-powered menus, optional megamenu |

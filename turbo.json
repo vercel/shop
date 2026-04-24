@@ -1,6 +1,7 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "globalEnv": [
+    "BETTER_AUTH_SECRET",
     "SHOPIFY_ADMIN_DOMAIN",
     "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
     "SHOPIFY_STORE_DOMAIN",

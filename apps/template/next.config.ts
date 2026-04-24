@@ -3,6 +3,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  serverExternalPackages: ["better-auth"],
   experimental: {
     cachedNavigations: true,
     inlineCss: true,
