@@ -115,6 +115,7 @@ const HomePage = () => (
 			<OneTwoSection
 				description="As AI agents increasingly shop on behalf of consumers, your storefront needs to be readable by machines — not just humans. Product, collection, and search pages serve structured markdown to LLM agents via the Accept header, making your catalog structured, discoverable, and transactable by any agent."
 				title="Built for agentic commerce"
+				reverse
 			>
 				<ContentNegotiationDemo />
 			</OneTwoSection>
