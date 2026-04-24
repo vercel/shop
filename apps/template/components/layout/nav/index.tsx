@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { isAuthConfigured } from "@/lib/auth/auth";
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
@@ -24,9 +25,11 @@ export function Nav({ locale }: { locale: string }) {
 
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
-          <Suspense fallback={<NavAccountFallback />}>
-            <NavAccount />
-          </Suspense>
+          {isAuthConfigured && (
+            <Suspense fallback={<NavAccountFallback />}>
+              <NavAccount />
+            </Suspense>
+          )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>
