@@ -1,10 +1,8 @@
 import { getTranslations } from "next-intl/server";
 
 import { AccountPageHeader } from "@/components/account/page-header";
-import { requireSession } from "@/lib/auth/server";
 
 export default async function AddressesPage() {
-  await requireSession();
   const t = await getTranslations("account");
 
   return (
