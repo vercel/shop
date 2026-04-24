@@ -1,6 +1,12 @@
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 
+export const isAuthConfigured = Boolean(
+  process.env.BETTER_AUTH_SECRET &&
+    process.env.SHOPIFY_CUSTOMER_CLIENT_ID &&
+    process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET,
+);
+
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];

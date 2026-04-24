@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { AccountMobileTabs } from "@/components/account/mobile-tabs";
@@ -7,6 +8,7 @@ import { AccountSidebar } from "@/components/account/sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isAuthConfigured } from "@/lib/auth/auth";
 import { requireCustomerSession } from "@/lib/auth/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,6 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
+  if (!isAuthConfigured) notFound();
+
   return (
     <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
       <aside className="hidden w-52 shrink-0 md:block">
