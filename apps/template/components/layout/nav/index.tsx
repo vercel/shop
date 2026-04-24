@@ -27,14 +27,7 @@ export function Nav({ locale }: { locale: string }) {
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
           {isAuthConfigured && (
-            <div className="relative size-5">
-              <span className="text-foreground">
-                <UserRoundIcon className="size-5" />
-              </span>
-              <Suspense>
-                <NavAccount />
-              </Suspense>
-            </div>
+            <div className="size-5 bg-[red]" />
           )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
