@@ -9,7 +9,7 @@ export async function NavAccount() {
   if (!session) {
     return (
       <Link
-        href="/login"
+        href="/account/login"
         className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
       >
         <UserRoundIcon className="size-5" />

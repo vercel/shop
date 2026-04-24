@@ -73,13 +73,13 @@ export const getSession = cache(async (): Promise<FullSession | null> => {
 
 export async function requireCustomerSession(): Promise<CustomerSession> {
   const session = await getCustomerSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/account/login");
 
   return session;
 }
 
 export async function requireSession(): Promise<FullSession> {
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/account/login");
   return session;
 }
