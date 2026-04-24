@@ -37,8 +37,9 @@ export function NavAccountFallback() {
   if (!isAuthConfigured) return null;
 
   return (
-    <div className="flex items-center justify-center text-foreground">
+    <span className="flex items-center justify-center text-foreground">
       <UserRoundIcon className="size-5" />
-    </div>
+      <span className="sr-only">Account</span>
+    </span>
   );
 }
