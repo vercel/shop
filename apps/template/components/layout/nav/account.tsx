@@ -2,12 +2,9 @@ import { UserRoundCheckIcon, UserRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { isAuthConfigured } from "@/lib/auth/auth";
 import { getCustomerSession } from "@/lib/auth/server";
 
 export async function NavAccount() {
-  if (!isAuthConfigured) return null;
-
   const [session, t] = await Promise.all([getCustomerSession(), getTranslations("nav")]);
 
   if (!session) {
@@ -34,12 +31,9 @@ export async function NavAccount() {
 }
 
 export function NavAccountFallback() {
-  if (!isAuthConfigured) return null;
-
   return (
     <span className="flex items-center justify-center text-foreground">
       <UserRoundIcon className="size-5" />
-      <span className="sr-only">Account</span>
     </span>
   );
 }

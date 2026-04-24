@@ -8,7 +8,7 @@ import { AccountSidebar } from "@/components/account/sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isAuthConfigured } from "@/lib/auth/auth";
+import { isAuthEnabled } from "@/lib/auth/auth";
 import { requireCustomerSession } from "@/lib/auth/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
-  if (!isAuthConfigured) notFound();
+  if (!isAuthEnabled) notFound();
 
   return (
     <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
