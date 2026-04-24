@@ -26,13 +26,9 @@ export async function Nav({ locale }: { locale: string }) {
 
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
-          <span className="text-xs text-red-500">
-            AUTH={String(isAuthConfigured)}|
-            RAW={String(process.env.NEXT_PUBLIC_AUTH_CONFIGURED)}|
-            SECRET={String(!!process.env.BETTER_AUTH_SECRET)}|
-            CID={String(!!process.env.SHOPIFY_CUSTOMER_CLIENT_ID)}|
-            CSEC={String(!!process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET)}
-          </span>
+          {isAuthConfigured && (
+            <div className="size-5 bg-[red]" />
+          )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>
