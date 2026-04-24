@@ -1,0 +1,117 @@
+---
+title: Authentication
+description: Built-in customer authentication with better-auth and Shopify Customer Account API OIDC.
+---
+
+The template includes built-in customer authentication using [better-auth](https://www.better-auth.com/) with the Shopify Customer Account API. When configured, customers can sign in via Shopify OIDC, view their profile, order history, and address book.
+
+Authentication is **opt-in via environment variables**. Without them, the storefront works as a guest-only experience and no auth UI is rendered.
+
+## Enabling authentication
+
+Add these three environment variables to enable the auth UI:
+
+```bash
+BETTER_AUTH_SECRET="generate-with-openssl-rand-base64-32"
+SHOPIFY_CUSTOMER_CLIENT_ID="your-customer-client-id"
+SHOPIFY_CUSTOMER_CLIENT_SECRET="your-customer-client-secret"
+```
+
+Generate the secret with `openssl rand -base64 32`. The client ID and secret come from Shopify's Customer Account API.
+
+### Shopify Admin setup
+
+1. Go to **Shopify Admin → Settings → Customer accounts**
+2. Enable **Customer Account API**
+3. Create a **Customer Account API client** (under "API clients")
+4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
+5. Copy the client ID and client secret to your environment variables
+6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+
+See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
+
+## How it works
+
+Authentication is built on three modules in `lib/auth/`:
+
+| Module | Purpose |
+|--------|---------|
+| `auth.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin. Exports `isAuthConfigured` for feature-gating. |
+| `server.ts` | Server-side session helpers: `getCustomerSession()`, `getSession()`, `requireCustomerSession()`, `requireSession()`. Uses React `cache()` for per-request memoization. |
+| `client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`. |
+
+The API route at `/api/auth/[...all]` handles all OAuth callbacks, session management, and token operations via better-auth's `toNextJsHandler`.
+
+### Feature gating
+
+The `isAuthConfigured` flag (exported from `lib/auth/auth.ts`) checks whether all three required env vars are present. When `false`:
+
+- The account icon does not appear in the nav
+- `/account/login` and `/account/*` return 404
+- No auth-related code runs at request time
+
+This means auth infrastructure has zero runtime cost when unconfigured.
+
+## Routes
+
+Authentication uses Shopify-native URL paths:
+
+| Route | Description |
+|-------|-------------|
+| `/account/login` | Auto-redirects to Shopify OIDC. Not indexed by search engines. |
+| `/account` | Redirects to `/account/profile`. |
+| `/account/profile` | Displays customer name and email. |
+| `/account/orders` | Order history (scaffold — wire with Customer Account API operations). |
+| `/account/orders/[id]` | Order detail (scaffold). |
+| `/account/addresses` | Address book (scaffold). |
+
+The account pages use a `(authenticated)` route group so the auth-gated layout applies to protected pages without blocking `/account/login`.
+
+## Architecture
+
+### Session flow
+
+1. Customer visits `/account/login` → auto-redirected to Shopify OIDC
+2. After Shopify consent → redirected to `/api/auth/callback/shopify`
+3. better-auth exchanges the code for tokens, decodes the ID token, and creates a session
+4. Session stored in an `httpOnly` cookie with PKCE verification
+
+### Server-side usage
+
+```ts
+import { getCustomerSession, requireSession } from "@/lib/auth/server";
+
+// In a server component — returns null if not authenticated
+const session = await getCustomerSession();
+
+// In a protected page — redirects to /account/login if not authenticated
+const session = await requireSession();
+// session.accessToken is available for Customer Account API calls
+```
+
+### Client-side usage
+
+```ts
+"use client";
+import { useSession, signIn, signOut } from "@/lib/auth/client";
+
+function AccountMenu() {
+  const { loading, authenticated, customer } = useSession();
+
+  if (loading) return null;
+  if (!authenticated) return <button onClick={() => signIn()}>Sign in</button>;
+  return <button onClick={() => signOut()}>Sign out</button>;
+}
+```
+
+## Guardrails
+
+- Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
+- Always call `requireSession()` before any Customer Account API operation
+- The Customer Account API uses a separate GraphQL endpoint from the Storefront API — validate fields with the Shopify schema
+- Session cookies use `httpOnly` and `secure` flags automatically via better-auth
+- PKCE is enabled for the OAuth flow — never disable it
+
+## Next steps
+
+The account pages are scaffolds. To populate them with real data, create Customer Account API operations in `lib/shopify/operations/customer.ts` for fetching profile, orders, and addresses using the access token from `requireSession()`.

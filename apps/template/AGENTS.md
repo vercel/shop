@@ -113,12 +113,28 @@ Storefront skills are provided by the project-scoped `vercel-shop` plugin rather
 Common entry points:
 
 - Shopify GraphQL work: `/vercel-shop:shopify-graphql-reference`
-- Customer auth and account pages: `/vercel-shop:enable-shopify-auth`
 - Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
 - Locale-prefixed routing only: `/vercel-shop:add-locale-url-prefix`
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
+
+## Authentication
+
+Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is opt-in via environment variables (`BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET`). When unconfigured, auth UI is hidden and has zero runtime cost.
+
+Key files:
+
+- `lib/auth/auth.ts` — better-auth config, exports `isAuthConfigured`
+- `lib/auth/server.ts` — `getCustomerSession()`, `requireSession()`, etc.
+- `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
+- `app/api/auth/[...all]/route.ts` — OAuth callback handler
+- `app/account/(authenticated)/` — auth-gated account pages
+- `app/account/login/` — login redirect (outside auth gate)
+- `components/layout/nav/account.tsx` — nav icon, gated by `isAuthConfigured`
+- `components/account/` — sidebar, tabs, page header, sign-out button
+
+All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
 
 ## Template Rollout Log
 
