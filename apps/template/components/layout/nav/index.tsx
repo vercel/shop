@@ -26,12 +26,9 @@ export async function Nav({ locale }: { locale: string }) {
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
           {isAuthEnabled && (
-            <div className="relative size-5">
-              <NavAccountFallback />
-              <Suspense>
-                <NavAccount />
-              </Suspense>
-            </div>
+            <Suspense fallback={<NavAccountFallback />}>
+              <NavAccount />
+            </Suspense>
           )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
