@@ -125,8 +125,7 @@ Customer authentication is built in using better-auth with Shopify Customer Acco
 
 Key files:
 
-- `lib/auth/config.ts` — `isAuthConfigured` flag (reads `NEXT_PUBLIC_AUTH_ENABLED`)
-- `lib/auth/auth.ts` — better-auth config with Shopify OIDC (server-only)
+- `lib/auth/auth.ts` — better-auth config with Shopify OIDC, exports `isAuthEnabled` (server-only)
 - `lib/auth/server.ts` — `getCustomerSession()`, `requireSession()`, etc.
 - `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
 - `app/api/auth/[...all]/route.ts` — OAuth callback handler

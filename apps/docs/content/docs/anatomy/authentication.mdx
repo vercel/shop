@@ -39,8 +39,7 @@ Authentication is built on these modules:
 
 | Module | Purpose |
 |--------|---------|
-| `lib/auth/config.ts` | Exports `isAuthConfigured` — reads `NEXT_PUBLIC_AUTH_ENABLED`. Safe for both server and client code. |
-| `lib/auth/auth.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin. Server-only. |
+| `lib/auth/auth.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin. Exports `isAuthEnabled`. Server-only. |
 | `lib/auth/server.ts` | Server-side session helpers: `getCustomerSession()`, `getSession()`, `requireCustomerSession()`, `requireSession()`. Uses React `cache()` for per-request memoization. |
 | `lib/auth/client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`. |
 
@@ -48,7 +47,7 @@ The API route at `/api/auth/[...all]` handles all OAuth callbacks, session manag
 
 ### Feature gating
 
-The `isAuthConfigured` flag (from `lib/auth/config.ts`) reads `NEXT_PUBLIC_AUTH_ENABLED`. When `false`:
+The `isAuthEnabled` flag (from `lib/auth/auth.ts`) reads `NEXT_PUBLIC_AUTH_ENABLED`. When `false`:
 
 - The account icon does not appear in the nav
 - `/account/login` and `/account/*` return 404
@@ -119,7 +118,7 @@ function AccountMenu() {
 - The Customer Account API uses a separate GraphQL endpoint from the Storefront API — validate fields with the Shopify schema
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - PKCE is enabled for the OAuth flow — never disable it
-- `isAuthConfigured` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components
+- `isAuthEnabled` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components
 
 ## Next steps
 

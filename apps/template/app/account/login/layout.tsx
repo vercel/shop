@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { isAuthConfigured } from "@/lib/auth/config";
+import { isAuthEnabled } from "@/lib/auth/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
-  if (!isAuthConfigured) notFound();
+  if (!isAuthEnabled) notFound();
 
   return children;
 }

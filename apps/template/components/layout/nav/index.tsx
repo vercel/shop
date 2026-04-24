@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { isAuthConfigured } from "@/lib/auth/config";
+import { isAuthEnabled } from "@/lib/auth/auth";
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
@@ -25,7 +25,7 @@ export async function Nav({ locale }: { locale: string }) {
 
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
-          {isAuthConfigured && (
+          {isAuthEnabled && (
             <div className="relative size-5">
               <NavAccountFallback />
               <Suspense>

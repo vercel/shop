@@ -1,9 +1,11 @@
 // Core better-auth configuration with Shopify Customer Account API OIDC.
-// Auth is opt-in via NEXT_PUBLIC_AUTH_ENABLED. See lib/auth/config.ts for
-// the feature gate and .env.example for the full variable list.
+// Auth is opt-in via NEXT_PUBLIC_AUTH_ENABLED. See .env.example for setup.
 import "server-only";
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
+
+/** True when auth is enabled via NEXT_PUBLIC_AUTH_ENABLED=1. */
+export const isAuthEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "1";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
