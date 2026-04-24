@@ -121,20 +121,21 @@ Common entry points:
 
 ## Authentication
 
-Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is opt-in via environment variables (`BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET`). When unconfigured, auth UI is hidden and has zero runtime cost.
+Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is gated by `NEXT_PUBLIC_AUTH_ENABLED=1`. This variable must be a `NEXT_PUBLIC_` env var because it controls conditional rendering in the nav — server-only env vars cause hydration mismatches with cache components. The remaining auth secrets (`BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET`) are server-only.
 
 Key files:
 
-- `lib/auth/auth.ts` — better-auth config, exports `isAuthConfigured`
+- `lib/auth/config.ts` — `isAuthConfigured` flag (reads `NEXT_PUBLIC_AUTH_ENABLED`)
+- `lib/auth/auth.ts` — better-auth config with Shopify OIDC (server-only)
 - `lib/auth/server.ts` — `getCustomerSession()`, `requireSession()`, etc.
 - `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
 - `app/api/auth/[...all]/route.ts` — OAuth callback handler
 - `app/account/(authenticated)/` — auth-gated account pages
 - `app/account/login/` — login redirect (outside auth gate)
-- `components/layout/nav/account.tsx` — nav icon, gated by `isAuthConfigured`
+- `components/layout/nav/account.tsx` — nav icon (async, inside Suspense)
 - `components/account/` — sidebar, tabs, page header, sign-out button
 
-All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
+The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
 
 ## Template Rollout Log
 

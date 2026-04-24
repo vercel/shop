@@ -29,3 +29,11 @@ export async function NavAccount() {
     </Link>
   );
 }
+
+export function NavAccountFallback() {
+  return (
+    <span className="flex items-center justify-center text-foreground">
+      <UserRoundIcon className="size-5" />
+    </span>
+  );
+}

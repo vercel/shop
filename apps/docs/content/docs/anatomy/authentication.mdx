@@ -9,15 +9,18 @@ Authentication is **opt-in via environment variables**. Without them, the storef
 
 ## Enabling authentication
 
-Add these three environment variables to enable the auth UI:
+Add these environment variables to enable the auth UI:
 
 ```bash
+NEXT_PUBLIC_AUTH_ENABLED=1
 BETTER_AUTH_SECRET="generate-with-openssl-rand-base64-32"
 SHOPIFY_CUSTOMER_CLIENT_ID="your-customer-client-id"
 SHOPIFY_CUSTOMER_CLIENT_SECRET="your-customer-client-secret"
 ```
 
-Generate the secret with `openssl rand -base64 32`. The client ID and secret come from Shopify's Customer Account API.
+`NEXT_PUBLIC_AUTH_ENABLED` controls whether the auth UI renders (account icon, login page, account pages). It must be a `NEXT_PUBLIC_` variable because it's used in conditional rendering — server-only env vars cause hydration mismatches with cache components. The remaining three variables are server-only secrets used by better-auth at runtime.
+
+Generate the auth secret with `openssl rand -base64 32`. The client ID and secret come from Shopify's Customer Account API.
 
 ### Shopify Admin setup
 
@@ -32,25 +35,26 @@ See [Environment Variables](/docs/reference/env-vars) for the full variable refe
 
 ## How it works
 
-Authentication is built on three modules in `lib/auth/`:
+Authentication is built on these modules:
 
 | Module | Purpose |
 |--------|---------|
-| `auth.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin. Exports `isAuthConfigured` for feature-gating. |
-| `server.ts` | Server-side session helpers: `getCustomerSession()`, `getSession()`, `requireCustomerSession()`, `requireSession()`. Uses React `cache()` for per-request memoization. |
-| `client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`. |
+| `lib/auth/config.ts` | Exports `isAuthConfigured` — reads `NEXT_PUBLIC_AUTH_ENABLED`. Safe for both server and client code. |
+| `lib/auth/auth.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin. Server-only. |
+| `lib/auth/server.ts` | Server-side session helpers: `getCustomerSession()`, `getSession()`, `requireCustomerSession()`, `requireSession()`. Uses React `cache()` for per-request memoization. |
+| `lib/auth/client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`. |
 
 The API route at `/api/auth/[...all]` handles all OAuth callbacks, session management, and token operations via better-auth's `toNextJsHandler`.
 
 ### Feature gating
 
-The `isAuthConfigured` flag (exported from `lib/auth/auth.ts`) checks whether all three required env vars are present. When `false`:
+The `isAuthConfigured` flag (from `lib/auth/config.ts`) reads `NEXT_PUBLIC_AUTH_ENABLED`. When `false`:
 
 - The account icon does not appear in the nav
 - `/account/login` and `/account/*` return 404
 - No auth-related code runs at request time
 
-This means auth infrastructure has zero runtime cost when unconfigured.
+This means auth infrastructure has zero runtime cost when disabled.
 
 ## Routes
 
@@ -75,6 +79,10 @@ The account pages use a `(authenticated)` route group so the auth-gated layout a
 2. After Shopify consent → redirected to `/api/auth/callback/shopify`
 3. better-auth exchanges the code for tokens, decodes the ID token, and creates a session
 4. Session stored in an `httpOnly` cookie with PKCE verification
+
+### Nav account icon
+
+The nav uses a fixed-size container (`size-5`) with the fallback icon rendered inline and the async `NavAccount` component positioned absolutely on top via Suspense. This ensures the icon space is always reserved and there is no layout shift when the Suspense boundary resolves.
 
 ### Server-side usage
 
@@ -111,6 +119,7 @@ function AccountMenu() {
 - The Customer Account API uses a separate GraphQL endpoint from the Storefront API — validate fields with the Shopify schema
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - PKCE is enabled for the OAuth flow — never disable it
+- `isAuthConfigured` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components
 
 ## Next steps
 

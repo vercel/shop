@@ -1,9 +1,8 @@
-import { UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { isAuthConfigured } from "@/lib/auth/config";
-import { NavAccount } from "./account";
+import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
@@ -27,7 +26,12 @@ export async function Nav({ locale }: { locale: string }) {
         <div className="flex items-center gap-5 ml-auto">
           <SearchModal />
           {isAuthConfigured && (
-            <div className="size-5 bg-[red]" />
+            <div className="relative size-5">
+              <NavAccountFallback />
+              <Suspense>
+                <NavAccount />
+              </Suspense>
+            </div>
           )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
