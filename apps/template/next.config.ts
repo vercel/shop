@@ -3,6 +3,14 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  env: {
+    NEXT_PUBLIC_AUTH_CONFIGURED:
+      process.env.BETTER_AUTH_SECRET &&
+      process.env.SHOPIFY_CUSTOMER_CLIENT_ID &&
+      process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET
+        ? "1"
+        : "",
+  },
   serverExternalPackages: ["better-auth"],
   experimental: {
     cachedNavigations: true,

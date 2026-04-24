@@ -2,7 +2,7 @@ import { UserRoundIcon } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { isAuthConfigured } from "@/lib/auth/auth";
+import { isAuthConfigured } from "@/lib/auth/config";
 import { NavAccount } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";

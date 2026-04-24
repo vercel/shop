@@ -5,12 +5,8 @@ import "server-only";
 import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 
-/** True when all required auth env vars are set. Used to gate UI rendering. */
-export const isAuthConfigured = Boolean(
-  !!process.env.BETTER_AUTH_SECRET &&
-    !!process.env.SHOPIFY_CUSTOMER_CLIENT_ID &&
-    !!process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET,
-);
+// Re-export for convenience — the source of truth is lib/auth/config.ts
+export { isAuthConfigured } from "./config";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 

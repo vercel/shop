@@ -8,7 +8,7 @@ import { AccountSidebar } from "@/components/account/sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isAuthConfigured } from "@/lib/auth/auth";
+import { isAuthConfigured } from "@/lib/auth/config";
 import { requireCustomerSession } from "@/lib/auth/server";
 
 export async function generateMetadata(): Promise<Metadata> {
