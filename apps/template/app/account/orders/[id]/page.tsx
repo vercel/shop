@@ -1,9 +1,18 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
 import { AccountPageHeader } from "@/components/account/page-header";
 
-export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense>
+      <OrderDetailContent params={params} />
+    </Suspense>
+  );
+}
+
+async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const t = await getTranslations("account");
 
