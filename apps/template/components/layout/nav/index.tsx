@@ -9,7 +9,7 @@ import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
-export function Nav({ locale }: { locale: string }) {
+export async function Nav({ locale }: { locale: string }) {
   return (
     <nav
       className="sticky top-0 z-30 w-full bg-background pt-[env(safe-area-inset-top,0px)] transition-shadow duration-250"
