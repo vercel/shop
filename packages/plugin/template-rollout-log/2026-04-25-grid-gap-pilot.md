@@ -1,6 +1,6 @@
 ---
-title: Vertical-spacing pilot — home + PDP on grid+gap
-changeKey: grid-gap-pilot-home-pdp
+title: Sections primitive — vertical-spacing pilot on home & PDP
+changeKey: sections-pilot-home-pdp
 introducedOn: 2026-04-25
 changeType: refactor
 defaultAction: review
@@ -8,6 +8,7 @@ appliesTo:
   - all
 paths:
   - apps/template/components/ui/container.tsx
+  - apps/template/components/ui/sections.tsx
   - apps/template/app/page.tsx
   - apps/template/components/product/products-grid.tsx
   - apps/template/components/product/related-products-section.tsx
@@ -22,22 +23,25 @@ paths:
 
 ## Summary
 
-The template's vertical-spacing model is shifting away from child-side margins (`mb-*`, `mt-*`) and `space-y-*` (which is still margin-based under the hood) toward **parent-owned** spacing using `display: grid` with a single implicit column and `gap-*`. This entry rolls out the convention to the home page and the PDP. Other pages convert in follow-up PRs.
+Vertical rhythm between page sections moves from child-side margins (`mb-*`, `mt-*`) and `space-y-*` to a small parent primitive: **`Sections`** (`components/ui/sections.tsx`). It's a `<div className="grid gap-10">` wrapper that overrides cleanly via `className`. `Container` keeps its narrow role — horizontal padding + max-width — and no longer carries any vertical opinion.
+
+This entry rolls out the convention to the home page and the PDP. Other pages stay on prior patterns until follow-up PRs.
 
 Concrete changes:
 
-- `Container` now sets `grid gap-10` by default, so its direct children get the canonical vertical rhythm with no extra wrapper.
-- Home page (`app/page.tsx`) drops its inner `<div className="flex flex-col gap-10">` wrapper; `ProductsGrid` is now a direct Container child.
-- `ProductsGrid`'s outer `<div>` becomes `grid gap-4`; `mb-4` removed from its title row.
-- All `space-y-*` on the PDP (page shell, fallback, options, color/option pickers, media) become `grid gap-*` with the same numeric value.
-- The `mt-3` between the product title and price moves into the wrapper as `grid gap-2.5`.
-- AGENTS.md gains a `Spacing` subsection codifying the convention and the canonical gap scale (`gap-2.5 / 4 / 5 / 10`).
+- New `<Sections>` primitive, default `grid gap-10`, override via `className`.
+- `app/page.tsx` wraps banner + Container in `<Sections>` so full-bleed and constrained children compose freely.
+- PDP `ProductContent` and the Suspense fallback shell use `<Sections>` for inter-section rhythm. Inner column layouts (sticky right column with title → options → buy → description) use plain `grid gap-*`.
+- The product title and price sit flush, matching production. The pilot's earlier accidental `gap-2.5` between them is removed.
+- `space-y-*` and `flex flex-col gap-*` inside the PDP files (color/option pickers, product-media, related-products skeleton) are normalized to `grid gap-*` — internal layout improvements that don't affect inter-section rhythm.
+- `products-grid` outer becomes `grid gap-4`; the `mb-4` on the title row is gone.
+- AGENTS.md gains a `Spacing` subsection codifying the rule and the canonical scale (`gap-2.5 / 4 / 5 / 10`).
 
 ## Why it matters
 
-- Predictable layout: child components no longer push each other around, so reordering or reusing a component doesn't change the rhythm.
-- Eliminates margin-collapse and `space-y-*`-vs-grid surprises.
-- The 5-column language used by search, the nav megamenu, and the footer all assume CSS gap; this pilot brings the page-level scaffolding in line.
+- Predictable layout: child components no longer push each other around, so reordering or reusing them doesn't change the rhythm.
+- `Container` and `Sections` have orthogonal responsibilities. A page can interleave full-bleed sections (a hero strip, a marketing banner) with constrained `<Container>` children inside the same `<Sections>`.
+- Per-page rhythm is a one-prop override (`<Sections className="gap-5">`) rather than a Container API negotiation.
 
 ## Apply when
 
@@ -47,18 +51,22 @@ Concrete changes:
 ## Safe to skip when
 
 - The storefront has heavily customized the home or PDP layouts and has its own spacing convention.
-- The storefront overrides `Container` to disable padding/sizing — the new `gap-10` default will only apply between direct children, so the override may already be a no-op, but verify.
 
 ## Validation
 
-1. `pnpm --filter template dev`. Visit `/`. Visual diff against `main`: banner sits flush, products grid below with the same rhythm. Mobile and desktop unchanged.
+1. `pnpm --filter template dev`. Visit `/`. Visual diff against `main`: banner + featured products grid, same rhythm. Mobile and desktop unchanged.
 2. Visit `/products/[handle]`:
-   - Loaded state: title → price (gap-2.5), pickers (gap-10 between groups), buy buttons, description, then RelatedProductsSection. Same rhythm as before.
-   - Suspense fallback: skeleton shell mirrors the loaded state's rhythm.
-3. DevTools: confirm direct children of `<Container>`, the PDP grid wrapper, and the product-info column have no inline `margin-top` / `margin-bottom`.
-4. Lint and format clean: `pnpm --filter template lint` / `pnpm --filter template format --check`.
+   - Title and price flush — no extra gap between them.
+   - Sticky right column rhythm matches production (title-price → options → buy → description).
+   - RelatedProductsSection sits below ProductDetailSection with `gap-10`.
+   - Suspense fallback mirrors loaded rhythm.
+3. Visit `/collections/[handle]` and `/search?q=beds`. Rhythm matches `main` — Container is back to horizontal-only, so pages that haven't migrated keep their original spacing.
+4. DevTools:
+   - `<Container>` has no `display: grid` and no inline gap.
+   - `<Sections>` instances have `display: grid; gap: 40px;` (or override).
+5. Lint and format clean: `pnpm --filter template lint` / `pnpm --filter template format --check`.
 
 ## Follow-ups
 
-- Apply the same convention to search, account, cart, and footer body in subsequent PRs (one page per PR keeps blast radius small).
-- After the majority of pages convert, consider adding an oxlint rule banning `\bmb-`, `\bmt-`, `\bspace-y-` in JSX `className` strings (with carve-outs for compound-component internals like `ScrollCarousel`).
+- Apply `<Sections>` to search, collection, account, cart, footer body in subsequent PRs (one page per PR keeps blast radius small). Each page gets to pick its own gap (`gap-5` for collection's filter→grid pairing, etc.).
+- After the majority of pages convert, consider an oxlint rule banning `\bmb-`, `\bmt-`, `\bspace-y-` in JSX `className` strings (with carve-outs for compound-component internals like `ScrollCarousel`).

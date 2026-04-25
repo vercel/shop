@@ -4,6 +4,7 @@ import { ProductSchema } from "@/components/product-detail/schema";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Container } from "@/components/ui/container";
+import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
@@ -24,7 +25,7 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 
 function ProductPageFallback() {
   return (
-    <div className="grid gap-10">
+    <Sections>
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
         <div className="lg:col-span-6">
           {/* Mobile: single full-bleed square + pagination space */}
@@ -41,7 +42,7 @@ function ProductPageFallback() {
           </div>
         </div>
         <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-          <div className="grid gap-2.5">
+          <div>
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-24" />
           </div>
@@ -59,7 +60,7 @@ function ProductPageFallback() {
           </div>
         </div>
       </div>
-    </div>
+    </Sections>
   );
 }
 
@@ -93,14 +94,14 @@ async function ProductContent({
       />
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      <div className="grid gap-10">
+      <Sections>
         <ProductDetailSection
           product={product}
           locale={locale}
           variantIdPromise={variantIdPromise}
         />
         <RelatedProductsSection handle={handle} locale={locale} />
-      </div>
+      </Sections>
     </>
   );
 }

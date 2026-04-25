@@ -23,7 +23,7 @@ function ProductInfoHeader({
   ...props
 }: ProductInfoHeaderProps) {
   return (
-    <div data-slot="product-info-header" className={cn("grid gap-2.5", className)} {...props}>
+    <div data-slot="product-info-header" className={className} {...props}>
       <h1 className={cn("font-semibold text-foreground tracking-tight", "text-3xl")}>{title}</h1>
 
       {selectedVariant && (
