@@ -8,8 +8,8 @@ import {
 import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
 import { CollectionToolbarSkeleton } from "@/components/collections/toolbar";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { loadMoreSearchProducts } from "@/lib/collections/actions";
 import type { Locale } from "@/lib/i18n";
+import { loadMoreSearchProducts } from "@/lib/search/action";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
