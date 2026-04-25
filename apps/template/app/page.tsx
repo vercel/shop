@@ -47,7 +47,7 @@ export default async function HomePage() {
         }}
       />
 
-      <Container>
+      <Container className="pb-10">
         {featuredProductsResult.products.length > 0 && (
           <ProductsGrid
             title={t("featuredProducts.title")}
