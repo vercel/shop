@@ -32,7 +32,7 @@ Three small convention tightenings, no behavior changes.
 
 3. **`React.ComponentProps<"X">` everywhere (was: `ComponentPropsWithoutRef<"X">` in product/product-detail).** Refs are regular props in React 19, so the `WithoutRef` distinction is no longer meaningful, and the rest of the codebase (`components/ui/*`) already uses the `React.ComponentProps` form via `import type * as React from "react"`. Converted 7 files in `components/product/*` and `components/product-detail/*`. AGENTS.md now states this under Naming.
 
-`components/ui/drawer.tsx` is intentionally left on `React.ComponentPropsWithoutRef`. It's the older shadcn `forwardRef` + `React.ElementRef` pattern; converting it requires a wider rewrite of every `forwardRef` block, which is out of scope here and worth doing as a coordinated drawer-modernization PR.
+`components/ui/drawer.tsx` was deliberately scoped out of this PR (it's the older shadcn `forwardRef` + `React.ElementRef` pattern that needed a wider rewrite). It was modernized separately in `drawer-modernize-no-forwardref` (PR #194) and is now on the same `React.ComponentProps` form as the rest of `components/ui/`.
 
 ## Why it matters
 
@@ -53,7 +53,7 @@ Three small convention tightenings, no behavior changes.
 ## Validation
 
 1. `pnpm --filter template build` — clean (the pre-existing i18n typecheck errors on main are unrelated).
-2. `git grep "ComponentPropsWithoutRef" apps/template/components` returns only `components/ui/drawer.tsx` (the deliberate exclusion) and `components/ai-elements/*` (vendored).
+2. `git grep "ComponentPropsWithoutRef" apps/template/components` returns only `components/ai-elements/*` (vendored).
 3. `git grep "type [A-Z][a-zA-Z]*Props =" apps/template/components` returns only files in `components/ai-elements/*` (vendored).
 4. `git grep "client-components\.tsx\|server-components\.tsx" apps/template` returns no results.
 5. PDP renders normally (color picker, option picker, price, discount badge, autoplay video, lightbox).
