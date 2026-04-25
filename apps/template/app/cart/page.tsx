@@ -47,7 +47,7 @@ async function CartContent({ locale }: { locale: Locale }) {
         {!cart || cart.totalQuantity === 0 ? (
           <Empty />
         ) : (
-          <Container>
+          <Container className="py-10">
             <Header />
             <div className="lg:grid lg:grid-cols-12 lg:gap-10">
               <div className="lg:col-span-9">

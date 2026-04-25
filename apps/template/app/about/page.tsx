@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <Container className="max-w-2xl">
+    <Container className="max-w-2xl py-10">
       <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
         <h1>About Vercel Shop</h1>
         <p>
