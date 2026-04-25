@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { ProductsGrid } from "@/components/product/products-grid";
 import { BannerSection } from "@/components/sections/banner-section";
 import { Container } from "@/components/ui/container";
+import { Sections } from "@/components/ui/sections";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -32,7 +33,7 @@ export default async function HomePage() {
   const featuredProductsResult = await getProducts({ limit: 8, locale });
 
   return (
-    <>
+    <Sections>
       {/* To use a custom hero image, pass a backgroundImage prop:
           backgroundImage: { url: "https://...", alt: "...", width: 1920, height: 1080 }
           or import a local image: import myHero from "@/public/my-hero.jpg" */}
@@ -46,18 +47,16 @@ export default async function HomePage() {
         }}
       />
 
-      <Container>
-        <div className="flex flex-col gap-10">
-          {featuredProductsResult.products.length > 0 && (
-            <ProductsGrid
-              title={t("featuredProducts.title")}
-              products={featuredProductsResult.products}
-              locale={locale}
-              collectionUrl="/search"
-            />
-          )}
-        </div>
+      <Container className="pb-10">
+        {featuredProductsResult.products.length > 0 && (
+          <ProductsGrid
+            title={t("featuredProducts.title")}
+            products={featuredProductsResult.products}
+            locale={locale}
+            collectionUrl="/search"
+          />
+        )}
       </Container>
-    </>
+    </Sections>
   );
 }

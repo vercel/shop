@@ -23,7 +23,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   if (!isAuthEnabled) notFound();
 
   return (
-    <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
+    <Container className="py-10 flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
       <aside className="hidden w-52 shrink-0 md:block">
         <div className="sticky top-24 flex flex-col gap-6">
           <Suspense fallback={<UserInfoSkeleton />}>

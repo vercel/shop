@@ -61,6 +61,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Props interfaces: `{ComponentName}Props`
 - Constants: `SCREAMING_SNAKE_CASE`
 
+### Spacing
+
+- `Container` provides horizontal padding and max-width only. It does **not** manage vertical spacing.
+- For vertical rhythm between sibling sections, wrap them in `<Sections>` (`components/ui/sections.tsx`). Default `gap-10`; override per page via `className` (e.g. `<Sections className="gap-5">`). `<Sections>` happily mixes full-bleed and contained children since each child can be a `<Container>`, a banner, or anything else.
+- Inside a single section, prefer `grid gap-*` on the immediate parent. Don't add `mb-*` / `mt-*` / `my-*` / `space-y-*` to children for inter-sibling spacing.
+- Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
+- Padding *inside* a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
+- This convention is partially rolled out: home and PDP follow it; other pages still use `mb-*`/`space-y-*` patterns and that's OK in this transitional state.
+
 ### Tailwind & Styling
 
 - Prefer `data-[attr=value]` selectors over conditional class assembly.

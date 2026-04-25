@@ -32,7 +32,6 @@ function ProductInfoHeader({
           currencyCode={selectedVariant.price.currencyCode}
           compareAtAmount={selectedVariant.compareAtPrice?.amount}
           locale={locale}
-          className="mt-3"
         />
       )}
     </div>
@@ -67,7 +66,7 @@ function ProductInfoOptions({
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
-      <div className="space-y-10">
+      <div className="grid gap-10">
         {/* Color Pickers (with images or swatches) */}
         {colorOptions.map((colorOption) => (
           <ColorPicker
