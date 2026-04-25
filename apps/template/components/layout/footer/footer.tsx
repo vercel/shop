@@ -50,7 +50,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
   const columns = items.slice(0, 5);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 pb-10 mb-10 border-b">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 mb-15">
       {columns.map((column) => (
         <div key={column.id} className="space-y-3">
           {column.url ? (
