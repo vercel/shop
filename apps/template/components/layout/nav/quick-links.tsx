@@ -68,7 +68,7 @@ function NavItem({ item }: { item: MenuItem }) {
           "bg-background border-b shadow-md",
         )}
       >
-        <div className="px-5 lg:px-10 py-8">
+        <div className="px-5 lg:px-10 pb-5">
           <div className="grid grid-cols-5 gap-5">
             {columns.map((column) => (
               <div key={column.id}>
