@@ -122,7 +122,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
           requestAnimationFrame(() => inputRef.current?.focus());
         }}
       >
-        <div className="w-full max-w-lg h-fit">
+        <div className="w-full max-w-xl h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
           <div className="bg-background rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
             {/* Search input */}
