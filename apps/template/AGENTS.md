@@ -51,14 +51,15 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 - Keep sub-components in the same file as their consumer when they share the same directive (or lack one). Only split into a separate file when the components need different directives (e.g., one is `"use client"` and the other is a server component) or when the file becomes unwieldy.
 - A single file per logical component is preferred.
-- When a split is necessary, name the file by its role: `components.tsx` for directive-free sub-components, `client-components.tsx` for `"use client"` sub-components, `server-components.tsx` for server-only sub-components.
+- When a directive split is necessary, suffix the carved-out file with the directive: `foo.tsx` (the entry, typically a server component) is paired with `foo-client.tsx` for `"use client"` sub-components — e.g. `sidebar.tsx` + `sidebar-client.tsx`, `mobile-tabs.tsx` + `mobile-tabs-client.tsx`. Use `foo-server.tsx` symmetrically if a server-only piece needs to be carved out of an otherwise-client file. The suffix keeps the pair adjacent in the directory listing.
 
 ### Naming
 
 - Files: `kebab-case.tsx`
 - Components: `PascalCase`
 - Server actions: verb + `Action` suffix (`addToCartAction`)
-- Props interfaces: `{ComponentName}Props`
+- Props interfaces: `{ComponentName}Props`. Use `interface` (not `type`) so consumers can extend or augment.
+- Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
 
 ### Spacing

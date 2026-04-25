@@ -18,11 +18,11 @@ const COUNTRY_CODES: Record<string, string> = {
   "ru-RU": "RU",
 };
 
-type CountryFlagProps = {
+interface CountryFlagProps {
   locale: string;
   className?: string;
   size?: "sm" | "md" | "lg";
-};
+}
 
 const SIZE_DIMENSIONS = {
   sm: { width: 20, height: 16 },

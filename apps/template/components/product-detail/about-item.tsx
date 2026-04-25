@@ -1,8 +1,8 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface AboutItemProps extends ComponentPropsWithoutRef<"div"> {
+interface AboutItemProps extends React.ComponentProps<"div"> {
   descriptionHtml: string;
 }
 

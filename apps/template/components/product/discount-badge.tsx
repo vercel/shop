@@ -1,8 +1,8 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface DiscountBadgeProps extends ComponentPropsWithoutRef<"span"> {
+interface DiscountBadgeProps extends React.ComponentProps<"span"> {
   percent: number;
   variant?: "green" | "blue";
 }

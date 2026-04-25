@@ -1,10 +1,10 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type * as React from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { cn } from "@/lib/utils";
 
-interface ProductPriceProps extends ComponentPropsWithoutRef<"div"> {
+interface ProductPriceProps extends React.ComponentProps<"div"> {
   amount: string;
   currencyCode: string;
   compareAtAmount?: string;
