@@ -1,4 +1,4 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type * as React from "react";
 
 import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
@@ -9,7 +9,7 @@ import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { ProductPrice } from "./product-price";
 
-interface ProductInfoHeaderProps extends ComponentPropsWithoutRef<"div"> {
+interface ProductInfoHeaderProps extends React.ComponentProps<"div"> {
   selectedVariant: ProductVariant | undefined;
   title: string;
   locale: string;
@@ -38,7 +38,7 @@ function ProductInfoHeader({
   );
 }
 
-interface ProductInfoOptionsProps extends ComponentPropsWithoutRef<"div"> {
+interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
   variants: ProductVariant[];
   options: ProductOption[];
   selectedOptions: SelectedOptions;
@@ -98,7 +98,7 @@ function ProductInfoOptions({
   );
 }
 
-interface ProductInfoDescriptionProps extends ComponentPropsWithoutRef<"div"> {
+interface ProductInfoDescriptionProps extends React.ComponentProps<"div"> {
   descriptionHtml: string;
 }
 

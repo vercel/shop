@@ -1,16 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { type ComponentPropsWithoutRef, useEffect, useRef, useState } from "react";
+import type * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Image as ImageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type AutoPlayVideoProps = Omit<ComponentPropsWithoutRef<"video">, "autoPlay" | "ref"> & {
+interface AutoPlayVideoProps extends Omit<React.ComponentProps<"video">, "autoPlay" | "ref"> {
   previewImage?: ImageType | null;
   sizes?: string;
   priorityImage?: boolean;
-};
+}
 
 /**
  * A video element that autoplays when visible and pauses when off-screen.

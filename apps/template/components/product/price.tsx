@@ -1,9 +1,9 @@
-import type { ComponentPropsWithoutRef } from "react";
+import type * as React from "react";
 
 import { defaultLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-interface PriceProps extends ComponentPropsWithoutRef<"span"> {
+interface PriceProps extends React.ComponentProps<"span"> {
   amount: string;
   currencyCode: string;
   locale?: string;
