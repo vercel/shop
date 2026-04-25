@@ -64,6 +64,8 @@ function ProductInfoOptions({
   const colorOptions = options.filter((opt) => isColorOption(opt) && !isDefaultOption(opt));
   const otherOptions = options.filter((opt) => !isColorOption(opt) && !isDefaultOption(opt));
 
+  if (colorOptions.length === 0 && otherOptions.length === 0) return null;
+
   return (
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-10">
