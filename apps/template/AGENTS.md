@@ -61,6 +61,14 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Props interfaces: `{ComponentName}Props`
 - Constants: `SCREAMING_SNAKE_CASE`
 
+### Spacing
+
+- Vertical spacing between sibling sections is **parent-owned**. Use `grid gap-*` on the parent (single implicit column unless `grid-cols-*` is set). Don't add `mb-*`, `mt-*`, `my-*`, or `space-y-*` to children.
+- `Container` provides `grid gap-10` by default, so direct children of `<Container>` need no wrapper.
+- Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
+- Padding *inside* a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
+- This convention is partially rolled out: home and PDP follow it; other pages convert page-by-page.
+
 ### Tailwind & Styling
 
 - Prefer `data-[attr=value]` selectors over conditional class assembly.

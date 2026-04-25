@@ -47,16 +47,14 @@ export default async function HomePage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-10">
-          {featuredProductsResult.products.length > 0 && (
-            <ProductsGrid
-              title={t("featuredProducts.title")}
-              products={featuredProductsResult.products}
-              locale={locale}
-              collectionUrl="/search"
-            />
-          )}
-        </div>
+        {featuredProductsResult.products.length > 0 && (
+          <ProductsGrid
+            title={t("featuredProducts.title")}
+            products={featuredProductsResult.products}
+            locale={locale}
+            collectionUrl="/search"
+          />
+        )}
       </Container>
     </>
   );

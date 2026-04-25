@@ -15,8 +15,8 @@ interface ProductsGridProps {
 export async function ProductsGrid({ title, products, locale, collectionUrl }: ProductsGridProps) {
   const t = await getTranslations("product");
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
+    <div className="grid gap-4">
+      <div className="flex items-center justify-between">
         <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
         {collectionUrl && (
           <Link

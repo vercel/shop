@@ -24,11 +24,11 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
 
 function ProductPageFallback() {
   return (
-    <div className="space-y-10">
-      <div className="lg:grid lg:grid-cols-10 lg:items-start lg:gap-5 space-y-10 lg:space-y-0">
+    <div className="grid gap-10">
+      <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
         <div className="lg:col-span-6">
           {/* Mobile: single full-bleed square + pagination space */}
-          <div className="space-y-5 lg:hidden -mx-5">
+          <div className="grid gap-5 lg:hidden -mx-5">
             <Skeleton className="aspect-square w-full" />
             <div className="h-1.5" />
           </div>
@@ -40,12 +40,12 @@ function ProductPageFallback() {
             <Skeleton className="aspect-square w-full" />
           </div>
         </div>
-        <div className="space-y-10 lg:sticky lg:top-20 lg:col-span-4">
-          <div>
+        <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+          <div className="grid gap-2.5">
             <Skeleton className="h-8 w-3/4" />
             <Skeleton className="h-6 w-24" />
           </div>
-          <div className="space-y-2.5">
+          <div className="grid gap-2.5">
             <Skeleton className="h-4 w-20" />
             <div className="grid grid-cols-5 gap-2.5">
               {["a", "b", "c", "d"].map((k) => (
@@ -93,7 +93,7 @@ async function ProductContent({
       />
       <ProductBreadcrumbSchema title={title} handle={handle} />
 
-      <div className="flex flex-col gap-10">
+      <div className="grid gap-10">
         <ProductDetailSection
           product={product}
           locale={locale}

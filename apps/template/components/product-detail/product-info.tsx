@@ -23,7 +23,7 @@ function ProductInfoHeader({
   ...props
 }: ProductInfoHeaderProps) {
   return (
-    <div data-slot="product-info-header" className={className} {...props}>
+    <div data-slot="product-info-header" className={cn("grid gap-2.5", className)} {...props}>
       <h1 className={cn("font-semibold text-foreground tracking-tight", "text-3xl")}>{title}</h1>
 
       {selectedVariant && (
@@ -32,7 +32,6 @@ function ProductInfoHeader({
           currencyCode={selectedVariant.price.currencyCode}
           compareAtAmount={selectedVariant.compareAtPrice?.amount}
           locale={locale}
-          className="mt-3"
         />
       )}
     </div>
@@ -67,7 +66,7 @@ function ProductInfoOptions({
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
-      <div className="space-y-10">
+      <div className="grid gap-10">
         {/* Color Pickers (with images or swatches) */}
         {colorOptions.map((colorOption) => (
           <ColorPicker

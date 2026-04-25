@@ -23,7 +23,7 @@ export function OptionPicker({
   ...props
 }: OptionPickerProps) {
   return (
-    <div className={cn("space-y-2.5", className)} {...props}>
+    <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
         {option.name}: <span className="text-foreground">{selectedValue}</span>
       </p>
