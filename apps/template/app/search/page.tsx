@@ -83,26 +83,43 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <Container className="pt-2.5 md:pt-10">
       <FilterTransitionProvider>
-        <Suspense fallback={<ResultsSkeleton title={t("title")} />}>
-          <SearchContent
-            locale={locale}
-            searchParamsPromise={searchParams}
-            defaultTitle={t("title")}
-          />
+        <div className="mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+            <Link href="/search">{t("title")}</Link>
+            <Suspense fallback={null}>
+              <SearchQueryLabel searchParamsPromise={searchParams} />
+            </Suspense>
+          </h1>
+        </div>
+        <Suspense fallback={<ResultsSkeleton />}>
+          <SearchContent locale={locale} searchParamsPromise={searchParams} />
         </Suspense>
       </FilterTransitionProvider>
     </Container>
   );
 }
 
+async function SearchQueryLabel({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [resolvedSearchParams, t] = await Promise.all([
+    searchParamsPromise,
+    getTranslations("search"),
+  ]);
+  const raw = resolvedSearchParams.q;
+  const query = Array.isArray(raw) ? raw[0] : raw;
+  if (!query) return null;
+  return t("forQuery", { query });
+}
+
 async function SearchContent({
   locale,
   searchParamsPromise,
-  defaultTitle,
 }: {
   locale: Locale;
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-  defaultTitle: string;
 }) {
   const [resolvedSearchParams, t] = await Promise.all([
     searchParamsPromise,
@@ -122,12 +139,6 @@ async function SearchContent({
 
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-          <Link href="/search">{q ? t("titleQuery", { query: q }) : defaultTitle}</Link>
-        </h1>
-      </div>
-
       <Suspense fallback={<CollectionToolbarSkeleton />}>
         <SearchToolbar
           locale={locale}

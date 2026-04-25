@@ -272,6 +272,7 @@ declare const messages: {
     "clearFilters": "Clear all filters",
     "filter": "Filter",
     "filters": "Filters",
+    "forQuery": " for \"{query}\"",
     "loadingMore": "Loading more products...",
     "noResults": "No products found",
     "noResultsAvailable": "No products available",
@@ -306,8 +307,7 @@ declare const messages: {
       "priceLowToHigh": "Price: Low to High"
     },
     "sortBy": "Sort",
-    "title": "All Products",
-    "titleQuery": "Search results for \"{query}\"",
+    "title": "Search",
     "titleSubtext": "Showing results for your search query"
   },
   "seo": {

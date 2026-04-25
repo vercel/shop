@@ -22,12 +22,9 @@ const RESULTS_SKELETON_KEYS = Array.from(
   (_, index) => `search-results-skeleton-${index}`,
 );
 
-export function ResultsSkeleton({ title }: { title: string }) {
+export function ResultsSkeleton() {
   return (
     <>
-      <div className="mb-6">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">{title}</h1>
-      </div>
       <CollectionToolbarSkeleton />
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {RESULTS_SKELETON_KEYS.map((key) => (
