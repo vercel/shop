@@ -28,7 +28,7 @@ export function CartOverlay({ locale }: CartOverlayProps) {
 
   return (
     <Sheet open={isOverlayOpen} onOpenChange={setOverlayOpen}>
-      <SheetContent side="right" className="w-full max-w-md p-0 gap-0">
+      <SheetContent side="right" className="p-0 gap-0">
         <div className="flex h-16 shrink-0 items-center gap-2 px-5">
           <SheetTitle className="text-lg font-semibold">{t("shoppingCart")}</SheetTitle>
           <CartCountBadge />

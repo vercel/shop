@@ -49,7 +49,7 @@ All cart mutations are defined in `lib/cart/action.ts` with `"use server"`:
 
 ## Cart overlay
 
-The overlay renders as a right-side `Sheet` on every viewport. It uses `w-full max-w-md` so it fills the screen on mobile and caps at 28rem on larger displays.
+The overlay renders as a right-side `Sheet` on every viewport, inheriting the `Sheet` primitive's left/right defaults: `w-[calc(100%-2.5rem)] max-w-md`. That keeps a consistent `gap-10` of backdrop visible on mobile and caps the slideover at 28rem on larger displays — the same width rule used by the mobile menu and the collection filter sidebar.
 
 The overlay content in `overlay-content.tsx` composes three sections: an empty state when the cart has no items, a scrollable list of line items, and a summary with subtotal, checkout button, and a link to the full cart page.
 
