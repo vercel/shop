@@ -51,11 +51,11 @@ async function CartContent({ locale }: { locale: Locale }) {
           <Container className="py-10">
             <Sections>
               <Header />
-              <div className="grid gap-10 lg:grid-cols-12">
-                <div className="lg:col-span-9">
+              <div className="grid gap-5 lg:grid-cols-12">
+                <div className="lg:col-span-8 xl:col-span-9">
                   <CartItemsList locale={locale} />
                 </div>
-                <aside className="lg:col-span-3">
+                <aside className="lg:col-span-4 xl:col-span-3">
                   <div className="lg:sticky lg:top-20">
                     <Summary locale={locale} />
                   </div>

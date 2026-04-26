@@ -11,7 +11,9 @@ export function Header() {
 
   return (
     <div className="flex items-center gap-2.5">
-      <h1 className="text-3xl font-semibold tracking-tight">{t("shoppingCart")}</h1>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+        {t("shoppingCart")}
+      </h1>
       {count > 0 && (
         <span className="flex size-7 items-center justify-center rounded-full bg-foreground text-sm text-background">
           {count}

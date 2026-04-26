@@ -58,11 +58,11 @@ export function PageSkeleton() {
     <Container className="py-10">
       <Sections>
         <div className="h-5 bg-muted rounded w-32 animate-pulse" />
-        <div className="grid gap-10 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div className="grid gap-5 lg:grid-cols-12">
+          <div className="lg:col-span-8 xl:col-span-9">
             <ItemsSkeleton />
           </div>
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-4 xl:col-span-3">
             <SummarySkeleton />
           </div>
         </div>
