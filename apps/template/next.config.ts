@@ -1,9 +1,19 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+// Auth turns on at build time when all three secrets are present. Exposed to the
+// browser as NEXT_PUBLIC_AUTH_ENABLED so client and server agree at hydration.
+const isAuthEnabled = !!(
+  process.env.BETTER_AUTH_SECRET &&
+  process.env.SHOPIFY_CUSTOMER_CLIENT_ID &&
+  process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET
+);
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  serverExternalPackages: ["better-auth"],
+  env: {
+    NEXT_PUBLIC_AUTH_ENABLED: isAuthEnabled ? "1" : "",
+  },
   experimental: {
     cachedNavigations: true,
     inlineCss: true,
@@ -45,6 +55,7 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
+  serverExternalPackages: ["better-auth"],
 };
 
 const withNextIntl = createNextIntlPlugin({

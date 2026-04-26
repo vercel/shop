@@ -64,16 +64,15 @@ You can find the storefront token in **Settings → Apps and sales channels → 
 
 ### Optional: Enable customer authentication
 
-The template includes built-in customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API. To enable it, add these variables to your `.env.local`:
+The template includes built-in customer authentication using [better-auth](https://www.better-auth.com/) with Shopify Customer Account API. To enable it, add these three server-only secrets to your `.env.local`:
 
 ```bash
-NEXT_PUBLIC_AUTH_ENABLED=1
 BETTER_AUTH_SECRET="generate-with-openssl-rand-base64-32"
 SHOPIFY_CUSTOMER_CLIENT_ID="your-customer-client-id"
 SHOPIFY_CUSTOMER_CLIENT_SECRET="your-customer-client-secret"
 ```
 
-`NEXT_PUBLIC_AUTH_ENABLED=1` turns on the auth UI (account icon, login page, account pages). The remaining three are server-side secrets. Without these variables, the storefront works as a guest-only experience. See [Environment Variables](/docs/reference/env-vars) for details.
+The auth UI (account icon, login page, account pages) turns on automatically when all three are set — `next.config.ts` derives `NEXT_PUBLIC_AUTH_ENABLED` at build time from their presence. Don't set `NEXT_PUBLIC_AUTH_ENABLED` yourself. Without these variables, the storefront works as a guest-only experience. See [Environment Variables](/docs/reference/env-vars) for details.
 
 ## Step 4: Run locally
 

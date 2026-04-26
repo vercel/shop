@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { isAuthEnabled } from "@/lib/auth/server";
+import { isAuthEnabled } from "@/lib/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");

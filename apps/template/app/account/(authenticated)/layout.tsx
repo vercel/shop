@@ -9,7 +9,8 @@ import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isAuthEnabled, requireCustomerSession } from "@/lib/auth/server";
+import { isAuthEnabled } from "@/lib/auth";
+import { requireCustomerSession } from "@/lib/auth/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
