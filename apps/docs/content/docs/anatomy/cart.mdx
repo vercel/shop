@@ -16,7 +16,7 @@ The `CartProvider` in `context.tsx` exposes a `useCart()` hook with the followin
 
 - **cart** - the last confirmed cart from the server
 - **cartWithPending** - the confirmed cart merged with optimistic line items, used for rendering
-- **isOverlayOpen** - controls the cart drawer/sheet visibility
+- **isOverlayOpen** - controls the cart slideover visibility
 - **isAddingToCart** - true while an add-to-cart request is in flight
 - **isUpdatingCart** - true while a quantity update or removal is in flight
 - **pendingQuantity** - accumulated quantity from rapid add-to-cart clicks before the debounce fires
@@ -49,7 +49,7 @@ All cart mutations are defined in `lib/cart/action.ts` with `"use server"`:
 
 ## Cart overlay
 
-The overlay renders differently based on screen size. On desktop (`md` and up), it appears as a side sheet. On mobile, it renders as a bottom drawer. The `useMediaQuery` hook determines which component to mount.
+The overlay renders as a right-side `Sheet` on every viewport, inheriting the `Sheet` primitive's left/right defaults: `w-[calc(100%-2.5rem)] max-w-md`. That keeps a consistent `gap-10` of backdrop visible on mobile and caps the slideover at 28rem on larger displays — the same width rule used by the mobile menu and the collection filter sidebar.
 
 The overlay content in `overlay-content.tsx` composes three sections: an empty state when the cart has no items, a scrollable list of line items, and a summary with subtotal, checkout button, and a link to the full cart page.
 
@@ -79,7 +79,7 @@ The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's Graph
 | File | Purpose |
 |------|---------|
 | `components/cart/context.tsx` | Cart state, optimistic updates, debouncing |
-| `components/cart/overlay.tsx` | Cart drawer (mobile) and sheet (desktop) |
+| `components/cart/overlay.tsx` | Cart slideover (mobile and desktop) |
 | `components/cart/overlay-content.tsx` | Cart overlay content and layout |
 | `components/cart/overlay-item.tsx` | Individual cart line item UI (shared with cart page) |
 | `components/cart/overlay-summary.tsx` | Overlay summary with estimated total |
