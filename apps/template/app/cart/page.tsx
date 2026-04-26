@@ -11,6 +11,7 @@ import { Summary } from "@/components/cart-page/summary";
 import { CartContextSync } from "@/components/cart/context-sync";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
+import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { getCart } from "@/lib/shopify/operations/cart";
@@ -48,23 +49,25 @@ async function CartContent({ locale }: { locale: Locale }) {
           <Empty />
         ) : (
           <Container className="py-10">
-            <Header />
-            <div className="lg:grid lg:grid-cols-12 lg:gap-10">
-              <div className="lg:col-span-9">
-                <CartItemsList locale={locale} />
-              </div>
-              <aside className="lg:col-span-3 mt-10 lg:mt-0">
-                <div className="lg:sticky lg:top-20">
-                  <Summary locale={locale} />
+            <Sections>
+              <Header />
+              <div className="grid gap-10 lg:grid-cols-12">
+                <div className="lg:col-span-9">
+                  <CartItemsList locale={locale} />
                 </div>
-              </aside>
-            </div>
-            {cart.lines[0]?.merchandise.product.handle ? (
-              <RelatedProductsSection
-                handle={cart.lines[0].merchandise.product.handle}
-                locale={locale}
-              />
-            ) : null}
+                <aside className="lg:col-span-3">
+                  <div className="lg:sticky lg:top-20">
+                    <Summary locale={locale} />
+                  </div>
+                </aside>
+              </div>
+              {cart.lines[0]?.merchandise.product.handle ? (
+                <RelatedProductsSection
+                  handle={cart.lines[0].merchandise.product.handle}
+                  locale={locale}
+                />
+              ) : null}
+            </Sections>
           </Container>
         )}
       </CartContextSync>

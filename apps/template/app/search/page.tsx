@@ -20,6 +20,7 @@ import {
   getSearchResultsData,
 } from "@/components/search/results";
 import { Container } from "@/components/ui/container";
+import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -83,17 +84,19 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <Container className="pt-2.5 md:pt-10 pb-10">
       <FilterTransitionProvider>
-        <div className="mb-6">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-            <Link href="/search">{t("title")}</Link>
-            <Suspense fallback={null}>
-              <SearchQueryLabel searchParamsPromise={searchParams} />
-            </Suspense>
-          </h1>
-        </div>
-        <Suspense fallback={<ResultsSkeleton />}>
-          <SearchContent locale={locale} searchParamsPromise={searchParams} />
-        </Suspense>
+        <Sections className="gap-5">
+          <div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+              <Link href="/search">{t("title")}</Link>
+              <Suspense fallback={null}>
+                <SearchQueryLabel searchParamsPromise={searchParams} />
+              </Suspense>
+            </h1>
+          </div>
+          <Suspense fallback={<ResultsSkeleton />}>
+            <SearchContent locale={locale} searchParamsPromise={searchParams} />
+          </Suspense>
+        </Sections>
       </FilterTransitionProvider>
     </Container>
   );

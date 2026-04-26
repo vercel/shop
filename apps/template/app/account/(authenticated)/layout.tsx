@@ -7,6 +7,7 @@ import { AccountMobileTabs } from "@/components/account/mobile-tabs";
 import { AccountSidebar } from "@/components/account/sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
+import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAuthEnabled, requireCustomerSession } from "@/lib/auth/server";
 
@@ -45,11 +46,11 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
         <Suspense>
           <AccountMobileTabs />
         </Suspense>
-        <div className="pt-6 md:pt-0">
+        <Sections className="gap-5 pt-6 md:pt-0">
           <Suspense>
             <AccountGate>{children}</AccountGate>
           </Suspense>
-        </div>
+        </Sections>
       </div>
     </Container>
   );

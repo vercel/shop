@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Sections } from "@/components/ui/sections";
 import { siteConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 
@@ -13,13 +14,15 @@ export function Footer({ locale }: { locale: string }) {
   return (
     <footer>
       <div className="mx-auto px-5 pt-10 pb-22 lg:px-10">
-        {items.length > 0 && <FooterMenu items={items} />}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
-          <p className="text-sm text-muted-foreground leading-5">
-            &copy; Vercel Shop. All rights reserved.
-          </p>
-          {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
-        </div>
+        <Sections className="gap-10">
+          {items.length > 0 && <FooterMenu items={items} />}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
+            <p className="text-sm text-muted-foreground leading-5">
+              &copy; Vercel Shop. All rights reserved.
+            </p>
+            {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
+          </div>
+        </Sections>
       </div>
     </footer>
   );
@@ -50,7 +53,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
   const columns = items.slice(0, 5);
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10 mb-15">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-10">
       {columns.map((column) => (
         <div key={column.id} className="space-y-3">
           {column.url ? (

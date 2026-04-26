@@ -87,7 +87,7 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Inside a single section, prefer `grid gap-*` on the immediate parent. Don't add `mb-*` / `mt-*` / `my-*` / `space-y-*` to children for inter-sibling spacing.
 - Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
 - Padding _inside_ a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
-- This convention is partially rolled out: home and PDP follow it; other pages still use `mb-*`/`space-y-*` patterns and that's OK in this transitional state.
+- This convention is rolled out across the template. New pages should use `<Sections>` from day one.
 
 ### Tailwind & Styling
 

@@ -19,10 +19,7 @@ export default async function ProfilePage() {
 }
 
 async function ProfileContent() {
-  const [session, t] = await Promise.all([
-    getCustomerSession(),
-    getTranslations("account"),
-  ]);
+  const [session, t] = await Promise.all([getCustomerSession(), getTranslations("account")]);
 
   return (
     <div className="space-y-4">
