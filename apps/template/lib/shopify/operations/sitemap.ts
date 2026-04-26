@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 
 interface ProductHandleNode {
   handle: string;

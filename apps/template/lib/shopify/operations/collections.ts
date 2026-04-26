@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 import {
   type ShopifyCollection,
   transformShopifyCollection,

@@ -4,7 +4,7 @@ import { invalidateCartCache } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
 const CART_FRAGMENT = `

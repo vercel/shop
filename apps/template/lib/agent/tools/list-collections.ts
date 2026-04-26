@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getCollections } from "@/lib/shopify/operations/collections";
 
-import { getAgentContext } from "../context";
+import { getAgentContext } from "../server";
 
 export function listCollectionsTool() {
   return tool({

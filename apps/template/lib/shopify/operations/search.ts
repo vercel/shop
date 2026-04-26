@@ -1,7 +1,7 @@
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { PredictiveSearchResult } from "@/lib/types";
 
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 import { IMAGE_FRAGMENT, MONEY_FRAGMENT } from "../fragments";
 import {
   type ShopifyPredictiveSearchResult,

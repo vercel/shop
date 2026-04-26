@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { removeFromCart } from "@/lib/shopify/operations/cart";
 
-import { getAgentContext } from "../context";
+import { getAgentContext } from "../server";
 
 export function removeFromCartTool() {
   return tool({

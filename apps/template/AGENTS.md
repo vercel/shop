@@ -53,6 +53,24 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - A single file per logical component is preferred.
 - When a directive split is necessary, suffix the carved-out file with the directive: `foo.tsx` (the entry, typically a server component) is paired with `foo-client.tsx` for `"use client"` sub-components — e.g. `sidebar.tsx` + `sidebar-client.tsx`, `mobile-tabs.tsx` + `mobile-tabs-client.tsx`. Use `foo-server.tsx` symmetrically if a server-only piece needs to be carved out of an otherwise-client file. The suffix keeps the pair adjacent in the directory listing.
 
+#### `lib/<domain>/` files
+
+Inside a domain folder under `lib/`, name files by execution context — same idea as the directive suffix above, applied to the lib side:
+
+- `index.ts` — universal modules (safe to import from server _and_ client code).
+- `server.ts` — server-only modules. Top-of-file `import "server-only"` when the runtime guard helps.
+- `client.ts` — `"use client"` modules.
+- `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
+
+Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{server,client}.ts`, `lib/i18n/index.ts`.
+
+Two exceptions that don't fit cleanly:
+
+- A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route) or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
+- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/config.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
+
+Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — that collides with the runtime meaning. Use a verb (`fetch.ts`) or product noun (`shopify.ts`) instead.
+
 ### Naming
 
 - Files: `kebab-case.tsx`
@@ -68,7 +86,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - For vertical rhythm between sibling sections, wrap them in `<Sections>` (`components/ui/sections.tsx`). Default `gap-10`; override per page via `className` (e.g. `<Sections className="gap-5">`). `<Sections>` happily mixes full-bleed and contained children since each child can be a `<Container>`, a banner, or anything else.
 - Inside a single section, prefer `grid gap-*` on the immediate parent. Don't add `mb-*` / `mt-*` / `my-*` / `space-y-*` to children for inter-sibling spacing.
 - Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
-- Padding *inside* a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
+- Padding _inside_ a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
 - This convention is partially rolled out: home and PDP follow it; other pages still use `mb-*`/`space-y-*` patterns and that's OK in this transitional state.
 
 ### Tailwind & Styling
