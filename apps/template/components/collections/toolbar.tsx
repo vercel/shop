@@ -14,7 +14,7 @@ export function CollectionToolbar({
   resultCount,
 }: CollectionToolbarProps) {
   return (
-    <div className="flex items-center gap-5 py-2.5 mb-2">
+    <div className="flex items-center gap-5">
       {filterSheet}
       <div className="flex items-center gap-5 ml-auto">
         {resultCount && (
@@ -28,7 +28,7 @@ export function CollectionToolbar({
 
 export function CollectionToolbarSkeleton() {
   return (
-    <div className="flex items-center gap-5 py-2.5 mb-2">
+    <div className="flex items-center gap-5">
       <Skeleton className="h-9 w-24" />
       <div className="flex items-center gap-5 ml-auto">
         <Skeleton className="h-4 w-32 hidden sm:block" />
