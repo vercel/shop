@@ -1,5 +1,5 @@
-import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { AccountPageHeader } from "@/components/account/page-header";
