@@ -14,7 +14,7 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
   const t = useTranslations("cart");
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
-  // Calculate subtotal from line items for accurate real-time display
+  // Sum line totals locally — Shopify's `subtotalAmount` lags during optimistic updates.
   const subtotal = cart.lines.reduce(
     (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
     0,

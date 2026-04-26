@@ -14,18 +14,11 @@ import {
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
-/**
- * Generate a `product-{numericId}` cache tag for a Shopify product GID.
- * Returns `null` if the numeric ID cannot be extracted.
- */
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);
   return numericId ? `product-${numericId}` : null;
 }
 
-/**
- * Call `cacheTag` for each product in a list, using their numeric Shopify IDs.
- */
 function tagProducts(products: Array<{ id: string }>): void {
   for (const product of products) {
     const tag = productIdTag(product.id);
@@ -528,10 +521,6 @@ const GET_PRODUCTS_BY_IDS_QUERY = `
   }
 `;
 
-/**
- * Decode a Shopify ID from base64 to GID format if needed.
- * Handles both base64-encoded IDs and raw GIDs.
- */
 function decodeShopifyId(id: string): string {
   if (id.startsWith("gid://")) {
     return id;
@@ -539,9 +528,6 @@ function decodeShopifyId(id: string): string {
   return Buffer.from(id, "base64").toString("utf-8");
 }
 
-/**
- * Fetch a single product by its Shopify ID (GID or base64-encoded).
- */
 export async function getProductById(
   id: string,
   locale: string = defaultLocale,
@@ -570,10 +556,7 @@ export async function getProductById(
   return transformShopifyProductDetails(product);
 }
 
-/**
- * Fetch multiple products by their Shopify IDs (GID or base64-encoded) in a single request.
- * Results are returned in the same order as the input IDs.
- */
+/** Results are returned in the same order as the input IDs. */
 export async function getProductsByIds(
   ids: string[],
   locale: string = defaultLocale,
@@ -603,11 +586,7 @@ export async function getProductsByIds(
   return shopifyProducts.map(transformShopifyProductCard);
 }
 
-/**
- * Fetch multiple products by their handles in a single request.
- * Uses Shopify's products query with handle filter.
- * Results are reordered to match the input handle order.
- */
+/** Results are reordered to match the input handle order. */
 export async function getProductsByHandles(
   handles: string[],
   locale: string = defaultLocale,
@@ -634,13 +613,11 @@ export async function getProductsByHandles(
     variables: { query: searchQuery, first: handles.length, country, language },
   });
 
-  // Create a map for O(1) lookup by handle
   const productMap = new Map<string, ShopifyProductCard>();
   for (const edge of data.products.edges) {
     productMap.set(edge.node.handle, edge.node);
   }
 
-  // Return products in the original handle order, filtering out missing
   const shopifyProducts = handles
     .map((handle) => productMap.get(handle))
     .filter((product): product is ShopifyProductCard => product !== undefined);

@@ -8,9 +8,6 @@ export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = [defaultLocale];
 export const localeSwitchingEnabled = enabledLocales.length > 1;
 
-/**
- * Type guard to check if a string is a valid locale
- */
 export function isLocale(value: string): value is Locale {
   return locales.includes(value as Locale);
 }
@@ -19,22 +16,15 @@ export function isEnabledLocale(value: string): value is Locale {
   return enabledLocales.includes(value as Locale);
 }
 
-/**
- * Safely convert a string to a supported locale.
- */
 export function asLocale(value: string): Locale {
   return isLocale(value) ? value : defaultLocale;
 }
 
-/**
- * Resolve a locale for the current deployment. Unsupported or disabled values
- * fall back to the configured default locale.
- */
+/** Unsupported or disabled values fall back to `defaultLocale`. */
 export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
 
-// Currency data per locale
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
   "en-US": { currency: "USD", symbol: "$" },
 };
@@ -52,11 +42,10 @@ export function getLocaleData(locale: string): LocaleData {
   const [lang, country] = locale.split("-");
   const currencyData = localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
 
-  // Get native language name (e.g., "Deutsch" for de-DE)
+  // Native language name (e.g., "Deutsch" for de-DE).
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
   const languageName = languageNames.of(lang) ?? lang;
 
-  // Get currency name in the locale's language
   const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
   const currencyName = currencyNames.of(currencyData.currency) ?? currencyData.currency;
 

@@ -13,9 +13,6 @@ import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProduct } from "@/lib/shopify/operations/products";
 
-/**
- * Parse referer URL to extract locale and path segments.
- */
 function parseReferer(referer: string | null): {
   locale: Locale;
   segments: string[];
@@ -34,10 +31,7 @@ function parseReferer(referer: string | null): {
   }
 }
 
-/**
- * Resolve page context from URL segments.
- * Fetches trusted data from the database.
- */
+/** Fetches trusted data from the database — never trusts client-supplied context. */
 async function resolvePageContext(
   segments: string[],
   locale: Locale,
@@ -47,7 +41,7 @@ async function resolvePageContext(
     return { type: "home" };
   }
 
-  // segments[0] = page type, segments[1] = handle/id
+  // segments[0] = page type, segments[1] = handle/id.
   const pageType = segments[0];
 
   if (pageType === "products" && segments.length >= 2) {
@@ -56,7 +50,7 @@ async function resolvePageContext(
       const product = await getProduct(handle, locale);
       return { type: "product", product };
     } catch {
-      // Product not found
+      // Product not found — fall through to other branches.
     }
   }
 
@@ -68,7 +62,7 @@ async function resolvePageContext(
         return { type: "collection", handle, title: collection.title };
       }
     } catch {
-      // Collection not found
+      // Collection not found — fall through to other branches.
     }
   }
 
@@ -118,7 +112,6 @@ export async function POST(request: Request) {
   if (!cartId) {
     const newCart = await createCartWithoutCookie(locale);
     cartId = newCart.id;
-    // Build Set-Cookie header value for the new cart
     const secure = process.env.NODE_ENV === "production";
     const maxAge = 60 * 60 * 24 * 7; // 7 days
     newCartCookie = `shopify_cartId=${cartId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure ? "; Secure" : ""}`;

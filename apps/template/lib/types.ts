@@ -6,10 +6,6 @@ export type SearchParamsPromise = Promise<Record<string, string | string[] | und
 
 export type NormalizedSearchParams = Record<string, string | undefined>;
 
-/**
- * Normalize search params by taking the first value of any arrays.
- * Use this to convert raw Next.js searchParams to a clean string map.
- */
 export function normalizeSearchParams(
   params: Record<string, string | string[] | undefined>,
 ): NormalizedSearchParams {
@@ -18,13 +14,8 @@ export function normalizeSearchParams(
   );
 }
 
-/**
- * Core types for the commerce template
- *
- * These types define the contract between data sources and components.
- * Each integration (Shopify, Algolia, etc.) transforms their API responses
- * into these types.
- */
+// These types are the contract between data sources and components. Each
+// integration (Shopify, Algolia, etc.) transforms its API responses into these.
 
 export interface Money {
   amount: string;
@@ -50,10 +41,6 @@ export interface SEO {
   description: string;
 }
 
-/**
- * Minimal product data for cards in grids/carousels
- * Used by: ProductCard, search results, category listings
- */
 export interface ProductCard {
   id: string;
   handle: string;
@@ -69,10 +56,6 @@ export interface ProductCard {
   defaultVariantSelectedOptions?: SelectedOption[];
 }
 
-/**
- * Extended product data for product detail pages
- * Used by: PDP components (Info, Images, Variants, Details)
- */
 export interface ProductDetails extends ProductCard {
   description: string;
   descriptionHtml: string;
@@ -171,9 +154,6 @@ export interface CartMerchandise {
   product: CartProduct;
 }
 
-/**
- * Minimal product data within cart context
- */
 export interface CartProduct {
   id: string;
   handle: string;
@@ -237,10 +217,6 @@ export interface ProductListResult {
   subcategories?: CategoryNavItem[];
 }
 
-/**
- * Lightweight product data for predictive search results.
- * Subset of ProductCard for predictive search results.
- */
 export interface PredictiveSearchProduct {
   id: string;
   handle: string;

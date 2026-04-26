@@ -1,14 +1,9 @@
 import { getNumericShopifyId } from "@/lib/shopify/utils";
 import type { Image, Money, ProductOption, ProductVariant, SelectedOption } from "@/lib/types";
 
-// ── Variant selection ────────────────────────────────────────────────
-
 export type SelectedOptions = Record<string, string>;
 
-/**
- * Compute initial selected options based on variantId and available variants.
- * Called server-side so the initial HTML matches hydrated state (zero CLS).
- */
+/** Called server-side so the initial HTML matches hydrated state (zero CLS). */
 export function computeInitialSelectedOptions(
   variants: ProductVariant[],
   initialVariantId?: string,
@@ -52,11 +47,6 @@ export function resolveSelectedVariant(
   );
 }
 
-/**
- * Compute the URL for selecting a given option value.
- * Finds the variant matching the updated options and returns
- * `/products/{handle}?variantId={numericId}`.
- */
 export function getVariantUrl(
   handle: string,
   variants: ProductVariant[],
@@ -66,12 +56,10 @@ export function getVariantUrl(
 ): string {
   const newOptions = { ...currentOptions, [optionName]: optionValue };
 
-  // Try exact match first
   let variant = variants.find((v) =>
     v.selectedOptions.every((opt) => newOptions[opt.name] === opt.value),
   );
 
-  // Fall back to first variant with this option value
   if (!variant) {
     variant = variants.find((v) =>
       v.selectedOptions.some((opt) => opt.name === optionName && opt.value === optionValue),
@@ -86,18 +74,9 @@ export function getVariantUrl(
   return `/products/${handle}`;
 }
 
-// ── Color image partitioning ─────────────────────────────────────────
-
 /**
- * Returns filtered images for the currently selected color variant.
- *
- * Collects variant images assigned to other colors and excludes them,
- * keeping the selected color's variant image and all shared/unassigned images.
- *
- * Falls back to all product images when:
- * - No color option exists on the product
- * - Only one color is available
- * - No variant images are assigned
+ * Falls back to all product images when no color option exists, only one color
+ * is available, or no variant images are assigned.
  */
 export function getImagesForSelectedColor(
   images: Image[],
@@ -121,7 +100,6 @@ export function getImagesForSelectedColor(
   // Only one color means all images belong to it
   if (colorOption.values.length <= 1) return images;
 
-  // Collect variant image URLs for each color
   const colorToImageUrls = new Map<string, Set<string>>();
   for (const variant of variants) {
     if (!variant.image) continue;
@@ -136,10 +114,8 @@ export function getImagesForSelectedColor(
     urls.add(variant.image.url);
   }
 
-  // No variant images assigned — show all
   if (colorToImageUrls.size === 0) return images;
 
-  // Collect image URLs belonging to other colors (not the selected one)
   const otherColorImageUrls = new Set<string>();
   for (const [color, urls] of colorToImageUrls) {
     if (color !== selectedColor) {
@@ -149,7 +125,7 @@ export function getImagesForSelectedColor(
     }
   }
 
-  // Don't exclude images that are shared with the selected color
+  // Images shared with the selected color must not be excluded.
   const selectedColorUrls = colorToImageUrls.get(selectedColor);
   if (selectedColorUrls) {
     for (const url of selectedColorUrls) {
@@ -161,7 +137,6 @@ export function getImagesForSelectedColor(
 
   if (filtered.length === 0) return images;
 
-  // Partition: color-specific images first, then shared/unassigned images
   const colorImages: typeof filtered = [];
   const sharedImages: typeof filtered = [];
 
@@ -173,7 +148,6 @@ export function getImagesForSelectedColor(
     }
   }
 
-  // Within color images, move the selected variant's image to the front
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
   const variantImageUrl = selectedVariant?.image?.url;
 
@@ -188,13 +162,6 @@ export function getImagesForSelectedColor(
   return [...colorImages, ...sharedImages];
 }
 
-/**
- * Returns partitioned images for the currently selected color variant.
- *
- * Returns an object with:
- * - colorImages: Images specific to the selected color variant
- * - otherImages: Shared/unassigned images
- */
 export function getPartitionedImagesForSelectedColor(
   images: Image[],
   options: ProductOption[],
@@ -214,10 +181,8 @@ export function getPartitionedImagesForSelectedColor(
   const selectedColor = selectedOptions[colorOption.name];
   if (!selectedColor) return { colorImages: [], otherImages: images };
 
-  // Only one color means all images belong to it
   if (colorOption.values.length <= 1) return { colorImages: images, otherImages: [] };
 
-  // Collect variant image URLs for each color
   const colorToImageUrls = new Map<string, Set<string>>();
   for (const variant of variants) {
     if (!variant.image) continue;
@@ -232,10 +197,8 @@ export function getPartitionedImagesForSelectedColor(
     urls.add(variant.image.url);
   }
 
-  // No variant images assigned — all are "other"
   if (colorToImageUrls.size === 0) return { colorImages: [], otherImages: images };
 
-  // Collect image URLs belonging to other colors (not the selected one)
   const otherColorImageUrls = new Set<string>();
   for (const [color, urls] of colorToImageUrls) {
     if (color !== selectedColor) {
@@ -245,7 +208,7 @@ export function getPartitionedImagesForSelectedColor(
     }
   }
 
-  // Don't exclude images that are shared with the selected color
+  // Images shared with the selected color must not be excluded.
   const selectedColorUrls = colorToImageUrls.get(selectedColor);
   if (selectedColorUrls) {
     for (const url of selectedColorUrls) {
@@ -257,7 +220,6 @@ export function getPartitionedImagesForSelectedColor(
 
   if (filtered.length === 0) return { colorImages: [], otherImages: images };
 
-  // Partition: color-specific images vs shared/unassigned images
   const colorImages: Image[] = [];
   const otherImages: Image[] = [];
 
@@ -269,7 +231,6 @@ export function getPartitionedImagesForSelectedColor(
     }
   }
 
-  // Within color images, move the selected variant's image to the front
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
   const variantImageUrl = selectedVariant?.image?.url;
 
@@ -284,11 +245,7 @@ export function getPartitionedImagesForSelectedColor(
   return { colorImages, otherImages };
 }
 
-/**
- * Returns true when all variants share the same price and compareAtPrice.
- * When true, we can render the price immediately without waiting for
- * searchParams to resolve the selected variant.
- */
+/** When true, the price renders without waiting for searchParams to resolve the variant. */
 export function hasUniformPricing(variants: ProductVariant[]): boolean {
   if (variants.length <= 1) return true;
   const first = variants[0];
@@ -300,22 +257,14 @@ export function hasUniformPricing(variants: ProductVariant[]): boolean {
   );
 }
 
-/**
- * Returns true when every variant shares the same availableForSale value.
- * When true, we can eagerly show the correct buy-button labels in the
- * Suspense fallback without waiting for variant resolution.
- */
+/** When true, buy-button labels can render in the Suspense fallback without variant resolution. */
 export function hasUniformStock(variants: ProductVariant[]): boolean {
   if (variants.length <= 1) return true;
   const first = variants[0];
   return variants.every((v) => v.availableForSale === first.availableForSale);
 }
 
-/**
- * Returns true when the product has multiple color variants with
- * distinct images — meaning the gallery would change based on
- * the selected color (i.e. based on searchParams).
- */
+/** True when the gallery depends on selected color (i.e. on searchParams). */
 export function hasColorImagePartitioning(
   options: ProductOption[],
   variants: ProductVariant[],
@@ -333,10 +282,7 @@ export function hasColorImagePartitioning(
   );
 }
 
-/**
- * Returns images not assigned to any color variant.
- * These "shared" images can render without waiting for searchParams.
- */
+/** Images not assigned to any color variant — can render without waiting for searchParams. */
 export function getSharedImages(
   images: Image[],
   options: ProductOption[],
@@ -364,9 +310,6 @@ export function getSharedImages(
   return images.filter((img) => !allColorImageUrls.has(img.url));
 }
 
-// ── Optimistic cart info ─────────────────────────────────────────────
-
-// Product info needed to construct an optimistic CartLine
 export type OptimisticProductInfo = {
   variantTitle: string;
   productTitle: string;
@@ -376,7 +319,7 @@ export type OptimisticProductInfo = {
   selectedOptions: SelectedOption[];
 };
 
-// Build OptimisticProductInfo from a ProductCard (grid/carousel quick-add)
+/** From a ProductCard (grid/carousel quick-add). */
 export function productCardToOptimisticInfo(product: {
   title: string;
   handle: string;
@@ -400,7 +343,7 @@ export function productCardToOptimisticInfo(product: {
   };
 }
 
-// Build OptimisticProductInfo from a PDP variant + product
+/** From a PDP variant + product. */
 export function variantToOptimisticInfo(
   variant: {
     title: string;

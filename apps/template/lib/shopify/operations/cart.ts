@@ -116,8 +116,7 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
 }
 
 /**
- * Create a cart without setting cookies.
- * Use this in streaming contexts (e.g., AI agent) where cookies().set() won't work.
+ * Use in streaming contexts (e.g., the AI agent) where `cookies().set()` won't work.
  * The caller is responsible for setting the cookie via response headers.
  */
 export async function createCartWithoutCookie(locale: string = defaultLocale): Promise<Cart> {
@@ -155,7 +154,6 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
 export async function createCart(locale: string = defaultLocale): Promise<Cart> {
   const cart = await createCartWithoutCookie(locale);
 
-  // Store cart ID in HTTP-only cookie (server-side only)
   if (cart.id) {
     (await cookies()).set("shopify_cartId", cart.id, {
       httpOnly: true,
@@ -178,7 +176,6 @@ export async function addToCart(
     cartId = (await cookies()).get("shopify_cartId")?.value;
   }
 
-  // No cart exists, create one with the current locale's country
   if (!cartId) {
     const cart = await createCart(locale);
     cartId = cart.id;

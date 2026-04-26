@@ -79,7 +79,6 @@ export function BuyButtons({
 
   const isOutOfStock = !selectedVariant.availableForSale;
 
-  // Button text logic
   const getButtonText = () => {
     if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
     if (isAddingToCart) return t("addingToCart");

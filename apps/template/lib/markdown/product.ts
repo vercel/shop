@@ -2,18 +2,13 @@ import type { ProductDetails } from "@/lib/types";
 
 import { createTable, escapeMarkdown, formatPrice } from "./utils";
 
-/**
- * Convert a ProductDetails object to a Markdown string.
- * Designed for agent/crawler consumption with structured, parseable output.
- */
+/** Output is consumed by agents/crawlers, so structure must stay parseable. */
 export function productToMarkdown(product: ProductDetails, locale: string): string {
   const sections: string[] = [];
 
-  // Title
   sections.push(`# ${escapeMarkdown(product.title)}`);
   sections.push("");
 
-  // Product Information
   sections.push("## Product Information");
   sections.push("");
   sections.push(`- **Handle**: ${product.handle}`);
@@ -30,7 +25,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   sections.push(`- **Available**: ${product.availableForSale ? "Yes" : "No"}`);
   sections.push("");
 
-  // Pricing
   sections.push("## Pricing");
   sections.push("");
   sections.push(`- **Price**: ${formatPrice(product.price, locale)}`);
@@ -54,7 +48,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   }
   sections.push("");
 
-  // Description
   if (product.description) {
     sections.push("## Description");
     sections.push("");
@@ -62,7 +55,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Options (compact summary)
   if (product.options.length > 0) {
     sections.push("## Options");
     sections.push("");
@@ -73,7 +65,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Variants (full table)
   if (product.variants.length > 0) {
     sections.push("## Variants");
     sections.push("");
@@ -98,7 +89,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Specifications
   if (product.metafields && product.metafields.length > 0) {
     sections.push("## Specifications");
     sections.push("");
@@ -113,7 +103,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Images (as plain URLs)
   if (product.images.length > 0) {
     sections.push("## Images");
     sections.push("");
@@ -123,7 +112,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Tags
   if (product.tags.length > 0) {
     sections.push("## Tags");
     sections.push("");
@@ -131,7 +119,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // SEO
   if (product.seo.title || product.seo.description) {
     sections.push("## SEO");
     sections.push("");
@@ -144,7 +131,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  // Footer metadata
   sections.push("---");
   sections.push("");
   sections.push(`*Last updated: ${product.updatedAt}*`);

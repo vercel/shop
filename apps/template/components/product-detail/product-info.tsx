@@ -55,7 +55,6 @@ function ProductInfoOptions({
   className,
   ...props
 }: ProductInfoOptionsProps) {
-  // Separate color/swatch options from other options.
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");

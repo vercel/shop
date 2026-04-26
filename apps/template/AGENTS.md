@@ -103,6 +103,28 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Named exports only in component files. Pages use default exports per Next.js convention.
 - Alphabetize specifiers in export statements.
 
+### Comments
+
+Default to writing none. Well-named identifiers, types, and tests already document WHAT the code does. Add a comment only when removing it would leave a future reader genuinely confused — and the reason is something they couldn't recover by reading the surrounding code.
+
+A comment earns its place when it captures one of:
+
+- A hidden constraint (e.g. "cookies can't be set during stream").
+- A workaround for a specific upstream/library bug.
+- A non-obvious algorithmic choice or invariant.
+- A cross-system quirk (e.g. "Shopify's `productFilters` only affects facet counts, not results").
+
+Don't write:
+
+- JSDoc that restates the function name (`/** Verify webhook signature */` over `verifyWebhook()`). Either drop it or replace it with the WHY.
+- Inline comments that narrate the next line (`// fetch products` above `fetchProducts()`).
+- References to current work (`// added for cart refactor`, `// part of issue #123`, `// new`). That belongs in the PR description.
+- File-top banner comments and `// ── Section ──`-style dividers. If a file is large enough that you reach for one, split the file instead.
+- Bare `// TODO` without an owner or actionable reason. Either write `// TODO(handle): explain blocker` or fix the thing now.
+- Multi-paragraph docstrings on simple functions. If the JSDoc fits on one line, inline it; if you reach for multiple paragraphs, that's a signal to split or rename, not to write more prose.
+
+Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other tooling directives — those are not prose comments.
+
 <!-- END:vercel-shop-style -->
 
 ## Overview

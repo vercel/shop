@@ -17,7 +17,6 @@ import type { Cart, CartLine } from "@/lib/types";
 
 const DEBOUNCE_MS = 400;
 
-// Internal utility functions (moved from utils.ts)
 function createOptimisticCart(cart: Cart, lineId: string, newQuantity: number): Cart {
   const currentLine = cart.lines.find((l) => l.id === lineId);
   if (!currentLine) return cart;
@@ -63,12 +62,10 @@ function computeCartWithPending(
   pendingLines: CartLine[],
 ): Cart | null {
   if (cart) {
-    // Merge pending lines into existing cart lines
     const mergedLines = [...cart.lines];
     for (const pl of pendingLines) {
       const existingIndex = mergedLines.findIndex((l) => l.merchandise.id === pl.merchandise.id);
       if (existingIndex >= 0) {
-        // Increment quantity on existing line
         const existing = mergedLines[existingIndex];
         const unitPrice = parseFloat(existing.cost.totalAmount.amount) / existing.quantity;
         const newQty = existing.quantity + pl.quantity;
@@ -169,13 +166,11 @@ type CartContextType = {
     productInfo?: OptimisticProductInfo,
   ) => Promise<boolean>;
   pendingQuantity: number;
-  // Update/remove line items - quantity=0 removes the item
+  /** quantity=0 removes the item. */
   updateItemOptimistic: (lineId: string, quantity: number) => void;
-  // True when any update/remove operation is in-flight
   isUpdatingCart: boolean;
 };
 
-// Type for tracking pending line operations
 type LineOperation = {
   originalCart: Cart | null;
   targetQuantity: number;
@@ -209,32 +204,28 @@ export function CartProvider({
   const [cart, setCartInternal] = useState<Cart | null>(initialCart);
   const [, startTransition] = useTransition();
 
-  // Overlay state
   const [isOverlayOpen, setOverlayOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [pendingQuantity, setPendingQuantity] = useState(0);
   const [pendingLines, setPendingLines] = useState<CartLine[]>([]);
 
-  // Track in-flight update/remove operations
   const [isUpdatingCart, setIsUpdatingCart] = useState(false);
   const inFlightCountRef = useRef(0);
 
   const openOverlay = useCallback(() => setOverlayOpen(true), []);
 
-  // Debounce state for add-to-cart
   const addToCartDebounceRef = useRef({
     pending: new Map<string, number>(),
     timer: null as ReturnType<typeof setTimeout> | null,
   });
   const addToCartResolversRef = useRef<Map<string, Array<(success: boolean) => void>>>(new Map());
 
-  // Track overlay state for timeout callback
   const isOverlayOpenRef = useRef(isOverlayOpen);
   isOverlayOpenRef.current = isOverlayOpen;
 
-  // Track pending line item operations (for update/remove with leading-edge debounce)
+  // Pending line item ops use leading-edge debounce.
   const lineOpsRef = useRef<Map<string, LineOperation>>(new Map());
-  // Per-line request versioning to ignore stale responses that return out of order
+  // Per-line request versioning ignores stale responses that return out of order.
   const latestLineRequestIdRef = useRef<Map<string, number>>(new Map());
 
   const nextLineRequestId = (lineId: string) => {
@@ -244,10 +235,8 @@ export function CartProvider({
   };
 
   const displayCart = applyPendingLineOperations(cart, lineOpsRef.current);
-  // Compute cart with pending quantity and optimistic lines
   const cartWithPending = computeCartWithPending(displayCart, pendingQuantity, pendingLines);
 
-  // Build an optimistic CartLine from product info
   const buildOptimisticLine = (
     variantId: string,
     qty: number,
@@ -276,10 +265,9 @@ export function CartProvider({
     },
   });
 
-  // Ref to track product info for each variant (used when building optimistic lines)
   const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(new Map());
 
-  // Add to cart with debouncing - accumulates rapid clicks into a single request
+  /** Debounced — accumulates rapid clicks into a single request per variant. */
   const addToCartOptimistic = (
     variantId: string,
     quantity: number,
@@ -292,20 +280,16 @@ export function CartProvider({
       addToCartResolversRef.current.set(variantId, resolvers);
     });
 
-    // Store product info if provided
     if (productInfo) {
       pendingProductInfoRef.current.set(variantId, productInfo);
     }
 
-    // Accumulate quantity for this variant
     const current = debounce.pending.get(variantId) || 0;
     debounce.pending.set(variantId, current + quantity);
 
-    // Update pending quantity display
     const totalPending = Array.from(debounce.pending.values()).reduce((sum, q) => sum + q, 0);
     setPendingQuantity(totalPending);
 
-    // Build optimistic pending lines from all accumulated variants
     const nextPendingLines: CartLine[] = [];
     for (const [vid, qty] of debounce.pending) {
       const info = pendingProductInfoRef.current.get(vid);
@@ -315,18 +299,15 @@ export function CartProvider({
     }
     setPendingLines(nextPendingLines);
 
-    // Open overlay on first addition
     if (!isOverlayOpenRef.current) {
       setIsAddingToCart(true);
       setOverlayOpen(true);
     }
 
-    // Reset debounce timer
     if (debounce.timer !== null) {
       clearTimeout(debounce.timer);
     }
 
-    // Flush pending items after debounce period
     debounce.timer = setTimeout(() => {
       debounce.timer = null;
 
@@ -342,7 +323,6 @@ export function CartProvider({
         addToCartResolversRef.current.delete(vid);
       }
 
-      // Make one request per variant (usually just one)
       for (const [vid, qty] of items) {
         startTransition(async () => {
           let success = false;
@@ -363,7 +343,7 @@ export function CartProvider({
             }
           }
 
-          // Only clear pending state if no new items have been queued while we were in-flight
+          // Only clear pending state if nothing was queued while in-flight.
           if (debounce.pending.size === 0) {
             setIsAddingToCart(false);
             setPendingQuantity(0);
@@ -376,7 +356,6 @@ export function CartProvider({
     return requestPromise;
   };
 
-  // Track start/end of in-flight requests
   const trackInFlight = () => {
     inFlightCountRef.current++;
     setIsUpdatingCart(true);
@@ -389,7 +368,6 @@ export function CartProvider({
     };
   };
 
-  // Send update request to server
   const fireUpdateRequest = (lineId: string, quantity: number, originalCart: Cart | null) => {
     const requestId = nextLineRequestId(lineId);
     const endTracking = trackInFlight();
@@ -405,19 +383,17 @@ export function CartProvider({
       const pending = lineOpsRef.current.get(lineId);
 
       if (result.success && result.cart) {
-        // If user changed quantity during request, keep optimistic state
-        // (the debounce timer will fire the final request)
+        // If the user changed quantity during the request, keep the optimistic
+        // state — the debounce timer will fire the final request.
         if (!pending || pending.targetQuantity === quantity) {
           setCartInternal(result.cart);
           lineOpsRef.current.delete(lineId);
         }
       } else if (originalCart) {
         setCartInternal(originalCart);
-        // Check if more changes came in during request
-        if (pending && pending.targetQuantity !== quantity) {
-          // User changed quantity again, keep pending for retry
-          // The debounce timer will fire the final request
-        } else {
+        // If quantity changed again during the request, leave the pending
+        // entry so the debounce timer will retry.
+        if (!pending || pending.targetQuantity === quantity) {
           lineOpsRef.current.delete(lineId);
         }
       }
@@ -426,20 +402,20 @@ export function CartProvider({
     });
   };
 
-  // Update/remove line items with leading-edge debounce
-  // quantity > 0: update quantity (first update instant, subsequent debounced)
-  // quantity === 0: remove item (always immediate)
+  /**
+   * quantity > 0: update with leading-edge debounce (first instant, rest debounced).
+   * quantity === 0: remove immediately, no debounce.
+   */
   const updateItemOptimistic = (lineId: string, quantity: number) => {
     if (quantity < 0 || quantity > 99 || !cart) return;
 
-    // REMOVE: quantity === 0 (immediate, no debounce)
     if (quantity === 0) {
       const pending = lineOpsRef.current.get(lineId);
       if (pending?.timer) clearTimeout(pending.timer);
 
       const originalCart = pending?.originalCart ?? cart;
       lineOpsRef.current.delete(lineId);
-      // Invalidate any in-flight quantity update responses for this line.
+      // Invalidate in-flight quantity-update responses for this line.
       nextLineRequestId(lineId);
 
       setCartInternal(createOptimisticCartWithoutItem(cart, lineId));
@@ -457,7 +433,6 @@ export function CartProvider({
       return;
     }
 
-    // UPDATE: quantity > 0
     let pending = lineOpsRef.current.get(lineId);
 
     if (!pending) {
@@ -472,20 +447,17 @@ export function CartProvider({
 
     pending.targetQuantity = quantity;
 
-    // Optimistic UI update (always instant)
     setCartInternal(createOptimisticCart(cart, lineId, quantity));
 
-    // Clear existing debounce timer
     if (pending.timer) clearTimeout(pending.timer);
 
-    // Leading-edge: first update fires immediately
+    // Leading edge — first update fires immediately, the rest are debounced.
     if (!pending.hasFiredInitial) {
       pending.hasFiredInitial = true;
       fireUpdateRequest(lineId, quantity, pending.originalCart);
       return;
     }
 
-    // Trailing-edge: subsequent updates are debounced
     pending.timer = setTimeout(() => {
       const p = lineOpsRef.current.get(lineId);
       if (!p) return;
@@ -493,16 +465,13 @@ export function CartProvider({
     }, DEBOUNCE_MS);
   };
 
-  // Cleanup timers on unmount
   useEffect(() => {
     const debounce = addToCartDebounceRef.current;
     return () => {
-      // Clear add-to-cart debounce timer
       if (debounce.timer !== null) {
         clearTimeout(debounce.timer);
       }
 
-      // Clear all pending line operation timers
       for (const [, pending] of lineOpsRef.current) {
         if (pending.timer !== null) {
           clearTimeout(pending.timer);
@@ -512,8 +481,7 @@ export function CartProvider({
     };
   }, []);
 
-  // Cleanup stale line operations when cart changes
-  // (handles edge case: cart revalidates, line no longer exists)
+  // Drop pending ops for lines the revalidated cart no longer contains.
   useEffect(() => {
     const lineIds = new Set(cart?.lines.map((l) => l.id) ?? []);
     for (const [lineId, pending] of lineOpsRef.current) {

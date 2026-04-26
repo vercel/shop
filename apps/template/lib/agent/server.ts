@@ -15,14 +15,12 @@ import { removeFromCartTool } from "./tools/remove-from-cart";
 import { searchProductsTool } from "./tools/search-products";
 import { updateCartItemTool } from "./tools/update-cart-item";
 
-// ── Context ──────────────────────────────────────────────────────────
-
 export type User = {
   type: "guest";
   locale: Locale;
 };
 
-// Page context resolved from Referer header with trusted data
+/** Resolved server-side from the Referer header with trusted data. */
 export type PageContext =
   | { type: "home" }
   | { type: "product"; product: ProductDetails }
@@ -31,8 +29,6 @@ export type PageContext =
   | { type: "cart" }
   | null;
 
-// We can track context in here like current user or current page
-// so we can adapt the agent's behavior to the context, like having order tools for logged in users etc
 export interface AgentContext {
   chatId: string;
   user: User;
@@ -60,8 +56,6 @@ export function getAgentContext() {
   }
   return ctx;
 }
-
-// ── Prompt ───────────────────────────────────────────────────────────
 
 /** Strip common leading whitespace from a tagged template literal. */
 function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
@@ -186,8 +180,6 @@ function getSystemPrompt() {
   const ctx = getAgentContext();
   return createSystemPrompt(ctx);
 }
-
-// ── Agent ────────────────────────────────────────────────────────────
 
 const defaults: ToolLoopAgentSettings = {
   model: "anthropic/claude-sonnet-4.6",

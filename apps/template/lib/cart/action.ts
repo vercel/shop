@@ -158,11 +158,7 @@ export async function addToCartAction(
   }
 }
 
-/**
- * Sync cart buyer identity with the current locale
- * This ensures the cart uses the correct country/currency for the locale
- * Should be called when the locale changes or on initial page load
- */
+/** Aligns cart country/currency with the locale; call on locale change or initial page load. */
 export async function syncCartLocaleAction(locale: string): Promise<CartActionResult> {
   if (!isEnabledLocale(locale)) {
     return {
@@ -174,8 +170,8 @@ export async function syncCartLocaleAction(locale: string): Promise<CartActionRe
   try {
     const cart = await updateCartBuyerIdentity(locale);
 
+    // No cart exists yet — nothing to sync, treat as success.
     if (!cart) {
-      // No cart exists, that's fine
       return { success: true };
     }
 
@@ -216,11 +212,7 @@ export async function updateCartNoteAction(note: string): Promise<CartActionResu
   }
 }
 
-/**
- * Build a Shop Pay checkout URL for the given variant.
- * Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`)
- * so no cart needs to be created via the API.
- */
+/** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */
 export async function buyNowAction(
   merchandiseId: string,
   quantity: number = 1,
@@ -257,10 +249,6 @@ export async function buyNowAction(
   return { checkoutUrl };
 }
 
-/**
- * Return the checkout URL for the current cart.
- * Called before redirecting to Shopify checkout.
- */
 export async function prepareCheckoutAction(): Promise<{
   checkoutUrl: string | null;
 }> {

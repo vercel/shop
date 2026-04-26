@@ -43,5 +43,4 @@ export function transformShopifyCollections(collections: ShopifyCollection[]): C
   return collections.map(transformShopifyCollection);
 }
 
-// Re-export Shopify types for use in operations
 export type { ShopifyCollection };

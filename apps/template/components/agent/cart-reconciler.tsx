@@ -43,7 +43,6 @@ export function CartReconciler({ messages }: { messages: UIMessage[] }) {
       if (message.role !== "assistant") continue;
 
       for (const part of message.parts) {
-        // Check if this part is a cart-modifying tool call
         const toolName =
           part.type === "dynamic-tool" && "toolName" in part
             ? (part.toolName as string)
