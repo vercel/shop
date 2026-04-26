@@ -56,7 +56,6 @@ export async function ProductDetailSection({
     ? resolveSelectedVariant(variants, eagerSelectedOptions)
     : null;
 
-  // Translations for stock-aware buy button fallback
   const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
   const allInStock = variants[0]?.availableForSale ?? true;
 

@@ -4,17 +4,10 @@ export function flattenEdges<T>(connection: ShopifyEdges<T>): T[] {
   return connection.edges.map((edge) => edge.node);
 }
 
-/**
- * Extract the numeric ID from a Shopify GID string.
- * e.g. "gid://shopify/Product/1234567890" → "1234567890"
- *
- * Handles both raw GID strings and base64-encoded GIDs.
- * Returns `null` if the ID cannot be extracted.
- */
+/** "gid://shopify/Product/1234567890" → "1234567890". Accepts raw or base64-encoded GIDs. */
 export function getNumericShopifyId(gid: string): string | null {
   let decoded = gid;
 
-  // If it doesn't look like a GID, try base64 decoding
   if (!decoded.startsWith("gid://")) {
     try {
       decoded = Buffer.from(decoded, "base64").toString("utf-8");

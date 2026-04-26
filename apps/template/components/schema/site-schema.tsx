@@ -1,6 +1,5 @@
 import { siteConfig } from "@/lib/config";
 
-// TODO: Skill
 function buildSiteSchema(locale: string) {
   return [
     {

@@ -235,7 +235,6 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSw
 }
 
 function transformOption(option: ShopifyOption): ProductOption {
-  // Build a lookup from optionValues for swatch data
   const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
   if (option.optionValues) {
     for (const ov of option.optionValues) {
@@ -256,7 +255,6 @@ function transformOption(option: ShopifyOption): ProductOption {
   };
 }
 
-// Map metafield keys to display labels
 const METAFIELD_LABELS: Record<string, string> = {
   material: "Material",
   dimensions: "Dimensions",
@@ -282,15 +280,11 @@ function transformMetafields(
     }));
 }
 
-// Convert snake_case or kebab-case to Title Case
 function formatKey(key: string): string {
   return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/**
- * Filter product images to exclude variant-specific images (e.g. color swatches)
- * while keeping product-level images and the default variant's image.
- */
+/** Excludes variant-specific images (e.g. color swatches); keeps the default variant's image. */
 function filterVariantImages(product: ShopifyProductCard): Image[] {
   if (!product.images) return [];
 

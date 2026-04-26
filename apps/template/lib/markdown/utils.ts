@@ -1,8 +1,5 @@
 import type { Money } from "@/lib/types";
 
-/**
- * Format a Money object to a localized price string.
- */
 export function formatPrice(money: Money, locale: string): string {
   const amount = Number.parseFloat(money.amount);
   return new Intl.NumberFormat(locale, {
@@ -12,10 +9,7 @@ export function formatPrice(money: Money, locale: string): string {
   }).format(amount);
 }
 
-/**
- * Escape special markdown characters in text.
- * Handles: | (table pipes), * (bold/italic), _ (italic), ` (code), # (headers)
- */
+/** Handles: | (table pipes), * (bold/italic), _ (italic), ` (code), # (headers). */
 export function escapeMarkdown(text: string): string {
   return text
     .replace(/\|/g, "\\|")
@@ -25,11 +19,7 @@ export function escapeMarkdown(text: string): string {
     .replace(/^#/gm, "\\#");
 }
 
-/**
- * Create a markdown table from headers and rows.
- * Validates that all rows have the same number of cells as headers.
- * Empty rows are filtered out. Rows with mismatched cell counts are padded with empty cells.
- */
+/** Empty rows are dropped; mismatched cell counts are truncated or padded with empty cells. */
 export function createTable(headers: string[], rows: string[][]): string {
   if (headers.length === 0 || rows.length === 0) return "";
 

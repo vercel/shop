@@ -1,9 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 
-/**
- * A hook for managing controlled/uncontrolled component state.
- * Replaces @radix-ui/react-use-controllable-state.
- */
+/** Replaces `@radix-ui/react-use-controllable-state`. */
 export function useControllableState<T>({
   prop,
   defaultProp,

@@ -38,7 +38,6 @@ If there are multiple variants (sizes, colors), ask the user which one they want
           user.locale,
         );
 
-        // Include product title in response if we have context
         let productInfo = "";
         if (page?.type === "product") {
           const { product } = page;

@@ -168,7 +168,6 @@ function Carousel({
   );
 }
 
-/** Single grid item — extracted for reuse. */
 function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: number }) {
   return (
     <div className="relative aspect-square w-full overflow-hidden bg-accent">

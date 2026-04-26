@@ -7,10 +7,6 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection } from "@/lib/shopify/operations/collections";
 
-// export async function generateStaticParams() {
-//   return [{ handle: "__placeholder__" }];
-// }
-
 export async function generateMetadata({
   params,
 }: PageProps<"/collections/[handle]">): Promise<Metadata> {

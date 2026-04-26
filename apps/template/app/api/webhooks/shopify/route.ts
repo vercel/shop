@@ -6,9 +6,6 @@ import { getNumericShopifyId } from "@/lib/shopify/utils";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 
-/**
- * Verify Shopify webhook HMAC signature
- */
 async function verifyWebhook(body: string, hmacHeader: string | null): Promise<boolean> {
   if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
     return false;
@@ -23,21 +20,15 @@ async function verifyWebhook(body: string, hmacHeader: string | null): Promise<b
 }
 
 /**
- * Shopify webhook handler for cache invalidation
- *
- * Supported topics:
- * - products/create, products/update, products/delete
- * - collections/create, collections/update, collections/delete
- *
- * Configure these webhooks in Shopify Admin:
- * Settings > Notifications > Webhooks
+ * Cache invalidation handler. Configure topics in Shopify Admin →
+ * Settings → Notifications → Webhooks. Supported: `products/*`,
+ * `collections/*`, `inventory_levels/*`, `metaobjects/*`.
  */
 export async function POST(request: Request) {
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const topic = request.headers.get("x-shopify-topic");
 
-  // Verify webhook signature in production
   if (SHOPIFY_WEBHOOK_SECRET) {
     const isValid = await verifyWebhook(body, hmacHeader);
     if (!isValid) {
@@ -54,11 +45,10 @@ export async function POST(request: Request) {
 
   const tagsInvalidated: string[] = [];
 
-  // Product-related webhooks
   if (topic.startsWith("products/")) {
     const productTags = ["products", "collections"];
 
-    // Parse body to get specific product handle/id for targeted invalidation
+    // Pull handle/id from the payload for targeted invalidation.
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
@@ -74,7 +64,7 @@ export async function POST(request: Request) {
         productTags.push(`product-${payload.id}`);
       }
     } catch {
-      // If parsing fails, just invalidate generic tags
+      // Parse failure: fall through and invalidate the generic tags.
     }
 
     for (const tag of productTags) {
@@ -83,18 +73,16 @@ export async function POST(request: Request) {
     }
   }
 
-  // Collection-related webhooks
   if (topic.startsWith("collections/")) {
     const collectionTags = ["collections", "products", "menus"];
 
-    // Parse body to get specific collection handle
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
         collectionTags.push(`collection-${payload.handle}`);
       }
     } catch {
-      // If parsing fails, just invalidate generic tags
+      // Parse failure: fall through and invalidate the generic tags.
     }
 
     for (const tag of collectionTags) {
@@ -103,7 +91,6 @@ export async function POST(request: Request) {
     }
   }
 
-  // Inventory-related webhooks (product availability changes)
   if (topic.startsWith("inventory_levels/")) {
     const inventoryTags = ["products", "collections"];
 
@@ -113,7 +100,6 @@ export async function POST(request: Request) {
     }
   }
 
-  // Metaobject-related webhooks (CMS)
   if (topic.startsWith("metaobjects/")) {
     const cmsTags = ["cms:all"];
 
@@ -136,7 +122,7 @@ export async function POST(request: Request) {
         cmsTags.push("cms:pages", "cms:homepage");
       }
     } catch {
-      // If parsing fails, just invalidate base CMS tag
+      // Parse failure: fall through and invalidate the base CMS tag only.
     }
 
     for (const tag of cmsTags) {
