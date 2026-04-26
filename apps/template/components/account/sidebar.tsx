@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { tNamespace } from "@/lib/i18n/server";
 
 import { SidebarClient } from "./sidebar-client";
 
@@ -9,11 +9,11 @@ const ACCOUNT_LINKS = [
 ] as const;
 
 export async function AccountSidebar() {
-  const t = await getTranslations("account");
+  const labels = await tNamespace("account");
 
   const links = ACCOUNT_LINKS.map((link) => ({
     href: link.href,
-    label: t(link.key),
+    label: labels[link.key],
   }));
 
   return <SidebarClient links={links} />;

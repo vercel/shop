@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { CartItemsList } from "@/components/cart-page/cart-items-list";
@@ -13,13 +11,13 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
+import { t, tNamespace } from "@/lib/i18n/server";
 import { getLocale } from "@/lib/params";
 import { getCart } from "@/lib/shopify/operations/cart";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("cart");
   return {
-    title: t("title"),
+    title: await t("cart.title"),
     robots: {
       index: false,
       follow: false,
@@ -40,37 +38,35 @@ export default async function CartPage() {
 }
 
 async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages] = await Promise.all([getCart(), getMessages()]);
+  const [cart, labels] = await Promise.all([getCart(), tNamespace("cart")]);
 
   return (
-    <NextIntlClientProvider messages={{ cart: messages.cart }}>
-      <CartContextSync cart={cart ?? null}>
-        {!cart || cart.totalQuantity === 0 ? (
-          <Empty />
-        ) : (
-          <Container className="py-10">
-            <Sections>
-              <Header />
-              <div className="grid gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-8 xl:col-span-9">
-                  <CartItemsList locale={locale} />
-                </div>
-                <aside className="lg:col-span-4 xl:col-span-3">
-                  <div className="lg:sticky lg:top-20">
-                    <Summary locale={locale} />
-                  </div>
-                </aside>
+    <CartContextSync cart={cart ?? null}>
+      {!cart || cart.totalQuantity === 0 ? (
+        <Empty />
+      ) : (
+        <Container className="py-10">
+          <Sections>
+            <Header shoppingCartLabel={labels.shoppingCart} />
+            <div className="grid gap-5 lg:grid-cols-12">
+              <div className="lg:col-span-8 xl:col-span-9">
+                <CartItemsList labels={labels} locale={locale} />
               </div>
-              {cart.lines[0]?.merchandise.product.handle ? (
-                <RelatedProductsSection
-                  handle={cart.lines[0].merchandise.product.handle}
-                  locale={locale}
-                />
-              ) : null}
-            </Sections>
-          </Container>
-        )}
-      </CartContextSync>
-    </NextIntlClientProvider>
+              <aside className="lg:col-span-4 xl:col-span-3">
+                <div className="lg:sticky lg:top-20">
+                  <Summary labels={labels} locale={locale} />
+                </div>
+              </aside>
+            </div>
+            {cart.lines[0]?.merchandise.product.handle ? (
+              <RelatedProductsSection
+                handle={cart.lines[0].merchandise.product.handle}
+                locale={locale}
+              />
+            ) : null}
+          </Sections>
+        </Container>
+      )}
+    </CartContextSync>
   );
 }

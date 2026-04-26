@@ -19,6 +19,7 @@
   },
   "agent": {
     "assistantLabel": "Shopping assistant",
+    "chooseVariant": "Choose a variant",
     "clearChat": "Clear chat",
     "copy": "Copy",
     "dropFiles": "Drop files here",
@@ -26,6 +27,7 @@
     "minimizeAssistant": "Minimize assistant",
     "name": "Agent",
     "openAssistant": "Open shopping assistant",
+    "qtyShort": "Qty",
     "retry": "Retry",
     "title": ""
   },

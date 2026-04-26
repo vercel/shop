@@ -1,17 +1,18 @@
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
+import { tNamespace } from "@/lib/i18n/server";
+
 export async function Empty() {
-  const t = await getTranslations("cart");
+  const labels = await tNamespace("cart");
 
   return (
     <div className="flex flex-col items-center justify-center gap-5 py-10 px-5">
-      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{t("empty")}</h2>
+      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{labels.empty}</h2>
       <Link
         href="/"
         className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
       >
-        {t("continueShopping")}
+        {labels.continueShopping}
       </Link>
     </div>
   );

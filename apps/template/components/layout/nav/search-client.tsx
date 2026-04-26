@@ -1,18 +1,21 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useRef, useState } from "react";
 
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
+import type { Locale, NamespaceMessages } from "@/lib/i18n";
 
 import { PredictiveSearchPanel } from "../action-bar/predictive-search-results";
 
-export function SearchClient() {
+interface SearchClientProps {
+  labels: NamespaceMessages<"nav">;
+  locale: Locale;
+}
+
+export function SearchClient({ labels, locale }: SearchClientProps) {
   const router = useRouter();
-  const locale = useLocale();
-  const t = useTranslations("nav");
   const inputRef = useRef<HTMLInputElement>(null);
   const [showPanel, setShowPanel] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
@@ -100,7 +103,7 @@ export function SearchClient() {
           type="text"
           name="q"
           role="combobox"
-          placeholder={t("searchPlaceholder")}
+          placeholder={labels.searchPlaceholder}
           className="w-full h-10 pl-10 pr-5 rounded-full bg-muted border-0 text-base md:text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/20"
           maxLength={100}
           autoComplete="off"
@@ -133,6 +136,8 @@ export function SearchClient() {
         <PredictiveSearchPanel
           results={results}
           isLoading={isLoading}
+          labels={labels.predictiveSearch}
+          locale={locale}
           query={query}
           activeIndex={activeIndex}
           onSelectSuggestion={(text) => {

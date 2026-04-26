@@ -1,10 +1,10 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { loadMoreCollectionProducts } from "@/lib/collections/action";
 import type { CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
 
@@ -30,18 +30,26 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ result, filters, collection, sort }, t, tProduct] = await Promise.all([
+  const [
+    { result, filters, collection, sort },
+    noResults,
+    noResultsAvailable,
+    outOfStockText,
+    addToCartLabel,
+  ] = await Promise.all([
     collectionResultsDataPromise,
-    getTranslations("search"),
-    getTranslations("product"),
+    t("search.noResults"),
+    t("search.noResultsAvailable"),
+    t("product.outOfStock"),
+    t("product.addToCart"),
   ]);
   const products = result.products;
 
   if (products.length === 0) {
     return (
       <div className="py-10 text-center">
-        <h2 className="mb-2 text-2xl font-semibold">{t("noResults")}</h2>
-        <p className="text-muted-foreground">{t("noResultsAvailable")}</p>
+        <h2 className="mb-2 text-2xl font-semibold">{noResults}</h2>
+        <p className="text-muted-foreground">{noResultsAvailable}</p>
       </div>
     );
   }
@@ -59,10 +67,11 @@ async function Render({
 
   return (
     <InfiniteProductGrid
+      addToCartLabel={addToCartLabel}
       initialProducts={products}
       initialPageInfo={result.pageInfo}
       locale={locale}
-      outOfStockText={tProduct("outOfStock")}
+      outOfStockText={outOfStockText}
       loadMore={boundLoadMore}
     >
       {products.map((product) => (
@@ -70,7 +79,7 @@ async function Render({
           key={product.id}
           product={product}
           locale={locale}
-          outOfStockText={tProduct("outOfStock")}
+          outOfStockText={outOfStockText}
         />
       ))}
     </InfiniteProductGrid>

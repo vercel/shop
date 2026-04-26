@@ -2,11 +2,11 @@
 
 import { Search, Tag } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Price } from "@/components/product/price";
+import type { Locale, NamespaceMessages } from "@/lib/i18n";
 import type {
   PredictiveSearchCollection,
   PredictiveSearchProduct,
@@ -17,9 +17,13 @@ import { cn } from "@/lib/utils";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 
+type PredictiveSearchLabels = NamespaceMessages<"nav">["predictiveSearch"];
+
 interface PredictiveSearchPanelProps {
   results: PredictiveSearchResult | null;
   isLoading: boolean;
+  labels: PredictiveSearchLabels;
+  locale: Locale;
   query: string;
   activeIndex: number;
   onSelectSuggestion: (text: string) => void;
@@ -31,6 +35,8 @@ interface PredictiveSearchPanelProps {
 export function PredictiveSearchPanel({
   results,
   isLoading,
+  labels,
+  locale,
   query,
   activeIndex,
   onSelectSuggestion,
@@ -38,7 +44,6 @@ export function PredictiveSearchPanel({
   position = "above",
   className,
 }: PredictiveSearchPanelProps) {
-  const t = useTranslations("nav.predictiveSearch");
   const show = query.trim().length > 0 && (results !== null || isLoading);
 
   return (
@@ -57,7 +62,7 @@ export function PredictiveSearchPanel({
           )}
           role="listbox"
           id="predictive-search-results"
-          aria-label={t("suggestions")}
+          aria-label={labels.suggestions}
         >
           {isLoading && !results && (
             <div className="px-5 py-2.5">
@@ -68,7 +73,7 @@ export function PredictiveSearchPanel({
           {results && (
             <div className="max-h-[60vh] overflow-y-auto overscroll-contain">
               {results.queries.length > 0 && (
-                <SearchSection title={t("suggestions")}>
+                <SearchSection title={labels.suggestions}>
                   {results.queries.map((suggestion, i) => (
                     <SuggestionItem
                       key={suggestion.text}
@@ -81,11 +86,12 @@ export function PredictiveSearchPanel({
               )}
 
               {results.products.length > 0 && (
-                <SearchSection title={t("products")}>
+                <SearchSection title={labels.products}>
                   {results.products.map((product, i) => (
                     <ProductItem
                       key={product.id}
                       product={product}
+                      locale={locale}
                       active={activeIndex === results.queries.length + i}
                       onClick={onNavigate}
                     />
@@ -94,7 +100,7 @@ export function PredictiveSearchPanel({
               )}
 
               {results.collections.length > 0 && (
-                <SearchSection title={t("collections")}>
+                <SearchSection title={labels.collections}>
                   {results.collections.map((collection, i) => (
                     <CollectionItem
                       key={collection.handle}
@@ -110,7 +116,7 @@ export function PredictiveSearchPanel({
                 results.collections.length === 0 &&
                 results.queries.length === 0 && (
                   <div className="px-5 py-2.5 text-sm text-muted-foreground">
-                    {t("noResults", { query })}
+                    {labels.noResults.replace("{query}", query)}
                   </div>
                 )}
 
@@ -120,7 +126,7 @@ export function PredictiveSearchPanel({
                   onClick={onNavigate}
                   className="block px-5 py-2.5 text-sm font-medium text-primary hover:bg-accent/50 border-t border-border/30 transition-colors"
                 >
-                  {t("viewAll", { query: query.trim() })}
+                  {labels.viewAll.replace("{query}", query.trim())}
                 </Link>
               )}
             </div>
@@ -172,15 +178,15 @@ function SuggestionItem({
 
 function ProductItem({
   product,
+  locale,
   active,
   onClick,
 }: {
   product: PredictiveSearchProduct;
+  locale: Locale;
   active: boolean;
   onClick: () => void;
 }) {
-  const locale = useLocale();
-
   return (
     <Link
       href={`/products/${product.handle}`}

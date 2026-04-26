@@ -29,8 +29,94 @@ Interactively set up Shopify Markets with multi-locale routing using next-intl. 
 ## Prerequisites
 
 - The storefront is running in single-locale mode (default state)
-- `next-intl` is installed (it is by default)
 - Shopify Markets are configured in the Shopify admin for the desired locales
+
+---
+
+## Step 0: Reinstall next-intl
+
+The default template runs single-locale and ships **without** `next-intl` — translations resolve server-side via `lib/i18n/server.ts` (`t`, `tNamespace`) and prop-drill into client components. For multi-locale you need next-intl back: it provides locale-prefix middleware, hreflang alternates, locale-aware `<Link>`, and CLDR-aware client formatters.
+
+### 0a. Install the package
+
+```bash
+pnpm --filter template add next-intl
+```
+
+(Optionally pin to the version that shipped with the template before the `remove-next-intl` rollout: check the `template-rollout-log/2026-04-26-remove-next-intl.md` entry for the previous pin.)
+
+### 0b. Recreate `apps/template/lib/i18n/request.ts`
+
+```ts
+import { getRequestConfig } from "next-intl/server";
+
+import { defaultLocale, resolveLocale } from ".";
+import type enMessages from "./messages/en.json";
+
+const messageLoaders = {
+  "en-US": () => import("./messages/en.json"),
+  // additional locales added by Step 14
+} as const;
+
+export default getRequestConfig(async () => {
+  const locale = resolveLocale(defaultLocale);
+  const messages = (await messageLoaders[locale]()).default as typeof enMessages;
+
+  return { locale, messages };
+});
+```
+
+### 0c. Recreate `apps/template/global.ts`
+
+```ts
+import type { locales } from "@/lib/i18n";
+import type messages from "@/lib/i18n/messages/en.json";
+
+declare module "next-intl" {
+  interface AppConfig {
+    Locale: (typeof locales)[number];
+    Messages: typeof messages;
+  }
+}
+```
+
+### 0d. Re-add the next-intl plugin to `apps/template/next.config.ts`
+
+```ts
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin({
+  experimental: { createMessagesDeclaration: "./lib/i18n/messages/en.json" },
+  requestConfig: "./lib/i18n/request.ts",
+});
+
+export default withNextIntl(nextConfig);
+```
+
+### 0e. Mount `<NextIntlClientProvider>` in `app/layout.tsx`
+
+Wrap the root layout body so deeper client components can call `useTranslations` again:
+
+```tsx
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+
+const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
+// ...
+<NextIntlClientProvider locale={locale} messages={messages}>
+  {/* existing tree */}
+</NextIntlClientProvider>
+```
+
+### 0f. Convert hot client components back to `useTranslations`
+
+The template currently passes labels via props (e.g. `<MobileMenu menuLabel={...} showAllTemplate={...} />`). Once next-intl is back, you can either keep the prop-drilling (works fine even with multi-locale, since the server still resolves per request) or switch back to `useTranslations` inside client components for tighter ergonomics. Pick one approach and apply it consistently to: `mobile-menu.tsx`, `search-modal.tsx`, `search-client.tsx`, `predictive-search-results.tsx`, `buy-buttons.tsx`, `agent-panel.tsx`, `agent/registry.tsx`, `cart/overlay.tsx`, `cart/overlay-content.tsx`, `cart/overlay-item.tsx`, `cart/overlay-summary.tsx`, `cart-page/*.tsx`, `account/sign-out-button.tsx`, `collections/sort-select.tsx`, `collections/filter-sidebar.tsx`, `product-card/quick-add.tsx`, `product-detail/product-media.tsx`, `layout/nav/cart-client.tsx`, `app/account/login/login-client.tsx`, `components/ui/error-boundary-content.tsx`.
+
+Recommended: **keep prop drilling** (it works under multi-locale and avoids fragmenting the bundle) and reserve `useTranslations` for the few cases where dynamic client state composes a string at runtime.
+
+### 0g. Replace `error.tsx` fallback labels
+
+The template's `error.tsx` files pass static `ERROR_BOUNDARY_LABELS` from `lib/i18n/error-fallback.ts`. With multi-locale, swap each error.tsx to use a thin `useTranslations("common")` call (or render a `<ClientErrorBoundary />` that does) so error UI honors the active locale. After this step the `lib/i18n/error-fallback.ts` constants are no longer needed.
 
 ---
 

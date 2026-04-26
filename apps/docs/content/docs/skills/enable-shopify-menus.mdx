@@ -123,11 +123,11 @@ Skip this section if the user did not select the footer menu.
 Add the Shopify menu fetch back to the footer. Create a `FooterContent` async component:
 
 ```tsx
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
+import { t } from "@/lib/i18n/server";
 import { getMenu } from "@/lib/shopify/operations/menu";
 
 const LINK_CLASS = "text-sm text-muted-foreground transition-colors hover:text-foreground";
@@ -179,13 +179,9 @@ function FooterHeading({ title, url }: { title: string; url: string }) {
 
 async function Copyright() {
   await connection();
-  const t = await getTranslations("footer");
+  const copyright = await t("footer.copyright", { year: String(new Date().getFullYear()) });
 
-  return (
-    <p className="text-sm text-muted-foreground">
-      {t("copyright", { year: String(new Date().getFullYear()) })}
-    </p>
-  );
+  return <p className="text-sm text-muted-foreground">{copyright}</p>;
 }
 
 async function FooterContent({ locale }: { locale: string }) {
@@ -538,18 +534,20 @@ Key behavior:
 
 The component accepts `items: MegamenuItem[]` and optional `children` (rendered in a footer below the nav list).
 
-It uses translation keys from the `nav` namespace:
-- `categories` — trigger button label
-- `exploreCategories` — heading above the nav list
-- `showAllCategory` — "Show all {category}" link text (with `{category}` interpolation)
+It needs three translated strings from the `nav` namespace, passed in as props from the server parent (no `useTranslations` — the template resolves translations server-side and prop-drills the result):
+
+- `categoriesLabel: string` — trigger button label (from `nav.categories`)
+- `exploreCategoriesLabel: string` — heading above the nav list (from `nav.exploreCategories`)
+- `showAllTemplate: string` — "Show all {category}" template (from `nav.showAllCategory`); interpolate `{category}` client-side via `template.replace("{category}", title)`
 
 Export both `MegamenuClient` and `MegamenuFallback` from this file. The fallback renders a disabled-looking trigger with the hamburger icon and "Browse" label.
 
 #### C4e. `megamenu-desktop.tsx`
 
-A thin server component wrapper that renders `MegamenuClient` only when items are non-empty:
+A thin server component wrapper that renders `MegamenuClient` only when items are non-empty. It resolves the `nav` labels and prop-drills the three strings the client needs:
 
 ```tsx
+import { t } from "@/lib/i18n/server";
 import type { MegamenuItem } from "@/lib/shopify/types/megamenu";
 
 import { MegamenuClient } from "./megamenu-client";
@@ -559,12 +557,27 @@ type Props = {
   children?: React.ReactNode;
 };
 
-export function MegamenuDesktop({ items, children }: Props) {
+export async function MegamenuDesktop({ items, children }: Props) {
   if (!items.length) {
     return null;
   }
 
-  return <MegamenuClient items={items}>{children}</MegamenuClient>;
+  const [categoriesLabel, exploreCategoriesLabel, showAllTemplate] = await Promise.all([
+    t("nav.categories"),
+    t("nav.exploreCategories"),
+    t("nav.showAllCategory"),
+  ]);
+
+  return (
+    <MegamenuClient
+      items={items}
+      categoriesLabel={categoriesLabel}
+      exploreCategoriesLabel={exploreCategoriesLabel}
+      showAllTemplate={showAllTemplate}
+    >
+      {children}
+    </MegamenuClient>
+  );
 }
 ```
 
@@ -711,7 +724,7 @@ Then update `components/collections/header.tsx` and `components/collections/stru
 
 - The `getMenu()` operation from `lib/shopify/operations/menu.ts` already handles caching (`"use cache: remote"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
 - Components in `components/layout/nav/megamenu/` may import from `@/lib/shopify/types/megamenu` for prop types, but must not call Shopify operations directly — data fetching happens in the server component barrel (`index.tsx`).
-- All user-visible strings must use `useTranslations("nav")` — no hardcoded English text in components.
+- All user-visible strings must come from the `nav` namespace via prop drilling from the server parent (`tNamespace("nav")` or `t("nav.key")` in the server wrapper) — no `useTranslations` calls in client components, no hardcoded English text.
 - The BroadcastChannel name must be `"megamenu"` for cross-tab sync to work.
 - External links (starting with `http`) must use `<a>` with `target="_blank"` and `rel="noopener noreferrer"`. Internal links must use Next.js `Link`.
 - The mobile component renders on all viewports but is only visible below `md`. Desktop uses `hidden md:block`.

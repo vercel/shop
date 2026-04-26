@@ -1,5 +1,4 @@
 import { SlidersHorizontalIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
@@ -9,12 +8,14 @@ import {
   type CollectionResultsData,
   getExactCollectionResultCount,
 } from "@/lib/collections/server";
-import type { Locale } from "@/lib/i18n";
+import { type Locale, formatPlural } from "@/lib/i18n";
+import { tNamespace } from "@/lib/i18n/server";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionResultsGrid } from "./results-grid";
+import { buildSortOptions } from "./sort-options";
 import { CollectionToolbar, CollectionToolbarSkeleton } from "./toolbar";
 
 const FALLBACK_SKELETON_KEYS = Array.from(
@@ -50,30 +51,33 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [data, tSearch] = await Promise.all([
+  const [data, searchLabels, categoryLabels] = await Promise.all([
     collectionResultsDataPromise,
-    getTranslations("search"),
+    tNamespace("search"),
+    tNamespace("category"),
   ]);
 
   const activeCount = getActiveFilterCount(data);
   const exactCount = getExactCollectionResultCount({ result: data.result });
+  const filtersLabel = searchLabels.filters;
+  const sortOptions = buildSortOptions(searchLabels);
 
   return (
     <>
       <CollectionToolbar
         resultCount={
           exactCount !== undefined && exactCount > 0
-            ? tSearch("resultCount", { count: exactCount })
+            ? formatPlural(searchLabels.resultCount, exactCount, locale)
             : undefined
         }
         filterSheet={
           <FilterSidebarSheet
-            label={tSearch("filters")}
+            label={filtersLabel}
             activeCount={activeCount}
             trigger={
               <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
-                <span>{tSearch("filters")}</span>
+                <span>{filtersLabel}</span>
                 {activeCount > 0 && (
                   <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
                     {activeCount}
@@ -83,11 +87,18 @@ async function Render({
             }
           >
             <FilterPendingScope>
-              <CollectionFilters collectionResultsDataPromise={collectionResultsDataPromise} />
+              <CollectionFilters
+                collectionResultsDataPromise={collectionResultsDataPromise}
+                filtersLabel={filtersLabel}
+                priceLabel={categoryLabels.price}
+                resetLabel={searchLabels.reset}
+              />
             </FilterPendingScope>
           </FilterSidebarSheet>
         }
-        sortSelect={<CollectionsSortSelect />}
+        sortSelect={
+          <CollectionsSortSelect options={sortOptions} sortByLabel={searchLabels.sortBy} />
+        }
       />
 
       <FilterPendingScope>

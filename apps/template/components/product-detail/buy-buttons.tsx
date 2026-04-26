@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/context";
@@ -13,22 +12,31 @@ import { cn } from "@/lib/utils";
 
 import { ShopLogo } from "./shop-logo";
 
+export interface BuyButtonsLabels {
+  addToCart: string;
+  addingTemplate: string;
+  addingToCart: string;
+  buyWithShop: string;
+  outOfStock: string;
+}
+
 export function BuyButtons({
   selectedVariant,
   title,
   handle,
   featuredImage,
   availableForSale = true,
+  labels,
 }: {
   selectedVariant: ProductVariant | undefined;
   title: string;
   handle: string;
   featuredImage: Image | null;
   availableForSale?: boolean;
+  labels: BuyButtonsLabels;
 }) {
   const selectedVariantId = selectedVariant?.id;
 
-  const t = useTranslations("product");
   const [, startBuyNowTransition] = useTransition();
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
@@ -81,10 +89,11 @@ export function BuyButtons({
 
   // Button text logic
   const getButtonText = () => {
-    if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
-    if (isAddingToCart) return t("addingToCart");
-    if (isOutOfStock) return t("outOfStock");
-    return t("addToCart");
+    if (pendingQuantity > 0)
+      return labels.addingTemplate.replace("{quantity}", String(pendingQuantity));
+    if (isAddingToCart) return labels.addingToCart;
+    if (isOutOfStock) return labels.outOfStock;
+    return labels.addToCart;
   };
 
   return (
@@ -102,7 +111,7 @@ export function BuyButtons({
           <Loader2 className="size-4 animate-spin" />
         ) : (
           <>
-            <span className="text-sm font-medium">{t("buyWithShop")}</span>
+            <span className="text-sm font-medium">{labels.buyWithShop}</span>
             <ShopLogo className="h-4 w-auto" />
           </>
         )}

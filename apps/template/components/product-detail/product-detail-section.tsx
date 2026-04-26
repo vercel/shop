@@ -1,7 +1,6 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { type BuyButtonsLabels, BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
@@ -15,6 +14,7 @@ import { ProductPrice } from "@/components/product-detail/product-price";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
+import { tNamespace } from "@/lib/i18n/server";
 import {
   computeInitialSelectedOptions,
   getPartitionedImagesForSelectedColor,
@@ -31,6 +31,22 @@ import type {
   ProductVariant,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+function buildBuyButtonsLabels(productLabels: {
+  addToCart: string;
+  addingQuantity: string;
+  addingToCart: string;
+  buyWithShop: string;
+  outOfStock: string;
+}): BuyButtonsLabels {
+  return {
+    addToCart: productLabels.addToCart,
+    addingTemplate: productLabels.addingQuantity,
+    addingToCart: productLabels.addingToCart,
+    buyWithShop: productLabels.buyWithShop,
+    outOfStock: productLabels.outOfStock,
+  };
+}
 
 export async function ProductDetailSection({
   product,
@@ -56,9 +72,10 @@ export async function ProductDetailSection({
     ? resolveSelectedVariant(variants, eagerSelectedOptions)
     : null;
 
-  // Translations for stock-aware buy button fallback
-  const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
+  const productLabels = await tNamespace("product");
   const allInStock = variants[0]?.availableForSale ?? true;
+  const buyButtonsLabels = buildBuyButtonsLabels(productLabels);
+  const showFallbackButtons = uniformStock && !singleVariant;
 
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
@@ -67,6 +84,7 @@ export async function ProductDetailSection({
           otherImages={getSharedImages(images, options, variants)}
           videos={videos}
           title={title}
+          goToImageTemplate={productLabels.goToImage}
           className="lg:col-span-6"
           desktopSlot={
             <Suspense
@@ -111,6 +129,7 @@ export async function ProductDetailSection({
           otherImages={images}
           videos={videos}
           title={title}
+          goToImageTemplate={productLabels.goToImage}
           className="lg:col-span-6"
         />
       )}
@@ -171,11 +190,12 @@ export async function ProductDetailSection({
             handle={handle}
             featuredImage={featuredImage}
             availableForSale={product.availableForSale}
+            labels={buyButtonsLabels}
           />
         ) : (
           <Suspense
             fallback={
-              t ? (
+              showFallbackButtons ? (
                 <div className="grid grid-cols-2 gap-2">
                   <div
                     className={cn(
@@ -183,11 +203,11 @@ export async function ProductDetailSection({
                       !allInStock && "invisible",
                     )}
                   >
-                    <span className="text-sm font-medium">{t("buyWithShop")}</span>
+                    <span className="text-sm font-medium">{productLabels.buyWithShop}</span>
                     <ShopLogo className="h-4 w-auto" />
                   </div>
                   <div className="flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
-                    {allInStock ? t("addToCart") : t("outOfStock")}
+                    {allInStock ? productLabels.addToCart : productLabels.outOfStock}
                   </div>
                 </div>
               ) : (
@@ -205,6 +225,7 @@ export async function ProductDetailSection({
               featuredImage={featuredImage}
               availableForSale={product.availableForSale}
               variantIdPromise={variantIdPromise}
+              labels={buyButtonsLabels}
             />
           </Suspense>
         )}
@@ -245,6 +266,7 @@ async function ResolvedBuyButtons({
   featuredImage,
   availableForSale,
   variantIdPromise,
+  labels,
 }: {
   variants: ProductVariant[];
   title: string;
@@ -252,6 +274,7 @@ async function ResolvedBuyButtons({
   featuredImage: ImageType | null;
   availableForSale: boolean;
   variantIdPromise: Promise<string | undefined>;
+  labels: BuyButtonsLabels;
 }) {
   const variantId = await variantIdPromise;
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
@@ -264,6 +287,7 @@ async function ResolvedBuyButtons({
       handle={handle}
       featuredImage={featuredImage}
       availableForSale={availableForSale}
+      labels={labels}
     />
   );
 }

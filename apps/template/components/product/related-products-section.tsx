@@ -1,10 +1,10 @@
-import { getTranslations } from "next-intl/server";
 import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ProductsCarousel } from "@/components/product/products-carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
 function Fallback({ title }: { title: string }) {
@@ -31,16 +31,14 @@ function Fallback({ title }: { title: string }) {
 
 async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   await connection();
-  const [t, recommendations] = await Promise.all([
-    getTranslations("product"),
+  const [title, recommendations] = await Promise.all([
+    t("product.recommendations"),
     getProductRecommendations(handle, locale),
   ]);
 
   if (recommendations.length === 0) return null;
 
-  return (
-    <ProductsCarousel title={t("recommendations")} products={recommendations} locale={locale} />
-  );
+  return <ProductsCarousel title={title} products={recommendations} locale={locale} />;
 }
 
 export async function RelatedProductsSection({
@@ -50,9 +48,9 @@ export async function RelatedProductsSection({
   handle: string;
   locale: Locale;
 }) {
-  const t = await getTranslations("product");
+  const title = await t("product.recommendations");
   return (
-    <Suspense fallback={<Fallback title={t("recommendations")} />}>
+    <Suspense fallback={<Fallback title={title} />}>
       <Render handle={handle} locale={locale} />
     </Suspense>
   );

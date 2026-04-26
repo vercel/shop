@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { tNamespace } from "@/lib/i18n/server";
 
 import { MobileTabsClient } from "./mobile-tabs-client";
 
@@ -9,11 +9,11 @@ const ACCOUNT_TABS = [
 ] as const;
 
 export async function AccountMobileTabs() {
-  const t = await getTranslations("account");
+  const labels = await tNamespace("account");
 
   const tabs = ACCOUNT_TABS.map((tab) => ({
     href: tab.href,
-    label: t(tab.key),
+    label: labels[tab.key],
   }));
 
   return <MobileTabsClient tabs={tabs} />;

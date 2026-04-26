@@ -1,12 +1,12 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
 import { prepareCheckoutAction } from "@/lib/cart/action";
+import type { NamespaceMessages } from "@/lib/i18n";
 import { cn, formatPrice } from "@/lib/utils";
 
 function CheckoutLink({
@@ -61,11 +61,11 @@ function CheckoutLink({
 }
 
 interface SummaryProps {
+  labels: NamespaceMessages<"cart">;
   locale: string;
 }
 
-export function Summary({ locale }: SummaryProps) {
-  const t = useTranslations("cart");
+export function Summary({ labels, locale }: SummaryProps) {
   const { isUpdatingCart } = useCart();
   const cart = useCartRender();
 
@@ -81,19 +81,19 @@ export function Summary({ locale }: SummaryProps) {
     <div className="space-y-5">
       <div>
         <div className="flex items-baseline justify-between">
-          <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
+          <span className="text-base text-muted-foreground">{labels.estimatedTotal}</span>
           <span className="text-xl font-medium text-foreground">
             {formatPrice(subtotal, currencyCode, locale)}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
+        <p className="text-xs text-muted-foreground mt-1">{labels.taxesAndShippingNote}</p>
       </div>
 
       <CheckoutLink
         checkoutUrl={cart.checkoutUrl}
         isUpdatingCart={isUpdatingCart}
-        updatingText={t("updatingCart")}
-        checkoutText={t("completeCheckout")}
+        updatingText={labels.updatingCart}
+        checkoutText={labels.completeCheckout}
       />
     </div>
   );

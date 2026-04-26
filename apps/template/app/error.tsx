@@ -1,6 +1,7 @@
 "use client";
 
 import { ErrorBoundaryContent } from "@/components/ui/error-boundary-content";
+import { ERROR_BOUNDARY_LABELS } from "@/lib/i18n/error-fallback";
 
 export default function LocaleError({
   reset,
@@ -8,5 +9,5 @@ export default function LocaleError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorBoundaryContent reset={reset} />;
+  return <ErrorBoundaryContent reset={reset} {...ERROR_BOUNDARY_LABELS} />;
 }

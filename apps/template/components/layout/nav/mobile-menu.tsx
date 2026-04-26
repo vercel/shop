@@ -1,7 +1,6 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -42,28 +41,30 @@ function MenuLink({ url, children, className, onClick }: MenuLinkProps) {
   );
 }
 
-export function MobileMenu({ items }: { items: MenuItem[] }) {
-  const t = useTranslations("nav");
+interface MobileMenuProps {
+  items: MenuItem[];
+  menuLabel: string;
+  showAllTemplate: string;
+}
+
+export function MobileMenu({ items, menuLabel, showAllTemplate }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  const showAllLabel = (title: string) => showAllTemplate.replace("{category}", title);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button type="button" className="md:hidden -ml-2 p-2" aria-label={t("menu")}>
+        <button type="button" className="md:hidden -ml-2 p-2" aria-label={menuLabel}>
           <Menu className="size-5" />
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="gap-0">
         <div className="flex h-16 items-center px-5">
-          <SheetTitle className="text-lg font-semibold">{t("menu")}</SheetTitle>
+          <SheetTitle className="text-lg font-semibold">{menuLabel}</SheetTitle>
         </div>
         <nav className="px-5">
-          <MobileMenuList
-            items={items}
-            onLinkClick={close}
-            showAllLabel={(title: string) => t("showAllCategory", { category: title })}
-          />
+          <MobileMenuList items={items} onLinkClick={close} showAllLabel={showAllLabel} />
         </nav>
       </SheetContent>
     </Sheet>

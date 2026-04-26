@@ -1,28 +1,14 @@
-"use client";
+import { tNamespace } from "@/lib/i18n/server";
 
-import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { LoginRedirect } from "./login-client";
 
-import { signIn } from "@/lib/auth/client";
-
-export default function LoginPage() {
-  const t = useTranslations("common");
-
-  useEffect(() => {
-    signIn("/account");
-  }, []);
-
+export default async function LoginPage() {
+  const labels = await tNamespace("common");
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="text-center">
-        <p className="text-muted-foreground">{t("loginRedirecting")}</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("loginNotRedirected")}{" "}
-          <button type="button" onClick={() => signIn("/account")} className="underline">
-            {t("loginClickHere")}
-          </button>
-        </p>
-      </div>
-    </div>
+    <LoginRedirect
+      redirectingLabel={labels.loginRedirecting}
+      notRedirectedLabel={labels.loginNotRedirected}
+      clickHereLabel={labels.loginClickHere}
+    />
   );
 }

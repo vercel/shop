@@ -1,8 +1,8 @@
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 interface ProductsGridProps {
@@ -13,7 +13,10 @@ interface ProductsGridProps {
 }
 
 export async function ProductsGrid({ title, products, locale, collectionUrl }: ProductsGridProps) {
-  const t = await getTranslations("product");
+  const [viewAll, outOfStockText] = await Promise.all([
+    t("product.viewAll"),
+    t("product.outOfStock"),
+  ]);
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
@@ -23,7 +26,7 @@ export async function ProductsGrid({ title, products, locale, collectionUrl }: P
             href={collectionUrl}
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            {t("viewAll")}
+            {viewAll}
           </Link>
         )}
       </div>
@@ -33,7 +36,7 @@ export async function ProductsGrid({ title, products, locale, collectionUrl }: P
             key={product.id}
             product={product}
             locale={locale}
-            outOfStockText={t("outOfStock")}
+            outOfStockText={outOfStockText}
           />
         ))}
       </div>

@@ -2,9 +2,9 @@
 
 import { defineRegistry } from "@json-render/react";
 import { CheckCircleIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
+import { createContext, useContext } from "react";
 
 import {
   ProductCard,
@@ -16,8 +16,28 @@ import {
 } from "@/components/product-card/components";
 import { Price } from "@/components/product/price";
 import { catalog } from "@/lib/agent";
+import { type Locale, type NamespaceMessages, formatPlural } from "@/lib/i18n";
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+export interface AgentRegistryLabels {
+  agent: NamespaceMessages<"agent">;
+  cart: NamespaceMessages<"cart">;
+  locale: Locale;
+  product: NamespaceMessages<"product">;
+}
+
+const Ctx = createContext<AgentRegistryLabels | null>(null);
+
+export const AgentRegistryLabelsProvider = Ctx.Provider;
+
+function useLabels(): AgentRegistryLabels {
+  const value = useContext(Ctx);
+  if (!value) {
+    throw new Error("AgentRegistryLabelsProvider missing");
+  }
+  return value;
+}
 
 function parsePriceString(price: string): Money {
   const parts = price.split(" ");
@@ -30,8 +50,7 @@ function parsePriceString(price: string): Money {
 export const { registry } = defineRegistry(catalog, {
   components: {
     AgentProductCard: ({ props }) => {
-      const locale = useLocale();
-      const t = useTranslations("product");
+      const { locale, product } = useLabels();
       const price = parsePriceString(props.price);
       const compareAtPrice = props.compareAtPrice
         ? parsePriceString(props.compareAtPrice)
@@ -45,7 +64,7 @@ export const { registry } = defineRegistry(catalog, {
                 src={props.image}
                 alt={props.title}
                 outOfStock={!props.available}
-                outOfStockText={t("outOfStock")}
+                outOfStockText={product.outOfStock}
                 fallbackTitle={props.title}
                 sizes="(max-width: 640px) 45vw, 180px"
               />
@@ -77,17 +96,17 @@ export const { registry } = defineRegistry(catalog, {
     },
 
     AgentCartSummary: ({ props }) => {
-      const locale = useLocale();
-      const tCart = useTranslations("cart");
+      const { agent, cart, locale } = useLabels();
       const subtotal = parsePriceString(props.subtotal);
       const tax = parsePriceString(props.tax);
       const total = parsePriceString(props.total);
+      const itemCountLabel = formatPlural(cart.itemCount, props.totalQuantity, locale);
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
           <div className="border-b bg-muted/50 px-2.5 py-2">
             <h4 className="font-medium text-sm">
-              Cart ({props.totalQuantity} {props.totalQuantity === 1 ? "item" : "items"})
+              {cart.title} ({itemCountLabel})
             </h4>
           </div>
           <div className="divide-y">
@@ -118,7 +137,9 @@ export const { registry } = defineRegistry(catalog, {
                     {item.options && (
                       <span className="text-muted-foreground text-xs">{item.options}</span>
                     )}
-                    <span className="text-muted-foreground text-xs">Qty: {item.quantity}</span>
+                    <span className="text-muted-foreground text-xs">
+                      {agent.qtyShort}: {item.quantity}
+                    </span>
                   </div>
                   <Price
                     amount={itemPrice.amount}
@@ -132,7 +153,7 @@ export const { registry } = defineRegistry(catalog, {
           </div>
           <div className="border-t bg-muted/50 px-2.5 py-2">
             <div className="flex justify-between text-muted-foreground text-sm">
-              <span>Subtotal</span>
+              <span>{cart.subtotal}</span>
               <Price
                 amount={subtotal.amount}
                 currencyCode={subtotal.currencyCode}
@@ -140,11 +161,11 @@ export const { registry } = defineRegistry(catalog, {
               />
             </div>
             <div className="flex justify-between text-muted-foreground text-sm">
-              <span>Tax</span>
+              <span>{cart.estimatedTax}</span>
               <Price amount={tax.amount} currencyCode={tax.currencyCode} locale={locale} />
             </div>
             <div className="mt-1 flex justify-between border-t pt-1 font-medium text-sm">
-              <span>Total</span>
+              <span>{cart.total}</span>
               <Price amount={total.amount} currencyCode={total.currencyCode} locale={locale} />
             </div>
           </div>
@@ -153,7 +174,7 @@ export const { registry } = defineRegistry(catalog, {
               href={props.checkoutUrl}
               className="block w-full rounded-lg bg-foreground px-5 py-2 text-center font-medium text-background text-sm hover:bg-foreground/90"
             >
-              {tCart("checkout")}
+              {cart.checkout}
             </a>
           </div>
         </div>
@@ -161,15 +182,14 @@ export const { registry } = defineRegistry(catalog, {
     },
 
     AgentCartConfirmation: ({ props }) => {
-      const locale = useLocale();
-      const tCart = useTranslations("cart");
+      const { agent, cart, locale } = useLabels();
       const price = parsePriceString(props.price);
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border border-positive/30 bg-positive/5">
           <div className="flex items-center gap-2 border-b border-positive/30 px-2.5 py-2">
             <CheckCircleIcon className="size-4 text-positive" />
-            <span className="font-medium text-positive text-sm">{tCart("addedToCart")}</span>
+            <span className="font-medium text-positive text-sm">{cart.addedToCart}</span>
           </div>
           <div className="flex gap-2.5 p-2.5">
             {props.image ? (
@@ -195,7 +215,9 @@ export const { registry } = defineRegistry(catalog, {
               {props.variantTitle && (
                 <span className="text-muted-foreground text-xs">{props.variantTitle}</span>
               )}
-              <span className="text-muted-foreground text-xs">Qty: {props.quantity}</span>
+              <span className="text-muted-foreground text-xs">
+                {agent.qtyShort}: {props.quantity}
+              </span>
             </div>
             <Price
               amount={price.amount}
@@ -209,7 +231,7 @@ export const { registry } = defineRegistry(catalog, {
     },
 
     AgentVariantPicker: ({ props }) => {
-      const locale = useLocale();
+      const { agent, locale, product } = useLabels();
 
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
@@ -234,7 +256,7 @@ export const { registry } = defineRegistry(catalog, {
               >
                 {props.productTitle}
               </Link>
-              <span className="text-muted-foreground text-xs">Choose a variant</span>
+              <span className="text-muted-foreground text-xs">{agent.chooseVariant}</span>
             </div>
           </div>
           {props.options.length > 0 && (
@@ -280,7 +302,7 @@ export const { registry } = defineRegistry(catalog, {
                       className="text-sm"
                     />
                     {!variant.available && (
-                      <span className="text-destructive text-xs">Out of stock</span>
+                      <span className="text-destructive text-xs">{product.outOfStock}</span>
                     )}
                   </div>
                 </div>

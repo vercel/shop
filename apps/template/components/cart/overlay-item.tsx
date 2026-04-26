@@ -1,11 +1,11 @@
 "use client";
 
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import type { NamespaceMessages } from "@/lib/i18n";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -13,12 +13,12 @@ import { useCart } from "./context";
 
 interface OverlayItemProps {
   item: CartLine;
+  labels: NamespaceMessages<"cart">;
   locale: string;
 }
 
-export function OverlayItem({ item, locale }: OverlayItemProps) {
+export function OverlayItem({ item, labels, locale }: OverlayItemProps) {
   const { cartWithPending, updateItemOptimistic } = useCart();
-  const t = useTranslations("cart");
 
   // Read quantity from cartWithPending (includes optimistic updates)
   const currentLine = cartWithPending?.lines.find((l) => l.id === item.id);
@@ -73,7 +73,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             className="size-7 rounded-full"
             onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
             disabled={quantity === 1}
-            aria-label={t("decreaseQuantity")}
+            aria-label={labels.decreaseQuantity}
           >
             <MinusIcon className="size-3" />
           </Button>
@@ -89,7 +89,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             className="size-7 rounded-full"
             onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
             disabled={quantity === 99}
-            aria-label={t("increaseQuantity")}
+            aria-label={labels.increaseQuantity}
           >
             <PlusIcon className="size-3" />
           </Button>
@@ -100,7 +100,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             size="icon"
             className="size-7 text-muted-foreground hover:text-foreground"
             onClick={() => updateItemOptimistic(item.id || "", 0)}
-            aria-label={t("removeItem")}
+            aria-label={labels.removeItem}
           >
             <Trash2Icon className="size-4" />
           </Button>

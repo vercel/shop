@@ -1,9 +1,9 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 import type { getCollection } from "@/lib/shopify/operations/collections";
 
 async function Render({
@@ -15,10 +15,10 @@ async function Render({
   handlePromise: Promise<string>;
   collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
 }) {
-  const [handle, collection, t] = await Promise.all([
+  const [handle, collection, homeLabel] = await Promise.all([
     handlePromise,
     collectionPromise,
-    getTranslations("collections.breadcrumb"),
+    t("collections.breadcrumb.home"),
   ]);
 
   if (!collection) return null;
@@ -26,7 +26,7 @@ async function Render({
   const { title, description, updatedAt } = collection;
 
   const breadcrumbItems = [
-    { name: t("home"), path: "/" },
+    { name: homeLabel, path: "/" },
     { name: title, path: `/collections/${handle}` },
   ];
 

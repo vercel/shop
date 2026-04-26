@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { isAuthEnabled } from "@/lib/auth";
+import { type Locale } from "@/lib/i18n";
+import { tNamespace } from "@/lib/i18n/server";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
@@ -10,8 +12,9 @@ import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
-export async function Nav({ locale }: { locale: string }) {
+export async function Nav({ locale }: { locale: Locale }) {
   const items = defaultNavItems;
+  const navLabels = await tNamespace("nav");
 
   return (
     <nav
@@ -19,7 +22,11 @@ export async function Nav({ locale }: { locale: string }) {
       id="nav-outer"
     >
       <div className="mx-auto flex h-16 items-center gap-2.5 md:gap-5 px-5 lg:px-10">
-        <MobileMenu items={items} />
+        <MobileMenu
+          items={items}
+          menuLabel={navLabels.menu}
+          showAllTemplate={navLabels.showAllCategory}
+        />
 
         <Link className="flex items-center shrink-0" href="/">
           <span className="text-xl font-semibold leading-4 tracking-tight">Vercel Shop</span>
@@ -28,7 +35,7 @@ export async function Nav({ locale }: { locale: string }) {
         <QuickLinks items={items} />
 
         <div className="flex items-center gap-5 ml-auto">
-          <SearchModal />
+          <SearchModal labels={navLabels} locale={locale} />
           {isAuthEnabled && (
             <Suspense fallback={<NavAccountFallback />}>
               <NavAccount />

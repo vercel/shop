@@ -18,6 +18,7 @@ import { productCardToOptimisticInfo } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
 interface InfiniteProductGridProps {
+  addToCartLabel: string;
   initialProducts: ProductCard[];
   initialPageInfo: PageInfo;
   locale: string;
@@ -27,6 +28,7 @@ interface InfiniteProductGridProps {
 }
 
 export function InfiniteProductGrid({
+  addToCartLabel,
   initialProducts,
   initialPageInfo,
   locale,
@@ -87,6 +89,7 @@ export function InfiniteProductGrid({
         {additionalProducts.map((product) => (
           <ClientProductCard
             key={product.id}
+            addToCartLabel={addToCartLabel}
             product={product}
             locale={locale}
             outOfStockText={outOfStockText}
@@ -104,10 +107,12 @@ export function InfiniteProductGrid({
 }
 
 function ClientProductCard({
+  addToCartLabel,
   product,
   locale,
   outOfStockText,
 }: {
+  addToCartLabel: string;
   product: ProductCard;
   locale: string;
   outOfStockText: string;
@@ -131,6 +136,7 @@ function ClientProductCard({
           >
             {product.availableForSale && product.defaultVariantId && (
               <ProductCardQuickAdd
+                addToCartLabel={addToCartLabel}
                 variantId={product.defaultVariantId}
                 productInfo={productCardToOptimisticInfo(product)}
               />

@@ -1,11 +1,15 @@
 import { UserRoundCheckIcon, UserRoundIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { getCustomerSession } from "@/lib/auth/server";
+import { t } from "@/lib/i18n/server";
 
 export async function NavAccount() {
-  const [session, t] = await Promise.all([getCustomerSession(), getTranslations("nav")]);
+  const [session, signInLabel, accountLabel] = await Promise.all([
+    getCustomerSession(),
+    t("nav.signIn"),
+    t("nav.account"),
+  ]);
 
   if (!session) {
     return (
@@ -14,7 +18,7 @@ export async function NavAccount() {
         className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
       >
         <UserRoundIcon className="size-5" />
-        <span className="sr-only">{t("signIn")}</span>
+        <span className="sr-only">{signInLabel}</span>
       </Link>
     );
   }
@@ -25,7 +29,7 @@ export async function NavAccount() {
       className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
     >
       <UserRoundCheckIcon className="size-5" />
-      <span className="sr-only">{t("account")}</span>
+      <span className="sr-only">{accountLabel}</span>
     </Link>
   );
 }

@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 
 // Auth turns on at build time when all three secrets are present. Exposed to the
 // browser as NEXT_PUBLIC_AUTH_ENABLED so client and server agree at hydration.
@@ -58,9 +57,4 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["better-auth"],
 };
 
-const withNextIntl = createNextIntlPlugin({
-  experimental: { createMessagesDeclaration: "./lib/i18n/messages/en.json" },
-  requestConfig: "./lib/i18n/request.ts",
-});
-
-export default withNextIntl(nextConfig);
+export default nextConfig;

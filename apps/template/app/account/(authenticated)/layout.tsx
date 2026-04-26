@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -11,17 +10,18 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAuthEnabled } from "@/lib/auth";
 import { requireCustomerSession } from "@/lib/auth/server";
+import { t } from "@/lib/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("seo");
   return {
-    title: t("accountTitle"),
+    title: await t("seo.accountTitle"),
     robots: { index: false, follow: false },
   };
 }
 
-export default function AccountLayout({ children }: { children: React.ReactNode }) {
+export default async function AccountLayout({ children }: { children: React.ReactNode }) {
   if (!isAuthEnabled) notFound();
+  const signOutLabel = await t("account.signOut");
 
   return (
     <Container className="py-10 flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
@@ -33,7 +33,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <Suspense fallback={<SidebarSkeleton />}>
             <AccountSidebar />
           </Suspense>
-          <SignOutButton />
+          <SignOutButton signOutLabel={signOutLabel} />
         </div>
       </aside>
 
@@ -42,7 +42,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
           <Suspense fallback={<UserInfoSkeleton />}>
             <UserInfo />
           </Suspense>
-          <SignOutButton />
+          <SignOutButton signOutLabel={signOutLabel} />
         </div>
         <Suspense>
           <AccountMobileTabs />

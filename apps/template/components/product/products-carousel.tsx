@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server";
-
 import { ProductCard } from "@/components/product-card/product-card";
 import {
   ScrollCarousel,
@@ -10,6 +8,7 @@ import {
   ScrollCarouselTitle,
 } from "@/components/ui/scroll-carousel";
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 interface ProductsCarouselProps {
@@ -19,7 +18,7 @@ interface ProductsCarouselProps {
 }
 
 export async function ProductsCarousel({ title, products, locale }: ProductsCarouselProps) {
-  const t = await getTranslations("product");
+  const outOfStockText = await t("product.outOfStock");
   return (
     <ScrollCarousel>
       <ScrollCarouselHeader>
@@ -29,7 +28,7 @@ export async function ProductsCarousel({ title, products, locale }: ProductsCaro
       <ScrollCarouselContent>
         {products.map((product) => (
           <ScrollCarouselItem key={product.id}>
-            <ProductCard product={product} locale={locale} outOfStockText={t("outOfStock")} />
+            <ProductCard product={product} locale={locale} outOfStockText={outOfStockText} />
           </ScrollCarouselItem>
         ))}
       </ScrollCarouselContent>

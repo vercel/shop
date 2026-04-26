@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -71,16 +70,17 @@ function MediaVideo({
 function Carousel({
   mediaItems,
   title,
+  goToImageTemplate,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
+  goToImageTemplate: string;
   children?: React.ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevMediaRef = useRef<string>("");
-  const t = useTranslations("product");
 
   // Reset carousel to first item when the filtered media change
   const joinedKey = mediaItems.map(mediaKey).join(",");
@@ -160,7 +160,7 @@ function Carousel({
                 ? "bg-foreground w-8"
                 : "bg-muted-foreground/30 w-1.5 hover:bg-muted-foreground/50",
             )}
-            aria-label={t("goToImage", { number: String(idx + 1) })}
+            aria-label={goToImageTemplate.replace("{number}", String(idx + 1))}
           />
         ))}
       </div>
@@ -248,6 +248,7 @@ export function ProductMedia({
   otherImages,
   videos,
   title,
+  goToImageTemplate,
   className,
   desktopSlot,
   mobileSlot,
@@ -255,6 +256,7 @@ export function ProductMedia({
   otherImages: ImageType[];
   videos: Video[];
   title: string;
+  goToImageTemplate: string;
   className?: string;
   /** Color images rendered as grid items (desktop). */
   desktopSlot?: React.ReactNode;
@@ -271,7 +273,7 @@ export function ProductMedia({
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={sharedMediaItems} title={title}>
+        <Carousel mediaItems={sharedMediaItems} title={title} goToImageTemplate={goToImageTemplate}>
           {mobileSlot}
         </Carousel>
       </div>

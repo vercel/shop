@@ -1,27 +1,23 @@
-"use client";
+import type { Locale } from "@/lib/i18n";
+import { tNamespace } from "@/lib/i18n/server";
+import { getLocale } from "@/lib/params";
 
-import { MessageCircle } from "lucide-react";
-import { useRef, useState } from "react";
+import { AgentButtonClient } from "./agent-button-client";
 
-import { AgentPanel } from "./client";
-
-export function AgentButton() {
-  const [open, setOpen] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
+export async function AgentButton() {
+  const [locale, agentLabels, cartLabels, productLabels] = await Promise.all([
+    getLocale(),
+    tNamespace("agent"),
+    tNamespace("cart"),
+    tNamespace("product"),
+  ]);
 
   return (
-    <>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="flex items-center gap-1.5 px-2 py-1"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-      >
-        <MessageCircle className="size-4 text-primary" />
-        <span className="sr-only">Agent</span>
-      </button>
-      {open && <AgentPanel open={open} onOpenChange={setOpen} triggerRef={triggerRef} />}
-    </>
+    <AgentButtonClient
+      agentLabels={agentLabels}
+      cartLabels={cartLabels}
+      locale={locale satisfies Locale}
+      productLabels={productLabels}
+    />
   );
 }

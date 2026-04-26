@@ -1,6 +1,35 @@
+import type en from "./messages/en.json";
+
 export const locales = ["en-US"] as const;
 
 export type Locale = (typeof locales)[number];
+
+export type Messages = typeof en;
+export type Namespace = keyof Messages;
+export type PluralForms = Partial<Record<Intl.LDMLPluralRule, string>>;
+
+type WithOverrides<T, Overrides> = Omit<T, keyof Overrides> & Overrides;
+
+export type NamespaceMessages<N extends Namespace> = N extends "cart"
+  ? WithOverrides<Messages["cart"], { itemCount: PluralForms }>
+  : N extends "category"
+    ? WithOverrides<Messages["category"], { productCount: PluralForms; totalResults: PluralForms }>
+    : N extends "search"
+      ? WithOverrides<Messages["search"], { resultCount: PluralForms }>
+      : Messages[N];
+
+export function formatPlural(
+  forms: PluralForms,
+  count: number,
+  locale: Locale,
+  vars?: Record<string, string | number>,
+): string {
+  const category = new Intl.PluralRules(locale).select(count);
+  const chosen = forms[category] ?? forms.other ?? "";
+  return chosen
+    .replace(/#/g, String(count))
+    .replace(/\{(\w+)\}/g, (_, n) => String(vars?.[n] ?? (n === "count" ? count : "")));
+}
 
 // Deployment-level locale mode. By default the storefront runs in single-locale
 // mode, but additional locales can be enabled here when the app is ready.

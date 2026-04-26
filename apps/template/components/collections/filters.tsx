@@ -10,15 +10,24 @@ function Fallback() {
 
 async function Render({
   collectionResultsDataPromise,
+  filtersLabel,
+  priceLabel,
+  resetLabel,
 }: {
   collectionResultsDataPromise: Promise<CollectionResultsData>;
+  filtersLabel: string;
+  priceLabel: string;
+  resetLabel: string;
 }) {
   const { activeFilters, transformedFilters } = await collectionResultsDataPromise;
 
   return (
     <CollectionFilterSidebarClient
       filters={transformedFilters.filters}
+      filtersLabel={filtersLabel}
+      priceLabel={priceLabel}
       priceRange={transformedFilters.priceRange}
+      resetLabel={resetLabel}
       activeFilters={activeFilters}
     />
   );
@@ -26,12 +35,23 @@ async function Render({
 
 export function CollectionFilters({
   collectionResultsDataPromise,
+  filtersLabel,
+  priceLabel,
+  resetLabel,
 }: {
   collectionResultsDataPromise: Promise<CollectionResultsData>;
+  filtersLabel: string;
+  priceLabel: string;
+  resetLabel: string;
 }) {
   return (
     <Suspense fallback={<Fallback />}>
-      <Render collectionResultsDataPromise={collectionResultsDataPromise} />
+      <Render
+        collectionResultsDataPromise={collectionResultsDataPromise}
+        filtersLabel={filtersLabel}
+        priceLabel={priceLabel}
+        resetLabel={resetLabel}
+      />
     </Suspense>
   );
 }

@@ -1,8 +1,8 @@
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { AccountPageHeader } from "@/components/account/page-header";
+import { tNamespace } from "@/lib/i18n/server";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -13,16 +13,15 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 }
 
 async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const t = await getTranslations("account");
+  const [{ id }, labels] = await Promise.all([params, tNamespace("account")]);
 
   if (!id) notFound();
 
   return (
     <>
-      <AccountPageHeader title={`${t("order")} #${id}`} />
+      <AccountPageHeader title={`${labels.order} #${id}`} />
       <div className="rounded-lg border p-6 text-center">
-        <p className="text-sm text-muted-foreground">{t("orderDetailPlaceholder")}</p>
+        <p className="text-sm text-muted-foreground">{labels.orderDetailPlaceholder}</p>
       </div>
     </>
   );

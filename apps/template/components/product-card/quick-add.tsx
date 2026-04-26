@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckIcon, LoaderCircleIcon, HandbagIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
@@ -11,18 +10,19 @@ import { cn } from "@/lib/utils";
 type QuickAddState = "idle" | "adding" | "success";
 
 interface ProductCardQuickAddProps {
+  addToCartLabel: string;
   variantId: string;
   productInfo?: OptimisticProductInfo;
   className?: string;
 }
 
 export function ProductCardQuickAdd({
+  addToCartLabel,
   variantId,
   productInfo,
   className,
 }: ProductCardQuickAddProps) {
   const { addToCartOptimistic } = useCart();
-  const t = useTranslations("product");
   const [state, setState] = useState<QuickAddState>("idle");
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
@@ -64,7 +64,7 @@ export function ProductCardQuickAdd({
         e.preventDefault();
         e.stopPropagation();
       }}
-      aria-label={t("addToCart")}
+      aria-label={addToCartLabel}
       className={cn(
         "absolute bottom-2 right-2 z-10",
         "flex items-center justify-center size-9 rounded-full",

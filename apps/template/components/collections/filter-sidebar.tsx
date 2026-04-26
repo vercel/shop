@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
@@ -27,7 +26,10 @@ import {
 
 interface CollectionFilterSidebarClientProps {
   filters: Filter[];
+  filtersLabel: string;
+  priceLabel: string;
   priceRange?: PriceRange;
+  resetLabel: string;
   activeFilters: Record<string, string | string[] | undefined>;
 }
 
@@ -109,7 +111,10 @@ function applyPriceParams(params: URLSearchParams, min: number | null, max: numb
 
 export function CollectionFilterSidebarClient({
   filters,
+  filtersLabel,
+  priceLabel,
   priceRange,
+  resetLabel,
   activeFilters,
 }: CollectionFilterSidebarClientProps) {
   const pathname = usePathname();
@@ -117,8 +122,6 @@ export function CollectionFilterSidebarClient({
   const searchParams = useSearchParams();
   const isPending = useFilterPending();
   const startFilterTransition = useFilterTransition();
-  const tSearch = useTranslations("search");
-  const tCategory = useTranslations("category");
 
   const [optimisticFilters, setOptimisticFilters] = useOptimistic(
     activeFilters,
@@ -200,8 +203,8 @@ export function CollectionFilterSidebarClient({
     <FilterSidebar>
       <div className="flex flex-col gap-5 pb-41.5">
         <FilterSidebarHeader
-          title={tSearch("filters")}
-          resetLabel={tSearch("reset")}
+          title={filtersLabel}
+          resetLabel={resetLabel}
           activeCount={totalActiveCount > 0 ? totalActiveCount : undefined}
           onReset={totalActiveCount > 0 ? clearAllFilters : undefined}
         />
@@ -227,7 +230,7 @@ export function CollectionFilterSidebarClient({
 
         {priceRange && (
           <FilterSection>
-            <FilterSectionHeader title={tCategory("price")} />
+            <FilterSectionHeader title={priceLabel} />
             <FilterSectionContent>
               <FilterPriceRange
                 minValue={minInput}

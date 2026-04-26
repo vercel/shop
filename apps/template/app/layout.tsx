@@ -1,7 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
@@ -13,6 +11,7 @@ import { Footer } from "@/components/layout/footer";
 import { Nav } from "@/components/layout/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { siteConfig } from "@/lib/config";
+import { t } from "@/lib/i18n/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
@@ -27,10 +26,9 @@ const geistMono = Geist_Mono({
 });
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, messages, t] = await Promise.all([
+  const [locale, skipToContent] = await Promise.all([
     getLocale(),
-    getMessages(),
-    getTranslations("accessibility"),
+    t("accessibility.skipToContent"),
   ]);
 
   return (
@@ -43,35 +41,31 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-5 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:ring-2 focus:ring-foreground focus:outline-none"
         >
-          {t("skipToContent")}
+          {skipToContent}
         </a>
         <SiteSchema locale={locale} />
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <CartProvider initialCart={null}>
-            <Nav locale={locale} />
-            <main id="main-content" className="flex flex-1 flex-col min-w-0">
-              {children}
-            </main>
-            <Footer locale={locale} />
-            <Suspense>
-              <CartOverlayWithAddress locale={locale} />
-            </Suspense>
-            <Suspense>
-              <ActionBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</ActionBar>
-            </Suspense>
-          </CartProvider>
-        </NextIntlClientProvider>
+        <CartProvider initialCart={null}>
+          <Nav locale={locale} />
+          <main id="main-content" className="flex flex-1 flex-col min-w-0">
+            {children}
+          </main>
+          <Footer locale={locale} />
+          <Suspense>
+            <CartOverlayWithAddress locale={locale} />
+          </Suspense>
+          <Suspense>
+            <ActionBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</ActionBar>
+          </Suspense>
+        </CartProvider>
       </body>
     </html>
   );
 }
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const t = await getTranslations("seo");
-
   return {
     alternates: buildAlternates({ pathname: "/" }),
-    description: t("defaultDescription"),
+    description: await t("seo.defaultDescription"),
     generator: "Vercel Shop",
     metadataBase: new URL(siteConfig.url),
     openGraph: {

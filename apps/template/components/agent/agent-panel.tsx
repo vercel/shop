@@ -31,12 +31,12 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { nanoid } from "nanoid";
-import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
+import type { Locale, NamespaceMessages } from "@/lib/i18n";
 
 import {
   ChainOfThought,
@@ -65,7 +65,7 @@ import { Shimmer } from "../ai-elements/shimmer";
 import { SpeechInput } from "../ai-elements/speech-input";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { CartReconciler } from "./cart-reconciler";
-import { registry } from "./registry";
+import { type AgentRegistryLabels, AgentRegistryLabelsProvider, registry } from "./registry";
 
 const easing = [0.32, 0.72, 0, 1] as const;
 const AUTO_CLOSE_DELAY = 1000;
@@ -273,19 +273,22 @@ function AttachmentChips() {
 }
 
 function ChatMessage({
+  agentLabels,
+  registryLabels,
   message,
   isLastAssistant,
   status,
   messages,
   regenerate,
 }: {
+  agentLabels: NamespaceMessages<"agent">;
+  registryLabels: AgentRegistryLabels;
   message: UIMessage;
   isLastAssistant: boolean;
   status: string;
   messages: UIMessage[];
   regenerate: () => void;
 }) {
-  const t = useTranslations("agent");
   const { spec, text, hasSpec } = useJsonRenderMessage(message.parts);
 
   // Chain of thought state — hooks must be before early return
@@ -394,19 +397,21 @@ function ChatMessage({
           <MessageContent>
             {text && <MessageResponse linkSafety={linkSafety}>{text}</MessageResponse>}
             {hasSpec && spec && (
-              <JSONUIProvider registry={registry}>
-                <Renderer spec={spec} registry={registry} />
-              </JSONUIProvider>
+              <AgentRegistryLabelsProvider value={registryLabels}>
+                <JSONUIProvider registry={registry}>
+                  <Renderer spec={spec} registry={registry} />
+                </JSONUIProvider>
+              </AgentRegistryLabelsProvider>
             )}
           </MessageContent>
           {isLastAssistant && (
             <MessageActions>
-              <MessageAction onClick={() => regenerate()} label={t("retry")}>
+              <MessageAction onClick={() => regenerate()} label={agentLabels.retry}>
                 <RefreshCcwIcon className="size-3" />
               </MessageAction>
               <MessageAction
                 onClick={() => navigator.clipboard.writeText(text || "")}
-                label={t("copy")}
+                label={agentLabels.copy}
               >
                 <CopyIcon className="size-3" />
               </MessageAction>
@@ -419,13 +424,30 @@ function ChatMessage({
 }
 
 export interface AgentPanelProps {
-  open: boolean;
+  agentLabels: NamespaceMessages<"agent">;
+  cartLabels: NamespaceMessages<"cart">;
+  locale: Locale;
   onOpenChange: (open: boolean) => void;
+  open: boolean;
+  productLabels: NamespaceMessages<"product">;
   triggerRef: React.RefObject<HTMLElement | null>;
 }
 
-export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) {
-  const t = useTranslations("agent");
+export function AgentPanel({
+  agentLabels,
+  cartLabels,
+  locale,
+  onOpenChange,
+  open,
+  productLabels,
+  triggerRef,
+}: AgentPanelProps) {
+  const registryLabels: AgentRegistryLabels = {
+    agent: agentLabels,
+    cart: cartLabels,
+    locale,
+    product: productLabels,
+  };
   const [persistedChat] = useState(readPersistedAgentChat);
   const [input, setInput] = useState(persistedChat.input);
   const [isDragging, setIsDragging] = useState(false);
@@ -569,7 +591,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
           <motion.div
             ref={panelRef}
             role="dialog"
-            aria-label={t("assistantLabel")}
+            aria-label={agentLabels.assistantLabel}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
@@ -581,15 +603,17 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
             {isDragging && (
               <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 backdrop-blur-sm">
                 <UploadIcon className="size-8 text-primary/60" />
-                <p className="font-medium text-primary/80 text-sm">{t("dropFiles")}</p>
+                <p className="font-medium text-primary/80 text-sm">{agentLabels.dropFiles}</p>
               </div>
             )}
 
             {/* Header */}
             <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm">{t("name")}</span>
-                {t("title") && <span className="text-muted-foreground text-sm">{t("title")}</span>}
+                <span className="font-semibold text-sm">{agentLabels.name}</span>
+                {agentLabels.title && (
+                  <span className="text-muted-foreground text-sm">{agentLabels.title}</span>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <button
@@ -597,7 +621,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                   onClick={handleClear}
                   disabled={!canClear}
                   className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                  aria-label={t("clearChat")}
+                  aria-label={agentLabels.clearChat}
                 >
                   <Trash2Icon className="size-4" />
                 </button>
@@ -605,7 +629,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                   type="button"
                   onClick={() => onOpenChange(false)}
                   className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                  aria-label={t("minimizeAssistant")}
+                  aria-label={agentLabels.minimizeAssistant}
                 >
                   <MinusIcon className="size-4" />
                 </button>
@@ -619,12 +643,14 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                   {messages.length === 0 && (
                     <div className="flex items-start gap-2.5">
                       <BotMessageSquareIcon className="size-5 shrink-0 text-primary mt-0.5" />
-                      <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
+                      <p className="pt-2 text-sm text-foreground">{agentLabels.greeting}</p>
                     </div>
                   )}
                   {messages.map((message, messageIndex) => (
                     <ChatMessage
                       key={message.id}
+                      agentLabels={agentLabels}
+                      registryLabels={registryLabels}
                       message={message}
                       isLastAssistant={messageIndex === lastAssistantIndex}
                       status={status}

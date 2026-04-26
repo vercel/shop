@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { isAuthEnabled } from "@/lib/auth";
+import { t } from "@/lib/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("seo");
   return {
-    title: t("loginTitle"),
+    title: await t("seo.loginTitle"),
     robots: { index: false, follow: false },
   };
 }

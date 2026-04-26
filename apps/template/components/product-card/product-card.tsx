@@ -1,7 +1,7 @@
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import type { Locale } from "@/lib/i18n";
+import { t } from "@/lib/i18n/server";
 import { productCardToOptimisticInfo } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
@@ -35,7 +35,10 @@ export async function ProductCard({
   className,
 }: ProductCardProps) {
   const isFeatured = variant === "featured";
-  const t = isFeatured ? await getTranslations("product") : null;
+  const [addToCartLabel, featuredBadgeText] = await Promise.all([
+    t("product.addToCart"),
+    isFeatured ? t("product.featuredBadge") : Promise.resolve(""),
+  ]);
 
   return (
     <Link
@@ -47,10 +50,10 @@ export async function ProductCard({
       className={className}
     >
       <ProductCardRoot variant={variant}>
-        {isFeatured && t && (
+        {isFeatured && (
           <ProductCardBadge>
             <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
-              {t("featuredBadge")}
+              {featuredBadgeText}
             </span>
           </ProductCardBadge>
         )}
@@ -66,6 +69,7 @@ export async function ProductCard({
           >
             {product.availableForSale && product.defaultVariantId && (
               <ProductCardQuickAdd
+                addToCartLabel={addToCartLabel}
                 variantId={product.defaultVariantId}
                 productInfo={productCardToOptimisticInfo(product)}
               />

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { t } from "@/lib/i18n/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection } from "@/lib/shopify/operations/collections";
@@ -20,14 +20,13 @@ export async function generateMetadata({
     notFound();
   }
 
-  const [collection, t] = await Promise.all([
-    getCollection(handle, locale),
-    getTranslations("seo"),
-  ]);
+  const collection = await getCollection(handle, locale);
 
   if (!collection) {
-    const title = t("collectionFallbackTitle");
-    const description = t("collectionFallbackDescription");
+    const [title, description] = await Promise.all([
+      t("seo.collectionFallbackTitle"),
+      t("seo.collectionFallbackDescription"),
+    ]);
 
     return {
       title,
