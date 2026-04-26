@@ -62,7 +62,7 @@ Inside a domain folder under `lib/`, name files by execution context — same id
 - `client.ts` — `"use client"` modules.
 - `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
 
-Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{server,client}.ts`, `lib/i18n/index.ts`.
+Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{index,server,client}.ts`, `lib/i18n/index.ts`.
 
 Two exceptions that don't fit cleanly:
 
@@ -150,12 +150,12 @@ Common entry points:
 
 ## Authentication
 
-Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is gated by `NEXT_PUBLIC_AUTH_ENABLED=1`. This variable must be a `NEXT_PUBLIC_` env var because it controls conditional rendering in the nav — server-only env vars cause hydration mismatches with cache components. The remaining auth secrets (`BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET`) are server-only.
+Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It turns on automatically when all three server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are set. `next.config.ts` derives `NEXT_PUBLIC_AUTH_ENABLED` from their presence at build time and exposes it to the browser via `env`, so server and client agree at hydration (probing the server-only secrets directly inside a component causes mismatches under cache components). Don't set `NEXT_PUBLIC_AUTH_ENABLED` manually.
 
 Key files:
 
-- `lib/auth/auth.ts` — better-auth config with Shopify OIDC, exports `isAuthEnabled` (server-only)
-- `lib/auth/server.ts` — `getCustomerSession()`, `requireSession()`, etc.
+- `lib/auth/index.ts` — universal `isAuthEnabled` flag (safe to import from server and client code)
+- `lib/auth/server.ts` — better-auth config with Shopify OIDC, plus `getCustomerSession()`, `requireSession()`, etc.
 - `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
 - `app/api/auth/[...all]/route.ts` — OAuth callback handler
 - `app/account/(authenticated)/` — auth-gated account pages

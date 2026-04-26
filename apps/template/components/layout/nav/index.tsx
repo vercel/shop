@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { isAuthEnabled } from "@/lib/auth/server";
+import { isAuthEnabled } from "@/lib/auth";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";

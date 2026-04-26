@@ -14,14 +14,15 @@ type: reference
 
 ## Customer Authentication
 
-These variables enable built-in customer authentication with [better-auth](https://www.better-auth.com/) and Shopify Customer Account API OIDC. Set `NEXT_PUBLIC_AUTH_ENABLED=1` to turn on the auth UI, then provide the three server-side secrets.
+These variables enable built-in customer authentication with [better-auth](https://www.better-auth.com/) and Shopify Customer Account API OIDC. Provide all three server-side secrets to turn on the auth UI; `next.config.ts` derives `NEXT_PUBLIC_AUTH_ENABLED` from their presence at build time so client and server agree at hydration.
 
 | Variable | Description |
 |----------|-------------|
-| `NEXT_PUBLIC_AUTH_ENABLED` | Set to `1` to enable the auth UI (account icon, login page, account pages). Must be a public variable for hydration compatibility with cache components. |
 | `BETTER_AUTH_SECRET` | Secret for signing sessions. Generate with `openssl rand -base64 32`. |
 | `SHOPIFY_CUSTOMER_CLIENT_ID` | Customer Account API client ID. Found in **Shopify Admin → Settings → Customer accounts → API clients**. |
 | `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Found in the same location as the client ID. |
+
+`NEXT_PUBLIC_AUTH_ENABLED` is computed automatically — don't set it manually. It must be a public variable so the auth UI's conditional rendering matches between server and client under cache components.
 
 ## Optional
 
