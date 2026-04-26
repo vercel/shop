@@ -31,6 +31,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`**. Never guess Shopify field names.
 5. **If a template change should be considered for existing storefronts, add a rollout entry in `packages/plugin/template-rollout-log/`**. Do not rely on the template version number alone.
+6. **Every `process.env.X` read in `apps/template/` (or `apps/docs/`) must be listed in `turbo.json` `globalEnv`**. Turbo's strict mode (default in Turbo 2) strips unlisted env vars from the build environment, so missing entries silently turn features off in deployed builds. User-configurable vars also need a row in `apps/template/.env.example` and `apps/docs/content/docs/reference/env-vars.mdx`.
 
 <!-- BEGIN:vercel-shop-style -->
 

@@ -28,6 +28,13 @@ These variables enable built-in customer authentication with [better-auth](https
 
 | Variable | Description |
 |----------|-------------|
-| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Private Storefront API token for server-side requests. Enables higher rate limits and access to draft content. |
+| `AI_AGENT_DISABLED` | Set to any non-empty value to hide the AI shopping assistant button. |
 | `BETTER_AUTH_BASE_URL` | Override the base URL for auth callbacks. Defaults to `NEXT_PUBLIC_BASE_URL` or the Vercel production URL. |
 | `BETTER_AUTH_TRUSTED_ORIGINS` | Comma-separated list of trusted origins for auth callbacks. |
+| `CMS_DRAFT_MODE_SECRET` | Secret token guarding the `/api/draft` route for CMS preview links. Generate with `openssl rand -base64 32`. |
+| `DEBUG_SHOPIFY` | Set to `true` to log every Shopify Storefront API request and response in the server console. |
+| `NEXT_PUBLIC_BASE_URL` | Absolute base URL used for sitemap entries, OG tags, and auth callbacks. Defaults to `https://${VERCEL_PROJECT_PRODUCTION_URL}` on Vercel. |
+| `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` | Private Storefront API token for server-side requests. Enables higher rate limits and access to draft content. |
+| `SHOPIFY_WEBHOOK_SECRET` | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`. |
+
+System variables auto-injected on Vercel that the build reads (`VERCEL_PROJECT_PRODUCTION_URL`, `NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, `V0_CALLBACK_URL`) are listed in `turbo.json` `globalEnv` so Turbo's strict-mode build sees them. You don't set these yourself.
