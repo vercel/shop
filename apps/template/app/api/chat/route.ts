@@ -7,7 +7,7 @@ import {
 } from "ai";
 import { cookies } from "next/headers";
 
-import { createAgent } from "@/lib/agent/agent";
+import { createAgent } from "@/lib/agent/create-agent";
 import { type PageContext, type User, withAgentContext } from "@/lib/agent/context";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
