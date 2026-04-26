@@ -8,8 +8,7 @@ import { AccountSidebar } from "@/components/account/sidebar";
 import { SignOutButton } from "@/components/account/sign-out-button";
 import { Container } from "@/components/ui/container";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isAuthEnabled } from "@/lib/auth/auth";
-import { requireCustomerSession } from "@/lib/auth/server";
+import { isAuthEnabled, requireCustomerSession } from "@/lib/auth/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");

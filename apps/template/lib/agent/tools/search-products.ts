@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { getProducts } from "@/lib/shopify/operations/products";
 
-import { getAgentContext } from "../context";
+import { getAgentContext } from "../server";
 
 export function searchProductsTool() {
   return tool({

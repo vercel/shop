@@ -15,7 +15,7 @@ import {
   ProductCardTitle,
 } from "@/components/product-card/components";
 import { Price } from "@/components/product/price";
-import { catalog } from "@/lib/agent/ui/catalog";
+import { catalog } from "@/lib/agent";
 import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

@@ -1,4 +1,67 @@
-import { type AgentContext, getAgentContext } from "./context";
+import { stepCountIs, ToolLoopAgent, type ToolLoopAgentSettings } from "ai";
+
+import { catalog } from ".";
+import type { Locale } from "../i18n";
+import type { ProductDetails } from "../types";
+import { addCartNoteTool } from "./tools/add-cart-note";
+import { addToCartTool } from "./tools/add-to-cart";
+import { browseCollectionTool } from "./tools/browse-collection";
+import { getCartTool } from "./tools/get-cart";
+import { getProductDetailsTool } from "./tools/get-product-details";
+import { getRecommendationsTool } from "./tools/get-recommendations";
+import { listCollectionsTool } from "./tools/list-collections";
+import { navigateTool } from "./tools/navigate";
+import { removeFromCartTool } from "./tools/remove-from-cart";
+import { searchProductsTool } from "./tools/search-products";
+import { updateCartItemTool } from "./tools/update-cart-item";
+
+// ── Context ──────────────────────────────────────────────────────────
+
+export type User = {
+  type: "guest";
+  locale: Locale;
+};
+
+// Page context resolved from Referer header with trusted data
+export type PageContext =
+  | { type: "home" }
+  | { type: "product"; product: ProductDetails }
+  | { type: "collection"; handle: string; title: string }
+  | { type: "search"; query: string }
+  | { type: "cart" }
+  | null;
+
+// We can track context in here like current user or current page
+// so we can adapt the agent's behavior to the context, like having order tools for logged in users etc
+export interface AgentContext {
+  chatId: string;
+  user: User;
+  cart: string | undefined;
+  page: PageContext;
+}
+
+const agentContext = new AsyncLocalStorage<AgentContext>();
+
+export function withAgentContext<T>(ctx: AgentContext, fn: () => T): T {
+  return agentContext.run(ctx, fn);
+}
+
+export function setUser(user: User) {
+  const ctx = agentContext.getStore();
+  if (ctx) {
+    ctx.user = user;
+  }
+}
+
+export function getAgentContext() {
+  const ctx = agentContext.getStore();
+  if (!ctx) {
+    throw new Error("Agent context not found");
+  }
+  return ctx;
+}
+
+// ── Prompt ───────────────────────────────────────────────────────────
 
 /** Strip common leading whitespace from a tagged template literal. */
 function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
@@ -6,7 +69,6 @@ function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
     (acc, str, i) => acc + str + (i < values.length ? String(values[i]) : ""),
     "",
   );
-  // Remove leading blank line
   raw = raw.replace(/^\n/, "");
   const match = raw.match(/^[ \t]+/m);
   if (match) {
@@ -14,13 +76,12 @@ function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
   }
   return raw.trimEnd();
 }
-import { catalog } from "./ui/catalog";
 
-export const BASE_SYSTEM_PROMPT = dedent`
+const BASE_SYSTEM_PROMPT = dedent`
 You're a helpful shopping assistant for Vercel Shop. Never use emojis in your responses.
 `;
 
-export const createSystemPrompt = (ctx: AgentContext) => {
+function createSystemPrompt(ctx: AgentContext) {
   const { user, page } = ctx;
 
   let prompt = BASE_SYSTEM_PROMPT;
@@ -29,7 +90,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     You are currently in the ${user.locale} locale, always respond in the same language as the user but prefer to use the user's language when unclear.
   `;
 
-  // Capabilities overview
   prompt += dedent`\n
     ## Your Capabilities
 
@@ -41,7 +101,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     - **Navigation**: Guide users to any page on the site (products, collections, search, cart)
   `;
 
-  // Add page-specific context
   if (page?.type === "home") {
     prompt += dedent`\n
       ## Current Page Context
@@ -105,7 +164,6 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     `;
   }
 
-  // Append json-render catalog prompt for generative UI
   prompt +=
     "\n\n" +
     catalog.prompt({
@@ -122,10 +180,40 @@ export const createSystemPrompt = (ctx: AgentContext) => {
     });
 
   return prompt;
+}
+
+function getSystemPrompt() {
+  const ctx = getAgentContext();
+  return createSystemPrompt(ctx);
+}
+
+// ── Agent ────────────────────────────────────────────────────────────
+
+const defaults: ToolLoopAgentSettings = {
+  model: "anthropic/claude-sonnet-4.6",
 };
 
-export function getSystemPrompt() {
-  const ctx = getAgentContext();
+const tools = {
+  searchProducts: searchProductsTool(),
+  getProductDetails: getProductDetailsTool(),
+  getProductRecommendations: getRecommendationsTool(),
+  listCollections: listCollectionsTool(),
+  browseCollection: browseCollectionTool(),
+  addToCart: addToCartTool(),
+  getCart: getCartTool(),
+  updateCartItemQuantity: updateCartItemTool(),
+  removeFromCart: removeFromCartTool(),
+  addCartNote: addCartNoteTool(),
+  navigateUser: navigateTool(),
+};
 
-  return createSystemPrompt(ctx);
+export function createAgent() {
+  const agent = new ToolLoopAgent({
+    ...defaults,
+    instructions: getSystemPrompt(),
+    stopWhen: stepCountIs(10),
+    tools,
+  });
+
+  return agent;
 }
