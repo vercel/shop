@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import type { Locale } from "@/lib/i18n";
-import { productCardToOptimisticInfo } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 import {
@@ -15,7 +14,6 @@ import {
   ProductCardSkeleton,
   ProductCardTitle,
 } from "./components";
-import { ProductCardQuickAdd } from "./quick-add";
 
 export interface ProductCardProps {
   product: ProductCardType;
@@ -63,14 +61,7 @@ export async function ProductCard({
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
             fallbackTitle={product.title}
-          >
-            {product.availableForSale && product.defaultVariantId && (
-              <ProductCardQuickAdd
-                variantId={product.defaultVariantId}
-                productInfo={productCardToOptimisticInfo(product)}
-              />
-            )}
-          </ProductCardImage>
+          />
           <ProductCardContent>
             <ProductCardTitle>{product.title}</ProductCardTitle>
             <ProductCardPrice

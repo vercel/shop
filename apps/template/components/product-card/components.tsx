@@ -16,7 +16,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full group overflow-hidden", className)}
+      className={cn("flex flex-col h-full overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -67,7 +67,6 @@ interface ProductCardImageProps {
   outOfStockText?: string;
   fallbackTitle?: string;
   className?: string;
-  children?: React.ReactNode;
 }
 
 function ProductCardImage({
@@ -79,7 +78,6 @@ function ProductCardImage({
   outOfStockText,
   fallbackTitle,
   className,
-  children,
 }: ProductCardImageProps) {
   const hasSlideshow = images && images.length > 1;
 
@@ -103,7 +101,6 @@ function ProductCardImage({
           </span>
         </div>
       )}
-      {children}
     </div>
   );
 }

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
@@ -13,8 +12,6 @@ import {
   ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
-import { ProductCardQuickAdd } from "@/components/product-card/quick-add";
-import { productCardToOptimisticInfo } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
 interface InfiniteProductGridProps {
@@ -128,14 +125,7 @@ function ClientProductCard({
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
             fallbackTitle={product.title}
-          >
-            {product.availableForSale && product.defaultVariantId && (
-              <ProductCardQuickAdd
-                variantId={product.defaultVariantId}
-                productInfo={productCardToOptimisticInfo(product)}
-              />
-            )}
-          </ProductCardImage>
+          />
           <ProductCardContent>
             <ProductCardTitle>{product.title}</ProductCardTitle>
             <ProductCardPrice
