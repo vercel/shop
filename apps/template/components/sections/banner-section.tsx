@@ -59,9 +59,8 @@ export function BannerSection({ hero }: BannerSectionProps) {
             )}
             {hero.ctaText && hero.ctaLink && (
               <Button
-                variant="outline"
                 asChild
-                className="h-11 px-5 border-white text-white bg-transparent hover:bg-white/10 hover:text-white"
+                className="h-11 px-5 bg-background text-foreground hover:bg-background/90"
               >
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>

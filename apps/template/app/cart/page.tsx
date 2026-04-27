@@ -11,6 +11,7 @@ import { Summary } from "@/components/cart-page/summary";
 import { CartContextSync } from "@/components/cart/context-sync";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -48,27 +49,29 @@ async function CartContent({ locale }: { locale: Locale }) {
         {!cart || cart.totalQuantity === 0 ? (
           <Empty />
         ) : (
-          <Container className="py-10">
-            <Sections>
-              <Header />
-              <div className="grid gap-5 lg:grid-cols-12">
-                <div className="lg:col-span-8 xl:col-span-9">
-                  <CartItemsList locale={locale} />
-                </div>
-                <aside className="lg:col-span-4 xl:col-span-3">
-                  <div className="lg:sticky lg:top-20">
-                    <Summary locale={locale} />
+          <Page>
+            <Container>
+              <Sections>
+                <Header />
+                <div className="grid gap-5 lg:grid-cols-12">
+                  <div className="lg:col-span-8 xl:col-span-9">
+                    <CartItemsList locale={locale} />
                   </div>
-                </aside>
-              </div>
-              {cart.lines[0]?.merchandise.product.handle ? (
-                <RelatedProductsSection
-                  handle={cart.lines[0].merchandise.product.handle}
-                  locale={locale}
-                />
-              ) : null}
-            </Sections>
-          </Container>
+                  <aside className="lg:col-span-4 xl:col-span-3">
+                    <div className="lg:sticky lg:top-20">
+                      <Summary locale={locale} />
+                    </div>
+                  </aside>
+                </div>
+                {cart.lines[0]?.merchandise.product.handle ? (
+                  <RelatedProductsSection
+                    handle={cart.lines[0].merchandise.product.handle}
+                    locale={locale}
+                  />
+                ) : null}
+              </Sections>
+            </Container>
+          </Page>
         )}
       </CartContextSync>
     </NextIntlClientProvider>

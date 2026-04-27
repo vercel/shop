@@ -4,6 +4,7 @@ import { ProductSchema } from "@/components/product-detail/schema";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
@@ -30,34 +31,20 @@ function ProductPageFallback() {
         <div className="lg:col-span-6">
           {/* Mobile: single full-bleed square + pagination space */}
           <div className="grid gap-5 lg:hidden -mx-5">
-            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="aspect-square w-full rounded-none" />
             <div className="h-1.5" />
           </div>
           {/* Desktop: 2×2 grid */}
           <div className="hidden lg:grid grid-cols-2 gap-2.5">
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="aspect-square w-full" />
-            <Skeleton className="aspect-square w-full" />
+            <Skeleton className="aspect-square w-full rounded-none" />
+            <Skeleton className="aspect-square w-full rounded-none" />
+            <Skeleton className="aspect-square w-full rounded-none" />
+            <Skeleton className="aspect-square w-full rounded-none" />
           </div>
         </div>
         <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-          <div>
-            <Skeleton className="h-8 w-3/4" />
-            <Skeleton className="h-6 w-24" />
-          </div>
-          <div className="grid gap-2.5">
-            <Skeleton className="h-4 w-20" />
-            <div className="grid grid-cols-5 gap-2.5">
-              {["a", "b", "c", "d"].map((k) => (
-                <Skeleton key={k} className="aspect-square" />
-              ))}
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="h-12 rounded-lg bg-shop" />
-            <div className="h-12 rounded-lg bg-foreground" />
-          </div>
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-32 w-full" />
         </div>
       </div>
     </Sections>
@@ -116,14 +103,16 @@ export async function ProductDetailPage({
   variantIdPromise: Promise<string | undefined>;
 }) {
   return (
-    <Container className="bg-background pt-0 pb-10">
-      <Suspense fallback={<ProductPageFallback />}>
-        <ProductContent
-          productPromise={productPromise}
-          locale={locale}
-          variantIdPromise={variantIdPromise}
-        />
-      </Suspense>
-    </Container>
+    <Page className="pt-0">
+      <Container className="bg-background">
+        <Suspense fallback={<ProductPageFallback />}>
+          <ProductContent
+            productPromise={productPromise}
+            locale={locale}
+            variantIdPromise={variantIdPromise}
+          />
+        </Suspense>
+      </Container>
+    </Page>
   );
 }

@@ -26,7 +26,7 @@ A responsive grid showing up to 8 products fetched via `getProducts()`. The grid
 - Out-of-stock overlay when unavailable
 - Title and price (with compare-at price for discounts)
 
-The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. The `ProductsCarousel` component is also available for a horizontally scrollable layout (used on the PDP for related products).
+The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. The `ProductsSlider` component is also available for a horizontally scrollable layout (used on the PDP for related products).
 
 ## Data fetching
 
@@ -39,6 +39,6 @@ Products are fetched server-side with `getProducts({ limit: 8, locale })`, which
 | `app/page.tsx` | Root page, metadata generation, product fetch |
 | `components/sections/banner-section.tsx` | Full-width hero banner with image, headline, CTA |
 | `components/product/products-grid.tsx` | Responsive product grid with section title |
-| `components/product/products-carousel.tsx` | Horizontally scrollable product carousel (used on PDP) |
+| `components/product/products-slider.tsx` | Horizontally scrollable product slider (used on PDP) |
 | `components/product-card/product-card.tsx` | Product card with image, hover slideshow, and price |
 | `lib/shopify/operations/products.ts` | Shopify product fetching with caching |
