@@ -190,8 +190,8 @@ function ProductCardSkeleton({ className }: { className?: string }) {
     >
       <div className="aspect-square bg-muted animate-pulse" />
       <div className="py-2.5">
-        <div className="h-4 w-full bg-muted rounded animate-pulse" />
-        <div className="h-4 w-12 bg-muted rounded animate-pulse mt-2" />
+        <div className="h-4 w-full bg-muted animate-pulse" />
+        <div className="h-4 w-12 bg-muted animate-pulse mt-2" />
       </div>
     </div>
   );

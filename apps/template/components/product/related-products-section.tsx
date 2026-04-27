@@ -15,11 +15,11 @@ function Fallback({ title }: { title: string }) {
         <div className="grid grid-flow-col gap-5 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]">
           {["a", "b", "c", "d"].map((key) => (
             <div key={key}>
-              <Skeleton className="aspect-square" />
+              <Skeleton className="aspect-square rounded-none" />
               <div className="py-2.5 h-18 box-content grid gap-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-full rounded-none" />
+                <Skeleton className="h-4 w-3/4 rounded-none" />
+                <Skeleton className="h-4 w-16 rounded-none" />
               </div>
             </div>
           ))}
