@@ -259,9 +259,9 @@ export const generateStaticParams = async () => {
 
 The browse menu previously included a `LocaleCurrencySelector` that let users switch language and see their currency. It was removed when locale URL prefixes were removed (since there's only one locale without them). To restore it:
 
-1. The component already exists at `components/layout/nav/locale-currency.tsx` (with a fallback at `locale-currency-fallback.tsx`).
+1. The component already exists at `components/nav/locale-currency.tsx` (with a fallback at `locale-currency-fallback.tsx`).
 
-2. Add it back to `components/layout/nav/megamenu/index.tsx`:
+2. Add it back to `components/nav/megamenu/index.tsx`:
 
 ```tsx
 import { LocaleCurrencySelector } from "../locale-currency";

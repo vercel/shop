@@ -5,12 +5,12 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
+import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
-import { ActionBar } from "@/components/layout/action-bar";
-import { Footer } from "@/components/layout/footer";
-import { Nav } from "@/components/layout/nav";
+import { Footer } from "@/components/footer";
+import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";

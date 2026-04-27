@@ -183,7 +183,7 @@ Key files:
 - `app/api/auth/[...all]/route.ts` — OAuth callback handler
 - `app/account/(authenticated)/` — auth-gated account pages
 - `app/account/login/` — login redirect (outside auth gate)
-- `components/layout/nav/account.tsx` — nav icon (async, inside Suspense)
+- `components/nav/account.tsx` — nav icon (async, inside Suspense)
 - `components/account/` — sidebar, tabs, page header, sign-out button
 
 The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.

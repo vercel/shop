@@ -1,15 +1,14 @@
 import Link from "next/link";
 
 import { Sections } from "@/components/ui/sections";
-import { siteConfig } from "@/lib/config";
+import { footerItems, siteConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 
-import { defaultFooterItems } from "./menu-data";
 import { SocialLinks } from "./social-links";
 
 export function Footer({ locale }: { locale: string }) {
   const { socialLinks } = siteConfig;
-  const items = defaultFooterItems;
+  const items = footerItems;
 
   return (
     <footer>

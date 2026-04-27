@@ -50,7 +50,7 @@ Wait for the user to answer all questions before proceeding.
 
 Skip this section if the user did not select the nav menu.
 
-### A1. Update `components/layout/nav/quick-links.tsx`
+### A1. Update `components/nav/quick-links.tsx`
 
 Replace the hardcoded links array with a Shopify menu fetch. Make the component async:
 
@@ -102,7 +102,7 @@ export async function QuickLinks({ locale }: { locale: string }) {
 
 Replace `"NAV_HANDLE"` with the handle the user provided.
 
-### A2. Update `components/layout/nav/index.tsx`
+### A2. Update `components/nav/index.tsx`
 
 Since `QuickLinks` is now async, wrap it in `<Suspense>` and pass `locale`:
 
@@ -118,7 +118,7 @@ Since `QuickLinks` is now async, wrap it in `<Suspense>` and pass `locale`:
 
 Skip this section if the user did not select the footer menu.
 
-### B1. Update `components/layout/footer.tsx`
+### B1. Update `components/footer.tsx`
 
 Add the Shopify menu fetch back to the footer. Create a `FooterContent` async component:
 
@@ -346,7 +346,7 @@ This relies on `getMenu()` from `lib/shopify/operations/menu.ts` which already e
 
 ### C4. Create megamenu components
 
-Create a directory `components/layout/nav/megamenu/` with the following files:
+Create a directory `components/nav/megamenu/` with the following files:
 
 #### C4a. `menu-trigger-icon.tsx`
 
@@ -648,7 +648,7 @@ Add the following keys to **all** locale files under `lib/i18n/messages/` in the
 
 ### C6. Wire into the nav
 
-Import and render the `Megamenu` component in `components/layout/nav/index.tsx`, passing `locale`:
+Import and render the `Megamenu` component in `components/nav/index.tsx`, passing `locale`:
 
 ```tsx
 import { Megamenu } from "./megamenu";
@@ -671,7 +671,7 @@ npx shadcn@latest add accordion
 
 ### C8. Add Browse toggle to the action bar
 
-The action bar (`components/layout/action-bar.tsx`) should include a Browse button that toggles the megamenu on mobile. Add:
+The action bar (`components/action-bar.tsx`) should include a Browse button that toggles the megamenu on mobile. Add:
 
 1. Import `MenuTriggerIcon` from `./nav/megamenu/menu-trigger-icon` and `X` from `lucide-react`
 2. Add state: `const [menuOpen, setMenuOpen] = useState(false)`
@@ -710,7 +710,7 @@ Then update `components/collections/header.tsx` and `components/collections/stru
 ## Guardrails
 
 - The `getMenu()` operation from `lib/shopify/operations/menu.ts` already handles caching (`"use cache: remote"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
-- Components in `components/layout/nav/megamenu/` may import from `@/lib/shopify/types/megamenu` for prop types, but must not call Shopify operations directly — data fetching happens in the server component barrel (`index.tsx`).
+- Components in `components/nav/megamenu/` may import from `@/lib/shopify/types/megamenu` for prop types, but must not call Shopify operations directly — data fetching happens in the server component barrel (`index.tsx`).
 - All user-visible strings must use `useTranslations("nav")` — no hardcoded English text in components.
 - The BroadcastChannel name must be `"megamenu"` for cross-tab sync to work.
 - External links (starting with `http`) must use `<a>` with `target="_blank"` and `rel="noopener noreferrer"`. Internal links must use Next.js `Link`.

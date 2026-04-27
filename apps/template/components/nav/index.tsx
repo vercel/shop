@@ -2,16 +2,16 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { isAuthEnabled } from "@/lib/auth";
+import { navItems } from "@/lib/config";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
-import { defaultNavItems } from "./menu-data";
 import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
 export async function Nav({ locale }: { locale: string }) {
-  const items = defaultNavItems;
+  const items = navItems;
 
   return (
     <nav
