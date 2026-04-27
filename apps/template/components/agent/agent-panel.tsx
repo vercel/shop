@@ -29,7 +29,6 @@ import {
   UploadIcon,
   XIcon,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import { nanoid } from "nanoid";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -67,7 +66,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card"
 import { CartReconciler } from "./cart-reconciler";
 import { registry } from "./registry";
 
-const easing = [0.32, 0.72, 0, 1] as const;
 const AUTO_CLOSE_DELAY = 1000;
 const AGENT_CHAT_STORAGE_KEY = "template-agent-chat:v1";
 
@@ -564,115 +562,108 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   return (
     <>
       <CartReconciler messages={messages} />
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            ref={panelRef}
-            role="dialog"
-            aria-label={t("assistantLabel")}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            onAnimationComplete={scrollMessagesToBottom}
-            transition={{ duration: 0.35, ease: easing }}
-            className="fixed right-5 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm"
-          >
-            {/* Drag overlay */}
-            {isDragging && (
-              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 backdrop-blur-sm">
-                <UploadIcon className="size-8 text-primary/60" />
-                <p className="font-medium text-primary/80 text-sm">{t("dropFiles")}</p>
-              </div>
-            )}
-
-            {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm">{t("name")}</span>
-                {t("title") && <span className="text-muted-foreground text-sm">{t("title")}</span>}
-              </div>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  disabled={!canClear}
-                  className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-                  aria-label={t("clearChat")}
-                >
-                  <Trash2Icon className="size-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onOpenChange(false)}
-                  className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                  aria-label={t("minimizeAssistant")}
-                >
-                  <MinusIcon className="size-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" data-slot="messages">
-              <Conversation>
-                <ConversationContent>
-                  {messages.length === 0 && (
-                    <div className="flex items-start gap-2.5">
-                      <BotMessageSquareIcon className="size-5 shrink-0 text-primary mt-0.5" />
-                      <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
-                    </div>
-                  )}
-                  {messages.map((message, messageIndex) => (
-                    <ChatMessage
-                      key={message.id}
-                      message={message}
-                      isLastAssistant={messageIndex === lastAssistantIndex}
-                      status={status}
-                      messages={messages}
-                      regenerate={regenerate}
-                    />
-                  ))}
-                </ConversationContent>
-              </Conversation>
-            </div>
-
-            {/* Input */}
-            <PromptInput
-              onSubmit={handleSubmit}
-              className="px-5 py-2.5 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
-              globalDrop
-              multiple
-            >
-              <AttachmentChips />
-              <div className="flex w-full items-center">
-                <AttachButton />
-                <PromptInputBody>
-                  <PromptInputTextarea
-                    autoFocus
-                    className="min-h-0 py-2.5 text-sm"
-                    onChange={(e) => setInput(e.target.value)}
-                    value={input}
-                  />
-                </PromptInputBody>
-                <SpeechInput
-                  type="button"
-                  size="icon-sm"
-                  variant="ghost"
-                  className="shrink-0 bg-transparent text-foreground/50 hover:bg-transparent hover:text-foreground"
-                  onTranscriptionChange={(text) => {
-                    setInput((prev) => (prev ? `${prev} ${text}` : text));
-                  }}
-                />
-                <PromptInputSubmit
-                  className="mr-1.5"
-                  disabled={!input && !status}
-                  status={status}
-                />
-              </div>
-            </PromptInput>
-          </motion.div>
+      <div
+        ref={panelRef}
+        data-state={open ? "open" : "closed"}
+        role="dialog"
+        aria-label={t("assistantLabel")}
+        onTransitionEnd={(e) => {
+          if (e.target === e.currentTarget && e.propertyName === "opacity" && open) {
+            scrollMessagesToBottom();
+          }
+        }}
+        className="fixed right-5 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm transition-[opacity,transform,display] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] transition-discrete data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-2.5 data-[state=closed]:hidden starting:opacity-0 starting:translate-y-2.5"
+      >
+        {/* Drag overlay */}
+        {isDragging && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 backdrop-blur-sm">
+            <UploadIcon className="size-8 text-primary/60" />
+            <p className="font-medium text-primary/80 text-sm">{t("dropFiles")}</p>
+          </div>
         )}
-      </AnimatePresence>
+
+        {/* Header */}
+        <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm">{t("name")}</span>
+            {t("title") && <span className="text-muted-foreground text-sm">{t("title")}</span>}
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={handleClear}
+              disabled={!canClear}
+              className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-default disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+              aria-label={t("clearChat")}
+            >
+              <Trash2Icon className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => onOpenChange(false)}
+              className="flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              aria-label={t("minimizeAssistant")}
+            >
+              <MinusIcon className="size-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" data-slot="messages">
+          <Conversation>
+            <ConversationContent>
+              {messages.length === 0 && (
+                <div className="flex items-start gap-2.5">
+                  <BotMessageSquareIcon className="size-5 shrink-0 text-primary mt-0.5" />
+                  <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
+                </div>
+              )}
+              {messages.map((message, messageIndex) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  isLastAssistant={messageIndex === lastAssistantIndex}
+                  status={status}
+                  messages={messages}
+                  regenerate={regenerate}
+                />
+              ))}
+            </ConversationContent>
+          </Conversation>
+        </div>
+
+        {/* Input */}
+        <PromptInput
+          onSubmit={handleSubmit}
+          className="px-5 py-2.5 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
+          globalDrop
+          multiple
+        >
+          <AttachmentChips />
+          <div className="flex w-full items-center">
+            <AttachButton />
+            <PromptInputBody>
+              <PromptInputTextarea
+                autoFocus
+                className="min-h-0 py-2.5 text-sm"
+                onChange={(e) => setInput(e.target.value)}
+                value={input}
+              />
+            </PromptInputBody>
+            <SpeechInput
+              type="button"
+              size="icon-sm"
+              variant="ghost"
+              className="shrink-0 bg-transparent text-foreground/50 hover:bg-transparent hover:text-foreground"
+              onTranscriptionChange={(text) => {
+                setInput((prev) => (prev ? `${prev} ${text}` : text));
+              }}
+            />
+            <PromptInputSubmit className="mr-1.5" disabled={!input && !status} status={status} />
+          </div>
+        </PromptInput>
+      </div>
     </>
   );
 }
