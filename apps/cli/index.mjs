@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -165,6 +165,15 @@ export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
 
+export async function hasNodeModules(projectDir) {
+  try {
+    const info = await stat(join(projectDir, 'node_modules'));
+    return info.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
 export async function writeBootstrapMetadata(
   projectDir,
   templateVersion,
@@ -230,6 +239,19 @@ export async function main({
 
     if (scaffoldCode !== 0) {
       return scaffoldCode;
+    }
+
+    // create-next-app prints install errors but can still exit 0 (npm peer-dep
+    // conflicts being the common case). Plugin installs require a working
+    // install context, so treat a missing node_modules as a hard scaffold
+    // failure.
+    if (!(await hasNodeModules(plan.projectDir))) {
+      console.warn('\nScaffold copied files but the install step failed (no node_modules).');
+      console.warn(`Fix the install in ${plan.projectDir}, then retry plugins:`);
+      console.warn('  npx plugins add vercel/shop --scope project --yes');
+      console.warn('  npx plugins add vercel/vercel-plugin --scope project --yes');
+      console.warn('  npx plugins add Shopify/shopify-ai-toolkit --scope project --yes');
+      return 1;
     }
 
     try {

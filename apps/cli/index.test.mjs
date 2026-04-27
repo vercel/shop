@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import test from 'node:test';
@@ -70,6 +70,9 @@ test('main scaffolds the template and writes bootstrap metadata by default', asy
       cwd: tempRoot,
       run: async (command, args, options = {}) => {
         calls.push({ command, args, options });
+        if (args.includes('create-next-app@latest')) {
+          await mkdir(join(projectDir, 'node_modules'), { recursive: true });
+        }
         return 0;
       },
     });
@@ -87,6 +90,35 @@ test('main scaffolds the template and writes bootstrap metadata by default', asy
     assert.equal(bootstrapMetadata.templateVersion, await readTemplateVersion());
     assert.equal(typeof bootstrapMetadata.scaffoldedAt, 'string');
     assert.ok(Number.isFinite(Date.parse(bootstrapMetadata.scaffoldedAt)));
+  } finally {
+    await rm(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test('main skips plugin installs when scaffold leaves no node_modules', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
+  const projectName = 'my-store';
+  const projectDir = join(tempRoot, projectName);
+  const calls = [];
+
+  try {
+    const exitCode = await main({
+      cliArgs: [projectName],
+      cwd: tempRoot,
+      run: async (command, args, options = {}) => {
+        calls.push({ command, args, options });
+        if (args.includes('create-next-app@latest')) {
+          // Mimic CNA's "files copied, install failed, exit 0" failure mode:
+          // create the project dir but no node_modules.
+          await mkdir(projectDir, { recursive: true });
+        }
+        return 0;
+      },
+    });
+
+    assert.equal(exitCode, 1);
+    assert.equal(calls.length, 1);
+    assert.ok(calls[0].args.includes('create-next-app@latest'));
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }
