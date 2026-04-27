@@ -12,7 +12,7 @@ The PLP covers two routes - `/collections/[handle]` for browsing a collection an
 
 Products display in a responsive grid: 2 columns on mobile, 3 on tablet, 4 on desktop. During filter or sort transitions, a pending overlay dims the grid to signal loading.
 
-Each product renders as a card with the featured image (with hover slideshow on desktop), title, price, compare-at price, availability status, and a quick-add button for in-stock items.
+Each product renders as a card with the featured image (with hover slideshow on desktop), title, price, compare-at price, and availability status.
 
 ## Filtering
 
@@ -87,7 +87,7 @@ The `/search` route accepts a `q` query parameter and combines it with the same 
 | `components/collections/filter-pending-context.tsx` | Context provider for optimistic filter transitions |
 | `components/collections/sort-select.tsx` | Sort dropdown with transition-based navigation |
 | `components/collections/structured-data.tsx` | JSON-LD structured data for collections |
-| `components/product-card/product-card.tsx` | Product card with image, hover slideshow, price, quick-add |
+| `components/product-card/product-card.tsx` | Product card with image, hover slideshow, and price |
 | `components/search/results.tsx` | Search results layout with no-results state |
 | `lib/shopify/operations/products.ts` | Product search with caching and filter mapping |
 | `lib/shopify/operations/collections.ts` | Collection metadata fetching |

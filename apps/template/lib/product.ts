@@ -319,31 +319,6 @@ export type OptimisticProductInfo = {
   selectedOptions: SelectedOption[];
 };
 
-/** From a ProductCard (grid/carousel quick-add). */
-export function productCardToOptimisticInfo(product: {
-  title: string;
-  handle: string;
-  price: Money;
-  featuredImage: Image | null;
-  defaultVariantSelectedOptions?: SelectedOption[];
-}): OptimisticProductInfo {
-  const opts = product.defaultVariantSelectedOptions ?? [];
-  return {
-    variantTitle: opts.map((o) => o.value).join(" / ") || "Default Title",
-    productTitle: product.title,
-    productHandle: product.handle,
-    price: product.price,
-    image: product.featuredImage || {
-      url: "",
-      altText: product.title,
-      width: 0,
-      height: 0,
-    },
-    selectedOptions: opts,
-  };
-}
-
-/** From a PDP variant + product. */
 export function variantToOptimisticInfo(
   variant: {
     title: string;
