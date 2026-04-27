@@ -52,6 +52,17 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --shadow-line: 0 1px 0 0 #0000001a;
+
+  --animate-shimmer: shimmer var(--shimmer-duration, 2s) linear infinite;
+
+  @keyframes shimmer {
+    from {
+      background-position: 100% center;
+    }
+    to {
+      background-position: 0% center;
+    }
+  }
 }
 
 :root {
