@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
+import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
 export const NO_TEMPLATE_FLAG = '--no-template';
+export const DEFAULT_PROJECT_NAME = 'my-shop';
 
 const PACKAGE_MANAGER_FLAGS = ['--use-pnpm', '--use-npm', '--use-yarn', '--use-bun'];
 const flagsWithValues = new Set(['--import-alias']);
@@ -65,7 +67,7 @@ export function getRunner(packageManager) {
   return { command: 'npx', args: [] };
 }
 
-export function findProjectDir(args, cwd = process.cwd()) {
+export function findPositionalProjectName(args) {
   let skipNext = false;
 
   for (const arg of args) {
@@ -84,11 +86,30 @@ export function findProjectDir(args, cwd = process.cwd()) {
     }
 
     if (!arg.startsWith('-')) {
-      return resolve(cwd, arg);
+      return arg;
     }
   }
 
-  return cwd;
+  return null;
+}
+
+export function findProjectDir(args, cwd = process.cwd()) {
+  const name = findPositionalProjectName(args);
+  return name ? resolve(cwd, name) : cwd;
+}
+
+export async function promptProjectName({
+  defaultName = DEFAULT_PROJECT_NAME,
+  input = process.stdin,
+  output = process.stdout,
+} = {}) {
+  const rl = createInterface({ input, output });
+  try {
+    const answer = await rl.question(`What is your project named? (${defaultName}) `);
+    return answer.trim() || defaultName;
+  } finally {
+    rl.close();
+  }
 }
 
 export function getScaffoldArgs({ cliArgs, packageManagerFlag, runnerArgs = [] }) {
@@ -165,15 +186,6 @@ export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
 
-export async function hasNodeModules(projectDir) {
-  try {
-    const info = await stat(join(projectDir, 'node_modules'));
-    return info.isDirectory();
-  } catch {
-    return false;
-  }
-}
-
 export async function writeBootstrapMetadata(
   projectDir,
   templateVersion,
@@ -224,11 +236,28 @@ export async function main({
   cwd = process.cwd(),
   execPath = process.env.npm_execpath ?? '',
   importMetaUrl = import.meta.url,
+  isTTY = Boolean(process.stdin.isTTY),
+  prompt = promptProjectName,
   run = runCommand,
   userAgent = process.env.npm_config_user_agent ?? '',
 } = {}) {
+  // Pre-prompt for the project name when none is given. Without this,
+  // create-next-app would prompt interactively but in its own subprocess —
+  // we'd never learn the chosen name and would run plugin installs against
+  // the parent directory.
+  let effectiveCliArgs = cliArgs;
+  const noTemplate = cliArgs.includes(NO_TEMPLATE_FLAG);
+  if (
+    !noTemplate &&
+    isTTY &&
+    findPositionalProjectName(stripInternalArgs(cliArgs)) === null
+  ) {
+    const name = await prompt();
+    effectiveCliArgs = [name, ...cliArgs];
+  }
+
   const plan = createExecutionPlan({
-    cliArgs,
+    cliArgs: effectiveCliArgs,
     cwd,
     execPath,
     userAgent,
@@ -239,19 +268,6 @@ export async function main({
 
     if (scaffoldCode !== 0) {
       return scaffoldCode;
-    }
-
-    // create-next-app prints install errors but can still exit 0 (npm peer-dep
-    // conflicts being the common case). Plugin installs require a working
-    // install context, so treat a missing node_modules as a hard scaffold
-    // failure.
-    if (!(await hasNodeModules(plan.projectDir))) {
-      console.warn('\nScaffold copied files but the install step failed (no node_modules).');
-      console.warn(`Fix the install in ${plan.projectDir}, then retry plugins:`);
-      console.warn('  npx plugins add vercel/shop --scope project --yes');
-      console.warn('  npx plugins add vercel/vercel-plugin --scope project --yes');
-      console.warn('  npx plugins add Shopify/shopify-ai-toolkit --scope project --yes');
-      return 1;
     }
 
     try {
