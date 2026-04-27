@@ -391,13 +391,13 @@ components/ui/filter-sidebar.tsx
 components/product/breadcrumb.tsx
 components/prefetch-link.tsx
 components/orders/order-detail.tsx
-components/layout/predictive-search-results.tsx
-components/layout/nav/quick-links.tsx
-components/layout/nav/account-client.tsx
-components/layout/nav/account.tsx
-components/layout/nav/current-page-link.tsx
-components/layout/nav/index.tsx
-components/layout/footer.tsx
+components/predictive-search-results.tsx
+components/nav/quick-links.tsx
+components/nav/account-client.tsx
+components/nav/account.tsx
+components/nav/current-page-link.tsx
+components/nav/index.tsx
+components/footer.tsx
 components/collections/pagination.tsx
 components/error-boundary-content.tsx
 components/collections/collection-page.tsx
@@ -422,9 +422,9 @@ Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navig
 
 > **Prerequisite:** This step requires the `enable-shopify-menus` skill to have been run first. If the megamenu has not been added, skip this step.
 
-**File:** `components/layout/nav/megamenu/index.tsx`
+**File:** `components/nav/megamenu/index.tsx`
 
-The `LocaleCurrencySelector` component already exists at `components/layout/nav/locale-currency.tsx`. Add it to the megamenu:
+The `LocaleCurrencySelector` component already exists at `components/nav/locale-currency.tsx`. Add it to the megamenu:
 
 ```tsx
 import { LocaleCurrencySelector } from "../locale-currency";
