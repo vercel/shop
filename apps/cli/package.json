@@ -3,6 +3,11 @@
 		"create-vercel-shop": "index.mjs"
 	},
 	"name": "create-vercel-shop",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/vercel/shop.git",
+		"directory": "apps/cli"
+	},
 	"shopTemplateVersion": "0.1.0",
 	"type": "module",
 	"version": "0.2.1"
