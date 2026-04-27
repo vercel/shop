@@ -18,7 +18,7 @@ For the API client and query patterns, see [Storefront API](/docs/reference/stor
 |---|---|---|
 | Products | `/products/[handle]` | Product detail page with variants, gallery, buy section |
 | Collections | `/collections/[handle]` | Product grid with filtering, sorting, pagination |
-| Menus | Navigation, footer | Megamenu, quick links bar, footer columns |
+| Menus | Navigation, footer | Quick links bar (with hover panels), mobile sheet, footer columns |
 | Pages | `/pages/[slug]` | Marketing page renderer (requires CMS setup) |
 | Search | `/search` | Same grid as collections, driven by query param |
 | Cart | `/cart` + overlay | Cart context with optimistic updates |
@@ -31,7 +31,7 @@ When enabled, the template fetches menus by handle from **Online Store → Navig
 
 | Menu handle | Where it renders | Structure |
 |---|---|---|
-| `main-menu` | Top navigation links (or megamenu) | Flat list or 3-level hierarchy |
+| `main-menu` | Top navigation links | Flat list or 3-level hierarchy |
 | `footer` | Footer link columns | 2-level: column headings → links |
 
 Menu items can link to collections, products, pages, or custom URLs.
