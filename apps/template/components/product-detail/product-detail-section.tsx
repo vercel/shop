@@ -71,10 +71,10 @@ export async function ProductDetailSection({
             <Suspense
               fallback={
                 <>
-                  <Skeleton className="aspect-square w-full" />
-                  <Skeleton className="aspect-square w-full" />
-                  <Skeleton className="aspect-square w-full" />
-                  <Skeleton className="aspect-square w-full" />
+                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <Skeleton className="aspect-square w-full rounded-none" />
                 </>
               }
             >
@@ -91,7 +91,7 @@ export async function ProductDetailSection({
             <Suspense
               fallback={
                 <div className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden">
-                  <Skeleton className="size-full" />
+                  <Skeleton className="size-full rounded-none" />
                 </div>
               }
             >
@@ -127,7 +127,7 @@ export async function ProductDetailSection({
               />
             )
           ) : (
-            <Suspense fallback={<Skeleton className="h-6 w-24" />}>
+            <Suspense fallback={<div className="h-6" aria-hidden />}>
               <ResolvedPrice
                 variants={variants}
                 locale={locale}
