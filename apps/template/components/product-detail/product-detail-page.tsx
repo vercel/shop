@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { ProductSummarySection } from "@/components/product-detail/product-summary-section";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -87,6 +88,7 @@ async function ProductContent({
           locale={locale}
           variantIdPromise={variantIdPromise}
         />
+        <ProductSummarySection description={product.description} handle={handle} title={title} />
         <RelatedProductsSection handle={handle} locale={locale} />
       </Sections>
     </>
