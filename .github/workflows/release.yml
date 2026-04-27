@@ -5,6 +5,13 @@ name: Release
 # the GitHub REST API and are auto-signed by GitHub's signing key. This
 # satisfies the "Commits must have verified signatures" repository rule
 # without any GPG key management or bypass exceptions.
+#
+# Publishing to npm is enabled via the npm Trusted Publisher mechanism.
+# The workflow filename (`release.yml`) is bound to the publisher config on
+# npm.com — renaming or replacing this file will break publishing until the
+# npm-side setting is updated to match.
+#
+# See https://docs.npmjs.com/trusted-publishers for the publisher binding.
 
 on:
   push:
@@ -30,10 +37,14 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+      # Node 24 (LTS Krypton) ships npm >= 11.12, which has Trusted Publisher
+      # OIDC authentication. Node 22's bundled npm 10.x can sign provenance
+      # attestations but cannot use OIDC tokens to authenticate the publish
+      # itself, leading to a confusing 404 after provenance signing succeeds.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
@@ -49,5 +60,5 @@ jobs:
           title: "chore: release"
           commitMode: github-api
         env:
+          NPM_CONFIG_PROVENANCE: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
