@@ -28,15 +28,15 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+// Placeholder homepage. Replace this file's contents to swap in your own —
+// CMS-driven sections, hand-written marketing, etc. Copy is intentionally
+// inline (not in i18n catalogs) so you can rip the whole page out cleanly.
 export default async function HomePage() {
-  const [locale, t] = await Promise.all([getLocale(), getTranslations("content.homepage")]);
+  const locale = await getLocale();
 
   return (
     <Page className="pt-0">
       <Sections>
-        {/* To use a custom hero image, pass a backgroundImage prop:
-            backgroundImage: { url: "https://...", alt: "...", width: 1920, height: 1080 }
-            or import a local image: import myHero from "@/public/my-hero.jpg" */}
         <BannerSection
           hero={{
             id: "homepage-hero",
@@ -49,7 +49,7 @@ export default async function HomePage() {
 
         <Container>
           <FeaturedProducts
-            title={t("featuredProducts.title")}
+            title="Featured Products"
             limit={8}
             locale={locale}
             collectionUrl="/search"
