@@ -1,7 +1,6 @@
 "use client";
 
 import { Search, Tag } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,8 +13,6 @@ import type {
   SearchSuggestion,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const easing = [0.32, 0.72, 0, 1] as const;
 
 interface PredictiveSearchPanelProps {
   results: PredictiveSearchResult | null;
@@ -42,23 +39,25 @@ export function PredictiveSearchPanel({
   const show = query.trim().length > 0 && (results !== null || isLoading);
 
   return (
-    <AnimatePresence>
+    <div
+      data-state={show ? "open" : "closed"}
+      role="listbox"
+      id="predictive-search-results"
+      aria-label={t("suggestions")}
+      className={cn(
+        "absolute left-0 right-0 z-50 overflow-hidden bg-popover/90 backdrop-blur-xl border border-border/50 shadow-lg",
+        "transition-[opacity,transform,display] duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] transition-discrete",
+        "data-[state=open]:opacity-100 data-[state=open]:translate-y-0",
+        "data-[state=closed]:opacity-0 data-[state=closed]:hidden",
+        position === "above" &&
+          "bottom-full mb-2 starting:translate-y-2 data-[state=closed]:translate-y-2",
+        position === "below" &&
+          "top-full mt-2 starting:-translate-y-2 data-[state=closed]:-translate-y-2",
+        className,
+      )}
+    >
       {show && (
-        <motion.div
-          initial={{ opacity: 0, y: position === "above" ? 8 : -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: position === "above" ? 8 : -8 }}
-          transition={{ duration: 0.2, ease: easing }}
-          className={cn(
-            "absolute left-0 right-0 z-50 overflow-hidden bg-popover/90 backdrop-blur-xl border border-border/50 shadow-lg",
-            position === "above" && "bottom-full mb-2",
-            position === "below" && "top-full mt-2",
-            className,
-          )}
-          role="listbox"
-          id="predictive-search-results"
-          aria-label={t("suggestions")}
-        >
+        <>
           {isLoading && !results && (
             <div className="px-5 py-2.5">
               <LoadingSkeleton />
@@ -125,9 +124,9 @@ export function PredictiveSearchPanel({
               )}
             </div>
           )}
-        </motion.div>
+        </>
       )}
-    </AnimatePresence>
+    </div>
   );
 }
 
