@@ -1,4 +1,5 @@
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 
 export function ItemsSkeleton() {
@@ -55,18 +56,20 @@ export function SummarySkeleton() {
 
 export function PageSkeleton() {
   return (
-    <Container className="py-10">
-      <Sections>
-        <div className="h-5 bg-muted rounded w-32 animate-pulse" />
-        <div className="grid gap-5 lg:grid-cols-12">
-          <div className="lg:col-span-8 xl:col-span-9">
-            <ItemsSkeleton />
+    <Page>
+      <Container>
+        <Sections>
+          <div className="h-5 bg-muted rounded w-32 animate-pulse" />
+          <div className="grid gap-5 lg:grid-cols-12">
+            <div className="lg:col-span-8 xl:col-span-9">
+              <ItemsSkeleton />
+            </div>
+            <div className="lg:col-span-4 xl:col-span-3">
+              <SummarySkeleton />
+            </div>
           </div>
-          <div className="lg:col-span-4 xl:col-span-3">
-            <SummarySkeleton />
-          </div>
-        </div>
-      </Sections>
-    </Container>
+        </Sections>
+      </Container>
+    </Page>
   );
 }

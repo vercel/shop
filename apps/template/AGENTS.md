@@ -83,11 +83,12 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 ### Spacing
 
 - `Container` provides horizontal padding and max-width only. It does **not** manage vertical spacing.
+- `Page` (`components/ui/page.tsx`) owns page-level top padding. It defaults to `pt-10` and accepts `className` for overrides — `<Page className="pt-0">` for pages whose first child is flush to the nav (home, PDP), or `<Page className="pt-2.5 md:pt-10">` for search and collection where the title sits tighter to the nav on mobile. `Page` deliberately has no bottom padding; the gap above the footer comes from the footer's own `pt-10`. `Page` doesn't set `flex` by default; layouts that need to fill viewport height (account layout, `not-found`) add `flex flex-1 flex-col` via `className`.
 - For vertical rhythm between sibling sections, wrap them in `<Sections>` (`components/ui/sections.tsx`). Default `gap-10`; override per page via `className` (e.g. `<Sections className="gap-5">`). `<Sections>` happily mixes full-bleed and contained children since each child can be a `<Container>`, a banner, or anything else.
 - Inside a single section, prefer `grid gap-*` on the immediate parent. Don't add `mb-*` / `mt-*` / `my-*` / `space-y-*` to children for inter-sibling spacing.
 - Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
 - Padding _inside_ a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
-- This convention is rolled out across the template. New pages should use `<Sections>` from day one.
+- This convention is rolled out across the template. New pages should use `<Page>` + `<Sections>` from day one — never put `py-*` on `<Container>`.
 
 ### Tailwind & Styling
 

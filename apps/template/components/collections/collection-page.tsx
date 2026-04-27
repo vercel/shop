@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { CollectionResultsSection } from "@/components/collections/results";
 import { CollectionStructuredData } from "@/components/collections/structured-data";
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
@@ -33,22 +34,24 @@ export function CollectionDetailPage({
 
   return (
     <FilterTransitionProvider>
-      <Container className="pt-2.5 md:pt-10 pb-10">
-        <CollectionStructuredData
-          locale={locale}
-          handlePromise={handlePromise}
-          collectionPromise={collectionPromise}
-        />
-        <Sections className="gap-5">
-          <Suspense fallback={<CollectionTitleSkeleton />}>
-            <CollectionTitle collectionPromise={collectionPromise} />
-          </Suspense>
-          <CollectionResultsSection
+      <Page className="pt-2.5 md:pt-10">
+        <Container>
+          <CollectionStructuredData
             locale={locale}
-            collectionResultsDataPromise={collectionResultsDataPromise}
+            handlePromise={handlePromise}
+            collectionPromise={collectionPromise}
           />
-        </Sections>
-      </Container>
+          <Sections className="gap-5">
+            <Suspense fallback={<CollectionTitleSkeleton />}>
+              <CollectionTitle collectionPromise={collectionPromise} />
+            </Suspense>
+            <CollectionResultsSection
+              locale={locale}
+              collectionResultsDataPromise={collectionResultsDataPromise}
+            />
+          </Sections>
+        </Container>
+      </Page>
     </FilterTransitionProvider>
   );
 }

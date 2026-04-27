@@ -20,6 +20,7 @@ import {
   getSearchResultsData,
 } from "@/components/search/results";
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
@@ -82,23 +83,25 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   return (
-    <Container className="pt-2.5 md:pt-10 pb-10">
-      <FilterTransitionProvider>
-        <Sections className="gap-5">
-          <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-              <Link href="/search">{t("title")}</Link>
-              <Suspense fallback={null}>
-                <SearchQueryLabel searchParamsPromise={searchParams} />
-              </Suspense>
-            </h1>
-          </div>
-          <Suspense fallback={<ResultsSkeleton />}>
-            <SearchContent locale={locale} searchParamsPromise={searchParams} />
-          </Suspense>
-        </Sections>
-      </FilterTransitionProvider>
-    </Container>
+    <Page className="pt-2.5 md:pt-10">
+      <Container>
+        <FilterTransitionProvider>
+          <Sections className="gap-5">
+            <div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+                <Link href="/search">{t("title")}</Link>
+                <Suspense fallback={null}>
+                  <SearchQueryLabel searchParamsPromise={searchParams} />
+                </Suspense>
+              </h1>
+            </div>
+            <Suspense fallback={<ResultsSkeleton />}>
+              <SearchContent locale={locale} searchParamsPromise={searchParams} />
+            </Suspense>
+          </Sections>
+        </FilterTransitionProvider>
+      </Container>
+    </Page>
   );
 }
 

@@ -4,6 +4,7 @@ import { ProductSchema } from "@/components/product-detail/schema";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Container } from "@/components/ui/container";
+import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
@@ -116,14 +117,16 @@ export async function ProductDetailPage({
   variantIdPromise: Promise<string | undefined>;
 }) {
   return (
-    <Container className="bg-background pt-0 pb-10">
-      <Suspense fallback={<ProductPageFallback />}>
-        <ProductContent
-          productPromise={productPromise}
-          locale={locale}
-          variantIdPromise={variantIdPromise}
-        />
-      </Suspense>
-    </Container>
+    <Page className="pt-0">
+      <Container className="bg-background">
+        <Suspense fallback={<ProductPageFallback />}>
+          <ProductContent
+            productPromise={productPromise}
+            locale={locale}
+            variantIdPromise={variantIdPromise}
+          />
+        </Suspense>
+      </Container>
+    </Page>
   );
 }
