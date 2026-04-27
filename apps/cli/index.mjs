@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import { realpathSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -253,7 +254,9 @@ export async function main({
   return 0;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// process.argv[1] is the bin symlink (e.g. node_modules/.bin/create-vercel-shop),
+// while import.meta.url is the resolved file path — so we realpath argv[1] before comparing.
+if (process.argv[1] && import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href) {
   const exitCode = await main();
   process.exit(exitCode);
 }
