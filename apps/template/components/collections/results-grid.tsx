@@ -1,25 +1,21 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
+import { ProductCard } from "@/components/product-card/product-card";
+import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { loadMoreCollectionProducts } from "@/lib/collections/action";
 import type { CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
 
-const RESULTS_SKELETON_KEYS = Array.from(
-  { length: 15 },
-  (_, index) => `collection-results-skeleton-${index}`,
-);
-
 function Fallback() {
   return (
-    <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-      {RESULTS_SKELETON_KEYS.map((key) => (
-        <ProductCardSkeleton key={key} />
-      ))}
-    </div>
+    <ProductsGridSkeleton
+      count={RESULTS_PER_PAGE}
+      className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+    />
   );
 }
 

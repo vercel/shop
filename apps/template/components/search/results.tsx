@@ -7,7 +7,8 @@ import {
 } from "@/components/collections/filter-pending-context";
 import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
 import { CollectionToolbarSkeleton } from "@/components/collections/toolbar";
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
+import { ProductCard } from "@/components/product-card/product-card";
+import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
 import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
@@ -17,20 +18,14 @@ import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
-const RESULTS_SKELETON_KEYS = Array.from(
-  { length: 15 },
-  (_, index) => `search-results-skeleton-${index}`,
-);
-
 export function ResultsSkeleton() {
   return (
     <>
       <CollectionToolbarSkeleton />
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {RESULTS_SKELETON_KEYS.map((key) => (
-          <ProductCardSkeleton key={key} />
-        ))}
-      </div>
+      <ProductsGridSkeleton
+        count={RESULTS_PER_PAGE}
+        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      />
     </>
   );
 }
@@ -93,11 +88,10 @@ export async function SearchResultsGrid({
   return (
     <Suspense
       fallback={
-        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {RESULTS_SKELETON_KEYS.map((key) => (
-            <ProductCardSkeleton key={key} />
-          ))}
-        </div>
+        <ProductsGridSkeleton
+          count={RESULTS_PER_PAGE}
+          className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        />
       }
     >
       <SearchResultsGridRender

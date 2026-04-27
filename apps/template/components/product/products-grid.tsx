@@ -1,19 +1,42 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
+import { Suspense } from "react";
 
-import { ProductCard } from "@/components/product-card/product-card";
+import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import type { ProductCard as ProductCardType } from "@/lib/types";
+import { getProducts } from "@/lib/shopify/operations/products";
+import { cn } from "@/lib/utils";
 
-interface ProductsGridProps {
+interface ProductsGridSkeletonProps {
+  count: number;
+  className?: string;
+}
+
+export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonProps) {
+  return (
+    <div className={cn("grid grid-cols-2 gap-5 lg:grid-cols-4", className)}>
+      {Array.from({ length: count }, (_, index) => (
+        <ProductCardSkeleton key={index} />
+      ))}
+    </div>
+  );
+}
+
+interface FeaturedProductsProps {
   title: string;
-  products: ProductCardType[];
+  limit: number;
   locale: Locale;
   collectionUrl?: string;
 }
 
-export async function ProductsGrid({ title, products, locale, collectionUrl }: ProductsGridProps) {
+export async function FeaturedProducts({
+  title,
+  limit,
+  locale,
+  collectionUrl,
+}: FeaturedProductsProps) {
   const t = await getTranslations("product");
+
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
@@ -27,16 +50,36 @@ export async function ProductsGrid({ title, products, locale, collectionUrl }: P
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            locale={locale}
-            outOfStockText={t("outOfStock")}
-          />
-        ))}
-      </div>
+      <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
+        <FeaturedProductsGrid limit={limit} locale={locale} outOfStockText={t("outOfStock")} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function FeaturedProductsGrid({
+  limit,
+  locale,
+  outOfStockText,
+}: {
+  limit: number;
+  locale: Locale;
+  outOfStockText: string;
+}) {
+  const { products } = await getProducts({ limit, locale });
+
+  if (products.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          locale={locale}
+          outOfStockText={outOfStockText}
+        />
+      ))}
     </div>
   );
 }

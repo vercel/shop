@@ -5,6 +5,21 @@ declare const messages: {
   "accessibility": {
     "skipToContent": "Skip to content"
   },
+  "account": {
+    "addresses": "Addresses",
+    "addressesDescription": "Manage your saved addresses",
+    "email": "Email",
+    "name": "Name",
+    "noAddresses": "You have no saved addresses yet.",
+    "noOrders": "You have no orders yet.",
+    "order": "Order",
+    "orderDetailPlaceholder": "Order details will appear here once customer operations are connected.",
+    "orders": "Orders",
+    "ordersDescription": "View your order history",
+    "profile": "Profile",
+    "profileDescription": "Your account information",
+    "signOut": "Sign out"
+  },
   "agent": {
     "assistantLabel": "Shopping assistant",
     "clearChat": "Clear chat",
@@ -113,6 +128,9 @@ declare const messages: {
     "error": "Something went wrong",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "goHome": "Go back to the home page",
+    "loginClickHere": "Click here",
+    "loginNotRedirected": "Not redirected?",
+    "loginRedirecting": "Redirecting to sign in...",
     "notFound": "Page Not Found",
     "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "tryAgain": "Try again"
@@ -178,6 +196,8 @@ declare const messages: {
     "setAddress": "Set address",
     "shoppingAddress": "Shipping address",
     "showAllCategory": "Show all {category}",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
     "switchLanguage": "Switch language",
     "toggleAiSearch": "Toggle AI Search",
     "zipCode": "ZIP code"
@@ -311,6 +331,7 @@ declare const messages: {
     "titleSubtext": "Showing results for your search query"
   },
   "seo": {
+    "accountTitle": "Account",
     "collectionFallbackDescription": "Browse collection products.",
     "collectionFallbackTitle": "Collection",
     "collectionsDescription": "Browse all product collections.",
@@ -318,6 +339,7 @@ declare const messages: {
     "defaultDescription": "Shop premium products, curated collections, and latest offers from Vercel Shop.",
     "homeDescription": "Explore featured products, curated collections, and seasonal campaigns.",
     "homeTitle": "Home",
+    "loginTitle": "Sign In",
     "searchDescription": "Search for products in our store",
     "searchDescriptionQuery": "Find products matching \"{query}\"",
     "searchTitle": "Search",
