@@ -1,5 +1,11 @@
 name: Release
 
+# Opens / updates a "chore: release" PR when changesets are queued on main.
+# Uses changesets/action with `commitMode: github-api`, so commits go through
+# the GitHub REST API and are auto-signed by GitHub's signing key. This
+# satisfies the "Commits must have verified signatures" repository rule
+# without any GPG key management or bypass exceptions.
+
 on:
   push:
     branches:
@@ -35,10 +41,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
+        uses: changesets/action@6a0a831ff30acef54f2c6aa1cbbc1096b066edaf # v1.7.0
         with:
           version: pnpm run version
           publish: pnpm run release
+          commit: "chore: release"
+          title: "chore: release"
+          commitMode: github-api
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
