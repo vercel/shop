@@ -2,9 +2,9 @@
 
 This file provides guidance for agents working in the template.
 
-## Expected Project Plugins
+## Recommended Project Plugins
 
-This project expects these project-scoped plugins to be installed:
+These project-scoped plugins are not required to run the template, but they make agent work in this codebase substantially better. If you're working with an agent that supports them, install with:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes
@@ -29,9 +29,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 1. **Every cart mutation MUST call `invalidateCartCache()`** (from `@/lib/cart/server`) or cache goes stale.
 2. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
-4. **Always verify Shopify GraphQL fields against the live schema via `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference`**. Never guess Shopify field names.
-5. **If a template change should be considered for existing storefronts, add a rollout entry in `packages/plugin/template-rollout-log/`**. Do not rely on the template version number alone.
-6. **Every `process.env.X` read in `apps/template/` (or `apps/docs/`) must be listed in `turbo.json` `globalEnv`**. Turbo's strict mode (default in Turbo 2) strips unlisted env vars from the build environment, so missing entries silently turn features off in deployed builds. User-configurable vars also need a row in `apps/template/.env.example` and `apps/docs/content/docs/reference/env-vars.mdx`.
+4. **Always verify Shopify GraphQL fields against the live schema** before adding or changing fields. Use `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference` if available, otherwise consult the Shopify Storefront / Customer Account API docs. Never guess Shopify field names.
+5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
 <!-- BEGIN:vercel-shop-style -->
 
@@ -158,11 +157,9 @@ pnpm format
 Request → Page → Operation → shopifyFetch → Shopify API → Transform → Domain type → Component
 ```
 
-## Storefront Skills
+## Storefront Skills (Optional Plugin)
 
-Storefront skills are provided by the project-scoped `vercel-shop` plugin rather than local repo files.
-
-Common entry points:
+If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" above), agents have access to slash commands that walk through common storefront extensions:
 
 - Shopify GraphQL work: `/vercel-shop:shopify-graphql-reference`
 - Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
@@ -170,6 +167,8 @@ Common entry points:
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
+
+These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
@@ -188,20 +187,10 @@ Key files:
 
 The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
 
-## Template Rollout Log
-
-The `vercel-shop` plugin includes a template rollout log in `packages/plugin/template-rollout-log/` for downstream adoption work.
-
-- Add one append-only markdown entry for each template change that downstream storefronts may want to review or adopt.
-- Keep entries change-scoped. Do not batch unrelated work into one log item.
-- Include what changed, why it matters, when it applies, safe skip cases, and validation steps.
-- Prefer `changeKey`, `introducedOn`, and any bootstrap `scaffoldedAt` metadata over version math when reasoning about rollout order.
-- Treat the log as the source of truth for rollout planning. The template version is only a hint.
-
 ## Shopify GraphQL Workflow
 
-- Use the installed `Shopify/shopify-ai-toolkit` plugin to inspect the live Storefront or Customer Account schema before changing fields.
-- Use `/vercel-shop:shopify-graphql-reference` for template-specific GraphQL conventions: fragments, locale context, caching, transforms, and operation placement.
+- Inspect the live Storefront or Customer Account schema before changing fields. The `Shopify/shopify-ai-toolkit` plugin streamlines this if installed; otherwise the official Shopify GraphQL docs are the source of truth.
+- Use `/vercel-shop:shopify-graphql-reference` (if the plugin is installed) for template-specific GraphQL conventions: fragments, locale context, caching, transforms, and operation placement.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns
