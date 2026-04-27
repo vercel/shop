@@ -132,26 +132,6 @@
     "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "tryAgain": "Try again"
   },
-  "content": {
-    "homepage": {
-      "featuredCollection": {
-        "title": "From {collectionTitle}"
-      },
-      "featuredProducts": {
-        "title": "Featured Products"
-      },
-      "hero": {
-        "ctaText": "Browse the catalog",
-        "headline": "Start selling with {storeName}",
-        "subheadline": "A clean Shopify storefront you can shape as you go."
-      },
-      "intro": {
-        "paragraphOne": "This homepage is intentionally defined in code so a new store never starts from a blank CMS.",
-        "paragraphTwo": "Swap the content system later or keep editing the local structure as your storefront evolves.",
-        "title": "Built to launch first, customize later"
-      }
-    }
-  },
   "footer": {
     "copyright": "© {year} Vercel Shop. All rights reserved."
   },
