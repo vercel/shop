@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import { getProducts } from "@/lib/shopify/operations/products";
+import { getCatalogProducts } from "@/lib/shopify/operations/products";
 import { cn } from "@/lib/utils";
 
 interface ProductsGridSkeletonProps {
@@ -66,7 +66,7 @@ async function FeaturedProductsGrid({
   locale: Locale;
   outOfStockText: string;
 }) {
-  const { products } = await getProducts({ limit, locale });
+  const { products } = await getCatalogProducts({ limit, locale });
 
   if (products.length === 0) return null;
 

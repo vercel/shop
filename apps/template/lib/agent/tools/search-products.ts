@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getProducts } from "@/lib/shopify/operations/products";
+import { searchIndexProducts } from "@/lib/shopify/operations/products";
 
 import { getAgentContext } from "../server";
 
@@ -21,7 +21,7 @@ Returns a list of matching products with titles, prices, and availability.`,
       const { user } = getAgentContext();
 
       try {
-        const { products, total } = await getProducts({
+        const { products, total } = await searchIndexProducts({
           query,
           sortKey,
           limit,

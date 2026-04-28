@@ -167,7 +167,7 @@ async function SearchToolbar({
   searchResultsDataPromise: Promise<SearchResultsData>;
   filtersLabel: string;
 }) {
-  const data = await searchResultsDataPromise;
+  const [data, t] = await Promise.all([searchResultsDataPromise, getTranslations("search")]);
 
   const activeFilterCount = Object.values(data.activeFilters).reduce((count, v) => {
     if (!v) return count;
@@ -176,6 +176,7 @@ async function SearchToolbar({
 
   return (
     <CollectionToolbar
+      resultCount={data.total > 0 ? t("resultCount", { count: data.total }) : undefined}
       filterSheet={
         <FilterSidebarSheet
           label={filtersLabel}

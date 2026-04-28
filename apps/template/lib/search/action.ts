@@ -1,6 +1,6 @@
 "use server";
 
-import { getProducts } from "@/lib/shopify/operations/products";
+import { getCatalogProducts } from "@/lib/shopify/operations/products";
 import { predictiveSearch } from "@/lib/shopify/operations/search";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, PredictiveSearchResult, ProductCard } from "@/lib/types";
@@ -23,8 +23,8 @@ export async function loadMoreSearchProducts(params: {
   sortKey?: string;
   filters?: ProductFilter[];
   locale: string;
-}): Promise<{ products: ProductCard[]; pageInfo: PageInfo; total: number }> {
-  const result = await getProducts({
+}): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
+  const result = await getCatalogProducts({
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,
@@ -36,6 +36,5 @@ export async function loadMoreSearchProducts(params: {
   return {
     products: result.products,
     pageInfo: result.pageInfo,
-    total: result.total,
   };
 }
