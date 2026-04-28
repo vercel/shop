@@ -2,326 +2,326 @@
 // See: https://next-intl.dev/docs/workflows/typescript#messages-arguments
 
 declare const messages: {
-  accessibility: {
-    skipToContent: "Skip to content";
-  };
-  account: {
-    addresses: "Addresses";
-    addressesDescription: "Manage your saved addresses";
-    email: "Email";
-    name: "Name";
-    noAddresses: "You have no saved addresses yet.";
-    noOrders: "You have no orders yet.";
-    order: "Order";
-    orderDetailPlaceholder: "Order details will appear here once customer operations are connected.";
-    orders: "Orders";
-    ordersDescription: "View your order history";
-    profile: "Profile";
-    profileDescription: "Your account information";
-    signOut: "Sign out";
-  };
-  agent: {
-    assistantLabel: "Shopping assistant";
-    clearChat: "Clear chat";
-    copy: "Copy";
-    dropFiles: "Drop files here";
-    greeting: "Hi, how can I help?";
-    minimizeAssistant: "Minimize assistant";
-    name: "Agent";
-    openAssistant: "Open shopping assistant";
-    retry: "Retry";
-    title: "";
-  };
-  cart: {
-    addedToCart: "Added to cart";
-    addToCart: "Add to Cart";
-    adding: "Adding...";
-    addressPlaceholder: "Address will be added at checkout";
-    cartItemsLabel: "Cart items";
-    cartTotalIs: "Cart total is";
-    checkout: "Checkout";
-    completeCheckout: "Go to Checkout";
-    continueShopping: "Continue Shopping";
-    decreaseQuantity: "Decrease quantity";
-    delivery: {
-      express: "Delivery in 2-3 business days";
-      overnight: "Delivery next business day";
-      standard: "Delivery in 5-7 business days";
-    };
-    empty: "Your cart is empty";
-    emptyDescription: "Looks like you haven't added anything yet. Let's explore our products and find something great!";
-    estimatedTax: "Estimated Tax";
-    estimatedTotal: "Estimated total";
-    expressShipping: "Express Shipping";
-    increaseQuantity: "Increase quantity";
-    isThisAGift: "Is this a gift?";
-    itemCount: "{count, plural, one {# item} other {# items}}";
-    itemQuantity: "Item quantity";
-    items: "Items";
-    moreInfo: "More information";
-    orderTotal: "Order total";
-    overnightShipping: "Overnight Shipping";
-    proceedToCheckout: "Proceed to Checkout";
-    redirecting: "Redirecting...";
-    removeItem: "Remove item";
-    reviewCartDescription: "Review your cart items and proceed to checkout";
-    shipping: "Shipping";
-    shippingAndHandling: "Shipping & Handling";
-    shippingCalculatedAtCheckout: "Calculated at checkout";
-    shippingMethod: "Shipping Method";
-    shoppingAddress: "Shipping address";
-    shoppingBagTitle: "Shopping Bag";
-    shoppingCart: "Cart";
-    standardShipping: "Standard Shipping";
-    startAdding: "Start adding items to your cart";
-    subtotal: "Subtotal";
-    taxesAndShippingNote: "Taxes and shipping calculated at checkout.";
-    title: "Cart";
-    total: "Total";
-    updatingCart: "Updating cart...";
-    upsell: {
-      description: "Complete your order with these complementary products";
-      title: "You might also like";
-    };
-    viewFullCart: "View full cart";
-  };
-  category: {
-    activeFilters: "Active Filters";
-    apply: "Apply";
-    brand: "Brand";
-    browseAll: "Browse all products in this category";
-    categories: "Categories";
-    clear: "Clear";
-    clearFilters: "Clear all";
-    color: "Color";
-    filters: "Filter";
-    firstPage: "First";
-    material: "Material";
-    max: "Max";
-    min: "Min";
-    nextPage: "Next";
-    noProducts: "No products found in this category";
-    pages: "pages";
-    price: "Price";
-    productCount: "{count, plural, one {# product} other {# products}}";
-    size: "Size";
-    sortBy: "Sort";
-    sortNewest: "Newest";
-    sortPriceHigh: "Price: High to Low";
-    sortPriceLow: "Price: Low to High";
-    sortRelevance: "Relevance";
-    subcategory: "Subcategory";
-    totalResults: "{count, plural, one {# product} other {# products}}";
-    type: "Type";
-  };
-  collections: {
-    breadcrumb: {
-      collections: "Collections";
-      home: "Home";
-    };
-    description: "Browse products by collection.";
-    title: "Collections";
-    viewCollection: "View this collection";
-  };
-  common: {
-    continueShopping: "Continue Shopping";
-    error: "Something went wrong";
-    errorDesc: "An unexpected error occurred. Please try again.";
-    goHome: "Go back to the home page";
-    loginClickHere: "Click here";
-    loginNotRedirected: "Not redirected?";
-    loginRedirecting: "Redirecting to sign in...";
-    notFound: "Page Not Found";
-    notFoundDesc: "The link may be incorrect, or the page has been removed.";
-    tryAgain: "Try again";
-  };
-  footer: {
-    copyright: "© {year} Vercel Shop. All rights reserved.";
-  };
-  home: {
-    title: "Enterprise Commerce Template";
-    viewAllProducts: "See All Products";
-    viewSampleProduct: "View Sample Product";
-  };
-  nav: {
-    account: "Account";
-    addNew: "Add new";
-    addressSubtitle: "Changing your address might affect results and delivery times";
-    aiSearch: "AI Search";
-    cart: "Cart";
-    changeAddress: "Change";
-    city: "City";
-    collapseCategory: "Collapse";
-    country: "Country";
-    deliverTo: "Deliver to";
-    expandCategory: "Expand";
-    manageAddressBook: "Manage address book";
-    menu: "Menu";
-    predictiveSearch: {
-      collections: "Collections";
-      noResults: 'No results for "{query}"';
-      products: "Products";
-      suggestions: "Suggestions";
-      viewAll: 'View all results for "{query}"';
-      viewAllShort: "View All";
-    };
-    saveAddress: "Save";
-    search: "Search";
-    searchClear: "Clear";
-    searchPlaceholder: "Search products";
-    searchPlaceholderAi: "AI-Powered Search";
-    seeAll: "See All";
-    setAddress: "Set address";
-    shoppingAddress: "Shipping address";
-    showAllCategory: "Show all {category}";
-    signIn: "Sign in";
-    signOut: "Sign out";
-    switchLanguage: "Switch language";
-    toggleAiSearch: "Toggle AI Search";
-    zipCode: "ZIP code";
-  };
-  product: {
-    aboutThisItem: "Description";
-    addedToCart: "✓ Added to Cart!";
-    addingQuantity: "Adding {quantity}...";
-    addingToCart: "Adding to Cart...";
-    addToCart: "Add to Cart";
-    brand: "Brand";
-    breadcrumb: {
-      home: "Home";
-      toggleMenu: "Toggle menu";
-    };
-    buyNow: "Buy now";
-    buyWithShop: "Buy with";
-    color: "Color";
-    decreaseQuantity: "Decrease quantity";
-    details: {
-      avoidSun: "Avoid prolonged exposure to direct sunlight";
-      brand: "Brand";
-      careTitle: "Care Instructions";
-      exchanges: "Exchanges";
-      exchangesDesc: "Need a different size or color? We'll process your exchange for free within 30 days.";
-      hangFold: "Hang or fold to store";
-      ironMedium: "Iron on medium heat if needed";
-      ironingStorage: "Ironing & Storage";
-      materials: {
-        belt: "Belt loops at waist";
-        closure: "Zip fly with button closure";
-        fabric: "Premium washed cotton twill fabric";
-        fit: "Slim fit through hip and thigh";
-        pockets: "Classic five-pocket styling";
-      };
-      materialsTitle: "Materials & Features";
-      modelDesc: 'Model is 6\'1" and wearing size 32 with a 30" inseam';
-      modelMeasurements: "Model Measurements";
-      noBleach: "Do not bleach";
-      professional: "Professional Care";
-      professionalDesc: "Dry cleaning is optional but recommended for best results and longevity.";
-      returns: "Returns";
-      returnsDesc: "We offer free returns within 30 days of purchase. Items must be unworn, unwashed, and in original condition with tags attached.";
-      shipping: "Shipping";
-      shippingExpress: "Express shipping: 1-2 business days";
-      shippingFree: "Free standard shipping on orders over $100";
-      shippingIntl: "International shipping available";
-      shippingStandard: "Standard delivery: 3-5 business days";
-      shippingTitle: "Shipping & Returns";
-      sizeFit: "Fit";
-      sizeFitDesc: "Slim fit - sits at waist, slim through hip and thigh";
-      sizeGuide: "Size Guide";
-      sizeTableInseam: "Inseam (in)";
-      sizeTableSize: "Size";
-      sizeTableWaist: "Waist (in)";
-      sizeTitle: "Size & Fit";
-      title: "Product Details";
-      tumbleDry: "Tumble dry low";
-      washCold: "Machine wash cold with like colors";
-      washGentle: "Use gentle cycle";
-      washing: "Washing";
-    };
-    featuredBadge: "Assistant's pick";
-    freeShipping: "FREE";
-    goToImage: "Go to image {number}";
-    inCart: "You have {quantity} {quantity, plural, one {item} other {items}} in your cart";
-    increaseQuantity: "Increase quantity";
-    inStock: "In Stock";
-    manageAddressBook: "Manage address book";
-    noImage: "No image";
-    officialStore: "Official Store";
-    outOfStock: "Out of Stock";
-    quantity: "Quantity";
-    recommendations: "You May Also Like";
-    seeAllSpecs: "See all specs";
-    selectVariant: "Please select a variant";
-    selectVariantLabel: "Select {name}: {value}";
-    sku: "SKU";
-    stockLeft: "({stock} left)";
-    viewAll: "View All";
-    viewImage: "View image {current} of {total}";
-    visitStore: "Visit the store";
-  };
-  search: {
-    allCategories: "All Collections";
-    breadcrumb: {
-      home: "Home";
-      search: "Search";
-      searchQuery: 'Search: "{query}"';
-    };
-    category: "Collection";
-    clearFilters: "Clear all filters";
-    filter: "Filter";
-    filters: "Filters";
-    forQuery: ' for "{query}"';
-    loadingMore: "Loading more products...";
-    noResults: "No products found";
-    noResultsAvailable: "No products available";
-    noResultsQuery: 'We couldn\'t find any products matching "{query}"';
-    pagination: {
-      first: "First";
-      firstPage: "First page";
-      goToPage: "Page {page}";
-      lastPage: "Last page";
-      next: "Next";
-      nextPage: "Next page";
-      previousPage: "Previous page";
-      resultsPerPage: "Showing {startResult}-{endResult} of {totalResults} products";
-      shown: "({count} shown)";
-      totalResults: "{totalResults} products";
-    };
-    priceUpTo: "up to";
-    reset: "Reset";
-    resultCount: "{count, plural, one {# Item} other {# Items}}";
-    resultRange: "(showing {start}-{end})";
-    results: "Results";
-    selectCategory: "Select collection";
-    selectSort: "Select sort order";
-    sort: {
-      bestMatches: "Best Matches";
-      bestSelling: "Best Selling";
-      dateNewToOld: "Date: New to Old";
-      dateOldToNew: "Date: Old to New";
-      nameAscending: "Name: A-Z";
-      nameDescending: "Name: Z-A";
-      priceHighToLow: "Price: High to Low";
-      priceLowToHigh: "Price: Low to High";
-    };
-    sortBy: "Sort";
-    title: "Search";
-    titleSubtext: "Showing results for your search query";
-  };
-  seo: {
-    accountTitle: "Account";
-    collectionFallbackDescription: "Browse collection products.";
-    collectionFallbackTitle: "Collection";
-    collectionsDescription: "Browse all product collections.";
-    collectionsTitle: "Collections";
-    defaultDescription: "Shop premium products, curated collections, and latest offers from Vercel Shop.";
-    homeDescription: "Explore featured products, curated collections, and seasonal campaigns.";
-    homeTitle: "Home";
-    loginTitle: "Sign In";
-    searchDescription: "Search for products in our store";
-    searchDescriptionQuery: 'Find products matching "{query}"';
-    searchTitle: "Search";
-    searchTitleQuery: 'Search results for "{query}"';
-  };
+  "accessibility": {
+    "skipToContent": "Skip to content"
+  },
+  "account": {
+    "addresses": "Addresses",
+    "addressesDescription": "Manage your saved addresses",
+    "email": "Email",
+    "name": "Name",
+    "noAddresses": "You have no saved addresses yet.",
+    "noOrders": "You have no orders yet.",
+    "order": "Order",
+    "orderDetailPlaceholder": "Order details will appear here once customer operations are connected.",
+    "orders": "Orders",
+    "ordersDescription": "View your order history",
+    "profile": "Profile",
+    "profileDescription": "Your account information",
+    "signOut": "Sign out"
+  },
+  "agent": {
+    "assistantLabel": "Shopping assistant",
+    "clearChat": "Clear chat",
+    "copy": "Copy",
+    "dropFiles": "Drop files here",
+    "greeting": "Hi, how can I help?",
+    "minimizeAssistant": "Minimize assistant",
+    "name": "Agent",
+    "openAssistant": "Open shopping assistant",
+    "retry": "Retry",
+    "title": ""
+  },
+  "cart": {
+    "addedToCart": "Added to cart",
+    "addToCart": "Add to Cart",
+    "adding": "Adding...",
+    "addressPlaceholder": "Address will be added at checkout",
+    "cartItemsLabel": "Cart items",
+    "cartTotalIs": "Cart total is",
+    "checkout": "Checkout",
+    "completeCheckout": "Go to Checkout",
+    "continueShopping": "Continue Shopping",
+    "decreaseQuantity": "Decrease quantity",
+    "delivery": {
+      "express": "Delivery in 2-3 business days",
+      "overnight": "Delivery next business day",
+      "standard": "Delivery in 5-7 business days"
+    },
+    "empty": "Your cart is empty",
+    "emptyDescription": "Looks like you haven't added anything yet. Let's explore our products and find something great!",
+    "estimatedTax": "Estimated Tax",
+    "estimatedTotal": "Estimated total",
+    "expressShipping": "Express Shipping",
+    "increaseQuantity": "Increase quantity",
+    "isThisAGift": "Is this a gift?",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "itemQuantity": "Item quantity",
+    "items": "Items",
+    "moreInfo": "More information",
+    "orderTotal": "Order total",
+    "overnightShipping": "Overnight Shipping",
+    "proceedToCheckout": "Proceed to Checkout",
+    "redirecting": "Redirecting...",
+    "removeItem": "Remove item",
+    "reviewCartDescription": "Review your cart items and proceed to checkout",
+    "shipping": "Shipping",
+    "shippingAndHandling": "Shipping & Handling",
+    "shippingCalculatedAtCheckout": "Calculated at checkout",
+    "shippingMethod": "Shipping Method",
+    "shoppingAddress": "Shipping address",
+    "shoppingBagTitle": "Shopping Bag",
+    "shoppingCart": "Cart",
+    "standardShipping": "Standard Shipping",
+    "startAdding": "Start adding items to your cart",
+    "subtotal": "Subtotal",
+    "taxesAndShippingNote": "Taxes and shipping calculated at checkout.",
+    "title": "Cart",
+    "total": "Total",
+    "updatingCart": "Updating cart...",
+    "upsell": {
+      "description": "Complete your order with these complementary products",
+      "title": "You might also like"
+    },
+    "viewFullCart": "View full cart"
+  },
+  "category": {
+    "activeFilters": "Active Filters",
+    "apply": "Apply",
+    "brand": "Brand",
+    "browseAll": "Browse all products in this category",
+    "categories": "Categories",
+    "clear": "Clear",
+    "clearFilters": "Clear all",
+    "color": "Color",
+    "filters": "Filter",
+    "firstPage": "First",
+    "material": "Material",
+    "max": "Max",
+    "min": "Min",
+    "nextPage": "Next",
+    "noProducts": "No products found in this category",
+    "pages": "pages",
+    "price": "Price",
+    "productCount": "{count, plural, one {# product} other {# products}}",
+    "size": "Size",
+    "sortBy": "Sort",
+    "sortNewest": "Newest",
+    "sortPriceHigh": "Price: High to Low",
+    "sortPriceLow": "Price: Low to High",
+    "sortRelevance": "Relevance",
+    "subcategory": "Subcategory",
+    "totalResults": "{count, plural, one {# product} other {# products}}",
+    "type": "Type"
+  },
+  "collections": {
+    "breadcrumb": {
+      "collections": "Collections",
+      "home": "Home"
+    },
+    "description": "Browse products by collection.",
+    "title": "Collections",
+    "viewCollection": "View this collection"
+  },
+  "common": {
+    "continueShopping": "Continue Shopping",
+    "error": "Something went wrong",
+    "errorDesc": "An unexpected error occurred. Please try again.",
+    "goHome": "Go back to the home page",
+    "loginClickHere": "Click here",
+    "loginNotRedirected": "Not redirected?",
+    "loginRedirecting": "Redirecting to sign in...",
+    "notFound": "Page Not Found",
+    "notFoundDesc": "The link may be incorrect, or the page has been removed.",
+    "tryAgain": "Try again"
+  },
+  "footer": {
+    "copyright": "© {year} Vercel Shop. All rights reserved."
+  },
+  "home": {
+    "title": "Enterprise Commerce Template",
+    "viewAllProducts": "See All Products",
+    "viewSampleProduct": "View Sample Product"
+  },
+  "nav": {
+    "account": "Account",
+    "addNew": "Add new",
+    "addressSubtitle": "Changing your address might affect results and delivery times",
+    "aiSearch": "AI Search",
+    "cart": "Cart",
+    "changeAddress": "Change",
+    "city": "City",
+    "collapseCategory": "Collapse",
+    "country": "Country",
+    "deliverTo": "Deliver to",
+    "expandCategory": "Expand",
+    "manageAddressBook": "Manage address book",
+    "menu": "Menu",
+    "predictiveSearch": {
+      "collections": "Collections",
+      "noResults": "No results for \"{query}\"",
+      "products": "Products",
+      "suggestions": "Suggestions",
+      "viewAll": "View all results for \"{query}\"",
+      "viewAllShort": "View All"
+    },
+    "saveAddress": "Save",
+    "search": "Search",
+    "searchClear": "Clear",
+    "searchPlaceholder": "Search products",
+    "searchPlaceholderAi": "AI-Powered Search",
+    "seeAll": "See All",
+    "setAddress": "Set address",
+    "shoppingAddress": "Shipping address",
+    "showAllCategory": "Show all {category}",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "switchLanguage": "Switch language",
+    "toggleAiSearch": "Toggle AI Search",
+    "zipCode": "ZIP code"
+  },
+  "product": {
+    "aboutThisItem": "Description",
+    "addedToCart": "✓ Added to Cart!",
+    "addingQuantity": "Adding {quantity}...",
+    "addingToCart": "Adding to Cart...",
+    "addToCart": "Add to Cart",
+    "brand": "Brand",
+    "breadcrumb": {
+      "home": "Home",
+      "toggleMenu": "Toggle menu"
+    },
+    "buyNow": "Buy now",
+    "buyWithShop": "Buy with",
+    "color": "Color",
+    "decreaseQuantity": "Decrease quantity",
+    "details": {
+      "avoidSun": "Avoid prolonged exposure to direct sunlight",
+      "brand": "Brand",
+      "careTitle": "Care Instructions",
+      "exchanges": "Exchanges",
+      "exchangesDesc": "Need a different size or color? We'll process your exchange for free within 30 days.",
+      "hangFold": "Hang or fold to store",
+      "ironMedium": "Iron on medium heat if needed",
+      "ironingStorage": "Ironing & Storage",
+      "materials": {
+        "belt": "Belt loops at waist",
+        "closure": "Zip fly with button closure",
+        "fabric": "Premium washed cotton twill fabric",
+        "fit": "Slim fit through hip and thigh",
+        "pockets": "Classic five-pocket styling"
+      },
+      "materialsTitle": "Materials & Features",
+      "modelDesc": "Model is 6'1\" and wearing size 32 with a 30\" inseam",
+      "modelMeasurements": "Model Measurements",
+      "noBleach": "Do not bleach",
+      "professional": "Professional Care",
+      "professionalDesc": "Dry cleaning is optional but recommended for best results and longevity.",
+      "returns": "Returns",
+      "returnsDesc": "We offer free returns within 30 days of purchase. Items must be unworn, unwashed, and in original condition with tags attached.",
+      "shipping": "Shipping",
+      "shippingExpress": "Express shipping: 1-2 business days",
+      "shippingFree": "Free standard shipping on orders over $100",
+      "shippingIntl": "International shipping available",
+      "shippingStandard": "Standard delivery: 3-5 business days",
+      "shippingTitle": "Shipping & Returns",
+      "sizeFit": "Fit",
+      "sizeFitDesc": "Slim fit - sits at waist, slim through hip and thigh",
+      "sizeGuide": "Size Guide",
+      "sizeTableInseam": "Inseam (in)",
+      "sizeTableSize": "Size",
+      "sizeTableWaist": "Waist (in)",
+      "sizeTitle": "Size & Fit",
+      "title": "Product Details",
+      "tumbleDry": "Tumble dry low",
+      "washCold": "Machine wash cold with like colors",
+      "washGentle": "Use gentle cycle",
+      "washing": "Washing"
+    },
+    "featuredBadge": "Assistant's pick",
+    "freeShipping": "FREE",
+    "goToImage": "Go to image {number}",
+    "inCart": "You have {quantity} {quantity, plural, one {item} other {items}} in your cart",
+    "increaseQuantity": "Increase quantity",
+    "inStock": "In Stock",
+    "manageAddressBook": "Manage address book",
+    "noImage": "No image",
+    "officialStore": "Official Store",
+    "outOfStock": "Out of Stock",
+    "quantity": "Quantity",
+    "recommendations": "You May Also Like",
+    "seeAllSpecs": "See all specs",
+    "selectVariant": "Please select a variant",
+    "selectVariantLabel": "Select {name}: {value}",
+    "sku": "SKU",
+    "stockLeft": "({stock} left)",
+    "viewAll": "View All",
+    "viewImage": "View image {current} of {total}",
+    "visitStore": "Visit the store"
+  },
+  "search": {
+    "allCategories": "All Collections",
+    "breadcrumb": {
+      "home": "Home",
+      "search": "Search",
+      "searchQuery": "Search: \"{query}\""
+    },
+    "category": "Collection",
+    "clearFilters": "Clear all filters",
+    "filter": "Filter",
+    "filters": "Filters",
+    "forQuery": " for \"{query}\"",
+    "loadingMore": "Loading more products...",
+    "noResults": "No products found",
+    "noResultsAvailable": "No products available",
+    "noResultsQuery": "We couldn't find any products matching \"{query}\"",
+    "pagination": {
+      "first": "First",
+      "firstPage": "First page",
+      "goToPage": "Page {page}",
+      "lastPage": "Last page",
+      "next": "Next",
+      "nextPage": "Next page",
+      "previousPage": "Previous page",
+      "resultsPerPage": "Showing {startResult}-{endResult} of {totalResults} products",
+      "shown": "({count} shown)",
+      "totalResults": "{totalResults} products"
+    },
+    "priceUpTo": "up to",
+    "reset": "Reset",
+    "resultCount": "{count, plural, one {# Item} other {# Items}}",
+    "resultRange": "(showing {start}-{end})",
+    "results": "Results",
+    "selectCategory": "Select collection",
+    "selectSort": "Select sort order",
+    "sort": {
+      "bestMatches": "Best Matches",
+      "bestSelling": "Best Selling",
+      "dateNewToOld": "Date: New to Old",
+      "dateOldToNew": "Date: Old to New",
+      "nameAscending": "Name: A-Z",
+      "nameDescending": "Name: Z-A",
+      "priceHighToLow": "Price: High to Low",
+      "priceLowToHigh": "Price: Low to High"
+    },
+    "sortBy": "Sort",
+    "title": "Search",
+    "titleSubtext": "Showing results for your search query"
+  },
+  "seo": {
+    "accountTitle": "Account",
+    "collectionFallbackDescription": "Browse collection products.",
+    "collectionFallbackTitle": "Collection",
+    "collectionsDescription": "Browse all product collections.",
+    "collectionsTitle": "Collections",
+    "defaultDescription": "Shop premium products, curated collections, and latest offers from Vercel Shop.",
+    "homeDescription": "Explore featured products, curated collections, and seasonal campaigns.",
+    "homeTitle": "Home",
+    "loginTitle": "Sign In",
+    "searchDescription": "Search for products in our store",
+    "searchDescriptionQuery": "Find products matching \"{query}\"",
+    "searchTitle": "Search",
+    "searchTitleQuery": "Search results for \"{query}\""
+  }
 };
 export default messages;

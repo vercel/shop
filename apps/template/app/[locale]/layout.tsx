@@ -2,7 +2,7 @@ import "../globals.css";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
@@ -28,11 +28,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
-});
-
 export const generateStaticParams = async () => {
   return locales.map((locale) => ({ locale }));
 };
@@ -48,7 +43,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
     <html lang={locale}>
       <head />
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} flex min-h-dvh flex-col font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >
         <a
           href="#main-content"
