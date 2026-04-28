@@ -345,9 +345,10 @@ export async function getCatalogProducts(params: {
   const catalogQuery = buildCatalogQuery({ query, collection, filters });
 
   // RELEVANCE only orders results meaningfully when there's a query string;
-  // fall back to TITLE for plain catalog browse.
+  // fall back to BEST_SELLING for plain catalog browse so the landing order
+  // matches typical storefront expectations.
   const sortKey =
-    sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "TITLE" : sortConfig.sortKey;
+    sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "BEST_SELLING" : sortConfig.sortKey;
 
   const data = await shopifyFetch<{
     products: {
