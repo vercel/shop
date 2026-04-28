@@ -6,7 +6,6 @@ import {
   ProductGridPendingOverlay,
 } from "@/components/collections/filter-pending-context";
 import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
-import { CollectionToolbarSkeleton } from "@/components/collections/toolbar";
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import type { Locale } from "@/lib/i18n";
@@ -21,18 +20,6 @@ import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
-
-export function ResultsSkeleton() {
-  return (
-    <>
-      <CollectionToolbarSkeleton />
-      <ProductsGridSkeleton
-        count={RESULTS_PER_PAGE}
-        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      />
-    </>
-  );
-}
 
 export interface SearchResultsData {
   products: ProductCardType[];

@@ -47,6 +47,7 @@ export function CollectionDetailPage({
             </Suspense>
             <CollectionResultsSection
               locale={locale}
+              searchStatePromise={searchStatePromise}
               collectionResultsDataPromise={collectionResultsDataPromise}
             />
           </Sections>

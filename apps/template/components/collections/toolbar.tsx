@@ -1,10 +1,11 @@
 import type * as React from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
-
 interface CollectionToolbarProps {
   filterSheet: React.ReactNode;
   sortSelect: React.ReactNode;
+  // Pass JSX (e.g. a Suspense'd count) on pages that surface a result count.
+  // Pages without a count (collections) should omit this prop entirely so the
+  // slot doesn't reserve space.
   resultCount?: React.ReactNode;
 }
 
@@ -16,23 +17,13 @@ export function CollectionToolbar({
   return (
     <div className="flex items-center gap-5">
       {filterSheet}
-      <div className="flex items-center gap-5 ml-auto">
-        {resultCount && (
-          <span className="text-sm text-muted-foreground hidden sm:inline">{resultCount}</span>
+      <div className="ml-auto flex items-center gap-5">
+        {resultCount !== undefined && (
+          <div className="hidden items-center text-sm text-muted-foreground sm:flex">
+            {resultCount}
+          </div>
         )}
         {sortSelect}
-      </div>
-    </div>
-  );
-}
-
-export function CollectionToolbarSkeleton() {
-  return (
-    <div className="flex items-center gap-5">
-      <Skeleton className="h-9 w-24" />
-      <div className="flex items-center gap-5 ml-auto">
-        <Skeleton className="h-4 w-32 hidden sm:block" />
-        <Skeleton className="h-5 w-24" />
       </div>
     </div>
   );
