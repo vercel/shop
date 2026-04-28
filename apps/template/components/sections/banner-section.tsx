@@ -8,9 +8,16 @@ import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
   hero: BannerSectionType;
+  /**
+   * Heading level for the banner headline. Use "h1" for the page's primary
+   * banner and "h2" for any secondary banners further down the page so the
+   * document outline stays correct. Visual size is unchanged either way.
+   */
+  headingLevel?: "h1" | "h2";
 }
 
-export function BannerSection({ hero }: BannerSectionProps) {
+export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps) {
+  const Heading = headingLevel;
   const image = hero.backgroundImage ?? heroDefault;
   const isStatic = typeof image === "object" && "src" in image;
 
@@ -51,9 +58,9 @@ export function BannerSection({ hero }: BannerSectionProps) {
 
         <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-5 lg:px-10 lg:py-10">
           <div className="flex flex-col items-center text-center gap-2.5">
-            <h1 className="text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
+            <Heading className="text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
               {hero.headline}
-            </h1>
+            </Heading>
             {hero.subheadline && (
               <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
             )}
