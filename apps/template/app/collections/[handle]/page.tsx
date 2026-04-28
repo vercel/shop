@@ -5,7 +5,12 @@ import { notFound } from "next/navigation";
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollection } from "@/lib/shopify/operations/collections";
+import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
+
+export async function generateStaticParams() {
+  const collections = await getCollections();
+  return collections.map((collection) => ({ handle: collection.handle }));
+}
 
 export async function generateMetadata({
   params,

@@ -143,7 +143,6 @@ function CollectionHeaderFallback() {
   return (
     <div>
       <Skeleton className="h-9 w-72 sm:h-10 md:h-12" />
-      <Skeleton className="mt-1 h-6 w-96 max-w-full" />
     </div>
   );
 }
