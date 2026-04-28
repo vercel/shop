@@ -38,10 +38,18 @@ export default async function HomePage() {
     <Page className="pt-0">
       <Sections>
         <BannerSection
+          as="h1"
           hero={{
-            id: "homepage-hero",
-            headline: "Agentic Infrastructure for Commerce",
-            subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
+            id: "homepage-outdoor",
+            headline: "The Outdoor Edit",
+            subheadline:
+              "Durable, stylish pieces built for backyard parties, patio dinners, and every long evening in between.",
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/a60299db-53b9-433c-8ed8-1536b094bdee-1-eZIhPYkLEQmYZi0Wfy4znewVcLR3CP_4483df00-a8e6-409b-ad89-0765b64918d6.png?v=1776523442",
+              alt: "Outdoor lifestyle scene",
+              width: 1456,
+              height: 819,
+            },
             ctaText: "Browse the Catalog",
             ctaLink: "/search",
           }}
@@ -55,6 +63,23 @@ export default async function HomePage() {
             collectionUrl="/search"
           />
         </Container>
+
+        <BannerSection
+          as="h2"
+          hero={{
+            id: "homepage-rugs",
+            headline: "Eye-catching Interior Rugs",
+            subheadline: null,
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/dc554ad4-3d74-4086-9b09-7e1528a3b35b-2-31jjQuqcdERUaPJTgelJxrAbb9Gr3K.png?v=1776523438",
+              alt: "Patterned interior rug detail",
+              width: 1456,
+              height: 819,
+            },
+            ctaText: "Shop Now",
+            ctaLink: "/search?q=rugs",
+          }}
+        />
       </Sections>
     </Page>
   );

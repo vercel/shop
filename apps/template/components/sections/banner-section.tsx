@@ -8,9 +8,11 @@ import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
   hero: BannerSectionType;
+  as?: "h1" | "h2";
 }
 
-export function BannerSection({ hero }: BannerSectionProps) {
+export function BannerSection({ hero, as = "h1" }: BannerSectionProps) {
+  const Heading = as;
   const image = hero.backgroundImage ?? heroDefault;
   const isStatic = typeof image === "object" && "src" in image;
 
@@ -51,9 +53,9 @@ export function BannerSection({ hero }: BannerSectionProps) {
 
         <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-5 lg:px-10 lg:py-10">
           <div className="flex flex-col items-center text-center gap-2.5">
-            <h1 className="font-display text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
+            <Heading className="font-display text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
               {hero.headline}
-            </h1>
+            </Heading>
             {hero.subheadline && (
               <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
             )}
