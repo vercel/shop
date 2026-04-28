@@ -116,7 +116,9 @@ export async function ProductDetailSection({
 
       <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
         <div data-slot="product-info-header">
-          <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
+          <h1 className="font-display font-semibold text-foreground tracking-tight text-3xl">
+            {title}
+          </h1>
           {uniformPrice ? (
             variants[0] && (
               <ProductPrice

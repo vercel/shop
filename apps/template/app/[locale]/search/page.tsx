@@ -92,7 +92,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/[locale]/
         <FilterTransitionProvider>
           <Sections className="gap-5">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
                 <Link href="/search">{t("title")}</Link>
                 <Suspense fallback={null}>
                   <SearchQueryLabel searchParamsPromise={searchParams} />

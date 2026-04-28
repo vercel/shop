@@ -40,7 +40,9 @@ export async function FeaturedProducts({
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
+        <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">
+          {title}
+        </h2>
         {collectionUrl && (
           <Link
             href={collectionUrl}
