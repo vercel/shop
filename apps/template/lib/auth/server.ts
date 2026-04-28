@@ -9,6 +9,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
+import { getLocale } from "@/lib/params";
+
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
@@ -173,13 +175,13 @@ export const getSession = cache(async (): Promise<FullSession | null> => {
 
 export async function requireCustomerSession(): Promise<CustomerSession> {
   const session = await getCustomerSession();
-  if (!session) redirect("/account/login");
+  if (!session) redirect(`/${await getLocale()}/account/login`);
 
   return session;
 }
 
 export async function requireSession(): Promise<FullSession> {
   const session = await getSession();
-  if (!session) redirect("/account/login");
+  if (!session) redirect(`/${await getLocale()}/account/login`);
   return session;
 }
