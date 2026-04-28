@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { FeaturedProducts } from "@/components/product/products-grid";
+import { SearchProductsSlider } from "@/components/product/search-products-slider";
 import { BannerSection } from "@/components/sections/banner-section";
+import { CollectionCards } from "@/components/sections/collection-cards";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
@@ -80,6 +82,44 @@ export default async function HomePage() {
             ctaLink: "/search?q=rugs",
           }}
         />
+
+        <Container>
+          <SearchProductsSlider title="Shop Bookcases" query="bookcase" limit={8} locale={locale} />
+        </Container>
+
+        <Container>
+          <CollectionCards
+            cards={[
+              {
+                id: "bedframes",
+                title: "Bedframes",
+                href: "/search?q=bedframe",
+                image: {
+                  url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/03bb0e43-7cbe-47cb-bce1-14a24de06963-1-gIwQJOfLv5qxUGFlp3c6XLBrFvd5Hf_a0c0bd74-1f89-4858-95f1-85356353bbaf.png?v=1776523439",
+                  alt: "Bedframe styled in a softly lit bedroom",
+                },
+              },
+              {
+                id: "nightstands",
+                title: "Nightstands",
+                href: "/search?q=nightstand",
+                image: {
+                  url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/0cf98bc5-1cf3-4cc9-9077-6854b85171b3-1-e12Lkh7xxItTObH5r8AIH3W5I2oInl.png?v=1776523437",
+                  alt: "Nightstand vignette with a styled lamp",
+                },
+              },
+              {
+                id: "consoles",
+                title: "Consoles",
+                href: "/search?q=console",
+                image: {
+                  url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/e3e65c8b-7bbb-4916-b8a8-df2b773c710b-1-HnB2sfYQaDvBIvRza2HsRReiMo4wXm.png?v=1776523447",
+                  alt: "Console table styled in an entryway",
+                },
+              },
+            ]}
+          />
+        </Container>
       </Sections>
     </Page>
   );

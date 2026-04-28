@@ -1,0 +1,53 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
+
+import { ProductsSlider } from "@/components/product/products-slider";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Locale } from "@/lib/i18n";
+import { getProducts } from "@/lib/shopify/operations/products";
+
+interface SearchProductsSliderProps {
+  title: string;
+  query: string;
+  limit?: number;
+  locale: Locale;
+}
+
+function Fallback({ title }: { title: string }) {
+  return (
+    <div className="overflow-x-clip">
+      <div className="mx-auto min-w-0 grid gap-4">
+        <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">
+          {title}
+        </h2>
+        <div className="grid grid-flow-col gap-5 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]">
+          {["a", "b", "c", "d"].map((key) => (
+            <div key={key}>
+              <Skeleton className="aspect-square rounded-none" />
+              <div className="py-2.5 h-18 box-content grid gap-2">
+                <Skeleton className="h-4 w-full rounded-none" />
+                <Skeleton className="h-4 w-3/4 rounded-none" />
+                <Skeleton className="h-4 w-16 rounded-none" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function Render({ title, query, limit, locale }: SearchProductsSliderProps) {
+  await connection();
+  const { products } = await getProducts({ query, limit, locale });
+  if (products.length === 0) return null;
+  return <ProductsSlider title={title} products={products} locale={locale} />;
+}
+
+export function SearchProductsSlider(props: SearchProductsSliderProps) {
+  return (
+    <Suspense fallback={<Fallback title={props.title} />}>
+      <Render {...props} />
+    </Suspense>
+  );
+}
