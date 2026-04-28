@@ -4,76 +4,40 @@ import { Suspense } from "react";
 
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { ProductsGridSkeleton } from "@/components/product/products-grid";
-import {
-  type CollectionResultsData,
-  getExactCollectionResultCount,
-} from "@/lib/collections/server";
+import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
+import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { FilterPendingScope } from "./filter-pending-context";
 import { CollectionFilters } from "./filters";
 import { CollectionResultsGrid } from "./results-grid";
-import { CollectionToolbar, CollectionToolbarSkeleton } from "./toolbar";
+import { CollectionToolbar } from "./toolbar";
 
-function Fallback() {
-  return (
-    <>
-      <CollectionToolbarSkeleton />
-      <ProductsGridSkeleton
-        count={RESULTS_PER_PAGE}
-        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      />
-    </>
-  );
-}
-
-function getActiveFilterCount(data: CollectionResultsData): number {
-  const badges = getActiveFilterBadges(data.transformedFilters.filters, data.activeFilters);
-  const hasPriceFilter =
-    data.activeFilters["filter.v.price.gte"] !== undefined ||
-    data.activeFilters["filter.v.price.lte"] !== undefined;
-  return badges.length + (hasPriceFilter ? 1 : 0);
-}
-
-async function Render({
+export async function CollectionResultsSection({
   locale,
+  searchStatePromise,
   collectionResultsDataPromise,
 }: {
   locale: Locale;
+  searchStatePromise: Promise<CollectionSearchState>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [data, tSearch] = await Promise.all([
-    collectionResultsDataPromise,
-    getTranslations("search"),
-  ]);
-
-  const activeCount = getActiveFilterCount(data);
-  const exactCount = getExactCollectionResultCount({ result: data.result });
+  const tSearch = await getTranslations("search");
+  const filtersLabel = tSearch("filters");
 
   return (
     <>
       <CollectionToolbar
-        resultCount={
-          exactCount !== undefined && exactCount > 0
-            ? tSearch("resultCount", { count: exactCount })
-            : undefined
-        }
         filterSheet={
           <FilterSidebarSheet
-            label={tSearch("filters")}
-            activeCount={activeCount}
+            label={filtersLabel}
             trigger={
               <button type="button" className="flex items-center gap-2 text-sm font-medium">
                 <SlidersHorizontalIcon className="size-4" />
-                <span>{tSearch("filters")}</span>
-                {activeCount > 0 && (
-                  <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-                    {activeCount}
-                  </span>
-                )}
+                <span>{filtersLabel}</span>
+                <Suspense fallback={null}>
+                  <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
+                </Suspense>
               </button>
             }
           >
@@ -82,7 +46,11 @@ async function Render({
             </FilterPendingScope>
           </FilterSidebarSheet>
         }
-        sortSelect={<CollectionsSortSelect />}
+        sortSelect={
+          <Suspense fallback={<SortSelectFallback label={tSearch("sortBy")} />}>
+            <CollectionsSortSelect />
+          </Suspense>
+        }
       />
 
       <FilterPendingScope>
@@ -95,16 +63,20 @@ async function Render({
   );
 }
 
-export function CollectionResultsSection({
-  locale,
-  collectionResultsDataPromise,
+async function CollectionFilterCountBadge({
+  searchStatePromise,
 }: {
-  locale: Locale;
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
+  searchStatePromise: Promise<CollectionSearchState>;
 }) {
+  const { activeFilters } = await searchStatePromise;
+  const activeCount = Object.values(activeFilters).reduce((count, v) => {
+    if (!v) return count;
+    return count + (Array.isArray(v) ? v.length : 1);
+  }, 0);
+  if (activeCount === 0) return null;
   return (
-    <Suspense fallback={<Fallback />}>
-      <Render locale={locale} collectionResultsDataPromise={collectionResultsDataPromise} />
-    </Suspense>
+    <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+      {activeCount}
+    </span>
   );
 }
