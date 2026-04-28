@@ -74,7 +74,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   if (!displayCart || displayCart.lines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-5 text-center">
-        <h3 className="text-2xl font-semibold tracking-tighter mb-6">{t("empty")}</h3>
+        <h3 className="font-display text-2xl font-semibold tracking-tighter mb-6">{t("empty")}</h3>
         <Button
           onClick={() => {
             setOverlayOpen(false);

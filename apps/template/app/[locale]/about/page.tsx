@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <Page>
       <Container className="max-w-2xl">
-        <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
+        <article className="prose prose-neutral prose-headings:font-display prose-headings:font-semibold prose-headings:tracking-tight">
           <h1>About Vercel Shop</h1>
           <p>
             Vercel Shop is a Next.js storefront that connects to Shopify. You get product pages,

@@ -80,7 +80,7 @@ function NavItem({ item }: { item: MenuItem }) {
                     {column.title}
                   </MenuLink>
                 ) : (
-                  <h3 className="text-sm font-semibold mb-3">{column.title}</h3>
+                  <h3 className="font-display text-sm font-semibold mb-3">{column.title}</h3>
                 )}
                 {column.items.length > 0 && (
                   <ul className="space-y-2">
