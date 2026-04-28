@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${title} | ${siteConfig.name}`,
     description,
-    alternates: buildAlternates({ pathname: "/" }),
+    alternates: await buildAlternates({ pathname: "/" }),
     openGraph: buildOpenGraph({
       title,
       description,

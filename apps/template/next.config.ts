@@ -32,22 +32,32 @@ const nextConfig: NextConfig = {
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
   reactCompiler: true,
+  async redirects() {
+    return [
+      { source: "/:locale/product", destination: "/:locale/products", permanent: true },
+      {
+        source: "/:locale/product/:path*",
+        destination: "/:locale/products/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [
         {
-          source: "/collections/:handle",
-          destination: "/collections/md/:handle",
+          source: "/:locale/collections/:handle",
+          destination: "/:locale/collections/md/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/products/:handle",
-          destination: "/products/md/:handle",
+          source: "/:locale/products/:handle",
+          destination: "/:locale/products/md/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/search",
-          destination: "/search/md",
+          source: "/:locale/search",
+          destination: "/:locale/search/md",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],

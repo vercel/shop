@@ -9,7 +9,7 @@ import { getCollection } from "@/lib/shopify/operations/collections";
 
 export async function generateMetadata({
   params,
-}: PageProps<"/collections/[handle]">): Promise<Metadata> {
+}: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === "__placeholder__") {
@@ -28,7 +28,7 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: buildAlternates({
+      alternates: await buildAlternates({
         pathname: `/collections/${handle}`,
       }),
       openGraph: buildOpenGraph({
@@ -52,7 +52,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: buildAlternates({
+    alternates: await buildAlternates({
       pathname: `/collections/${collection.handle}`,
     }),
     openGraph: buildOpenGraph({
@@ -73,7 +73,7 @@ export async function generateMetadata({
 export const unstable_instant = {
   samples: [
     {
-      params: { handle: "__placeholder__" },
+      params: { locale: "en-US", handle: "__placeholder__" },
       searchParams: {
         sort: null,
       },
@@ -87,7 +87,7 @@ export const unstable_prefetch = "force-runtime";
 export default async function CollectionPage({
   params,
   searchParams,
-}: PageProps<"/collections/[handle]">) {
+}: PageProps<"/[locale]/collections/[handle]">) {
   const [locale] = await Promise.all([getLocale()]);
   const handlePromise = params.then(({ handle }) => handle);
 

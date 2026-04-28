@@ -27,7 +27,9 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { parseFiltersFromSearchParams } from "@/lib/utils";
 
-export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/[locale]/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations("seo");
   const q = Array.isArray(resolvedSearchParams.q)
@@ -41,7 +43,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   return {
     title,
     description,
-    alternates: buildAlternates({
+    alternates: await buildAlternates({
       pathname: "/search",
       searchParams: resolvedSearchParams,
     }),
@@ -67,6 +69,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
 export const unstable_instant = {
   samples: [
     {
+      params: { locale: "en-US" },
       searchParams: {
         q: "__placeholder__",
         collection: null,
@@ -79,7 +82,7 @@ export const unstable_instant = {
 
 export const unstable_prefetch = "force-runtime";
 
-export default async function SearchPage({ searchParams }: PageProps<"/search">) {
+export default async function SearchPage({ searchParams }: PageProps<"/[locale]/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   return (

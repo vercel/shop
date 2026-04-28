@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../globals.css";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -13,6 +13,7 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { siteConfig } from "@/lib/config";
+import { locales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
@@ -26,7 +27,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export const generateStaticParams = async () => {
+  return locales.map((locale) => ({ locale }));
+};
+
+export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
   const [locale, messages, t] = await Promise.all([
     getLocale(),
     getMessages(),
@@ -70,7 +75,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
   const t = await getTranslations("seo");
 
   return {
-    alternates: buildAlternates({ pathname: "/" }),
+    alternates: await buildAlternates({ pathname: "/" }),
     description: t("defaultDescription"),
     generator: "Vercel Shop",
     metadataBase: new URL(siteConfig.url),

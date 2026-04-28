@@ -28,7 +28,7 @@ async function buildProductMetadata(
   return {
     title: product.seo.title,
     description: product.seo.description,
-    alternates: buildAlternates({
+    alternates: await buildAlternates({
       pathname: canonicalPath,
     }),
     openGraph: buildOpenGraph({
@@ -55,7 +55,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/products/[handle]">): Promise<Metadata> {
+}: PageProps<"/[locale]/products/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === PLACEHOLDER_HANDLE) return {};
@@ -66,7 +66,7 @@ export async function generateMetadata({
 export const unstable_instant = {
   samples: [
     {
-      params: { handle: "__placeholder__" },
+      params: { locale: "en-US", handle: "__placeholder__" },
       searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
@@ -78,7 +78,7 @@ export const unstable_prefetch = "force-runtime";
 export default async function ProductPage({
   params,
   searchParams,
-}: PageProps<"/products/[handle]">) {
+}: PageProps<"/[locale]/products/[handle]">) {
   const locale = await getLocale();
   const handlePromise = params.then(({ handle }) => {
     if (handle === PLACEHOLDER_HANDLE) notFound();
