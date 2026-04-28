@@ -11,7 +11,11 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
-import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import {
+  buildProductFiltersFromParams,
+  getCatalogProducts,
+  getSearchFacets,
+} from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
@@ -56,20 +60,23 @@ export async function getSearchResultsData({
   activeFilters: Record<string, string | string[] | undefined>;
 }): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getProducts({
-    query,
-    collection,
-    sortKey: sort,
-    limit: RESULTS_PER_PAGE,
-    filters: shopifyFilters,
-    locale,
-  });
+  const [catalog, facets] = await Promise.all([
+    getCatalogProducts({
+      query,
+      collection,
+      sortKey: sort,
+      limit: RESULTS_PER_PAGE,
+      filters: shopifyFilters,
+      locale,
+    }),
+    getSearchFacets({ query, collection, filters: shopifyFilters, locale }),
+  ]);
 
   return {
-    products: result.products,
-    total: result.total,
-    pageInfo: result.pageInfo,
-    transformedFilters: transformShopifyFilters(result.filters, { activeFilters }),
+    products: catalog.products,
+    total: facets.total,
+    pageInfo: catalog.pageInfo,
+    transformedFilters: transformShopifyFilters(facets.filters, { activeFilters }),
     activeFilters,
     filters: shopifyFilters,
     query,

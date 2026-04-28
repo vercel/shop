@@ -61,17 +61,39 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-const PRODUCTS_SEARCH_QUERY = `
+const CATALOG_PRODUCTS_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
-  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    search(
-      query: $query
+  query catalogProducts($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    products(
       first: $first
       after: $after
+      query: $query
       sortKey: $sortKey
       reverse: $reverse
+    ) {
+      edges {
+        cursor
+        node {
+          ...ProductCardFields
+        }
+      }
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+`;
+
+const SEARCH_FACETS_QUERY = `
+  query searchFacets($query: String!, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    search(
+      query: $query
       productFilters: $productFilters
       types: PRODUCT
+      first: 1
     ) {
       totalCount
       productFilters {
@@ -85,6 +107,22 @@ const PRODUCTS_SEARCH_QUERY = `
           input
         }
       }
+    }
+  }
+`;
+
+const PRODUCTS_SEARCH_QUERY = `
+  ${PRODUCT_CARD_FRAGMENT}
+  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    search(
+      query: $query
+      first: $first
+      after: $after
+      sortKey: $sortKey
+      reverse: $reverse
+      types: PRODUCT
+    ) {
+      totalCount
       edges {
         cursor
         node {
@@ -103,52 +141,88 @@ const PRODUCTS_SEARCH_QUERY = `
   }
 `;
 
-// SearchSortKeys only supports PRICE and RELEVANCE.
-// Name-based sort options are excluded from the search UI.
+// QueryRoot.products(sortKey: ProductSortKeys) — used for the catalog browse path.
+const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
+  "best-matches": { sortKey: "RELEVANCE", reverse: false },
+  "best-selling": { sortKey: "BEST_SELLING", reverse: false },
+  "date-new-to-old": { sortKey: "CREATED_AT", reverse: true },
+  "date-old-to-new": { sortKey: "CREATED_AT", reverse: false },
+  "price-high-to-low": { sortKey: "PRICE", reverse: true },
+  "price-low-to-high": { sortKey: "PRICE", reverse: false },
+  "product-name-ascending": { sortKey: "TITLE", reverse: false },
+  "product-name-descending": { sortKey: "TITLE", reverse: true },
+  BEST_SELLING: { sortKey: "BEST_SELLING", reverse: false },
+  CREATED_AT: { sortKey: "CREATED_AT", reverse: false },
+  ID: { sortKey: "ID", reverse: false },
+  PRICE: { sortKey: "PRICE", reverse: false },
+  PRODUCT_TYPE: { sortKey: "PRODUCT_TYPE", reverse: false },
+  RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
+  TITLE: { sortKey: "TITLE", reverse: false },
+  UPDATED_AT: { sortKey: "UPDATED_AT", reverse: false },
+  VENDOR: { sortKey: "VENDOR", reverse: false },
+};
+
+// SearchSortKeys only supports PRICE and RELEVANCE — used by the AI agent text-search path.
 const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
+  "price-low-to-high": { sortKey: "PRICE", reverse: false },
   PRICE: { sortKey: "PRICE", reverse: false },
   RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
 };
 
-/**
- * Shopify's search query `productFilters` only affects facet counts, not actual
- * results. Apply filters in memory after fetching to match collection behavior.
- */
-function applyFiltersInMemory(products: ProductCard[], filters: ProductFilter[]): ProductCard[] {
-  return products.filter((product) => {
-    for (const filter of filters) {
-      if (filter.price) {
-        const price = Number.parseFloat(product.price.amount);
-        if (filter.price.min !== undefined && price < filter.price.min) return false;
-        if (filter.price.max !== undefined && price > filter.price.max) return false;
-      }
-      if (filter.productVendor && product.vendor !== filter.productVendor) {
-        return false;
-      }
-      if (filter.available !== undefined && product.availableForSale !== filter.available) {
-        return false;
-      }
-    }
-    return true;
-  });
+function escapeProductQuery(value: string): string {
+  return value.replace(/'/g, "\\'");
 }
 
-function buildShopifySearchQuery(query?: string, collection?: string): string {
-  const queryParts: string[] = [];
+function joinOr(field: string, values: string[]): string {
+  const expressions = values.map((v) => `${field}:'${escapeProductQuery(v)}'`);
+  return expressions.length > 1 ? `(${expressions.join(" OR ")})` : expressions[0];
+}
 
-  if (query?.trim()) {
-    queryParts.push(query.trim());
+// Translates ProductFilter[] (from URL params) into Shopify's product-query syntax.
+// `productFilters` on Search only affects facet counts; QueryRoot.products has no
+// equivalent arg, so structured filters are encoded into the `query` string instead.
+// variantOption / productMetafield filters have no product-query syntax and are dropped.
+function buildCatalogQuery(args: {
+  query?: string;
+  collection?: string;
+  filters: ProductFilter[];
+}): string {
+  const parts: string[] = [];
+
+  if (args.query?.trim()) {
+    parts.push(args.query.trim());
   }
 
-  if (collection) {
-    const safeCollection = collection.replace(/'/g, "\\'");
-    queryParts.push(`collection:'${safeCollection}'`);
+  if (args.collection) {
+    parts.push(`collection:'${escapeProductQuery(args.collection)}'`);
   }
 
-  return queryParts.length > 0 ? queryParts.join(" AND ") : "*";
+  const vendors: string[] = [];
+  const types: string[] = [];
+  const tags: string[] = [];
+  let available: boolean | undefined;
+  let priceMin: number | undefined;
+  let priceMax: number | undefined;
+
+  for (const f of args.filters) {
+    if (f.productVendor) vendors.push(f.productVendor);
+    if (f.productType) types.push(f.productType);
+    if (f.tag) tags.push(f.tag);
+    if (f.available !== undefined) available = f.available;
+    if (f.price?.min !== undefined) priceMin = f.price.min;
+    if (f.price?.max !== undefined) priceMax = f.price.max;
+  }
+
+  if (vendors.length) parts.push(joinOr("vendor", vendors));
+  if (types.length) parts.push(joinOr("product_type", types));
+  if (tags.length) parts.push(joinOr("tag", tags));
+  if (available !== undefined) parts.push(`available_for_sale:${available}`);
+  if (priceMin !== undefined) parts.push(`variants.price:>=${priceMin}`);
+  if (priceMax !== undefined) parts.push(`variants.price:<=${priceMax}`);
+
+  return parts.join(" AND ");
 }
 
 function toArray(value: string | string[] | undefined): string[] {
@@ -239,7 +313,7 @@ export function buildProductFiltersFromParams(
   return filters;
 }
 
-export async function getProducts(params: {
+export async function getCatalogProducts(params: {
   query?: string;
   collection?: string;
   sortKey?: string;
@@ -249,9 +323,7 @@ export async function getProducts(params: {
   locale?: string;
 }): Promise<{
   products: ProductCard[];
-  total: number;
   pageInfo: PageInfo;
-  filters: ShopifyFilter[];
 }> {
   "use cache: remote";
   cacheLife("max");
@@ -267,28 +339,125 @@ export async function getProducts(params: {
     locale = defaultLocale,
   } = params;
 
-  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
+  const sortConfig = CATALOG_SORT_KEY_MAP[rawSortKey] ?? CATALOG_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
-  const searchQuery = buildShopifySearchQuery(query, collection);
+  const catalogQuery = buildCatalogQuery({ query, collection, filters });
+
+  // RELEVANCE only orders results meaningfully when there's a query string;
+  // fall back to TITLE for plain catalog browse.
+  const sortKey =
+    sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "TITLE" : sortConfig.sortKey;
+
+  const data = await shopifyFetch<{
+    products: {
+      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
+      pageInfo: PageInfo;
+    };
+  }>({
+    operation: "catalogProducts",
+    query: CATALOG_PRODUCTS_QUERY,
+    variables: {
+      first: limit,
+      after: cursor,
+      query: catalogQuery || undefined,
+      sortKey,
+      reverse: sortConfig.reverse,
+      country,
+      language,
+    },
+  });
+
+  const shopifyProducts = data.products.edges
+    .map((edge) => edge.node)
+    .filter((node): node is ShopifyProductCard => node !== null);
+
+  tagProducts(shopifyProducts);
+
+  return {
+    products: shopifyProducts.map(transformShopifyProductCard),
+    pageInfo: data.products.pageInfo,
+  };
+}
+
+export async function getSearchFacets(params: {
+  query?: string;
+  collection?: string;
+  filters?: ProductFilter[];
+  locale?: string;
+}): Promise<{ filters: ShopifyFilter[]; total: number }> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  const { query, collection, filters = [], locale = defaultLocale } = params;
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const queryParts: string[] = [];
+  if (query?.trim()) queryParts.push(query.trim());
+  if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
+  const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
 
   const data = await shopifyFetch<{
     search: {
       totalCount: number;
       productFilters: ShopifyFilter[];
+    };
+  }>({
+    operation: "searchFacets",
+    query: SEARCH_FACETS_QUERY,
+    variables: {
+      query: searchQuery,
+      productFilters: filters.length > 0 ? filters : undefined,
+      country,
+      language,
+    },
+  });
+
+  return {
+    filters: data.search.productFilters,
+    total: data.search.totalCount,
+  };
+}
+
+// Index-based search; ranks by relevance over the search index. Reserved for
+// callers that genuinely want search semantics (the AI agent tool). Catalog
+// browse and the /search page should use getCatalogProducts instead.
+export async function searchIndexProducts(params: {
+  query: string;
+  sortKey?: string;
+  limit?: number;
+  locale?: string;
+}): Promise<{ products: ProductCard[]; total: number }> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  const {
+    query,
+    sortKey: rawSortKey = "best-matches",
+    limit = 50,
+    locale = defaultLocale,
+  } = params;
+
+  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const data = await shopifyFetch<{
+    search: {
+      totalCount: number;
       edges: Array<{ node: ShopifyProductCard | null }>;
-      pageInfo: PageInfo;
     };
   }>({
     operation: "searchProducts",
     query: PRODUCTS_SEARCH_QUERY,
     variables: {
-      query: searchQuery,
-      first: filters.length > 0 ? 250 : limit,
-      after: filters.length > 0 ? undefined : cursor,
+      query: query.trim() || "*",
+      first: limit,
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
-      productFilters: filters.length > 0 ? filters : undefined,
       country,
       language,
     },
@@ -300,20 +469,9 @@ export async function getProducts(params: {
 
   tagProducts(shopifyProducts);
 
-  let products = shopifyProducts.map(transformShopifyProductCard);
-
-  // Shopify's search query productFilters only affect facet counts, not actual
-  // results. Apply filters in memory to match the collection products behavior.
-  if (filters.length > 0) {
-    products = applyFiltersInMemory(products, filters);
-  }
-
   return {
-    products,
-    total: filters.length > 0 ? products.length : data.search.totalCount,
-    pageInfo:
-      filters.length > 0 ? { ...data.search.pageInfo, hasNextPage: false } : data.search.pageInfo,
-    filters: data.search.productFilters,
+    products: shopifyProducts.map(transformShopifyProductCard),
+    total: data.search.totalCount,
   };
 }
 

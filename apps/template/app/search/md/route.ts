@@ -1,6 +1,10 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
-import { buildProductFiltersFromParams, getProducts } from "@/lib/shopify/operations/products";
+import {
+  buildProductFiltersFromParams,
+  getCatalogProducts,
+  getSearchFacets,
+} from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
@@ -25,27 +29,30 @@ export async function GET(request: Request) {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
 
   try {
-    const result = await getProducts({
-      query,
-      collection,
-      sortKey: sort,
-      limit: RESULTS_PER_PAGE,
-      cursor,
-      filters: shopifyFilters,
-      locale,
-    });
+    const [catalog, facets] = await Promise.all([
+      getCatalogProducts({
+        query,
+        collection,
+        sortKey: sort,
+        limit: RESULTS_PER_PAGE,
+        cursor,
+        filters: shopifyFilters,
+        locale,
+      }),
+      getSearchFacets({ query, collection, filters: shopifyFilters, locale }),
+    ]);
 
-    const transformedFilters = transformShopifyFilters(result.filters, { activeFilters });
-    const hasPriceRange = result.filters.some((filter) => filter.type === "PRICE_RANGE");
+    const transformedFilters = transformShopifyFilters(facets.filters, { activeFilters });
+    const hasPriceRange = facets.filters.some((filter) => filter.type === "PRICE_RANGE");
     const markdown = searchResultsToMarkdown({
       query,
       collection,
-      products: result.products,
-      total: result.total,
+      products: catalog.products,
+      total: facets.total,
       filters: transformedFilters.filters,
       priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
       activeFilters,
-      pageInfo: result.pageInfo,
+      pageInfo: catalog.pageInfo,
       locale,
       sort,
     });

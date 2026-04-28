@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ProductDetailPage } from "@/components/product-detail/product-detail-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getProduct, getProducts } from "@/lib/shopify/operations/products";
+import { getCatalogProducts, getProduct } from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -48,7 +48,7 @@ async function buildProductMetadata(
 }
 
 export async function generateStaticParams() {
-  const { products } = await getProducts({ limit: 1 });
+  const { products } = await getCatalogProducts({ limit: 1 });
   const first = products[0];
   return first ? [{ handle: first.handle }] : [];
 }
