@@ -8,11 +8,6 @@ import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
   hero: BannerSectionType;
-  /**
-   * Heading level for the banner headline. Use "h1" for the page's primary
-   * banner and "h2" for any secondary banners further down the page so the
-   * document outline stays correct. Visual size is unchanged either way.
-   */
   headingLevel?: "h1" | "h2";
 }
 
