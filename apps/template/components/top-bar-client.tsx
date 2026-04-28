@@ -4,7 +4,6 @@ import { ChevronDownIcon } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import type { ChangeEvent } from "react";
 
-import { CountryFlag } from "@/components/ui/country-flag";
 import { getLocaleData, type Locale } from "@/lib/i18n";
 
 interface LocaleSwitcherProps {
@@ -24,13 +23,12 @@ export function LocaleSwitcher({ current, locales }: LocaleSwitcherProps) {
   }
 
   return (
-    <label className="relative flex cursor-pointer items-center gap-2">
-      <CountryFlag locale={current} size="sm" className="rounded-xs" />
+    <label className="relative flex cursor-pointer items-center">
       <select
         aria-label="Select locale"
         value={current}
         onChange={handleChange}
-        className="cursor-pointer appearance-none bg-transparent pr-4 text-xs uppercase tracking-wide focus:outline-none"
+        className="cursor-pointer appearance-none bg-transparent pr-4 text-xs focus:outline-none"
       >
         {locales.map((loc) => (
           <option key={loc} value={loc} className="text-foreground">

@@ -69,6 +69,7 @@ export const unstable_instant = {
       params: { locale: "en-US", handle: "__placeholder__" },
       searchParams: { variantId: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
+      headers: [["x-vercel-ip-postal-code", null]],
     },
   ],
 };
