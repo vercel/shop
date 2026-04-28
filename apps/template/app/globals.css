@@ -12,6 +12,7 @@
   --color-shop: #5A31F4;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-bricolage);
   --text-xxs: 0.625rem;
 
   --color-sidebar-ring: var(--sidebar-ring);
@@ -71,39 +72,39 @@
     4rem + var(--safe-area-top)
   ); /* 64px = h-16 single nav row + safe area */
   --radius: 0.625rem;
-  --background: #ffffff;
-  --foreground: #010101;
-  --card: #ffffff;
-  --card-foreground: #010101;
-  --popover: #ffffff;
-  --popover-foreground: #010101;
-  --primary: #000000;
-  --primary-foreground: #ffffff;
-  --secondary: #e9e9e9;
-  --secondary-foreground: #020202;
-  --muted: #e9e9e9;
-  --muted-foreground: #2c2c2c;
-  --accent: #e9e9e9;
-  --accent-foreground: #020202;
-  --destructive: #cc0001;
-  --destructive-foreground: #f4f4f4;
-  --positive: #00ba5a;
-  --positive-foreground: #ffffff;
-  --border: #c8c8c8;
-  --input: #ececec;
+  --background: #010101;
+  --foreground: #ffffff;
+  --card: #0a0a0a;
+  --card-foreground: #ffffff;
+  --popover: #0a0a0a;
+  --popover-foreground: #ffffff;
+  --primary: #ffffff;
+  --primary-foreground: #000000;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #fafafa;
+  --muted: #1f1f1f;
+  --muted-foreground: #a3a3a3;
+  --accent: #1f1f1f;
+  --accent-foreground: #fafafa;
+  --destructive: #ff4d4d;
+  --destructive-foreground: #ffffff;
+  --positive: #00d96b;
+  --positive-foreground: #000000;
+  --border: #303030;
+  --input: #1a1a1a;
   --ring: #5a5a5a;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: #fafafa;
-  --sidebar-foreground: #010101;
+  --sidebar: #0a0a0a;
+  --sidebar-foreground: #ffffff;
   --sidebar-primary: #2986ff;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e9e9e9;
-  --sidebar-accent-foreground: #020202;
-  --sidebar-border: #c8c8c8;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #303030;
   --sidebar-ring: #5a5a5a;
 }
 
@@ -120,6 +121,11 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
   }
   button,
   [role="button"] {
