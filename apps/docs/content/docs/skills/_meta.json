@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "enable-analytics",
+    "enable-i18n",
     "enable-shopify-markets",
     "enable-shopify-cms",
     "enable-shopify-menus",

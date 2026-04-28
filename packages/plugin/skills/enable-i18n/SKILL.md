@@ -1,0 +1,355 @@
+---
+name: enable-i18n
+description: >
+  Enable next-intl-based i18n in the shop template — locale-prefixed URLs,
+  per-locale message catalogs, and a locale switcher. Use when the user wants
+  "locale URLs", "multi-language", or "i18n" without Shopify Markets
+  integration. For full Shopify Markets multi-region commerce (region-aware
+  pricing, inventory, payments), use `enable-shopify-markets` instead — this
+  skill is the routing/i18n layer only.
+---
+
+# Enable i18n (next-intl, no Markets)
+
+Wire next-intl into the template so the storefront serves locale-prefixed URLs (`/en-US/products/foo`), loads per-locale message catalogs, and exposes a locale switcher. The template ships single-locale by default with clean URLs (`/products/foo`) — this skill restores the i18n machinery.
+
+> **Use `enable-shopify-markets` instead** if you want region-aware pricing/inventory/payments. That skill builds on the same routing layer plus Markets-specific operations. If you only want URL prefixing and translated copy, this skill is the right one.
+
+## Source of truth: `lib/i18n/index.ts`
+
+The locale list lives in `lib/i18n/index.ts` as `locales` and `enabledLocales`. **Always read those at the start of the skill** — don't hardcode a list. Adding new locales means editing that file plus the `localeCurrency` map; everything downstream (`routing`, sitemap, alternates, switcher) reads from it.
+
+```ts
+// lib/i18n/index.ts
+export const locales = ["en-US", "en-GB", "de-DE", "fr-FR"] as const;
+export const defaultLocale: Locale = "en-US";
+export const enabledLocales: readonly Locale[] = locales;
+```
+
+## What this skill turns on
+
+1. `lib/i18n/routing.ts` and `lib/i18n/navigation.ts` (next-intl)
+2. Route segment `app/[locale]/` containing every page
+3. `proxy.ts` middleware running `next-intl/middleware`
+4. `lib/params.ts` `getLocale()` reading from `next/root-params`
+5. `lib/i18n/request.ts` loading messages by resolved locale
+6. Locale-prefixed canonicals + hreflang alternates in `lib/seo.ts`
+7. Sitemap entries per locale
+8. `next.config.ts` rewrites/redirects on `/:locale/*` sources
+9. `app/(unlocalized)/page.tsx` fallback redirect to default locale
+10. `generateStaticParams` on the root layout
+11. (If `enable-shopify-menus` already ran) Re-enable `LocaleCurrencySelector` in the megamenu
+
+## Cache Components compatibility — read this first
+
+The template runs with `cacheComponents: true` (Next.js 16). That changes a few things this skill needs to handle correctly. Skipping any of these will produce build errors that look unrelated:
+
+### A. Don't swap `next/link` to next-intl's `<Link>`
+
+The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
+
+```
+Error: Route "/[locale]/..." accessed [...] which is not defined in the `samples` of `unstable_instant`.
+```
+
+or a generic "blocking route" prerender failure.
+
+**Do this instead:** keep `next/link` and let `proxy.ts` middleware redirect unprefixed paths (`/products/foo` → `/en-US/products/foo`). Internal links work; there's a one-time middleware redirect on click for unprefixed hrefs. Trade a few redirects for a clean prerender.
+
+If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
+
+### B. `unstable_instant` samples need `locale` in `params`
+
+Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
+
+```
+Error: Route "/[locale]/products/[handle]" accessed root param "locale"
+       which is not defined in the `samples` of `unstable_instant`.
+```
+
+Fix:
+
+```ts
+export const unstable_instant = {
+  samples: [
+    {
+      params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
+      searchParams: { variantId: "1" },
+      cookies: [{ name: "shopify_cartId", value: null }],
+    },
+  ],
+};
+```
+
+### C. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
+
+This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
+
+```ts
+samples: [
+  {
+    params: { locale: "en-US", handle: "__placeholder__" },
+    searchParams: { variantId: "1" },
+    cookies: [{ name: "shopify_cartId", value: null }],
+    headers: [["x-vercel-ip-postal-code", null]], // ← add this
+  },
+],
+```
+
+`null` means "header may be absent." If you forget, the build error is explicit:
+
+```
+Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
+       defined in the `samples` of `unstable_instant`. Add it to the
+       sample's `headers` array, or `["...", null]` if it should be absent.
+```
+
+### D. `redirect()` from next-intl doesn't return `never`
+
+```ts
+// BREAKS: TS doesn't narrow `session` after redirect
+import { redirect } from "@/lib/i18n/navigation";
+if (!session) redirect({ href: "/account/login", locale });
+return session; // type error: session is CustomerSession | null
+```
+
+next-intl's `redirect` is typed to return `void`, so TypeScript doesn't treat it as control-flow-ending. Use `next/navigation`'s `redirect` (which returns `never`) and prefix the locale yourself:
+
+```ts
+import { redirect } from "next/navigation";
+import { getLocale } from "@/lib/params";
+
+if (!session) redirect(`/${await getLocale()}/account/login`);
+return session; // OK, narrowed
+```
+
+## Step-by-step
+
+### Step 1: Routing config
+
+Create `lib/i18n/routing.ts`:
+
+```ts
+import { defineRouting } from "next-intl/routing";
+import { defaultLocale, enabledLocales } from ".";
+
+export const routing = defineRouting({
+  locales: enabledLocales, // pulled from lib/i18n/index.ts — never hardcode
+  defaultLocale,
+  localePrefix: "always",
+});
+```
+
+Create `lib/i18n/navigation.ts`:
+
+```ts
+import { createNavigation } from "next-intl/navigation";
+import { routing } from "./routing";
+
+export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
+```
+
+> Per "Cache Components compatibility A" above, `Link` here is mostly used by the locale switcher / programmatic routing in client components — not as a wholesale replacement for `next/link`.
+
+### Step 2: Move routes under `app/[locale]/`
+
+Move every route file from `app/` into `app/[locale]/`:
+
+- `app/layout.tsx` → `app/[locale]/layout.tsx` (becomes the root layout for the locale segment)
+- `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
+- `app/about/`, `app/account/`, `app/cart/`, `app/collections/`, `app/products/`, `app/search/` → `app/[locale]/...`
+
+**Stay at `app/`:** `api/`, `sitemap.ts`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
+
+In the moved layout, fix `import "./globals.css"` → `import "../globals.css"`.
+
+Update every `PageProps<"/foo">` and `LayoutProps<"/foo">` generic to include the locale segment: `PageProps<"/[locale]/products/[handle]">`, `LayoutProps<"/[locale]">`, etc.
+
+### Step 3: `lib/params.ts` reads from root params
+
+```ts
+import { notFound } from "next/navigation";
+import { locale as rootLocale } from "next/root-params";
+import { type Locale, locales } from "./i18n";
+
+export async function getLocale(): Promise<Locale> {
+  const current = await rootLocale();
+  if (!current || !locales.includes(current as Locale)) notFound();
+  return current as Locale;
+}
+```
+
+### Step 4: `lib/i18n/request.ts` loads messages by resolved locale
+
+```ts
+import { hasLocale } from "next-intl";
+import { getRequestConfig } from "next-intl/server";
+import { getLocale } from "../params";
+import type enMessages from "./messages/en.json";
+import { routing } from "./routing";
+
+const messageLoaders: Record<string, () => Promise<{ default: typeof enMessages }>> = {
+  "en-US": () => import("./messages/en.json"),
+  // Add per-locale loaders as you ship message files. Missing locales fall
+  // back to the default locale loader.
+};
+
+export default getRequestConfig(async () => {
+  const requested = await getLocale();
+  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  const loader = messageLoaders[locale] ?? messageLoaders[routing.defaultLocale];
+  const messages = (await loader()).default as typeof enMessages;
+  return { locale, messages };
+});
+```
+
+### Step 5: `proxy.ts` middleware
+
+```ts
+import createMiddleware from "next-intl/middleware";
+import { type NextRequest, NextResponse } from "next/server";
+import { routing } from "@/lib/i18n/routing";
+
+const handlei18n = createMiddleware(routing);
+
+export default function middleware(request: NextRequest): NextResponse {
+  const response = handlei18n(request);
+  if (!response.ok) return response;
+
+  const rewriteHeader = response.headers.get("x-middleware-rewrite");
+  if (!rewriteHeader) return response;
+
+  const rewriteTarget = new URL(rewriteHeader, request.url);
+  const [, ...segments] = rewriteTarget.pathname.split("/");
+  const normalized = new URL(`/${segments.filter(Boolean).join("/")}`, request.url);
+  normalized.search = rewriteTarget.search;
+  return NextResponse.rewrite(normalized, { headers: response.headers });
+}
+
+export const config = {
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+};
+```
+
+> The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
+
+### Step 6: Internal hrefs — keep `next/link`
+
+Per the cache-components note above, **leave existing `next/link` imports alone**. Middleware redirects unprefixed URLs to the active locale on click. The only places to use the next-intl-aware Link are inside client components that explicitly need to switch locales (e.g. a locale switcher) — and even then, `usePathname()` + `useRouter().push()` from `next/navigation` plus a manual segment swap is often cleaner under cacheComponents.
+
+For programmatic redirects in server code, use `next/navigation`'s `redirect`:
+
+```ts
+redirect(`/${await getLocale()}/account/login`);
+```
+
+### Step 7: `lib/seo.ts` — locale-aware canonicals + hreflang alternates
+
+```ts
+import { defaultLocale, enabledLocales } from "./i18n";
+import { getLocale } from "./params";
+
+function withLocalePath(locale: string, pathname: string): string {
+  const normalized = normalizePath(pathname);
+  return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
+}
+
+export async function buildAlternates({ pathname, searchParams }: {...}): Promise<Metadata["alternates"]> {
+  const locale = await getLocale();
+  const canonical = buildCanonicalPath(withLocalePath(locale, pathname), searchParams);
+
+  const languages: Record<string, string> = {};
+  for (const candidate of enabledLocales) {
+    languages[candidate] = buildCanonicalPath(withLocalePath(candidate, pathname), searchParams);
+  }
+  languages["x-default"] = buildCanonicalPath(withLocalePath(defaultLocale, pathname), searchParams);
+
+  return { canonical, languages };
+}
+```
+
+`buildAlternates` is now async — update every caller to `await`.
+
+### Step 8: Sitemap per-locale entries
+
+```ts
+import { enabledLocales } from "@/lib/i18n";
+
+function localizePath(locale: string, pathname: string): string {
+  if (pathname === "/") return `/${locale}`;
+  const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return `/${locale}${normalized}`;
+}
+
+// Inside sitemap(): one entry per locale per page.
+```
+
+### Step 9: `next.config.ts` rewrites/redirects on `/:locale/*`
+
+Existing markdown content-negotiation rewrites must move from `/products/:handle` to `/:locale/products/:handle`, etc. Add the locale-prefixed redirect rules from the original config (`/:locale/product*` → `/:locale/products*`).
+
+### Step 10: `app/(unlocalized)/page.tsx` fallback
+
+```ts
+import { permanentRedirect } from "next/navigation";
+import { defaultLocale } from "@/lib/i18n";
+
+export default function UnlocalizedRoot(): never {
+  permanentRedirect(`/${defaultLocale}`);
+}
+```
+
+This is a defensive fallback; with `localePrefix: "always"` middleware should already redirect `/`.
+
+### Step 11: `generateStaticParams` on the locale layout
+
+```ts
+import { locales } from "@/lib/i18n";
+
+export const generateStaticParams = async () => {
+  return locales.map((locale) => ({ locale }));
+};
+```
+
+### Step 12: Patch `unstable_instant` samples
+
+Walk every route file that exports `unstable_instant` and add `locale` to each sample's `params`:
+
+```ts
+params: { locale: "en-US", handle: "__placeholder__" }
+```
+
+If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
+
+```ts
+headers: [["x-vercel-ip-postal-code", null]]
+```
+
+(See "Cache Components compatibility B/C" at the top.)
+
+### Step 13: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
+
+Only if the `enable-shopify-menus` skill has already been run and `components/nav/megamenu/index.tsx` exists. The selector component lives at `components/nav/locale-currency.tsx` (with a fallback at `locale-currency-fallback.tsx`). Wire it into both `MegamenuDesktop` and `MegamenuMobile` per the original instructions.
+
+## Verifying
+
+After applying:
+
+```bash
+pnpm build         # should pass; routes prerender at /en-US, /en-GB, etc.
+pnpm dev           # then:
+curl -I /          # → 307 /en-US
+curl -I /products  # → 307 /en-US/products
+curl /sitemap.xml  # → entries with /en-US/... URLs
+curl /en-US        # → 200 with <html lang="en-US">
+```
+
+Smoke-test checklist:
+
+- [ ] Build passes
+- [ ] Bare `/` redirects to default locale
+- [ ] Each enabled locale serves 200 at its prefix
+- [ ] `<html lang>` matches the URL's locale segment
+- [ ] Sitemap emits one entry per locale per page
+- [ ] Canonical + hreflang alternates appear in page metadata
+- [ ] Unprefixed internal links from existing `next/link` calls redirect (one extra hop, but correct)

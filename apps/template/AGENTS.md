@@ -164,7 +164,7 @@ If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" abov
 
 - Shopify GraphQL work: `/vercel-shop:shopify-graphql-reference`
 - Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
-- Locale-prefixed routing only: `/vercel-shop:add-locale-url-prefix`
+- Locale-prefixed routing + i18n (no Markets): `/vercel-shop:enable-i18n`
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
@@ -198,7 +198,7 @@ The nav uses a fixed `size-5` container with the fallback icon rendered inline a
 
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - `getLocale()` resolves the active deployment locale; the template defaults to `en-US`.
-- Multi-locale URL routing is documented in `/vercel-shop:add-locale-url-prefix` and is intentionally not enabled by default.
+- Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
 - Components import domain types from `@/lib/types`, not Shopify response types.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.

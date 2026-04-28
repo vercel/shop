@@ -11,7 +11,7 @@ argument-hint: "[sub-path|per-domain]"
 
 ## Description
 
-Interactively set up Shopify Markets with multi-locale routing using next-intl. Supports both sub-path routing (`/en/products/...`) and per-domain routing (`en.store.com/products/...`). This skill supersedes `add-locale-url-prefix.md` as the recommended way to enable multi-locale support.
+Interactively set up Shopify Markets with multi-locale routing using next-intl. Supports both sub-path routing (`/en/products/...`) and per-domain routing (`en.store.com/products/...`). This skill is the Markets-aware path; if you only want next-intl routing/messages without Markets, use `enable-i18n` instead.
 
 ## When to Use This Skill
 
