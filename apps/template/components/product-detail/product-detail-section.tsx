@@ -6,11 +6,7 @@ import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/product-detail/product-info";
-import {
-  ColorImageCarouselItems,
-  ColorImageGrid,
-  ProductMedia,
-} from "@/components/product-detail/product-media";
+import { type MediaItem, ProductMedia } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductRating } from "@/components/product-detail/product-rating";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
@@ -31,6 +27,7 @@ import type {
   ProductOption,
   ProductReviews,
   ProductVariant,
+  Video,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -52,7 +49,6 @@ export async function ProductDetailSection({
   const singleVariant = variants.length === 1;
   const uniformStock = hasUniformStock(variants);
 
-  // Pre-resolve for single-variant products (no searchParam needed)
   const eagerSelectedOptions = singleVariant
     ? computeInitialSelectedOptions(variants, undefined)
     : null;
@@ -73,59 +69,26 @@ export async function ProductDetailSection({
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
       {needsPartitioning ? (
-        <ProductMedia
-          otherImages={getSharedImages(images, options, variants)}
-          videos={videos}
-          title={title}
-          className="lg:col-span-6"
-          desktopSlot={
-            <Suspense
-              fallback={
-                <>
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                </>
-              }
-            >
-              <ResolvedColorImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
-          }
-          mobileSlot={
-            <Suspense
-              fallback={
-                <div className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden">
-                  <Skeleton className="size-full rounded-none" />
-                </div>
-              }
-            >
-              <ResolvedColorCarouselImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
-          }
-        />
+        <Suspense fallback={<MediaSkeleton className="lg:col-span-5" />}>
+          <ResolvedMedia
+            images={images}
+            options={options}
+            variants={variants}
+            videos={videos}
+            title={title}
+            variantIdPromise={variantIdPromise}
+            className="lg:col-span-5"
+          />
+        </Suspense>
       ) : (
         <ProductMedia
-          otherImages={images}
-          videos={videos}
+          mediaItems={buildMediaItems([], videos, images)}
           title={title}
-          className="lg:col-span-6"
+          className="lg:col-span-5"
         />
       )}
 
-      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-5">
         <div data-slot="product-info-header">
           <ProductRating
             rating={reviews.rating}
@@ -232,6 +195,67 @@ export async function ProductDetailSection({
   );
 }
 
+function buildMediaItems(
+  colorImages: ImageType[],
+  videos: Video[],
+  sharedImages: ImageType[],
+): MediaItem[] {
+  return [
+    ...colorImages.map((image): MediaItem => ({ type: "image", image })),
+    ...videos.map((video): MediaItem => ({ type: "video", video })),
+    ...sharedImages.map((image): MediaItem => ({ type: "image", image })),
+  ];
+}
+
+function MediaSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={className}>
+      <div className="lg:hidden">
+        <Skeleton className="aspect-square w-full rounded-none" />
+      </div>
+      <div className="hidden lg:flex gap-2.5">
+        <div className="flex flex-col gap-2.5 w-20 shrink-0">
+          {["a", "b", "c", "d"].map((key) => (
+            <Skeleton key={key} className="aspect-square w-full rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="flex-1 aspect-square rounded-lg" />
+      </div>
+    </div>
+  );
+}
+
+async function ResolvedMedia({
+  images,
+  options,
+  variants,
+  videos,
+  title,
+  variantIdPromise,
+  className,
+}: {
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  videos: Video[];
+  title: string;
+  variantIdPromise: Promise<string | undefined>;
+  className?: string;
+}) {
+  const variantId = await variantIdPromise;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const { colorImages } = getPartitionedImagesForSelectedColor(
+    images,
+    options,
+    variants,
+    selectedOptions,
+  );
+  const sharedImages = getSharedImages(images, options, variants);
+  const mediaItems = buildMediaItems(colorImages, videos, sharedImages);
+
+  return <ProductMedia mediaItems={mediaItems} title={title} className={className} />;
+}
+
 async function ResolvedOptions({
   variants,
   options,
@@ -309,58 +333,4 @@ async function ResolvedPrice({
       locale={locale}
     />
   );
-}
-
-async function ResolvedColorImages({
-  images,
-  options,
-  variants,
-  title,
-  variantIdPromise,
-}: {
-  images: ImageType[];
-  options: ProductOption[];
-  variants: ProductVariant[];
-  title: string;
-  variantIdPromise: Promise<string | undefined>;
-}) {
-  const variantId = await variantIdPromise;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const { colorImages } = getPartitionedImagesForSelectedColor(
-    images,
-    options,
-    variants,
-    selectedOptions,
-  );
-
-  if (colorImages.length === 0) return null;
-
-  return <ColorImageGrid images={colorImages} title={title} />;
-}
-
-async function ResolvedColorCarouselImages({
-  images,
-  options,
-  variants,
-  title,
-  variantIdPromise,
-}: {
-  images: ImageType[];
-  options: ProductOption[];
-  variants: ProductVariant[];
-  title: string;
-  variantIdPromise: Promise<string | undefined>;
-}) {
-  const variantId = await variantIdPromise;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const { colorImages } = getPartitionedImagesForSelectedColor(
-    images,
-    options,
-    variants,
-    selectedOptions,
-  );
-
-  if (colorImages.length === 0) return null;
-
-  return <ColorImageCarouselItems images={colorImages} title={title} />;
 }

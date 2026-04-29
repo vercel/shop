@@ -28,21 +28,23 @@ function ProductPageFallback() {
   return (
     <Sections>
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <div className="lg:col-span-6">
+        <div className="lg:col-span-5">
           {/* Mobile: single full-bleed square + pagination space */}
           <div className="grid gap-5 lg:hidden -mx-5">
             <Skeleton className="aspect-square w-full rounded-none" />
             <div className="h-1.5" />
           </div>
-          {/* Desktop: 2×2 grid */}
-          <div className="hidden lg:grid grid-cols-2 gap-2.5">
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
+          {/* Desktop: thumbnail column + featured image */}
+          <div className="hidden lg:flex gap-2.5">
+            <div className="flex flex-col gap-2.5 w-20 shrink-0">
+              {["a", "b", "c", "d"].map((key) => (
+                <Skeleton key={key} className="aspect-square w-full rounded-lg" />
+              ))}
+            </div>
+            <Skeleton className="flex-1 aspect-square rounded-lg" />
           </div>
         </div>
-        <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+        <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-5">
           <Skeleton className="h-40 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
