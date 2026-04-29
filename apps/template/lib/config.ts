@@ -39,7 +39,7 @@ export const navItems: MenuItem[] = [
   {
     id: "nav-shop",
     title: "Shop",
-    url: "#",
+    url: "/search",
     type: "HTTP",
     items: [
       {

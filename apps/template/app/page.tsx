@@ -41,7 +41,8 @@ export default async function HomePage() {
           hero={{
             id: "homepage-hero",
             headline: "The Outdoor Edit",
-            subheadline: null,
+            subheadline:
+              "Layered shells, technical knits, and trail-ready pieces built for the climate ahead.",
             backgroundImage: {
               url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/a60299db-53b9-433c-8ed8-1536b094bdee-1-eZIhPYkLEQmYZi0Wfy4znewVcLR3CP_4483df00-a8e6-409b-ad89-0765b64918d6.png?v=1776523442",
               alt: "The Outdoor Edit",
@@ -61,6 +62,24 @@ export default async function HomePage() {
             collectionUrl="/search"
           />
         </Container>
+
+        <BannerSection
+          headingLevel="h2"
+          hero={{
+            id: "homepage-rugs",
+            headline: "Eye-Catching Interior Rugs",
+            subheadline:
+              "Hand-tufted forms and graphic prints to anchor every room with quiet character.",
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/06d5df4c-347b-4b6b-91d1-c6bbade245ba-2-GOxxEWNRZj0NgqxVk1TPPyAXvdRi0c.png?v=1776523437",
+              alt: "Eye-catching interior rugs",
+              width: 1920,
+              height: 640,
+            },
+            ctaText: "Shop Rugs",
+            ctaLink: "/collections/rugs",
+          }}
+        />
       </Sections>
     </Page>
   );
