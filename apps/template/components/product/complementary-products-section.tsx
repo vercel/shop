@@ -16,15 +16,17 @@ function Fallback({ title }: { title: string }) {
       <div className="border-b bg-muted/50 px-2.5 py-2">
         <h2 className="text-sm font-medium">{title}</h2>
       </div>
-      <div className="grid grid-cols-3 gap-2.5 p-2.5">
+      <ul className="divide-y">
         {["a", "b", "c"].map((key) => (
-          <div key={key} className="grid gap-2">
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="h-3 w-full rounded-none" />
-            <Skeleton className="h-3 w-12 rounded-none" />
-          </div>
+          <li key={key} className="flex gap-2.5 p-2.5">
+            <Skeleton className="size-16 shrink-0 rounded-none" />
+            <div className="flex-1 min-w-0 flex flex-col gap-2 py-0.5">
+              <Skeleton className="h-4 w-3/4 rounded-none" />
+              <Skeleton className="h-3 w-12 rounded-none" />
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
@@ -43,40 +45,39 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
       <div className="border-b bg-muted/50 px-2.5 py-2">
         <h2 className="text-sm font-medium">{t("pairsWellWith")}</h2>
       </div>
-      <div className="grid grid-cols-3 gap-2.5 p-2.5">
+      <ul className="divide-y">
         {products.map((product) => (
-          <Link
-            key={product.id}
-            href={
-              product.defaultVariantNumericId
-                ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}`
-                : `/products/${product.handle}`
-            }
-            className="grid gap-2 group"
-          >
-            <div className="relative aspect-square overflow-hidden bg-muted">
-              {product.featuredImage?.url ? (
-                <Image
-                  src={product.featuredImage.url}
-                  alt={product.featuredImage.altText || product.title}
-                  fill
-                  className="object-cover transition-opacity group-hover:opacity-90"
-                  sizes="(min-width: 1024px) 12vw, 30vw"
+          <li key={product.id}>
+            <Link
+              href={`/products/${product.handle}`}
+              className="flex gap-2.5 p-2.5 group hover:bg-muted/40 transition-colors"
+            >
+              <div className="relative size-16 shrink-0 overflow-hidden bg-muted">
+                {product.featuredImage?.url ? (
+                  <Image
+                    src={product.featuredImage.url}
+                    alt={product.featuredImage.altText || product.title}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                ) : null}
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col gap-1 py-0.5">
+                <p className="text-sm font-medium text-foreground line-clamp-2 leading-4">
+                  {product.title}
+                </p>
+                <Price
+                  amount={product.price.amount}
+                  currencyCode={product.price.currencyCode}
+                  locale={locale}
+                  className="text-xs text-muted-foreground"
                 />
-              ) : null}
-            </div>
-            <p className="text-xs font-medium text-foreground line-clamp-2 leading-4">
-              {product.title}
-            </p>
-            <Price
-              amount={product.price.amount}
-              currencyCode={product.price.currencyCode}
-              locale={locale}
-              className="text-xs text-muted-foreground"
-            />
-          </Link>
+              </div>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }
