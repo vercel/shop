@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
+import { CollectionSlider } from "@/components/product/collection-slider";
 import { FeaturedProducts } from "@/components/product/products-grid";
 import { BannerSection } from "@/components/sections/banner-section";
 import { Container } from "@/components/ui/container";
@@ -76,6 +77,27 @@ export default async function HomePage() {
             },
             ctaText: "Shop Rugs",
             ctaLink: "/collections/rugs",
+          }}
+        />
+
+        <Container>
+          <CollectionSlider collection="bookcases" title="Shop Bookcases" locale={locale} />
+        </Container>
+
+        <BannerSection
+          headingLevel="h2"
+          hero={{
+            id: "homepage-bedroom-sale",
+            headline: "The Semi-Annual Bedroom Sale",
+            subheadline: null,
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/ba52372f-eace-4eca-a867-d92aed5bab5b-color-smoked-ash-oxWB0cyHNJnTlCbm8GGURF572Y8LgF.png?v=1776523451",
+              alt: "The Semi-Annual Bedroom Sale",
+              width: 1920,
+              height: 640,
+            },
+            ctaText: "Shop the Sale",
+            ctaLink: "/collections/bedroom",
           }}
         />
       </Sections>
