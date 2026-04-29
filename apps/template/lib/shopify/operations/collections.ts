@@ -18,7 +18,10 @@ type CollectionResponse = {
   collection: ShopifyCollection | null;
 };
 
-export async function getCollections(locale: string = defaultLocale): Promise<Collection[]> {
+export async function getCollections({
+  limit = 250,
+  locale = defaultLocale,
+}: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("collections");
@@ -52,7 +55,7 @@ export async function getCollections(locale: string = defaultLocale): Promise<Co
         }
       }
     `,
-    variables: { first: 250, country, language },
+    variables: { first: limit, country, language },
   });
 
   const rawCollections = data.collections.edges.map((edge) => edge.node);

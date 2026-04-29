@@ -8,8 +8,9 @@ import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
 
 export async function generateStaticParams() {
-  const collections = await getCollections();
-  return collections.map((collection) => ({ handle: collection.handle }));
+  const collections = await getCollections({ limit: 1 });
+  const first = collections[0];
+  return first ? [{ handle: first.handle }] : [];
 }
 
 export async function generateMetadata({
