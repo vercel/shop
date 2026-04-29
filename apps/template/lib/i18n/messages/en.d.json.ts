@@ -254,6 +254,9 @@ declare const messages: {
       ariaLabel: "Rated {rating} out of 5 stars, {count, plural, one {# review} other {# reviews}}";
     };
     recommendations: "You May Also Like";
+    reviews: {
+      title: "Customer Reviews";
+    };
     seeAllSpecs: "See all specs";
     selectVariant: "Please select a variant";
     selectVariantLabel: "Select {name}: {value}";
