@@ -249,7 +249,7 @@ declare const messages: {
     noImage: "No image";
     officialStore: "Official Store";
     outOfStock: "Out of Stock";
-    pairsWellWith: "Pairs well with";
+    pairsWellWith: "Pairs Well With";
     quantity: "Quantity";
     rating: {
       ariaLabel: "Rated {rating} out of 5 stars, {count, plural, one {# review} other {# reviews}}";

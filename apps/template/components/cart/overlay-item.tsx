@@ -53,7 +53,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             href={`/products/${item.merchandise.product.handle}`}
             className="hover:opacity-70 transition-opacity"
           >
-            <h3 className="font-medium text-sm text-foreground line-clamp-2">
+            <h3 className="font-semibold text-sm text-foreground line-clamp-2">
               {item.merchandise.product.title}
             </h3>
           </Link>

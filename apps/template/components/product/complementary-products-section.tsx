@@ -64,7 +64,7 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
                 ) : null}
               </div>
               <div className="flex-1 min-w-0 flex flex-col gap-1 py-0.5">
-                <p className="text-sm font-medium text-foreground line-clamp-2 leading-4">
+                <p className="text-sm font-semibold text-foreground line-clamp-2 leading-4">
                   {product.title}
                 </p>
                 <Price
