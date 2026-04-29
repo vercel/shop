@@ -20,28 +20,25 @@ The template fetches up to 50 variants per product and 10 media items.
 
 ## Metafields
 
-The template fetches 14 specific metafields to populate a product specs section. These are optional - if a metafield doesn't exist on a product, it's simply not displayed.
+The template ships with **no metafield identifiers** in `PRODUCT_FRAGMENT`. Metafield namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults.
 
-| Namespace | Key | Display label |
-|---|---|---|
-| `custom` | `material` | Material |
-| `custom` | `dimensions` | Dimensions |
-| `custom` | `weight` | Weight |
-| `custom` | `connectivity` | Connectivity |
-| `custom` | `battery_life` | Battery Life |
-| `custom` | `warranty` | Warranty |
-| `custom` | `country_of_origin` | Country of Origin |
-| `custom` | `model_number` | Model Number |
-| `specs` | `material` | Material |
-| `specs` | `dimensions` | Dimensions |
-| `specs` | `weight` | Weight |
-| `specs` | `connectivity` | Connectivity |
-| `specs` | `battery_life` | Battery Life |
-| `specs` | `warranty` | Warranty |
+To wire metafields into the PDP for your store:
 
-Both the `custom` and `specs` namespaces are queried. If you use a different namespace for product specs, update the metafield identifiers in `lib/shopify/fragments.ts` and the label map in `lib/shopify/transforms/product.ts`.
+1. Add a `metafields(identifiers: [...])` field to `PRODUCT_FRAGMENT` in `lib/shopify/fragments.ts`, importing `${METAFIELD_FRAGMENT}` and selecting `...MetafieldFields` inside.
+2. Extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for the keys you query.
 
-To add these metafields in Shopify admin: **Settings → Custom data → Products → Add definition**.
+Example:
+
+```graphql
+metafields(identifiers: [
+  {namespace: "custom", key: "material"},
+  {namespace: "custom", key: "warranty"},
+]) {
+  ...MetafieldFields
+}
+```
+
+Define metafields in Shopify admin under **Settings → Custom data → Products → Add definition**.
 
 ## Color swatches
 

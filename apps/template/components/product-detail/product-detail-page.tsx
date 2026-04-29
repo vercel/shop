@@ -9,7 +9,7 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
-import type { ProductDetails } from "@/lib/types";
+import type { ProductDetails, ProductReviews } from "@/lib/types";
 
 import { ProductDetailSection } from "./product-detail-section";
 
@@ -53,10 +53,12 @@ function ProductPageFallback() {
 
 async function ProductContent({
   productPromise,
+  reviewsPromise,
   locale,
   variantIdPromise,
 }: {
   productPromise: Promise<ProductDetails>;
+  reviewsPromise: Promise<ProductReviews>;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
@@ -84,6 +86,7 @@ async function ProductContent({
       <Sections>
         <ProductDetailSection
           product={product}
+          reviewsPromise={reviewsPromise}
           locale={locale}
           variantIdPromise={variantIdPromise}
         />
@@ -95,10 +98,12 @@ async function ProductContent({
 
 export async function ProductDetailPage({
   productPromise,
+  reviewsPromise,
   locale,
   variantIdPromise,
 }: {
   productPromise: Promise<ProductDetails>;
+  reviewsPromise: Promise<ProductReviews>;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
@@ -108,6 +113,7 @@ export async function ProductDetailPage({
         <Suspense fallback={<ProductPageFallback />}>
           <ProductContent
             productPromise={productPromise}
+            reviewsPromise={reviewsPromise}
             locale={locale}
             variantIdPromise={variantIdPromise}
           />

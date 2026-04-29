@@ -29,16 +29,19 @@ import type {
   Image as ImageType,
   ProductDetails,
   ProductOption,
+  ProductReviews,
   ProductVariant,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export async function ProductDetailSection({
   product,
+  reviewsPromise,
   locale,
   variantIdPromise,
 }: {
   product: ProductDetails;
+  reviewsPromise: Promise<ProductReviews>;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
@@ -61,12 +64,11 @@ export async function ProductDetailSection({
   const allInStock = variants[0]?.availableForSale ?? true;
 
   const tProduct = await getTranslations("product");
-  const ratingAriaLabel = product.reviews
-    ? tProduct("rating.ariaLabel", {
-        rating: product.reviews.rating.toFixed(1),
-        count: product.reviews.count,
-      })
-    : undefined;
+  const reviews = await reviewsPromise;
+  const ratingAriaLabel = tProduct("rating.ariaLabel", {
+    rating: reviews.rating.toFixed(1),
+    count: reviews.count,
+  });
 
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
@@ -126,8 +128,8 @@ export async function ProductDetailSection({
       <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
         <div data-slot="product-info-header">
           <ProductRating
-            rating={product.reviews?.rating ?? null}
-            count={product.reviews?.count ?? null}
+            rating={reviews.rating}
+            count={reviews.count}
             ariaLabel={ratingAriaLabel}
             locale={locale}
           />

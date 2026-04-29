@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product-detail/product-detail-page";
 import { getLocale } from "@/lib/params";
+import { getProductReviews } from "@/lib/reviews/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCatalogProducts, getProduct } from "@/lib/shopify/operations/products";
 
@@ -89,11 +90,14 @@ export default async function ProductPage({
     getProduct(handle, locale).catch(() => notFound()),
   );
 
+  const reviewsPromise = handlePromise.then((handle) => getProductReviews(handle));
+
   const variantIdPromise = searchParams.then((sp) => sp?.variantId as string | undefined);
 
   return (
     <ProductDetailPage
       productPromise={productPromise}
+      reviewsPromise={reviewsPromise}
       locale={locale}
       variantIdPromise={variantIdPromise}
     />
