@@ -61,7 +61,6 @@ export const PRODUCT_FRAGMENT = `
   ${IMAGE_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
-  ${METAFIELD_FRAGMENT}
   fragment ProductFields on Product {
     id
     title
@@ -151,24 +150,6 @@ export const PRODUCT_FRAGMENT = `
           handle
         }
       }
-    }
-    metafields(identifiers: [
-      {namespace: "custom", key: "material"},
-      {namespace: "custom", key: "dimensions"},
-      {namespace: "custom", key: "weight"},
-      {namespace: "custom", key: "connectivity"},
-      {namespace: "custom", key: "battery_life"},
-      {namespace: "custom", key: "warranty"},
-      {namespace: "custom", key: "country_of_origin"},
-      {namespace: "custom", key: "model_number"},
-      {namespace: "specs", key: "material"},
-      {namespace: "specs", key: "dimensions"},
-      {namespace: "specs", key: "weight"},
-      {namespace: "specs", key: "connectivity"},
-      {namespace: "specs", key: "battery_life"},
-      {namespace: "specs", key: "warranty"},
-    ]) {
-      ...MetafieldFields
     }
   }
 `;
