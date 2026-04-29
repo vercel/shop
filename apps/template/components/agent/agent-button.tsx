@@ -14,7 +14,7 @@ export function AgentButton() {
       <button
         ref={triggerRef}
         type="button"
-        className="flex items-center gap-1.5 px-2 py-1"
+        className="flex items-center gap-1.5 px-2 py-1 text-link-foreground"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
