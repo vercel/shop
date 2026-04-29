@@ -20,20 +20,25 @@ The template fetches up to 50 variants per product and 10 media items.
 
 ## Metafields
 
-The template fetches a small set of metafields to populate a product specs section, all under the `specs` namespace. These are optional — if a metafield doesn't exist on a product, it's simply not displayed.
+The template ships with **no metafield identifiers** in `PRODUCT_FRAGMENT`. Metafield namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults.
 
-| Namespace | Key | Display label |
-|---|---|---|
-| `specs` | `material` | Material |
-| `specs` | `dimensions` | Dimensions |
-| `specs` | `weight` | Weight |
-| `specs` | `connectivity` | Connectivity |
-| `specs` | `battery_life` | Battery Life |
-| `specs` | `warranty` | Warranty |
+To wire metafields into the PDP for your store:
 
-The `custom` namespace is intentionally not queried by default. Each storefront's `custom` keys are shop-specific, so the template doesn't presume them. If you use the `custom` namespace (or any other namespace) for product specs, add identifiers to `lib/shopify/fragments.ts` and extend the label map in `lib/shopify/transforms/product.ts`.
+1. Add a `metafields(identifiers: [...])` field to `PRODUCT_FRAGMENT` in `lib/shopify/fragments.ts`, importing `${METAFIELD_FRAGMENT}` and selecting `...MetafieldFields` inside.
+2. Extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for the keys you query.
 
-To add these metafields in Shopify admin: **Settings → Custom data → Products → Add definition**.
+Example:
+
+```graphql
+metafields(identifiers: [
+  {namespace: "custom", key: "material"},
+  {namespace: "custom", key: "warranty"},
+]) {
+  ...MetafieldFields
+}
+```
+
+Define metafields in Shopify admin under **Settings → Custom data → Products → Add definition**.
 
 ## Color swatches
 
