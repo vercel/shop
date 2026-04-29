@@ -13,7 +13,6 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { TopBar } from "@/components/nav/top-bar";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { NewsletterSection } from "@/components/sections/newsletter-section";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -60,7 +59,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
             </main>
-            <NewsletterSection />
             <Footer locale={locale} />
             <Suspense>
               <CartOverlayWithAddress locale={locale} />

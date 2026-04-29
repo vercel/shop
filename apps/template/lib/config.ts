@@ -25,7 +25,13 @@ export interface SocialLink {
 
 export const siteConfig = {
   name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Hausu",
-  socialLinks: [] as SocialLink[],
+  socialLinks: [
+    { platform: "instagram", url: "#" },
+    { platform: "x", url: "#" },
+    { platform: "tiktok", url: "#" },
+    { platform: "youtube", url: "#" },
+    { platform: "pinterest", url: "#" },
+  ] as SocialLink[],
   url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
 } as const;
 

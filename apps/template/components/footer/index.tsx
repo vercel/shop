@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { NewsletterSection } from "@/components/sections/newsletter-section";
 import { Sections } from "@/components/ui/sections";
 import { footerItems, siteConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/types/menu";
@@ -14,6 +15,7 @@ export function Footer({ locale }: { locale: string }) {
     <footer>
       <div className="mx-auto px-5 pt-10 pb-22 lg:px-10">
         <Sections className="gap-10">
+          <NewsletterSection />
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <p className="text-sm text-muted-foreground leading-5">
