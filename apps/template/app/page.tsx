@@ -40,8 +40,14 @@ export default async function HomePage() {
         <BannerSection
           hero={{
             id: "homepage-hero",
-            headline: "Agentic Infrastructure for Commerce",
-            subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
+            headline: "The Outdoor Edit",
+            subheadline: null,
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/a60299db-53b9-433c-8ed8-1536b094bdee-1-eZIhPYkLEQmYZi0Wfy4znewVcLR3CP_4483df00-a8e6-409b-ad89-0765b64918d6.png?v=1776523442",
+              alt: "The Outdoor Edit",
+              width: 1920,
+              height: 640,
+            },
             ctaText: "Browse the Catalog",
             ctaLink: "/search",
           }}

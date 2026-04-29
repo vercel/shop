@@ -8,6 +8,7 @@
   --breakpoint-4xl: 140rem; /* 2240px */
 
   --color-background: var(--background);
+  --color-chartreuse: var(--chartreuse);
   --color-foreground: var(--foreground);
   --color-link: var(--link);
   --color-link-foreground: var(--link-foreground);
@@ -75,6 +76,7 @@
   ); /* 64px = h-16 single nav row + safe area */
   --radius: 0.625rem;
   --background: #ffffff;
+  --chartreuse: #ccff00;
   --foreground: #010101;
   --link: #0a1f4b;
   --link-foreground: #ffffff;
