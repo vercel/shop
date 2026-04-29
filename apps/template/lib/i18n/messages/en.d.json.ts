@@ -181,6 +181,13 @@ declare const messages: {
     toggleAiSearch: "Toggle AI Search";
     zipCode: "ZIP code";
   };
+  newsletter: {
+    ariaLabel: "Newsletter signup";
+    description: "Sign up for new arrivals, exclusive drops, and members-only sales.";
+    emailPlaceholder: "you@example.com";
+    heading: "Stay in the Loop";
+    signUp: "Sign Up";
+  };
   product: {
     aboutThisItem: "Description";
     addedToCart: "✓ Added to Cart!";
