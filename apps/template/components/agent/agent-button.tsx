@@ -18,7 +18,7 @@ export function AgentButton() {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
-        <MessageCircle className="size-4 text-primary" />
+        <MessageCircle className="size-4" />
         <span className="sr-only">Agent</span>
       </button>
       {open && <AgentPanel open={open} onOpenChange={setOpen} triggerRef={triggerRef} />}
