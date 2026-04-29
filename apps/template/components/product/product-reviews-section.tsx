@@ -39,6 +39,8 @@ async function Render({
     getProductReviewSnippets(handle, title, description),
   ]);
 
+  if (reviews.length === 0) return null;
+
   return (
     <div className="grid gap-4">
       <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">

@@ -12,17 +12,13 @@ export interface ProductReviewSnippet {
 }
 
 const ReviewSnippetSchema = z.object({
-  score: z.number().int().min(3).max(5).describe("Whole-star rating from 3 to 5"),
+  score: z.number().min(3).max(5).describe("Whole-star rating from 3 to 5"),
   name: z.string().describe("First name + last initial, e.g. 'Sarah K.'"),
-  text: z
-    .string()
-    .min(120)
-    .max(140)
-    .describe("Review body, 120-140 characters, tone matching the score"),
+  text: z.string().describe("Review body, 120-140 characters, tone matching the score"),
 });
 
 const ReviewSnippetsSchema = z.object({
-  reviews: z.array(ReviewSnippetSchema).length(3),
+  reviews: z.array(ReviewSnippetSchema),
 });
 
 export async function getProductReviewSnippets(
@@ -31,24 +27,35 @@ export async function getProductReviewSnippets(
   description: string,
 ): Promise<ProductReviewSnippet[]> {
   "use cache";
-  cacheLife("max");
+  // 24h revalidate (not "max"): if the AI call fails during a build with no
+  // gateway access, we cache `[]` for that day rather than poisoning the
+  // per-handle cache permanently.
+  cacheLife("days");
   cacheTag(`product-review-snippets-${handle}`);
 
-  const { output } = await generateText({
-    model: "anthropic/claude-sonnet-4.6",
-    output: Output.object({ schema: ReviewSnippetsSchema }),
-    prompt: [
-      `Write 3 distinct customer reviews for the product below.`,
-      `Each review needs a whole-star score from 3 to 5, a reviewer name as "First L." (first name + last initial), and a 120–140 character body whose tone matches the score (5 is enthusiastic, 4 is positive with a small caveat, 3 is mixed).`,
-      `Keep voices varied. Do not use emojis. Do not mention shipping, packaging, or refunds.`,
-      ``,
-      `Product: ${title}`,
-      `Handle: ${handle}`,
-      `Description: ${description}`,
-    ].join("\n"),
-  });
+  try {
+    const { output } = await generateText({
+      model: "anthropic/claude-sonnet-4.6",
+      output: Output.object({ schema: ReviewSnippetsSchema }),
+      prompt: [
+        `Write 3 distinct customer reviews for the product below.`,
+        `Each review needs a whole-star score from 3 to 5, a reviewer name as "First L." (first name + last initial), and a body of roughly 120–140 characters whose tone matches the score (5 is enthusiastic, 4 is positive with a small caveat, 3 is mixed).`,
+        `Keep voices varied. Do not use emojis. Do not mention shipping, packaging, or refunds.`,
+        ``,
+        `Product: ${title}`,
+        `Handle: ${handle}`,
+        `Description: ${description}`,
+      ].join("\n"),
+    });
 
-  return output.reviews;
+    return output.reviews.slice(0, 3).map((r) => ({
+      score: Math.max(3, Math.min(5, Math.round(r.score))),
+      name: r.name,
+      text: r.text,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 export async function getProductReviews(handle: string): Promise<ProductReviews> {
