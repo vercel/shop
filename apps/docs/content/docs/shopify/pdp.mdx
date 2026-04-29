@@ -20,18 +20,10 @@ The template fetches up to 50 variants per product and 10 media items.
 
 ## Metafields
 
-The template fetches 14 specific metafields to populate a product specs section. These are optional - if a metafield doesn't exist on a product, it's simply not displayed.
+The template fetches a small set of metafields to populate a product specs section, all under the `specs` namespace. These are optional — if a metafield doesn't exist on a product, it's simply not displayed.
 
 | Namespace | Key | Display label |
 |---|---|---|
-| `custom` | `material` | Material |
-| `custom` | `dimensions` | Dimensions |
-| `custom` | `weight` | Weight |
-| `custom` | `connectivity` | Connectivity |
-| `custom` | `battery_life` | Battery Life |
-| `custom` | `warranty` | Warranty |
-| `custom` | `country_of_origin` | Country of Origin |
-| `custom` | `model_number` | Model Number |
 | `specs` | `material` | Material |
 | `specs` | `dimensions` | Dimensions |
 | `specs` | `weight` | Weight |
@@ -39,7 +31,7 @@ The template fetches 14 specific metafields to populate a product specs section.
 | `specs` | `battery_life` | Battery Life |
 | `specs` | `warranty` | Warranty |
 
-Both the `custom` and `specs` namespaces are queried. If you use a different namespace for product specs, update the metafield identifiers in `lib/shopify/fragments.ts` and the label map in `lib/shopify/transforms/product.ts`.
+The `custom` namespace is intentionally not queried by default. Each storefront's `custom` keys are shop-specific, so the template doesn't presume them. If you use the `custom` namespace (or any other namespace) for product specs, add identifiers to `lib/shopify/fragments.ts` and extend the label map in `lib/shopify/transforms/product.ts`.
 
 To add these metafields in Shopify admin: **Settings → Custom data → Products → Add definition**.
 

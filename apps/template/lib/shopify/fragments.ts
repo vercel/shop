@@ -153,14 +153,6 @@ export const PRODUCT_FRAGMENT = `
       }
     }
     metafields(identifiers: [
-      {namespace: "custom", key: "material"},
-      {namespace: "custom", key: "dimensions"},
-      {namespace: "custom", key: "weight"},
-      {namespace: "custom", key: "connectivity"},
-      {namespace: "custom", key: "battery_life"},
-      {namespace: "custom", key: "warranty"},
-      {namespace: "custom", key: "country_of_origin"},
-      {namespace: "custom", key: "model_number"},
       {namespace: "specs", key: "material"},
       {namespace: "specs", key: "dimensions"},
       {namespace: "specs", key: "weight"},
