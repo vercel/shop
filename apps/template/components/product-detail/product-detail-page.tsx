@@ -1,8 +1,15 @@
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { ProductSchema } from "@/components/product-detail/schema";
-import { ProductReviewsSection } from "@/components/product/product-reviews-section";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
+import {
+  ProductReviewsSection,
+  ProductReviewsSectionSkeleton,
+} from "@/components/product/product-reviews-section";
+import {
+  RelatedProductsSection,
+  RelatedProductsSectionSkeleton,
+} from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -25,7 +32,13 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
   );
 }
 
-function ProductPageFallback() {
+function ProductPageFallback({
+  reviewsTitle,
+  recommendationsTitle,
+}: {
+  reviewsTitle: string;
+  recommendationsTitle: string;
+}) {
   return (
     <Sections>
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
@@ -50,6 +63,8 @@ function ProductPageFallback() {
           <Skeleton className="h-32 w-full" />
         </div>
       </div>
+      <ProductReviewsSectionSkeleton title={reviewsTitle} />
+      <RelatedProductsSectionSkeleton title={recommendationsTitle} />
     </Sections>
   );
 }
@@ -116,10 +131,18 @@ export async function ProductDetailPage({
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
 }) {
+  const t = await getTranslations("product");
   return (
     <Page className="pt-0">
       <Container className="bg-background">
-        <Suspense fallback={<ProductPageFallback />}>
+        <Suspense
+          fallback={
+            <ProductPageFallback
+              reviewsTitle={t("reviews.title")}
+              recommendationsTitle={t("recommendations")}
+            />
+          }
+        >
           <ProductContent
             productPromise={productPromise}
             reviewsPromise={reviewsPromise}

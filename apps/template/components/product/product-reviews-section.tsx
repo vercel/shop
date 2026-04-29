@@ -6,10 +6,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductReviewSnippets, type ProductReviewSnippet } from "@/lib/reviews/server";
 
-function Fallback({ title }: { title: string }) {
+export function ProductReviewsSectionSkeleton({ title }: { title?: string }) {
   return (
     <div className="grid gap-4">
-      <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
+      {title ? (
+        <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">
+          {title}
+        </h2>
+      ) : (
+        <Skeleton className="h-7 w-48 rounded-none sm:h-9" />
+      )}
       <div className="grid gap-5 sm:grid-cols-3">
         {["a", "b", "c"].map((key) => (
           <div key={key} className="grid gap-2.5">
@@ -94,7 +100,7 @@ export async function ProductReviewsSection({
 }) {
   const t = await getTranslations("product");
   return (
-    <Suspense fallback={<Fallback title={t("reviews.title")} />}>
+    <Suspense fallback={<ProductReviewsSectionSkeleton title={t("reviews.title")} />}>
       <Render handle={handle} title={title} description={description} locale={locale} />
     </Suspense>
   );

@@ -7,13 +7,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
-function Fallback({ title }: { title: string }) {
+export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
   return (
     <div className="overflow-x-clip">
       <div className="mx-auto min-w-0 grid gap-4">
-        <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">
-          {title}
-        </h2>
+        {title ? (
+          <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">
+            {title}
+          </h2>
+        ) : (
+          <Skeleton className="h-7 w-48 rounded-none sm:h-9" />
+        )}
         <div className="grid grid-flow-col gap-5 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]">
           {["a", "b", "c", "d"].map((key) => (
             <div key={key}>
@@ -52,7 +56,7 @@ export async function RelatedProductsSection({
 }) {
   const t = await getTranslations("product");
   return (
-    <Suspense fallback={<Fallback title={t("recommendations")} />}>
+    <Suspense fallback={<RelatedProductsSectionSkeleton title={t("recommendations")} />}>
       <Render handle={handle} locale={locale} />
     </Suspense>
   );
