@@ -70,7 +70,7 @@ export async function ProductDetailSection({
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
       {needsPartitioning ? (
-        <Suspense fallback={<MediaSkeleton className="lg:col-span-5" />}>
+        <Suspense fallback={<MediaSkeleton className="lg:col-span-5 lg:sticky lg:top-20" />}>
           <ResolvedMedia
             images={images}
             options={options}
@@ -78,18 +78,18 @@ export async function ProductDetailSection({
             videos={videos}
             title={title}
             variantIdPromise={variantIdPromise}
-            className="lg:col-span-5"
+            className="lg:col-span-5 lg:sticky lg:top-20"
           />
         </Suspense>
       ) : (
         <ProductMedia
           mediaItems={buildMediaItems([], videos, images)}
           title={title}
-          className="lg:col-span-5"
+          className="lg:col-span-5 lg:sticky lg:top-20"
         />
       )}
 
-      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-5">
+      <div className="grid gap-10 lg:col-span-5">
         <div data-slot="product-info-header">
           <ProductRating
             rating={reviews.rating}

@@ -29,7 +29,7 @@ function ProductPageFallback() {
   return (
     <Sections>
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 lg:sticky lg:top-20">
           {/* Mobile: single full-bleed square + pagination space */}
           <div className="grid gap-5 lg:hidden -mx-5">
             <Skeleton className="aspect-square w-full rounded-none" />
@@ -45,7 +45,7 @@ function ProductPageFallback() {
             <Skeleton className="flex-1 aspect-square rounded-none" />
           </div>
         </div>
-        <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-5">
+        <div className="grid gap-10 lg:col-span-5">
           <Skeleton className="h-40 w-full" />
           <Skeleton className="h-32 w-full" />
         </div>
