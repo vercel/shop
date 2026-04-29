@@ -17,7 +17,7 @@ export default async function NotFoundError() {
           <p className="text-sm md:text-base text-muted-foreground max-w-xl">{t("notFoundDesc")}</p>
           <Link
             href="/search"
-            className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+            className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-link text-link-foreground hover:bg-link/90 transition-colors"
           >
             {t("continueShopping")}
           </Link>

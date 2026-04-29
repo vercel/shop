@@ -204,14 +204,14 @@ export async function ProductDetailSection({
                     <span className="text-sm font-medium">{t("buyWithShop")}</span>
                     <ShopLogo className="h-4 w-auto" />
                   </div>
-                  <div className="col-span-6 flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
+                  <div className="col-span-6 flex items-center justify-center rounded-lg h-12 bg-link text-link-foreground text-sm font-medium">
                     {allInStock ? t("addToCart") : t("outOfStock")}
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-10 gap-2.5">
                   <div className="col-span-4 h-12 rounded-lg bg-shop" />
-                  <div className="col-span-6 h-12 rounded-lg bg-foreground" />
+                  <div className="col-span-6 h-12 rounded-lg bg-link" />
                 </div>
               )
             }

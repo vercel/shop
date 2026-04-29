@@ -58,7 +58,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
           {column.url ? (
             <MenuLink
               url={column.url}
-              className="block font-display text-sm font-semibold hover:opacity-70 transition-opacity"
+              className="block font-display text-sm font-semibold text-link hover:opacity-70 transition-opacity"
             >
               {column.title}
             </MenuLink>
@@ -71,7 +71,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
                 <li key={leaf.id}>
                   <MenuLink
                     url={leaf.url}
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="block text-sm text-link hover:opacity-70 transition-opacity"
                   >
                     {leaf.title}
                   </MenuLink>

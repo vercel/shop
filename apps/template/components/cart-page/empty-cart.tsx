@@ -11,7 +11,7 @@ export async function Empty() {
       </h2>
       <Link
         href="/"
-        className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+        className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-link text-link-foreground hover:bg-link/90 transition-colors"
       >
         {t("continueShopping")}
       </Link>

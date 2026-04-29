@@ -89,7 +89,7 @@ function MobileMenuList({
             <MenuLink
               url={item.url}
               onClick={onLinkClick}
-              className="text-base transition-colors hover:text-muted-foreground"
+              className="text-base text-link transition-opacity hover:opacity-70"
             >
               {item.title}
             </MenuLink>
@@ -104,14 +104,14 @@ function MobileMenuList({
       {items.map((item) =>
         item.items.length > 0 ? (
           <AccordionItem key={item.id} value={item.id}>
-            <AccordionTrigger className="py-3 text-base">{item.title}</AccordionTrigger>
+            <AccordionTrigger className="py-3 text-base text-link">{item.title}</AccordionTrigger>
             <AccordionContent>
               <NestedItems items={item.items} onLinkClick={onLinkClick} />
               {item.url ? (
                 <MenuLink
                   url={item.url}
                   onClick={onLinkClick}
-                  className="mt-3 block text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors"
+                  className="mt-3 block text-xs font-medium uppercase tracking-wide text-link hover:opacity-70 transition-opacity"
                 >
                   {showAllLabel(item.title)}
                 </MenuLink>
@@ -123,7 +123,7 @@ function MobileMenuList({
             <MenuLink
               url={item.url}
               onClick={onLinkClick}
-              className="flex py-3 text-base transition-colors hover:text-muted-foreground"
+              className="flex py-3 text-base text-link transition-opacity hover:opacity-70"
             >
               {item.title}
             </MenuLink>
@@ -142,7 +142,7 @@ function NestedItems({ items, onLinkClick }: { items: MenuItem[]; onLinkClick: (
           <MenuLink
             url={item.url}
             onClick={onLinkClick}
-            className="block text-sm font-medium hover:opacity-70 transition-opacity"
+            className="block text-sm font-medium text-link hover:opacity-70 transition-opacity"
           >
             {item.title}
           </MenuLink>
@@ -153,7 +153,7 @@ function NestedItems({ items, onLinkClick }: { items: MenuItem[]; onLinkClick: (
                   <MenuLink
                     url={leaf.url}
                     onClick={onLinkClick}
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="block text-sm text-link hover:opacity-70 transition-opacity"
                   >
                     {leaf.title}
                   </MenuLink>

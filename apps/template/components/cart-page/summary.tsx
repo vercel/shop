@@ -32,7 +32,7 @@ function CheckoutLink({
   }, []);
 
   const baseClassName =
-    "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-foreground text-background transition-colors";
+    "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-link text-link-foreground transition-colors";
 
   if (isUpdatingCart || isCheckingOut) {
     return (
@@ -48,7 +48,7 @@ function CheckoutLink({
   return (
     <button
       type="button"
-      className={cn(baseClassName, "hover:bg-foreground/90 cursor-pointer")}
+      className={cn(baseClassName, "hover:bg-link/90 cursor-pointer")}
       onClick={async () => {
         setIsCheckingOut(true);
         const { checkoutUrl: url } = await prepareCheckoutAction();

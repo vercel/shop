@@ -60,10 +60,7 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
               <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
             )}
             {hero.ctaText && hero.ctaLink && (
-              <Button
-                asChild
-                className="h-11 px-5 bg-background text-foreground hover:bg-background/90"
-              >
+              <Button asChild className="h-11 px-5 bg-link text-link-foreground hover:bg-link/90">
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>
             )}
