@@ -130,7 +130,7 @@ async function CollectionHeader({
       <BreadcrumbSchema items={breadcrumbItems} />
       <CollectionSchema collection={{ handle, title, description, updatedAt }} />
       <div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+        <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
           <Link href={`/collections/${handle}`}>{title}</Link>
         </h1>
         {description && <p className="mt-1 text-muted-foreground">{description}</p>}

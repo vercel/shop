@@ -136,7 +136,7 @@ declare const messages: {
     tryAgain: "Try again";
   };
   footer: {
-    copyright: "© {year} Vercel Shop. All rights reserved.";
+    copyright: "© {year} Hausu. All rights reserved.";
   };
   home: {
     title: "Enterprise Commerce Template";
@@ -317,7 +317,7 @@ declare const messages: {
     collectionFallbackTitle: "Collection";
     collectionsDescription: "Browse all product collections.";
     collectionsTitle: "Collections";
-    defaultDescription: "Shop premium products, curated collections, and latest offers from Vercel Shop.";
+    defaultDescription: "Shop premium products, curated collections, and latest offers from Hausu.";
     homeDescription: "Explore featured products, curated collections, and seasonal campaigns.";
     homeTitle: "Home";
     loginTitle: "Sign In";

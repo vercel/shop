@@ -133,7 +133,9 @@ export async function ProductDetailSection({
             ariaLabel={ratingAriaLabel}
             locale={locale}
           />
-          <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
+          <h1 className="font-display font-semibold text-foreground tracking-tight text-3xl">
+            {title}
+          </h1>
           {uniformPrice ? (
             variants[0] && (
               <ProductPrice
@@ -192,24 +194,24 @@ export async function ProductDetailSection({
           <Suspense
             fallback={
               t ? (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-10 gap-2.5">
                   <div
                     className={cn(
-                      "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
+                      "col-span-4 flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
                       !allInStock && "invisible",
                     )}
                   >
                     <span className="text-sm font-medium">{t("buyWithShop")}</span>
                     <ShopLogo className="h-4 w-auto" />
                   </div>
-                  <div className="flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
+                  <div className="col-span-6 flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
                     {allInStock ? t("addToCart") : t("outOfStock")}
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="h-12 rounded-lg bg-shop" />
-                  <div className="h-12 rounded-lg bg-foreground" />
+                <div className="grid grid-cols-10 gap-2.5">
+                  <div className="col-span-4 h-12 rounded-lg bg-shop" />
+                  <div className="col-span-6 h-12 rounded-lg bg-foreground" />
                 </div>
               )
             }

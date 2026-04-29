@@ -36,7 +36,7 @@ async function Render({
   if (products.length === 0) {
     return (
       <div className="py-10 text-center">
-        <h2 className="mb-2 text-2xl font-semibold">{t("noResults")}</h2>
+        <h2 className="mb-2 font-display text-2xl font-semibold">{t("noResults")}</h2>
         <p className="text-muted-foreground">{t("noResultsAvailable")}</p>
       </div>
     );

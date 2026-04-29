@@ -24,7 +24,7 @@ export interface SocialLink {
 }
 
 export const siteConfig = {
-  name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
+  name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Hausu",
   socialLinks: [] as SocialLink[],
   url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
 } as const;

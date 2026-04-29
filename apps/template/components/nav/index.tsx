@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { isAuthEnabled } from "@/lib/auth";
-import { navItems } from "@/lib/config";
+import { navItems, siteConfig } from "@/lib/config";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
@@ -22,7 +22,9 @@ export async function Nav({ locale }: { locale: string }) {
         <MobileMenu items={items} />
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl font-semibold leading-4 tracking-tight">Vercel Shop</span>
+          <span className="font-display text-xl font-semibold leading-4 tracking-tight">
+            {siteConfig.name}
+          </span>
         </Link>
 
         <QuickLinks items={items} />

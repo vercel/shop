@@ -17,7 +17,7 @@ export function Footer({ locale }: { locale: string }) {
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <p className="text-sm text-muted-foreground leading-5">
-              &copy; Vercel Shop. All rights reserved.
+              &copy; {siteConfig.name}. All rights reserved.
             </p>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>
@@ -58,12 +58,12 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
           {column.url ? (
             <MenuLink
               url={column.url}
-              className="block text-sm font-semibold hover:opacity-70 transition-opacity"
+              className="block font-display text-sm font-semibold hover:opacity-70 transition-opacity"
             >
               {column.title}
             </MenuLink>
           ) : (
-            <h3 className="text-sm font-semibold">{column.title}</h3>
+            <h3 className="font-display text-sm font-semibold">{column.title}</h3>
           )}
           {column.items.length > 0 && (
             <ul className="space-y-2">
