@@ -31,7 +31,7 @@ function SearchTrigger() {
     <DialogTrigger asChild>
       <button
         type="button"
-        className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
+        className="flex items-center justify-center text-link hover:opacity-70 transition-opacity"
       >
         <Search className="size-5" />
         <span className="sr-only">{t("search")}</span>

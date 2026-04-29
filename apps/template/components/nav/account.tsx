@@ -11,7 +11,7 @@ export async function NavAccount() {
     return (
       <Link
         href="/account/login"
-        className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
+        className="flex items-center justify-center text-link hover:opacity-70 transition-opacity"
       >
         <UserRoundIcon className="size-5" />
         <span className="sr-only">{t("signIn")}</span>
@@ -22,7 +22,7 @@ export async function NavAccount() {
   return (
     <Link
       href="/account"
-      className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
+      className="flex items-center justify-center text-link hover:opacity-70 transition-opacity"
     >
       <UserRoundCheckIcon className="size-5" />
       <span className="sr-only">{t("account")}</span>
@@ -32,7 +32,7 @@ export async function NavAccount() {
 
 export function NavAccountFallback() {
   return (
-    <span className="flex items-center justify-center text-foreground">
+    <span className="flex items-center justify-center text-link">
       <UserRoundIcon className="size-5" />
     </span>
   );

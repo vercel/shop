@@ -50,7 +50,11 @@ export function MobileMenu({ items }: { items: MenuItem[] }) {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button type="button" className="md:hidden -ml-2 p-2" aria-label={t("menu")}>
+        <button
+          type="button"
+          className="md:hidden -ml-2 p-2 text-link hover:opacity-70 transition-opacity"
+          aria-label={t("menu")}
+        >
           <Menu className="size-5" />
         </button>
       </SheetTrigger>
