@@ -83,6 +83,7 @@ export const unstable_instant = {
         sort: null,
       },
       cookies: [{ name: "shopify_cartId", value: null }],
+      headers: [["x-vercel-ip-postal-code", null]],
     },
   ],
 };

@@ -172,6 +172,7 @@ declare const messages: {
     searchPlaceholderAi: "AI-Powered Search";
     seeAll: "See All";
     setAddress: "Set address";
+    shippingTo: "Shipping to";
     shoppingAddress: "Shipping address";
     showAllCategory: "Show all {category}";
     signIn: "Sign in";

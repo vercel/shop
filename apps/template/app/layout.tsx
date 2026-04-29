@@ -11,6 +11,7 @@ import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
+import { TopBar } from "@/components/nav/top-bar";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
@@ -53,6 +54,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
+            <TopBar />
             <Nav locale={locale} />
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
