@@ -9,6 +9,7 @@
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-link: var(--link);
   --color-shop: #5A31F4;
   --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
@@ -74,6 +75,7 @@
   --radius: 0.625rem;
   --background: #ffffff;
   --foreground: #010101;
+  --link: #0011ff;
   --card: #ffffff;
   --card-foreground: #010101;
   --popover: #ffffff;
@@ -112,6 +114,9 @@
   .prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     letter-spacing: -0.025em; /* tracking-tight */
     font-weight: 600; /* font-semibold */
+  }
+  .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    color: var(--link);
   }
 }
 
