@@ -8,6 +8,7 @@ import type {
   ProductCard,
   ProductDetails,
   ProductOption,
+  ProductReviews,
   ProductVariant,
   Video,
 } from "@/lib/types";
@@ -273,11 +274,54 @@ function transformMetafields(
 
   return metafields
     .filter((mf): mf is ShopifyMetafield => mf !== null && mf.value !== "")
+    .filter((mf) => !(mf.namespace === "custom" && mf.key === "reviews"))
     .map((mf) => ({
       key: mf.key,
       label: METAFIELD_LABELS[mf.key] || formatKey(mf.key),
       value: mf.value,
     }));
+}
+
+function toFiniteNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+}
+
+function transformReviews(metafields?: (ShopifyMetafield | null)[]): ProductReviews | null {
+  const mf = metafields?.find(
+    (m): m is ShopifyMetafield =>
+      m !== null && m.namespace === "custom" && m.key === "reviews" && m.value !== "",
+  );
+  if (!mf) return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(mf.value);
+  } catch {
+    return null;
+  }
+  if (!parsed || typeof parsed !== "object") return null;
+
+  const obj = parsed as Record<string, unknown>;
+  const rating = toFiniteNumber(obj.rating ?? obj.value ?? obj.average);
+  const count = toFiniteNumber(obj.count ?? obj.total ?? obj.rating_count);
+  const scaleMax = toFiniteNumber(obj.scale_max);
+
+  if (rating === null) return null;
+
+  // Normalize to a 0–5 scale when the source uses a different max (e.g. Shopify's
+  // built-in `rating` type often uses a 1.0–5.0 scale_max).
+  const normalizedRating =
+    scaleMax && scaleMax > 0 && scaleMax !== 5 ? (rating / scaleMax) * 5 : rating;
+
+  return {
+    rating: Math.max(0, Math.min(5, normalizedRating)),
+    count: count !== null && count >= 0 ? Math.round(count) : 0,
+  };
 }
 
 function formatKey(key: string): string {
@@ -367,6 +411,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     categoryId: product.category?.id,
     collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
     metafields: transformMetafields(product.metafields),
+    reviews: transformReviews(product.metafields),
   };
 }
 

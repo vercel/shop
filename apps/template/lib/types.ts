@@ -76,6 +76,12 @@ export interface ProductDetails extends ProductCard {
   categoryId?: string;
   collectionHandles: string[];
   metafields?: Metafield[];
+  reviews?: ProductReviews | null;
+}
+
+export interface ProductReviews {
+  rating: number;
+  count: number;
 }
 
 export interface ProductVariant {

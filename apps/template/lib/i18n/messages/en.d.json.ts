@@ -249,6 +249,9 @@ declare const messages: {
     officialStore: "Official Store";
     outOfStock: "Out of Stock";
     quantity: "Quantity";
+    rating: {
+      ariaLabel: "Rated {rating} out of 5 stars, {count, plural, one {# review} other {# reviews}}";
+    };
     recommendations: "You May Also Like";
     seeAllSpecs: "See all specs";
     selectVariant: "Please select a variant";

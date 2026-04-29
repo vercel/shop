@@ -12,6 +12,7 @@ import {
   ProductMedia,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
+import { ProductRating } from "@/components/product-detail/product-rating";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
@@ -58,6 +59,14 @@ export async function ProductDetailSection({
 
   const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
   const allInStock = variants[0]?.availableForSale ?? true;
+
+  const tProduct = await getTranslations("product");
+  const ratingAriaLabel = product.reviews
+    ? tProduct("rating.ariaLabel", {
+        rating: product.reviews.rating.toFixed(1),
+        count: product.reviews.count,
+      })
+    : undefined;
 
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
@@ -116,6 +125,12 @@ export async function ProductDetailSection({
 
       <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
         <div data-slot="product-info-header">
+          <ProductRating
+            rating={product.reviews?.rating ?? null}
+            count={product.reviews?.count ?? null}
+            ariaLabel={ratingAriaLabel}
+            locale={locale}
+          />
           <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
           {uniformPrice ? (
             variants[0] && (

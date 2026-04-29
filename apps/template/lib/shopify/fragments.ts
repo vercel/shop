@@ -161,6 +161,7 @@ export const PRODUCT_FRAGMENT = `
       {namespace: "custom", key: "warranty"},
       {namespace: "custom", key: "country_of_origin"},
       {namespace: "custom", key: "model_number"},
+      {namespace: "custom", key: "reviews"},
       {namespace: "specs", key: "material"},
       {namespace: "specs", key: "dimensions"},
       {namespace: "specs", key: "weight"},
