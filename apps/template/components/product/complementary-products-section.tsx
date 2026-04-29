@@ -12,9 +12,11 @@ const LIMIT = 3;
 
 function Fallback({ title }: { title: string }) {
   return (
-    <div className="grid gap-2.5">
-      <h2 className="text-sm font-medium text-foreground/70">{title}</h2>
-      <div className="grid grid-cols-3 gap-2.5">
+    <div className="overflow-hidden rounded-lg border">
+      <div className="border-b bg-muted/50 px-2.5 py-2">
+        <h2 className="text-sm font-medium">{title}</h2>
+      </div>
+      <div className="grid grid-cols-3 gap-2.5 p-2.5">
         {["a", "b", "c"].map((key) => (
           <div key={key} className="grid gap-2">
             <Skeleton className="aspect-square w-full rounded-none" />
@@ -37,9 +39,11 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
   if (products.length === 0) return null;
 
   return (
-    <div className="grid gap-2.5">
-      <h2 className="text-sm font-medium text-foreground/70">{t("pairsWellWith")}</h2>
-      <div className="grid grid-cols-3 gap-2.5">
+    <div className="overflow-hidden rounded-lg border">
+      <div className="border-b bg-muted/50 px-2.5 py-2">
+        <h2 className="text-sm font-medium">{t("pairsWellWith")}</h2>
+      </div>
+      <div className="grid grid-cols-3 gap-2.5 p-2.5">
         {products.map((product) => (
           <Link
             key={product.id}
