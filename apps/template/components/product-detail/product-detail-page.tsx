@@ -38,10 +38,10 @@ function ProductPageFallback() {
           <div className="hidden lg:flex gap-2.5">
             <div className="flex flex-col gap-2.5 w-20 shrink-0">
               {["a", "b", "c", "d"].map((key) => (
-                <Skeleton key={key} className="aspect-square w-full rounded-lg" />
+                <Skeleton key={key} className="aspect-square w-full rounded-none" />
               ))}
             </div>
-            <Skeleton className="flex-1 aspect-square rounded-lg" />
+            <Skeleton className="flex-1 aspect-square rounded-none" />
           </div>
         </div>
         <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-5">

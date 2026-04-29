@@ -185,9 +185,9 @@ function Gallery({ mediaItems, title }: { mediaItems: MediaItem[]; title: string
               aria-label={t("goToImage", { number: String(idx + 1) })}
               aria-current={isSelected ? "true" : undefined}
               className={cn(
-                "relative aspect-square w-full overflow-hidden bg-accent transition-all rounded-lg",
+                "relative aspect-square w-full overflow-hidden bg-accent transition-all",
                 isSelected
-                  ? "ring-2 ring-inset ring-foreground"
+                  ? "ring-1 ring-inset ring-foreground/50"
                   : "ring-1 ring-inset ring-transparent hover:opacity-80",
               )}
             >
@@ -203,7 +203,7 @@ function Gallery({ mediaItems, title }: { mediaItems: MediaItem[]; title: string
           );
         })}
       </div>
-      <div className="relative aspect-square flex-1 overflow-hidden bg-accent rounded-lg">
+      <div className="relative aspect-square flex-1 overflow-hidden bg-accent">
         {selected &&
           (selected.type === "video" ? (
             <MediaVideo item={selected} sizes="(min-width: 1024px) 50vw, 100vw" priority />
