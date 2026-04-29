@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ProductRating } from "@/components/product-detail/product-rating";
@@ -13,7 +12,7 @@ function Fallback({ title }: { title: string }) {
       <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
       <div className="grid gap-5 sm:grid-cols-3">
         {["a", "b", "c"].map((key) => (
-          <div key={key} className="grid gap-2.5 border-t border-border pt-5">
+          <div key={key} className="grid gap-2.5">
             <Skeleton className="h-4 w-20 rounded-none" />
             <Skeleton className="h-3 w-24 rounded-none" />
             <Skeleton className="h-16 w-full rounded-none" />
@@ -35,7 +34,6 @@ async function Render({
   description: string;
   locale: Locale;
 }) {
-  await connection();
   const [t, reviews] = await Promise.all([
     getTranslations("product"),
     getProductReviewSnippets(handle, title, description),
@@ -73,7 +71,7 @@ function ReviewCard({
   locale: Locale;
 }) {
   return (
-    <article className="grid gap-2.5 border-t border-border pt-5">
+    <article className="grid gap-2.5">
       <ProductRating rating={review.score} ariaLabel={ariaLabel} locale={locale} />
       <p className="text-sm font-medium text-foreground">{review.name}</p>
       <p className="text-sm text-muted-foreground leading-5">{review.text}</p>
