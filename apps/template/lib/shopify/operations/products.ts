@@ -645,6 +645,46 @@ export async function getProductRecommendations(
   return data.productRecommendations.map(transformShopifyProductCard);
 }
 
+const COMPLEMENTARY_PRODUCTS_QUERY = `
+  ${PRODUCT_CARD_FRAGMENT}
+  query complementaryProducts($productId: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productId: $productId, intent: COMPLEMENTARY) {
+      ...ProductCardFields
+    }
+  }
+`;
+
+export async function getComplementaryProducts(
+  handle: string,
+  locale: string = defaultLocale,
+): Promise<ProductCard[]> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `complementary-${handle}`);
+
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const product = await getProduct(handle, locale);
+  if (!product) {
+    return [];
+  }
+
+  const data = await shopifyFetch<{ productRecommendations: ShopifyProductCard[] }>({
+    operation: "complementaryProducts",
+    query: COMPLEMENTARY_PRODUCTS_QUERY,
+    variables: { productId: product.id, country, language },
+  });
+
+  if (!data.productRecommendations) {
+    return [];
+  }
+
+  tagProducts(data.productRecommendations);
+
+  return data.productRecommendations.map(transformShopifyProductCard);
+}
+
 const GET_PRODUCTS_BY_HANDLES_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
   query getProductsByHandles($query: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {

@@ -10,6 +10,7 @@ import { type MediaItem, ProductMedia } from "@/components/product-detail/produc
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductRating } from "@/components/product-detail/product-rating";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
+import { ComplementaryProductsSection } from "@/components/product/complementary-products-section";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import {
@@ -189,6 +190,7 @@ export async function ProductDetailSection({
             />
           </Suspense>
         )}
+        <ComplementaryProductsSection handle={handle} locale={locale} />
         <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
       </div>
     </div>
