@@ -26,7 +26,7 @@ export async function getProductReviewSnippets(
   title: string,
   description: string,
 ): Promise<ProductReviewSnippet[]> {
-  "use cache";
+  "use cache: remote";
   // 24h revalidate (not "max"): if the AI call fails during a build with no
   // gateway access, we cache `[]` for that day rather than poisoning the
   // per-handle cache permanently.
