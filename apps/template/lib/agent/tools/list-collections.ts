@@ -13,7 +13,7 @@ Use this when the user asks "what categories do you have?", "show me your depart
     execute: async () => {
       try {
         const { user } = getAgentContext();
-        const collections = await getCollections(user.locale);
+        const collections = await getCollections({ locale: user.locale });
 
         return {
           success: true,
