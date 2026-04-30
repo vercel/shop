@@ -26,7 +26,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="fromsrc flex min-h-[calc(100vh-4rem)]">
+      <div className="fromsrc mx-auto flex min-h-[calc(100vh-4rem)] max-w-[1448px]">
         <Sidebar
           basePath="/docs"
           defaultOpenLevel={2}

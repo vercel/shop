@@ -13,7 +13,8 @@
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-heading: "GeistPixel-Grid", "Geist Mono", ui-monospace, monospace;
   --font-pixel-square: var(--font-geist-pixel-square), ui-monospace, monospace;
-  --font-pixel-triangle: var(--font-geist-pixel-triangle), ui-monospace, monospace;
+  --font-pixel-triangle:
+    var(--font-geist-pixel-triangle), ui-monospace, monospace;
   /* Geist border radii */
   --radius-xs: 0.125rem; /* 2px */
   --radius-sm: 0.25rem; /* 4px */
@@ -27,8 +28,8 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--ds-gray-1000);
+  --color-primary-foreground: var(--ds-background-100);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -270,6 +271,7 @@
   --ds-shadow-border-small:
     var(--ds-shadow-border-base), var(--ds-shadow-small),
     var(--ds-shadow-background-border);
+  --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -406,6 +408,7 @@
   --ds-shadow-border-small:
     var(--ds-shadow-border-base), var(--ds-shadow-small),
     var(--ds-shadow-background-border);
+  --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -445,12 +448,19 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background-200 text-foreground;
     font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
     font-size: 14px;
   }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-geist-pixel-grid), var(--font-geist-mono), ui-monospace, monospace;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family:
+      var(--font-geist-pixel-grid), var(--font-geist-mono), ui-monospace,
+      monospace;
     font-weight: 400;
   }
 }
@@ -587,8 +597,6 @@ figure[role="group"] button {
   color: var(--muted-foreground);
 }
 
-
-
 .fromsrc {
   font-family: var(--font-sans);
   font-size: 16px;
@@ -672,38 +680,65 @@ figure[role="group"] button {
 
 .fromsrc > div:has(> aside[aria-label="sidebar navigation"]) {
   top: 4rem !important;
+  left: max(0px, calc((100vw - 1448px) / 2)) !important;
   height: calc(100dvh - 4rem) !important;
 }
 
 .fromsrc aside[aria-label="sidebar navigation"] {
-  background: var(--background) !important;
+  background: var(--ds-background-200) !important;
 }
 
 .fromsrc aside[aria-label="sidebar navigation"] section > h3 {
   color: var(--muted-foreground) !important;
 }
 
-.fromsrc aside[aria-label="sidebar navigation"] nav a:not([aria-current="page"]):not(:hover),
+.fromsrc aside[aria-label="sidebar navigation"] nav a,
+.fromsrc aside[aria-label="sidebar navigation"] nav a:hover,
+.fromsrc aside[aria-label="sidebar navigation"] nav a[aria-current="page"],
+.fromsrc aside[aria-label="sidebar navigation"] nav button,
+.fromsrc aside[aria-label="sidebar navigation"] nav button:hover {
+  background: transparent !important;
+}
+
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a:not([aria-current="page"]):not(:hover),
 .fromsrc aside[aria-label="sidebar navigation"] nav button:not(:hover) {
   color: var(--muted-foreground) !important;
   opacity: 1;
 }
 
-.fromsrc aside[aria-label="sidebar navigation"] nav a:not([aria-current="page"]):hover,
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a:not([aria-current="page"]):hover,
 .fromsrc aside[aria-label="sidebar navigation"] nav button:hover {
   color: var(--foreground) !important;
 }
 
-.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-content-summarization"],
-.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-virtual-try-on"] {
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a[href="/docs/skills/enable-content-summarization"],
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a[href="/docs/skills/enable-virtual-try-on"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem;
 }
 
-.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-content-summarization"]::after,
-.fromsrc aside[aria-label="sidebar navigation"] nav a[href="/docs/skills/enable-virtual-try-on"]::after {
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a[href="/docs/skills/enable-content-summarization"]::after,
+.fromsrc
+  aside[aria-label="sidebar navigation"]
+  nav
+  a[href="/docs/skills/enable-virtual-try-on"]::after {
   content: "Coming soon";
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: 999px;
@@ -819,7 +854,6 @@ figure[role="group"] button {
 }
 
 @media (max-width: 640px) {
-
   .prose :where(table) {
     font-size: 0.75rem;
   }
@@ -851,18 +885,47 @@ figure[role="group"] button {
 }
 
 @keyframes collapsible-down {
-  from { height: 0; }
-  to { height: var(--radix-collapsible-content-height); }
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
 }
 
 @keyframes collapsible-up {
-  from { height: var(--radix-collapsible-content-height); }
-  to { height: 0; }
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0;
+  }
 }
 
 @theme inline {
   --animate-collapsible-down: collapsible-down 200ms ease-out;
   --animate-collapsible-up: collapsible-up 200ms ease-out;
+}
+
+@utility text-heading-56 {
+  @apply font-sans font-semibold text-[56px] leading-[56px] tracking-[-3.36px];
+}
+
+@utility material-small {
+  box-shadow: var(--ds-shadow-border-small);
+  @apply bg-background-100 rounded-md;
+}
+
+@utility text-label-13 {
+  @apply font-sans font-normal text-[13px] leading-[16px];
+}
+
+@utility text-label-14-mono {
+  @apply font-mono font-normal text-[14px] leading-[20px];
+}
+
+@utility text-label-16-mono {
+  @apply font-mono font-normal text-[16px] leading-[20px];
 }
 
 @layer utilities {
@@ -879,23 +942,39 @@ figure[role="group"] button {
 }
 
 @keyframes fadein {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeout {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 @keyframes slidein {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 @keyframes slideout {
-  from { transform: translateX(0); }
-  to { transform: translateX(100%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 @keyframes fade-in {

@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Installer } from "@/components/fromsrc/installer";
-import { Button } from "@/components/ui/button";
-import { nav } from "@/lib/constants";
-import { homeDescription, siteName } from "@/lib/site";
+import {
+  CommandPromptContent,
+  CommandPromptCopy,
+  CommandPromptList,
+  CommandPromptPrefix,
+  CommandPromptRoot,
+  CommandPromptSurface,
+  CommandPromptTrigger,
+  CommandPromptTriggerDivider,
+  CommandPromptViewport,
+} from "@/components/ui/command-prompt";
+import { homeDescription, homeSubtitle, homeTitle, siteName } from "@/lib/site";
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
 import { CartDemo } from "./components/cart-demo";
@@ -12,12 +20,10 @@ import { CTA } from "./components/cta";
 import { FakeBrowser } from "./components/fake-browser";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
-import { PromptCopy } from "./components/prompt-copy";
 import { OneTwoSection } from "./components/one-two-section";
 
 const title = siteName;
 const description = homeDescription;
-const agentCommand = "npx plugins add vercel/shop";
 
 export const metadata: Metadata = {
 	title,
@@ -45,27 +51,35 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => (
-	<div className="container mx-auto max-w-[1114px]">
+	<div className="container mx-auto max-w-[1448px]">
 		<Hero
 			badge="Vercel Shop is now in alpha"
-			description={description}
-			title={title}
+			description={homeSubtitle}
+			title={homeTitle}
 		>
-			<div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-4">
-				<PromptCopy agentCommand={agentCommand} command="npx create-vercel-shop@latest" />
-				<Button asChild className="px-4" size="lg">
-					<Link href="/docs/getting-started">
-						Get Started
-					</Link>
-				</Button>
-				<div className="flex items-center gap-4 text-sm text-muted-foreground">
-					{nav.filter((item) => item.target === "_blank").map((item) => (
-						<a key={item.href} href={item.href} className="underline underline-offset-4 hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
-							{item.label}
-						</a>
-					))}
-				</div>
-			</div>
+			<CommandPromptRoot defaultValue="humans">
+				<CommandPromptList>
+					<CommandPromptTrigger className="min-w-[90px]" value="humans">
+						For humans
+					</CommandPromptTrigger>
+					<CommandPromptTriggerDivider />
+					<CommandPromptTrigger className="min-w-[84px]" value="agents">
+						For agents
+					</CommandPromptTrigger>
+				</CommandPromptList>
+				<CommandPromptSurface>
+					<CommandPromptPrefix>$</CommandPromptPrefix>
+					<CommandPromptViewport>
+						<CommandPromptContent value="humans">
+							npx create-vercel-shop@latest
+						</CommandPromptContent>
+						<CommandPromptContent value="agents">
+							npx plugins add vercel/shop
+						</CommandPromptContent>
+					</CommandPromptViewport>
+					<CommandPromptCopy />
+				</CommandPromptSurface>
+			</CommandPromptRoot>
 		</Hero>
 		<div className="grid divide-y border-y sm:border-x">
 			<CenteredSection

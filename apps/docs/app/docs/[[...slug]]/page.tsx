@@ -5,10 +5,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+import { MobileDocsBar } from "@/components/geistdocs/mobile-docs-bar";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
+import { getDocsNavSections } from "@/lib/fromsrc/nav-sections";
 import { docsDescription, siteName } from "@/lib/site";
-import { MobileToc } from "../mobiletoc";
 import { Outline } from "../outline";
 
 interface Props {
@@ -49,10 +50,11 @@ function neighbors(ordered: NavItem[], current: string) {
 
 export default async function DocsPage({ params }: Props) {
   const { slug } = await params;
-  const [doc, allDocs, navigation] = await Promise.all([
+  const [doc, allDocs, navigation, navSections] = await Promise.all([
     docs.getDoc(slug ?? []),
     docs.getAllDocs(),
     docs.getNavigation(),
+    getDocsNavSections(),
   ]);
 
   if (!doc) {
@@ -72,12 +74,12 @@ export default async function DocsPage({ params }: Props) {
 
   return (
     <div>
-      <MobileToc headings={headings} title={doc.title} />
+      <MobileDocsBar headings={headings} navigation={navSections} />
       <div className="grid w-full max-w-7xl mx-auto lg:grid-cols-[minmax(0,1fr)_14rem]">
       <article className="min-w-0 px-4 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
         <div className="max-w-[860px]">
           <header className="mb-10">
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="font-sans text-3xl font-semibold tracking-tight">
               {doc.title}
             </h1>
             {doc.description && (
