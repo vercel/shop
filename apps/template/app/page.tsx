@@ -47,6 +47,12 @@ export default async function HomePage() {
             id: "homepage-hero",
             headline: "The Outdoor Edit",
             subheadline: null,
+            backgroundImage: {
+              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/boomerang-poster.jpg?v=1777564966",
+              alt: "The Outdoor Edit",
+              width: 1280,
+              height: 720,
+            },
             backgroundVideo: {
               url: "https://cdn.shopify.com/videos/c/o/v/db1572ad04ae4ecbad692430c6269fcf.mp4",
             },
