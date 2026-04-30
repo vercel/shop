@@ -81,7 +81,7 @@ const HomePage = () => (
 				</CommandPromptSurface>
 			</CommandPromptRoot>
 		</Hero>
-		<div className="grid divide-y border-y sm:border-x">
+		<div className="mx-auto grid max-w-[1078px] divide-y border-y sm:border-x">
 			<CenteredSection
 				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
 				title="Dynamic storefronts with instant static responses"

@@ -76,7 +76,7 @@ export default async function DocsPage({ params }: Props) {
     <div>
       <MobileDocsBar headings={headings} navigation={navSections} />
       <div className="grid w-full max-w-7xl mx-auto lg:grid-cols-[minmax(0,1fr)_14rem]">
-      <article className="min-w-0 px-4 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
+      <article className="min-w-0 px-6 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
         <div className="max-w-[860px]">
           <header className="mb-10">
             <h1 className="font-sans text-3xl font-semibold tracking-tight">

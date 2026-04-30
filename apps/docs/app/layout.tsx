@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 import { Chat } from "@/components/fromsrc/chat";
+import { Footer } from "@/components/fromsrc/footer";
 import { Search } from "@/components/fromsrc/search";
 import { Navbar } from "@/components/geistdocs/navbar";
 import { Toaster } from "@/components/ui/sonner";
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
             <Navbar navigation={navSections} />
             <Search />
             {children}
+            <Footer />
             <Chat />
             <Toaster />
           </AdapterProvider>

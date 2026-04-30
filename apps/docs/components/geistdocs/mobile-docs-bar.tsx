@@ -35,15 +35,17 @@ export const MobileDocsBar = ({ headings, navigation }: MobileDocsBarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
 
-  useEffect(() => {
-    setMenuOpen(false);
-    setTocOpen(false);
-  }, [pathname]);
+  // useEffect(() => {
+  //   setMenuOpen(false);
+  //   setTocOpen(false);
+  // }, [pathname]);
 
   const showToc = headings && headings.length > 0;
 
   return (
-    <div className="sticky top-16 z-30 -mt-px flex h-[54px] items-center justify-between border-b bg-background-100 px-4 sm:px-8 lg:hidden">
+    <>
+      <div aria-hidden className="h-[54px] lg:hidden" />
+      <div className="fixed top-16 left-0 right-0 z-40 -mt-px flex h-[54px] items-center justify-between border-b bg-background-200 px-6 sm:px-8 lg:hidden">
       <button
         className="flex items-center gap-3 text-base text-gray-1000"
         onClick={() => setMenuOpen(true)}
@@ -135,6 +137,7 @@ export const MobileDocsBar = ({ headings, navigation }: MobileDocsBarProps) => {
           </SheetContent>
         </Sheet>
       )}
-    </div>
+      </div>
+    </>
   );
 };

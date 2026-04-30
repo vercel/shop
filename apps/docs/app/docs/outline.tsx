@@ -126,8 +126,8 @@ export function Outline({ headings }: { headings: Heading[] }) {
   }, [svg, activeSet]);
 
   return (
-    <aside className="hidden lg:block w-56 shrink-0">
-      <div className="fixed top-[4rem] w-56 h-[calc(100dvh-4rem)] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-12 pl-8 pe-4 pb-6">
+    <aside className="hidden lg:block lg:sticky lg:top-16 lg:self-start w-56 shrink-0">
+      <div className="max-h-[calc(100dvh-4rem)] w-56 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pt-12 pl-8 pe-4 pb-6">
         {headings.length > 0 && (
           <>
             <p className="flex items-center gap-2 mb-4 text-sm text-muted-foreground font-medium">

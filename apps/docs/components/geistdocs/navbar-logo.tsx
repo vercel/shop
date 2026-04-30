@@ -104,7 +104,7 @@ export function NavbarLogo({
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                    )
+                    ),
                   )}
                 </ul>
               </NavigationMenuContent>
