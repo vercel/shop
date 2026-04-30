@@ -8,7 +8,7 @@ type: guide
 
 Product, collection, and search pages serve structured markdown when clients send `Accept: text/markdown`. Browsers continue to receive HTML; AI agents and crawlers get clean, parseable markdown from the same URL.
 
-This is a built-in feature that requires no configuration.
+This is a built-in feature that requires no configuration. Every markdown route lives under a single top-level `app/md/` directory so all content-negotiation handlers are co-located and easy to find.
 
 ## How it works
 
@@ -19,9 +19,9 @@ GET /search?q=speaker        (Accept: text/markdown)
     ↓
 next.config.ts rewrite
     ↓
-/products/md/[handle]
-/collections/md/[handle]
-/search/md
+/md/products/[handle]
+/md/collections/[handle]
+/md/search
     ↓
 Route handler response: text/markdown
 ```
@@ -59,9 +59,9 @@ The markdown representation includes:
 | File | Purpose |
 |------|---------|
 | `next.config.ts` | Rewrite rules matching `Accept: text/markdown` |
-| `app/products/md/[handle]/route.ts` | Product markdown route handler |
-| `app/collections/md/[handle]/route.ts` | Collection markdown route handler |
-| `app/search/md/route.ts` | Search markdown route handler |
+| `app/md/products/[handle]/route.ts` | Product markdown route handler |
+| `app/md/collections/[handle]/route.ts` | Collection markdown route handler |
+| `app/md/search/route.ts` | Search markdown route handler |
 | `lib/markdown/product.ts` | `productToMarkdown()` converter |
 | `lib/markdown/collection.ts` | `collectionToMarkdown()` converter |
 | `lib/markdown/search.ts` | `searchResultsToMarkdown()` converter |

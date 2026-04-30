@@ -37,17 +37,17 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: "/collections/:handle",
-          destination: "/collections/md/:handle",
+          destination: "/md/collections/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
           source: "/products/:handle",
-          destination: "/products/md/:handle",
+          destination: "/md/products/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
           source: "/search",
-          destination: "/search/md",
+          destination: "/md/search",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],
