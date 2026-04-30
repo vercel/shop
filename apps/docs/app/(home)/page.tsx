@@ -83,6 +83,31 @@ const HomePage = () => (
 		</Hero>
 		<div className="mx-auto grid max-w-[1078px]">
 			<CenteredSection
+				aside={
+					<CommandPromptRoot defaultValue="humans">
+						<CommandPromptList>
+							<CommandPromptTrigger className="min-w-[90px]" value="humans">
+								For humans
+							</CommandPromptTrigger>
+							<CommandPromptTriggerDivider />
+							<CommandPromptTrigger className="min-w-[84px]" value="agents">
+								For agents
+							</CommandPromptTrigger>
+						</CommandPromptList>
+						<CommandPromptSurface>
+							<CommandPromptPrefix>$</CommandPromptPrefix>
+							<CommandPromptViewport>
+								<CommandPromptContent value="humans">
+									npx create-vercel-shop@latest
+								</CommandPromptContent>
+								<CommandPromptContent value="agents">
+									npx plugins add vercel/shop
+								</CommandPromptContent>
+							</CommandPromptViewport>
+							<CommandPromptCopy />
+						</CommandPromptSurface>
+					</CommandPromptRoot>
+				}
 				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
 				title="Dynamic storefronts with instant static responses"
 			>
