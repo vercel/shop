@@ -15,7 +15,10 @@ export const AskAIButton = ({ className, onClick }: AskAIButtonProps) => {
 
   return (
     <Button
-      className={cn("gap-1.5 shadow-none font-normal", className)}
+      className={cn(
+        "gap-1.5 shadow-none font-normal text-gray-1000 bg-background-100 hover:bg-gray-100 hover:text-gray-1000",
+        className
+      )}
       onClick={() => {
         setIsOpen((prev) => !prev);
         onClick?.();
