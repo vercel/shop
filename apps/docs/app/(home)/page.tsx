@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Installer } from "@/components/fromsrc/installer";
+import { Button } from "@/components/ui/button";
 import {
   CommandPromptContent,
   CommandPromptCopy,
@@ -57,29 +59,20 @@ const HomePage = () => (
 			description={homeSubtitle}
 			title={homeTitle}
 		>
-			<CommandPromptRoot defaultValue="humans">
-				<CommandPromptList>
-					<CommandPromptTrigger className="min-w-[90px]" value="humans">
-						For humans
-					</CommandPromptTrigger>
-					<CommandPromptTriggerDivider />
-					<CommandPromptTrigger className="min-w-[84px]" value="agents">
-						For agents
-					</CommandPromptTrigger>
-				</CommandPromptList>
-				<CommandPromptSurface>
-					<CommandPromptPrefix>$</CommandPromptPrefix>
-					<CommandPromptViewport>
-						<CommandPromptContent value="humans">
-							npx create-vercel-shop@latest
-						</CommandPromptContent>
-						<CommandPromptContent value="agents">
-							npx plugins add vercel/shop
-						</CommandPromptContent>
-					</CommandPromptViewport>
-					<CommandPromptCopy />
-				</CommandPromptSurface>
-			</CommandPromptRoot>
+			<div className="flex flex-wrap items-center justify-center gap-3">
+				<Button
+					asChild
+					className="h-10 w-fit rounded-full border border-gray-alpha-400 bg-background-100 text-foreground shadow-none hover:bg-background-200 dark:border-gray-alpha-400 dark:bg-background-100 dark:hover:bg-background-200"
+					variant="outline"
+				>
+					<Link href="/docs">View Documentation</Link>
+				</Button>
+				<Button asChild className="h-10 w-fit rounded-full">
+					<Link href="https://vercel.com/contact/sales" target="_blank">
+						Talk to an expert
+					</Link>
+				</Button>
+			</div>
 		</Hero>
 		<div className="mx-auto grid max-w-[1078px]">
 			<CenteredSection
