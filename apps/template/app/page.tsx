@@ -88,7 +88,11 @@ export default async function HomePage() {
         />
 
         <Container>
-          <Suspense fallback={<RelatedProductsSectionSkeleton title="Shop Bookcases" />}>
+          <Suspense
+            fallback={
+              <RelatedProductsSectionSkeleton title="Shop Bookcases" aspectRatio="portrait" />
+            }
+          >
             <BookcasesSlider locale={locale} />
           </Suspense>
         </Container>
@@ -117,5 +121,12 @@ export default async function HomePage() {
 async function BookcasesSlider({ locale }: { locale: Locale }) {
   const { products } = await getCatalogProducts({ query: "bookcase", limit: 8, locale });
   if (products.length === 0) return null;
-  return <ProductsSlider title="Shop Bookcases" products={products} locale={locale} />;
+  return (
+    <ProductsSlider
+      title="Shop Bookcases"
+      products={products}
+      locale={locale}
+      aspectRatio="portrait"
+    />
+  );
 }
