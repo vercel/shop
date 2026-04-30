@@ -54,7 +54,7 @@ export default async function HomePage() {
               height: 640,
             },
             backgroundVideo: {
-              url: "https://cdn.shopify.com/videos/c/o/v/e00b370785b74f18b543302b18847cb9.mp4",
+              url: "https://cdn.shopify.com/videos/c/o/v/db1572ad04ae4ecbad692430c6269fcf.mp4",
             },
             ctaText: "Browse the Catalog",
             ctaLink: "/search",

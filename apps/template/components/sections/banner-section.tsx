@@ -2,8 +2,13 @@ import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
+import { AutoPlayVideo } from "@/components/product-detail/auto-play-video";
 import { Button } from "@/components/ui/button";
-import type { BannerSection as BannerSectionType } from "@/lib/types";
+import type {
+  BannerSection as BannerSectionType,
+  Image as ImageType,
+  MarketingImage,
+} from "@/lib/types";
 import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
@@ -16,8 +21,18 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
   const video = hero.backgroundVideo;
   const image = hero.backgroundImage ?? (video ? null : heroDefault);
   const isStatic = image !== null && typeof image === "object" && "src" in image;
-  const posterUrl =
-    video?.poster ?? (image && !isStatic ? (image as { url: string }).url : undefined);
+
+  // AutoPlayVideo expects `Image` (altText), not MarketingImage (alt). Map when both are
+  // available so the poster image renders underneath the video until canplay fires.
+  const videoPreview: ImageType | null =
+    video && image && !isStatic
+      ? {
+          url: (image as MarketingImage).url,
+          altText: (image as MarketingImage).alt,
+          width: (image as MarketingImage).width,
+          height: (image as MarketingImage).height,
+        }
+      : null;
 
   return (
     <section className="relative w-full overflow-hidden">
@@ -27,15 +42,14 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
 
         {video ? (
           <>
-            <video
+            <AutoPlayVideo
               src={video.url}
-              poster={posterUrl}
-              autoPlay
-              muted
-              loop
-              playsInline
+              previewImage={videoPreview}
+              priorityImage
+              sizes="100vw"
+              poster={video.poster}
               preload="auto"
-              aria-hidden="true"
+              aria-hidden
               className="absolute inset-0 h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
