@@ -100,8 +100,8 @@ const HomePage = () => (
 						</CommandPromptSurface>
 					</CommandPromptRoot>
 				}
-				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
-				title="Dynamic storefronts with instant static responses"
+				description="Cache Components serve product data instantly while streaming in personalized content"
+				title="Dynamic at the speed of static"
 			>
 				<FakeBrowser />
 			</CenteredSection>
