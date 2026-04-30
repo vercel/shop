@@ -12,7 +12,7 @@ export const CTA = ({ title, href, cta }: CTAProps) => (
     <h2 className="font-sans font-semibold text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl lg:text-[40px]">
       {title}
     </h2>
-    <Button asChild size="lg">
+    <Button asChild className="mt-2 h-10 w-fit rounded-full" size="default">
       <Link href={href}>{cta}</Link>
     </Button>
   </section>
