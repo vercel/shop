@@ -62,12 +62,12 @@ const HomePage = () => (
 			<div className="flex flex-wrap items-center justify-center gap-3">
 				<Button
 					asChild
-					className="h-10 w-fit rounded-full border border-gray-alpha-400 bg-background-100 text-foreground shadow-none hover:bg-background-200 dark:border-gray-alpha-400 dark:bg-background-100 dark:hover:bg-background-200"
+					className="h-12 w-fit rounded-full border border-gray-alpha-400 bg-background-100 text-foreground shadow-none hover:bg-background-200 dark:border-gray-alpha-400 dark:bg-background-100 dark:hover:bg-background-200"
 					variant="outline"
 				>
 					<Link href="/docs">View Documentation</Link>
 				</Button>
-				<Button asChild className="h-10 w-fit rounded-full">
+				<Button asChild className="h-12 w-fit rounded-full">
 					<Link href="https://vercel.com/contact/sales" target="_blank">
 						Talk to an expert
 					</Link>
