@@ -104,7 +104,6 @@ const HomePage = () => (
 					</>
 				}
 				title="Agentic development"
-				reverse
 			>
 				<AgentDemo />
 			</OneTwoSection>
@@ -117,7 +116,6 @@ const HomePage = () => (
 			<OneTwoSection
 				description="Optimistic UI means the cart updates before the server responds. No spinners, no delays."
 				title="Instant cart updates"
-				reverse
 			>
 				<CartDemo />
 			</OneTwoSection>
