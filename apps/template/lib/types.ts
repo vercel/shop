@@ -247,8 +247,15 @@ export interface PredictiveSearchResult {
 export interface MarketingImage {
   url: string;
   alt: string;
-  width: number;
-  height: number;
+  /** Optional — BannerSection renders with `fill`, so dimensions are metadata-only. */
+  width?: number;
+  height?: number;
+}
+
+export interface MarketingVideo {
+  url: string;
+  /** Optional explicit poster URL. Defaults to `backgroundImage` when present. */
+  poster?: string;
 }
 
 export interface BannerSection {
@@ -256,6 +263,12 @@ export interface BannerSection {
   headline: string;
   subheadline: string | null;
   backgroundImage?: MarketingImage | StaticImageData | null;
+  /**
+   * When set, an autoplaying muted loop renders in place of the background
+   * image. `backgroundImage` (if also passed) acts as a poster while the
+   * video buffers, mirroring the PDP gallery's video pattern.
+   */
+  backgroundVideo?: MarketingVideo | null;
   ctaText: string | null;
   ctaLink: string | null;
 }

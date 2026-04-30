@@ -4,11 +4,10 @@ import Image from "next/image";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
-import type { Image as ImageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface AutoPlayVideoProps extends Omit<React.ComponentProps<"video">, "autoPlay" | "ref"> {
-  previewImage?: ImageType | null;
+  previewImage?: { url: string; altText?: string } | null;
   sizes?: string;
   priorityImage?: boolean;
 }

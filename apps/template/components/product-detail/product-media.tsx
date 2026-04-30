@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { AutoPlayVideo } from "./auto-play-video";
 import { Lightbox, LightboxTrigger } from "./lightbox";
 
 type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
