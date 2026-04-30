@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
+import { unstable_io } from "next/cache";
 import { Suspense } from "react";
 
 import { ProductRating } from "@/components/product-detail/product-rating";
@@ -41,7 +41,7 @@ async function Render({
   description: string;
   locale: Locale;
 }) {
-  await connection();
+  await unstable_io();
   const [t, reviews] = await Promise.all([
     getTranslations("product"),
     getProductReviewSnippets(handle, title, description),
