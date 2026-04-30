@@ -13,8 +13,11 @@ interface BannerSectionProps {
 
 export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps) {
   const Heading = headingLevel;
-  const image = hero.backgroundImage ?? heroDefault;
-  const isStatic = typeof image === "object" && "src" in image;
+  const video = hero.backgroundVideo;
+  const image = hero.backgroundImage ?? (video ? null : heroDefault);
+  const isStatic = image !== null && typeof image === "object" && "src" in image;
+  const posterUrl =
+    video?.poster ?? (image && !isStatic ? (image as { url: string }).url : undefined);
 
   return (
     <section className="relative w-full overflow-hidden">
@@ -22,7 +25,22 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
         {/* Aspect-ratio spacer: sets the minimum height */}
         <div className="col-start-1 row-start-1 aspect-[16/9] md:aspect-[3/1]" />
 
-        {isStatic ? (
+        {video ? (
+          <>
+            <video
+              src={video.url}
+              poster={posterUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+          </>
+        ) : isStatic ? (
           <>
             <Image
               src={image as StaticImageData}
