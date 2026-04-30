@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Skill {
   label: string;
@@ -179,26 +180,27 @@ export const AgentDemo = () => {
   return (
     <div className="flex flex-col gap-3">
       {/* Skill switcher */}
-      <div className="flex gap-1.5">
-        {skills.map((s, i) => (
-          <button
-            key={s.label}
-            type="button"
-            onClick={() => {
-              if (i === activeSkill) return;
-              setActiveSkill(i);
-              resetAndRun();
-            }}
-            className={`rounded-md px-3 py-1.5 font-mono text-xs transition-colors ${
-              i === activeSkill
-                ? "bg-foreground text-background"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            }`}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        onValueChange={(value) => {
+          const index = skills.findIndex((s) => s.label === value);
+          if (index === -1 || index === activeSkill) return;
+          setActiveSkill(index);
+          resetAndRun();
+        }}
+        value={skill.label}
+      >
+        <TabsList className="mx-auto h-10 w-fit rounded-full border bg-background p-0">
+          {skills.map((s) => (
+            <TabsTrigger
+              className="h-full flex-auto rounded-full border-transparent px-5 py-2 text-base text-muted-foreground data-[state=active]:border-border data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-border dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-foreground"
+              key={s.label}
+              value={s.label}
+            >
+              {s.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Terminal */}
       <div

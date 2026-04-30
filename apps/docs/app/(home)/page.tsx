@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Installer } from "@/components/fromsrc/installer";
 import { Button } from "@/components/ui/button";
 import {
   CommandPromptContent,
@@ -74,7 +73,7 @@ const HomePage = () => (
 				</Button>
 			</div>
 		</Hero>
-		<div className="mx-auto grid max-w-[1078px]">
+		<div className="mx-auto grid max-w-[1080px]">
 			<CenteredSection
 				aside={
 					<CommandPromptRoot defaultValue="humans">
@@ -107,20 +106,8 @@ const HomePage = () => (
 				<FakeBrowser />
 			</CenteredSection>
 			<OneTwoSection
-				description={
-					<>
-						<p>
-							The vercel-shop plugin and template recipes let agents extend your
-							store with a single command. Add markets, CMS, auth, and more.
-						</p>
-						<div className="mt-4 max-w-[22rem]">
-							<Installer
-								className="w-full"
-								command="npx create-vercel-shop@latest --no-template"
-							/>
-						</div>
-					</>
-				}
+				description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+				leftClassName="sm:pt-[52px]"
 				title="Agentic development"
 			>
 				<AgentDemo />

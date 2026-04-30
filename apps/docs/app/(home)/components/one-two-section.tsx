@@ -3,16 +3,20 @@ import type { ReactNode } from "react";
 interface OneTwoSectionProps {
   children?: ReactNode;
   description: ReactNode;
+  leftClassName?: string;
   title: string;
 }
 
 export const OneTwoSection = ({
   title,
   description,
+  leftClassName,
   children,
 }: OneTwoSectionProps) => (
-  <div className="grid gap-12 p-8 sm:grid-cols-3 sm:gap-0 sm:p-0 sm:py-12">
-    <div className="flex flex-col gap-2 text-balance">
+  <div className="grid gap-12 p-8 sm:grid-cols-[436px_572px] sm:gap-x-[72px] sm:gap-y-0 sm:p-0 sm:py-12">
+    <div
+      className={`flex flex-col gap-2 text-balance${leftClassName ? ` ${leftClassName}` : ""}`}
+    >
       <h2 className="font-sans font-semibold text-xl tracking-tight dark:text-white sm:text-2xl md:text-3xl">
         {title}
       </h2>
@@ -20,6 +24,6 @@ export const OneTwoSection = ({
         {description}
       </div>
     </div>
-    <div className="sm:col-span-2">{children}</div>
+    <div>{children}</div>
   </div>
 );
