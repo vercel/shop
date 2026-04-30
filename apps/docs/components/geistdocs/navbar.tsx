@@ -20,7 +20,7 @@ export function Navbar({ navigation }: { navigation?: NavSection[] }) {
   return (
     <>
       <div className="h-16" />
-      <header className="fixed top-0 left-0 right-0 z-50 flex h-16 justify-center border-b bg-sidebar [backface-visibility:hidden]">
+      <header className="fixed top-0 left-0 right-0 z-50 flex h-16 justify-center border-b bg-background-200 [backface-visibility:hidden]">
         <div className="mx-auto flex w-full justify-between px-2">
           <div className="flex select-none flex-row items-center">
             <NavbarLogo className="ml-4" logo={<Logo />} variant="oss" />

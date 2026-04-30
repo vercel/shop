@@ -34,7 +34,7 @@ export const DesktopMenu = ({ items, className }: DesktopMenuProps) => {
                 asChild
                 className={cn(
                   "flex items-center text-sm transition-colors duration-100",
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  isActive ? "text-gray-1000" : "text-gray-900 hover:text-gray-1000"
                 )}
               >
                 {external ? (

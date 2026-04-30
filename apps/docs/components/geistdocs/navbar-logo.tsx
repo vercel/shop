@@ -58,7 +58,7 @@ export function NavbarLogo({
   return (
     <span className={cn("flex items-center gap-2.5", className)}>
       <Link
-        className="text-foreground"
+        className="text-gray-1000"
         href={isOss ? "https://vercel.com/oss" : "https://vercel.com/"}
         rel="noopener"
         target="_blank"
@@ -72,7 +72,7 @@ export function NavbarLogo({
           <LogoIconVercel size={20} />
         )}
       </Link>
-      <div className="w-4 text-center text-border text-lg">
+      <div className="w-4 text-center text-gray-300 text-lg dark:text-gray-600">
         <IconSlashForward />
       </div>
       {isOss ? (
@@ -81,7 +81,7 @@ export function NavbarLogo({
             <NavigationMenuItem className="flex items-center">
               <NavigationMenuTrigger className="-m-3 flex items-center gap-1.5 p-3">
                 <Link
-                  className="flex items-center text-foreground"
+                  className="flex items-center text-gray-1000"
                   href={href}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -95,7 +95,7 @@ export function NavbarLogo({
                       <li key={productHref}>
                         <NavigationMenuLink asChild>
                           <Link
-                            className="flex h-10 items-center gap-3 rounded-md px-3 py-2.5 text-foreground text-sm outline-none transition-colors hover:bg-accent"
+                            className="flex h-10 items-center gap-3 rounded-md px-3 py-2.5 text-gray-1000 text-sm outline-none transition-colors hover:bg-gray-100"
                             href={productHref}
                             rel="noopener"
                             target="_blank"
@@ -112,7 +112,7 @@ export function NavbarLogo({
           </NavigationMenuList>
         </NavigationMenu>
       ) : (
-        <Link className="flex items-center text-foreground" href={href}>
+        <Link className="flex items-center text-gray-1000" href={href}>
           {props.logo}
         </Link>
       )}

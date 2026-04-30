@@ -34,8 +34,8 @@ function NavLink({
   return (
     <Link
       className={cn(
-        "group flex items-center justify-between rounded-md p-3 transition-colors hover:bg-accent",
-        active ? "text-foreground font-medium" : "text-muted-foreground hover:text-foreground"
+        "group flex items-center justify-between rounded-md p-3 transition-colors hover:bg-gray-100 hover:text-gray-1000",
+        active ? "text-gray-1000 font-medium" : "text-gray-900"
       )}
       href={href}
       onClick={onClick}
@@ -45,7 +45,7 @@ function NavLink({
       {children}
       {external && (
         <IconArrowUpRight
-          className="text-muted-foreground group-hover:text-foreground"
+          className="text-gray-900 group-hover:text-gray-1000"
           size={16}
         />
       )}
@@ -64,20 +64,20 @@ function MobileMenuButton({
     <button
       aria-expanded={expanded}
       aria-label={expanded ? "Close menu" : "Open menu"}
-      className="relative flex size-8 items-center justify-center rounded-full border transition-colors hover:bg-accent lg:hidden"
+      className="relative flex size-8 items-center justify-center rounded-full border border-gray-200 transition-colors hover:bg-gray-100 lg:hidden"
       onClick={onClick}
       type="button"
     >
       <span className="flex flex-col items-center justify-center gap-[5px]">
         <span
           className={cn(
-            "block h-[1.5px] w-3.5 bg-foreground transition-all duration-150",
+            "block h-[1.5px] w-3.5 bg-gray-1000 transition-all duration-150",
             expanded && "translate-y-[3.25px] rotate-45"
           )}
         />
         <span
           className={cn(
-            "block h-[1.5px] w-3.5 bg-foreground transition-all duration-150",
+            "block h-[1.5px] w-3.5 bg-gray-1000 transition-all duration-150",
             expanded && "-translate-y-[3.25px] -rotate-45"
           )}
         />
@@ -126,7 +126,7 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
       {/* biome-ignore lint/a11y/useKeyWithClickEvents: backdrop dismiss */}
       <div
         className={cn(
-          "fixed inset-0 top-16 z-40 bg-background backdrop-blur-sm transition-opacity duration-200",
+          "fixed inset-0 top-16 z-40 bg-background-200 backdrop-blur-sm transition-opacity duration-200",
           show
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -136,7 +136,7 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
 
       <div
         className={cn(
-          "fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-background px-2 transition-all duration-200",
+          "fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-background-200 px-2 transition-all duration-200",
           show
             ? "translate-y-0 opacity-100"
             : "pointer-events-none -translate-y-2 opacity-0"
@@ -170,7 +170,7 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
             {navigation.map((section) => (
               <div key={section.title || "_root"} className="mt-4 first:mt-0">
                 {section.title && (
-                  <p className="flex items-center gap-2 mb-1 px-3 font-medium text-sm text-foreground">
+                  <p className="flex items-center gap-2 mb-1 px-3 font-medium text-sm text-gray-1000">
                     {section.title}
                   </p>
                 )}

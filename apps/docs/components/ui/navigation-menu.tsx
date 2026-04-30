@@ -70,7 +70,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex relative px-3 gap-1 w-max items-center justify-center text-sm transition-colors text-muted-foreground hover:text-foreground focus:text-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-foreground data-[state=open]:text-foreground"
+  "group inline-flex relative px-3 gap-1 w-max items-center justify-center text-sm transition-colors text-gray-900 hover:text-gray-1000 focus:text-gray-1000 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:text-gray-1000 data-[state=open]:text-gray-1000"
 )
 
 function NavigationMenuTrigger({
@@ -93,7 +93,7 @@ function NavigationMenuTrigger({
     >
       {children}
       <IconChevronDownSmall
-        className="relative top-px size-3.5 text-muted-foreground transition-all duration-200 ease group-hover:text-foreground group-data-[state=open]:rotate-180"
+        className="relative top-px size-3.5 text-gray-900 transition-all duration-200 ease group-hover:text-gray-1000 group-data-[state=open]:rotate-180"
         aria-hidden="true"
       />
       <div className="absolute -mx-12 inset-x-0 bottom-0 z-50 hidden h-[18px] group-data-[state=open]:flex" />
@@ -135,7 +135,7 @@ function NavigationMenuViewport({
       <NavigationMenuPrimitive.Viewport
         data-slot="navigation-menu-viewport"
         className={cn(
-          "origin-top-center relative mt-3.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-md data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
+          "origin-top-center relative mt-3.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-lg bg-background-100 text-gray-950 [box-shadow:var(--ds-shadow-menu)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-[var(--radix-navigation-menu-viewport-width)]",
           className
         )}
         {...props}
@@ -173,7 +173,7 @@ function NavigationMenuIndicator({
       )}
       {...props}
     >
-      <div className="bg-popover relative top-[6.5px] size-4 rotate-45 rounded-tl-sm border border-r-0 border-b-0" />
+      <div className="relative top-[6.5px] size-4 rotate-45 rounded-tl-sm border border-r-0 border-b-0 border-gray-200 bg-background-100" />
     </NavigationMenuPrimitive.Indicator>
   )
 }

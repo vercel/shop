@@ -24,7 +24,7 @@ export const AskAIButton = ({ className, onClick }: AskAIButtonProps) => {
       type="button"
       variant="outline"
     >
-      <MessagesSquareIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+      <MessagesSquareIcon className="size-3.5 text-gray-900" aria-hidden="true" />
       <span>Ask AI</span>
     </Button>
   );
