@@ -34,7 +34,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--foreground);
+  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -284,7 +284,7 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: var(--ds-gray-900);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -559,15 +559,6 @@
   font-size: max(0.875em, 14px);
 }
 
-/* Bump fromsrc sidebar section headings from text-xs to text-sm */
-[aria-label="sidebar navigation"] {
-  font-family: var(--font-sans);
-}
-[aria-label="sidebar navigation"] section > h3 {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
-
 .dark {
   --color-surface: oklch(0.205 0 0);
 }
@@ -676,89 +667,6 @@ figure[role="group"] button {
   text-decoration: underline;
   text-underline-offset: 2px;
   font-weight: 600;
-}
-
-.fromsrc > div:has(> aside[aria-label="sidebar navigation"]) {
-  top: 4rem !important;
-  left: max(0px, calc((100vw - 1448px) / 2)) !important;
-  height: calc(100dvh - 4rem) !important;
-}
-
-.fromsrc aside[aria-label="sidebar navigation"] {
-  background: var(--ds-background-200) !important;
-}
-
-.fromsrc aside[aria-label="sidebar navigation"] section > h3 {
-  color: var(--muted-foreground) !important;
-}
-
-.fromsrc aside[aria-label="sidebar navigation"] nav a,
-.fromsrc aside[aria-label="sidebar navigation"] nav a:hover,
-.fromsrc aside[aria-label="sidebar navigation"] nav a[aria-current="page"],
-.fromsrc aside[aria-label="sidebar navigation"] nav button,
-.fromsrc aside[aria-label="sidebar navigation"] nav button:hover {
-  background: transparent !important;
-}
-
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a:not([aria-current="page"]):not(:hover),
-.fromsrc aside[aria-label="sidebar navigation"] nav button:not(:hover) {
-  color: var(--muted-foreground) !important;
-  opacity: 1;
-}
-
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a:not([aria-current="page"]):hover,
-.fromsrc aside[aria-label="sidebar navigation"] nav button:hover {
-  color: var(--foreground) !important;
-}
-
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a[href="/docs/skills/enable-content-summarization"],
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a[href="/docs/skills/enable-virtual-try-on"] {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a[href="/docs/skills/enable-content-summarization"]::after,
-.fromsrc
-  aside[aria-label="sidebar navigation"]
-  nav
-  a[href="/docs/skills/enable-virtual-try-on"]::after {
-  content: "Coming soon";
-  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--muted) 74%, transparent);
-  color: var(--muted-foreground);
-  font-size: 0.625rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  padding: 0.3rem 0.45rem;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.fromsrc aside[aria-label="sidebar navigation"] > div:first-child {
-  display: none;
-}
-
-.fromsrc aside[aria-label="sidebar navigation"] > div:nth-child(2) {
-  display: none;
 }
 
 .fromsrc h1,

@@ -25,7 +25,7 @@ import {
   OpenInv0,
 } from "@/components/ai-elements/open-in-chat";
 
-const linkClass = "flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground font-sans";
+const linkClass = "flex items-center gap-1.5 text-gray-800 text-sm transition-colors hover:text-gray-1000 font-sans";
 
 function ScrollTop() {
   return (
