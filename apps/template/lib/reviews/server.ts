@@ -35,7 +35,7 @@ export async function getProductReviewSnippets(
 
   try {
     const { output } = await generateText({
-      model: "anthropic/claude-sonnet-4.6",
+      model: "openai/gpt-5.4-nano",
       output: Output.object({ schema: ReviewSnippetsSchema }),
       prompt: [
         `Write 3 distinct customer reviews for the product below.`,
