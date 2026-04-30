@@ -286,7 +286,7 @@ function localizePath(locale: string, pathname: string): string {
 
 ### Step 9: `next.config.ts` rewrites/redirects on `/:locale/*`
 
-Existing markdown content-negotiation rewrites must move from `/products/:handle` to `/:locale/products/:handle`, etc. Add the locale-prefixed redirect rules from the original config (`/:locale/product*` → `/:locale/products*`).
+Existing markdown content-negotiation rewrites must move their `source` from `/products/:handle` to `/:locale/products/:handle`, etc. Destinations stay at `/md/products/:handle`, `/md/collections/:handle`, and `/md/search` — the handlers read `locale` from query params, not the URL path. Add the locale-prefixed redirect rules from the original config (`/:locale/product*` → `/:locale/products*`).
 
 ### Step 10: `app/(unlocalized)/page.tsx` fallback
 
