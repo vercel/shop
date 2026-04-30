@@ -271,6 +271,10 @@
   --ds-shadow-border-small:
     var(--ds-shadow-border-base), var(--ds-shadow-small),
     var(--ds-shadow-background-border);
+  --ds-shadow-modal:
+    var(--ds-shadow-border-base), 0px 1px 1px rgba(0, 0, 0, 0.02),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.04),
+    0px 24px 32px -8px rgba(0, 0, 0, 0.06);
   --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(1 0 0);
@@ -408,6 +412,10 @@
   --ds-shadow-border-small:
     var(--ds-shadow-border-base), var(--ds-shadow-small),
     var(--ds-shadow-background-border);
+  --ds-shadow-modal:
+    var(--ds-shadow-border-base), 0px 1px 1px rgba(0, 0, 0, 0.2),
+    0px 8px 16px -4px rgba(0, 0, 0, 0.3),
+    0px 24px 32px -8px rgba(0, 0, 0, 0.4);
   --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(0.145 0 0);
