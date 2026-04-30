@@ -23,7 +23,7 @@ export const CenteredSection = ({
           {description}
         </p>
       </div>
-      {aside ? <div className="sm:justify-self-end">{aside}</div> : null}
+      {aside ? <div className="sm:justify-self-center">{aside}</div> : null}
     </div>
 
     {children}
