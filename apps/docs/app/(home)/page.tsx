@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => (
-	<div className="container mx-auto max-w-[1078px]">
+	<div className="container mx-auto max-w-[1448px]">
 		<Hero
 			badge="Vercel Shop is now in alpha"
 			description={homeSubtitle}
@@ -81,7 +81,7 @@ const HomePage = () => (
 				</CommandPromptSurface>
 			</CommandPromptRoot>
 		</Hero>
-		<div className="grid">
+		<div className="mx-auto grid max-w-[1078px]">
 			<CenteredSection
 				description="Using Cache Components you can instantly show static content while streaming in dynamic data."
 				title="Dynamic storefronts with instant static responses"
