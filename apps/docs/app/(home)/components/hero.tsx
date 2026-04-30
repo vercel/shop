@@ -15,7 +15,7 @@ export const Hero = ({ badge, title, description, children }: HeroProps) => (
         <div className="size-2 rounded-full bg-gray-700" />
         <p>{badge}</p>
       </Badge>
-      <h1 className="font-sans text-balance text-center text-heading-56 sm:text-5xl! xl:text-6xl!">
+      <h1 className="font-sans text-balance text-center text-heading-40 sm:text-heading-48 lg:text-heading-56">
         {title}
       </h1>
       <p className="mx-auto max-w-3xl text-balance text-muted-foreground leading-relaxed sm:text-xl">
