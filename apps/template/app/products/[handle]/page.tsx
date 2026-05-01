@@ -67,7 +67,7 @@ export const unstable_instant = {
   samples: [
     {
       params: { handle: "__placeholder__" },
-      searchParams: { variantId: "1" },
+      searchParams: { variant: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
@@ -89,7 +89,7 @@ export default async function ProductPage({
     getProduct(handle, locale).catch(() => notFound()),
   );
 
-  const variantIdPromise = searchParams.then((sp) => sp?.variantId as string | undefined);
+  const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
 
   return (
     <ProductDetailPage

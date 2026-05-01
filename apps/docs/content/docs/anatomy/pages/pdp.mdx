@@ -23,7 +23,7 @@ export const unstable_instant = {
   samples: [
     {
       params: { handle: "__placeholder__" },
-      searchParams: { variantId: "1" },
+      searchParams: { variant: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
@@ -36,17 +36,17 @@ export const unstable_prefetch = "force-runtime";
 
 ## Variant selection
 
-Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with a `?variantId` query parameter:
+Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with Shopify's `?variant` query parameter:
 
 ```
-/products/classic-tee?variantId=123456
+/products/classic-tee?variant=123456
 ```
 
-The page component receives `searchParams` as a promise and extracts the `variantId`:
+The page component receives `searchParams` as a promise and extracts the selected variant ID:
 
 ```tsx
 const variantIdPromise = searchParams.then(
-  (sp) => (sp?.variantId as string | undefined),
+  (sp) => (sp?.variant as string | undefined),
 );
 ```
 
@@ -57,7 +57,7 @@ On the server, `computeInitialSelectedOptions()` matches the numeric variant ID 
 - The page is fully server-rendered with zero layout shift
 - Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
 
-The `getVariantUrl()` helper in `lib/product/index.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variantId`.
+The `getVariantUrl()` helper in `lib/product/index.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variant` query parameter.
 
 Unavailable options render as inert `<span>` elements instead of links.
 

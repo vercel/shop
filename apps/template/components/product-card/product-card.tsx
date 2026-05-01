@@ -42,7 +42,7 @@ export async function ProductCard({
     <Link
       href={
         product.defaultVariantNumericId
-          ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}`
+          ? `/products/${product.handle}?variant=${product.defaultVariantNumericId}`
           : `/products/${product.handle}`
       }
       className={className}
