@@ -73,6 +73,7 @@ export const unstable_instant = {
         sort: null,
       },
       cookies: [{ name: "shopify_cartId", value: null }],
+      headers: [["x-vercel-ip-postal-code", null]],
     },
   ],
 };
@@ -104,7 +105,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         <FilterTransitionProvider>
           <Sections className="gap-5">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
                 <Link href="/search">{t("title")}</Link>
                 <Suspense fallback={null}>
                   <SearchQueryLabel searchParamsPromise={searchParams} />

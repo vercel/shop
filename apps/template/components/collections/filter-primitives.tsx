@@ -48,7 +48,7 @@ function FilterSidebarHeader({
       className={cn("flex items-center gap-2", className)}
       {...props}
     >
-      <h2 className="text-xl font-semibold tracking-tight text-foreground">
+      <h2 className="font-display text-xl font-semibold tracking-tight text-foreground">
         {title}
         {activeCount !== undefined && activeCount > 0 && (
           <span className="ml-1">({activeCount})</span>

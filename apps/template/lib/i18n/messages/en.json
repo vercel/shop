@@ -133,7 +133,7 @@
     "tryAgain": "Try again"
   },
   "footer": {
-    "copyright": "© {year} Vercel Shop. All rights reserved."
+    "copyright": "© {year} Hausu. All rights reserved."
   },
   "home": {
     "title": "Enterprise Commerce Template",
@@ -169,6 +169,7 @@
     "searchPlaceholderAi": "AI-Powered Search",
     "seeAll": "See All",
     "setAddress": "Set address",
+    "shippingTo": "Shipping to",
     "shoppingAddress": "Shipping address",
     "showAllCategory": "Show all {category}",
     "signIn": "Sign in",
@@ -176,6 +177,13 @@
     "switchLanguage": "Switch language",
     "toggleAiSearch": "Toggle AI Search",
     "zipCode": "ZIP code"
+  },
+  "newsletter": {
+    "ariaLabel": "Newsletter signup",
+    "description": "Sign up for new arrivals, exclusive drops, and members-only sales.",
+    "emailPlaceholder": "you@example.com",
+    "heading": "Stay in the Loop",
+    "signUp": "Sign Up"
   },
   "product": {
     "aboutThisItem": "Description",
@@ -245,8 +253,15 @@
     "noImage": "No image",
     "officialStore": "Official Store",
     "outOfStock": "Out of Stock",
+    "pairsWellWith": "Pairs Well With",
     "quantity": "Quantity",
+    "rating": {
+      "ariaLabel": "Rated {rating} out of 5 stars, {count, plural, one {# review} other {# reviews}}"
+    },
     "recommendations": "You May Also Like",
+    "reviews": {
+      "title": "Customer Reviews"
+    },
     "seeAllSpecs": "See all specs",
     "selectVariant": "Please select a variant",
     "selectVariantLabel": "Select {name}: {value}",
@@ -311,7 +326,7 @@
     "collectionFallbackTitle": "Collection",
     "collectionsDescription": "Browse all product collections.",
     "collectionsTitle": "Collections",
-    "defaultDescription": "Shop premium products, curated collections, and latest offers from Vercel Shop.",
+    "defaultDescription": "Shop premium products, curated collections, and latest offers from Hausu.",
     "homeDescription": "Explore featured products, curated collections, and seasonal campaigns.",
     "homeTitle": "Home",
     "loginTitle": "Sign In",

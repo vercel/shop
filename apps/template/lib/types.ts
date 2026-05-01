@@ -78,6 +78,11 @@ export interface ProductDetails extends ProductCard {
   metafields?: Metafield[];
 }
 
+export interface ProductReviews {
+  rating: number;
+  count: number;
+}
+
 export interface ProductVariant {
   id: string;
   title: string;
@@ -251,11 +256,18 @@ export interface MarketingImage {
   height: number;
 }
 
+export interface MarketingVideo {
+  url: string;
+  poster?: string;
+}
+
 export interface BannerSection {
   id: string;
   headline: string;
   subheadline: string | null;
   backgroundImage?: MarketingImage | StaticImageData | null;
+  /** When set, renders an autoplaying muted loop in place of the background image. */
+  backgroundVideo?: MarketingVideo | null;
   ctaText: string | null;
   ctaLink: string | null;
 }

@@ -2,8 +2,13 @@ import type { StaticImageData } from "next/image";
 import Image from "next/image";
 import Link from "next/link";
 
+import { AutoPlayVideo } from "@/components/product-detail/auto-play-video";
 import { Button } from "@/components/ui/button";
-import type { BannerSection as BannerSectionType } from "@/lib/types";
+import type {
+  BannerSection as BannerSectionType,
+  Image as ImageType,
+  MarketingImage,
+} from "@/lib/types";
 import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
@@ -13,8 +18,21 @@ interface BannerSectionProps {
 
 export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps) {
   const Heading = headingLevel;
-  const image = hero.backgroundImage ?? heroDefault;
-  const isStatic = typeof image === "object" && "src" in image;
+  const video = hero.backgroundVideo;
+  const image = hero.backgroundImage ?? (video ? null : heroDefault);
+  const isStatic = image !== null && typeof image === "object" && "src" in image;
+
+  // AutoPlayVideo expects `Image` (altText), not MarketingImage (alt). Map when both are
+  // available so the poster image renders underneath the video until canplay fires.
+  const videoPreview: ImageType | null =
+    video && image && !isStatic
+      ? {
+          url: (image as MarketingImage).url,
+          altText: (image as MarketingImage).alt,
+          width: (image as MarketingImage).width,
+          height: (image as MarketingImage).height,
+        }
+      : null;
 
   return (
     <section className="relative w-full overflow-hidden">
@@ -22,7 +40,21 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
         {/* Aspect-ratio spacer: sets the minimum height */}
         <div className="col-start-1 row-start-1 aspect-[16/9] md:aspect-[3/1]" />
 
-        {isStatic ? (
+        {video ? (
+          <>
+            <AutoPlayVideo
+              src={video.url}
+              previewImage={videoPreview}
+              priorityImage
+              sizes="100vw"
+              poster={video.poster}
+              preload="auto"
+              aria-hidden
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+          </>
+        ) : isStatic ? (
           <>
             <Image
               src={image as StaticImageData}
@@ -53,17 +85,14 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
 
         <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-5 lg:px-10 lg:py-10">
           <div className="flex flex-col items-center text-center gap-2.5">
-            <Heading className="text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
+            <Heading className="font-display text-3xl md:text-5xl font-semibold text-chartreuse tracking-tight max-w-3xl">
               {hero.headline}
             </Heading>
             {hero.subheadline && (
-              <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
+              <p className="text-sm md:text-base text-chartreuse max-w-xl">{hero.subheadline}</p>
             )}
             {hero.ctaText && hero.ctaLink && (
-              <Button
-                asChild
-                className="h-11 px-5 bg-background text-foreground hover:bg-background/90"
-              >
+              <Button asChild className="h-11 px-5 bg-chartreuse text-black hover:bg-chartreuse/90">
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>
             )}

@@ -14,11 +14,11 @@ export function AgentButton() {
       <button
         ref={triggerRef}
         type="button"
-        className="flex items-center gap-1.5 px-2 py-1"
+        className="flex items-center gap-1.5 px-2 py-1 text-link-foreground"
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
       >
-        <MessageCircle className="size-4 text-primary" />
+        <MessageCircle className="size-4" />
         <span className="sr-only">Agent</span>
       </button>
       {open && <AgentPanel open={open} onOpenChange={setOpen} triggerRef={triggerRef} />}

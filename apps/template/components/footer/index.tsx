@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { NewsletterSection } from "@/components/sections/newsletter-section";
 import { Sections } from "@/components/ui/sections";
 import { footerItems, siteConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/types/menu";
@@ -14,10 +15,11 @@ export function Footer({ locale }: { locale: string }) {
     <footer>
       <div className="mx-auto px-5 pt-10 pb-22 lg:px-10">
         <Sections className="gap-10">
+          <NewsletterSection />
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <p className="text-sm text-muted-foreground leading-5">
-              &copy; Vercel Shop. All rights reserved.
+              &copy; {siteConfig.name}. All rights reserved.
             </p>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>
@@ -58,12 +60,12 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
           {column.url ? (
             <MenuLink
               url={column.url}
-              className="block text-sm font-semibold hover:opacity-70 transition-opacity"
+              className="block font-display text-sm font-semibold text-link hover:opacity-70 transition-opacity"
             >
               {column.title}
             </MenuLink>
           ) : (
-            <h3 className="text-sm font-semibold">{column.title}</h3>
+            <h3 className="font-display text-sm font-semibold">{column.title}</h3>
           )}
           {column.items.length > 0 && (
             <ul className="space-y-2">
@@ -71,7 +73,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
                 <li key={leaf.id}>
                   <MenuLink
                     url={leaf.url}
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="block text-sm text-link hover:opacity-70 transition-opacity"
                   >
                     {leaf.title}
                   </MenuLink>

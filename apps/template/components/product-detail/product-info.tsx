@@ -24,7 +24,9 @@ function ProductInfoHeader({
 }: ProductInfoHeaderProps) {
   return (
     <div data-slot="product-info-header" className={className} {...props}>
-      <h1 className={cn("font-semibold text-foreground tracking-tight", "text-3xl")}>{title}</h1>
+      <h1 className={cn("font-display font-semibold text-foreground tracking-tight", "text-3xl")}>
+        {title}
+      </h1>
 
       {selectedVariant && (
         <ProductPrice

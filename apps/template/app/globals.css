@@ -8,8 +8,12 @@
   --breakpoint-4xl: 140rem; /* 2240px */
 
   --color-background: var(--background);
+  --color-chartreuse: var(--chartreuse);
   --color-foreground: var(--foreground);
+  --color-link: var(--link);
+  --color-link-foreground: var(--link-foreground);
   --color-shop: #5A31F4;
+  --font-display: var(--font-bricolage);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --text-xxs: 0.625rem;
@@ -72,7 +76,10 @@
   ); /* 64px = h-16 single nav row + safe area */
   --radius: 0.625rem;
   --background: #ffffff;
+  --chartreuse: #ccff00;
   --foreground: #010101;
+  --link: #0a1f4b;
+  --link-foreground: #ffffff;
   --card: #ffffff;
   --card-foreground: #010101;
   --popover: #ffffff;
@@ -111,6 +118,9 @@
   .prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     letter-spacing: -0.025em; /* tracking-tight */
     font-weight: 600; /* font-semibold */
+  }
+  .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+    color: var(--link);
   }
 }
 

@@ -72,7 +72,7 @@ function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
 }
 
 const BASE_SYSTEM_PROMPT = dedent`
-You're a helpful shopping assistant for Vercel Shop. Never use emojis in your responses.
+You're a helpful shopping assistant for Hausu. Never use emojis in your responses.
 `;
 
 function createSystemPrompt(ctx: AgentContext) {

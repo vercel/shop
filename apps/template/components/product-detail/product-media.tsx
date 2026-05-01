@@ -10,10 +10,19 @@ import { cn } from "@/lib/utils";
 import { AutoPlayVideo } from "./auto-play-video";
 import { Lightbox, LightboxTrigger } from "./lightbox";
 
-type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
+export type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 
 function mediaKey(item: MediaItem) {
   return item.type === "video" ? item.video.url : item.image.url;
+}
+
+function mediaPreviewUrl(item: MediaItem) {
+  return item.type === "video" ? (item.video.previewImage?.url ?? "") : item.image.url;
+}
+
+function mediaAlt(item: MediaItem, title: string, idx: number) {
+  if (item.type === "video") return item.video.previewImage?.altText || `${title} video ${idx + 1}`;
+  return item.image.altText || `${title} image ${idx + 1}`;
 }
 
 function MediaImage({
@@ -67,22 +76,12 @@ function MediaVideo({
   );
 }
 
-/** Snap-scroll carousel for mobile viewports. */
-function Carousel({
-  mediaItems,
-  title,
-  children,
-}: {
-  mediaItems: MediaItem[];
-  title: string;
-  children?: React.ReactNode;
-}) {
+function Carousel({ mediaItems, title }: { mediaItems: MediaItem[]; title: string }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevMediaRef = useRef<string>("");
   const t = useTranslations("product");
 
-  // Reset carousel to first item when the filtered media change
   const joinedKey = mediaItems.map(mediaKey).join(",");
   if (prevMediaRef.current && prevMediaRef.current !== joinedKey) {
     scrollContainerRef.current?.scrollTo({ left: 0 });
@@ -112,7 +111,6 @@ function Carousel({
       setSelectedIndex(newIndex);
     };
 
-    // Sync indicator from actual scroll position on mount / Activity re-activation
     syncIndex();
 
     container.addEventListener("scroll", syncIndex, { passive: true });
@@ -126,28 +124,20 @@ function Carousel({
         className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-5 w-[calc(100%+2.5rem)]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {children}
         {mediaItems.map((item, idx) => (
           <div
             key={mediaKey(item)}
             className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
           >
             {item.type === "video" ? (
-              <MediaVideo item={item} sizes="100vw" priority={!children && idx === 0} />
+              <MediaVideo item={item} sizes="100vw" priority={idx === 0} />
             ) : (
-              <MediaImage
-                item={item}
-                title={title}
-                idx={idx}
-                sizes="100vw"
-                priority={!children && idx === 0}
-              />
+              <MediaImage item={item} title={title} idx={idx} sizes="100vw" priority={idx === 0} />
             )}
           </div>
         ))}
       </div>
 
-      {/* Dot indicators – reserve space but hide when there's only one image */}
       <div className={cn("flex justify-center gap-2", mediaItems.length <= 1 && "invisible")}>
         {mediaItems.map((item, idx) => (
           <button
@@ -168,116 +158,91 @@ function Carousel({
   );
 }
 
-function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: number }) {
-  return (
-    <div className="relative aspect-square w-full overflow-hidden bg-accent">
-      {item.type === "video" ? (
-        <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={idx < 2} />
-      ) : (
-        <LightboxTrigger item={item}>
-          <MediaImage
-            item={item}
-            title={title}
-            idx={idx}
-            sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={idx < 2}
-          />
-        </LightboxTrigger>
-      )}
-    </div>
-  );
-}
+function Gallery({ mediaItems, title }: { mediaItems: MediaItem[]; title: string }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const prevMediaRef = useRef<string>("");
 
-/** 2-column grid with lightbox for desktop viewports. */
-function Grid({
-  mediaItems,
-  title,
-  children,
-}: {
-  mediaItems: MediaItem[];
-  title: string;
-  children?: React.ReactNode;
-}) {
+  const joinedKey = mediaItems.map(mediaKey).join(",");
+  if (prevMediaRef.current && prevMediaRef.current !== joinedKey) {
+    setSelectedIndex(0);
+  }
+  prevMediaRef.current = joinedKey;
+
+  const safeIndex = Math.min(selectedIndex, Math.max(0, mediaItems.length - 1));
+  const selected = mediaItems[safeIndex];
+  const t = useTranslations("product");
+
   return (
-    <Lightbox label={title}>
-      <div className="grid grid-cols-2 gap-2.5">
-        {children}
-        {mediaItems.map((item, idx) => (
-          <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
-        ))}
+    <div className="flex gap-2.5">
+      <div className="flex flex-col gap-2.5 w-20 shrink-0">
+        {mediaItems.map((item, idx) => {
+          const isSelected = idx === safeIndex;
+          return (
+            <button
+              type="button"
+              key={mediaKey(item)}
+              onClick={() => setSelectedIndex(idx)}
+              aria-label={t("goToImage", { number: String(idx + 1) })}
+              aria-current={isSelected ? "true" : undefined}
+              className={cn(
+                "relative aspect-square w-full overflow-hidden bg-accent transition-all",
+                isSelected
+                  ? "ring-1 ring-inset ring-foreground/50"
+                  : "ring-1 ring-inset ring-transparent hover:opacity-80",
+              )}
+            >
+              <Image
+                src={mediaPreviewUrl(item)}
+                alt={mediaAlt(item, title, idx)}
+                fill
+                className="object-cover"
+                sizes="80px"
+                draggable={false}
+              />
+            </button>
+          );
+        })}
       </div>
-    </Lightbox>
-  );
-}
-
-/**
- * Renders color-specific images as grid items (desktop).
- * Designed to be used inside a Suspense boundary as children of ProductMedia.
- */
-export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
-  return images.map((image, idx) => (
-    <GridItem key={image.url} item={{ type: "image", image }} title={title} idx={idx} />
-  ));
-}
-
-/**
- * Renders color-specific images as carousel items (mobile).
- * Matches the Carousel item structure for consistent snap-scroll behavior.
- */
-export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
-  return images.map((image, idx) => (
-    <div
-      key={image.url}
-      className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
-    >
-      <Image
-        src={image.url}
-        alt={image.altText || `${title} image ${idx + 1}`}
-        fill
-        className="object-cover"
-        sizes="100vw"
-        priority={idx === 0}
-        draggable={false}
-      />
+      <div className="relative aspect-square flex-1 overflow-hidden bg-accent">
+        {selected &&
+          (selected.type === "video" ? (
+            <MediaVideo item={selected} sizes="(min-width: 1024px) 50vw, 100vw" priority />
+          ) : (
+            <LightboxTrigger item={selected}>
+              <MediaImage
+                item={selected}
+                title={title}
+                idx={safeIndex}
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                priority
+              />
+            </LightboxTrigger>
+          ))}
+      </div>
     </div>
-  ));
+  );
 }
 
 export function ProductMedia({
-  otherImages,
-  videos,
+  mediaItems,
   title,
   className,
-  desktopSlot,
-  mobileSlot,
 }: {
-  otherImages: ImageType[];
-  videos: Video[];
+  mediaItems: MediaItem[];
   title: string;
   className?: string;
-  /** Color images rendered as grid items (desktop). */
-  desktopSlot?: React.ReactNode;
-  /** Color images rendered as carousel items (mobile). */
-  mobileSlot?: React.ReactNode;
 }) {
-  const sharedMediaItems: MediaItem[] = [
-    ...videos.map((video): MediaItem => ({ type: "video", video })),
-    ...otherImages.map((image): MediaItem => ({ type: "image", image })),
-  ];
-
-  if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) return null;
+  if (mediaItems.length === 0) return null;
 
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={sharedMediaItems} title={title}>
-          {mobileSlot}
-        </Carousel>
+        <Carousel mediaItems={mediaItems} title={title} />
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={sharedMediaItems} title={title}>
-          {desktopSlot}
-        </Grid>
+        <Lightbox label={title}>
+          <Gallery mediaItems={mediaItems} title={title} />
+        </Lightbox>
       </div>
     </div>
   );

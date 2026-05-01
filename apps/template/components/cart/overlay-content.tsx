@@ -74,13 +74,13 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   if (!displayCart || displayCart.lines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full px-5 text-center">
-        <h3 className="text-2xl font-semibold tracking-tighter mb-6">{t("empty")}</h3>
+        <h3 className="font-display text-2xl font-semibold tracking-tighter mb-6">{t("empty")}</h3>
         <Button
           onClick={() => {
             setOverlayOpen(false);
             router.push("/");
           }}
-          className="h-12 px-8 bg-foreground text-background hover:bg-foreground/90"
+          className="h-12 px-8 bg-link text-link-foreground hover:bg-link/90"
         >
           {t("continueShopping")}
         </Button>
@@ -104,7 +104,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
-          className="w-full h-12 justify-center bg-foreground text-background hover:bg-foreground/90"
+          className="w-full h-12 justify-center bg-link text-link-foreground hover:bg-link/90"
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}
         >

@@ -5,7 +5,7 @@ import { Page } from "@/components/ui/page";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Learn about Vercel Shop, a Next.js storefront template for Shopify.",
+  description: "Learn about Hausu, a Next.js storefront template for Shopify.",
 };
 
 export default function AboutPage() {
@@ -13,9 +13,9 @@ export default function AboutPage() {
     <Page>
       <Container className="max-w-2xl">
         <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
-          <h1>About Vercel Shop</h1>
+          <h1>About Hausu</h1>
           <p>
-            Vercel Shop is a Next.js storefront that connects to Shopify. You get product pages,
+            Hausu is a Next.js storefront that connects to Shopify. You get product pages,
             collections, a cart, and search out of the box. Point it at your store and you're
             selling.
           </p>

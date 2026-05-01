@@ -37,7 +37,8 @@ export function QuickLinks({ items }: { items: MenuItem[] }) {
   );
 }
 
-const TRIGGER_CLASS = "flex items-center gap-1 text-sm hover:opacity-70 transition-opacity";
+const TRIGGER_CLASS =
+  "flex items-center gap-1 text-sm text-link hover:opacity-70 transition-opacity";
 
 function NavItem({ item }: { item: MenuItem }) {
   if (item.items.length === 0) {
@@ -78,12 +79,12 @@ function NavItem({ item }: { item: MenuItem }) {
                 {column.url ? (
                   <MenuLink
                     url={column.url}
-                    className="block text-sm font-semibold mb-3 hover:opacity-70 transition-opacity"
+                    className="block font-display text-sm font-semibold text-link mb-3 hover:opacity-70 transition-opacity"
                   >
                     {column.title}
                   </MenuLink>
                 ) : (
-                  <h3 className="text-sm font-semibold mb-3">{column.title}</h3>
+                  <h3 className="font-display text-sm font-semibold mb-3">{column.title}</h3>
                 )}
                 {column.items.length > 0 && (
                   <ul className="space-y-2">
@@ -91,7 +92,7 @@ function NavItem({ item }: { item: MenuItem }) {
                       <li key={leaf.id}>
                         <MenuLink
                           url={leaf.url}
-                          className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                          className="block text-sm text-link hover:opacity-70 transition-opacity"
                         >
                           {leaf.title}
                         </MenuLink>

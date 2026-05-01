@@ -87,11 +87,11 @@ export function BuyButtons({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2.5">
+    <div className="grid grid-cols-10 gap-2.5">
       <button
         type="button"
         className={cn(
-          "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
+          "col-span-4 flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
           !availableForSale && "invisible",
         )}
         disabled={isOutOfStock || isBuyingNow}
@@ -110,7 +110,7 @@ export function BuyButtons({
         type="button"
         disabled={isOutOfStock}
         onClick={handleAddToCart}
-        className="flex-1 justify-center h-12 bg-foreground text-background hover:bg-foreground/90"
+        className="col-span-6 justify-center h-12 bg-link text-link-foreground hover:bg-link/90"
       >
         {getButtonText()}
       </Button>
