@@ -67,8 +67,7 @@ function ProductInfoOptions({
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
-      <div className="grid gap-10">
-        {/* Color Pickers (with images or swatches) */}
+      <div className="grid gap-5">
         {colorOptions.map((colorOption) => (
           <ColorPicker
             key={colorOption.id}
@@ -81,7 +80,6 @@ function ProductInfoOptions({
           />
         ))}
 
-        {/* Other Options (text buttons) */}
         {otherOptions.map((option) => (
           <OptionPicker
             key={option.id}
