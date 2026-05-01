@@ -9,8 +9,7 @@ type: reference
 | Route | File | Description |
 |---|---|---|
 | `/` | `app/page.tsx` | Home page with hero, featured products, info section |
-| `/products/[handle]` | `app/products/[handle]/page.tsx` | Product detail page (default variant) |
-| `/products/[handle]/[variantId]` | `app/products/[handle]/[variantId]/page.tsx` | Product detail page (specific variant) |
+| `/products/[handle]` | `app/products/[handle]/page.tsx` | Product detail page; `?variant=` selects a specific variant |
 | `/collections/[handle]` | `app/collections/[handle]/page.tsx` | Collection listing with filters, sort, pagination |
 | `/search` | `app/search/page.tsx` | Search results (same grid as collections) |
 | `/cart` | `app/cart/page.tsx` | Full cart page with upsells |
@@ -25,10 +24,10 @@ type: reference
 | `POST /api/chat` | `app/api/chat/route.ts` | AI shopping assistant endpoint |
 | `GET /api/draft` | `app/api/draft/route.ts` | Draft mode toggle for content preview |
 
-## URL rewrites
+## Variant URLs
 
-The following rewrite in `next.config.ts` enables variant selection via query parameters:
+Product variant selection uses Shopify's standard `variant` query parameter directly on the product route:
 
-| Source | Destination | Purpose |
-|---|---|---|
-| `/products/:handle?variantId=:variantId` | `/products/:handle/:variantId` | Maps variant query param to route segment |
+| URL | Purpose |
+|---|---|
+| `/products/:handle?variant=:variantId` | Opens the product page with the matching variant selected |

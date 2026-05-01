@@ -254,7 +254,6 @@ Update all `PageProps` and `LayoutProps` type parameters to include `[locale]`:
 
 - `LayoutProps<"/">` → `LayoutProps<"/[locale]">`
 - `PageProps<"/products/[handle]">` → `PageProps<"/[locale]/products/[handle]">`
-- `PageProps<"/products/[handle]/[variantId]">` → `PageProps<"/[locale]/products/[handle]/[variantId]">`
 - `PageProps<"/collections/[handle]">` → `PageProps<"/[locale]/collections/[handle]">`
 - `PageProps<"/search">` → `PageProps<"/[locale]/search">`
 - `PageProps<"/pages/[slug]">` → `PageProps<"/[locale]/pages/[slug]">`
@@ -339,7 +338,7 @@ The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/ope
 
 **File:** `proxy.ts`
 
-Add a `proxy.ts` with next-intl middleware for locale routing and variant ID rewrites:
+Add a `proxy.ts` with next-intl middleware for locale routing:
 
 ```ts
 export const config = {
@@ -348,37 +347,18 @@ export const config = {
   ],
 };
 
-import { type NextRequest, NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/lib/i18n/routing";
 
 const handlei18n = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
-  // 1. Normal flow: locale routing via next-intl
-  let response = handlei18n(request);
-
-  // 2. Variant ID rewrite (after locale resolution)
-  const url = new URL(request.url);
-  const variantId = url.searchParams.get("variantId");
-  if (variantId) {
-    const segments = url.pathname.split("/").filter(Boolean);
-    const productIndex = segments.findIndex((s) => s === "products");
-    if (productIndex !== -1 && segments[productIndex + 1] && !segments[productIndex + 2]) {
-      const rewriteUrl = new URL(request.url);
-      rewriteUrl.pathname = `${url.pathname}/${variantId}`;
-      const params = new URLSearchParams(url.searchParams);
-      params.delete("variantId");
-      rewriteUrl.search = params.toString();
-      return NextResponse.rewrite(rewriteUrl);
-    }
-  }
-
-  return response;
+export function proxy(request: NextRequest) {
+  return handlei18n(request);
 }
 ```
 
-> **Note:** The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
+> **Note:** Product variant selection stays on Shopify's standard `?variant=` query parameter. The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
 
 ---
 
@@ -596,7 +576,7 @@ After completing all steps, verify the implementation:
    - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
    - Product prices render in the correct currency for each locale
 3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Middleware**: Confirm `?variantId=` rewrites still work
+4. **Variants**: Confirm product variant links preserve `?variant=` across locale-prefixed URLs
 5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
 6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries
 

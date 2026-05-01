@@ -110,7 +110,7 @@ function ClientProductCard({
   outOfStockText: string;
 }) {
   const href = product.defaultVariantNumericId
-    ? `/products/${product.handle}?variantId=${product.defaultVariantNumericId}`
+    ? `/products/${product.handle}?variant=${product.defaultVariantNumericId}`
     : `/products/${product.handle}`;
 
   return (

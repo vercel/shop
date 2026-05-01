@@ -98,7 +98,7 @@ export const unstable_instant = {
   samples: [
     {
       params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
-      searchParams: { variantId: "1" },
+      searchParams: { variant: "1" },
       cookies: [{ name: "shopify_cartId", value: null }],
     },
   ],
@@ -113,7 +113,7 @@ This is easy to forget. If you (or a downstream skill) adds a server component t
 samples: [
   {
     params: { locale: "en-US", handle: "__placeholder__" },
-    searchParams: { variantId: "1" },
+    searchParams: { variant: "1" },
     cookies: [{ name: "shopify_cartId", value: null }],
     headers: [["x-vercel-ip-postal-code", null]], // ← add this
   },
