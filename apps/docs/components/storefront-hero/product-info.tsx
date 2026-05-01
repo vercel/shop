@@ -22,15 +22,15 @@ export const ProductInfo = () => (
       <p className="text-[18px] text-gray-500">$100.00</p>
     </div>
     <hr className="border-gray-300" />
-    <div className="flex flex-col gap-6">
+    <div className="mt-auto flex flex-col gap-6">
       <div className="flex flex-col gap-2">
         <span className="text-[11px] text-gray-500">Select Size:</span>
-        <div className="grid grid-cols-2 @docs-sm:grid-cols-3 @docs-md:grid-cols-6 gap-1">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1">
           {SIZES.map((size, i) => (
             <div
               className={cn(
                 "rounded-lg border bg-gray-100 py-2 text-center text-[11px] text-gray-500",
-                i < 6 && "hidden @docs-sm:block",
+                i < 6 && "hidden sm:block",
                 size === "10.0"
                   ? "border-gray-alpha-400"
                   : "border-transparent",

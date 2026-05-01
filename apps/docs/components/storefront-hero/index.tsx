@@ -6,7 +6,7 @@ import { Recommendations } from "./recommendations";
 import { ShoePreviewImage } from "./shoe-preview-image";
 
 export const StorefrontHero = () => (
-  <BrowserChrome className="@container" url="vercel.shop">
+  <BrowserChrome url="vercel.shop">
     <StaticBoundary>
       <div className="mt-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -17,8 +17,8 @@ export const StorefrontHero = () => (
         </div>
         <CartIndicator />
       </div>
-      <div className="mt-6 flex flex-col @docs-lg:flex-row @docs-lg:items-start gap-7">
-        <div className="inline-flex rounded-lg border border-gray-500 @docs-sm:min-w-[450px] py-5 px-12">
+      <div className="mt-6 flex flex-col lg:flex-row lg:items-stretch gap-7">
+        <div className="inline-flex rounded-lg border border-gray-500 sm:min-w-[450px] py-5 px-12">
           <ShoePreviewImage className="h-[212px] text-gray-600 dark:text-gray-400 mx-auto" />
         </div>
         <ProductInfo />
