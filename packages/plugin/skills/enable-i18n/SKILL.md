@@ -44,7 +44,31 @@ export const enabledLocales: readonly Locale[] = locales;
 
 The template runs with `cacheComponents: true` (Next.js 16). That changes a few things this skill needs to handle correctly. Skipping any of these will produce build errors that look unrelated:
 
-### A. Don't swap `next/link` to next-intl's `<Link>`
+### A. `experimental.rootParams: true` must stay on
+
+`next/root-params` (used by `getLocale()` below) is gated behind a flag. The template ships with it enabled in `next.config.ts`:
+
+```ts
+const nextConfig: NextConfig = {
+  cacheComponents: true,
+  experimental: {
+    rootParams: true,
+    // ...existing experimental flags
+  },
+};
+```
+
+If it's been removed, add it back. Without it, `import { locale } from "next/root-params"` resolves but returns `undefined`, and you'll see `notFound()` on every request.
+
+### B. There must be no `app/layout.tsx` above `app/[locale]/`
+
+For `[locale]` to be recognized as a root param, the dynamic segment must be the root layout. After Step 2, the file at `app/layout.tsx` should be gone (moved into `app/[locale]/layout.tsx`). If both exist, `rootParams.locale()` returns `undefined`.
+
+### C. `setRequestLocale` is not used
+
+next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages. **Don't add them under cacheComponents.** That helper writes to a request-scoped store and forces dynamic rendering — it defeats the cache. The rootParams + request-config pattern below makes it unnecessary because the resolved locale is already a cache key.
+
+### D. Don't swap `next/link` to next-intl's `<Link>`
 
 The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
 
@@ -58,7 +82,7 @@ or a generic "blocking route" prerender failure.
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### B. `unstable_instant` samples need `locale` in `params`
+### E. `unstable_instant` samples need `locale` in `params`
 
 Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
 
@@ -81,7 +105,7 @@ export const unstable_instant = {
 };
 ```
 
-### C. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
+### F. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
 
 This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
 
@@ -104,7 +128,7 @@ Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
        sample's `headers` array, or `["...", null]` if it should be absent.
 ```
 
-### D. `redirect()` from next-intl doesn't return `never`
+### G. `redirect()` from next-intl doesn't return `never`
 
 ```ts
 // BREAKS: TS doesn't narrow `session` after redirect
@@ -149,13 +173,13 @@ import { routing } from "./routing";
 export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
 ```
 
-> Per "Cache Components compatibility A" above, `Link` here is mostly used by the locale switcher / programmatic routing in client components — not as a wholesale replacement for `next/link`.
+> Per "Cache Components compatibility D" above, `Link` here is mostly used by the locale switcher / programmatic routing in client components — not as a wholesale replacement for `next/link`.
 
 ### Step 2: Move routes under `app/[locale]/`
 
 Move every route file from `app/` into `app/[locale]/`:
 
-- `app/layout.tsx` → `app/[locale]/layout.tsx` (becomes the root layout for the locale segment)
+- `app/layout.tsx` → `app/[locale]/layout.tsx` (becomes the root layout for the locale segment). **Delete the original `app/layout.tsx` after the move** — see compatibility B above; both files cannot coexist.
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
 - `app/about/`, `app/account/`, `app/cart/`, `app/collections/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
@@ -194,6 +218,12 @@ const messageLoaders: Record<string, () => Promise<{ default: typeof enMessages 
   // back to the default locale loader.
 };
 
+// We intentionally do NOT destructure `{ locale }` from the callback args.
+// next-intl populates that arg from the `x-next-intl-locale` request header,
+// and reading request headers from inside a cached tree forces the route
+// dynamic — every `unstable_instant` sample then needs an explicit
+// `headers: [["x-next-intl-locale", null]]` declaration. Going straight to
+// `getLocale()` (which reads `next/root-params`) keeps the lookup cacheable.
 export default getRequestConfig(async () => {
   const requested = await getLocale();
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
@@ -325,7 +355,7 @@ If any layout-level server component (e.g. a shipping/postal banner, geo-aware n
 headers: [["x-vercel-ip-postal-code", null]]
 ```
 
-(See "Cache Components compatibility B/C" at the top.)
+(See "Cache Components compatibility E/F" at the top.)
 
 ### Step 13: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
 

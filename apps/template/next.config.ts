@@ -19,6 +19,7 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     optimisticRouting: true,
     partialFallbacks: true,
+    rootParams: true,
     turbopackFileSystemCacheForDev: true,
   },
   images: {
