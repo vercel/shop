@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: true,
   },
   images: {
+    // Trimmed from the Next defaults (8 device + 8 image widths). Our largest
+    // realistic display is the lightbox at ~1920w; smallest is the 64px cart
+    // thumbnail (served at 128w for retina). Cuts ~half the optimized variants
+    // per Shopify asset without visible quality loss.
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 384],
     minimumCacheTTL: 31536000,
     remotePatterns: [
       {

@@ -59,7 +59,7 @@ async function Render({ handle, locale }: { handle: string; locale: Locale }) {
                     alt={product.featuredImage.altText || product.title}
                     fill
                     className="object-cover"
-                    sizes="64px"
+                    sizes="80px"
                   />
                 ) : null}
               </div>
