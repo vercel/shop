@@ -61,11 +61,11 @@ export function ColorPicker({
                   width={200}
                   height={200}
                   alt={`${value.name} swatch`}
-                  className="size-full border border-foreground/10 object-cover"
+                  className="size-full rounded-lg border border-foreground/10 object-cover"
                 />
               ) : (
                 <div
-                  className="size-full border border-foreground/10 bg-accent"
+                  className="size-full rounded-lg border border-foreground/10 bg-accent"
                   style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
                 />
               )}
