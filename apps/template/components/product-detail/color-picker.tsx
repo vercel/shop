@@ -51,7 +51,7 @@ export function ColorPicker({
           const swatch = (
             <div
               className={cn(
-                "aspect-square w-full transition-all overflow-hidden",
+                "aspect-square w-full rounded-lg transition-all overflow-hidden",
                 isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
             >
