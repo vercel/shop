@@ -16,18 +16,18 @@ type: guide
 
 # Enable Analytics
 
-By default, the storefront has no analytics or performance monitoring. This skill adds Vercel Analytics, Vercel Speed Insights, and/or Google Tag Manager using their recommended integrations.
+The current storefront includes Vercel Analytics and Vercel Speed Insights by default. This skill adds the same default wiring to older storefronts and can also add Google Tag Manager using the recommended integration.
 
 ## Before you start
 
 Ask the user two questions in order:
 
-### 1. Do you want Vercel Analytics and/or Vercel Speed Insights?
+### 1. Do you need to add or change Vercel Analytics and/or Vercel Speed Insights?
 
-- **Vercel Analytics** — page view and custom event tracking via `@vercel/analytics`
-- **Vercel Speed Insights** — Core Web Vitals monitoring via `@vercel/speed-insights`
-- **Both** (recommended)
-- **Neither**
+- **Keep both** — current template default: page views, custom events, and Core Web Vitals
+- **Analytics only** — page view and custom event tracking via `@vercel/analytics`
+- **Speed Insights only** — Core Web Vitals monitoring via `@vercel/speed-insights`
+- **Neither** — remove or skip both Vercel packages
 
 ### 2. Do you want Google Tag Manager?
 
@@ -46,7 +46,7 @@ Skip this section if the user selected neither.
 Install only the packages the user selected:
 
 ```bash
-# Both (recommended)
+# Both (current template default)
 pnpm add @vercel/analytics @vercel/speed-insights
 
 # Analytics only
