@@ -162,6 +162,18 @@
   --color-pink-800: var(--ds-pink-800);
   --color-pink-900: var(--ds-pink-900);
   --color-pink-1000: var(--ds-pink-1000);
+
+  /* Custom container query sizes for docs components, mirroring the
+     viewport sm/md/lg/xl/2xl widths. Used as @docs-sm/@docs-md/@docs-lg
+     etc. inside `@container` regions when you want the container's own
+     width to drive the same breakpoints the viewport scale would.
+     Kept under their own --container-docs-* prefix to leave the default
+     --container-sm/md/lg etc. (and therefore max-w-sm/md/lg) unchanged. */
+  --container-docs-sm: 40rem;
+  --container-docs-md: 48rem;
+  --container-docs-lg: 64rem;
+  --container-docs-xl: 80rem;
+  --container-docs-2xl: 96rem;
 }
 
 :root {
