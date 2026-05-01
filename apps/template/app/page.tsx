@@ -28,9 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Placeholder homepage. Replace this file's contents to swap in your own —
-// CMS-driven sections, hand-written marketing, etc. Copy is intentionally
-// inline (not in i18n catalogs) so you can rip the whole page out cleanly.
+// Placeholder homepage; copy is inline so the file can be replaced wholesale.
 export default async function HomePage() {
   const locale = await getLocale();
 

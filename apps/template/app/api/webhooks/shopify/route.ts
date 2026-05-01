@@ -19,11 +19,7 @@ async function verifyWebhook(body: string, hmacHeader: string | null): Promise<b
   return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
 }
 
-/**
- * Cache invalidation handler. Configure topics in Shopify Admin →
- * Settings → Notifications → Webhooks. Supported: `products/*`,
- * `collections/*`, `inventory_levels/*`, `metaobjects/*`.
- */
+// Configure webhook topics in Shopify Admin → Settings → Notifications → Webhooks.
 export async function POST(request: Request) {
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");

@@ -402,10 +402,7 @@ export function CartProvider({
     });
   };
 
-  /**
-   * quantity > 0: update with leading-edge debounce (first instant, rest debounced).
-   * quantity === 0: remove immediately, no debounce.
-   */
+  // quantity > 0: leading-edge debounce. quantity === 0: remove immediately.
   const updateItemOptimistic = (lineId: string, quantity: number) => {
     if (quantity < 0 || quantity > 99 || !cart) return;
 
