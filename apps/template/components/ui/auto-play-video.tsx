@@ -4,11 +4,17 @@ import Image from "next/image";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
-import type { Image as ImageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+export interface AutoPlayVideoPreviewImage {
+  altText: string;
+  height: number;
+  url: string;
+  width: number;
+}
+
 interface AutoPlayVideoProps extends Omit<React.ComponentProps<"video">, "autoPlay" | "ref"> {
-  previewImage?: ImageType | null;
+  previewImage?: AutoPlayVideoPreviewImage | null;
   sizes?: string;
   priorityImage?: boolean;
 }
@@ -37,21 +43,32 @@ export function AutoPlayVideo({
     const el = videoRef.current;
     if (!el) return;
 
+    let isVisible = false;
+
+    // play() called at readyState=0 can race the metadata load and reject
+    // silently. The observer only re-fires on intersection transitions, so a
+    // failed initial play would never retry. Retrying on `canplay` (only when
+    // currently visible) covers the cold-load race without auto-playing
+    // off-screen videos.
+    const tryPlay = () => {
+      if (isVisible) el.play().catch(() => {});
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) {
-          el.play().catch(() => {});
-        } else {
-          el.pause();
-        }
+        isVisible = !!entry?.isIntersecting;
+        if (isVisible) tryPlay();
+        else el.pause();
       },
       { threshold: 0.25 },
     );
 
     observer.observe(el);
+    el.addEventListener("canplay", tryPlay);
 
     return () => {
       observer.disconnect();
+      el.removeEventListener("canplay", tryPlay);
     };
   }, []);
 

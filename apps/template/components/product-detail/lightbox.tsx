@@ -6,9 +6,8 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
+import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
-
-import { AutoPlayVideo } from "./auto-play-video";
 
 type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 
