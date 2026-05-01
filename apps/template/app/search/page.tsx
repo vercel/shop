@@ -82,9 +82,7 @@ export const unstable_prefetch = "force-runtime";
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
-  // searchParams is a Promise; awaiting it at the page level would force the
-  // route fully dynamic, so we kick off the data fetch as a derived promise
-  // and let child Suspense boundaries await it.
+  // Don't await searchParams here — it would force the route fully dynamic.
   const searchResultsDataPromise = (async () => {
     const resolved = await searchParams;
     return getSearchResultsData({

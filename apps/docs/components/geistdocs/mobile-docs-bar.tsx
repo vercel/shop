@@ -35,11 +35,6 @@ export const MobileDocsBar = ({ headings, navigation }: MobileDocsBarProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [tocOpen, setTocOpen] = useState(false);
 
-  // useEffect(() => {
-  //   setMenuOpen(false);
-  //   setTocOpen(false);
-  // }, [pathname]);
-
   const showToc = headings && headings.length > 0;
 
   return (

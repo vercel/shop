@@ -1,12 +1,5 @@
-// Syncs skill content from packages/plugin/skills/SKILL.md
-// into the corresponding docs MDX pages at content/docs/skills/*.mdx.
-//
-// Usage:
-//   npx tsx apps/docs/scripts/sync-skills.ts
-//
-// For each MDX file that contains BEGIN/END SKILL CONTENT comment
-// delimiters, the script replaces everything between them with the
-// current SKILL.md content (frontmatter stripped).
+// Syncs SKILL.md content into content/docs/skills/*.mdx between BEGIN/END SKILL CONTENT markers.
+// Usage: npx tsx apps/docs/scripts/sync-skills.ts
 
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { join, dirname } from "node:path";

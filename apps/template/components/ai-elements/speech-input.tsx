@@ -13,12 +13,7 @@ type SpeechInputMode = "speech-recognition" | "media-recorder" | "none";
 
 export type SpeechInputProps = ComponentProps<typeof Button> & {
   onTranscriptionChange?: (text: string) => void;
-  /**
-   * Callback for when audio is recorded using MediaRecorder fallback.
-   * This is called in browsers that don't support the Web Speech API (Firefox, Safari).
-   * The callback receives an audio Blob that should be sent to a transcription service.
-   * Return the transcribed text, which will be passed to onTranscriptionChange.
-   */
+  /** MediaRecorder fallback for browsers without Web Speech API; resolved text feeds onTranscriptionChange. */
   onAudioRecorded?: (audioBlob: Blob) => Promise<string>;
   lang?: string;
 };

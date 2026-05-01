@@ -3,9 +3,7 @@ import type * as React from "react";
 interface CollectionToolbarProps {
   filterSheet: React.ReactNode;
   sortSelect: React.ReactNode;
-  // Pass JSX (e.g. a Suspense'd count) on pages that surface a result count.
-  // Pages without a count (collections) should omit this prop entirely so the
-  // slot doesn't reserve space.
+  // Omit on pages without a count so the slot doesn't reserve space.
   resultCount?: React.ReactNode;
 }
 
