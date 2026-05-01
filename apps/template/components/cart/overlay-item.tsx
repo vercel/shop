@@ -43,7 +43,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
           alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
           fill
           className="object-cover"
-          sizes="64px"
+          sizes="80px"
         />
       </Link>
 
