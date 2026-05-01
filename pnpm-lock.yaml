@@ -179,6 +179,12 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      '@vercel/analytics':
+        specifier: 2.0.1
+        version: 2.0.1(next@16.3.0-canary.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vue@3.5.30(typescript@6.0.3))
+      '@vercel/speed-insights':
+        specifier: 2.0.0
+        version: 2.0.0(next@16.3.0-canary.1(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(react@19.2.5)(vue@3.5.30(typescript@6.0.3))
       ai:
         specifier: 6.0.168
         version: 6.0.168(zod@4.3.6)

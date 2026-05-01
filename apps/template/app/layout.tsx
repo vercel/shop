@@ -7,6 +7,7 @@ import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
+import { AnalyticsComponents } from "@/components/analytics";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
 import { Footer } from "@/components/footer";
@@ -61,6 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
+        <AnalyticsComponents />
       </body>
     </html>
   );
