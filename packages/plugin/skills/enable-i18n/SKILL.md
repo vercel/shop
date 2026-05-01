@@ -44,9 +44,9 @@ export const enabledLocales: readonly Locale[] = locales;
 
 The template runs with `cacheComponents: true` (Next.js 16). That changes a few things this skill needs to handle correctly. Skipping any of these will produce build errors that look unrelated:
 
-### A. `experimental.rootParams: true` is required
+### A. `experimental.rootParams: true` must stay on
 
-`next/root-params` (used by `getLocale()` below) is gated behind a flag. Add it to `next.config.ts` alongside `cacheComponents`:
+`next/root-params` (used by `getLocale()` below) is gated behind a flag. The template ships with it enabled in `next.config.ts`:
 
 ```ts
 const nextConfig: NextConfig = {
@@ -58,7 +58,7 @@ const nextConfig: NextConfig = {
 };
 ```
 
-Without it, `import { locale } from "next/root-params"` resolves but returns `undefined`, and you'll see `notFound()` on every request.
+If it's been removed, add it back. Without it, `import { locale } from "next/root-params"` resolves but returns `undefined`, and you'll see `notFound()` on every request.
 
 ### B. There must be no `app/layout.tsx` above `app/[locale]/`
 
