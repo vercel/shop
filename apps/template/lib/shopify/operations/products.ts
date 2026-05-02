@@ -486,7 +486,7 @@ export async function searchIndexProducts(params: {
       edges: Array<{ node: ShopifyProductCard | null }>;
     };
   }>({
-    operation: "searchProducts",
+    operation: "searchIndexProducts",
     query: SEARCH_INDEX_PRODUCTS_QUERY,
     variables: {
       query: query.trim() || "*",
