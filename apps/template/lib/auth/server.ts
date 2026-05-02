@@ -9,6 +9,51 @@ const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
 
+function formatVercelUrl(host?: string): string | undefined {
+  return host ? `https://${host}` : undefined;
+}
+
+function trimTrailingSlash(url: string): string {
+  return url.replace(/\/+$/, "");
+}
+
+function getAuthBaseUrl(): string {
+  const explicitUrl = process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
+  if (explicitUrl) return trimTrailingSlash(explicitUrl);
+
+  if (process.env.VERCEL_ENV === "production") {
+    const productionUrl = formatVercelUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL);
+    if (productionUrl) return productionUrl;
+  }
+
+  return (
+    formatVercelUrl(process.env.VERCEL_BRANCH_URL) ||
+    formatVercelUrl(process.env.VERCEL_URL) ||
+    "http://localhost:3000"
+  );
+}
+
+function getTrustedOrigins(authBaseUrl: string): string[] {
+  return [
+    authBaseUrl,
+    formatVercelUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL),
+    formatVercelUrl(process.env.VERCEL_BRANCH_URL),
+    formatVercelUrl(process.env.VERCEL_URL),
+    ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") ?? []),
+  ].reduce<string[]>((origins, origin) => {
+    if (!origin) return origins;
+
+    const normalizedOrigin = trimTrailingSlash(origin.trim());
+    if (normalizedOrigin && !origins.includes(normalizedOrigin)) {
+      origins.push(normalizedOrigin);
+    }
+
+    return origins;
+  }, []);
+}
+
+const authBaseUrl = getAuthBaseUrl();
+
 function decodeIdTokenPayload(idToken: string): {
   sub: string;
   email: string;
@@ -29,7 +74,7 @@ function decodeIdTokenPayload(idToken: string): {
 }
 
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL: authBaseUrl,
   secret: process.env.BETTER_AUTH_SECRET,
 
   session: {
@@ -96,7 +141,7 @@ export const auth = betterAuth({
   ],
 
   basePath: "/api/auth",
-  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") || [],
+  trustedOrigins: getTrustedOrigins(authBaseUrl),
 });
 
 export type Auth = typeof auth;
