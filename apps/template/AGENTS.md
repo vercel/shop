@@ -116,6 +116,8 @@ A comment earns its place when it captures one of:
 - A non-obvious algorithmic choice or invariant.
 - A cross-system quirk (e.g. "Shopify's `productFilters` only affects facet counts, not results").
 
+**One line max.** If you can't say it in a single line, the code probably needs renaming, splitting, or extracting a constant — not more prose. Long-form context belongs in the PR description, not the source file.
+
 Don't write:
 
 - JSDoc that restates the function name (`/** Verify webhook signature */` over `verifyWebhook()`). Either drop it or replace it with the WHY.

@@ -63,7 +63,8 @@ function NavItem({ item }: { item: MenuItem }) {
           "absolute inset-x-0 top-full z-40",
           "invisible opacity-0",
           "group-hover:visible group-hover:opacity-100",
-          "group-focus-within:visible group-focus-within:opacity-100",
+          // :focus-visible (not :focus-within) so post-click mouse focus doesn't pin the menu open.
+          "group-has-[:focus-visible]:visible group-has-[:focus-visible]:opacity-100",
           "transition-opacity duration-150",
           "bg-background border-b shadow-md",
         )}

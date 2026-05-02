@@ -65,10 +65,6 @@ import {
   useState,
 } from "react";
 
-// ============================================================================
-// Provider Context & Types
-// ============================================================================
-
 export interface AttachmentsContext {
   files: (FileUIPart & { id: string })[];
   add: (files: File[] | FileList) => void;
@@ -253,10 +249,6 @@ export function PromptInputProvider({
   );
 }
 
-// ============================================================================
-// Component Context & Hooks
-// ============================================================================
-
 const LocalAttachmentsContext = createContext<AttachmentsContext | null>(null);
 
 export const usePromptInputAttachments = () => {
@@ -271,10 +263,6 @@ export const usePromptInputAttachments = () => {
   }
   return context;
 };
-
-// ============================================================================
-// Referenced Sources (Local to PromptInput)
-// ============================================================================
 
 export interface ReferencedSourcesContext {
   sources: (SourceDocumentUIPart & { id: string })[];

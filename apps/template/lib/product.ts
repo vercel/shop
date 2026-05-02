@@ -68,7 +68,7 @@ export function getVariantUrl(
 
   const numericId = variant ? getNumericShopifyId(variant.id) : null;
   if (numericId) {
-    return `/products/${handle}?variantId=${numericId}`;
+    return `/products/${handle}?variant=${numericId}`;
   }
 
   return `/products/${handle}`;

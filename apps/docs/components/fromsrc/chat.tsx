@@ -153,7 +153,7 @@ function ChatInner({
   return (
     <div className="flex size-full w-full flex-col overflow-hidden bg-background border-l border-border">
       <div className="flex items-center justify-between px-4 h-16 shrink-0 border-b border-border bg-sidebar">
-        <h2 className="text-sm font-semibold">Chat</h2>
+        <h2 className="font-sans text-sm font-semibold">Chat</h2>
         <div className="flex items-center">
           <button
             type="button"

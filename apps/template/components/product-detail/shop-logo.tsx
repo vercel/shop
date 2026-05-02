@@ -1,10 +1,6 @@
 import type { SVGProps } from "react";
 
-/**
- * Shop wordmark logo for the "Buy with Shop" button.
- * Extracted from the official Shop Pay logo per Shopify brand guidelines.
- * @see https://help.shopify.com/en/manual/payments/shop-pay/assets
- */
+// https://help.shopify.com/en/manual/payments/shop-pay/assets
 export function ShopLogo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg

@@ -1,4 +1,4 @@
 {
   "title": "Features",
-  "pages": ["agent", "authentication", "cart", "pages", "navigation", "footer", "content-negotiation"]
+  "pages": ["agent", "authentication", "cart", "pages", "navigation", "footer", "aeo-geo"]
 }

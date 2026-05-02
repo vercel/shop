@@ -180,10 +180,7 @@ function joinOr(field: string, values: string[]): string {
   return expressions.length > 1 ? `(${expressions.join(" OR ")})` : expressions[0];
 }
 
-// Translates ProductFilter[] (from URL params) into Shopify's product-query syntax.
-// `productFilters` on Search only affects facet counts; QueryRoot.products has no
-// equivalent arg, so structured filters are encoded into the `query` string instead.
-// variantOption / productMetafield filters have no product-query syntax and are dropped.
+// QueryRoot.products has no productFilters arg, so filters are encoded into the query string; variantOption/productMetafield are dropped.
 function buildCatalogQuery(args: {
   query?: string;
   collection?: string;
@@ -344,9 +341,7 @@ export async function getCatalogProducts(params: {
   const language = getLanguageCode(locale);
   const catalogQuery = buildCatalogQuery({ query, collection, filters });
 
-  // RELEVANCE only orders results meaningfully when there's a query string;
-  // fall back to BEST_SELLING for plain catalog browse so the landing order
-  // matches typical storefront expectations.
+  // RELEVANCE is meaningless without a query; fall back to BEST_SELLING for plain browse.
   const sortKey =
     sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "BEST_SELLING" : sortConfig.sortKey;
 
@@ -422,9 +417,7 @@ export async function getSearchFacets(params: {
   };
 }
 
-// Index-based search; ranks by relevance over the search index. Reserved for
-// callers that genuinely want search semantics (the AI agent tool). Catalog
-// browse and the /search page should use getCatalogProducts instead.
+// Use getCatalogProducts for catalog browse / the /search page; this is the relevance-ranked search index.
 export async function searchIndexProducts(params: {
   query: string;
   sortKey?: string;

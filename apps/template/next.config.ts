@@ -19,10 +19,13 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     optimisticRouting: true,
     partialFallbacks: true,
+    rootParams: true,
     turbopackFileSystemCacheForDev: true,
     varyParams: true,
   },
   images: {
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 384],
     minimumCacheTTL: 31536000,
     remotePatterns: [
       {
@@ -38,17 +41,17 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: "/collections/:handle",
-          destination: "/collections/md/:handle",
+          destination: "/md/collections/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
           source: "/products/:handle",
-          destination: "/products/md/:handle",
+          destination: "/md/products/:handle",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
           source: "/search",
-          destination: "/search/md",
+          destination: "/md/search",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],

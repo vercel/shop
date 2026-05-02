@@ -58,6 +58,11 @@ function ProductCardImageContainer({
   );
 }
 
+type ProductCardAspectRatio = "landscape" | "portrait" | "square";
+
+const aspectRatioClasses =
+  "data-[aspect-ratio=landscape]:aspect-[4/3] data-[aspect-ratio=portrait]:aspect-[3/4] data-[aspect-ratio=square]:aspect-square";
+
 interface ProductCardImageProps {
   src?: string | null;
   alt: string;
@@ -66,6 +71,7 @@ interface ProductCardImageProps {
   outOfStock?: boolean;
   outOfStockText?: string;
   fallbackTitle?: string;
+  aspectRatio?: ProductCardAspectRatio;
   className?: string;
 }
 
@@ -77,6 +83,7 @@ function ProductCardImage({
   outOfStock = false,
   outOfStockText,
   fallbackTitle,
+  aspectRatio = "square",
   className,
 }: ProductCardImageProps) {
   const hasSlideshow = images && images.length > 1;
@@ -84,7 +91,8 @@ function ProductCardImage({
   return (
     <div
       data-slot="product-card-image"
-      className={cn("relative aspect-square overflow-hidden bg-muted group/image", className)}
+      data-aspect-ratio={aspectRatio}
+      className={cn("relative overflow-hidden bg-muted group/image", aspectRatioClasses, className)}
     >
       {src ? (
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
@@ -182,16 +190,26 @@ function ProductCardPrice({
   );
 }
 
-function ProductCardSkeleton({ className }: { className?: string }) {
+function ProductCardSkeleton({
+  aspectRatio = "square",
+  className,
+}: {
+  aspectRatio?: ProductCardAspectRatio;
+  className?: string;
+}) {
   return (
     <div
       data-slot="product-card-skeleton"
       className={cn("flex flex-col overflow-hidden", className)}
     >
-      <div className="aspect-square bg-muted animate-pulse" />
-      <div className="py-2.5">
+      <div
+        data-aspect-ratio={aspectRatio}
+        className={cn("bg-muted animate-pulse", aspectRatioClasses)}
+      />
+      <div className="py-2.5 h-18 box-content grid gap-2">
         <div className="h-4 w-full bg-muted animate-pulse" />
-        <div className="h-4 w-12 bg-muted animate-pulse mt-2" />
+        <div className="h-4 w-3/4 bg-muted animate-pulse" />
+        <div className="h-4 w-12 bg-muted animate-pulse" />
       </div>
     </div>
   );
@@ -199,6 +217,7 @@ function ProductCardSkeleton({ className }: { className?: string }) {
 
 export {
   ProductCard,
+  type ProductCardAspectRatio,
   ProductCardBadge,
   ProductCardContent,
   ProductCardImage,

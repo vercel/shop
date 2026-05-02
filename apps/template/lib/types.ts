@@ -247,8 +247,13 @@ export interface PredictiveSearchResult {
 export interface MarketingImage {
   url: string;
   alt: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
+}
+
+export interface MarketingVideo {
+  url: string;
+  previewImage?: MarketingImage | null;
 }
 
 export interface BannerSection {
@@ -256,6 +261,7 @@ export interface BannerSection {
   headline: string;
   subheadline: string | null;
   backgroundImage?: MarketingImage | StaticImageData | null;
+  backgroundVideo?: MarketingVideo | null;
   ctaText: string | null;
   ctaLink: string | null;
 }
