@@ -89,7 +89,7 @@ const CATALOG_PRODUCTS_QUERY = `
 
 const SEARCH_PRODUCTS_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
-  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $productFilters: [ProductFilter!]) {
     search(
       query: $query
       first: $first
@@ -414,9 +414,6 @@ export async function getSearchProducts(params: {
     locale = defaultLocale,
   } = params;
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
   const queryParts: string[] = [];
   if (query?.trim()) queryParts.push(query.trim());
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
@@ -439,8 +436,6 @@ export async function getSearchProducts(params: {
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
       productFilters: filters.length > 0 ? filters : undefined,
-      country,
-      language,
     },
   });
 
