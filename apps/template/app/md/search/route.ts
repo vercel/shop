@@ -2,8 +2,7 @@ import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
 import {
   buildProductFiltersFromParams,
-  getCatalogProducts,
-  getSearchFacets,
+  getSearchProducts,
 } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
@@ -29,30 +28,27 @@ export async function GET(request: Request) {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
 
   try {
-    const [catalog, facets] = await Promise.all([
-      getCatalogProducts({
-        query,
-        collection,
-        sortKey: sort,
-        limit: RESULTS_PER_PAGE,
-        cursor,
-        filters: shopifyFilters,
-        locale,
-      }),
-      getSearchFacets({ query, collection, filters: shopifyFilters, locale }),
-    ]);
+    const result = await getSearchProducts({
+      query,
+      collection,
+      sortKey: sort,
+      limit: RESULTS_PER_PAGE,
+      cursor,
+      filters: shopifyFilters,
+      locale,
+    });
 
-    const transformedFilters = transformShopifyFilters(facets.filters, { activeFilters });
-    const hasPriceRange = facets.filters.some((filter) => filter.type === "PRICE_RANGE");
+    const transformedFilters = transformShopifyFilters(result.filters, { activeFilters });
+    const hasPriceRange = result.filters.some((filter) => filter.type === "PRICE_RANGE");
     const markdown = searchResultsToMarkdown({
       query,
       collection,
-      products: catalog.products,
-      total: facets.total,
+      products: result.products,
+      total: result.total,
       filters: transformedFilters.filters,
       priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
       activeFilters,
-      pageInfo: catalog.pageInfo,
+      pageInfo: result.pageInfo,
       locale,
       sort,
     });

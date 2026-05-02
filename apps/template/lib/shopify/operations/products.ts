@@ -87,13 +87,17 @@ const CATALOG_PRODUCTS_QUERY = `
   }
 `;
 
-const SEARCH_FACETS_QUERY = `
-  query searchFacets($query: String!, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+const SEARCH_PRODUCTS_QUERY = `
+  ${PRODUCT_CARD_FRAGMENT}
+  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
+      first: $first
+      after: $after
+      sortKey: $sortKey
+      reverse: $reverse
       productFilters: $productFilters
       types: PRODUCT
-      first: 1
     ) {
       totalCount
       productFilters {
@@ -107,22 +111,6 @@ const SEARCH_FACETS_QUERY = `
           input
         }
       }
-    }
-  }
-`;
-
-const PRODUCTS_SEARCH_QUERY = `
-  ${PRODUCT_CARD_FRAGMENT}
-  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    search(
-      query: $query
-      first: $first
-      after: $after
-      sortKey: $sortKey
-      reverse: $reverse
-      types: PRODUCT
-    ) {
-      totalCount
       edges {
         cursor
         node {
@@ -136,6 +124,28 @@ const PRODUCTS_SEARCH_QUERY = `
         hasPreviousPage
         startCursor
         endCursor
+      }
+    }
+  }
+`;
+
+const SEARCH_INDEX_PRODUCTS_QUERY = `
+  ${PRODUCT_CARD_FRAGMENT}
+  query searchIndexProducts($query: String!, $first: Int!, $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    search(
+      query: $query
+      first: $first
+      sortKey: $sortKey
+      reverse: $reverse
+      types: PRODUCT
+    ) {
+      totalCount
+      edges {
+        node {
+          ... on Product {
+            ...ProductCardFields
+          }
+        }
       }
     }
   }
@@ -376,17 +386,34 @@ export async function getCatalogProducts(params: {
   };
 }
 
-export async function getSearchFacets(params: {
+export async function getSearchProducts(params: {
   query?: string;
   collection?: string;
+  sortKey?: string;
+  limit?: number;
+  cursor?: string;
   filters?: ProductFilter[];
   locale?: string;
-}): Promise<{ filters: ShopifyFilter[]; total: number }> {
+}): Promise<{
+  products: ProductCard[];
+  pageInfo: PageInfo;
+  filters: ShopifyFilter[];
+  total: number;
+}> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
-  const { query, collection, filters = [], locale = defaultLocale } = params;
+  const {
+    query,
+    collection,
+    sortKey: rawSortKey = "best-matches",
+    limit = 50,
+    cursor,
+    filters = [],
+    locale = defaultLocale,
+  } = params;
+  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -399,25 +426,39 @@ export async function getSearchFacets(params: {
     search: {
       totalCount: number;
       productFilters: ShopifyFilter[];
+      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
+      pageInfo: PageInfo;
     };
   }>({
-    operation: "searchFacets",
-    query: SEARCH_FACETS_QUERY,
+    operation: "searchProducts",
+    query: SEARCH_PRODUCTS_QUERY,
     variables: {
       query: searchQuery,
+      first: limit,
+      after: cursor,
+      sortKey: sortConfig.sortKey,
+      reverse: sortConfig.reverse,
       productFilters: filters.length > 0 ? filters : undefined,
       country,
       language,
     },
   });
 
+  const shopifyProducts = data.search.edges
+    .map((edge) => edge.node)
+    .filter((node): node is ShopifyProductCard => node !== null);
+
+  tagProducts(shopifyProducts);
+
   return {
+    products: shopifyProducts.map(transformShopifyProductCard),
+    pageInfo: data.search.pageInfo,
     filters: data.search.productFilters,
     total: data.search.totalCount,
   };
 }
 
-// Use getCatalogProducts for catalog browse / the /search page; this is the relevance-ranked search index.
+// This powers AI-agent text search; PLP search uses getSearchProducts for faceted filtering.
 export async function searchIndexProducts(params: {
   query: string;
   sortKey?: string;
@@ -446,7 +487,7 @@ export async function searchIndexProducts(params: {
     };
   }>({
     operation: "searchProducts",
-    query: PRODUCTS_SEARCH_QUERY,
+    query: SEARCH_INDEX_PRODUCTS_QUERY,
     variables: {
       query: query.trim() || "*",
       first: limit,

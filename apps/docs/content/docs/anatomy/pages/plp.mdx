@@ -68,7 +68,7 @@ Products within a collection are fetched via `getCollectionProducts()`, which ac
 
 ## Search page
 
-The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. The search page displays a heading with the query and shows a "no results" message with i18n support when the query returns empty. Predictive search is available from the navbar search modal, which shows suggestion chips and product results as the user types.
+The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. Search results are fetched with Shopify's `search(productFilters: ...)` API, so the product grid, total count, and facet counts come from the same filtered response and match Hydrogen-style search behavior. The search page displays a heading with the query and shows a "no results" message with i18n support when the query returns empty. Predictive search is available from the navbar search modal, which shows suggestion chips and product results as the user types.
 
 ## Key files
 

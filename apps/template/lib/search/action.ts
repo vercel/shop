@@ -1,6 +1,6 @@
 "use server";
 
-import { getCatalogProducts } from "@/lib/shopify/operations/products";
+import { getSearchProducts } from "@/lib/shopify/operations/products";
 import { predictiveSearch } from "@/lib/shopify/operations/search";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, PredictiveSearchResult, ProductCard } from "@/lib/types";
@@ -24,7 +24,7 @@ export async function loadMoreSearchProducts(params: {
   filters?: ProductFilter[];
   locale: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
-  const result = await getCatalogProducts({
+  const result = await getSearchProducts({
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,
