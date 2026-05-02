@@ -251,11 +251,17 @@ export interface MarketingImage {
   height?: number;
 }
 
+export interface MarketingVideo {
+  url: string;
+  previewImage?: MarketingImage | null;
+}
+
 export interface BannerSection {
   id: string;
   headline: string;
   subheadline: string | null;
   backgroundImage?: MarketingImage | StaticImageData | null;
+  backgroundVideo?: MarketingVideo | null;
   ctaText: string | null;
   ctaLink: string | null;
 }
