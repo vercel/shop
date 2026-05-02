@@ -6,9 +6,8 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
+import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
-
-import { AutoPlayVideo } from "./auto-play-video";
 
 type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 
@@ -56,7 +55,14 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
               <div className="pointer-events-none flex h-full w-full items-center justify-center">
                 <AutoPlayVideo
                   src={activeItem.video.url}
-                  previewImage={activeItem.video.previewImage}
+                  previewImage={
+                    activeItem.video.previewImage
+                      ? {
+                          src: activeItem.video.previewImage.url,
+                          alt: activeItem.video.previewImage.altText || "",
+                        }
+                      : null
+                  }
                   sizes="90vw"
                   priorityImage
                   className="pointer-events-auto max-h-full max-w-full object-contain"

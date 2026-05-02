@@ -10,9 +10,11 @@ The home page is a server component that renders a hero banner and a featured pr
 
 ## Hero section
 
-A full-width banner with a background image, gradient overlay, headline, subheadline, and a CTA link. The hero scales responsively - 300px tall on mobile, 400px on small screens, and 500px on medium and up.
+A full-width banner with a background image or autoplaying background video, gradient overlay, headline, subheadline, and a CTA link. On mobile, the hero height comes from its vertical padding; on medium screens and up, it keeps a wide `3 / 1` aspect ratio.
 
-By default the hero uses a statically imported image from `public/hero.jpg`, which enables automatic blur placeholders and prevents layout shift. To use a custom image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`) or a remote URL object (`{ url: "https://...", alt: "...", width: 1920, height: 1080 }`).
+By default the hero uses a statically imported image from `public/hero.jpg`, which enables automatic blur placeholders and prevents layout shift. To use a custom image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`) or a remote URL object (`{ url: "https://...", alt: "..." }`).
+
+To use a video hero, pass `backgroundVideo: { url: "https://...", previewImage: { url: "https://...", alt: "..." } }`. Videos use the shared `AutoPlayVideo` component, so they autoplay when visible and pause when off-screen. When both `backgroundVideo` and `backgroundImage` are present, the video is used.
 
 The headline and CTA are configurable through the `BannerSection` component's `hero` prop. By default the CTA links to `/search` to browse the catalog.
 

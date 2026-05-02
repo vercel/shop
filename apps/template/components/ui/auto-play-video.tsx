@@ -4,25 +4,21 @@ import Image from "next/image";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
 
-import type { Image as ImageType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-interface AutoPlayVideoProps extends Omit<React.ComponentProps<"video">, "autoPlay" | "ref"> {
-  previewImage?: ImageType | null;
+interface AutoPlayVideoPreviewImage {
+  src: string;
+  alt: string;
+}
+
+interface AutoPlayVideoProps extends Omit<
+  React.ComponentProps<"video">,
+  "autoPlay" | "loop" | "muted" | "onCanPlay" | "playsInline" | "ref"
+> {
+  previewImage?: AutoPlayVideoPreviewImage | null;
   sizes?: string;
   priorityImage?: boolean;
 }
-
-/**
- * A video element that autoplays when visible and pauses when off-screen.
- * Uses IntersectionObserver instead of a one-shot `play()` call so the video
- * reliably restarts after scrolling back into view (desktop grid) or swiping
- * back in a carousel (mobile), and retries on mobile browsers that may block
- * the initial autoplay attempt.
- *
- * When a `previewImage` is provided, a next/image is rendered underneath the
- * video and stays visible until the video fires `canplay`.
- */
 export function AutoPlayVideo({
   previewImage,
   sizes,
@@ -59,8 +55,8 @@ export function AutoPlayVideo({
     <>
       {previewImage && !videoReady && (
         <Image
-          src={previewImage.url}
-          alt={previewImage.altText || ""}
+          src={previewImage.src}
+          alt={previewImage.alt}
           fill
           className={cn("object-cover", className)}
           sizes={sizes}
