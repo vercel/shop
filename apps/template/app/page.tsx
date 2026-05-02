@@ -40,17 +40,6 @@ export default async function HomePage() {
             id: "homepage-hero",
             headline: "Agentic Infrastructure for Commerce",
             subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
-            backgroundImage: {
-              url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/boomerang-poster.jpg?v=1777564966",
-              alt: "The Outdoor Edit",
-            },
-            backgroundVideo: {
-              url: "https://cdn.shopify.com/videos/c/o/v/db1572ad04ae4ecbad692430c6269fcf.mp4",
-              previewImage: {
-                url: "https://cdn.shopify.com/s/files/1/0968/7236/6467/files/boomerang-poster.jpg?v=1777564966",
-                alt: "The Outdoor Edit",
-              },
-            },
             ctaText: "Browse the Catalog",
             ctaLink: "/search",
           }}
