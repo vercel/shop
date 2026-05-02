@@ -247,8 +247,8 @@ export interface PredictiveSearchResult {
 export interface MarketingImage {
   url: string;
   alt: string;
-  width: number;
-  height: number;
+  width?: number;
+  height?: number;
 }
 
 export interface BannerSection {
