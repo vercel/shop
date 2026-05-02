@@ -1,5 +1,11 @@
 # create-vercel-shop
 
+## 0.2.3
+
+### Patch Changes
+
+- [`2b0eb6f`](https://github.com/vercel/shop/commit/2b0eb6fb5b73bf3e4ace74e9c9083c0e5071311c) Thanks [@blurrah](https://github.com/blurrah)! - Prompt for the project name up front when none is passed, so plugin installs run in the right directory. Previously, omitting the project-name argument let `create-next-app` prompt interactively in its own subprocess; the CLI never learned the chosen name and tried to install plugins in the parent directory. Also reverts the `node_modules` post-scaffold check, which was checking the wrong path in the same scenario.
+
 ## 0.2.2
 
 ### Patch Changes
