@@ -143,7 +143,7 @@ const HomePage = () => (
         }}
         secondary={{ href: "/docs", label: "View Documentation" }}
         title="Start your shop today."
-        className="mt-12"
+        className="mt-12 sm:mt-32"
       />
     </div>
   </div>
