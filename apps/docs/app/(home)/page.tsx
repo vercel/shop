@@ -21,6 +21,7 @@ import { CTA } from "./components/cta";
 import { StorefrontHero } from "@/components/storefront-hero";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
+import { LogosMarquee } from "./components/logos-marquee";
 import { OneTwoSection } from "./components/one-two-section";
 import { ShopifyCommerce } from "./components/shopify-commerce";
 
@@ -132,6 +133,7 @@ const HomePage = () => (
         <ContentNegotiationDemo />
       </OneTwoSection>
       <ShopifyCommerce />
+      <LogosMarquee />
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
         primary={{

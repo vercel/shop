@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconArrowUpRightSmall } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-arrow-up-right-small";
+import { IconArrowUpRightSmall } from "@/components/assets/icons/icon-arrow-up-right-small";
 import {
   NavigationMenu,
   NavigationMenuItem,
