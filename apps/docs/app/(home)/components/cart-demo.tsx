@@ -1,243 +1,255 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { IconCart } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-cart";
 
 type Phase =
-	| "idle"
-	| "cursor-enter"
-	| "cursor-on-button"
-	| "press"
-	| "updated"
-	| "hold";
+  | "idle"
+  | "cursor-enter"
+  | "cursor-on-button"
+  | "press"
+  | "updated"
+  | "hold";
 
-const ShoppingBagIcon = ({ className }: { className?: string }) => (
-	<svg
-		className={className}
-		fill="none"
-		stroke="currentColor"
-		strokeWidth={1.5}
-		viewBox="0 0 24 24"
-	>
-		<path
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-		/>
-	</svg>
-);
+interface Product {
+  name: string;
+  price: string;
+  image: string;
+  imageDark: string;
+}
 
-const ImageIcon = ({ className }: { className?: string }) => (
-	<svg className={className} fill="currentColor" viewBox="0 0 24 24">
-		<circle cx="8" cy="9" r="2.5" />
-		<path d="M21 17l-5-5-4 4-3-3-5 5v2h17z" />
-	</svg>
-);
+const products: Product[] = [
+  {
+    name: "Running",
+    price: "$95",
+    image: "/sneakers/sneaker-1.png",
+    imageDark: "/sneakers/sneaker-1-dark.png",
+  },
+  {
+    name: "Sport",
+    price: "$88",
+    image: "/sneakers/sneaker-4.png",
+    imageDark: "/sneakers/sneaker-4-dark.png",
+  },
+  {
+    name: "Classic",
+    price: "$62",
+    image: "/sneakers/sneaker-2.png",
+    imageDark: "/sneakers/sneaker-2-dark.png",
+  },
+];
 
 const CursorIcon = ({ className }: { className?: string }) => (
-	<svg
-		className={className}
-		viewBox="0 0 24 24"
-		fill="currentColor"
-	>
-		<path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.36Z" />
-	</svg>
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.87a.5.5 0 0 0 .35-.85L6.35 2.85a.5.5 0 0 0-.85.36Z" />
+  </svg>
 );
 
 export const CartDemo = () => {
-	const [phase, setPhase] = useState<Phase>("idle");
-	const ref = useRef<HTMLDivElement>(null);
-	const hasStarted = useRef(false);
-	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const ref = useRef<HTMLDivElement>(null);
+  const hasStarted = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-	const clearTimeouts = useCallback(() => {
-		if (timeoutRef.current) clearTimeout(timeoutRef.current);
-	}, []);
+  const clearTimeouts = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+  }, []);
 
-	const runAnimation = useCallback(() => {
-		setPhase("cursor-enter");
+  const runAnimation = useCallback(() => {
+    setPhase("cursor-enter");
 
-		// Cursor arrives on button after the CSS transition (600ms)
-		timeoutRef.current = setTimeout(() => {
-			setPhase("cursor-on-button");
+    timeoutRef.current = setTimeout(() => {
+      setPhase("cursor-on-button");
 
-			// Brief pause, then click
-			timeoutRef.current = setTimeout(() => {
-				setPhase("press");
+      timeoutRef.current = setTimeout(() => {
+        setPhase("press");
 
-				// Release + instant update
-				timeoutRef.current = setTimeout(() => {
-					setPhase("updated");
+        timeoutRef.current = setTimeout(() => {
+          setPhase("updated");
 
-					// Hold, then reset and replay
-					timeoutRef.current = setTimeout(() => {
-						setPhase("hold");
-						timeoutRef.current = setTimeout(() => {
-							setPhase("idle");
-							timeoutRef.current = setTimeout(() => {
-								runAnimation();
-							}, 1500);
-						}, 2500);
-					}, 100);
-				}, 200);
-			}, 400);
-		}, 650);
-	}, []);
+          timeoutRef.current = setTimeout(() => {
+            setPhase("hold");
+            timeoutRef.current = setTimeout(() => {
+              setPhase("idle");
+              timeoutRef.current = setTimeout(() => {
+                runAnimation();
+              }, 1500);
+            }, 2500);
+          }, 100);
+        }, 200);
+      }, 400);
+    }, 650);
+  }, []);
 
-	useEffect(() => {
-		if (hasStarted.current) return;
+  useEffect(() => {
+    if (hasStarted.current) return;
 
-		const observer = new IntersectionObserver(
-			([entry]) => {
-				if (entry?.isIntersecting && !hasStarted.current) {
-					hasStarted.current = true;
-					observer.disconnect();
-					setTimeout(() => runAnimation(), 800);
-				}
-			},
-			{ threshold: 0.5 },
-		);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && !hasStarted.current) {
+          hasStarted.current = true;
+          observer.disconnect();
+          setTimeout(() => runAnimation(), 800);
+        }
+      },
+      { threshold: 0.5 },
+    );
 
-		if (ref.current) observer.observe(ref.current);
-		return () => observer.disconnect();
-	}, [runAnimation]);
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [runAnimation]);
 
-	useEffect(() => {
-		return clearTimeouts;
-	}, [clearTimeouts]);
+  useEffect(() => clearTimeouts, [clearTimeouts]);
 
-	const isUpdated = phase === "updated" || phase === "hold";
-	const showCursor =
-		phase === "cursor-enter" ||
-		phase === "cursor-on-button" ||
-		phase === "press";
-	const isPressing = phase === "press";
+  const isUpdated = phase === "updated" || phase === "hold";
+  const showCursor =
+    phase === "cursor-enter" ||
+    phase === "cursor-on-button" ||
+    phase === "press";
+  const isPressing = phase === "press";
 
-	return (
-		<div
-			ref={ref}
-			className="relative flex h-64 flex-col overflow-hidden rounded-xl border bg-white dark:bg-white/5 sm:h-72"
-		>
-			{/* Header with cart icon */}
-			<div className="flex items-center justify-between px-4 py-2.5">
-				<span className="text-[11px] font-medium text-fd-muted-foreground">
-					Products
-				</span>
-				<div className="relative flex items-center gap-1.5">
-					<span className="text-[11px] text-fd-muted-foreground">
-						Cart
-					</span>
-					<div className="relative">
-						<ShoppingBagIcon className="size-4 text-fd-foreground" />
-						{isUpdated && (
-							<span className="absolute -top-1.5 -right-1.5 flex size-3.5 items-center justify-center rounded-full bg-fd-primary text-[8px] font-bold text-fd-primary-foreground animate-[scale-in_0.15s_ease-out]">
-								1
-							</span>
-						)}
-					</div>
-				</div>
-			</div>
+  return (
+    <div
+      className="overflow-hidden rounded-xl border border-gray-alpha-400 bg-background-100"
+      ref={ref}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-alpha-400 px-5 py-3.5">
+        <span className="text-xs font-medium text-gray-700">Shop</span>
+        <div className="relative">
+          <IconCart className="text-foreground" size={16} />
+          {isUpdated && (
+            <span className="absolute -right-2 -top-2 flex size-3.5 items-center justify-center rounded-full bg-red-800 text-[9px] font-medium text-white animate-[scale-in_0.15s_ease-out]">
+              1
+            </span>
+          )}
+        </div>
+      </div>
 
-			{/* Split view: products | cart */}
-			<div className="flex flex-1 gap-px overflow-hidden bg-fd-border">
-				{/* Product list */}
-				<div className="relative flex flex-1 flex-col gap-2 bg-white p-3 dark:bg-white/5">
-					{/* First product row */}
-					<div className="flex items-center gap-3 rounded-lg border bg-fd-background p-2.5">
-						<div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-black/10 dark:bg-white/10 sm:size-16">
-							<ImageIcon className="size-5 text-black/20 dark:text-white/20" />
-						</div>
-						<div className="flex min-w-0 flex-1 flex-col gap-1">
-							<div className="h-2.5 w-24 rounded bg-black/10 dark:bg-white/10" />
-							<div className="h-2.5 w-14 rounded bg-black/10 dark:bg-white/10" />
-						</div>
-						<button
-							type="button"
-							onClick={() => {
-								if (phase === "idle") runAnimation();
-							}}
-							disabled={phase !== "idle"}
-							className={`flex shrink-0 items-center gap-1 rounded-md bg-black px-2.5 py-1.5 text-[11px] font-medium text-white dark:bg-white dark:text-black transition-transform sm:text-xs ${
-								phase === "idle"
-									? "cursor-pointer hover:opacity-90"
-									: "cursor-default"
-							} ${isPressing ? "scale-90" : "scale-100"}`}
-						>
-							<ShoppingBagIcon className="size-3.5" />
-							<span className="hidden sm:inline">Add</span>
-						</button>
-					</div>
+      {/* Body */}
+      <div className="flex flex-col bg-background-200 xl:flex-row">
+        {/* Products */}
+        <div className="relative flex flex-col gap-1 border-b border-gray-alpha-400 p-5 xl:flex-[2] xl:border-b-0 xl:border-r">
+          <span className="mb-2 text-xs font-medium text-gray-700">
+            Products
+          </span>
+          {products.map((product, i) => {
+            const isFirst = i === 0;
+            const isLast = i === products.length - 1;
+            return (
+              <div
+                className={`relative flex items-center gap-4 rounded px-2 ${
+                  isFirst
+                    ? "border border-gray-alpha-400 bg-background-100"
+                    : ""
+                } ${!isFirst && !isLast ? "border-b border-gray-200" : ""}`}
+                key={product.name}
+              >
+                <div className="relative size-14 shrink-0">
+                  <Image
+                    alt={product.name}
+                    className="object-contain dark:hidden"
+                    fill
+                    sizes="56px"
+                    src={product.image}
+                  />
+                  <Image
+                    alt={product.name}
+                    className="hidden object-contain dark:block"
+                    fill
+                    sizes="56px"
+                    src={product.imageDark}
+                  />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-xs text-foreground">
+                    {product.name}
+                  </span>
+                  <span className="text-xs text-gray-600">{product.price}</span>
+                </div>
+                <button
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-medium transition-transform bg-background-200 text-gray-800 border border-gray-alpha-400 ${isFirst && isPressing ? "scale-95" : "scale-100"}`}
+                  disabled={phase !== "idle"}
+                  onClick={() => {
+                    if (isFirst && phase === "idle") runAnimation();
+                  }}
+                  type="button"
+                >
+                  <IconCart size={12} />
+                  Add
+                </button>
+                {isLast && (
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background-200 to-transparent"
+                  />
+                )}
+              </div>
+            );
+          })}
 
-					{/* Ghost rows */}
-					<div className="flex items-center gap-3 rounded-lg border border-transparent p-2.5 opacity-40">
-						<div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-black/10 dark:bg-white/10 sm:size-16">
-							<ImageIcon className="size-5 text-black/20 dark:text-white/20" />
-						</div>
-						<div className="flex min-w-0 flex-1 flex-col gap-1">
-							<div className="h-2.5 w-20 rounded bg-black/10 dark:bg-white/10" />
-							<div className="h-2.5 w-10 rounded bg-black/10 dark:bg-white/10" />
-						</div>
-					</div>
-					<div className="flex items-center gap-3 rounded-lg border border-transparent p-2.5 opacity-20">
-						<div className="flex size-14 shrink-0 items-center justify-center rounded-md bg-black/10 dark:bg-white/10 sm:size-16">
-							<ImageIcon className="size-5 text-black/20 dark:text-white/20" />
-						</div>
-						<div className="flex min-w-0 flex-1 flex-col gap-1">
-							<div className="h-2.5 w-16 rounded bg-black/10 dark:bg-white/10" />
-							<div className="h-2.5 w-12 rounded bg-black/10 dark:bg-white/10" />
-						</div>
-					</div>
+          {/* Animated cursor */}
+          {showCursor && (
+            <div
+              className="pointer-events-none absolute z-10 transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] drop-shadow-md"
+              style={{
+                top: phase === "cursor-enter" ? "85%" : "70px",
+                right: phase === "cursor-enter" ? "5%" : "32px",
+              }}
+            >
+              <CursorIcon
+                className={`size-6 text-foreground transition-transform duration-100 ${
+                  isPressing ? "scale-75" : "scale-100"
+                }`}
+              />
+            </div>
+          )}
+        </div>
 
-					{/* Animated cursor */}
-					{showCursor && (
-						<div
-							className="pointer-events-none absolute z-10 transition-all duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] drop-shadow-md"
-							style={{
-								top:
-									phase === "cursor-enter"
-										? "75%"
-										: "42px",
-								right:
-									phase === "cursor-enter"
-										? "5%"
-										: "28px",
-							}}
-						>
-							<CursorIcon
-								className={`size-6 text-fd-foreground transition-transform duration-100 ${
-									isPressing ? "scale-75" : "scale-100"
-								}`}
-							/>
-						</div>
-					)}
-				</div>
-
-				{/* Cart panel */}
-				<div className="flex w-[38%] flex-col bg-fd-background p-3 sm:w-[35%]">
-					{isUpdated ? (
-						<div className="flex flex-col gap-2.5 animate-[fade-in_0.15s_ease]">
-							<div className="flex gap-2">
-								<div className="flex size-10 shrink-0 items-center justify-center rounded bg-black/10 dark:bg-white/10">
-									<ImageIcon className="size-3.5 text-black/20 dark:text-white/20" />
-								</div>
-								<div className="flex flex-col gap-1 pt-0.5">
-									<div className="h-2 w-14 rounded bg-black/10 dark:bg-white/10" />
-									<div className="h-2 w-9 rounded bg-black/10 dark:bg-white/10" />
-								</div>
-							</div>
-							<div className="mt-auto flex items-center justify-between border-t pt-2 text-[10px]">
-								<span className="text-fd-muted-foreground">Total</span>
-								<span className="font-medium text-fd-foreground">$29.99</span>
-							</div>
-						</div>
-					) : (
-						<div className="flex flex-1 items-center justify-center">
-							<span className="text-[10px] text-fd-muted-foreground/60">
-								Empty
-							</span>
-						</div>
-					)}
-				</div>
-			</div>
-		</div>
-	);
+        {/* Cart */}
+        <div className="flex w-full flex-col p-5 xl:w-[34%]">
+          <span className="mb-4 text-xs font-medium text-gray-700">Cart</span>
+          {isUpdated ? (
+            <div className="flex flex-col gap-4 animate-[fade-in_0.15s_ease]">
+              <div className="flex items-center gap-3">
+                <div className="relative flex size-12 shrink-0 items-center justify-center rounded border border-gray-alpha-400 bg-background-100">
+                  <Image
+                    alt="Running"
+                    className="object-contain p-1 dark:hidden"
+                    fill
+                    sizes="48px"
+                    src="/sneakers/sneaker-1.png"
+                  />
+                  <Image
+                    alt="Running"
+                    className="hidden object-contain p-1 dark:block"
+                    fill
+                    sizes="48px"
+                    src="/sneakers/sneaker-1-dark.png"
+                  />
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-foreground">Running</span>
+                    <span className="text-xs text-gray-700">$95</span>
+                  </div>
+                  <span className="text-[9px] text-gray-600">Shoe</span>
+                </div>
+              </div>
+              <div className="border-t border-gray-alpha-400" />
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-foreground">Total</span>
+                <span className="text-foreground">$95.00</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-1 items-center justify-center">
+              <span className="text-xs text-gray-500">Empty</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };

@@ -38,9 +38,9 @@ function TabsList({
       data-slot="tabs-list"
       className={cn(
         variant === "underline"
-          ? "inline-flex items-baseline gap-6 shadow-[inset_0_-1px_0_var(--ds-gray-alpha-200)]"
+          ? "inline-flex items-baseline gap-6 shadow-[inset_0_-1px_0_var(--ds-gray-200)]"
           : "bg-muted text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[3px]",
-        className
+        className,
       )}
       {...props}
     />
@@ -59,7 +59,7 @@ function TabsTrigger({
         variant === "underline"
           ? "text-gray-900 data-[state=active]:text-gray-1000 inline-flex items-baseline justify-center px-0.5 py-3.5 mb-0 text-sm whitespace-nowrap border-b-2 border-transparent data-[state=active]:border-gray-1000 transition-colors hover:text-gray-1000 disabled:pointer-events-none disabled:opacity-50"
           : "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        className
+        className,
       )}
       {...props}
     />
