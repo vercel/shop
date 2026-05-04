@@ -9,7 +9,7 @@ interface HeroProps {
 }
 
 export const Hero = ({ badge, title, description, children }: HeroProps) => (
-  <section className="space-y-6 px-4 pt-16 pb-32 text-center sm:pt-24 sm:pb-40">
+  <section className="space-y-6 pt-16 pb-32 text-center sm:pt-24 sm:pb-40">
     <div className="mx-auto w-full max-w-4xl space-y-5">
       <Badge className="rounded-full" variant="secondary">
         <div className="size-2 rounded-full bg-gray-700" />

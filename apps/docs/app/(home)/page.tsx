@@ -22,6 +22,7 @@ import { StorefrontHero } from "@/components/storefront-hero";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
 import { OneTwoSection } from "./components/one-two-section";
+import { ShopifyCommerce } from "./components/shopify-commerce";
 
 const title = siteName;
 const description = homeDescription;
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => (
-  <div className="container mx-auto max-w-[1448px] px-4">
+  <div className="container mx-auto max-w-[1448px]">
     <Hero
       badge="Vercel Shop is now in alpha"
       description={homeSubtitle}
@@ -73,7 +74,7 @@ const HomePage = () => (
         </Button>
       </div>
     </Hero>
-    <div className="mx-auto grid max-w-[1080px]">
+    <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
       <CenteredSection
         aside={
           <CommandPromptRoot defaultValue="humans">
@@ -107,7 +108,7 @@ const HomePage = () => (
       </CenteredSection>
       <OneTwoSection
         description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
-        leftClassName="sm:pt-[52px]"
+        leftClassName="xl:pt-[52px]"
         title="Agentic development"
       >
         <AgentDemo />
@@ -130,7 +131,18 @@ const HomePage = () => (
       >
         <ContentNegotiationDemo />
       </OneTwoSection>
-      <CTA cta="Get started" href="/docs" title="Start your shop today" />
+      <ShopifyCommerce />
+      <CTA
+        description="Fully customizable with AI agents. Built on Next.js."
+        primary={{
+          href: "https://vercel.com/contact/sales",
+          label: "Talk to an Expert",
+          target: "_blank",
+        }}
+        secondary={{ href: "/docs", label: "View Documentation" }}
+        title="Start your shop today."
+        className="mt-12"
+      />
     </div>
   </div>
 );
