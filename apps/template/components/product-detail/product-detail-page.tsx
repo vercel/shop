@@ -1,5 +1,9 @@
 import { Suspense } from "react";
 
+import {
+  aspectRatioClasses,
+  type ProductCardAspectRatio,
+} from "@/components/product-card/components";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -10,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 import { ProductDetailSection } from "./product-detail-section";
 
@@ -24,22 +29,21 @@ function ProductBreadcrumbSchema({ title, handle }: { title: string; handle: str
   );
 }
 
-function ProductPageFallback() {
+function ProductPageFallback({ aspectRatio }: { aspectRatio: ProductCardAspectRatio }) {
+  const tile = cn("w-full rounded-none", aspectRatioClasses);
   return (
     <Sections>
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
         <div className="lg:col-span-6">
-          {/* Mobile: single full-bleed square + pagination space */}
           <div className="grid gap-5 lg:hidden -mx-5">
-            <Skeleton className="aspect-square w-full rounded-none" />
+            <Skeleton data-aspect-ratio={aspectRatio} className={tile} />
             <div className="h-1.5" />
           </div>
-          {/* Desktop: 2×2 grid */}
           <div className="hidden lg:grid grid-cols-2 gap-2.5">
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
-            <Skeleton className="aspect-square w-full rounded-none" />
+            <Skeleton data-aspect-ratio={aspectRatio} className={tile} />
+            <Skeleton data-aspect-ratio={aspectRatio} className={tile} />
+            <Skeleton data-aspect-ratio={aspectRatio} className={tile} />
+            <Skeleton data-aspect-ratio={aspectRatio} className={tile} />
           </div>
         </div>
         <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
@@ -55,10 +59,12 @@ async function ProductContent({
   productPromise,
   locale,
   variantIdPromise,
+  aspectRatio,
 }: {
   productPromise: Promise<ProductDetails>;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
+  aspectRatio: ProductCardAspectRatio;
 }) {
   const product = await productPromise;
   const { handle, title } = product;
@@ -86,6 +92,7 @@ async function ProductContent({
           product={product}
           locale={locale}
           variantIdPromise={variantIdPromise}
+          aspectRatio={aspectRatio}
         />
         <RelatedProductsSection handle={handle} locale={locale} />
       </Sections>
@@ -97,19 +104,22 @@ export async function ProductDetailPage({
   productPromise,
   locale,
   variantIdPromise,
+  aspectRatio = "square",
 }: {
   productPromise: Promise<ProductDetails>;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
+  aspectRatio?: ProductCardAspectRatio;
 }) {
   return (
     <Page className="pt-0">
       <Container className="bg-background">
-        <Suspense fallback={<ProductPageFallback />}>
+        <Suspense fallback={<ProductPageFallback aspectRatio={aspectRatio} />}>
           <ProductContent
             productPromise={productPromise}
             locale={locale}
             variantIdPromise={variantIdPromise}
+            aspectRatio={aspectRatio}
           />
         </Suspense>
       </Container>

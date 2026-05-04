@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  aspectRatioClasses,
+  type ProductCardAspectRatio,
+} from "@/components/product-card/components";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -78,10 +82,12 @@ function MediaVideo({
 function Carousel({
   mediaItems,
   title,
+  aspectRatio,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
   children?: React.ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -137,7 +143,11 @@ function Carousel({
         {mediaItems.map((item, idx) => (
           <div
             key={mediaKey(item)}
-            className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
+            data-aspect-ratio={aspectRatio}
+            className={cn(
+              "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+              aspectRatioClasses,
+            )}
           >
             {item.type === "video" ? (
               <MediaVideo item={item} sizes="100vw" priority={!children && idx === 0} />
@@ -175,9 +185,22 @@ function Carousel({
   );
 }
 
-function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: number }) {
+function GridItem({
+  item,
+  title,
+  idx,
+  aspectRatio,
+}: {
+  item: MediaItem;
+  title: string;
+  idx: number;
+  aspectRatio: ProductCardAspectRatio;
+}) {
   return (
-    <div className="relative aspect-square w-full overflow-hidden bg-accent">
+    <div
+      data-aspect-ratio={aspectRatio}
+      className={cn("relative w-full overflow-hidden bg-accent", aspectRatioClasses)}
+    >
       {item.type === "video" ? (
         <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={idx < 2} />
       ) : (
@@ -199,10 +222,12 @@ function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: n
 function Grid({
   mediaItems,
   title,
+  aspectRatio,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
   children?: React.ReactNode;
 }) {
   return (
@@ -210,7 +235,13 @@ function Grid({
       <div className="grid grid-cols-2 gap-2.5">
         {children}
         {mediaItems.map((item, idx) => (
-          <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
+          <GridItem
+            key={mediaKey(item)}
+            item={item}
+            title={title}
+            idx={idx}
+            aspectRatio={aspectRatio}
+          />
         ))}
       </div>
     </Lightbox>
@@ -221,9 +252,23 @@ function Grid({
  * Renders color-specific images as grid items (desktop).
  * Designed to be used inside a Suspense boundary as children of ProductMedia.
  */
-export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
+export function ColorImageGrid({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
   return images.map((image, idx) => (
-    <GridItem key={image.url} item={{ type: "image", image }} title={title} idx={idx} />
+    <GridItem
+      key={image.url}
+      item={{ type: "image", image }}
+      title={title}
+      idx={idx}
+      aspectRatio={aspectRatio}
+    />
   ));
 }
 
@@ -231,11 +276,23 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
  * Renders color-specific images as carousel items (mobile).
  * Matches the Carousel item structure for consistent snap-scroll behavior.
  */
-export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
+export function ColorImageCarouselItems({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
   return images.map((image, idx) => (
     <div
       key={image.url}
-      className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
+      data-aspect-ratio={aspectRatio}
+      className={cn(
+        "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+        aspectRatioClasses,
+      )}
     >
       <Image
         src={image.url}
@@ -254,6 +311,7 @@ export function ProductMedia({
   otherImages,
   videos,
   title,
+  aspectRatio = "square",
   className,
   desktopSlot,
   mobileSlot,
@@ -261,6 +319,7 @@ export function ProductMedia({
   otherImages: ImageType[];
   videos: Video[];
   title: string;
+  aspectRatio?: ProductCardAspectRatio;
   className?: string;
   /** Color images rendered as grid items (desktop). */
   desktopSlot?: React.ReactNode;
@@ -277,12 +336,12 @@ export function ProductMedia({
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={sharedMediaItems} title={title}>
+        <Carousel mediaItems={sharedMediaItems} title={title} aspectRatio={aspectRatio}>
           {mobileSlot}
         </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={sharedMediaItems} title={title}>
+        <Grid mediaItems={sharedMediaItems} title={title} aspectRatio={aspectRatio}>
           {desktopSlot}
         </Grid>
       </div>
