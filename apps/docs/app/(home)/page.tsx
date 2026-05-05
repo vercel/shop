@@ -102,7 +102,7 @@ const HomePage = () => (
             </CommandPromptSurface>
           </CommandPromptRoot>
         }
-        description="Cache Components serve product data instantly while streaming in personalized content"
+        description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"
       >
         <StorefrontHero />
