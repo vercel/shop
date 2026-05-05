@@ -1,6 +1,8 @@
 "use client";
 
+import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BrowserChrome } from "@/components/storefront-hero/browser-chrome";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Skill {
@@ -78,9 +80,9 @@ const LogLine = ({
   return (
     <div className="flex items-start gap-2 animate-[fade-in_0.3s_ease_forwards] font-mono text-xs">
       <span
-        className={
-          icon === "add" ? "shrink-0 text-green-800" : "shrink-0 text-amber-800"
-        }
+        className={`inline-flex size-3.5 shrink-0 items-center justify-center text-sm leading-none ${
+          icon === "add" ? "text-green-800" : "text-amber-800"
+        }`}
       >
         {icon === "add" ? "+" : "~"}
       </span>
@@ -90,7 +92,7 @@ const LogLine = ({
 };
 
 const Spinner = () => (
-  <span className="inline-flex items-center gap-1.5 text-xs text-blue-800">
+  <span className="inline-flex items-center gap-1.5 text-xs text-gray-1000">
     <svg
       className="size-3 animate-spin"
       fill="none"
@@ -178,7 +180,7 @@ export const AgentDemo = () => {
   const showDone = phaseIndex >= 6;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Skill switcher */}
       <Tabs
         onValueChange={(value) => {
@@ -189,42 +191,42 @@ export const AgentDemo = () => {
         }}
         value={skill.label}
       >
-        <TabsList className="mx-auto h-10 w-fit rounded-full border bg-background p-0">
-          {skills.map((s) => (
-            <TabsTrigger
-              className="h-full flex-auto rounded-full border-transparent px-5 py-2 text-base text-muted-foreground data-[state=active]:border-border data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none dark:data-[state=active]:border-border dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-foreground"
-              key={s.label}
-              value={s.label}
-            >
-              {s.label}
-            </TabsTrigger>
-          ))}
+        <TabsList className="relative mx-auto h-10 w-fit items-start gap-0 overflow-visible rounded-full border border-gray-400 bg-background-200 p-0">
+          {skills.map((s) => {
+            const isActive = s.label === skill.label;
+            return (
+              <TabsTrigger
+                className="group relative -top-px h-10 flex-none rounded-full border-0 bg-transparent px-5 text-base text-muted-foreground first:-ml-px last:-mr-px data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
+                key={s.label}
+                value={s.label}
+              >
+                {isActive && (
+                  <motion.span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 z-0 rounded-full border border-gray-400 bg-background bg-clip-padding"
+                    layoutId="agent-demo-tab-indicator"
+                    transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                  />
+                )}
+                <span className="relative z-1">{s.label}</span>
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
       </Tabs>
 
       {/* Terminal */}
-      <div
-        ref={ref}
-        className="flex h-64 flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#0a0a0a] sm:h-72"
-      >
-        {/* Terminal title bar */}
-        <div className="flex items-center gap-2 border-b border-black/10 dark:border-white/10 px-4 py-2">
-          <div className="flex gap-1.5">
-            <div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
-            <div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
-            <div className="size-2.5 rounded-full bg-black/20 dark:bg-white/20" />
-          </div>
-          <span className="mx-auto font-mono text-[11px] text-black/40 dark:text-white/40">
-            coding agent
-          </span>
-        </div>
-
-        {/* Terminal body */}
-        <div className="flex flex-1 flex-col gap-2.5 overflow-hidden p-4">
+      <BrowserChrome showLockIcon={false} url="Coding Agent">
+        <div
+          ref={ref}
+          className="flex h-48 flex-col gap-2.5 overflow-hidden sm:h-56"
+        >
           {/* Command input */}
           {showCommand && (
             <div className="flex items-center gap-2 animate-[fade-in_0.15s_ease]">
-              <span className="font-mono text-xs text-amber-800">&gt;</span>
+              <span className="inline-flex size-3.5 shrink-0 items-center justify-center font-mono text-sm leading-none text-amber-800">
+                &gt;
+              </span>
               <span className="font-mono text-xs text-black dark:text-white">
                 {phase === "typing-command"
                   ? skill.command.slice(0, charIndex)
@@ -272,13 +274,13 @@ export const AgentDemo = () => {
           )}
 
           {/* Prompt input at bottom */}
-          <div className="mt-auto flex items-center gap-2 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-2">
+          {/* <div className="mt-auto flex items-center gap-2 rounded-lg border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/5 px-3 py-2">
             <span className="font-mono text-xs text-black/30 dark:text-white/30">
               Ask a question...
             </span>
-          </div>
+          </div> */}
         </div>
-      </div>
+      </BrowserChrome>
     </div>
   );
 };

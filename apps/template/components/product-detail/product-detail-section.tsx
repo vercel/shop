@@ -1,6 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
+import {
+  aspectRatioClasses,
+  type ProductCardAspectRatio,
+} from "@/components/product-card/components";
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
@@ -36,10 +40,12 @@ export async function ProductDetailSection({
   product,
   locale,
   variantIdPromise,
+  aspectRatio = "square",
 }: {
   product: ProductDetails;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
+  aspectRatio?: ProductCardAspectRatio;
 }) {
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
@@ -66,15 +72,28 @@ export async function ProductDetailSection({
           otherImages={getSharedImages(images, options, variants)}
           videos={videos}
           title={title}
+          aspectRatio={aspectRatio}
           className="lg:col-span-6"
           desktopSlot={
             <Suspense
               fallback={
                 <>
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
-                  <Skeleton className="aspect-square w-full rounded-none" />
+                  <Skeleton
+                    data-aspect-ratio={aspectRatio}
+                    className={cn("w-full rounded-none", aspectRatioClasses)}
+                  />
+                  <Skeleton
+                    data-aspect-ratio={aspectRatio}
+                    className={cn("w-full rounded-none", aspectRatioClasses)}
+                  />
+                  <Skeleton
+                    data-aspect-ratio={aspectRatio}
+                    className={cn("w-full rounded-none", aspectRatioClasses)}
+                  />
+                  <Skeleton
+                    data-aspect-ratio={aspectRatio}
+                    className={cn("w-full rounded-none", aspectRatioClasses)}
+                  />
                 </>
               }
             >
@@ -83,6 +102,7 @@ export async function ProductDetailSection({
                 options={options}
                 variants={variants}
                 title={title}
+                aspectRatio={aspectRatio}
                 variantIdPromise={variantIdPromise}
               />
             </Suspense>
@@ -90,7 +110,13 @@ export async function ProductDetailSection({
           mobileSlot={
             <Suspense
               fallback={
-                <div className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden">
+                <div
+                  data-aspect-ratio={aspectRatio}
+                  className={cn(
+                    "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+                    aspectRatioClasses,
+                  )}
+                >
                   <Skeleton className="size-full rounded-none" />
                 </div>
               }
@@ -100,6 +126,7 @@ export async function ProductDetailSection({
                 options={options}
                 variants={variants}
                 title={title}
+                aspectRatio={aspectRatio}
                 variantIdPromise={variantIdPromise}
               />
             </Suspense>
@@ -110,6 +137,7 @@ export async function ProductDetailSection({
           otherImages={images}
           videos={videos}
           title={title}
+          aspectRatio={aspectRatio}
           className="lg:col-span-6"
         />
       )}
@@ -297,12 +325,14 @@ async function ResolvedColorImages({
   options,
   variants,
   title,
+  aspectRatio,
   variantIdPromise,
 }: {
   images: ImageType[];
   options: ProductOption[];
   variants: ProductVariant[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
@@ -316,7 +346,7 @@ async function ResolvedColorImages({
 
   if (colorImages.length === 0) return null;
 
-  return <ColorImageGrid images={colorImages} title={title} />;
+  return <ColorImageGrid images={colorImages} title={title} aspectRatio={aspectRatio} />;
 }
 
 async function ResolvedColorCarouselImages({
@@ -324,12 +354,14 @@ async function ResolvedColorCarouselImages({
   options,
   variants,
   title,
+  aspectRatio,
   variantIdPromise,
 }: {
   images: ImageType[];
   options: ProductOption[];
   variants: ProductVariant[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
@@ -343,5 +375,5 @@ async function ResolvedColorCarouselImages({
 
   if (colorImages.length === 0) return null;
 
-  return <ColorImageCarouselItems images={colorImages} title={title} />;
+  return <ColorImageCarouselItems images={colorImages} title={title} aspectRatio={aspectRatio} />;
 }

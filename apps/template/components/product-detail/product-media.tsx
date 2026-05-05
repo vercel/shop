@@ -4,6 +4,10 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import {
+  aspectRatioClasses,
+  type ProductCardAspectRatio,
+} from "@/components/product-card/components";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -22,6 +26,7 @@ function MediaImage({
   idx,
   sizes,
   priority,
+  eager,
   className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
@@ -29,6 +34,7 @@ function MediaImage({
   idx: number;
   sizes: string;
   priority: boolean;
+  eager: boolean;
   className?: string;
 }) {
   return (
@@ -39,7 +45,7 @@ function MediaImage({
       className={cn("object-cover", className)}
       sizes={sizes}
       priority={priority}
-      loading={priority ? "eager" : "lazy"}
+      loading={priority || eager ? "eager" : "lazy"}
       draggable={false}
     />
   );
@@ -78,10 +84,14 @@ function MediaVideo({
 function Carousel({
   mediaItems,
   title,
+  aspectRatio,
+  hasColorSlot,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
+  hasColorSlot: boolean;
   children?: React.ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -134,24 +144,33 @@ function Carousel({
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
-        {mediaItems.map((item, idx) => (
-          <div
-            key={mediaKey(item)}
-            className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
-          >
-            {item.type === "video" ? (
-              <MediaVideo item={item} sizes="100vw" priority={!children && idx === 0} />
-            ) : (
-              <MediaImage
-                item={item}
-                title={title}
-                idx={idx}
-                sizes="100vw"
-                priority={!children && idx === 0}
-              />
-            )}
-          </div>
-        ))}
+        {mediaItems.map((item, idx) => {
+          const priority = !hasColorSlot && idx === 0;
+          const eager = hasColorSlot ? idx === 0 : idx === 1;
+          return (
+            <div
+              key={mediaKey(item)}
+              data-aspect-ratio={aspectRatio}
+              className={cn(
+                "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+                aspectRatioClasses,
+              )}
+            >
+              {item.type === "video" ? (
+                <MediaVideo item={item} sizes="100vw" priority={priority || eager} />
+              ) : (
+                <MediaImage
+                  item={item}
+                  title={title}
+                  idx={idx}
+                  sizes="100vw"
+                  priority={priority}
+                  eager={eager}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Dot indicators – reserve space but hide when there's only one image */}
@@ -175,11 +194,32 @@ function Carousel({
   );
 }
 
-function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: number }) {
+function GridItem({
+  item,
+  title,
+  idx,
+  aspectRatio,
+  priority,
+  eager,
+}: {
+  item: MediaItem;
+  title: string;
+  idx: number;
+  aspectRatio: ProductCardAspectRatio;
+  priority: boolean;
+  eager: boolean;
+}) {
   return (
-    <div className="relative aspect-square w-full overflow-hidden bg-accent">
+    <div
+      data-aspect-ratio={aspectRatio}
+      className={cn("relative w-full overflow-hidden bg-accent", aspectRatioClasses)}
+    >
       {item.type === "video" ? (
-        <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={idx < 2} />
+        <MediaVideo
+          item={item}
+          sizes="(min-width: 1024px) 25vw, 50vw"
+          priority={priority || eager}
+        />
       ) : (
         <LightboxTrigger item={item}>
           <MediaImage
@@ -187,7 +227,8 @@ function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: n
             title={title}
             idx={idx}
             sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={idx < 2}
+            priority={priority}
+            eager={eager}
           />
         </LightboxTrigger>
       )}
@@ -199,19 +240,35 @@ function GridItem({ item, title, idx }: { item: MediaItem; title: string; idx: n
 function Grid({
   mediaItems,
   title,
+  aspectRatio,
+  hasColorSlot,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
+  aspectRatio: ProductCardAspectRatio;
+  hasColorSlot: boolean;
   children?: React.ReactNode;
 }) {
   return (
     <Lightbox label={title}>
       <div className="grid grid-cols-2 gap-2.5">
         {children}
-        {mediaItems.map((item, idx) => (
-          <GridItem key={mediaKey(item)} item={item} title={title} idx={idx} />
-        ))}
+        {mediaItems.map((item, idx) => {
+          const priority = !hasColorSlot && idx === 0;
+          const eager = hasColorSlot ? idx === 0 : idx === 1;
+          return (
+            <GridItem
+              key={mediaKey(item)}
+              item={item}
+              title={title}
+              idx={idx}
+              aspectRatio={aspectRatio}
+              priority={priority}
+              eager={eager}
+            />
+          );
+        })}
       </div>
     </Lightbox>
   );
@@ -221,9 +278,25 @@ function Grid({
  * Renders color-specific images as grid items (desktop).
  * Designed to be used inside a Suspense boundary as children of ProductMedia.
  */
-export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
+export function ColorImageGrid({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
   return images.map((image, idx) => (
-    <GridItem key={image.url} item={{ type: "image", image }} title={title} idx={idx} />
+    <GridItem
+      key={image.url}
+      item={{ type: "image", image }}
+      title={title}
+      idx={idx}
+      aspectRatio={aspectRatio}
+      priority={idx === 0}
+      eager={idx === 1}
+    />
   ));
 }
 
@@ -231,29 +304,47 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
  * Renders color-specific images as carousel items (mobile).
  * Matches the Carousel item structure for consistent snap-scroll behavior.
  */
-export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
-  return images.map((image, idx) => (
-    <div
-      key={image.url}
-      className="relative shrink-0 w-full aspect-square snap-start snap-always overflow-hidden"
-    >
-      <Image
-        src={image.url}
-        alt={image.altText || `${title} image ${idx + 1}`}
-        fill
-        className="object-cover"
-        sizes="100vw"
-        priority={idx === 0}
-        draggable={false}
-      />
-    </div>
-  ));
+export function ColorImageCarouselItems({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
+  return images.map((image, idx) => {
+    const priority = idx === 0;
+    const eager = idx === 1;
+    return (
+      <div
+        key={image.url}
+        data-aspect-ratio={aspectRatio}
+        className={cn(
+          "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+          aspectRatioClasses,
+        )}
+      >
+        <Image
+          src={image.url}
+          alt={image.altText || `${title} image ${idx + 1}`}
+          fill
+          className="object-cover"
+          sizes="100vw"
+          priority={priority}
+          loading={priority || eager ? "eager" : "lazy"}
+          draggable={false}
+        />
+      </div>
+    );
+  });
 }
 
 export function ProductMedia({
   otherImages,
   videos,
   title,
+  aspectRatio = "square",
   className,
   desktopSlot,
   mobileSlot,
@@ -261,6 +352,7 @@ export function ProductMedia({
   otherImages: ImageType[];
   videos: Video[];
   title: string;
+  aspectRatio?: ProductCardAspectRatio;
   className?: string;
   /** Color images rendered as grid items (desktop). */
   desktopSlot?: React.ReactNode;
@@ -274,15 +366,27 @@ export function ProductMedia({
 
   if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) return null;
 
+  const hasColorSlot = !!mobileSlot || !!desktopSlot;
+
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={sharedMediaItems} title={title}>
+        <Carousel
+          mediaItems={sharedMediaItems}
+          title={title}
+          aspectRatio={aspectRatio}
+          hasColorSlot={hasColorSlot}
+        >
           {mobileSlot}
         </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={sharedMediaItems} title={title}>
+        <Grid
+          mediaItems={sharedMediaItems}
+          title={title}
+          aspectRatio={aspectRatio}
+          hasColorSlot={hasColorSlot}
+        >
           {desktopSlot}
         </Grid>
       </div>
