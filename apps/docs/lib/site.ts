@@ -13,15 +13,16 @@ export const docsDescription =
 
 export function getBaseUrl() {
   if (
-    process.env.VERCEL_ENV !== "production" &&
-    process.env.NEXT_PUBLIC_VERCEL_URL
+    process.env.VERCEL_ENV === "production" &&
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
   ) {
-    return new URL(`https://${process.env.NEXT_PUBLIC_VERCEL_URL}`);
+    return new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
   }
 
-  const host =
-    process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL || "localhost:3000";
-  const protocol = host.includes("localhost") ? "http" : "https";
+  const previewHost = process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL;
+  if (previewHost) {
+    return new URL(`https://${previewHost}`);
+  }
 
-  return new URL(`${protocol}://${host}`);
+  return new URL(`http://localhost:${process.env.PORT ?? "3000"}`);
 }
