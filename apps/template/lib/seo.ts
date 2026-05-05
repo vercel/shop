@@ -24,8 +24,12 @@ function toSearchParams(input: SearchParamsInput): URLSearchParams {
   for (const [key, value] of Object.entries(input)) {
     if (value === undefined) continue;
     if (Array.isArray(value)) {
-      for (const item of value) {
-        params.append(key, item);
+      if (key.startsWith("filter.")) {
+        if (value.length > 0) params.set(key, value.join(","));
+      } else {
+        for (const item of value) {
+          params.append(key, item);
+        }
       }
       continue;
     }
