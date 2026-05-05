@@ -152,7 +152,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const description = doc.description ?? docsDescription;
-  const image = doc.slug ? `/og/${doc.slug}/image.png` : "/og/image.png";
   const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
 
   return {
@@ -164,19 +163,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName,
       type: "website",
       url,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 628,
-        },
-      ],
     },
     twitter: {
       card: "summary_large_image",
       title: doc.title,
       description,
-      images: [image],
     },
   };
 }
