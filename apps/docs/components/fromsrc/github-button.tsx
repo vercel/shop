@@ -10,7 +10,7 @@ export const GitHubButton = () => {
   const url = `https://github.com/${github.owner}/${github.repo}`;
 
   return (
-    <Button asChild size="icon-sm" type="button" variant="ghost">
+    <Button asChild size="icon-sm" type="button" variant="tertiary">
       <a href={url} rel="noopener" target="_blank">
         <SiGithub className="size-4" />
       </a>

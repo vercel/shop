@@ -122,18 +122,6 @@ async function SearchResultsGridRender({
     );
   }
 
-  const boundLoadMore = async (cursor: string) => {
-    "use server";
-    return loadMoreSearchProducts({
-      query: data.query,
-      collection: data.collection,
-      cursor,
-      sortKey: data.sort,
-      filters: data.filters,
-      locale,
-    });
-  };
-
   return (
     <FilterPendingScope>
       <ProductGridPendingOverlay>
@@ -142,7 +130,14 @@ async function SearchResultsGridRender({
           initialPageInfo={data.pageInfo}
           locale={locale}
           outOfStockText={tProduct("outOfStock")}
-          loadMore={boundLoadMore}
+          loadMore={loadMoreSearchProducts}
+          loadMoreParams={{
+            query: data.query,
+            collection: data.collection,
+            sortKey: data.sort,
+            filters: data.filters,
+            locale,
+          }}
         >
           {products.map((product) => (
             <ProductCard

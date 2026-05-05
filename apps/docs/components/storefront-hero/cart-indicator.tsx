@@ -1,4 +1,4 @@
-import { IconCart } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-cart";
+import { IconCart } from "@/components/assets/icons/icon-cart";
 
 export const CartIndicator = () => (
   <div className="flex items-center gap-1">

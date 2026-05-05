@@ -10,7 +10,7 @@ interface FooterProps {
 export const Footer = ({
   copyright = `Copyright Vercel ${new Date().getFullYear()}. All rights reserved.`,
 }: FooterProps) => (
-  <footer className="border-t px-4 py-5 md:px-12">
+  <footer className="px-4 py-5 md:px-12">
     <div className="mx-auto flex max-w-[1448px] flex-col items-center justify-between gap-4 sm:flex-row">
       <div className="flex items-center gap-2">
         <SiVercel className="size-4 shrink-0" />

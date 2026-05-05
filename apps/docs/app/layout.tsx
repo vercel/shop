@@ -24,19 +24,11 @@ export const metadata: Metadata = {
     description: docsDescription,
     siteName,
     type: "website",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 628,
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: docsTitle,
     description: docsDescription,
-    images: ["/opengraph-image"],
   },
 };
 

@@ -108,13 +108,13 @@ export const Feedback = () => {
                     <Button
                       className={cn(
                         "text-muted-foreground hover:text-foreground",
-                        emotion === e.name ? "bg-accent text-foreground" : ""
+                        emotion === e.name ? "bg-accent text-foreground" : "",
                       )}
                       key={e.name}
                       onClick={() => setEmotion(e.name)}
                       size="sm"
                       type="button"
-                      variant="ghost"
+                      variant="tertiary"
                     >
                       {e.emoji}
                       <span className="sr-only">{e.name}</span>
