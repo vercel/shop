@@ -92,14 +92,19 @@ export const ContentNegotiationDemo = () => {
       >
         {phase !== "idle" && (
           <div className="flex items-start gap-2 animate-[fade-in_0.15s_ease]">
-            <span className="font-mono text-xs text-gray-1000">$</span>
-            <span className="font-mono text-xs text-gray-1000 break-all">
+            <span className="font-mono text-xs leading-5 text-gray-1000">$</span>
+            <span className="font-mono text-xs leading-5 text-gray-1000 break-all">
               {phase === "typing"
                 ? CURL_COMMAND.slice(0, charIndex)
                 : CURL_COMMAND}
-              {phase === "typing" && (
-                <span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-black/70 dark:bg-white/70" />
-              )}
+              <span
+                aria-hidden
+                className={`ml-0.5 inline-block h-3.5 w-[5px] align-middle bg-black/70 dark:bg-white/70 ${
+                  phase === "typing"
+                    ? "animate-[pulse_0.6s_ease-in-out_infinite]"
+                    : "invisible"
+                }`}
+              />
             </span>
           </div>
         )}

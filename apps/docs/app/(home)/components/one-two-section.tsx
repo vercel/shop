@@ -13,7 +13,7 @@ export const OneTwoSection = ({
   leftClassName,
   children,
 }: OneTwoSectionProps) => (
-  <div className="grid gap-12 py-8 xl:grid-cols-[436px_572px] xl:gap-x-[72px] xl:gap-y-0 xl:p-0 xl:py-12">
+  <div className="grid gap-12 py-8 md:grid-cols-2 xl:gap-y-0 xl:p-0 xl:py-12">
     <div
       className={`flex flex-col gap-2 text-balance${leftClassName ? ` ${leftClassName}` : ""}`}
     >

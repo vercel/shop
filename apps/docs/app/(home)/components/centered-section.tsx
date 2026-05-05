@@ -14,7 +14,7 @@ export const CenteredSection = ({
   children,
 }: CenteredSectionProps) => (
   <div className="grid gap-12 py-8 sm:py-12">
-    <div className="grid gap-6 sm:grid-cols-2 sm:items-center sm:gap-10">
+    <div className="grid gap-6 md:grid-cols-2 sm:items-center sm:gap-10">
       <div className="grid gap-4">
         <h2 className="font-sans font-semibold text-3xl text-gray-1000 leading-10 tracking-[-0.04em]">
           {title}
@@ -25,7 +25,6 @@ export const CenteredSection = ({
       </div>
       {aside ? <div className="sm:justify-self-center">{aside}</div> : null}
     </div>
-
     {children}
   </div>
 );
