@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IconArrowUpRight } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-arrow-up-right";
+import { IconArrowUpRight } from "@/components/assets/icons/icon-arrow-up-right";
 import { nav } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { SearchButton } from "./search-button";

@@ -4,8 +4,8 @@ import type { Heading } from "fromsrc";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { IconFileText } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-file-text";
-import { IconMenuAlt } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-menu-alt";
+import { IconFileText } from "@/components/assets/icons/icon-file-text";
+import { IconMenuAlt } from "@/components/assets/icons/icon-menu-alt";
 import {
   Sheet,
   SheetContent,
