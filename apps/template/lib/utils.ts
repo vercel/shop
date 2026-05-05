@@ -13,6 +13,10 @@ export function formatPrice(amount: number, currencyCode: string, locale: string
   }).format(amount);
 }
 
+// Price keys are scalar (gte/lte) — buildProductFiltersFromParams' parsePrice
+// bails on arrays, so don't comma-split them.
+const PRICE_FILTER_KEYS = new Set(["filter.v.price.gte", "filter.v.price.lte"]);
+
 export function parseFiltersFromSearchParams(
   searchParams: Record<string, string | string[] | undefined>,
 ): Record<string, string | string[] | undefined> {
@@ -22,7 +26,18 @@ export function parseFiltersFromSearchParams(
     if (!key.startsWith("filter.") || value === undefined) {
       continue;
     }
-    filters[key] = value;
+    if (PRICE_FILTER_KEYS.has(key)) {
+      filters[key] = value;
+      continue;
+    }
+    const raw = Array.isArray(value) ? value : [value];
+    const split = raw
+      .flatMap((v) => v.split(","))
+      .map((v) => v.trim())
+      .filter(Boolean);
+    const deduped = [...new Set(split)];
+    if (deduped.length === 0) continue;
+    filters[key] = deduped.length === 1 ? deduped[0] : deduped;
   }
 
   return filters;

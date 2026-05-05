@@ -71,20 +71,19 @@ function buildHref(pathname: string, params: URLSearchParams): string {
   return query ? `${pathname}?${query}` : pathname;
 }
 
+function readFilterValues(params: URLSearchParams, key: string): string[] {
+  return params
+    .getAll(key)
+    .flatMap((v) => v.split(","))
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
 function toggleFilterParam(params: URLSearchParams, key: string, value: string): void {
-  const nextValues = getFilterValues(params.getAll(key));
-
-  if (nextValues.includes(value)) {
-    params.delete(key);
-    for (const nextValue of nextValues) {
-      if (nextValue !== value) {
-        params.append(key, nextValue);
-      }
-    }
-    return;
-  }
-
-  params.append(key, value);
+  const current = readFilterValues(params, key);
+  const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+  params.delete(key);
+  if (next.length > 0) params.set(key, next.join(","));
 }
 
 function parsePriceValue(value: string | null): number | null {
