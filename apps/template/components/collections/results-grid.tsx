@@ -42,24 +42,14 @@ async function Render({
     );
   }
 
-  const boundLoadMore = async (cursor: string) => {
-    "use server";
-    return loadMoreCollectionProducts({
-      collection,
-      cursor,
-      sortKey: sort,
-      filters,
-      locale,
-    });
-  };
-
   return (
     <InfiniteProductGrid
       initialProducts={products}
       initialPageInfo={result.pageInfo}
       locale={locale}
       outOfStockText={tProduct("outOfStock")}
-      loadMore={boundLoadMore}
+      loadMore={loadMoreCollectionProducts}
+      loadMoreParams={{ collection, sortKey: sort, filters, locale }}
     >
       {products.map((product) => (
         <ProductCard
