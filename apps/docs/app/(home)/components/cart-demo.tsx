@@ -208,7 +208,7 @@ export const CartDemo = () => {
         </div>
 
         {/* Cart */}
-        <div className="flex min-h-[180px] w-full flex-col p-5 xl:w-[34%]">
+        <div className="flex min-h-[170px] w-full flex-col p-5 xl:w-[34%]">
           <span className="mb-4 text-xs font-medium text-gray-700">Cart</span>
           {isUpdated ? (
             <div className="flex flex-col gap-4 animate-[fade-in_0.15s_ease]">
