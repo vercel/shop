@@ -4,6 +4,7 @@ import { searchIndexProducts } from "@/lib/shopify/operations/products";
 import { predictiveSearch } from "@/lib/shopify/operations/search";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, PredictiveSearchResult, ProductCard } from "@/lib/types";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function predictiveSearchAction(
   query: string,
@@ -24,12 +25,14 @@ export async function loadMoreSearchProducts(params: {
   filters?: ProductFilter[];
   locale: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
+  // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
   const result = await searchIndexProducts({
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,
     sortKey: params.sortKey,
     filters: params.filters,
+    limit: RESULTS_PER_PAGE,
     locale: params.locale,
   });
 
