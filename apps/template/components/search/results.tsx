@@ -12,8 +12,8 @@ import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
 import {
   buildProductFiltersFromParams,
-  getCatalogProducts,
   getSearchFacets,
+  searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
@@ -47,8 +47,8 @@ export async function getSearchResultsData({
   activeFilters: Record<string, string | string[] | undefined>;
 }): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const [catalog, facets] = await Promise.all([
-    getCatalogProducts({
+  const [results, facets] = await Promise.all([
+    searchIndexProducts({
       query,
       collection,
       sortKey: sort,
@@ -60,9 +60,9 @@ export async function getSearchResultsData({
   ]);
 
   return {
-    products: catalog.products,
+    products: results.products,
     total: facets.total,
-    pageInfo: catalog.pageInfo,
+    pageInfo: results.pageInfo,
     transformedFilters: transformShopifyFilters(facets.filters, { activeFilters }),
     activeFilters,
     filters: shopifyFilters,
