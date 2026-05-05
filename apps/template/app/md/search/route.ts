@@ -2,8 +2,8 @@ import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
 import {
   buildProductFiltersFromParams,
-  getCatalogProducts,
   getSearchFacets,
+  searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
@@ -29,8 +29,8 @@ export async function GET(request: Request) {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
 
   try {
-    const [catalog, facets] = await Promise.all([
-      getCatalogProducts({
+    const [results, facets] = await Promise.all([
+      searchIndexProducts({
         query,
         collection,
         sortKey: sort,
@@ -47,12 +47,12 @@ export async function GET(request: Request) {
     const markdown = searchResultsToMarkdown({
       query,
       collection,
-      products: catalog.products,
+      products: results.products,
       total: facets.total,
       filters: transformedFilters.filters,
       priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
       activeFilters,
-      pageInfo: catalog.pageInfo,
+      pageInfo: results.pageInfo,
       locale,
       sort,
     });

@@ -113,11 +113,12 @@ const SEARCH_FACETS_QUERY = `
 
 const PRODUCTS_SEARCH_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
-  query searchProducts($query: String!, $first: Int!, $after: String, $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+  query searchProducts($query: String!, $first: Int!, $after: String, $productFilters: [ProductFilter!], $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
       first: $first
       after: $after
+      productFilters: $productFilters
       sortKey: $sortKey
       reverse: $reverse
       types: PRODUCT
@@ -417,21 +418,29 @@ export async function getSearchFacets(params: {
   };
 }
 
-// Use getCatalogProducts for catalog browse / the /search page; this is the relevance-ranked search index.
+// Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
+// (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
+// silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
 export async function searchIndexProducts(params: {
-  query: string;
+  query?: string;
+  collection?: string;
   sortKey?: string;
   limit?: number;
+  cursor?: string;
+  filters?: ProductFilter[];
   locale?: string;
-}): Promise<{ products: ProductCard[]; total: number }> {
+}): Promise<{ products: ProductCard[]; total: number; pageInfo: PageInfo }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
   const {
     query,
+    collection,
     sortKey: rawSortKey = "best-matches",
     limit = 50,
+    cursor,
+    filters = [],
     locale = defaultLocale,
   } = params;
 
@@ -439,17 +448,26 @@ export async function searchIndexProducts(params: {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
+  const trimmedQuery = query?.trim() ?? "";
+  const queryParts: string[] = [];
+  if (trimmedQuery) queryParts.push(trimmedQuery);
+  if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
+  const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
+
   const data = await shopifyFetch<{
     search: {
       totalCount: number;
-      edges: Array<{ node: ShopifyProductCard | null }>;
+      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
+      pageInfo: PageInfo;
     };
   }>({
     operation: "searchProducts",
     query: PRODUCTS_SEARCH_QUERY,
     variables: {
-      query: query.trim() || "*",
+      query: searchQuery,
       first: limit,
+      after: cursor,
+      productFilters: filters.length > 0 ? filters : undefined,
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
       country,
@@ -466,6 +484,7 @@ export async function searchIndexProducts(params: {
   return {
     products: shopifyProducts.map(transformShopifyProductCard),
     total: data.search.totalCount,
+    pageInfo: data.search.pageInfo,
   };
 }
 
