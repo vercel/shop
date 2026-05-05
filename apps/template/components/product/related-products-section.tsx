@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import type { ProductCardAspectRatio } from "@/components/product-card/components";
@@ -30,7 +29,6 @@ export function RelatedProductsSectionSkeleton({
 }
 
 async function Render({ handle, locale }: { handle: string; locale: Locale }) {
-  await connection();
   const [t, recommendations] = await Promise.all([
     getTranslations("product"),
     getProductRecommendations(handle, locale),
