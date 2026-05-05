@@ -236,7 +236,7 @@ export type OpenInTriggerProps = ComponentProps<typeof DropdownMenuTrigger>;
 export const OpenInTrigger = ({ children, ...props }: OpenInTriggerProps) => (
   <DropdownMenuTrigger {...props} asChild>
     {children ?? (
-      <Button type="button" variant="outline">
+      <Button type="button" variant="secondary">
         Open in chat
         <ChevronDownIcon className="size-4" />
       </Button>
@@ -256,7 +256,9 @@ export const OpenInChatGPT = (props: OpenInChatGPTProps) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.chatgpt.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.chatgpt.icon}
+        </span>
         <span className="flex-1">{providers.chatgpt.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>
@@ -276,7 +278,9 @@ export const OpenInClaude = (props: OpenInClaudeProps) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.claude.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.claude.icon}
+        </span>
         <span className="flex-1">{providers.claude.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>
@@ -296,7 +300,9 @@ export const OpenInT3 = (props: OpenInT3Props) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.t3.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.t3.icon}
+        </span>
         <span className="flex-1">{providers.t3.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>
@@ -316,7 +322,9 @@ export const OpenInScira = (props: OpenInSciraProps) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.scira.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.scira.icon}
+        </span>
         <span className="flex-1">{providers.scira.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>
@@ -336,7 +344,9 @@ export const OpenInv0 = (props: OpenInv0Props) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.v0.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.v0.icon}
+        </span>
         <span className="flex-1">{providers.v0.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>
@@ -356,7 +366,9 @@ export const OpenInCursor = (props: OpenInCursorProps) => {
         rel="noopener"
         target="_blank"
       >
-        <span className="shrink-0 size-4 [&>svg]:size-4">{providers.cursor.icon}</span>
+        <span className="shrink-0 size-4 [&>svg]:size-4">
+          {providers.cursor.icon}
+        </span>
         <span className="flex-1">{providers.cursor.title}</span>
         <ExternalLinkIcon className="size-4 shrink-0" />
       </a>

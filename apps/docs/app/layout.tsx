@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/opengraph-image.jpg",
         width: 1200,
         height: 628,
       },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: docsTitle,
     description: docsDescription,
-    images: ["/opengraph-image"],
+    images: ["/opengraph-image.jpg"],
   },
 };
 

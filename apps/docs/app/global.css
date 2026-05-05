@@ -818,9 +818,22 @@ figure[role="group"] button {
   }
 }
 
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @theme inline {
   --animate-collapsible-down: collapsible-down 200ms ease-out;
   --animate-collapsible-up: collapsible-up 200ms ease-out;
+}
+
+@utility animate-marquee {
+  animation: marquee var(--marquee-duration, 40s) linear infinite;
 }
 
 @utility text-heading-40 {

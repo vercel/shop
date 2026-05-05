@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
-import { IconSlashForward } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-slash-forward";
-import { LogoAiElements } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-ai-elements";
-import { LogoAiSdk } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-ai-sdk";
-import { LogoChatSdk } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-chat-sdk";
-import { LogoFlagsSdk } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-flags-sdk";
-import { LogoIconVercel } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-icon-vercel";
-import { LogoStreamdown } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-streamdown";
-import { LogoVercelOss } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-vercel-oss";
-import { LogoWorkflowSdk } from "@/components/geistcn-fallbacks/geistcn-assets/logos/logo-workflow-sdk";
+import { IconSlashForward } from "@/components/assets/icons/icon-slash-forward";
+import { LogoAiElements } from "@/components/assets/logos/logo-ai-elements";
+import { LogoAiSdk } from "@/components/assets/logos/logo-ai-sdk";
+import { LogoChatSdk } from "@/components/assets/logos/logo-chat-sdk";
+import { LogoFlagsSdk } from "@/components/assets/logos/logo-flags-sdk";
+import { LogoIconVercel } from "@/components/assets/logos/logo-icon-vercel";
+import { LogoStreamdown } from "@/components/assets/logos/logo-streamdown";
+import { LogoVercelOss } from "@/components/assets/logos/logo-vercel-oss";
+import { LogoWorkflowSdk } from "@/components/assets/logos/logo-workflow-sdk";
 import {
   NavigationMenu,
   NavigationMenuContent,

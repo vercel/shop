@@ -14,23 +14,28 @@ import {
 } from "@/components/product-card/components";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
-interface InfiniteProductGridProps {
+interface InfiniteProductGridProps<TParams> {
   initialProducts: ProductCard[];
   initialPageInfo: PageInfo;
   locale: string;
   outOfStockText: string;
-  loadMore: (cursor: string) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
+  // Top-level "use server" action; passed by reference, no closure encryption.
+  loadMore: (
+    params: TParams & { cursor: string },
+  ) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
+  loadMoreParams: TParams;
   children: React.ReactNode;
 }
 
-export function InfiniteProductGrid({
+export function InfiniteProductGrid<TParams>({
   initialProducts,
   initialPageInfo,
   locale,
   outOfStockText,
   loadMore,
+  loadMoreParams,
   children,
-}: InfiniteProductGridProps) {
+}: InfiniteProductGridProps<TParams>) {
   const [additionalProducts, setAdditionalProducts] = useState<ProductCard[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,14 +56,14 @@ export function InfiniteProductGrid({
     setIsLoading(true);
 
     try {
-      const result = await loadMore(pageInfo.endCursor);
+      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor });
       setAdditionalProducts((prev) => [...prev, ...result.products]);
       setPageInfo(result.pageInfo);
     } finally {
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [pageInfo, loadMore]);
+  }, [pageInfo, loadMore, loadMoreParams]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;

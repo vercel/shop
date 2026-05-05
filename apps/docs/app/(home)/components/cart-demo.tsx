@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { IconCart } from "@/components/geistcn-fallbacks/geistcn-assets/icons/icon-cart";
+import { IconCart } from "@/components/assets/icons/icon-cart";
 
 type Phase =
   | "idle"

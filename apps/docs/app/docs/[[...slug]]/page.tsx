@@ -152,7 +152,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const description = doc.description ?? docsDescription;
-  const image = doc.slug ? `/og/${doc.slug}/image.png` : "/og/image.png";
   const url = doc.slug ? `/docs/${doc.slug}` : "/docs";
 
   return {
@@ -166,7 +165,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       images: [
         {
-          url: image,
+          url: "/opengraph-image.jpg",
           width: 1200,
           height: 628,
         },
@@ -176,7 +175,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: doc.title,
       description,
-      images: [image],
+      images: ["/opengraph-image.jpg"],
     },
   };
 }

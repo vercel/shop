@@ -92,16 +92,18 @@ const LogLine = ({
 };
 
 const Spinner = () => (
-  <span className="inline-flex items-center gap-1.5 text-xs text-gray-1000">
-    <svg
-      className="size-3 animate-spin"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      viewBox="0 0 24 24"
-    >
-      <path d="M12 2v4m0 12v4m-7.07-3.93 2.83-2.83m8.48-8.48 2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83" />
-    </svg>
+  <span className="inline-flex items-center gap-2 text-xs text-gray-1000">
+    <span className="inline-flex size-3.5 shrink-0 items-center justify-center">
+      <svg
+        className="size-3 animate-spin"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+      >
+        <path d="M12 2v4m0 12v4m-7.07-3.93 2.83-2.83m8.48-8.48 2.83-2.83M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83" />
+      </svg>
+    </span>
     Running skill…
   </span>
 );
@@ -223,17 +225,22 @@ export const AgentDemo = () => {
         >
           {/* Command input */}
           {showCommand && (
-            <div className="flex items-center gap-2 animate-[fade-in_0.15s_ease]">
-              <span className="inline-flex size-3.5 shrink-0 items-center justify-center font-mono text-sm leading-none text-amber-800">
-                &gt;
+            <div className="flex h-5 items-center gap-2 animate-[fade-in_0.15s_ease]">
+              <span className="inline-flex size-3.5 shrink-0 items-center justify-center font-mono text-xs leading-none text-amber-800">
+                $
               </span>
-              <span className="font-mono text-xs text-black dark:text-white">
+              <span className="font-mono text-xs leading-5 text-black dark:text-white">
                 {phase === "typing-command"
                   ? skill.command.slice(0, charIndex)
                   : skill.command}
-                {phase === "typing-command" && (
-                  <span className="ml-0.5 inline-block h-3.5 w-[5px] animate-[pulse_0.6s_ease-in-out_infinite] bg-black/70 dark:bg-white/70" />
-                )}
+                <span
+                  aria-hidden
+                  className={`ml-0.5 inline-block h-3.5 w-[5px] align-middle bg-black/70 dark:bg-white/70 ${
+                    phase === "typing-command"
+                      ? "animate-[pulse_0.6s_ease-in-out_infinite]"
+                      : "invisible"
+                  }`}
+                />
               </span>
             </div>
           )}
@@ -246,7 +253,7 @@ export const AgentDemo = () => {
           )}
 
           {/* Log lines */}
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2.5">
             {skill.logs.map((log, i) => (
               <LogLine
                 key={log.text}

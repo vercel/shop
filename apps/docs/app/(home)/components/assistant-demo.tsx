@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { AvatarTommy } from "@/components/assets/avatars/avatar-tommy";
 
 interface Shoe {
   name: string;
@@ -45,15 +46,11 @@ export const AssistantDemo = () => (
           <span className="text-[13px] font-medium text-foreground">
             Tommy Triangle
           </span>
-          <span
-            aria-hidden
-            className="flex size-5 items-center justify-center rounded-full bg-gray-1000 text-[10px] text-background-100"
-          >
-            ▲
-          </span>
+          <AvatarTommy className="size-5 rounded-full" />
         </div>
         <div className="relative rounded-2xl bg-gray-100 px-4 py-2 text-sm text-foreground">
-          Find me a white sneaker under $120
+          Find me a <span className="dark:hidden">white</span>
+          <span className="hidden dark:inline">black</span> sneaker under $120
           <svg
             aria-hidden
             className="absolute -top-[7px] left-full -ml-3.5 text-gray-100"

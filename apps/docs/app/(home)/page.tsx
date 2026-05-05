@@ -21,6 +21,7 @@ import { CTA } from "./components/cta";
 import { StorefrontHero } from "@/components/storefront-hero";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
+import { LogosMarquee } from "./components/logos-marquee";
 import { OneTwoSection } from "./components/one-two-section";
 import { ShopifyCommerce } from "./components/shopify-commerce";
 
@@ -38,7 +39,7 @@ export const metadata: Metadata = {
     siteName,
     images: [
       {
-        url: "/opengraph-image",
+        url: "/opengraph-image.jpg",
         width: 1200,
         height: 628,
       },
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/opengraph-image"],
+    images: ["/opengraph-image.jpg"],
   },
 };
 
@@ -62,8 +63,8 @@ const HomePage = () => (
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button
           asChild
-          className="h-12 w-fit rounded-full px-5 border border-gray-alpha-400 bg-background-100 text-foreground shadow-none hover:bg-background-200 dark:border-gray-alpha-400 dark:bg-background-100 dark:hover:bg-background-200"
-          variant="outline"
+          className="h-12 w-fit rounded-full px-5"
+          variant="secondary"
         >
           <Link href="/docs">View Documentation</Link>
         </Button>
@@ -101,7 +102,7 @@ const HomePage = () => (
             </CommandPromptSurface>
           </CommandPromptRoot>
         }
-        description="Cache Components serve product data instantly while streaming in personalized content"
+        description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"
       >
         <StorefrontHero />
@@ -132,6 +133,7 @@ const HomePage = () => (
         <ContentNegotiationDemo />
       </OneTwoSection>
       <ShopifyCommerce />
+      <LogosMarquee />
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
         primary={{
@@ -141,7 +143,7 @@ const HomePage = () => (
         }}
         secondary={{ href: "/docs", label: "View Documentation" }}
         title="Start your shop today."
-        className="mt-12"
+        className="mt-12 sm:mt-32"
       />
     </div>
   </div>
