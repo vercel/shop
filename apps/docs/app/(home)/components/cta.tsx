@@ -39,8 +39,8 @@ export const CTA = ({
       {secondary ? (
         <Button
           asChild
-          className="h-12 w-full sm:w-fit rounded-full border border-gray-alpha-400 bg-background-100 px-5 text-foreground shadow-none hover:bg-background-200"
-          variant="outline"
+          className="h-12 w-full sm:w-fit rounded-full px-5"
+          variant="secondary"
         >
           <Link href={secondary.href} target={secondary.target}>
             {secondary.label}

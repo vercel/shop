@@ -63,8 +63,8 @@ const HomePage = () => (
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button
           asChild
-          className="h-12 w-fit rounded-full px-5 border border-gray-alpha-400 bg-background-100 text-foreground shadow-none hover:bg-background-200 dark:border-gray-alpha-400 dark:bg-background-100 dark:hover:bg-background-200"
-          variant="outline"
+          className="h-12 w-fit rounded-full px-5"
+          variant="secondary"
         >
           <Link href="/docs">View Documentation</Link>
         </Button>

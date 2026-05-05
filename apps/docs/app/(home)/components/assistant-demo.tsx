@@ -53,7 +53,8 @@ export const AssistantDemo = () => (
           </span>
         </div>
         <div className="relative rounded-2xl bg-gray-100 px-4 py-2 text-sm text-foreground">
-          Find me a white sneaker under $120
+          Find me a <span className="dark:hidden">white</span>
+          <span className="hidden dark:inline">black</span> sneaker under $120
           <svg
             aria-hidden
             className="absolute -top-[7px] left-full -ml-3.5 text-gray-100"

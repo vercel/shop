@@ -40,8 +40,8 @@ export const ShopifyCommerce = () => (
       </div>
       <Button
         asChild
-        className="h-12 w-fit rounded-full border border-gray-alpha-400 bg-background-100 px-5 text-foreground shadow-none hover:bg-background-200"
-        variant="outline"
+        className="h-12 w-fit rounded-full px-5"
+        variant="secondary"
       >
         <Link href="https://vercel.com/contact/sales" target="_blank">
           Start Your Shop Today
