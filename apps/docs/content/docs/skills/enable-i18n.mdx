@@ -78,7 +78,7 @@ next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages.
 The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
 
 ```
-Error: Route "/[locale]/..." accessed [...] which is not defined in the `samples` of `unstable_instant`.
+Error: Route "/[locale]/..." accessed [...] which is not defined in the `unstable_samples` of `unstable_instant`.
 ```
 
 or a generic "blocking route" prerender failure.
@@ -87,20 +87,20 @@ or a generic "blocking route" prerender failure.
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### E. `unstable_instant` samples need `locale` in `params`
+### E. `unstable_instant` `unstable_samples` need `locale` in `params`
 
-Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
+Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or validation fails:
 
 ```
 Error: Route "/[locale]/products/[handle]" accessed root param "locale"
-       which is not defined in the `samples` of `unstable_instant`.
+       which is not defined in the `unstable_samples` of `unstable_instant`.
 ```
 
 Fix:
 
 ```ts
 export const unstable_instant = {
-  samples: [
+  unstable_samples: [
     {
       params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
       searchParams: { variant: "1" },
@@ -110,12 +110,12 @@ export const unstable_instant = {
 };
 ```
 
-### F. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
+### F. `unstable_instant` `unstable_samples` need `headers` declarations if any layout-level server component reads `headers()`
 
 This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
 
 ```ts
-samples: [
+unstable_samples: [
   {
     params: { locale: "en-US", handle: "__placeholder__" },
     searchParams: { variant: "1" },
@@ -129,7 +129,7 @@ samples: [
 
 ```
 Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
-       defined in the `samples` of `unstable_instant`. Add it to the
+       defined in the `unstable_samples` of `unstable_instant`. Add it to the
        sample's `headers` array, or `["...", null]` if it should be absent.
 ```
 
@@ -348,7 +348,7 @@ export const generateStaticParams = async () => {
 
 ### Step 12: Patch `unstable_instant` samples
 
-Walk every route file that exports `unstable_instant` and add `locale` to each sample's `params`:
+Walk every route file that exports `unstable_instant` and add `locale` to each `unstable_samples` entry's `params`:
 
 ```ts
 params: { locale: "en-US", handle: "__placeholder__" }

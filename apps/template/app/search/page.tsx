@@ -65,7 +65,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
 }
 
 export const unstable_instant = {
-  samples: [
+  unstable_samples: [
     {
       searchParams: {
         q: "__placeholder__",

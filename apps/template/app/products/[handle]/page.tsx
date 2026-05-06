@@ -64,7 +64,7 @@ export async function generateMetadata({
 }
 
 export const unstable_instant = {
-  samples: [
+  unstable_samples: [
     {
       params: { handle: "__placeholder__" },
       searchParams: { variant: "1" },

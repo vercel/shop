@@ -20,7 +20,7 @@ experimental: {
 
 // app/products/[handle]/page.tsx
 export const unstable_instant = {
-  samples: [
+  unstable_samples: [
     {
       params: { handle: "__placeholder__" },
       searchParams: { variant: "1" },
@@ -32,7 +32,7 @@ export const unstable_instant = {
 export const unstable_prefetch = "force-runtime";
 ```
 
-`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` provides `samples` with representative parameters so the framework can pre-render the static shell at build time. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
+`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` provides `unstable_samples` with representative parameters so the framework can pre-render the static shell at build time. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
 
 ## Variant selection
 
