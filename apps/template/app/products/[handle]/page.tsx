@@ -65,8 +65,6 @@ export async function generateMetadata({
 
 export const unstable_instant = true;
 
-export const unstable_prefetch = "force-runtime";
-
 export default async function ProductPage({
   params,
   searchParams,
