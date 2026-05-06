@@ -61,7 +61,6 @@ import {
   usePromptInputAttachments,
 } from "../ai-elements/prompt-input";
 import { Shimmer } from "../ai-elements/shimmer";
-import { SpeechInput } from "../ai-elements/speech-input";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { CartReconciler } from "./cart-reconciler";
 import { registry } from "./registry";
@@ -651,15 +650,6 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 value={input}
               />
             </PromptInputBody>
-            <SpeechInput
-              type="button"
-              size="icon-sm"
-              variant="ghost"
-              className="shrink-0 bg-transparent text-foreground/50 hover:bg-transparent hover:text-foreground"
-              onTranscriptionChange={(text) => {
-                setInput((prev) => (prev ? `${prev} ${text}` : text));
-              }}
-            />
             <PromptInputSubmit className="mr-1.5" disabled={!input && !status} status={status} />
           </div>
         </PromptInput>
