@@ -19,7 +19,7 @@ The template now uses `next@16.3.0-canary.12` and keeps instant navigation route
 
 ## Why it matters
 
-Next canary 12 defaults `experimental.instantInsights.validationLevel` to `manual-warning`, which preserves development warnings but disables build-time validation. Sample data is only needed for undocumented build-validation levels such as `experimental-manual-error`.
+Next canary 12 preserves development warnings while no longer requiring route samples for the template's default instant navigation setup.
 
 ## Apply when
 
@@ -27,7 +27,7 @@ Adopt this when upgrading a storefront to Next 16.3 canary 12 or newer and stayi
 
 ## Safe to skip when
 
-Skip this only if the storefront intentionally opts into an undocumented build-validation level and is prepared to maintain `unstable_samples` until Next reworks the sample/scenario API.
+Skip this only if the storefront is not upgrading to Next 16.3 canary 12 or newer.
 
 ## Validation
 

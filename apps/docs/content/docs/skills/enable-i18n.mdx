@@ -81,11 +81,9 @@ The straightforward instinct is to replace every `import Link from "next/link"` 
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### E. Leave `unstable_instant` sample data out by default
+### E. Keep `unstable_instant` simple
 
-The template uses Next's default `experimental.instantInsights.validationLevel` (`manual-warning`). At that level, `unstable_instant = true` enables development warnings without build-time validation, so routes do not need sample params, cookies, headers, or search params.
-
-Only add `unstable_samples` if you intentionally opt into an undocumented build-validation level such as `experimental-manual-error`. That path is not part of the default i18n rollout because the sample/scenario API is expected to change.
+Leave existing `unstable_instant = true` exports as-is. The template uses Next's default instant navigation behavior, which keeps development warnings without requiring route samples during this i18n rollout.
 
 ### F. `redirect()` from next-intl doesn't return `never`
 
@@ -302,7 +300,7 @@ export const generateStaticParams = async () => {
 
 ### Step 12: Keep `unstable_instant` simple
 
-Leave existing `unstable_instant = true` exports as-is. Do not add `unstable_samples` during the default i18n rollout; samples only apply when a project explicitly opts into undocumented build-validation levels.
+Leave existing `unstable_instant = true` exports as-is. Do not add route samples during the i18n rollout.
 
 ### Step 13: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
 
