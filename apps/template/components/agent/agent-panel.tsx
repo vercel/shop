@@ -17,7 +17,6 @@ import {
   MinusIcon,
   NavigationIcon,
   PackageIcon,
-  PaperclipIcon,
   PlusIcon,
   RefreshCcwIcon,
   SearchIcon,
@@ -26,12 +25,9 @@ import {
   SparklesIcon,
   StickyNoteIcon,
   Trash2Icon,
-  UploadIcon,
-  XIcon,
 } from "lucide-react";
 import { nanoid } from "nanoid";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -54,14 +50,11 @@ import {
 import {
   PromptInput,
   PromptInputBody,
-  PromptInputButton,
   type PromptInputMessage,
   PromptInputSubmit,
   PromptInputTextarea,
-  usePromptInputAttachments,
 } from "../ai-elements/prompt-input";
 import { Shimmer } from "../ai-elements/shimmer";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { CartReconciler } from "./cart-reconciler";
 import { registry } from "./registry";
 
@@ -191,83 +184,6 @@ const linkSafety = {
   enabled: true,
   onLinkCheck: (url: string) => url.startsWith("/"),
 };
-
-function AttachButton() {
-  const { openFileDialog } = usePromptInputAttachments();
-  return (
-    <PromptInputButton
-      className="ml-1.5 shrink-0"
-      onClick={() => openFileDialog()}
-      aria-label="Add attachment"
-    >
-      <PaperclipIcon className="size-4" />
-    </PromptInputButton>
-  );
-}
-
-function AttachmentChips() {
-  const { files, remove } = usePromptInputAttachments();
-  if (!files.length) return null;
-
-  return (
-    <div className="flex w-full flex-wrap gap-1.5 px-2.5 pb-1.5 pt-2.5">
-      {files.map((file) => {
-        const imageUrl = typeof file.url === "string" ? file.url : null;
-        const isImage = Boolean(file.mediaType?.startsWith("image/") && imageUrl);
-        const label = file.filename || "Attachment";
-
-        return (
-          <HoverCard key={file.id} openDelay={200} closeDelay={0}>
-            <HoverCardTrigger asChild>
-              <div className="flex h-7 cursor-default items-center gap-1 rounded-md bg-background/80 px-2 text-xs">
-                {isImage ? (
-                  <Image
-                    src={imageUrl ?? ""}
-                    alt={label}
-                    className="size-4 shrink-0 rounded object-cover"
-                    height={16}
-                    unoptimized
-                    width={16}
-                  />
-                ) : (
-                  <PaperclipIcon className="size-3 shrink-0 text-muted-foreground" />
-                )}
-                <span className="max-w-32 truncate">{label}</span>
-                <button
-                  type="button"
-                  className="ml-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                  onClick={() => remove(file.id)}
-                  aria-label={`Remove ${label}`}
-                >
-                  <XIcon className="size-3" />
-                </button>
-              </div>
-            </HoverCardTrigger>
-            <HoverCardContent side="top" align="start" className="w-auto p-2">
-              {isImage ? (
-                <Image
-                  src={imageUrl ?? ""}
-                  alt={label}
-                  className="max-h-48 max-w-64 rounded-md object-contain"
-                  height={192}
-                  unoptimized
-                  width={256}
-                />
-              ) : (
-                <div className="space-y-1 px-1">
-                  <p className="font-medium text-sm">{label}</p>
-                  {file.mediaType && (
-                    <p className="font-mono text-muted-foreground text-xs">{file.mediaType}</p>
-                  )}
-                </div>
-              )}
-            </HoverCardContent>
-          </HoverCard>
-        );
-      })}
-    </div>
-  );
-}
 
 function ChatMessage({
   message,
@@ -425,9 +341,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   const t = useTranslations("agent");
   const [persistedChat] = useState(readPersistedAgentChat);
   const [input, setInput] = useState(persistedChat.input);
-  const [isDragging, setIsDragging] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const dragCountRef = useRef(0);
 
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
@@ -493,48 +407,13 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handleDragEnter() {
-      dragCountRef.current++;
-      setIsDragging(true);
-    }
-
-    function handleDragLeave() {
-      dragCountRef.current--;
-      if (dragCountRef.current === 0) {
-        setIsDragging(false);
-      }
-    }
-
-    function handleDrop() {
-      dragCountRef.current = 0;
-      setIsDragging(false);
-    }
-
-    document.addEventListener("dragenter", handleDragEnter);
-    document.addEventListener("dragleave", handleDragLeave);
-    document.addEventListener("drop", handleDrop);
-    return () => {
-      document.removeEventListener("dragenter", handleDragEnter);
-      document.removeEventListener("dragleave", handleDragLeave);
-      document.removeEventListener("drop", handleDrop);
-    };
-  }, [open]);
-
   const handleSubmit = useCallback(
     (message: PromptInputMessage) => {
-      const hasText = Boolean(message.text);
-      const hasAttachments = Boolean(message.files?.length);
-      if (!(hasText || hasAttachments)) {
+      if (!message.text) {
         return;
       }
 
-      sendMessage({
-        text: message.text || "Sent with attachments",
-        files: message.files,
-      });
+      sendMessage({ text: message.text });
       setInput("");
     },
     [sendMessage],
@@ -573,14 +452,6 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
         }}
         className="fixed right-5 bottom-20 z-40 flex max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm transition-[opacity,transform,display] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] transition-discrete data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-2.5 data-[state=closed]:hidden starting:opacity-0 starting:translate-y-2.5"
       >
-        {/* Drag overlay */}
-        {isDragging && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 backdrop-blur-sm">
-            <UploadIcon className="size-8 text-primary/60" />
-            <p className="font-medium text-primary/80 text-sm">{t("dropFiles")}</p>
-          </div>
-        )}
-
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
           <div className="flex items-center gap-2">
@@ -636,12 +507,8 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
         <PromptInput
           onSubmit={handleSubmit}
           className="px-5 py-2.5 **:data-[slot=input-group]:h-auto **:data-[slot=input-group]:flex-col **:data-[slot=input-group]:rounded-2xl **:data-[slot=input-group]:border-0 **:data-[slot=input-group]:bg-input **:data-[slot=input-group]:shadow-none"
-          globalDrop
-          multiple
         >
-          <AttachmentChips />
           <div className="flex w-full items-center">
-            <AttachButton />
             <PromptInputBody>
               <PromptInputTextarea
                 autoFocus

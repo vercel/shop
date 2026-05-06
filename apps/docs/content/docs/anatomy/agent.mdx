@@ -87,7 +87,6 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 - Header controls to clear the conversation or minimize the panel
 - Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
 - Generative UI rendering via `useJsonRenderMessage()` and a component registry
-- File attachment support via drag-and-drop
 - Regenerate and copy message actions
 - Chat history and draft input persisted to localStorage (`template-agent-chat:v1`) until cleared
 - Click-outside and Escape to minimize
@@ -107,6 +106,6 @@ The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environmen
 | `lib/agent/tools/` | 11 tool implementations using Shopify operations |
 | `lib/agent/ui/catalog.ts` | json-render catalog schema definitions |
 | `components/agent/registry.tsx` | Generative UI component implementations |
-| `components/agent/agent.tsx` | Chat panel with messages, input, attachments, chain-of-thought |
+| `components/agent/agent.tsx` | Chat panel with messages, input, and chain-of-thought |
 | `components/agent/agent-button.tsx` | Toggle button in bottom bar |
 | `components/agent/cart-reconciler.tsx` | Syncs agent cart mutations to global cart context |
