@@ -59,7 +59,7 @@ The gallery is handled by a single `ProductMedia` component that adapts to scree
 
 **Mobile** - A horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
 
-Both layouts receive pre-filtered images as props from the server.
+Both layouts receive pre-filtered images as props from the server. When a URL-selected variant can change the first color image, only that first image position waits on `searchParams`; the gallery streams immediately with the default color images as the Suspense fallback.
 
 ### Color-based image filtering
 

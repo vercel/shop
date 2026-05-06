@@ -1,28 +1,26 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import {
-  aspectRatioClasses,
-  type ProductCardAspectRatio,
-} from "@/components/product-card/components";
+import type { ProductCardAspectRatio } from "@/components/product-card/components";
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/product-detail/product-info";
 import {
+  ColorImageCarouselItem,
   ColorImageCarouselItems,
   ColorImageGrid,
+  ColorImageGridItem,
   ProductMedia,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import {
   computeInitialSelectedOptions,
-  getPartitionedImagesForSelectedColor,
-  getSharedImages,
+  getDefaultPartitionedImagesForColor,
+  getPartitionedImagesForVariant,
   hasColorImagePartitioning,
   hasUniformPricing,
   hasUniformStock,
@@ -50,6 +48,9 @@ export async function ProductDetailSection({
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
   const needsPartitioning = hasColorImagePartitioning(options, variants);
+  const defaultPartitionedImages = needsPartitioning
+    ? getDefaultPartitionedImagesForColor(images, options, variants)
+    : null;
   const uniformPrice = hasUniformPricing(variants);
   const singleVariant = variants.length === 1;
   const uniformStock = hasUniformStock(variants);
@@ -67,69 +68,34 @@ export async function ProductDetailSection({
 
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-      {needsPartitioning ? (
+      {needsPartitioning && defaultPartitionedImages ? (
         <ProductMedia
-          otherImages={getSharedImages(images, options, variants)}
+          otherImages={defaultPartitionedImages.otherImages}
           videos={videos}
           title={title}
           aspectRatio={aspectRatio}
           className="lg:col-span-6"
           desktopSlot={
-            <Suspense
-              fallback={
-                <>
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                </>
-              }
-            >
-              <ResolvedColorImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                aspectRatio={aspectRatio}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
+            <ColorImages
+              defaultImages={defaultPartitionedImages.colorImages}
+              images={images}
+              options={options}
+              variants={variants}
+              title={title}
+              aspectRatio={aspectRatio}
+              variantIdPromise={variantIdPromise}
+            />
           }
           mobileSlot={
-            <Suspense
-              fallback={
-                <div
-                  data-aspect-ratio={aspectRatio}
-                  className={cn(
-                    "relative shrink-0 w-full snap-start snap-always overflow-hidden",
-                    aspectRatioClasses,
-                  )}
-                >
-                  <Skeleton className="size-full rounded-none" />
-                </div>
-              }
-            >
-              <ResolvedColorCarouselImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                aspectRatio={aspectRatio}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
+            <ColorCarouselImages
+              defaultImages={defaultPartitionedImages.colorImages}
+              images={images}
+              options={options}
+              variants={variants}
+              title={title}
+              aspectRatio={aspectRatio}
+              variantIdPromise={variantIdPromise}
+            />
           }
         />
       ) : (
@@ -320,7 +286,8 @@ async function ResolvedPrice({
   );
 }
 
-async function ResolvedColorImages({
+function ColorImages({
+  defaultImages,
   images,
   options,
   variants,
@@ -328,6 +295,7 @@ async function ResolvedColorImages({
   aspectRatio,
   variantIdPromise,
 }: {
+  defaultImages: ImageType[];
   images: ImageType[];
   options: ProductOption[];
   variants: ProductVariant[];
@@ -335,21 +303,198 @@ async function ResolvedColorImages({
   aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
 }) {
-  const variantId = await variantIdPromise;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const { colorImages } = getPartitionedImagesForSelectedColor(
-    images,
-    options,
-    variants,
-    selectedOptions,
+  const [firstImage, ...remainingImages] = defaultImages;
+
+  if (!firstImage) return null;
+
+  return (
+    <>
+      <Suspense
+        fallback={
+          <ColorImageGridItem
+            image={firstImage}
+            title={title}
+            idx={0}
+            aspectRatio={aspectRatio}
+            priority
+            eager={false}
+          />
+        }
+      >
+        <ResolvedFirstColorImage
+          defaultImage={firstImage}
+          images={images}
+          options={options}
+          variants={variants}
+          title={title}
+          aspectRatio={aspectRatio}
+          variantIdPromise={variantIdPromise}
+        />
+      </Suspense>
+      <Suspense
+        fallback={
+          <ColorImageGridTail images={remainingImages} title={title} aspectRatio={aspectRatio} />
+        }
+      >
+        <ResolvedColorImageTail
+          images={images}
+          options={options}
+          variants={variants}
+          title={title}
+          aspectRatio={aspectRatio}
+          variantIdPromise={variantIdPromise}
+        />
+      </Suspense>
+    </>
   );
-
-  if (colorImages.length === 0) return null;
-
-  return <ColorImageGrid images={colorImages} title={title} aspectRatio={aspectRatio} />;
 }
 
-async function ResolvedColorCarouselImages({
+function ColorCarouselImages({
+  defaultImages,
+  images,
+  options,
+  variants,
+  title,
+  aspectRatio,
+  variantIdPromise,
+}: {
+  defaultImages: ImageType[];
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const [firstImage, ...remainingImages] = defaultImages;
+
+  if (!firstImage) return null;
+
+  return (
+    <>
+      <Suspense
+        fallback={
+          <ColorImageCarouselItem
+            image={firstImage}
+            title={title}
+            idx={0}
+            aspectRatio={aspectRatio}
+            priority
+            eager={false}
+          />
+        }
+      >
+        <ResolvedFirstColorCarouselImage
+          defaultImage={firstImage}
+          images={images}
+          options={options}
+          variants={variants}
+          title={title}
+          aspectRatio={aspectRatio}
+          variantIdPromise={variantIdPromise}
+        />
+      </Suspense>
+      <Suspense
+        fallback={
+          <ColorImageCarouselTail
+            images={remainingImages}
+            title={title}
+            aspectRatio={aspectRatio}
+          />
+        }
+      >
+        <ResolvedColorCarouselImageTail
+          images={images}
+          options={options}
+          variants={variants}
+          title={title}
+          aspectRatio={aspectRatio}
+          variantIdPromise={variantIdPromise}
+        />
+      </Suspense>
+    </>
+  );
+}
+
+function ColorImageGridTail({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
+  return images.map((image, idx) => (
+    <ColorImageGridItem
+      key={image.url}
+      image={image}
+      title={title}
+      idx={idx + 1}
+      aspectRatio={aspectRatio}
+      priority={false}
+      eager={idx === 0}
+    />
+  ));
+}
+
+function ColorImageCarouselTail({
+  images,
+  title,
+  aspectRatio,
+}: {
+  images: ImageType[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+}) {
+  return images.map((image, idx) => (
+    <ColorImageCarouselItem
+      key={image.url}
+      image={image}
+      title={title}
+      idx={idx + 1}
+      aspectRatio={aspectRatio}
+      priority={false}
+      eager={idx === 0}
+    />
+  ));
+}
+
+async function ResolvedFirstColorImage({
+  defaultImage,
+  images,
+  options,
+  variants,
+  title,
+  aspectRatio,
+  variantIdPromise,
+}: {
+  defaultImage: ImageType;
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const image =
+    getPartitionedImagesForVariant(images, options, variants, variantId).colorImages[0] ??
+    defaultImage;
+
+  return (
+    <ColorImageGridItem
+      image={image}
+      title={title}
+      idx={0}
+      aspectRatio={aspectRatio}
+      priority
+      eager={false}
+    />
+  );
+}
+
+async function ResolvedColorImageTail({
   images,
   options,
   variants,
@@ -365,15 +510,72 @@ async function ResolvedColorCarouselImages({
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const { colorImages } = getPartitionedImagesForSelectedColor(
+  const tailImages = getPartitionedImagesForVariant(
     images,
     options,
     variants,
-    selectedOptions,
+    variantId,
+  ).colorImages.slice(1);
+
+  return <ColorImageGridTail images={tailImages} title={title} aspectRatio={aspectRatio} />;
+}
+
+async function ResolvedFirstColorCarouselImage({
+  defaultImage,
+  images,
+  options,
+  variants,
+  title,
+  aspectRatio,
+  variantIdPromise,
+}: {
+  defaultImage: ImageType;
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const image =
+    getPartitionedImagesForVariant(images, options, variants, variantId).colorImages[0] ??
+    defaultImage;
+
+  return (
+    <ColorImageCarouselItem
+      image={image}
+      title={title}
+      idx={0}
+      aspectRatio={aspectRatio}
+      priority
+      eager={false}
+    />
   );
+}
 
-  if (colorImages.length === 0) return null;
+async function ResolvedColorCarouselImageTail({
+  images,
+  options,
+  variants,
+  title,
+  aspectRatio,
+  variantIdPromise,
+}: {
+  images: ImageType[];
+  options: ProductOption[];
+  variants: ProductVariant[];
+  title: string;
+  aspectRatio: ProductCardAspectRatio;
+  variantIdPromise: Promise<string | undefined>;
+}) {
+  const variantId = await variantIdPromise;
+  const tailImages = getPartitionedImagesForVariant(
+    images,
+    options,
+    variants,
+    variantId,
+  ).colorImages.slice(1);
 
-  return <ColorImageCarouselItems images={colorImages} title={title} aspectRatio={aspectRatio} />;
+  return <ColorImageCarouselTail images={tailImages} title={title} aspectRatio={aspectRatio} />;
 }

@@ -162,19 +162,21 @@ export function getImagesForSelectedColor(
   return [...colorImages, ...sharedImages];
 }
 
-export function getPartitionedImagesForSelectedColor(
+function getColorOption(options: ProductOption[]) {
+  return options.find(
+    (opt) =>
+      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
+      opt.name.toLowerCase().includes("color"),
+  );
+}
+
+function partitionImagesForSelectedColor(
   images: Image[],
   options: ProductOption[],
   variants: ProductVariant[],
   selectedOptions: SelectedOptions,
 ): { colorImages: Image[]; otherImages: Image[] } {
-  // Find the color option using swatch data (locale-agnostic) first, then
-  // fall back to the English name for stores without swatches configured.
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
+  const colorOption = getColorOption(options);
 
   if (!colorOption) return { colorImages: [], otherImages: images };
 
@@ -208,7 +210,6 @@ export function getPartitionedImagesForSelectedColor(
     }
   }
 
-  // Images shared with the selected color must not be excluded.
   const selectedColorUrls = colorToImageUrls.get(selectedColor);
   if (selectedColorUrls) {
     for (const url of selectedColorUrls) {
@@ -231,18 +232,58 @@ export function getPartitionedImagesForSelectedColor(
     }
   }
 
+  return { colorImages, otherImages };
+}
+
+function promoteVariantImage(
+  colorImages: Image[],
+  variants: ProductVariant[],
+  selectedOptions: SelectedOptions,
+): Image[] {
   const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
   const variantImageUrl = selectedVariant?.image?.url;
 
-  if (variantImageUrl) {
-    const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
-    if (variantIdx > 0) {
-      const [variantImage] = colorImages.splice(variantIdx, 1);
-      colorImages.unshift(variantImage);
-    }
-  }
+  if (!variantImageUrl) return colorImages;
 
-  return { colorImages, otherImages };
+  const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
+  if (variantIdx <= 0) return colorImages;
+
+  const nextImages = [...colorImages];
+  const [variantImage] = nextImages.splice(variantIdx, 1);
+  nextImages.unshift(variantImage);
+  return nextImages;
+}
+
+export function getDefaultPartitionedImagesForColor(
+  images: Image[],
+  options: ProductOption[],
+  variants: ProductVariant[],
+): { colorImages: Image[]; otherImages: Image[] } {
+  const selectedOptions = getInitialSelectedOptions(variants);
+  return partitionImagesForSelectedColor(images, options, variants, selectedOptions);
+}
+
+export function getPartitionedImagesForVariant(
+  images: Image[],
+  options: ProductOption[],
+  variants: ProductVariant[],
+  variantId: string | undefined,
+): { colorImages: Image[]; otherImages: Image[] } {
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  return getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions);
+}
+
+export function getPartitionedImagesForSelectedColor(
+  images: Image[],
+  options: ProductOption[],
+  variants: ProductVariant[],
+  selectedOptions: SelectedOptions,
+): { colorImages: Image[]; otherImages: Image[] } {
+  const partitioned = partitionImagesForSelectedColor(images, options, variants, selectedOptions);
+  return {
+    colorImages: promoteVariantImage(partitioned.colorImages, variants, selectedOptions),
+    otherImages: partitioned.otherImages,
+  };
 }
 
 /** When true, the price renders without waiting for searchParams to resolve the variant. */
@@ -269,11 +310,7 @@ export function hasColorImagePartitioning(
   options: ProductOption[],
   variants: ProductVariant[],
 ): boolean {
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
+  const colorOption = getColorOption(options);
 
   if (!colorOption || colorOption.values.length <= 1) return false;
 
@@ -288,11 +325,7 @@ export function getSharedImages(
   options: ProductOption[],
   variants: ProductVariant[],
 ): Image[] {
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
+  const colorOption = getColorOption(options);
 
   if (!colorOption || colorOption.values.length <= 1) return images;
 

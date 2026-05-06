@@ -289,6 +289,33 @@ function Grid({
  * Renders color-specific images as grid items (desktop).
  * Designed to be used inside a Suspense boundary as children of ProductMedia.
  */
+export function ColorImageGridItem({
+  image,
+  title,
+  idx,
+  aspectRatio,
+  priority,
+  eager,
+}: {
+  image: ImageType;
+  title: string;
+  idx: number;
+  aspectRatio: ProductCardAspectRatio;
+  priority: boolean;
+  eager: boolean;
+}) {
+  return (
+    <GridItem
+      item={{ type: "image", image }}
+      title={title}
+      idx={idx}
+      aspectRatio={aspectRatio}
+      priority={priority}
+      eager={eager}
+    />
+  );
+}
+
 export function ColorImageGrid({
   images,
   title,
@@ -299,9 +326,9 @@ export function ColorImageGrid({
   aspectRatio: ProductCardAspectRatio;
 }) {
   return images.map((image, idx) => (
-    <GridItem
+    <ColorImageGridItem
       key={image.url}
-      item={{ type: "image", image }}
+      image={image}
       title={title}
       idx={idx}
       aspectRatio={aspectRatio}
@@ -315,6 +342,43 @@ export function ColorImageGrid({
  * Renders color-specific images as carousel items (mobile).
  * Matches the Carousel item structure for consistent snap-scroll behavior.
  */
+export function ColorImageCarouselItem({
+  image,
+  title,
+  idx,
+  aspectRatio,
+  priority,
+  eager,
+}: {
+  image: ImageType;
+  title: string;
+  idx: number;
+  aspectRatio: ProductCardAspectRatio;
+  priority: boolean;
+  eager: boolean;
+}) {
+  return (
+    <div
+      data-aspect-ratio={aspectRatio}
+      className={cn(
+        "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+        aspectRatioClasses,
+      )}
+    >
+      <Image
+        src={image.url}
+        alt={image.altText || `${title} image ${idx + 1}`}
+        fill
+        className="object-cover"
+        sizes="100vw"
+        priority={priority}
+        loading={priority || eager ? "eager" : "lazy"}
+        draggable={false}
+      />
+    </div>
+  );
+}
+
 export function ColorImageCarouselItems({
   images,
   title,
@@ -324,31 +388,17 @@ export function ColorImageCarouselItems({
   title: string;
   aspectRatio: ProductCardAspectRatio;
 }) {
-  return images.map((image, idx) => {
-    const priority = idx === 0;
-    const eager = idx === 1;
-    return (
-      <div
-        key={image.url}
-        data-aspect-ratio={aspectRatio}
-        className={cn(
-          "relative shrink-0 w-full snap-start snap-always overflow-hidden",
-          aspectRatioClasses,
-        )}
-      >
-        <Image
-          src={image.url}
-          alt={image.altText || `${title} image ${idx + 1}`}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority={priority}
-          loading={priority || eager ? "eager" : "lazy"}
-          draggable={false}
-        />
-      </div>
-    );
-  });
+  return images.map((image, idx) => (
+    <ColorImageCarouselItem
+      key={image.url}
+      image={image}
+      title={title}
+      idx={idx}
+      aspectRatio={aspectRatio}
+      priority={idx === 0}
+      eager={idx === 1}
+    />
+  ));
 }
 
 export function ProductMedia({
