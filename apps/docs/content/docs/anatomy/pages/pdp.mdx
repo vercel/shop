@@ -19,20 +19,12 @@ experimental: {
 }
 
 // app/products/[handle]/page.tsx
-export const unstable_instant = {
-  unstable_samples: [
-    {
-      params: { handle: "__placeholder__" },
-      searchParams: { variant: "1" },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
+export const unstable_instant = true;
 
 export const unstable_prefetch = "force-runtime";
 ```
 
-`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` provides `unstable_samples` with representative parameters so the framework can pre-render the static shell at build time. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
+`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant = true` opts the route into instant navigation validation at the default warning level. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
 
 ## Variant selection
 
