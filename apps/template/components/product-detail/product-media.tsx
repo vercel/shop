@@ -293,22 +293,27 @@ export function ColorImageGrid({
   images,
   title,
   aspectRatio,
+  startIndex = 0,
 }: {
   images: ImageType[];
   title: string;
   aspectRatio: ProductCardAspectRatio;
+  startIndex?: number;
 }) {
-  return images.map((image, idx) => (
-    <GridItem
-      key={image.url}
-      item={{ type: "image", image }}
-      title={title}
-      idx={idx}
-      aspectRatio={aspectRatio}
-      priority={idx === 0}
-      eager={idx === 1}
-    />
-  ));
+  return images.map((image, idx) => {
+    const itemIndex = startIndex + idx;
+    return (
+      <GridItem
+        key={image.url}
+        item={{ type: "image", image }}
+        title={title}
+        idx={itemIndex}
+        aspectRatio={aspectRatio}
+        priority={itemIndex === 0}
+        eager={itemIndex === 1}
+      />
+    );
+  });
 }
 
 /**
@@ -319,14 +324,17 @@ export function ColorImageCarouselItems({
   images,
   title,
   aspectRatio,
+  startIndex = 0,
 }: {
   images: ImageType[];
   title: string;
   aspectRatio: ProductCardAspectRatio;
+  startIndex?: number;
 }) {
   return images.map((image, idx) => {
-    const priority = idx === 0;
-    const eager = idx === 1;
+    const itemIndex = startIndex + idx;
+    const priority = itemIndex === 0;
+    const eager = itemIndex === 1;
     return (
       <div
         key={image.url}
@@ -338,7 +346,7 @@ export function ColorImageCarouselItems({
       >
         <Image
           src={image.url}
-          alt={image.altText || `${title} image ${idx + 1}`}
+          alt={image.altText || `${title} image ${itemIndex + 1}`}
           fill
           className="object-cover"
           sizes="100vw"

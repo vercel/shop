@@ -75,61 +75,75 @@ export async function ProductDetailSection({
           aspectRatio={aspectRatio}
           className="lg:col-span-6"
           desktopSlot={
-            <Suspense
-              fallback={
-                <>
+            <>
+              <Suspense
+                fallback={
                   <Skeleton
                     data-aspect-ratio={aspectRatio}
                     className={cn("w-full rounded-none", aspectRatioClasses)}
                   />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                </>
-              }
-            >
-              <ResolvedColorImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                aspectRatio={aspectRatio}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
+                }
+              >
+                <ResolvedColorImages
+                  images={images}
+                  options={options}
+                  variants={variants}
+                  title={title}
+                  aspectRatio={aspectRatio}
+                  variantIdPromise={variantIdPromise}
+                  mode="first"
+                />
+              </Suspense>
+              <Suspense>
+                <ResolvedColorImages
+                  images={images}
+                  options={options}
+                  variants={variants}
+                  title={title}
+                  aspectRatio={aspectRatio}
+                  variantIdPromise={variantIdPromise}
+                  mode="rest"
+                />
+              </Suspense>
+            </>
           }
           mobileSlot={
-            <Suspense
-              fallback={
-                <div
-                  data-aspect-ratio={aspectRatio}
-                  className={cn(
-                    "relative shrink-0 w-full snap-start snap-always overflow-hidden",
-                    aspectRatioClasses,
-                  )}
-                >
-                  <Skeleton className="size-full rounded-none" />
-                </div>
-              }
-            >
-              <ResolvedColorCarouselImages
-                images={images}
-                options={options}
-                variants={variants}
-                title={title}
-                aspectRatio={aspectRatio}
-                variantIdPromise={variantIdPromise}
-              />
-            </Suspense>
+            <>
+              <Suspense
+                fallback={
+                  <div
+                    data-aspect-ratio={aspectRatio}
+                    className={cn(
+                      "relative shrink-0 w-full snap-start snap-always overflow-hidden",
+                      aspectRatioClasses,
+                    )}
+                  >
+                    <Skeleton className="size-full rounded-none" />
+                  </div>
+                }
+              >
+                <ResolvedColorCarouselImages
+                  images={images}
+                  options={options}
+                  variants={variants}
+                  title={title}
+                  aspectRatio={aspectRatio}
+                  variantIdPromise={variantIdPromise}
+                  mode="first"
+                />
+              </Suspense>
+              <Suspense>
+                <ResolvedColorCarouselImages
+                  images={images}
+                  options={options}
+                  variants={variants}
+                  title={title}
+                  aspectRatio={aspectRatio}
+                  variantIdPromise={variantIdPromise}
+                  mode="rest"
+                />
+              </Suspense>
+            </>
           }
         />
       ) : (
@@ -327,6 +341,7 @@ async function ResolvedColorImages({
   title,
   aspectRatio,
   variantIdPromise,
+  mode,
 }: {
   images: ImageType[];
   options: ProductOption[];
@@ -334,6 +349,7 @@ async function ResolvedColorImages({
   title: string;
   aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
+  mode: "first" | "rest";
 }) {
   const variantId = await variantIdPromise;
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
@@ -343,10 +359,19 @@ async function ResolvedColorImages({
     variants,
     selectedOptions,
   );
+  const visibleImages = mode === "first" ? colorImages.slice(0, 1) : colorImages.slice(1);
+  const startIndex = mode === "first" ? 0 : 1;
 
-  if (colorImages.length === 0) return null;
+  if (visibleImages.length === 0) return null;
 
-  return <ColorImageGrid images={colorImages} title={title} aspectRatio={aspectRatio} />;
+  return (
+    <ColorImageGrid
+      images={visibleImages}
+      title={title}
+      aspectRatio={aspectRatio}
+      startIndex={startIndex}
+    />
+  );
 }
 
 async function ResolvedColorCarouselImages({
@@ -356,6 +381,7 @@ async function ResolvedColorCarouselImages({
   title,
   aspectRatio,
   variantIdPromise,
+  mode,
 }: {
   images: ImageType[];
   options: ProductOption[];
@@ -363,6 +389,7 @@ async function ResolvedColorCarouselImages({
   title: string;
   aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
+  mode: "first" | "rest";
 }) {
   const variantId = await variantIdPromise;
   const selectedOptions = computeInitialSelectedOptions(variants, variantId);
@@ -372,8 +399,17 @@ async function ResolvedColorCarouselImages({
     variants,
     selectedOptions,
   );
+  const visibleImages = mode === "first" ? colorImages.slice(0, 1) : colorImages.slice(1);
+  const startIndex = mode === "first" ? 0 : 1;
 
-  if (colorImages.length === 0) return null;
+  if (visibleImages.length === 0) return null;
 
-  return <ColorImageCarouselItems images={colorImages} title={title} aspectRatio={aspectRatio} />;
+  return (
+    <ColorImageCarouselItems
+      images={visibleImages}
+      title={title}
+      aspectRatio={aspectRatio}
+      startIndex={startIndex}
+    />
+  );
 }
