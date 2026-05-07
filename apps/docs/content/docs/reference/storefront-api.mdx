@@ -92,7 +92,7 @@ import { PRODUCT_FRAGMENT } from "../fragments";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 export async function getProduct(handle: string, locale: string = defaultLocale) {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
 
@@ -112,14 +112,14 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
 
 Key elements:
 
-1. **`"use cache: remote"`** - opts the function into Next.js request-level caching
+1. **`"use cache"`** - uses the local Next.js cache for stable, low-cardinality reads
 2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
 3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
 4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
-All read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. Tags follow a hierarchy:
+Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, sitemap, and recommendation queries. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
 
 | Tag pattern | Scope |
 |-------------|-------|

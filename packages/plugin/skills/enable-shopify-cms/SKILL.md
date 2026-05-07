@@ -55,7 +55,7 @@ import { shopifyFetch } from "@/lib/shopify/client";
 import type { Homepage, MarketingPage } from "@/lib/types";
 
 export async function getHomepage(locale: string): Promise<Homepage | null> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("cms-content");
   // Query cms_homepage metaobject, transform to Homepage type
@@ -65,7 +65,7 @@ export async function getMarketingPage(
   slug: string,
   locale: string,
 ): Promise<MarketingPage | null> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("cms-content");
   // Query cms_page metaobject by slug, transform to MarketingPage type
@@ -74,7 +74,7 @@ export async function getMarketingPage(
 export async function getAllMarketingPageSlugs(): Promise<
   Array<{ slug: string; updatedAt: string }>
 > {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("cms-content");
   // Query all cms_page metaobjects, return slugs

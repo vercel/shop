@@ -22,7 +22,7 @@ export async function getCollections({
   limit = 250,
   locale = defaultLocale,
 }: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("collections");
 
@@ -66,7 +66,7 @@ export async function getCollection(
   handle: string,
   locale: string = defaultLocale,
 ): Promise<Collection | undefined> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);
 
