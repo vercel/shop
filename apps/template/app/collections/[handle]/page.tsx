@@ -76,17 +76,7 @@ export async function generateMetadata({
   };
 }
 
-export const unstable_instant = {
-  samples: [
-    {
-      params: { handle: "__placeholder__" },
-      searchParams: {
-        sort: null,
-      },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
+export const unstable_instant = true;
 
 export const unstable_prefetch = "force-runtime";
 

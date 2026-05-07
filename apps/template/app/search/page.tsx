@@ -64,18 +64,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
-export const unstable_instant = {
-  samples: [
-    {
-      searchParams: {
-        q: "__placeholder__",
-        collection: null,
-        sort: null,
-      },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
+export const unstable_instant = true;
 
 export const unstable_prefetch = "force-runtime";
 
