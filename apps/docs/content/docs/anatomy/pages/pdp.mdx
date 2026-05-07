@@ -63,7 +63,7 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
+When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing `?variant` does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
 
 1. Identifies the color option via swatch data or option name
 2. Collects variant images assigned to each color
