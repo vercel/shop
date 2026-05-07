@@ -51,7 +51,8 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 ### 5. Apply cache rules to reads
 
-- Read operations should include `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
+- Stable, low-cardinality reads should include `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`.
+- High-cardinality reads that depend on search, filters, sort, or cursors should use `"use cache: remote"` instead.
 - Pick existing cache tags when the data belongs to an established surface.
 - Mutations should not use read-cache directives.
 - Every cart mutation must call `invalidateCartCache()` after the write succeeds.
@@ -88,7 +89,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 ### Add a new read operation
 
 1. Define the GraphQL query using existing fragments where possible.
-2. Add `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
+2. Add `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
 3. Call `shopifyFetch` with the query and variables object.
 4. Transform the response before returning it.
 

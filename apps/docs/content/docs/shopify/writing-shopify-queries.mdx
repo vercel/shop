@@ -74,7 +74,7 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { shopifyFetch } from "../client";
 
 export async function getPrivacyPolicy(locale: string = defaultLocale) {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("policies");
 
@@ -93,9 +93,10 @@ export async function getPrivacyPolicy(locale: string = defaultLocale) {
 
 Key points:
 
-- **`"use cache: remote"`** enables Next.js caching for the function
+- **`"use cache"`** uses the local Next.js cache for stable, low-cardinality reads
 - **`cacheLife("max")`** caches until you manually invalidate
 - **`cacheTag("policies")`** lets you invalidate with `revalidateTag("policies")` later
+- Use `"use cache: remote"` instead for high-cardinality reads that depend on search, filters, sort, or cursors
 - Always pass `locale` and extract `country`/`language` from it
 
 ## 5. Add a transform (if needed)
@@ -175,7 +176,7 @@ Expose mutations to the client through server actions in `components/cart/action
 - [ ] Operation name in the query string matches the `operation` parameter
 - [ ] Variables passed as an object, never interpolated into the query
 - [ ] `@inContext` directive included if data is locale-sensitive
-- [ ] `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
+- [ ] `"use cache"` or `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
 - [ ] Transform added if the Shopify response shape needs mapping
 - [ ] Components import domain types from `lib/types`, not Shopify response types
 - [ ] Cart mutations call `invalidateCartCache()`

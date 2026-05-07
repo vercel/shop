@@ -65,12 +65,12 @@ const items = menu?.items ?? footerItems;
 
 Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` already accepts `MenuItem[]`. Keep the `footerItems` import as the fallback.
 
-The `Footer` callsite in `app/layout.tsx` (or wherever it is rendered) already passes `locale`; if it is not wrapped in `<Suspense>`, the menu fetch will block layout render — that is acceptable since `getMenu` is cached with `"use cache: remote"` and `cacheLife("max")`. Wrap in `<Suspense>` only if you specifically want the rest of the page to stream ahead of the footer.
+The `Footer` callsite in `app/layout.tsx` (or wherever it is rendered) already passes `locale`; if it is not wrapped in `<Suspense>`, the menu fetch will block layout render — that is acceptable since `getMenu` is cached with `"use cache"` and `cacheLife("max")`. Wrap in `<Suspense>` only if you specifically want the rest of the page to stream ahead of the footer.
 
 ---
 
 ## Guardrails
 
-- The `getMenu()` operation in `lib/shopify/operations/menu.ts` already handles caching (`"use cache: remote"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
+- The `getMenu()` operation in `lib/shopify/operations/menu.ts` already handles caching (`"use cache"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
 - Always preserve the `navItems` / `footerItems` fallback so a missing or empty Shopify menu doesn't leave the user with a blank nav or footer.
 - External links (URLs starting with `http`) are handled by the existing `MenuLink` helpers in each component — no change needed.

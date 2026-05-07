@@ -87,7 +87,7 @@ export async function getMenu(
   handle: string,
   _locale: string = defaultLocale,
 ): Promise<Menu | null> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("menus");
 
