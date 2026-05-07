@@ -95,6 +95,7 @@ function Carousel({
   children?: React.ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [itemCount, setItemCount] = useState(mediaItems.length);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const prevMediaRef = useRef<string>("");
   const t = useTranslations("product");
@@ -121,20 +122,30 @@ function Carousel({
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const syncIndex = () => {
-      const newIndex = Math.min(
-        Math.max(0, Math.round(container.scrollLeft / container.offsetWidth)),
-        mediaItems.length - 1,
-      );
+    // Variant/video items arrive via slot children, so count the rendered DOM, not just mediaItems.
+    const sync = () => {
+      const width = container.offsetWidth;
+      if (width === 0) return;
+      const total = Math.max(1, container.children.length);
+      const newIndex = Math.min(Math.max(0, Math.round(container.scrollLeft / width)), total - 1);
+      setItemCount(total);
       setSelectedIndex(newIndex);
     };
 
-    // Sync indicator from actual scroll position on mount / Activity re-activation
-    syncIndex();
+    sync();
 
-    container.addEventListener("scroll", syncIndex, { passive: true });
-    return () => container.removeEventListener("scroll", syncIndex);
-  }, [mediaItems.length]);
+    container.addEventListener("scroll", sync, { passive: true });
+    const resizeObserver = new ResizeObserver(sync);
+    resizeObserver.observe(container);
+    const mutationObserver = new MutationObserver(sync);
+    mutationObserver.observe(container, { childList: true });
+
+    return () => {
+      container.removeEventListener("scroll", sync);
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div className="grid gap-5">
@@ -174,11 +185,11 @@ function Carousel({
       </div>
 
       {/* Dot indicators – reserve space but hide when there's only one image */}
-      <div className={cn("flex justify-center gap-2", mediaItems.length <= 1 && "invisible")}>
-        {mediaItems.map((item, idx) => (
+      <div className={cn("flex justify-center gap-2", itemCount <= 1 && "invisible")}>
+        {Array.from({ length: itemCount }, (_, idx) => (
           <button
             type="button"
-            key={mediaKey(item)}
+            key={idx}
             onClick={() => scrollToImage(idx)}
             className={cn(
               "h-1.5 rounded-full transition-all",

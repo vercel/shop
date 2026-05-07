@@ -38,7 +38,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
 `;
 
 export async function getProduct(handle: string, locale: string = defaultLocale) {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);
@@ -311,32 +311,33 @@ export function buildProductFiltersFromParams(
   return filters;
 }
 
-export async function getCatalogProducts(params: {
+type CatalogProductsResult = {
+  products: ProductCard[];
+  pageInfo: PageInfo;
+};
+
+type CatalogProductsParams = {
+  limit?: number;
+  locale?: string;
+};
+
+type FilteredCatalogProductsParams = CatalogProductsParams & {
   query?: string;
   collection?: string;
   sortKey?: string;
-  limit?: number;
   cursor?: string;
   filters?: ProductFilter[];
-  locale?: string;
-}): Promise<{
-  products: ProductCard[];
-  pageInfo: PageInfo;
-}> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
+};
 
-  const {
-    query,
-    collection,
-    sortKey: rawSortKey = "best-matches",
-    limit = 50,
-    cursor,
-    filters = [],
-    locale = defaultLocale,
-  } = params;
-
+async function fetchCatalogProducts({
+  query,
+  collection,
+  sortKey: rawSortKey = "best-matches",
+  limit = 50,
+  cursor,
+  filters = [],
+  locale = defaultLocale,
+}: FilteredCatalogProductsParams): Promise<CatalogProductsResult> {
   const sortConfig = CATALOG_SORT_KEY_MAP[rawSortKey] ?? CATALOG_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -375,6 +376,26 @@ export async function getCatalogProducts(params: {
     products: shopifyProducts.map(transformShopifyProductCard),
     pageInfo: data.products.pageInfo,
   };
+}
+
+export async function getCatalogProducts(
+  params: CatalogProductsParams,
+): Promise<CatalogProductsResult> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("products");
+
+  return fetchCatalogProducts(params);
+}
+
+export async function getFilteredCatalogProducts(
+  params: FilteredCatalogProductsParams,
+): Promise<CatalogProductsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  return fetchCatalogProducts(params);
 }
 
 export async function getSearchFacets(params: {
@@ -630,7 +651,7 @@ export async function getProductRecommendations(
   handle: string,
   locale: string = defaultLocale,
 ): Promise<ProductCard[]> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `recommendations-${handle}`);
 
@@ -703,7 +724,7 @@ export async function getProductById(
   id: string,
   locale: string = defaultLocale,
 ): Promise<ProductDetails> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `product-id-${id}`);
 
@@ -732,7 +753,7 @@ export async function getProductsByIds(
   ids: string[],
   locale: string = defaultLocale,
 ): Promise<ProductCard[]> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products");
 
@@ -762,7 +783,7 @@ export async function getProductsByHandles(
   handles: string[],
   locale: string = defaultLocale,
 ): Promise<ProductCard[]> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products");
 

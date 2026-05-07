@@ -75,65 +75,17 @@ next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages.
 
 ### D. Don't swap `next/link` to next-intl's `<Link>`
 
-The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
-
-```
-Error: Route "/[locale]/..." accessed [...] which is not defined in the `samples` of `unstable_instant`.
-```
-
-or a generic "blocking route" prerender failure.
+The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that can turn otherwise static shells into blocking dynamic work and trigger instant-navigation warnings.
 
 **Do this instead:** keep `next/link` and let `proxy.ts` middleware redirect unprefixed paths (`/products/foo` → `/en-US/products/foo`). Internal links work; there's a one-time middleware redirect on click for unprefixed hrefs. Trade a few redirects for a clean prerender.
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### E. `unstable_instant` samples need `locale` in `params`
+### E. Keep `unstable_instant` simple
 
-Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
+Leave existing `unstable_instant = true` exports as-is. The template uses Next's default instant navigation behavior, which keeps development warnings without requiring route samples during this i18n rollout.
 
-```
-Error: Route "/[locale]/products/[handle]" accessed root param "locale"
-       which is not defined in the `samples` of `unstable_instant`.
-```
-
-Fix:
-
-```ts
-export const unstable_instant = {
-  samples: [
-    {
-      params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
-      searchParams: { variant: "1" },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
-```
-
-### F. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
-
-This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
-
-```ts
-samples: [
-  {
-    params: { locale: "en-US", handle: "__placeholder__" },
-    searchParams: { variant: "1" },
-    cookies: [{ name: "shopify_cartId", value: null }],
-    headers: [["x-vercel-ip-postal-code", null]], // ← add this
-  },
-],
-```
-
-`null` means "header may be absent." If you forget, the build error is explicit:
-
-```
-Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
-       defined in the `samples` of `unstable_instant`. Add it to the
-       sample's `headers` array, or `["...", null]` if it should be absent.
-```
-
-### G. `redirect()` from next-intl doesn't return `never`
+### F. `redirect()` from next-intl doesn't return `never`
 
 ```ts
 // BREAKS: TS doesn't narrow `session` after redirect
@@ -346,21 +298,9 @@ export const generateStaticParams = async () => {
 };
 ```
 
-### Step 12: Patch `unstable_instant` samples
+### Step 12: Keep `unstable_instant` simple
 
-Walk every route file that exports `unstable_instant` and add `locale` to each sample's `params`:
-
-```ts
-params: { locale: "en-US", handle: "__placeholder__" }
-```
-
-If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
-
-```ts
-headers: [["x-vercel-ip-postal-code", null]]
-```
-
-(See "Cache Components compatibility E/F" at the top.)
+Leave existing `unstable_instant = true` exports as-is. Do not add route samples during the i18n rollout.
 
 ### Step 13: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
 

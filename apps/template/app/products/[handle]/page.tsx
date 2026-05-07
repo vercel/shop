@@ -63,17 +63,7 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export const unstable_instant = {
-  samples: [
-    {
-      params: { handle: "__placeholder__" },
-      searchParams: { variant: "1" },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
-
-export const unstable_prefetch = "force-runtime";
+export const unstable_instant = true;
 
 export default async function ProductPage({
   params,

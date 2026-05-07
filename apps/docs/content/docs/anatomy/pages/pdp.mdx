@@ -10,7 +10,7 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP uses a rendering strategy combining `unstable_instant`, `unstable_prefetch`, and `experimental.partialFallbacks`:
+The PDP uses a rendering strategy combining `unstable_instant` and `experimental.partialFallbacks`:
 
 ```ts
 // next.config.ts
@@ -19,20 +19,10 @@ experimental: {
 }
 
 // app/products/[handle]/page.tsx
-export const unstable_instant = {
-  samples: [
-    {
-      params: { handle: "__placeholder__" },
-      searchParams: { variant: "1" },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
-
-export const unstable_prefetch = "force-runtime";
+export const unstable_instant = true;
 ```
 
-`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant` provides `samples` with representative parameters so the framework can pre-render the static shell at build time. `unstable_prefetch = "force-runtime"` tells Next.js to prefetch dynamic data at request time rather than statically.
+`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant = true` opts the route into instant navigation validation at the default warning level.
 
 ## Variant selection
 
@@ -73,7 +63,7 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
+When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing `?variant` does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
 
 1. Identifies the color option via swatch data or option name
 2. Collects variant images assigned to each color

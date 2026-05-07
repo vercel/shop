@@ -77,24 +77,10 @@ export async function ProductDetailSection({
           desktopSlot={
             <Suspense
               fallback={
-                <>
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                  <Skeleton
-                    data-aspect-ratio={aspectRatio}
-                    className={cn("w-full rounded-none", aspectRatioClasses)}
-                  />
-                </>
+                <Skeleton
+                  data-aspect-ratio={aspectRatio}
+                  className={cn("w-full rounded-none", aspectRatioClasses)}
+                />
               }
             >
               <ResolvedColorImages

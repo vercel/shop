@@ -35,7 +35,7 @@ const GET_PRODUCT_HANDLES_QUERY = `
 const PAGE_SIZE = 250;
 
 export async function getAllProductHandles(): Promise<ProductHandleNode[]> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products");
 
