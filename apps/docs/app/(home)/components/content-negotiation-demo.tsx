@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrowserChrome } from "@/components/storefront-hero/browser-chrome";
 
 const CURL_COMMAND =
-  'curl -H "Accept: text/markdown" https://vercel.shop/en-US/products/classic-tee';
+  'curl -H "Accept: text/markdown" https://vercel-shop.labs.vercel.dev/en-US/products/classic-tee';
 
 const MARKDOWN_RESPONSE = `# Classic Tee
 
