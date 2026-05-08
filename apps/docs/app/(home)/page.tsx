@@ -21,9 +21,7 @@ import { CTA } from "./components/cta";
 import { StorefrontHero } from "@/components/storefront-hero";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
 import { Hero } from "./components/hero";
-import { LogosMarquee } from "./components/logos-marquee";
 import { OneTwoSection } from "./components/one-two-section";
-import { ShopifyCommerce } from "./components/shopify-commerce";
 
 const title = siteName;
 const description = homeDescription;
@@ -108,7 +106,7 @@ const HomePage = () => (
         <StorefrontHero />
       </CenteredSection>
       <OneTwoSection
-        description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
+        description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add multi-region, CMS, auth, and more."
         leftClassName="xl:pt-[52px]"
         title="Agentic development"
       >
@@ -132,8 +130,6 @@ const HomePage = () => (
       >
         <ContentNegotiationDemo />
       </OneTwoSection>
-      <ShopifyCommerce />
-      <LogosMarquee />
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
         primary={{

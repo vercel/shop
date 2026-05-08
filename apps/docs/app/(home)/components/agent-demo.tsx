@@ -14,20 +14,20 @@ interface Skill {
 
 const skills: Skill[] = [
   {
-    label: "Markets",
-    command: "/vercel-shop:enable-shopify-markets",
+    label: "Multi-region",
+    command: "/vercel-shop:enable-multi-region",
     logs: [
       { icon: "edit", text: "Updated next.config.ts with i18n routing" },
       { icon: "add", text: "Added locale files: de-DE, fr-FR, es-ES, nl-NL" },
       { icon: "edit", text: "Wrapped routes with [locale] segment" },
     ],
-    done: "Shopify Markets enabled — 4 locales configured",
+    done: "Multi-region enabled — 4 locales configured",
   },
   {
     label: "Auth",
-    command: "/vercel-shop:enable-shopify-auth",
+    command: "/vercel-shop:enable-auth",
     logs: [
-      { icon: "add", text: "Installed better-auth with Shopify OIDC" },
+      { icon: "add", text: "Installed better-auth with OIDC" },
       {
         icon: "add",
         text: "Created account pages: profile, orders, addresses",
@@ -38,13 +38,13 @@ const skills: Skill[] = [
   },
   {
     label: "CMS",
-    command: "/vercel-shop:enable-shopify-cms",
+    command: "/vercel-shop:enable-cms",
     logs: [
-      { icon: "add", text: "Created cms_homepage metaobject definition" },
-      { icon: "add", text: "Added GraphQL queries for metaobjects" },
+      { icon: "add", text: "Created homepage content model" },
+      { icon: "add", text: "Added queries for marketing content" },
       { icon: "edit", text: "Wired MarketingPageRenderer to CMS data" },
     ],
-    done: "Shopify CMS enabled — homepage connected",
+    done: "CMS enabled — homepage connected",
   },
 ];
 
