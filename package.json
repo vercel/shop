@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "turbo": "2.9.9"
+    "turbo": "2.9.12"
   },
   "devDependencies": {
     "@changesets/changelog-github": "0.7.0",
