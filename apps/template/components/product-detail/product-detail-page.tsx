@@ -5,7 +5,10 @@ import {
   type ProductCardAspectRatio,
 } from "@/components/product-card/components";
 import { ProductSchema } from "@/components/product-detail/schema";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
+import {
+  RelatedProductsSection,
+  RelatedProductsSectionSkeleton,
+} from "@/components/product/related-products-section";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -51,6 +54,7 @@ function ProductPageFallback({ aspectRatio }: { aspectRatio: ProductCardAspectRa
           <Skeleton className="h-32 w-full" />
         </div>
       </div>
+      <RelatedProductsSectionSkeleton />
     </Sections>
   );
 }
