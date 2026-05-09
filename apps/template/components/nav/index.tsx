@@ -14,34 +14,31 @@ export async function Nav({ locale }: { locale: string }) {
   const items = navItems;
 
   return (
-    <>
-      <div className="h-8 bg-background pt-[env(safe-area-inset-top,0px)]" />
-      <nav
-        className="sticky top-0 z-30 w-full bg-background transition-shadow duration-250"
-        id="nav-outer"
-      >
-        <div className="mx-auto flex h-16 items-center gap-2.5 md:gap-5 px-5 lg:px-10">
-          <MobileMenu items={items} />
+    <nav
+      className="sticky top-0 z-30 w-full bg-background pt-[env(safe-area-inset-top,0px)] transition-shadow duration-250"
+      id="nav-outer"
+    >
+      <div className="mx-auto flex h-16 items-center gap-2.5 md:gap-5 px-5 lg:px-10">
+        <MobileMenu items={items} />
 
-          <Link className="flex items-center shrink-0" href="/">
-            <span className="text-xl font-semibold leading-4 tracking-tight">Vercel Shop</span>
-          </Link>
+        <Link className="flex items-center shrink-0" href="/">
+          <span className="text-xl font-semibold leading-4 tracking-tight">Vercel Shop</span>
+        </Link>
 
-          <QuickLinks items={items} />
+        <QuickLinks items={items} />
 
-          <div className="flex items-center gap-5 ml-auto">
-            <SearchModal />
-            {isAuthEnabled && (
-              <Suspense fallback={<NavAccountFallback />}>
-                <NavAccount />
-              </Suspense>
-            )}
-            <Suspense fallback={<CartIconFallback />}>
-              <CartIcon />
+        <div className="flex items-center gap-5 ml-auto">
+          <SearchModal />
+          {isAuthEnabled && (
+            <Suspense fallback={<NavAccountFallback />}>
+              <NavAccount />
             </Suspense>
-          </div>
+          )}
+          <Suspense fallback={<CartIconFallback />}>
+            <CartIcon />
+          </Suspense>
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }

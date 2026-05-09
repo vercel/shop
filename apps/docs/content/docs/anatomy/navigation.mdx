@@ -4,7 +4,7 @@ description: The storefront navigation system - navbar, quick links, mobile bott
 type: guide
 ---
 
-The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. By default, navigation links are hardcoded with a multi-column Shop menu and placeholder footer groups. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch menus from Shopify.
+The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. By default, navigation links are hardcoded. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch menus from Shopify.
 
 ## Navbar
 
@@ -12,7 +12,7 @@ A sticky header (`z-30`) that composes the logo/brand link, quick links, and the
 
 ## Quick links
 
-A horizontal link bar with hardcoded defaults: `Shop` and `About`. `Shop` links to `/search` and includes a five-column placeholder mega menu with product links at nested levels. The component already accepts a Shopify-shaped `MenuItem[]` and renders up to three levels via an inline hover panel; the `enable-shopify-menus` skill swaps the data source over to a Shopify Navigation menu. Hidden on mobile (`md:flex`).
+A horizontal link bar with hardcoded defaults: `Shop` and `About`. The component already accepts a Shopify-shaped `MenuItem[]` and renders up to three levels via an inline hover panel; the `enable-shopify-menus` skill swaps the data source over to a Shopify Navigation menu. Hidden on mobile (`md:flex`).
 
 ## Mobile menu
 
@@ -28,7 +28,7 @@ The cart icon is a server/client component pair. The server component reads the 
 
 ## Footer
 
-By default the footer renders placeholder link columns, a copyright notice, and optional social links. The `enable-shopify-menus` skill replaces the fallback footer columns with Shopify-powered headings and links.
+By default the footer renders only a copyright notice. The `enable-shopify-menus` skill adds Shopify-powered footer columns with headings and links.
 
 ## Mobile bottom bar
 
@@ -50,6 +50,6 @@ A fixed bar at the bottom of the viewport. It renders only when it has children 
 | `components/nav/cart.tsx` | Cart icon server component |
 | `components/nav/cart-client.tsx` | Cart icon with quantity badge |
 | `components/nav/search-modal.tsx` | Search icon and modal dialog |
-| `components/footer/index.tsx` | Footer columns, copyright, and social links slot |
+| `components/footer/index.tsx` | Footer (copyright only by default) |
 | `components/footer/social-links.tsx` | Social media icon links |
 | `components/action-bar/index.tsx` | Bottom action bar (agent button slot) |
