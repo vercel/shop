@@ -15,7 +15,7 @@ export const AskAIButton = ({ className, onClick }: AskAIButtonProps) => {
   return (
     <Button
       className={cn(
-        "shadow-none font-medium text-gray-1000 bg-background-100 hover:bg-gray-100 hover:text-gray-1000",
+        "font-medium text-gray-1000 bg-background-100 hover:bg-gray-100 hover:text-gray-1000",
         className,
       )}
       onClick={() => {
