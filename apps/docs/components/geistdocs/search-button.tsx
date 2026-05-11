@@ -19,7 +19,7 @@ export const SearchButton = ({ className, onClick }: SearchButtonProps) => {
   return (
     <Button
       className={cn(
-        "group justify-between gap-8 pr-1.5 font-normal text-gray-900 shadow-none hover:bg-gray-100 hover:text-gray-1000 lg:h-8 lg:w-[150px] lg:bg-background-200 lg:hover:bg-background-200",
+        "group justify-between gap-8 pr-1.5 font-normal text-gray-900 hover:bg-gray-100 hover:text-gray-1000 lg:h-8 lg:w-[150px] lg:bg-background-200 lg:hover:bg-background-200",
         "h-10",
         className,
       )}

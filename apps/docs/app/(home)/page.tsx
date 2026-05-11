@@ -69,8 +69,8 @@ const HomePage = () => (
           <Link href="/docs">View Documentation</Link>
         </Button>
         <Button asChild className="h-12 w-fit rounded-full px-5">
-          <Link href="https://vercel.com/contact/sales" target="_blank">
-            Talk to an expert
+          <Link href="https://template.vercel.shop/" target="_blank">
+            Go to Demo
           </Link>
         </Button>
       </div>
@@ -137,8 +137,8 @@ const HomePage = () => (
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
         primary={{
-          href: "https://vercel.com/contact/sales",
-          label: "Talk to an Expert",
+          href: "https://template.vercel.shop/",
+          label: "Go to Demo",
           target: "_blank",
         }}
         secondary={{ href: "/docs", label: "View Documentation" }}
