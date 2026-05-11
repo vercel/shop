@@ -51,7 +51,7 @@ export function ColorPicker({
           const swatch = (
             <div
               className={cn(
-                "aspect-square w-full rounded-lg transition-all overflow-hidden",
+                "aspect-square w-full rounded-lg transition-all duration-200 overflow-hidden",
                 isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
             >
@@ -75,7 +75,7 @@ export function ColorPicker({
           const label = (
             <span
               className={cn(
-                "text-sm font-medium transition-opacity text-center",
+                "text-sm font-medium transition-opacity duration-200 text-center",
                 isSelected ? "text-foreground" : "text-foreground/50",
               )}
             >
@@ -87,7 +87,7 @@ export function ColorPicker({
             return (
               <span
                 key={value.id}
-                className="flex flex-col items-center gap-2 opacity-40 cursor-not-allowed"
+                className="flex flex-col items-center gap-2 opacity-40 cursor-not-allowed transition-opacity duration-200 starting:opacity-0"
                 aria-label={`${option.name}: ${value.name} (unavailable)`}
               >
                 {swatch}
@@ -101,7 +101,7 @@ export function ColorPicker({
               key={value.id}
               href={href}
               scroll={false}
-              className="flex flex-col items-center gap-2"
+              className="flex flex-col items-center gap-2 transition-opacity duration-200 starting:opacity-0"
               aria-label={`Select ${option.name}: ${value.name}`}
             >
               {swatch}

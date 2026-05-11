@@ -40,7 +40,7 @@ export function OptionPicker({
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "px-5 py-2 text-sm font-medium rounded-lg border transition-all",
+            "px-5 py-2 text-sm font-medium rounded-lg border transition-all duration-200 starting:opacity-0",
             isSelected
               ? "border-foreground text-foreground"
               : "border-border text-foreground/50 hover:border-foreground/50",
