@@ -40,9 +40,9 @@ export function OptionPicker({
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "px-5 py-2 text-sm font-medium rounded-lg border transition-all duration-200 starting:opacity-0",
+            "px-5 py-2 text-sm font-medium rounded-lg border transition-all duration-200",
             isSelected
-              ? "border-foreground text-foreground"
+              ? "border-foreground text-foreground starting:opacity-0"
               : "border-border text-foreground/50 hover:border-foreground/50",
             !isAvailable && "opacity-40 cursor-not-allowed line-through",
           );

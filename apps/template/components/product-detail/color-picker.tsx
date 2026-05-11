@@ -87,7 +87,10 @@ export function ColorPicker({
             return (
               <span
                 key={value.id}
-                className="flex flex-col items-center gap-2 opacity-40 cursor-not-allowed transition-opacity duration-200 starting:opacity-0"
+                className={cn(
+                  "flex flex-col items-center gap-2 opacity-40 cursor-not-allowed",
+                  isSelected && "transition-opacity duration-200 starting:opacity-0",
+                )}
                 aria-label={`${option.name}: ${value.name} (unavailable)`}
               >
                 {swatch}
@@ -101,7 +104,10 @@ export function ColorPicker({
               key={value.id}
               href={href}
               scroll={false}
-              className="flex flex-col items-center gap-2 transition-opacity duration-200 starting:opacity-0"
+              className={cn(
+                "flex flex-col items-center gap-2",
+                isSelected && "transition-opacity duration-200 starting:opacity-0",
+              )}
               aria-label={`Select ${option.name}: ${value.name}`}
             >
               {swatch}
