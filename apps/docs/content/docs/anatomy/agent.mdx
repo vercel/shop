@@ -91,6 +91,16 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 - Chat history and draft input persisted to localStorage (`template-agent-chat:v1`) until cleared
 - Click-outside and Escape to minimize
 
+## Abuse protection
+
+`/api/chat` runs three checks before any model call or cart write:
+
+- **Vercel BotID** - `withBotId()` wraps `next.config.ts`, `initBotId()` runs in `instrumentation-client.ts`, and `checkBotId()` returns 403 in the route handler when a bot is detected
+- **Rate limit** - a per-IP sliding window log (20 requests / 60s) returns 429 with `Retry-After`. `lib/agent/rate-limit.ts` stores recent request timestamps in Vercel Runtime Cache via `getCache` from `@vercel/functions`. The cache is regional and eventually consistent, so concurrent requests can over-admit by a small constant — fine for abuse mitigation, not exact accounting
+- **Token cap** - the `ToolLoopAgent` defaults pin `maxOutputTokens: 8192`
+
+Bot and rate-limit checks run before `request.json()` and before any Shopify cart is created, so a flood of bot traffic does not poison cart records or burn gateway spend.
+
 ## Configuration
 
 The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environment variable, which hides the agent button from the storefront.
@@ -99,13 +109,14 @@ The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environmen
 
 | File | Purpose |
 |------|---------|
-| `app/api/chat/route.ts` | Chat endpoint - page context resolution, cart initialization, streaming |
-| `lib/agent/agent.ts` | ToolLoopAgent creation with model, tools, and system prompt |
-| `lib/agent/prompt.ts` | Dynamic system prompt with page context and UI catalog rules |
-| `lib/agent/context.ts` | AsyncLocalStorage context (chatId, user, cart, page) |
+| `app/api/chat/route.ts` | Chat endpoint - BotID + rate limit, page context resolution, cart initialization, streaming |
+| `instrumentation-client.ts` | `initBotId()` registers `/api/chat` as a protected route |
+| `lib/agent/rate-limit.ts` | Per-IP fixed-window rate limit primitive |
+| `lib/agent/server.ts` | ToolLoopAgent creation, `maxOutputTokens` cap, dynamic system prompt, and AsyncLocalStorage context (chatId, user, cart, page) |
+| `lib/agent/index.ts` | json-render catalog schema definitions |
 | `lib/agent/tools/` | 11 tool implementations using Shopify operations |
-| `lib/agent/ui/catalog.ts` | json-render catalog schema definitions |
 | `components/agent/registry.tsx` | Generative UI component implementations |
-| `components/agent/agent.tsx` | Chat panel with messages, input, and chain-of-thought |
+| `components/agent/agent-panel.tsx` | Chat panel with messages, input, and chain-of-thought |
+| `components/agent/client.tsx` | Client-only dynamic import wrapper for `AgentPanel` |
 | `components/agent/agent-button.tsx` | Toggle button in bottom bar |
 | `components/agent/cart-reconciler.tsx` | Syncs agent cart mutations to global cart context |

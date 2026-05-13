@@ -5,8 +5,10 @@ import {
   createUIMessageStreamResponse,
   safeValidateUIMessages,
 } from "ai";
+import { checkBotId } from "botid/server";
 import { cookies } from "next/headers";
 
+import { getRequestIp, rateLimit } from "@/lib/agent/rate-limit";
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
@@ -84,6 +86,19 @@ async function resolvePageContext(
 }
 
 export async function POST(request: Request) {
+  const bot = await checkBotId();
+  if (bot.isBot) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const limit = await rateLimit(getRequestIp(request.headers));
+  if (!limit.ok) {
+    return Response.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
+    );
+  }
+
   const body = await request.json();
   const store = await cookies();
   const { messages, chatId } = body;
