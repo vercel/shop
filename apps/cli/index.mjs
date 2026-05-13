@@ -2,23 +2,36 @@
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { get } from 'node:https';
 import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
 export const NO_TEMPLATE_FLAG = '--no-template';
 export const DEFAULT_PROJECT_NAME = 'my-shop';
+export const TEMPLATE_TARBALL_URL =
+  'https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main';
+export const TEMPLATE_TARBALL_PREFIX = 'shop-main/apps/template';
 
-const PACKAGE_MANAGER_FLAGS = ['--use-pnpm', '--use-npm', '--use-yarn', '--use-bun'];
-const flagsWithValues = new Set(['--import-alias']);
+const PACKAGE_MANAGER_FLAGS = {
+  '--use-bun': 'bun',
+  '--use-npm': 'npm',
+  '--use-pnpm': 'pnpm',
+  '--use-yarn': 'yarn',
+};
+const INTERNAL_FLAGS = new Set([NO_TEMPLATE_FLAG, ...Object.keys(PACKAGE_MANAGER_FLAGS)]);
+
 const pluginInstalls = [
   ['vercel/shop', '--scope', 'project', '--yes'],
   ['vercel/vercel-plugin', '--scope', 'project', '--yes'],
   ['Shopify/shopify-ai-toolkit', '--scope', 'project', '--yes'],
 ];
 
-export function hasExplicitPackageManagerFlag(args) {
-  return args.some((arg) => PACKAGE_MANAGER_FLAGS.includes(arg));
+export function explicitPackageManager(args) {
+  for (const arg of args) {
+    if (PACKAGE_MANAGER_FLAGS[arg]) return PACKAGE_MANAGER_FLAGS[arg];
+  }
+  return null;
 }
 
 export function detectPackageManager({ userAgent = '', execPath = '' } = {}) {
@@ -35,67 +48,11 @@ export function detectPackageManager({ userAgent = '', execPath = '' } = {}) {
   return null;
 }
 
-export function getPackageManagerFlag(packageManager) {
-  return packageManager === 'pnpm'
-    ? '--use-pnpm'
-    : packageManager === 'bun'
-      ? '--use-bun'
-      : packageManager === 'yarn'
-        ? '--use-yarn'
-        : packageManager === 'npm'
-          ? '--use-npm'
-          : null;
-}
-
-export function stripInternalArgs(args) {
-  return args.filter((arg) => arg !== NO_TEMPLATE_FLAG);
-}
-
-export function getRunner(packageManager) {
-  if (packageManager === 'pnpm') {
-    return { command: 'pnpm', args: ['dlx'] };
-  }
-
-  if (packageManager === 'bun') {
-    return { command: 'bunx', args: [] };
-  }
-
-  if (packageManager === 'yarn') {
-    return { command: 'yarn', args: ['dlx'] };
-  }
-
-  return { command: 'npx', args: [] };
-}
-
-export function findPositionalProjectName(args) {
-  let skipNext = false;
-
+export function findPositionalName(args) {
   for (const arg of args) {
-    if (skipNext) {
-      skipNext = false;
-      continue;
-    }
-
-    if (flagsWithValues.has(arg)) {
-      skipNext = true;
-      continue;
-    }
-
-    if (arg.startsWith('--import-alias=')) {
-      continue;
-    }
-
-    if (!arg.startsWith('-')) {
-      return arg;
-    }
+    if (!arg.startsWith('-')) return arg;
   }
-
   return null;
-}
-
-export function findProjectDir(args, cwd = process.cwd()) {
-  const name = findPositionalProjectName(args);
-  return name ? resolve(cwd, name) : cwd;
 }
 
 export async function promptProjectName({
@@ -112,50 +69,22 @@ export async function promptProjectName({
   }
 }
 
-export function getScaffoldArgs({ cliArgs, packageManagerFlag, runnerArgs = [] }) {
-  return [
-    ...runnerArgs,
-    'create-next-app@latest',
-    '--example',
-    'https://github.com/vercel/shop',
-    '--example-path',
-    'apps/template',
-    ...(packageManagerFlag ? [packageManagerFlag] : []),
-    ...cliArgs,
-  ];
-}
-
 export function createExecutionPlan({
   cliArgs,
   cwd = process.cwd(),
   execPath = process.env.npm_execpath ?? '',
   userAgent = process.env.npm_config_user_agent ?? '',
 } = {}) {
-  const forwardedArgs = stripInternalArgs(cliArgs);
-  const explicitPackageManager = hasExplicitPackageManagerFlag(cliArgs);
-  const detectedPackageManager = explicitPackageManager
-    ? null
-    : detectPackageManager({ userAgent, execPath });
-  const packageManagerFlag = getPackageManagerFlag(detectedPackageManager);
-  const runner = getRunner(detectedPackageManager);
   const noTemplate = cliArgs.includes(NO_TEMPLATE_FLAG);
-  const projectDir = findProjectDir(forwardedArgs, cwd);
+  const packageManager =
+    explicitPackageManager(cliArgs) ??
+    detectPackageManager({ userAgent, execPath }) ??
+    'npm';
+  const positionalName = findPositionalName(
+    cliArgs.filter((arg) => !INTERNAL_FLAGS.has(arg)),
+  );
 
-  return {
-    detectedPackageManager,
-    forwardedArgs,
-    noTemplate,
-    packageManagerFlag,
-    projectDir,
-    runner,
-    scaffoldArgs: noTemplate
-      ? null
-      : getScaffoldArgs({
-          cliArgs: forwardedArgs,
-          packageManagerFlag,
-          runnerArgs: runner.args,
-        }),
-  };
+  return { cwd, noTemplate, packageManager, positionalName };
 }
 
 export async function readTemplateVersion(importMetaUrl = import.meta.url) {
@@ -182,6 +111,53 @@ export function runCommand(command, args, options = {}) {
   });
 }
 
+function fetchResponse(url, depth = 0) {
+  if (depth > 5) {
+    return Promise.reject(new Error('Too many redirects fetching template tarball'));
+  }
+  return new Promise((resolveReq, rejectReq) => {
+    const req = get(url, (res) => {
+      const { statusCode = 0, headers } = res;
+      if (statusCode >= 300 && statusCode < 400 && headers.location) {
+        res.resume();
+        fetchResponse(headers.location, depth + 1).then(resolveReq, rejectReq);
+        return;
+      }
+      if (statusCode !== 200) {
+        res.resume();
+        rejectReq(new Error(`Template download failed with status ${statusCode}`));
+        return;
+      }
+      resolveReq(res);
+    });
+    req.on('error', rejectReq);
+  });
+}
+
+export async function fetchTemplate(
+  projectDir,
+  { url = TEMPLATE_TARBALL_URL, prefix = TEMPLATE_TARBALL_PREFIX } = {},
+) {
+  const stripComponents = prefix.split('/').length;
+  const tar = spawn(
+    'tar',
+    ['-xz', `--strip-components=${stripComponents}`, '-C', projectDir, prefix],
+    { stdio: ['pipe', 'inherit', 'inherit'] },
+  );
+
+  const tarClosed = new Promise((resolveTar, rejectTar) => {
+    tar.on('error', rejectTar);
+    tar.on('close', (code) => {
+      if (code === 0) resolveTar();
+      else rejectTar(new Error(`tar exited with code ${code}`));
+    });
+  });
+
+  const response = await fetchResponse(url);
+  response.pipe(tar.stdin);
+  await tarClosed;
+}
+
 export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
@@ -200,6 +176,14 @@ export async function writeBootstrapMetadata(
     `${JSON.stringify({ scaffoldedAt, templateVersion }, null, 2)}\n`,
     'utf8',
   );
+}
+
+export function installDependencies(projectDir, packageManager, run = runCommand) {
+  return run(packageManager, ['install'], { cwd: projectDir });
+}
+
+export function initGit(projectDir, run = runCommand) {
+  return run('git', ['init', '--quiet'], { cwd: projectDir });
 }
 
 export async function installProjectPlugins(projectDir, run = runCommand) {
@@ -239,54 +223,51 @@ export async function main({
   isTTY = Boolean(process.stdin.isTTY),
   prompt = promptProjectName,
   run = runCommand,
+  scaffold = fetchTemplate,
   userAgent = process.env.npm_config_user_agent ?? '',
 } = {}) {
-  // Pre-prompt for the project name when none is given. Without this,
-  // create-next-app would prompt interactively but in its own subprocess —
-  // we'd never learn the chosen name and would run plugin installs against
-  // the parent directory.
-  let effectiveCliArgs = cliArgs;
-  const noTemplate = cliArgs.includes(NO_TEMPLATE_FLAG);
-  if (
-    !noTemplate &&
-    isTTY &&
-    findPositionalProjectName(stripInternalArgs(cliArgs)) === null
-  ) {
-    const name = await prompt();
-    effectiveCliArgs = [name, ...cliArgs];
+  const plan = createExecutionPlan({ cliArgs, cwd, execPath, userAgent });
+
+  let projectName = plan.positionalName;
+  if (!plan.noTemplate && projectName === null) {
+    projectName = isTTY ? await prompt() : DEFAULT_PROJECT_NAME;
   }
 
-  const plan = createExecutionPlan({
-    cliArgs: effectiveCliArgs,
-    cwd,
-    execPath,
-    userAgent,
-  });
+  const projectDir = projectName ? resolve(plan.cwd, projectName) : plan.cwd;
+
+  await ensureProjectDir(projectDir);
 
   if (!plan.noTemplate) {
-    const scaffoldCode = await run(plan.runner.command, plan.scaffoldArgs);
-
-    if (scaffoldCode !== 0) {
-      return scaffoldCode;
+    try {
+      await scaffold(projectDir);
+    } catch (error) {
+      console.error('\nFailed to download the Vercel Shop template.');
+      console.error(error instanceof Error ? error.message : String(error));
+      return 1;
     }
 
     try {
       const templateVersion = await readTemplateVersion(importMetaUrl);
-      await writeBootstrapMetadata(plan.projectDir, templateVersion);
+      await writeBootstrapMetadata(projectDir, templateVersion);
     } catch (error) {
       console.warn('\nScaffold completed, but bootstrap metadata could not be written.');
       console.warn(error instanceof Error ? error.message : String(error));
-      printRetryCommands(plan.projectDir);
-      return 0;
     }
-  } else {
-    await ensureProjectDir(plan.projectDir);
+
+    const installCode = await installDependencies(projectDir, plan.packageManager, run);
+    if (installCode !== 0) {
+      console.warn(
+        `\n${plan.packageManager} install failed. Re-run it from ${projectDir} once resolved.`,
+      );
+    }
+
+    await initGit(projectDir, run);
   }
 
-  const failedPlugins = await installProjectPlugins(plan.projectDir, run);
+  const failedPlugins = await installProjectPlugins(projectDir, run);
 
   if (failedPlugins.length > 0) {
-    printRetryCommands(plan.projectDir, { scaffolded: !plan.noTemplate });
+    printRetryCommands(projectDir, { scaffolded: !plan.noTemplate });
   }
 
   return 0;
