@@ -19,11 +19,7 @@ importers:
         specifier: 2.31.0
         version: 2.31.0(@types/node@25.6.2)
 
-  apps/cli:
-    dependencies:
-      degit:
-        specifier: 2.8.4
-        version: 2.8.4
+  apps/cli: {}
 
   apps/docs:
     dependencies:
@@ -2784,11 +2780,6 @@ packages:
 
   defu@6.1.7:
     resolution: {integrity: sha512-7z22QmUWiQ/2d0KkdYmANbRUVABpZ9SNYyH5vx6PZ+nE5bcC0l7uFvEfHlyld/HcGBFTL536ClDt3DEcSlEJAQ==}
-
-  degit@2.8.4:
-    resolution: {integrity: sha512-vqYuzmSA5I50J882jd+AbAhQtgK6bdKUJIex1JNfEUPENCgYsxugzKVZlFyMwV4i06MmnV47/Iqi5Io86zf3Ng==}
-    engines: {node: '>=8.0.0'}
-    hasBin: true
 
   delaunator@5.0.1:
     resolution: {integrity: sha512-8nvh+XBe96aCESrGOqMp/84b13H9cdKbG5P2ejQCh4d4sK9RL4371qou9drQjMhvnPmhWl5hnmqbEE0fXr9Xnw==}
@@ -6699,8 +6690,6 @@ snapshots:
       character-entities: 2.0.2
 
   defu@6.1.7: {}
-
-  degit@2.8.4: {}
 
   delaunator@5.0.1:
     dependencies:

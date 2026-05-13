@@ -2,15 +2,16 @@
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { get } from 'node:https';
 import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
-import degit from 'degit';
-
 export const NO_TEMPLATE_FLAG = '--no-template';
 export const DEFAULT_PROJECT_NAME = 'my-shop';
-export const TEMPLATE_SOURCE = 'vercel/shop/apps/template#main';
+export const TEMPLATE_TARBALL_URL =
+  'https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main';
+export const TEMPLATE_TARBALL_PREFIX = 'shop-main/apps/template';
 
 const PACKAGE_MANAGER_FLAGS = {
   '--use-bun': 'bun',
@@ -110,9 +111,51 @@ export function runCommand(command, args, options = {}) {
   });
 }
 
-export async function fetchTemplate(projectDir, { source = TEMPLATE_SOURCE } = {}) {
-  const emitter = degit(source, { force: true });
-  await emitter.clone(projectDir);
+function fetchResponse(url, depth = 0) {
+  if (depth > 5) {
+    return Promise.reject(new Error('Too many redirects fetching template tarball'));
+  }
+  return new Promise((resolveReq, rejectReq) => {
+    const req = get(url, (res) => {
+      const { statusCode = 0, headers } = res;
+      if (statusCode >= 300 && statusCode < 400 && headers.location) {
+        res.resume();
+        fetchResponse(headers.location, depth + 1).then(resolveReq, rejectReq);
+        return;
+      }
+      if (statusCode !== 200) {
+        res.resume();
+        rejectReq(new Error(`Template download failed with status ${statusCode}`));
+        return;
+      }
+      resolveReq(res);
+    });
+    req.on('error', rejectReq);
+  });
+}
+
+export async function fetchTemplate(
+  projectDir,
+  { url = TEMPLATE_TARBALL_URL, prefix = TEMPLATE_TARBALL_PREFIX } = {},
+) {
+  const stripComponents = prefix.split('/').length;
+  const tar = spawn(
+    'tar',
+    ['-xz', `--strip-components=${stripComponents}`, '-C', projectDir, prefix],
+    { stdio: ['pipe', 'inherit', 'inherit'] },
+  );
+
+  const tarClosed = new Promise((resolveTar, rejectTar) => {
+    tar.on('error', rejectTar);
+    tar.on('close', (code) => {
+      if (code === 0) resolveTar();
+      else rejectTar(new Error(`tar exited with code ${code}`));
+    });
+  });
+
+  const response = await fetchResponse(url);
+  response.pipe(tar.stdin);
+  await tarClosed;
 }
 
 export async function ensureProjectDir(projectDir) {

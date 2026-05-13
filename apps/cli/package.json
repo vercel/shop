@@ -2,9 +2,6 @@
 	"bin": {
 		"create-vercel-shop": "index.mjs"
 	},
-	"dependencies": {
-		"degit": "2.8.4"
-	},
 	"name": "create-vercel-shop",
 	"repository": {
 		"type": "git",
