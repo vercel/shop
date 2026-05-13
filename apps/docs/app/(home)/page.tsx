@@ -61,17 +61,17 @@ const HomePage = () => (
       title={homeTitle}
     >
       <div className="flex flex-wrap items-center justify-center gap-3">
+        <Button asChild className="h-12 w-fit rounded-full px-5">
+          <Link href="https://template.vercel.shop/" target="_blank">
+            Go to Demo
+          </Link>
+        </Button>
         <Button
           asChild
           className="h-12 w-fit rounded-full px-5"
           variant="secondary"
         >
           <Link href="/docs">View Documentation</Link>
-        </Button>
-        <Button asChild className="h-12 w-fit rounded-full px-5">
-          <Link href="https://template.vercel.shop/" target="_blank">
-            Go to Demo
-          </Link>
         </Button>
       </div>
     </Hero>
@@ -107,6 +107,7 @@ const HomePage = () => (
       >
         <StorefrontHero />
       </CenteredSection>
+      <ShopifyCommerce />
       <OneTwoSection
         description="The vercel-shop plugin and template recipes let agents extend your store with a single command. Add markets, CMS, auth, and more."
         leftClassName="xl:pt-[52px]"
@@ -132,7 +133,6 @@ const HomePage = () => (
       >
         <ContentNegotiationDemo />
       </OneTwoSection>
-      <ShopifyCommerce />
       <LogosMarquee />
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
