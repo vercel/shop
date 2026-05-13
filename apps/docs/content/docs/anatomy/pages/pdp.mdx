@@ -108,8 +108,7 @@ The page emits two JSON-LD schemas:
 | File | Purpose |
 |------|---------|
 | `app/products/[handle]/page.tsx` | Product route, metadata, and rendering config |
-| `components/product-detail/product-detail-page.tsx` | Server component entry point, fetches related products and emits structured data |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with Suspense boundaries |
+| `components/product-detail/product-detail-page.tsx` | Server component entry point — page chrome, Suspense fallback, structured data, and the section that orchestrates media, options, pricing, and buy buttons |
 | `components/product-detail/color-picker.tsx` | Color swatch Links with variant images |
 | `components/product-detail/option-picker.tsx` | Text option Links (size, material, etc.) |
 | `components/product-detail/product-info.tsx` | Header, options, and description composition (exports `ProductInfoHeader`, `ProductInfoOptions`, `ProductInfoDescription`) |
