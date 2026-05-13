@@ -216,7 +216,6 @@ function ProductCardSkeleton({
 }
 
 export {
-  aspectRatioClasses,
   ProductCard,
   type ProductCardAspectRatio,
   ProductCardBadge,
