@@ -96,7 +96,7 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 `/api/chat` runs three checks before any model call or cart write:
 
 - **Vercel BotID** - `withBotId()` wraps `next.config.ts`, `initBotId()` runs in `instrumentation-client.ts`, and `checkBotId()` returns 403 in the route handler when a bot is detected
-- **Rate limit** - a per-IP fixed window (20 requests / 60s) returns 429 with `Retry-After`. The default primitive in `lib/agent/rate-limit.ts` is in-memory and best-effort - swap for Vercel KV / Upstash / Runtime Cache in production
+- **Rate limit** - a per-IP sliding window log (20 requests / 60s) returns 429 with `Retry-After`. `lib/agent/rate-limit.ts` stores recent request timestamps in Vercel Runtime Cache via `getCache` from `@vercel/functions`. The cache is regional and eventually consistent, so concurrent requests can over-admit by a small constant — fine for abuse mitigation, not exact accounting
 - **Token cap** - the `ToolLoopAgent` defaults pin `maxOutputTokens: 2048`
 
 Bot and rate-limit checks run before `request.json()` and before any Shopify cart is created, so a flood of bot traffic does not poison cart records or burn gateway spend.

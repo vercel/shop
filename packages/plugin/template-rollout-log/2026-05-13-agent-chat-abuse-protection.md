@@ -20,7 +20,7 @@ paths:
 The agent chat endpoint now hardens three abuse vectors before any model call or cart write:
 
 1. Vercel BotID via the `botid` package (`withBotId(nextConfig)`, `initBotId()` in `instrumentation-client.ts`, `checkBotId()` on the POST handler).
-2. Per-IP fixed-window rate limit (`lib/agent/rate-limit.ts`, 20 req / 60 s). Best-effort in-memory primitive — production deployments should swap for Vercel KV / Upstash / Runtime Cache.
+2. Per-IP sliding-window-log rate limit (`lib/agent/rate-limit.ts`, 20 req / 60 s) backed by Vercel Runtime Cache (`getCache` from `@vercel/functions`). Regional and eventually consistent; concurrent reads can over-admit by a small constant, which is acceptable for abuse mitigation.
 3. `maxOutputTokens: 8192` cap on the `ToolLoopAgent` defaults — sized to fit a full generative-UI response (multi-card grid + cart summary + surrounding text) while still bounding worst-case gateway spend per call.
 
 Bot and rate-limit checks run before `request.json()` and before `createCartWithoutCookie()`, so a flood of bot traffic no longer creates Shopify carts or burns gateway spend.

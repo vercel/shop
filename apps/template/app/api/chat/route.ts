@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const limit = rateLimit(getRequestIp(request.headers));
+  const limit = await rateLimit(getRequestIp(request.headers));
   if (!limit.ok) {
     return Response.json(
       { error: "Too many requests" },
