@@ -137,11 +137,15 @@ const HomePage = () => (
       <CTA
         description="Fully customizable with AI agents. Built on Next.js."
         primary={{
+          href: "https://vercel.com/contact/sales",
+          label: "Talk to an expert",
+          target: "_blank",
+        }}
+        secondary={{
           href: "https://template.vercel.shop/",
           label: "Go to Demo",
           target: "_blank",
         }}
-        secondary={{ href: "/docs", label: "View Documentation" }}
         title="Start your shop today."
         className="mt-12 sm:mt-32"
       />
