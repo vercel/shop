@@ -1,4 +1,3 @@
-import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
@@ -66,4 +65,4 @@ const withNextIntl = createNextIntlPlugin({
   requestConfig: "./lib/i18n/request.ts",
 });
 
-export default withNextIntl(withBotId(nextConfig));
+export default withNextIntl(nextConfig);
