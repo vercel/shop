@@ -1,10 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import {
-  aspectRatioClasses,
-  type ProductCardAspectRatio,
-} from "@/components/product-card/components";
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
@@ -40,12 +36,10 @@ export async function ProductDetailSection({
   product,
   locale,
   variantIdPromise,
-  aspectRatio = "square",
 }: {
   product: ProductDetails;
   locale: Locale;
   variantIdPromise: Promise<string | undefined>;
-  aspectRatio?: ProductCardAspectRatio;
 }) {
   const { handle, title, featuredImage, images, videos, variants, options } = product;
 
@@ -72,23 +66,14 @@ export async function ProductDetailSection({
           otherImages={getSharedImages(images, options, variants)}
           videos={videos}
           title={title}
-          aspectRatio={aspectRatio}
           className="lg:col-span-6"
           desktopSlot={
-            <Suspense
-              fallback={
-                <Skeleton
-                  data-aspect-ratio={aspectRatio}
-                  className={cn("w-full rounded-none", aspectRatioClasses)}
-                />
-              }
-            >
+            <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
               <ResolvedColorImages
                 images={images}
                 options={options}
                 variants={variants}
                 title={title}
-                aspectRatio={aspectRatio}
                 variantIdPromise={variantIdPromise}
               />
             </Suspense>
@@ -96,13 +81,7 @@ export async function ProductDetailSection({
           mobileSlot={
             <Suspense
               fallback={
-                <div
-                  data-aspect-ratio={aspectRatio}
-                  className={cn(
-                    "relative shrink-0 w-full snap-start snap-always overflow-hidden",
-                    aspectRatioClasses,
-                  )}
-                >
+                <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square">
                   <Skeleton className="size-full rounded-none" />
                 </div>
               }
@@ -112,7 +91,6 @@ export async function ProductDetailSection({
                 options={options}
                 variants={variants}
                 title={title}
-                aspectRatio={aspectRatio}
                 variantIdPromise={variantIdPromise}
               />
             </Suspense>
@@ -123,7 +101,6 @@ export async function ProductDetailSection({
           otherImages={images}
           videos={videos}
           title={title}
-          aspectRatio={aspectRatio}
           className="lg:col-span-6"
         />
       )}
@@ -311,14 +288,12 @@ async function ResolvedColorImages({
   options,
   variants,
   title,
-  aspectRatio,
   variantIdPromise,
 }: {
   images: ImageType[];
   options: ProductOption[];
   variants: ProductVariant[];
   title: string;
-  aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
@@ -332,7 +307,7 @@ async function ResolvedColorImages({
 
   if (colorImages.length === 0) return null;
 
-  return <ColorImageGrid images={colorImages} title={title} aspectRatio={aspectRatio} />;
+  return <ColorImageGrid images={colorImages} title={title} />;
 }
 
 async function ResolvedColorCarouselImages({
@@ -340,14 +315,12 @@ async function ResolvedColorCarouselImages({
   options,
   variants,
   title,
-  aspectRatio,
   variantIdPromise,
 }: {
   images: ImageType[];
   options: ProductOption[];
   variants: ProductVariant[];
   title: string;
-  aspectRatio: ProductCardAspectRatio;
   variantIdPromise: Promise<string | undefined>;
 }) {
   const variantId = await variantIdPromise;
@@ -361,5 +334,5 @@ async function ResolvedColorCarouselImages({
 
   if (colorImages.length === 0) return null;
 
-  return <ColorImageCarouselItems images={colorImages} title={title} aspectRatio={aspectRatio} />;
+  return <ColorImageCarouselItems images={colorImages} title={title} />;
 }
