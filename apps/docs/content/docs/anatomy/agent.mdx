@@ -93,13 +93,13 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 
 ## Abuse protection
 
-`/api/chat` runs three checks before any model call or cart write:
+`/api/chat` ships without bot, rate-limit, or token-cap protection by default — it's reachable anonymously. Before exposing the agent to real traffic, harden it. A reasonable baseline on Vercel:
 
-- **Vercel BotID** - `withBotId()` wraps `next.config.ts`, `initBotId()` runs in `instrumentation-client.ts`, and `checkBotId()` returns 403 in the route handler when a bot is detected
-- **Rate limit** - a per-IP sliding window log (20 requests / 60s) returns 429 with `Retry-After`. `lib/agent/rate-limit.ts` stores recent request timestamps in Vercel Runtime Cache via `getCache` from `@vercel/functions`. The cache is regional and eventually consistent, so concurrent requests can over-admit by a small constant — fine for abuse mitigation, not exact accounting
-- **Token cap** - the `ToolLoopAgent` defaults pin `maxOutputTokens: 8192`
+- **[Vercel BotID](https://vercel.com/docs/botid)** — wrap `next.config.ts` with `withBotId()`, call `initBotId({ protect: [{ path: "/api/chat", method: "POST" }] })` from `instrumentation-client.ts`, and call `checkBotId()` at the top of the POST handler. Returns 403 when a bot is detected and works locally without a Vercel deployment.
+- **Per-IP rate limit** — a sliding-window log keyed by the client IP, backed by [Vercel Runtime Cache](https://vercel.com/docs/runtime-cache) (`getCache` from `@vercel/functions`) so it shares state across regions. Run it before `request.json()` and before any Shopify cart is created so bot floods don't poison cart records or burn gateway spend.
+- **Token cap** — set `maxOutputTokens` on the `ToolLoopAgent` defaults to bound worst-case gateway spend per call.
 
-Bot and rate-limit checks run before `request.json()` and before any Shopify cart is created, so a flood of bot traffic does not poison cart records or burn gateway spend.
+If `/api/chat` sits behind an existing WAF (Cloudflare, etc.), prefer that and keep the token cap.
 
 ## Configuration
 
@@ -109,10 +109,8 @@ The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environmen
 
 | File | Purpose |
 |------|---------|
-| `app/api/chat/route.ts` | Chat endpoint - BotID + rate limit, page context resolution, cart initialization, streaming |
-| `instrumentation-client.ts` | `initBotId()` registers `/api/chat` as a protected route |
-| `lib/agent/rate-limit.ts` | Per-IP fixed-window rate limit primitive |
-| `lib/agent/server.ts` | ToolLoopAgent creation, `maxOutputTokens` cap, dynamic system prompt, and AsyncLocalStorage context (chatId, user, cart, page) |
+| `app/api/chat/route.ts` | Chat endpoint - page context resolution, cart initialization, streaming |
+| `lib/agent/server.ts` | ToolLoopAgent creation, dynamic system prompt, and AsyncLocalStorage context (chatId, user, cart, page) |
 | `lib/agent/index.ts` | json-render catalog schema definitions |
 | `lib/agent/tools/` | 11 tool implementations using Shopify operations |
 | `components/agent/registry.tsx` | Generative UI component implementations |
