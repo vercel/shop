@@ -50,7 +50,8 @@ export default async function HomePage() {
             title="Featured Products"
             limit={8}
             locale={locale}
-            collectionUrl="/search"
+            collectionHandle="frontpage"
+            collectionUrl="/collections/frontpage"
           />
         </Container>
       </Sections>
