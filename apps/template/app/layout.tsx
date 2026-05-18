@@ -9,7 +9,7 @@ import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
 import { CartProvider } from "@/components/cart/context";
-import { CartOverlayWithAddress } from "@/components/cart/overlay-with-address";
+import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </main>
             <Footer locale={locale} />
             <Suspense>
-              <CartOverlayWithAddress locale={locale} />
+              <CartOverlay locale={locale} />
             </Suspense>
             <Suspense>
               <ActionBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</ActionBar>

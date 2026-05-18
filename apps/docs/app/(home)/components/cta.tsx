@@ -36,6 +36,11 @@ export const CTA = ({
       <p className="text-lg text-muted-foreground">{description}</p>
     </div>
     <div className="flex flex-wrap items-center gap-3">
+      <Button asChild className="h-12 w-full sm:w-fit rounded-full px-5">
+        <Link href={primary.href} target={primary.target}>
+          {primary.label}
+        </Link>
+      </Button>
       {secondary ? (
         <Button
           asChild
@@ -47,11 +52,6 @@ export const CTA = ({
           </Link>
         </Button>
       ) : null}
-      <Button asChild className="h-12 w-full sm:w-fit rounded-full px-5">
-        <Link href={primary.href} target={primary.target}>
-          {primary.label}
-        </Link>
-      </Button>
     </div>
   </section>
 );
