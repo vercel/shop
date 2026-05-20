@@ -32,7 +32,7 @@ The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. The `Pro
 
 ## Data fetching
 
-Products are fetched server-side with `getProducts({ limit: 8, locale })`, which queries the Shopify Storefront API and caches the result with `cacheLife("max")` and product-level cache tags for granular revalidation.
+Products are fetched server-side with `getCollectionProducts({ collection: "frontpage", limit: 8, locale })`, which pulls from Shopify's default `frontpage` collection so merchants can curate the home page from the Shopify admin. The result is cached with `cacheLife("max")` and product- and collection-level cache tags for granular revalidation. To feature a different collection, change `collectionHandle` (and `collectionUrl`) on the `FeaturedProducts` call in `app/page.tsx`.
 
 ## Key files
 
