@@ -3,22 +3,15 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import {
-  ALL_PRODUCTS_HANDLE,
-  getCollection,
-  getCollections,
-} from "@/lib/shopify/operations/collections";
+import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
 
 export async function generateStaticParams() {
   const collections = await getCollections({ limit: 1 });
   const first = collections[0];
-  const params = [{ handle: ALL_PRODUCTS_HANDLE }];
-  if (first && first.handle !== ALL_PRODUCTS_HANDLE) {
-    params.push({ handle: first.handle });
-  }
-  return params;
+  return first ? [{ handle: first.handle }] : [];
 }
 
 export async function generateMetadata({
@@ -28,31 +21,6 @@ export async function generateMetadata({
 
   if (handle === "__placeholder__") {
     notFound();
-  }
-
-  if (handle === ALL_PRODUCTS_HANDLE) {
-    const tAll = await getTranslations("collections.all");
-    const title = tAll("title");
-    const description = tAll("description");
-    return {
-      title,
-      description,
-      alternates: buildAlternates({
-        pathname: `/collections/${ALL_PRODUCTS_HANDLE}`,
-      }),
-      openGraph: buildOpenGraph({
-        title,
-        description,
-        url: `/collections/${ALL_PRODUCTS_HANDLE}`,
-        type: "website",
-      }),
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description,
-        images: ["/og-default.png"],
-      },
-    };
   }
 
   const [collection, t] = await Promise.all([
@@ -117,17 +85,23 @@ export default async function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/collections/[handle]">) {
-  const [locale] = await Promise.all([getLocale()]);
+  const locale = await getLocale();
   const handlePromise = params.then(({ handle }) => handle);
-
   const collectionPromise = handlePromise.then((handle) => getCollection(handle, locale));
+  const searchStatePromise = getCollectionSearchState(searchParams);
+  const collectionResultsDataPromise = getCollectionResultsData({
+    handlePromise,
+    locale,
+    searchStatePromise,
+  });
 
   return (
     <CollectionDetailPage
       handlePromise={handlePromise}
       collectionPromise={collectionPromise}
+      collectionResultsDataPromise={collectionResultsDataPromise}
       locale={locale}
-      searchParams={searchParams}
+      searchStatePromise={searchStatePromise}
     />
   );
 }

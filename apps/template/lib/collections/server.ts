@@ -1,11 +1,21 @@
+import { getTranslations } from "next-intl/server";
+
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   getCollectionProducts,
+  getFilteredCatalogProducts,
 } from "@/lib/shopify/operations/products";
 import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
+import type { Collection } from "@/lib/types";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
+
+// Shopify's /collections/all is a Liquid-storefront convention with no Storefront API
+// equivalent — the "all" virtual collection is owned entirely by this module and the
+// dedicated app/collections/all/page.tsx route. The data layer (lib/shopify/operations)
+// stays unaware of it.
+export const ALL_PRODUCTS_HANDLE = "all";
 
 export interface CollectionSearchState {
   activeFilters: Record<string, string | string[] | undefined>;
@@ -77,4 +87,45 @@ export function getExactCollectionResultCount({
 
 function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+export async function getAllProductsCollection(): Promise<Collection> {
+  const t = await getTranslations("collections.all");
+  const title = t("title");
+  const description = t("description");
+  return {
+    handle: ALL_PRODUCTS_HANDLE,
+    title,
+    description,
+    image: null,
+    path: `/collections/${ALL_PRODUCTS_HANDLE}`,
+    updatedAt: new Date(0).toISOString(),
+    seo: { title, description },
+  };
+}
+
+export async function getAllProductsResultsData({
+  locale,
+  searchStatePromise,
+}: {
+  locale: Locale;
+  searchStatePromise: Promise<CollectionSearchState>;
+}): Promise<CollectionResultsData> {
+  const { activeFilters, sort } = await searchStatePromise;
+  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+  const products = await getFilteredCatalogProducts({
+    sortKey: sort,
+    limit: RESULTS_PER_PAGE,
+    filters: shopifyFilters,
+    locale,
+  });
+
+  return {
+    activeFilters,
+    collection: ALL_PRODUCTS_HANDLE,
+    sort,
+    filters: shopifyFilters,
+    result: { ...products, filters: [] },
+    transformedFilters: transformShopifyFilters([], { activeFilters }),
+  };
 }

@@ -10,25 +10,6 @@ import {
   transformShopifyCollections,
 } from "../transforms/collection";
 
-// Shopify's `/collections/all` is a Liquid-storefront convention with no equivalent in the
-// Storefront API — `collection(handle: "all")` always returns null, so we synthesize it.
-export const ALL_PRODUCTS_HANDLE = "all";
-
-function synthesizeAllProductsCollection(): Collection {
-  return {
-    handle: ALL_PRODUCTS_HANDLE,
-    title: "Products",
-    description: "",
-    image: null,
-    path: `/collections/${ALL_PRODUCTS_HANDLE}`,
-    updatedAt: new Date(0).toISOString(),
-    seo: {
-      title: "Products",
-      description: "",
-    },
-  };
-}
-
 type CollectionsResponse = {
   collections: { edges: Array<{ node: ShopifyCollection }> };
 };
@@ -88,10 +69,6 @@ export async function getCollection(
   "use cache";
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);
-
-  if (handle === ALL_PRODUCTS_HANDLE) {
-    return synthesizeAllProductsCollection();
-  }
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
