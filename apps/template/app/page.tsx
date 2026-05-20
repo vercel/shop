@@ -40,8 +40,8 @@ export default async function HomePage() {
             id: "homepage-hero",
             headline: "Agentic Infrastructure for Commerce",
             subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
-            ctaText: "Browse the Catalog",
-            ctaLink: "/search",
+            ctaText: "Shop Now",
+            ctaLink: "/collections/all",
           }}
         />
 
