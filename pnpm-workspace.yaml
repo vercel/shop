@@ -1,4 +1,4 @@
+minimumReleaseAge: 2880
+
 packages:
   - "apps/*"
-
-minimumReleaseAge: 2880
