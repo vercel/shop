@@ -1,4 +1,8 @@
 minimumReleaseAge: 2880
 
+minimumReleaseAgeExclude:
+  - "@next/*"
+  - next
+
 packages:
   - "apps/*"

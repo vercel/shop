@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
     cachedNavigations: true,
     inlineCss: true,
     optimisticRouting: true,
-    rootParams: true,
     turbopackFileSystemCacheForDev: true,
   },
   images: {
