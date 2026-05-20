@@ -5,12 +5,20 @@ import { notFound } from "next/navigation";
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
+import {
+  ALL_PRODUCTS_HANDLE,
+  getCollection,
+  getCollections,
+} from "@/lib/shopify/operations/collections";
 
 export async function generateStaticParams() {
   const collections = await getCollections({ limit: 1 });
   const first = collections[0];
-  return first ? [{ handle: first.handle }] : [];
+  const params = [{ handle: ALL_PRODUCTS_HANDLE }];
+  if (first && first.handle !== ALL_PRODUCTS_HANDLE) {
+    params.push({ handle: first.handle });
+  }
+  return params;
 }
 
 export async function generateMetadata({
@@ -20,6 +28,31 @@ export async function generateMetadata({
 
   if (handle === "__placeholder__") {
     notFound();
+  }
+
+  if (handle === ALL_PRODUCTS_HANDLE) {
+    const tAll = await getTranslations("collections.all");
+    const title = tAll("title");
+    const description = tAll("description");
+    return {
+      title,
+      description,
+      alternates: buildAlternates({
+        pathname: `/collections/${ALL_PRODUCTS_HANDLE}`,
+      }),
+      openGraph: buildOpenGraph({
+        title,
+        description,
+        url: `/collections/${ALL_PRODUCTS_HANDLE}`,
+        type: "website",
+      }),
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: ["/og-default.png"],
+      },
+    };
   }
 
   const [collection, t] = await Promise.all([

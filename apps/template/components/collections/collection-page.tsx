@@ -22,7 +22,7 @@ import {
   getCollectionSearchState,
 } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import type { getCollection } from "@/lib/shopify/operations/collections";
+import { ALL_PRODUCTS_HANDLE, type getCollection } from "@/lib/shopify/operations/collections";
 
 import { FilterPendingScope, FilterTransitionProvider } from "./filter-pending-context";
 
@@ -108,17 +108,21 @@ async function CollectionHeader({
   collectionPromise: Promise<Awaited<ReturnType<typeof getCollection>>>;
   handlePromise: Promise<string>;
 }) {
-  const [collection, handle, t] = await Promise.all([
+  const [collection, handle, t, tAll] = await Promise.all([
     collectionPromise,
     handlePromise,
     getTranslations("collections.breadcrumb"),
+    getTranslations("collections.all"),
   ]);
 
   if (!collection) {
     notFound();
   }
 
-  const { title, description, updatedAt } = collection;
+  const isAll = handle === ALL_PRODUCTS_HANDLE;
+  const title = isAll ? tAll("title") : collection.title;
+  const description = isAll ? tAll("description") : collection.description;
+  const { updatedAt } = collection;
 
   const breadcrumbItems = [
     { name: t("home"), path: "/" },

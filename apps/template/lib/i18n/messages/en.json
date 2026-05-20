@@ -111,6 +111,10 @@
     "type": "Type"
   },
   "collections": {
+    "all": {
+      "description": "Browse every product in the store.",
+      "title": "All Products"
+    },
     "breadcrumb": {
       "collections": "Collections",
       "home": "Home"

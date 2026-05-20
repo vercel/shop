@@ -33,7 +33,7 @@ export const navItems: MenuItem[] = [
   {
     id: "default-nav-shop",
     title: "Shop",
-    url: "/search",
+    url: "/collections/all",
     type: "HTTP",
     items: [],
   },

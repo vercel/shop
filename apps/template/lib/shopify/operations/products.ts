@@ -13,6 +13,7 @@ import {
 } from "../transforms/product";
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
+import { ALL_PRODUCTS_HANDLE } from "./collections";
 
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);
@@ -575,6 +576,17 @@ export async function getCollectionProducts(params: {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", "collections", `collection-${params.collection}`);
+
+  if (params.collection === ALL_PRODUCTS_HANDLE) {
+    const result = await fetchCatalogProducts({
+      sortKey: params.sortKey,
+      limit: params.limit,
+      cursor: params.cursor,
+      filters: params.filters,
+      locale: params.locale,
+    });
+    return { ...result, filters: [] };
+  }
 
   const {
     collection,

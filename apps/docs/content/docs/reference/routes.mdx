@@ -11,6 +11,7 @@ type: reference
 | `/` | `app/page.tsx` | Home page with hero, featured products, info section |
 | `/products/[handle]` | `app/products/[handle]/page.tsx` | Product detail page; `?variant=` selects a specific variant |
 | `/collections/[handle]` | `app/collections/[handle]/page.tsx` | Collection listing with filters, sort, pagination |
+| `/collections/all` | `app/collections/[handle]/page.tsx` | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
 | `/search` | `app/search/page.tsx` | Search results (same grid as collections) |
 | `/cart` | `app/cart/page.tsx` | Full cart page with upsells |
 | `/pages/[slug]` | `app/pages/[slug]/page.tsx` | CMS-driven marketing pages |
