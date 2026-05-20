@@ -17,13 +17,13 @@ export const ALL_PRODUCTS_HANDLE = "all";
 function synthesizeAllProductsCollection(): Collection {
   return {
     handle: ALL_PRODUCTS_HANDLE,
-    title: "All Products",
+    title: "Products",
     description: "",
     image: null,
     path: `/collections/${ALL_PRODUCTS_HANDLE}`,
     updatedAt: new Date(0).toISOString(),
     seo: {
-      title: "All Products",
+      title: "Products",
       description: "",
     },
   };

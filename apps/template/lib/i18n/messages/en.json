@@ -112,8 +112,8 @@
   },
   "collections": {
     "all": {
-      "description": "Browse every product in the store.",
-      "title": "All Products"
+      "description": "",
+      "title": "Products"
     },
     "breadcrumb": {
       "collections": "Collections",
