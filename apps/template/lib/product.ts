@@ -1,7 +1,43 @@
 import { getNumericShopifyId } from "@/lib/shopify/utils";
-import type { Image, Money, ProductOption, ProductVariant, SelectedOption } from "@/lib/types";
+import type {
+  Image,
+  Money,
+  ProductDetails,
+  ProductOption,
+  ProductVariant,
+  SelectedOption,
+} from "@/lib/types";
 
 export type SelectedOptions = Record<string, string>;
+
+export interface ProductSelection {
+  selectedOptions: SelectedOptions;
+  selectedVariant: ProductVariant | undefined;
+  colorImages: Image[];
+}
+
+export function computeSelection(
+  product: ProductDetails,
+  variantId: string | undefined,
+): ProductSelection {
+  const { images, options, variants } = product;
+  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
+  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const colorImages = hasColorImagePartitioning(options, variants)
+    ? getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions).colorImages
+    : [];
+  return { selectedOptions, selectedVariant, colorImages };
+}
+
+/** True when the ATF can render without awaiting searchParams. */
+export function isSelectionEager(product: ProductDetails): boolean {
+  return (
+    product.variants.length === 1 &&
+    hasUniformPricing(product.variants) &&
+    hasUniformStock(product.variants) &&
+    !hasColorImagePartitioning(product.options, product.variants)
+  );
+}
 
 /** Called server-side so the initial HTML matches hydrated state (zero CLS). */
 export function computeInitialSelectedOptions(

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { ProductDetailPage } from "@/components/product-detail/product-detail-page";
 import { getLocale } from "@/lib/params";
+import { computeSelection } from "@/lib/product";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCatalogProducts, getProduct } from "@/lib/shopify/operations/products";
 
@@ -81,11 +82,16 @@ export default async function ProductPage({
 
   const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
 
+  const selectionPromise = Promise.all([productPromise, variantIdPromise]).then(
+    ([product, variantId]) => computeSelection(product, variantId),
+  );
+
   return (
     <ProductDetailPage
+      handlePromise={handlePromise}
       productPromise={productPromise}
+      selectionPromise={selectionPromise}
       locale={locale}
-      variantIdPromise={variantIdPromise}
     />
   );
 }

@@ -33,10 +33,11 @@ export function RelatedProductsSectionSkeleton({
   );
 }
 
-async function Render({ handle, locale }: { handle: string; locale: Locale }) {
+async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
+  const resolvedHandle = await handle;
   const [t, recommendations] = await Promise.all([
     getTranslations("product"),
-    getProductRecommendations(handle, locale),
+    getProductRecommendations(resolvedHandle, locale),
   ]);
 
   if (recommendations.length === 0) return null;
@@ -48,7 +49,7 @@ export async function RelatedProductsSection({
   handle,
   locale,
 }: {
-  handle: string;
+  handle: string | Promise<string>;
   locale: Locale;
 }) {
   const t = await getTranslations("product");
