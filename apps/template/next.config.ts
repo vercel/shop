@@ -19,7 +19,6 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     optimisticRouting: true,
     turbopackFileSystemCacheForDev: true,
-    varyParams: true,
   },
   images: {
     deviceSizes: [640, 828, 1200, 1920],
