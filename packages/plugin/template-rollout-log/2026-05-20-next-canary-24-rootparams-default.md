@@ -16,7 +16,7 @@ paths:
 
 ## Summary
 
-Bumps Next.js to `16.3.0-canary.24` in both apps. `next/root-params` is now available without a flag, so `experimental.rootParams: true` was removed from `apps/template/next.config.ts`. The `enable-i18n` skill no longer instructs storefronts to add the flag.
+Bumps Next.js to `16.3.0-canary.25` in both apps. Starting at canary.24, `next/root-params` is available without a flag, so `experimental.rootParams: true` was removed from `apps/template/next.config.ts`. The `enable-i18n` skill no longer instructs storefronts to add the flag.
 
 ## Why it matters
 
