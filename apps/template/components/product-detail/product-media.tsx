@@ -251,7 +251,6 @@ function Grid({
         {children}
         {mediaItems.map((item, idx) => {
           const priority = !hasColorSlot && idx === 0;
-          const eager = hasColorSlot ? idx === 0 : idx === 1;
           return (
             <GridItem
               key={mediaKey(item)}
@@ -259,7 +258,7 @@ function Grid({
               title={title}
               idx={idx}
               priority={priority}
-              eager={eager}
+              eager
             />
           );
         })}
@@ -280,7 +279,7 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
       title={title}
       idx={idx}
       priority={idx === 0}
-      eager={idx === 1}
+      eager
     />
   ));
 }
