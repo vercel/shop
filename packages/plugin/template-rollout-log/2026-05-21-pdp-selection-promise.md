@@ -8,7 +8,6 @@ appliesTo:
   - all
 paths:
   - apps/template/app/products/[handle]/page.tsx
-  - apps/template/components/product-detail/product-detail-page.tsx
   - apps/template/components/product-detail/product-detail-section.tsx
   - apps/template/components/product-detail/product-media.tsx
   - apps/template/components/product/related-products-section.tsx
@@ -24,8 +23,8 @@ The PDP's per-slot Suspense boundaries (price, options, buy buttons, desktop col
 - `ProductDetailSection` keeps the same per-slot Suspense layout as before — title, description, schemas, single-variant options/buttons render eagerly; only the truly variant-dependent slots suspend with structural fallbacks (picker chrome, button-shaped placeholders, color image skeletons).
 - `BuyButtonsFallback` is extracted as its own component to keep the section JSX flat.
 - `ProductMediaSkeleton` is co-located with `ProductMedia`. The page-level Suspense uses `ProductDetailSectionSkeleton` (composed from the media skeleton + right-rail skeleton blobs) only for the `productPromise`-pending window.
-- The page-level outer Suspense moves into `ProductDetailSection` so `ProductDetailPage` is a thin composition shell.
-- Schemas (`ProductSchema`, `BreadcrumbSchema`) move from `ProductDetailPage` into the section's resolved content — they need the product anyway.
+- The page-level outer Suspense moves into `ProductDetailSection`. The single-caller `ProductDetailPage` wrapper is deleted — `app/products/[handle]/page.tsx` now owns the `<Page><Container><Sections>` shell directly.
+- Schemas (`ProductSchema`, `BreadcrumbSchema`) move into the section's resolved content — they need the product anyway.
 - `RelatedProductsSection` accepts `handle: string | Promise<string>` so the PDP can pass `handlePromise` directly while `/cart` keeps its plain string.
 
 ## Why it matters
