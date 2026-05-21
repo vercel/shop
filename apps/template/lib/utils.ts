@@ -61,4 +61,4 @@ export function searchParamsToRecord(
   return record;
 }
 
-export const RESULTS_PER_PAGE = 24;
+export const RESULTS_PER_PAGE = 20;
