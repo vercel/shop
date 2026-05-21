@@ -4,8 +4,9 @@ import { Suspense } from "react";
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { loadMoreCollectionProducts } from "@/lib/collections/action";
-import type { CollectionResultsData } from "@/lib/collections/server";
+import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
+import { loadMoreSearchProducts } from "@/lib/search/action";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
@@ -42,6 +43,32 @@ async function Render({
     );
   }
 
+  const cards = products.map((product) => (
+    <ProductCard
+      key={product.id}
+      product={product}
+      locale={locale}
+      outOfStockText={tProduct("outOfStock")}
+    />
+  ));
+
+  // /collections/all is backed by the catalog-browse search() field, not the collection
+  // field — load-more has to call the same backend the initial page used.
+  if (collection === ALL_PRODUCTS_HANDLE) {
+    return (
+      <InfiniteProductGrid
+        initialProducts={products}
+        initialPageInfo={result.pageInfo}
+        locale={locale}
+        outOfStockText={tProduct("outOfStock")}
+        loadMore={loadMoreSearchProducts}
+        loadMoreParams={{ sortKey: sort, filters, locale }}
+      >
+        {cards}
+      </InfiniteProductGrid>
+    );
+  }
+
   return (
     <InfiniteProductGrid
       initialProducts={products}
@@ -51,14 +78,7 @@ async function Render({
       loadMore={loadMoreCollectionProducts}
       loadMoreParams={{ collection, sortKey: sort, filters, locale }}
     >
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          locale={locale}
-          outOfStockText={tProduct("outOfStock")}
-        />
-      ))}
+      {cards}
     </InfiniteProductGrid>
   );
 }

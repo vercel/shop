@@ -28,12 +28,14 @@ export async function CollectionDetailPage({
   collectionResultsDataPromise,
   locale,
   searchStatePromise,
+  sortExclude,
 }: {
   handlePromise: Promise<string>;
   collectionPromise: Promise<Collection | undefined>;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
+  sortExclude?: string[];
 }) {
   const tSearch = await getTranslations("search");
   const filtersLabel = tSearch("filters");
@@ -74,7 +76,7 @@ export async function CollectionDetailPage({
               }
               sortSelect={
                 <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
-                  <CollectionsSortSelect />
+                  <CollectionsSortSelect exclude={sortExclude} />
                 </Suspense>
               }
             />

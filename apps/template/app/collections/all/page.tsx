@@ -41,6 +41,15 @@ export const unstable_instant = true;
 
 export const unstable_prefetch = "force-runtime";
 
+// Storefront `search()` only supports RELEVANCE and PRICE sort keys.
+const ALL_PRODUCTS_SORT_EXCLUDE = [
+  "best-selling",
+  "date-new-to-old",
+  "date-old-to-new",
+  "product-name-ascending",
+  "product-name-descending",
+];
+
 export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
   const locale = await getLocale();
   const handlePromise = Promise.resolve(ALL_PRODUCTS_HANDLE);
@@ -58,6 +67,7 @@ export default async function AllProductsPage({ searchParams }: PageProps<"/coll
       collectionResultsDataPromise={collectionResultsDataPromise}
       locale={locale}
       searchStatePromise={searchStatePromise}
+      sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}
     />
   );
 }
