@@ -1,6 +1,5 @@
 import type * as React from "react";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -113,13 +112,4 @@ function ProductInfoDescription({
   );
 }
 
-function ProductInfoSkeleton({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div className={cn("grid gap-10", className)} {...props}>
-      <Skeleton className="h-40 w-full" />
-      <Skeleton className="h-32 w-full" />
-    </div>
-  );
-}
-
-export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions, ProductInfoSkeleton };
+export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions };

@@ -29,16 +29,6 @@ export function computeSelection(
   return { selectedOptions, selectedVariant, colorImages };
 }
 
-/** True when the ATF can render without awaiting searchParams. */
-export function isSelectionEager(product: ProductDetails): boolean {
-  return (
-    product.variants.length === 1 &&
-    hasUniformPricing(product.variants) &&
-    hasUniformStock(product.variants) &&
-    !hasColorImagePartitioning(product.options, product.variants)
-  );
-}
-
 /** Called server-side so the initial HTML matches hydrated state (zero CLS). */
 export function computeInitialSelectedOptions(
   variants: ProductVariant[],

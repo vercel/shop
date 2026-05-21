@@ -1,11 +1,10 @@
+import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
-  ProductInfoHeader,
   ProductInfoOptions,
-  ProductInfoSkeleton,
 } from "@/components/product-detail/product-info";
 import {
   ColorImageCarouselItems,
@@ -13,18 +12,23 @@ import {
   ProductMedia,
   ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
+import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
+import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   computeSelection,
   getSharedImages,
   hasColorImagePartitioning,
-  isSelectionEager,
+  hasUniformPricing,
+  hasUniformStock,
   type ProductSelection,
 } from "@/lib/product";
 import type { ProductDetails } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export function ProductDetailSection({
   productPromise,
@@ -56,7 +60,6 @@ async function ProductDetailSectionContent({
   locale: Locale;
 }) {
   const product = await productPromise;
-  const eager = isSelectionEager(product);
 
   return (
     <>
@@ -81,28 +84,21 @@ async function ProductDetailSectionContent({
         ]}
       />
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaRegion product={product} eager={eager} selectionPromise={selectionPromise} />
-        <ProductInfoRegion
-          product={product}
-          eager={eager}
-          selectionPromise={selectionPromise}
-          locale={locale}
-        />
+        <ProductMediaArea product={product} selectionPromise={selectionPromise} />
+        <ProductInfoArea product={product} selectionPromise={selectionPromise} locale={locale} />
       </div>
     </>
   );
 }
 
-function ProductMediaRegion({
+function ProductMediaArea({
   product,
-  eager,
   selectionPromise,
 }: {
   product: ProductDetails;
-  eager: boolean;
   selectionPromise: Promise<ProductSelection>;
 }) {
-  if (eager || !hasColorImagePartitioning(product.options, product.variants)) {
+  if (!hasColorImagePartitioning(product.options, product.variants)) {
     return (
       <ProductMedia
         otherImages={product.images}
@@ -114,111 +110,241 @@ function ProductMediaRegion({
   }
 
   return (
-    <Suspense fallback={<ProductMediaSkeleton className="lg:col-span-6" />}>
-      <ResolvedProductMedia product={product} selectionPromise={selectionPromise} />
-    </Suspense>
-  );
-}
-
-async function ResolvedProductMedia({
-  product,
-  selectionPromise,
-}: {
-  product: ProductDetails;
-  selectionPromise: Promise<ProductSelection>;
-}) {
-  const { colorImages } = await selectionPromise;
-  return (
     <ProductMedia
       otherImages={getSharedImages(product.images, product.options, product.variants)}
       videos={product.videos}
       title={product.title}
       className="lg:col-span-6"
       desktopSlot={
-        colorImages.length > 0 ? (
-          <ColorImageGrid images={colorImages} title={product.title} />
-        ) : null
+        <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
+          <ResolvedColorImageGrid title={product.title} selectionPromise={selectionPromise} />
+        </Suspense>
       }
       mobileSlot={
-        colorImages.length > 0 ? (
-          <ColorImageCarouselItems images={colorImages} title={product.title} />
-        ) : null
+        <Suspense
+          fallback={
+            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square">
+              <Skeleton className="size-full rounded-none" />
+            </div>
+          }
+        >
+          <ResolvedColorImageCarousel title={product.title} selectionPromise={selectionPromise} />
+        </Suspense>
       }
     />
   );
 }
 
-function ProductInfoRegion({
+async function ResolvedColorImageGrid({
+  title,
+  selectionPromise,
+}: {
+  title: string;
+  selectionPromise: Promise<ProductSelection>;
+}) {
+  const { colorImages } = await selectionPromise;
+  if (colorImages.length === 0) return null;
+  return <ColorImageGrid images={colorImages} title={title} />;
+}
+
+async function ResolvedColorImageCarousel({
+  title,
+  selectionPromise,
+}: {
+  title: string;
+  selectionPromise: Promise<ProductSelection>;
+}) {
+  const { colorImages } = await selectionPromise;
+  if (colorImages.length === 0) return null;
+  return <ColorImageCarouselItems images={colorImages} title={title} />;
+}
+
+async function ProductInfoArea({
   product,
-  eager,
   selectionPromise,
   locale,
 }: {
   product: ProductDetails;
-  eager: boolean;
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
-  if (eager) {
-    return (
-      <ProductInfoColumn
-        product={product}
-        selection={computeSelection(product, undefined)}
-        locale={locale}
-      />
-    );
-  }
+  const { variants, options, handle, title, featuredImage, descriptionHtml, availableForSale } =
+    product;
+  const uniformPrice = hasUniformPricing(variants);
+  const uniformStock = hasUniformStock(variants);
+  const singleVariant = variants.length === 1;
+  const eagerSelection = singleVariant ? computeSelection(product, undefined) : null;
+  const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
+  const allInStock = variants[0]?.availableForSale ?? true;
 
   return (
-    <Suspense fallback={<ProductInfoSkeleton className="lg:sticky lg:top-20 lg:col-span-4" />}>
-      <ResolvedProductInfo product={product} selectionPromise={selectionPromise} locale={locale} />
-    </Suspense>
+    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+      <div data-slot="product-info-header">
+        <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
+        {uniformPrice ? (
+          variants[0] && (
+            <ProductPrice
+              amount={variants[0].price.amount}
+              currencyCode={variants[0].price.currencyCode}
+              compareAtAmount={variants[0].compareAtPrice?.amount}
+              locale={locale}
+            />
+          )
+        ) : (
+          <Suspense fallback={<div className="h-6" aria-hidden />}>
+            <ResolvedProductPrice selectionPromise={selectionPromise} locale={locale} />
+          </Suspense>
+        )}
+      </div>
+
+      {eagerSelection ? (
+        <ProductInfoOptions
+          variants={variants}
+          options={options}
+          selectedOptions={eagerSelection.selectedOptions}
+          handle={handle}
+        />
+      ) : (
+        <Suspense
+          fallback={
+            <ProductInfoOptions
+              variants={variants}
+              options={options}
+              selectedOptions={{}}
+              handle={handle}
+              hideImages
+            />
+          }
+        >
+          <ResolvedProductInfoOptions
+            variants={variants}
+            options={options}
+            handle={handle}
+            selectionPromise={selectionPromise}
+          />
+        </Suspense>
+      )}
+
+      {eagerSelection ? (
+        <BuyButtons
+          selectedVariant={eagerSelection.selectedVariant}
+          title={title}
+          handle={handle}
+          featuredImage={featuredImage}
+          availableForSale={availableForSale}
+        />
+      ) : (
+        <Suspense fallback={<BuyButtonsFallback t={t} allInStock={allInStock} />}>
+          <ResolvedBuyButtons
+            title={title}
+            handle={handle}
+            featuredImage={featuredImage}
+            availableForSale={availableForSale}
+            selectionPromise={selectionPromise}
+          />
+        </Suspense>
+      )}
+
+      <ProductInfoDescription descriptionHtml={descriptionHtml} />
+    </div>
   );
 }
 
-async function ResolvedProductInfo({
-  product,
+async function ResolvedProductPrice({
   selectionPromise,
   locale,
 }: {
-  product: ProductDetails;
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
-  const selection = await selectionPromise;
-  return <ProductInfoColumn product={product} selection={selection} locale={locale} />;
+  const { selectedVariant } = await selectionPromise;
+  if (!selectedVariant) return null;
+  return (
+    <ProductPrice
+      amount={selectedVariant.price.amount}
+      currencyCode={selectedVariant.price.currencyCode}
+      compareAtAmount={selectedVariant.compareAtPrice?.amount}
+      locale={locale}
+    />
+  );
 }
 
-function ProductInfoColumn({
-  product,
-  selection,
-  locale,
+async function ResolvedProductInfoOptions({
+  variants,
+  options,
+  handle,
+  selectionPromise,
 }: {
-  product: ProductDetails;
-  selection: ProductSelection;
-  locale: Locale;
+  variants: ProductDetails["variants"];
+  options: ProductDetails["options"];
+  handle: string;
+  selectionPromise: Promise<ProductSelection>;
 }) {
+  const { selectedOptions } = await selectionPromise;
   return (
-    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      <ProductInfoHeader
-        selectedVariant={selection.selectedVariant}
-        title={product.title}
-        locale={locale}
-      />
-      <ProductInfoOptions
-        variants={product.variants}
-        options={product.options}
-        selectedOptions={selection.selectedOptions}
-        handle={product.handle}
-      />
-      <BuyButtons
-        selectedVariant={selection.selectedVariant}
-        title={product.title}
-        handle={product.handle}
-        featuredImage={product.featuredImage}
-        availableForSale={product.availableForSale}
-      />
-      <ProductInfoDescription descriptionHtml={product.descriptionHtml} />
+    <ProductInfoOptions
+      variants={variants}
+      options={options}
+      selectedOptions={selectedOptions}
+      handle={handle}
+    />
+  );
+}
+
+async function ResolvedBuyButtons({
+  title,
+  handle,
+  featuredImage,
+  availableForSale,
+  selectionPromise,
+}: {
+  title: string;
+  handle: string;
+  featuredImage: ProductDetails["featuredImage"];
+  availableForSale: boolean;
+  selectionPromise: Promise<ProductSelection>;
+}) {
+  const { selectedVariant } = await selectionPromise;
+  return (
+    <BuyButtons
+      selectedVariant={selectedVariant}
+      title={title}
+      handle={handle}
+      featuredImage={featuredImage}
+      availableForSale={availableForSale}
+    />
+  );
+}
+
+function BuyButtonsFallback({
+  t,
+  allInStock,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
+  allInStock: boolean;
+}) {
+  if (!t) {
+    return (
+      <div className="grid grid-cols-2 gap-2">
+        <div className="h-12 rounded-lg bg-shop" />
+        <div className="h-12 rounded-lg bg-foreground" />
+      </div>
+    );
+  }
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <div
+        className={cn(
+          "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
+          !allInStock && "invisible",
+        )}
+      >
+        <span className="text-sm font-medium">{t("buyWithShop")}</span>
+        <ShopLogo className="h-4 w-auto" />
+      </div>
+      <div className="flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
+        {allInStock ? t("addToCart") : t("outOfStock")}
+      </div>
     </div>
   );
 }
@@ -227,7 +353,10 @@ export function ProductDetailSectionSkeleton() {
   return (
     <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
       <ProductMediaSkeleton className="lg:col-span-6" />
-      <ProductInfoSkeleton className="lg:sticky lg:top-20 lg:col-span-4" />
+      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
     </div>
   );
 }
