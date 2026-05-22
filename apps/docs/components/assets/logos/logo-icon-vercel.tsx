@@ -1,10 +1,4 @@
-export function LogoIconVercel({
-  size = 16,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function LogoIconVercel({ size = 16, className }: { size?: number; className?: string }) {
   return (
     <svg
       aria-hidden="true"
@@ -16,12 +10,7 @@ export function LogoIconVercel({
       width={size}
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        clipRule="evenodd"
-        d="m8 1 8 14H0z"
-        fill="currentColor"
-        fillRule="evenodd"
-      />
+      <path clipRule="evenodd" d="m8 1 8 14H0z" fill="currentColor" fillRule="evenodd" />
     </svg>
   );
 }

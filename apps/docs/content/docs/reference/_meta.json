@@ -1,10 +1,4 @@
 {
   "title": "Reference",
-  "pages": [
-    "routes",
-    "env-vars",
-    "storefront-api-permissions",
-    "storefront-api",
-    "troubleshooting"
-  ]
+  "pages": ["routes", "env-vars", "storefront-api-permissions", "storefront-api", "troubleshooting"]
 }

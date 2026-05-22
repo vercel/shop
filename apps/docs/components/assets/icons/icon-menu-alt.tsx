@@ -1,10 +1,4 @@
-export function IconMenuAlt({
-  size = 16,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function IconMenuAlt({ size = 16, className }: { size?: number; className?: string }) {
   return (
     <svg
       aria-hidden="true"

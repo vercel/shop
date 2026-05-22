@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
 import { IconArrowUpRightSmall } from "@/components/assets/icons/icon-arrow-up-right-small";
 import {
   NavigationMenu,
@@ -27,14 +28,15 @@ export const DesktopMenu = ({ items, className }: DesktopMenuProps) => {
         {items.map((item) => {
           const external = item.href.startsWith("http") || item.target === "_blank";
           const isActive =
-            !external && (pathname === item.href || (item.href === "/docs" && pathname.startsWith("/docs")));
+            !external &&
+            (pathname === item.href || (item.href === "/docs" && pathname.startsWith("/docs")));
           return (
             <NavigationMenuItem key={item.href}>
               <NavigationMenuLink
                 asChild
                 className={cn(
                   "flex items-center text-sm transition-colors duration-100",
-                  isActive ? "text-gray-1000" : "text-gray-900 hover:text-gray-1000"
+                  isActive ? "text-gray-1000" : "text-gray-900 hover:text-gray-1000",
                 )}
               >
                 {external ? (

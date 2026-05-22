@@ -1,8 +1,9 @@
-import type { MDXComponents } from "mdx/types";
 import { CodeBlock, H1, H2, H3, H4, H5, H6 } from "fromsrc/client";
+import type { MDXComponents } from "mdx/types";
 import Link from "next/link";
 import { isValidElement } from "react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
+
 import { CartBrowser } from "@/components/fake-browser/cart-browser";
 import { ContentBrowser } from "@/components/fake-browser/content-browser";
 import { HomeBrowser } from "@/components/fake-browser/home-browser";
@@ -23,32 +24,18 @@ function language(node: ReactNode): string {
 }
 
 function Cards({ children }: { children: ReactNode }) {
-  return (
-    <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {children}
-    </div>
-  );
+  return <div className="not-prose grid grid-cols-1 gap-4 sm:grid-cols-2">{children}</div>;
 }
 
 /**
  * Card component with children as description text.
  * Matches the pattern used in existing MDX: <Card title="..." href="...">description</Card>
  */
-function Card({
-  title,
-  href,
-  children,
-}: {
-  title: string;
-  href?: string;
-  children?: ReactNode;
-}) {
+function Card({ title, href, children }: { title: string; href?: string; children?: ReactNode }) {
   const content = (
     <div className="rounded-lg border p-4 transition-colors hover:bg-muted/50">
       <h3 className="mb-1 font-semibold">{title}</h3>
-      {children ? (
-        <div className="text-sm text-muted-foreground [&>p]:m-0">{children}</div>
-      ) : null}
+      {children ? <div className="text-sm text-muted-foreground [&>p]:m-0">{children}</div> : null}
     </div>
   );
 
@@ -59,26 +46,11 @@ function Card({
 }
 
 export const mdxComponents: MDXComponents = {
-  a: ({
-    href = "",
-    ...props
-  }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+  a: ({ href = "", ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
     if (href.startsWith("/")) {
-      return (
-        <Link
-          href={href}
-          className="font-normal text-primary no-underline"
-          {...props}
-        />
-      );
+      return <Link href={href} className="font-normal text-primary no-underline" {...props} />;
     }
-    return (
-      <a
-        href={href}
-        className="font-normal text-primary no-underline"
-        {...props}
-      />
-    );
+    return <a href={href} className="font-normal text-primary no-underline" {...props} />;
   },
 
   pre: ({ children, ...props }: PreProps) => (

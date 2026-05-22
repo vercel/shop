@@ -74,9 +74,9 @@ Product recommendations on the PDP are powered by Shopify's recommendation API. 
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `lib/shopify/fragments.ts` | Product fragment with metafield identifiers (lines 60–174) |
-| `lib/shopify/transforms/product.ts` | Metafield label mapping and product transform |
-| `lib/shopify/operations/products.ts` | Product fetch operations with caching |
-| `components/product/pdp/variants.ts` | Variant resolution and swatch handling |
+| File                                 | Purpose                                                         |
+| ------------------------------------ | --------------------------------------------------------------- |
+| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                     |
+| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                   |
+| `lib/shopify/operations/products.ts` | Product fetch operations with caching                           |
+| `lib/product.ts`                     | Variant resolution, swatch detection, and option URL generation |

@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SearchResult {
   title: string;
@@ -29,7 +29,11 @@ export function Search() {
         e.preventDefault();
         setOpen(true);
       }
-      if (e.key === "/" && !open && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      if (
+        e.key === "/" &&
+        !open &&
+        !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)
+      ) {
         e.preventDefault();
         setOpen(true);
       }
@@ -60,7 +64,9 @@ export function Search() {
 
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=8`, { signal: controller.signal });
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=8`, {
+          signal: controller.signal,
+        });
         const data = await res.json();
         setResults(data);
         setSelected(0);
@@ -74,26 +80,32 @@ export function Search() {
     };
   }, [query]);
 
-  const navigate = useCallback((result: SearchResult) => {
-    const path = result.slug ? `/docs/${result.slug}` : "/docs";
-    const url = result.anchor ? `${path}#${result.anchor}` : path;
-    router.push(url);
-    setOpen(false);
-  }, [router]);
-
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+  const navigate = useCallback(
+    (result: SearchResult) => {
+      const path = result.slug ? `/docs/${result.slug}` : "/docs";
+      const url = result.anchor ? `${path}#${result.anchor}` : path;
+      router.push(url);
       setOpen(false);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelected((s) => Math.min(s + 1, results.length - 1));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelected((s) => Math.max(s - 1, 0));
-    } else if (e.key === "Enter" && results[selected]) {
-      navigate(results[selected]);
-    }
-  }, [results, selected, navigate]);
+    },
+    [router],
+  );
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelected((s) => Math.min(s + 1, results.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelected((s) => Math.max(s - 1, 0));
+      } else if (e.key === "Enter" && results[selected]) {
+        navigate(results[selected]);
+      }
+    },
+    [results, selected, navigate],
+  );
 
   if (!open) return null;
 
@@ -105,11 +117,25 @@ export function Search() {
         onClick={() => setOpen(false)}
         aria-label="Close search"
       />
-      <div className="relative z-10 max-w-[640px] mx-auto" style={{ marginTop: "calc(50vh - 250px)" }}>
+      <div
+        className="relative z-10 max-w-[640px] mx-auto"
+        style={{ marginTop: "calc(50vh - 250px)" }}
+      >
         <div className="bg-sidebar border border-border rounded-xl shadow-2xl overflow-hidden">
           <div className="flex items-center gap-3 px-4 border-b border-border">
-            <svg className="w-4 h-4 text-muted-foreground shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <svg
+              className="w-4 h-4 text-muted-foreground shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <input
               ref={inputRef}
@@ -125,31 +151,35 @@ export function Search() {
           </div>
           {query.trim() && (
             <div className="max-h-[460px] overflow-y-auto p-1">
-              {loading && results.length === 0 ? null : results.length === 0 ? null : (
-                results.map((result, i) => (
-                  <button
-                    key={`${result.slug}-${result.anchor}-${i}`}
-                    type="button"
-                    onClick={() => navigate(result)}
-                    onMouseEnter={() => setSelected(i)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
-                      i === selected ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent/50"
-                    }`}
-                  >
-                    <div className="text-sm font-medium text-foreground">{result.title}</div>
-                    {result.heading && (
-                      <div className="text-xs text-muted-foreground mt-0.5 ps-3 border-l border-border">
-                        {result.heading}
-                      </div>
-                    )}
-                    {result.snippet && (
-                      <div className="text-xs text-muted-foreground mt-0.5 ps-3 border-l border-border truncate">
-                        {result.snippet}
-                      </div>
-                    )}
-                  </button>
-                ))
-              )}
+              {loading && results.length === 0
+                ? null
+                : results.length === 0
+                  ? null
+                  : results.map((result, i) => (
+                      <button
+                        key={`${result.slug}-${result.anchor}-${i}`}
+                        type="button"
+                        onClick={() => navigate(result)}
+                        onMouseEnter={() => setSelected(i)}
+                        className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                          i === selected
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:bg-accent/50"
+                        }`}
+                      >
+                        <div className="text-sm font-medium text-foreground">{result.title}</div>
+                        {result.heading && (
+                          <div className="text-xs text-muted-foreground mt-0.5 ps-3 border-l border-border">
+                            {result.heading}
+                          </div>
+                        )}
+                        {result.snippet && (
+                          <div className="text-xs text-muted-foreground mt-0.5 ps-3 border-l border-border truncate">
+                            {result.snippet}
+                          </div>
+                        )}
+                      </button>
+                    ))}
             </div>
           )}
         </div>

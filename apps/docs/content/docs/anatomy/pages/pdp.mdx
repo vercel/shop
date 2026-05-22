@@ -10,19 +10,19 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP uses a rendering strategy combining `unstable_instant` and `experimental.partialFallbacks`:
+The PDP runs under Next.js 16 Cache Components with instant navigation:
 
 ```ts
 // next.config.ts
-experimental: {
-  partialFallbacks: true,
-}
+cacheComponents: true,
 
 // app/products/[handle]/page.tsx
 export const unstable_instant = true;
 ```
 
-`partialFallbacks` enables Partial Pre-Rendering (PPR), where the static shell of the page is served instantly and dynamic sections stream in. `unstable_instant = true` opts the route into instant navigation validation at the default warning level.
+`cacheComponents: true` lets the static shell of the page serve instantly while anything that depends on `searchParams` (the selected variant) streams in behind Suspense. `unstable_instant = true` opts the route into instant navigation validation.
+
+The route passes promises — not awaited values — down into `ProductDetailSection`. Parts of the UI that don't depend on the selected variant (title, shared gallery images, uniformly-priced variants) render immediately; the color-specific gallery slot, variant-specific price, option highlight, and buy buttons each sit inside their own Suspense boundary so a `?variant=` change doesn't skeletonize the whole page.
 
 ## Variant selection
 
@@ -35,19 +35,17 @@ Variants are selected via `searchParams`. Each option (color, size, etc.) render
 The page component receives `searchParams` as a promise and extracts the selected variant ID:
 
 ```tsx
-const variantIdPromise = searchParams.then(
-  (sp) => (sp?.variant as string | undefined),
-);
+const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
 ```
 
-On the server, `computeInitialSelectedOptions()` matches the numeric variant ID to the full variant object and extracts its selected options. These are threaded down as props - no client-side variant context or `useState` is involved. This means:
+On the server, `computeSelection()` matches the numeric variant ID to the full variant object and returns `{ selectedOptions, selectedVariant, colorImages }` in one pass. These are threaded down as props - no client-side variant context or `useState` is involved. This means:
 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
 - The page is fully server-rendered with zero layout shift
 - Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
 
-The `getVariantUrl()` helper in `lib/product/index.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variant` query parameter.
+The `getVariantUrl()` helper in `lib/product.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variant` query parameter.
 
 Unavailable options render as inert `<span>` elements instead of links.
 
@@ -63,7 +61,7 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing `?variant` does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product/index.ts`:
+When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing `?variant` does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product.ts`:
 
 1. Identifies the color option via swatch data or option name
 2. Collects variant images assigned to each color
@@ -105,20 +103,12 @@ The page emits two JSON-LD schemas:
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `app/products/[handle]/page.tsx` | Product route, metadata, and rendering config |
-| `components/product-detail/product-detail-page.tsx` | Server component entry point, fetches related products and emits structured data |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with Suspense boundaries |
-| `components/product-detail/color-picker.tsx` | Color swatch Links with variant images |
-| `components/product-detail/option-picker.tsx` | Text option Links (size, material, etc.) |
-| `components/product-detail/product-info.tsx` | Header, options, and description composition (exports `ProductInfoHeader`, `ProductInfoOptions`, `ProductInfoDescription`) |
-| `components/product-detail/product-media.tsx` | Responsive image gallery (carousel on mobile, grid with lightbox on desktop) |
-| `components/product-detail/lightbox.tsx` | Full-screen image viewer with click-outside to close |
-| `components/product-detail/product-price.tsx` | Price display with discount badge, handles variant-specific pricing |
-| `components/product-detail/buy-buttons.tsx` | Buy with Shop + add to cart buttons |
-| `components/ui/auto-play-video.tsx` | Shared inline video player with preview image fallback |
-| `components/product-detail/about-item.tsx` | Product description rendered from HTML |
-| `components/product-detail/schema.tsx` | JSON-LD Product and Breadcrumb structured data |
-| `components/product-detail/shop-logo.tsx` | Shop wordmark SVG for the Buy with Shop button |
-| `lib/product/index.ts` | Variant resolution, URL generation, image partitioning, pricing/stock helpers |
+| File                                                   | Purpose                                                                                        |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `app/products/[handle]/page.tsx`                       | Route entry: metadata, rendering config, kicks off product + selection promises                |
+| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD |
+| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                            |
+| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
+| `lib/product.ts`                                       | `computeSelection`, variant resolution, URL generation, color-image partitioning               |
+
+Sibling components (`color-picker`, `option-picker`, `product-info`, `product-price`, `schema`, `lightbox`, `about-item`, `shop-logo`) live next to `product-detail-section.tsx` and are easiest to discover by browsing that directory.

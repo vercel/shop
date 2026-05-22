@@ -42,14 +42,11 @@ A fixed bar at the bottom of the viewport. It renders only when it has children 
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `components/nav/index.tsx` | Main navbar composition |
-| `components/nav/mobile-menu.tsx` | Hamburger menu with left sheet (mobile) |
-| `components/nav/quick-links.tsx` | Quick links (hardcoded by default) |
-| `components/nav/cart.tsx` | Cart icon server component |
-| `components/nav/cart-client.tsx` | Cart icon with quantity badge |
-| `components/nav/search-modal.tsx` | Search icon and modal dialog |
-| `components/footer/index.tsx` | Footer (copyright only by default) |
-| `components/footer/social-links.tsx` | Social media icon links |
-| `components/action-bar/index.tsx` | Bottom action bar (agent button slot) |
+| File                              | Purpose                                 |
+| --------------------------------- | --------------------------------------- |
+| `components/nav/index.tsx`        | Navbar composition                      |
+| `components/nav/mobile-menu.tsx`  | Mobile hamburger sheet                  |
+| `components/nav/search-modal.tsx` | Search icon and predictive-search modal |
+| `components/action-bar/index.tsx` | Fixed bottom bar (agent button slot)    |
+
+`quick-links`, `cart` / `cart-client`, and the footer components sit in their respective directories; the [footer page](/docs/anatomy/footer) covers footer composition.

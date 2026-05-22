@@ -1,19 +1,11 @@
 import type { SVGProps } from "react";
 
-interface IconProps
-  extends Omit<
-    SVGProps<SVGSVGElement>,
-    "width" | "height" | "viewBox" | "fill"
-  > {
+interface IconProps extends Omit<SVGProps<SVGSVGElement>, "width" | "height" | "viewBox" | "fill"> {
   color?: string;
   size?: number | string;
 }
 
-export function IconSlashForward({
-  size = 16,
-  color = "currentColor",
-  ...props
-}: IconProps) {
+export function IconSlashForward({ size = 16, color = "currentColor", ...props }: IconProps) {
   return (
     <svg
       aria-hidden="true"

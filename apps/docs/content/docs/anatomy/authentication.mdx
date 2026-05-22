@@ -36,11 +36,11 @@ See [Environment Variables](/docs/reference/env-vars) for the full variable refe
 
 Authentication is built on these modules:
 
-| Module | Purpose |
-|--------|---------|
-| `lib/auth/index.ts` | Universal `isAuthEnabled` flag. Safe to import from server and client code. |
+| Module               | Purpose                                                                                                                                                                                                                                                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lib/auth/index.ts`  | Universal `isAuthEnabled` flag. Safe to import from server and client code.                                                                                                                                                                                              |
 | `lib/auth/server.ts` | Core better-auth configuration with Shopify OIDC via the `genericOAuth` plugin, plus server-side session helpers: `getCustomerSession()`, `getSession()`, `requireCustomerSession()`, `requireSession()`. Uses React `cache()` for per-request memoization. Server-only. |
-| `lib/auth/client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`. |
+| `lib/auth/client.ts` | Client-side hooks and actions: `useSession()`, `signIn()`, `signOut()`.                                                                                                                                                                                                  |
 
 The API route at `/api/auth/[...all]` handles all OAuth callbacks, session management, and token operations via better-auth's `toNextJsHandler`.
 
@@ -58,14 +58,14 @@ This means auth infrastructure has zero runtime cost when disabled.
 
 Authentication uses Shopify-native URL paths:
 
-| Route | Description |
-|-------|-------------|
-| `/account/login` | Auto-redirects to Shopify OIDC. Not indexed by search engines. |
-| `/account` | Redirects to `/account/profile`. |
-| `/account/profile` | Displays customer name and email. |
-| `/account/orders` | Order history (scaffold — wire with Customer Account API operations). |
-| `/account/orders/[id]` | Order detail (scaffold). |
-| `/account/addresses` | Address book (scaffold). |
+| Route                  | Description                                                           |
+| ---------------------- | --------------------------------------------------------------------- |
+| `/account/login`       | Auto-redirects to Shopify OIDC. Not indexed by search engines.        |
+| `/account`             | Redirects to `/account/profile`.                                      |
+| `/account/profile`     | Displays customer name and email.                                     |
+| `/account/orders`      | Order history (scaffold — wire with Customer Account API operations). |
+| `/account/orders/[id]` | Order detail (scaffold).                                              |
+| `/account/addresses`   | Address book (scaffold).                                              |
 
 The account pages use a `(authenticated)` route group so the auth-gated layout applies to protected pages without blocking `/account/login`.
 

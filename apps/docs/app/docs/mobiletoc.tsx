@@ -20,7 +20,14 @@ function ProgressCircle({ value, className }: { value: number; className?: strin
       aria-valuemin={0}
       aria-valuemax={100}
     >
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" strokeWidth={strokeWidth} className="stroke-current/25" />
+      <circle
+        cx={size / 2}
+        cy={size / 2}
+        r={radius}
+        fill="none"
+        strokeWidth={strokeWidth}
+        className="stroke-current/25"
+      />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -84,7 +91,7 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
           setActiveIdx(currentIdx);
         }
       },
-      { rootMargin: "-64px 0px -40% 0px", threshold: 0 }
+      { rootMargin: "-64px 0px -40% 0px", threshold: 0 },
     );
 
     for (const item of elements) observer.observe(item.el);
@@ -93,7 +100,9 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
 
   useEffect(() => {
     if (!listRef.current || activeSet.size === 0) return;
-    const links = Array.from(listRef.current.querySelectorAll("a[data-active='true']")) as HTMLElement[];
+    const links = Array.from(
+      listRef.current.querySelectorAll("a[data-active='true']"),
+    ) as HTMLElement[];
     if (links.length === 0) {
       setThumbStyle({ top: 0, height: 0 });
       return;
@@ -121,7 +130,10 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
   const progress = (activeIdx + 1) / headings.length;
   const activeHeading = headings[activeIdx];
   const showHeading = !open && activeHeading;
-  const maxH = Math.min(contentHeight, typeof window !== "undefined" ? window.innerHeight * 0.85 : 600);
+  const maxH = Math.min(
+    contentHeight,
+    typeof window !== "undefined" ? window.innerHeight * 0.85 : 600,
+  );
 
   return (
     <div className="lg:hidden sticky top-16 z-30 font-sans">
@@ -166,9 +178,7 @@ export function MobileToc({ headings, title }: { headings: Heading[]; title: str
                     data-active={isActive}
                     onClick={() => setOpen(false)}
                     className={`relative py-1.5 text-sm transition-colors ${heading.level >= 3 ? "ps-6" : "ps-3"} ${
-                      isActive
-                        ? "text-foreground font-medium"
-                        : "text-muted-foreground"
+                      isActive ? "text-foreground font-medium" : "text-muted-foreground"
                     }`}
                   >
                     {heading.text}

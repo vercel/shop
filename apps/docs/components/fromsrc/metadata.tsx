@@ -2,14 +2,10 @@
 
 import { isToolUIPart } from "ai";
 import { BookmarkIcon } from "lucide-react";
+
 import type { MyUIMessage } from "@/app/api/chat/types";
 import { Shimmer } from "@/components/ai-elements/shimmer";
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from "@/components/ai-elements/sources";
+import { Source, Sources, SourcesContent, SourcesTrigger } from "@/components/ai-elements/sources";
 
 export function Metadata({
   parts,
@@ -18,9 +14,7 @@ export function Metadata({
   parts: MyUIMessage["parts"];
   streaming: boolean;
 }) {
-  const lastPart = parts
-    .filter((part) => part.type === "text" || isToolUIPart(part))
-    .at(-1);
+  const lastPart = parts.filter((part) => part.type === "text" || isToolUIPart(part)).at(-1);
 
   if (!lastPart) {
     return <Shimmer className="text-xs">Thinking...</Shimmer>;
@@ -31,10 +25,8 @@ export function Metadata({
 
   const sources = Array.from(
     new Map(
-      parts
-        .filter((part) => part.type === "source-url")
-        .map((part) => [part.url, part])
-    ).values()
+      parts.filter((part) => part.type === "source-url").map((part) => [part.url, part]),
+    ).values(),
   );
 
   if (sources.length > 0 && !hasText && streaming) {

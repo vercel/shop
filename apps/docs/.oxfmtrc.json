@@ -1,0 +1,9 @@
+{
+  "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**"],
+  "semi": true,
+  "singleQuote": false,
+  "sortImports": {},
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false
+}

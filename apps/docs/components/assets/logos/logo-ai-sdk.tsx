@@ -1,10 +1,4 @@
-export function LogoAiSdk({
-  height = 22,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoAiSdk({ height = 22, className }: { height?: number; className?: string }) {
   const width = (280 / 77) * height;
   return (
     <svg

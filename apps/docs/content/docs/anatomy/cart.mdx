@@ -76,21 +76,13 @@ The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's Graph
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `components/cart/context.tsx` | Cart state, optimistic updates, debouncing |
-| `components/cart/overlay.tsx` | Cart slideover (mobile and desktop) |
-| `components/cart/overlay-content.tsx` | Cart overlay content and layout |
-| `components/cart/overlay-item.tsx` | Individual cart line item UI (shared with cart page) |
-| `components/cart/overlay-summary.tsx` | Overlay summary with estimated total |
-| `components/cart/context-sync.tsx` | Server-to-client cart initialization |
-| `components/cart-page/header.tsx` | Cart page header with item count badge |
-| `components/cart-page/cart-items-list.tsx` | Full page cart items list |
-| `components/cart-page/summary.tsx` | Cart page summary sidebar with checkout button |
-| `components/cart-page/empty-cart.tsx` | Empty cart state (server component) |
-| `components/cart-page/skeletons.tsx` | Loading skeleton for cart page |
-| `app/cart/page.tsx` | Full cart page route |
-| `lib/cart/action.ts` | Server actions for cart mutations |
-| `lib/cart/server.ts` | `invalidateCartCache()` utility |
-| `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations |
-| `lib/shopify/transforms/cart.ts` | Shopify response to domain type transform |
+| File                             | Purpose                                                         |
+| -------------------------------- | --------------------------------------------------------------- |
+| `components/cart/context.tsx`    | Cart state, optimistic updates, debouncing                      |
+| `components/cart/overlay.tsx`    | Cart slideover composition                                      |
+| `app/cart/page.tsx`              | Full cart page route                                            |
+| `lib/cart/action.ts`             | Server actions for cart mutations                               |
+| `lib/cart/server.ts`             | `invalidateCartCache()` — must be called by every cart mutation |
+| `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations                                 |
+
+Sub-components (`overlay-content`, `overlay-item`, `overlay-summary`, `context-sync`, and the pieces under `components/cart-page/`) live alongside these and are discoverable by directory.

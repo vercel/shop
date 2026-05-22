@@ -4,6 +4,7 @@ import { track } from "@vercel/analytics";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,9 +39,7 @@ export const Installer = ({ command, className = "w-48" }: InstallerProps) => {
   return (
     <InputGroup className={`h-10 bg-background shadow-none text-sm overflow-hidden ${className}`}>
       <InputGroupAddon>
-        <InputGroupText className="font-mono font-normal text-muted-foreground">
-          $
-        </InputGroupText>
+        <InputGroupText className="font-mono font-normal text-muted-foreground">$</InputGroupText>
       </InputGroupAddon>
       <InputGroupInput className="min-w-0 font-mono text-sm" readOnly value={command} />
       <InputGroupAddon align="inline-end">

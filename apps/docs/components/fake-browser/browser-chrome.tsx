@@ -1,10 +1,4 @@
-export const BrowserChrome = ({
-  url,
-  children,
-}: {
-  url: string;
-  children: React.ReactNode;
-}) => (
+export const BrowserChrome = ({ url, children }: { url: string; children: React.ReactNode }) => (
   <div className="not-prose mb-6 w-full rounded-xl bg-fd-background shadow-(--ds-shadow-modal)">
     {/* Browser chrome */}
     <div className="relative flex items-center justify-center overflow-hidden rounded-t-xl border-b bg-black/5 dark:bg-white/5 px-4 py-2.5">

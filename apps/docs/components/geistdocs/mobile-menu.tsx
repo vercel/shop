@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
 import { IconArrowUpRight } from "@/components/assets/icons/icon-arrow-up-right";
 import { nav } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+
 import { SearchButton } from "./search-button";
 
 interface NavItem {
@@ -35,7 +37,7 @@ function NavLink({
     <Link
       className={cn(
         "group flex items-center justify-between rounded-md p-3 transition-colors hover:bg-gray-100 hover:text-gray-1000",
-        active ? "text-gray-1000 font-medium" : "text-gray-900"
+        active ? "text-gray-1000 font-medium" : "text-gray-900",
       )}
       href={href}
       onClick={onClick}
@@ -44,22 +46,13 @@ function NavLink({
     >
       {children}
       {external && (
-        <IconArrowUpRight
-          className="text-gray-900 group-hover:text-gray-1000"
-          size={16}
-        />
+        <IconArrowUpRight className="text-gray-900 group-hover:text-gray-1000" size={16} />
       )}
     </Link>
   );
 }
 
-function MobileMenuButton({
-  expanded,
-  onClick,
-}: {
-  expanded: boolean;
-  onClick: () => void;
-}) {
+function MobileMenuButton({ expanded, onClick }: { expanded: boolean; onClick: () => void }) {
   return (
     <button
       aria-expanded={expanded}
@@ -72,13 +65,13 @@ function MobileMenuButton({
         <span
           className={cn(
             "block h-[1.5px] w-3.5 bg-gray-1000 transition-all duration-150",
-            expanded && "translate-y-[3.25px] rotate-45"
+            expanded && "translate-y-[3.25px] rotate-45",
           )}
         />
         <span
           className={cn(
             "block h-[1.5px] w-3.5 bg-gray-1000 transition-all duration-150",
-            expanded && "-translate-y-[3.25px] -rotate-45"
+            expanded && "-translate-y-[3.25px] -rotate-45",
           )}
         />
       </span>
@@ -127,9 +120,7 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
       <div
         className={cn(
           "fixed inset-0 top-16 z-40 bg-background-200 backdrop-blur-sm transition-opacity duration-200",
-          show
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
+          show ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={close}
       />
@@ -137,9 +128,7 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
       <div
         className={cn(
           "fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto bg-background-200 px-2 transition-all duration-200",
-          show
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0"
+          show ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0",
         )}
       >
         <div className="p-4">
@@ -149,16 +138,9 @@ export const MobileMenu = ({ navigation }: { navigation?: NavSection[] }) => {
         <nav className="px-1">
           {nav.map(({ label, href, target }) => {
             const external = href.startsWith("http") || target === "_blank";
-            const active =
-              !external && (pathname === href || (href === "/docs" && isDocs));
+            const active = !external && (pathname === href || (href === "/docs" && isDocs));
             return (
-              <NavLink
-                active={active}
-                external={external}
-                href={href}
-                key={href}
-                onClick={close}
-              >
+              <NavLink active={active} external={external} href={href} key={href} onClick={close}>
                 {label}
               </NavLink>
             );

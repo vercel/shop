@@ -6,11 +6,7 @@ interface Column {
 const columns: Column[] = [
   {
     title: "Checkout and Payments",
-    items: [
-      "Shopify Checkout",
-      "Shop Pay for accelerated checkout",
-      "Shopify Payments",
-    ],
+    items: ["Shopify Checkout", "Shop Pay for accelerated checkout", "Shopify Payments"],
   },
   {
     title: "Commerce Backend",
@@ -37,9 +33,7 @@ export const ShopifyCommerce = () => (
     {/* Feature columns */}
     {columns.map((column) => (
       <div className="flex flex-col gap-4" key={column.title}>
-        <h3 className="font-sans font-semibold text-[20px] text-foreground">
-          {column.title}
-        </h3>
+        <h3 className="font-sans font-semibold text-[20px] text-foreground">{column.title}</h3>
         <ul className="flex list-disc flex-col gap-3 pl-5 text-muted-foreground marker:text-gray-900">
           {column.items.map((item) => (
             <li className="text-[18px]" key={item}>

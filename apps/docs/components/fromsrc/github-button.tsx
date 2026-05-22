@@ -1,5 +1,7 @@
 import { SiGithub } from "@icons-pack/react-simple-icons";
+
 import { github } from "@/lib/constants";
+
 import { Button } from "../ui/button";
 
 export const GitHubButton = () => {

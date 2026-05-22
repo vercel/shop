@@ -29,8 +29,11 @@ Some sections of `AGENTS.md` are managed by external tools and wrapped in HTML c
 
 ```md
 <!-- BEGIN:nextjs-agent-rules -->
+
 ## This is NOT the Next.js you know
+
 ...
+
 <!-- END:nextjs-agent-rules -->
 ```
 
@@ -41,10 +44,10 @@ These markers serve two purposes:
 
 The template ships with two blocks:
 
-| Block | Owner | What it contains |
-| --- | --- | --- |
-| `nextjs-agent-rules` | Next.js | Reminds agents that this Next.js version has breaking changes and to read bundled docs before writing code. Updated automatically when you upgrade Next.js. |
-| `vercel-shop-style` | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. These are the template's opinionated defaults — remove the block if your team prefers different conventions. |
+| Block                | Owner       | What it contains                                                                                                                                                                                                                                     |
+| -------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nextjs-agent-rules` | Next.js     | Reminds agents that this Next.js version has breaking changes and to read bundled docs before writing code. Updated automatically when you upgrade Next.js.                                                                                          |
+| `vercel-shop-style`  | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. These are the template's opinionated defaults — remove the block if your team prefers different conventions. |
 
 Everything outside these markers is yours. Add project-specific rules, team conventions, or domain constraints anywhere else in the file and no upgrade will overwrite them.
 
@@ -112,14 +115,16 @@ Check the transform in lib/shopify/transforms/product.ts.
 
 ## Writing effective prompts
 
-The difference between a vague prompt and a good one is specificity about *what*, *where*, and *when*.
+The difference between a vague prompt and a good one is specificity about _what_, _where_, and _when_.
 
 **Vague:**
+
 ```
 add size guide
 ```
 
 **Specific:**
+
 ```
 Add a size guide accordion below the product description on the PDP.
 Pull sizing data from a product metafield called "sizing_guide".
@@ -127,22 +132,26 @@ Only show the section when the metafield exists.
 ```
 
 **Vague:**
+
 ```
 fix the cart
 ```
 
 **Specific:**
+
 ```
 The cart overlay shows the wrong total after removing an item.
 Check overlay-item.tsx and the optimistic update logic in context.tsx.
 ```
 
 **Vague:**
+
 ```
 add reviews
 ```
 
 **Specific:**
+
 ```
 Add a customer reviews section below recommendations on the PDP.
 Fetch reviews from a "reviews" metafield on each product.
@@ -153,6 +162,7 @@ Show "No reviews yet" when the metafield is empty.
 ## What agents can and can't do
 
 **Agents can:**
+
 - Read and modify any file in your project
 - Run build and test commands
 - Follow skills step by step
@@ -160,6 +170,7 @@ Show "No reviews yet" when the metafield is empty.
 - Install dependencies and update configs
 
 **Agents can't:**
+
 - Access your Shopify admin panel
 - Deploy to production (unless you explicitly authorize it)
 - Make business decisions about pricing, copy, or design direction

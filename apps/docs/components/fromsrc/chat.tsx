@@ -3,6 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
+import { useLiveQuery } from "dexie-react-hooks";
 import {
   CheckIcon,
   ChevronRightIcon,
@@ -13,24 +14,20 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import { useLiveQuery } from "dexie-react-hooks";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { db } from "@/lib/chatdb";
+
+import type { MyUIMessage } from "@/app/api/chat/types";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "@/components/ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
 import { Suggestion, Suggestions } from "@/components/ai-elements/suggestion";
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
-import type { MyUIMessage } from "@/app/api/chat/types";
 import { Metadata } from "@/components/fromsrc/metadata";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+import { db } from "@/lib/chatdb";
 import { useChatState } from "@/lib/chatstate";
 import { cn } from "@/lib/utils";
 
@@ -43,27 +40,22 @@ const hints = [
 
 function Shimmer({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-block text-xs text-muted-foreground animate-pulse">
-      {children}
-    </span>
+    <span className="inline-block text-xs text-muted-foreground animate-pulse">{children}</span>
   );
 }
 
-function ChatInner({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+function ChatInner({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
   pathnameRef.current = pathname;
 
-  const [transport] = useState(() => new DefaultChatTransport({
-    api: "/api/chat",
-    body: () => ({ currentRoute: pathnameRef.current }),
-  }));
+  const [transport] = useState(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: () => ({ currentRoute: pathnameRef.current }),
+      }),
+  );
 
   const { messages, sendMessage, status, setMessages, stop } = useChat({
     transport,
@@ -76,9 +68,7 @@ function ChatInner({
   const initialized = useRef(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const storedMessages = useLiveQuery(() =>
-    db.messages.orderBy("sequence").toArray()
-  );
+  const storedMessages = useLiveQuery(() => db.messages.orderBy("sequence").toArray());
 
   useEffect(() => {
     if (!storedMessages || initialized.current) return;
@@ -86,7 +76,11 @@ function ChatInner({
       const today = new Date();
       const isOld = storedMessages.some((m) => {
         const d = new Date(m.timestamp);
-        return d.getFullYear() !== today.getFullYear() || d.getMonth() !== today.getMonth() || d.getDate() !== today.getDate();
+        return (
+          d.getFullYear() !== today.getFullYear() ||
+          d.getMonth() !== today.getMonth() ||
+          d.getDate() !== today.getDate()
+        );
       });
       if (isOld) {
         db.messages.clear();
@@ -126,7 +120,7 @@ function ChatInner({
       sendMessage({ text: value });
       setDraft("");
     },
-    [draft, status, sendMessage]
+    [draft, status, sendMessage],
   );
 
   const clear = useCallback(() => {
@@ -138,7 +132,10 @@ function ChatInner({
     const text = messages
       .map((m) => {
         const role = m.role === "user" ? "You" : "AI";
-        const content = m.parts.filter(p => p.type === "text").map(p => p.text).join("");
+        const content = m.parts
+          .filter((p) => p.type === "text")
+          .map((p) => p.text)
+          .join("");
         return `${role}: ${content}`;
       })
       .join("\n\n");
@@ -188,10 +185,7 @@ function ChatInner({
         <ConversationContent className="flex flex-col gap-8 p-4">
           {messages.map((message: UIMessage) => (
             <Message key={message.id} from={message.role} className="max-w-[90%]">
-              <Metadata
-                parts={message.parts as MyUIMessage["parts"]}
-                streaming={isStreaming}
-              />
+              <Metadata parts={message.parts as MyUIMessage["parts"]} streaming={isStreaming} />
               {message.parts
                 .filter((part) => part.type === "text")
                 .map((part, index) => (
@@ -199,7 +193,10 @@ function ChatInner({
                     {message.role === "user" ? (
                       <span className="text-wrap">{part.text}</span>
                     ) : (
-                      <MessageResponse className="text-wrap [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2" linkSafety={{ enabled: false }}>
+                      <MessageResponse
+                        className="text-wrap [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"
+                        linkSafety={{ enabled: false }}
+                      >
                         {part.text}
                       </MessageResponse>
                     )}
@@ -233,8 +230,12 @@ function ChatInner({
             <p className="text-sm text-muted-foreground whitespace-nowrap">
               Tip: You can open and close chat with{" "}
               <span className="inline-flex items-center gap-1">
-                <kbd className="pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded-sm border bg-transparent px-1 font-sans text-xs font-medium select-none">&#8984;</kbd>
-                <kbd className="pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded-sm border bg-transparent px-1 font-sans text-xs font-medium select-none">I</kbd>
+                <kbd className="pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded-sm border bg-transparent px-1 font-sans text-xs font-medium select-none">
+                  &#8984;
+                </kbd>
+                <kbd className="pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded-sm border bg-transparent px-1 font-sans text-xs font-medium select-none">
+                  I
+                </kbd>
               </span>
             </p>
           </>
@@ -247,8 +248,12 @@ function ChatInner({
             onChange={(e) => {
               if (e.target.value.length <= 1000) setDraft(e.target.value);
             }}
-            onCompositionStart={() => { composing.current = true; }}
-            onCompositionEnd={() => { composing.current = false; }}
+            onCompositionStart={() => {
+              composing.current = true;
+            }}
+            onCompositionEnd={() => {
+              composing.current = false;
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && !composing.current) {
                 e.preventDefault();
@@ -260,18 +265,16 @@ function ChatInner({
             style={{ fieldSizing: "content" } as React.CSSProperties}
           />
           <div className="flex w-full items-center justify-between px-3 pb-3">
-            <p className="text-xs text-muted-foreground tabular-nums">
-              {draft.length} / 1000
-            </p>
+            <p className="text-xs text-muted-foreground tabular-nums">{draft.length} / 1000</p>
             <button
               type="button"
-              onClick={() => isStreaming ? stop() : submit()}
+              onClick={() => (isStreaming ? stop() : submit())}
               disabled={!isStreaming && !draft.trim()}
               className={cn(
                 "size-8 rounded-md inline-flex items-center justify-center transition-colors",
                 draft.trim() || isStreaming
                   ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                  : "bg-primary/30 text-primary-foreground/50"
+                  : "bg-primary/30 text-primary-foreground/50",
               )}
               aria-label={isStreaming ? "Stop" : "Submit"}
             >
@@ -302,7 +305,6 @@ function useIsMobile() {
   }, []);
   return mobile;
 }
-
 
 export function Chat() {
   const { isOpen, setIsOpen } = useChatState();

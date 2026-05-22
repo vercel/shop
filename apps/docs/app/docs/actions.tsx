@@ -1,6 +1,5 @@
 "use client";
 
-import { useChatState } from "@/lib/chatstate";
 import {
   ArrowUpCircleIcon,
   CheckIcon,
@@ -11,8 +10,9 @@ import {
   SunIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
 import {
   OpenIn,
   OpenInChatGPT,
@@ -24,8 +24,10 @@ import {
   OpenInTrigger,
   OpenInv0,
 } from "@/components/ai-elements/open-in-chat";
+import { useChatState } from "@/lib/chatstate";
 
-const linkClass = "flex items-center gap-1.5 text-gray-800 text-sm transition-colors hover:text-gray-1000 font-sans";
+const linkClass =
+  "flex items-center gap-1.5 text-gray-800 text-sm transition-colors hover:text-gray-1000 font-sans";
 
 function ScrollTop() {
   return (
@@ -63,11 +65,7 @@ function AskAiAboutPage() {
   const { setIsOpen } = useChatState();
 
   return (
-    <button
-      type="button"
-      onClick={() => setIsOpen(true)}
-      className={linkClass}
-    >
+    <button type="button" onClick={() => setIsOpen(true)} className={linkClass}>
       <MessageCircleIcon className="size-3.5" />
       <span>Ask AI about this page</span>
     </button>
@@ -76,7 +74,8 @@ function AskAiAboutPage() {
 
 function OpenInChat() {
   const pathname = usePathname();
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://shop-docs.vercel.app";
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://shop-docs.vercel.app";
   const url = `${origin}${pathname}`;
   const query = `Read this documentation page and answer questions about it: ${url}`;
 
@@ -111,11 +110,7 @@ function ThemeToggle() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <button
-      type="button"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className={linkClass}
-    >
+    <button type="button" onClick={() => setTheme(isDark ? "light" : "dark")} className={linkClass}>
       {isDark ? <SunIcon className="size-3.5" /> : <MoonIcon className="size-3.5" />}
       <span>{isDark ? "Light mode" : "Dark mode"}</span>
     </button>

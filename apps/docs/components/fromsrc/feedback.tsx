@@ -3,15 +3,12 @@
 import { SiMarkdown } from "@icons-pack/react-simple-icons";
 import { ThumbsUpIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
-import {
-  type FormEventHandler,
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
+import { type FormEventHandler, useEffect, useState, useTransition } from "react";
+
 import { sendFeedback } from "@/app/actions/feedback";
 import { emotions } from "@/app/actions/feedback/emotions";
 import { cn } from "@/lib/utils";
+
 import { Button } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Textarea } from "../ui/textarea";

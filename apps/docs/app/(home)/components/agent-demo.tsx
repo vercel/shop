@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { BrowserChrome } from "@/components/storefront-hero/browser-chrome";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -48,34 +49,11 @@ const skills: Skill[] = [
   },
 ];
 
-type Phase =
-  | "idle"
-  | "typing-command"
-  | "running"
-  | "log-1"
-  | "log-2"
-  | "log-3"
-  | "done";
+type Phase = "idle" | "typing-command" | "running" | "log-1" | "log-2" | "log-3" | "done";
 
-const phases: Phase[] = [
-  "idle",
-  "typing-command",
-  "running",
-  "log-1",
-  "log-2",
-  "log-3",
-  "done",
-];
+const phases: Phase[] = ["idle", "typing-command", "running", "log-1", "log-2", "log-3", "done"];
 
-const LogLine = ({
-  icon,
-  text,
-  visible,
-}: {
-  icon: string;
-  text: string;
-  visible: boolean;
-}) => {
+const LogLine = ({ icon, text, visible }: { icon: string; text: string; visible: boolean }) => {
   if (!visible) return null;
   return (
     <div className="flex items-start gap-2 animate-[fade-in_0.3s_ease_forwards] font-mono text-xs">
@@ -150,10 +128,7 @@ export const AgentDemo = () => {
       setTimeout(() => setPhase("running"), 600);
       return;
     }
-    const timeout = setTimeout(
-      () => setCharIndex((i) => i + 1),
-      40 + Math.random() * 50,
-    );
+    const timeout = setTimeout(() => setCharIndex((i) => i + 1), 40 + Math.random() * 50);
     return () => clearTimeout(timeout);
   }, [phase, charIndex, skill.command.length]);
 
@@ -219,10 +194,7 @@ export const AgentDemo = () => {
 
       {/* Terminal */}
       <BrowserChrome showLockIcon={false} url="Coding Agent">
-        <div
-          ref={ref}
-          className="flex h-48 flex-col gap-2.5 overflow-hidden sm:h-56"
-        >
+        <div ref={ref} className="flex h-48 flex-col gap-2.5 overflow-hidden sm:h-56">
           {/* Command input */}
           {showCommand && (
             <div className="flex h-5 items-center gap-2 animate-[fade-in_0.15s_ease]">
@@ -230,9 +202,7 @@ export const AgentDemo = () => {
                 $
               </span>
               <span className="font-mono text-xs leading-5 text-black dark:text-white">
-                {phase === "typing-command"
-                  ? skill.command.slice(0, charIndex)
-                  : skill.command}
+                {phase === "typing-command" ? skill.command.slice(0, charIndex) : skill.command}
                 <span
                   aria-hidden
                   className={`ml-0.5 inline-block h-3.5 w-[5px] align-middle bg-black/70 dark:bg-white/70 ${

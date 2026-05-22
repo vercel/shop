@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { Streamdown } from 'streamdown';
+
+import { Streamdown } from "streamdown";
 
 function stripFrontmatter(content: string): string {
   if (content.startsWith("---")) {

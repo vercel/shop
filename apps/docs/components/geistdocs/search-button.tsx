@@ -1,13 +1,11 @@
 "use client";
 
-import { Kbd } from "@/components/ui/kbd";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { cn } from "@/lib/utils";
 
 function openSearchDialog() {
-  window.dispatchEvent(
-    new KeyboardEvent("keydown", { bubbles: true, key: "k", metaKey: true }),
-  );
+  window.dispatchEvent(new KeyboardEvent("keydown", { bubbles: true, key: "k", metaKey: true }));
 }
 
 interface SearchButtonProps {

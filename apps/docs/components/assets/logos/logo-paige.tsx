@@ -1,10 +1,4 @@
-export function LogoPaige({
-  height = 28,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoPaige({ height = 28, className }: { height?: number; className?: string }) {
   const width = (68 / 32) * height;
   return (
     <svg

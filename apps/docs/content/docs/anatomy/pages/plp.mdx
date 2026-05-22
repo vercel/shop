@@ -72,22 +72,13 @@ The `/search` route accepts a `q` query parameter and combines it with the same 
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `app/collections/[handle]/page.tsx` | Collection route with parallel data fetching |
-| `app/search/page.tsx` | Search route with query param handling |
-| `components/collections/collection-page.tsx` | Root wrapper with `FilterTransitionProvider` |
-| `components/collections/results.tsx` | Orchestrates toolbar, filter sidebar, and results grid |
-| `components/collections/results-grid.tsx` | Responsive product grid with loading overlay |
-| `components/collections/infinite-product-grid.tsx` | Infinite scroll with `IntersectionObserver` and server action |
-| `components/collections/toolbar.tsx` | Toolbar with filter trigger, result count, and sort |
-| `components/collections/filter-sidebar.tsx` | Async faceted filter sidebar with Shopify filter data |
-| `components/collections/filter-primitives.tsx` | Filter UI primitives (checkboxes, price slider, section headers) |
-| `components/collections/filter-sidebar-sheet.tsx` | Mobile sheet overlay for filters |
-| `components/collections/filter-pending-context.tsx` | Context provider for optimistic filter transitions |
-| `components/collections/sort-select.tsx` | Sort dropdown with transition-based navigation |
-| `components/collections/structured-data.tsx` | JSON-LD structured data for collections |
-| `components/product-card/product-card.tsx` | Product card with image, hover slideshow, and price |
-| `components/search/results.tsx` | Search results layout with no-results state |
-| `lib/shopify/operations/products.ts` | Product search with caching and filter mapping |
-| `lib/shopify/operations/collections.ts` | Collection metadata fetching |
+| File                                               | Purpose                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| `app/collections/[handle]/page.tsx`                | Collection route                                                |
+| `app/search/page.tsx`                              | Search route                                                    |
+| `components/collections/collection-page.tsx`       | Orchestrates toolbar, filter sidebar, results grid, and JSON-LD |
+| `components/collections/infinite-product-grid.tsx` | Infinite scroll via `IntersectionObserver` + server action      |
+| `components/collections/filter-sidebar.tsx`        | Faceted filter sidebar driven by Shopify filter data            |
+| `lib/shopify/operations/products.ts`               | Product search with caching and filter mapping                  |
+
+The toolbar, sort select, mobile filter sheet, filter primitives, transition context, search results layout, and product card live alongside these in `components/collections/`, `components/search/`, and `components/product-card/`.

@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 
 interface TemplatesProps {
@@ -18,9 +19,7 @@ export const Templates = ({ title, description, data }: TemplatesProps) => (
       <h2 className="font-semibold text-xl tracking-tight sm:text-2xl md:text-3xl lg:text-[40px]">
         {title}
       </h2>
-      <p className="text-balance text-lg text-muted-foreground">
-        {description}
-      </p>
+      <p className="text-balance text-lg text-muted-foreground">{description}</p>
     </div>
     <div className="grid gap-8 md:grid-cols-3">
       {data.map((item) => (
@@ -30,14 +29,12 @@ export const Templates = ({ title, description, data }: TemplatesProps) => (
           key={item.title}
         >
           <h3 className="font-medium tracking-tight">{item.title}</h3>
-          <p className="line-clamp-2 text-muted-foreground text-sm">
-            {item.description}
-          </p>
+          <p className="line-clamp-2 text-muted-foreground text-sm">{item.description}</p>
           <Image
             alt={item.title}
             className={cn(
               "mt-8 -mb-12 ml-7 aspect-video -rotate-3 overflow-hidden rounded-md border object-cover object-top",
-              "transition-transform duration-300 group-hover:-rotate-1 group-hover:scale-105"
+              "transition-transform duration-300 group-hover:-rotate-1 group-hover:scale-105",
             )}
             height={336}
             src={item.image}

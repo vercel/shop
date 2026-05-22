@@ -1,5 +1,6 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { localSearch } from "fromsrc";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { docs } from "@/lib/fromsrc/content";
 
 export async function GET(request: NextRequest) {
@@ -27,6 +28,6 @@ export async function GET(request: NextRequest) {
       headers: {
         "Cache-Control": "public, max-age=60, s-maxage=300",
       },
-    }
+    },
   );
 }

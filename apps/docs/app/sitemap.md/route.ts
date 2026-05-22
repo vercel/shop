@@ -10,7 +10,7 @@ type PageNode = {
 };
 
 function buildTree(
-  pages: Array<{ slug: string; title: string; description?: string }>
+  pages: Array<{ slug: string; title: string; description?: string }>,
 ): PageNode[] {
   const root: PageNode[] = [];
   const map = new Map<string, PageNode>();
@@ -52,13 +52,9 @@ function renderNode(node: PageNode, indent: number): string {
   const prefix = "    ".repeat(indent);
   const lines: string[] = [];
 
-  const summary = node.description
-    ? `Summary: ${node.description}`
-    : "";
+  const summary = node.description ? `Summary: ${node.description}` : "";
 
-  lines.push(
-    `${prefix}- [${node.title}](${node.url})${summary ? ` | ${summary}` : ""}`
-  );
+  lines.push(`${prefix}- [${node.title}](${node.url})${summary ? ` | ${summary}` : ""}`);
 
   for (const child of node.children) {
     lines.push("");

@@ -1,10 +1,4 @@
-export function LogoMadeIn({
-  height = 22,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoMadeIn({ height = 22, className }: { height?: number; className?: string }) {
   const width = (184 / 28) * height;
   return (
     <svg

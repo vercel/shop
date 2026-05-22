@@ -6,10 +6,12 @@ import {
   streamText,
 } from "ai";
 import { localSearch } from "fromsrc";
+
+import { docs } from "@/lib/fromsrc/content";
+
 import { createTools } from "./tools";
 import type { MyUIMessage } from "./types";
 import { createSystemPrompt } from "./utils";
-import { docs } from "@/lib/fromsrc/content";
 
 export const maxDuration = 800;
 
@@ -45,7 +47,7 @@ const normalizeSearchText = (value: string) =>
     .trim();
 
 const getPageContextFromRoute = async (
-  currentRoute: string
+  currentRoute: string,
 ): Promise<RequestBody["pageContext"] | undefined> => {
   if (!currentRoute?.startsWith("/docs")) {
     return undefined;
@@ -60,9 +62,7 @@ const getPageContextFromRoute = async (
     return undefined;
   }
 
-  const pageContent = [doc.description, doc.content]
-    .filter(Boolean)
-    .join("\n\n");
+  const pageContent = [doc.description, doc.content].filter(Boolean).join("\n\n");
 
   return {
     title: doc.title,
@@ -90,18 +90,14 @@ const getLastUserQuestion = (messages: MyUIMessage[]) => {
 };
 
 const getPageContextFromQuery = async (
-  query: string
+  query: string,
 ): Promise<RequestBody["pageContext"] | undefined> => {
   if (!query) {
     return undefined;
   }
 
   const searchDocs = await docs.getSearchDocs();
-  let results = await localSearch.search(
-    query,
-    searchDocs,
-    MAX_SEARCH_CONTEXT_RESULTS
-  );
+  let results = await localSearch.search(query, searchDocs, MAX_SEARCH_CONTEXT_RESULTS);
   if (results.length === 0) {
     const queryNormalized = normalizeSearchText(query);
     const terms = queryNormalized.split(" ").filter((term) => term.length >= 3);
@@ -169,9 +165,7 @@ export async function POST(req: Request) {
   try {
     const { messages, currentRoute, pageContext }: RequestBody = await req.json();
     // Filter out UI-only page context messages (they're just visual feedback)
-    const actualMessages = messages.filter(
-      (msg) => !msg.metadata?.isPageContext
-    );
+    const actualMessages = messages.filter((msg) => !msg.metadata?.isPageContext);
     const latestUserQuestion = getLastUserQuestion(actualMessages);
     const resolvedPageContext =
       pageContext ??
@@ -189,7 +183,7 @@ export async function POST(req: Request) {
           JSON.stringify({
             error: "No last message found",
           }),
-          { status: 500 }
+          { status: 500 },
         );
       }
 
@@ -257,7 +251,7 @@ User question: ${userQuestion}`,
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }

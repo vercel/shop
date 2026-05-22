@@ -1,4 +1,5 @@
 import { RssIcon } from "lucide-react";
+
 import { Button } from "../ui/button";
 
 export const RSSButton = () => (

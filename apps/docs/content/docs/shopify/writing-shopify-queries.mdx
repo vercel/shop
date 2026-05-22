@@ -119,9 +119,7 @@ export function transformShopifyPolicy(shopifyPolicy: ShopifyPolicy): Policy {
 Then call it in your operation before returning:
 
 ```ts
-return data.shop.privacyPolicy
-  ? transformShopifyPolicy(data.shop.privacyPolicy)
-  : null;
+return data.shop.privacyPolicy ? transformShopifyPolicy(data.shop.privacyPolicy) : null;
 ```
 
 For simple responses where the shape already matches your needs, you can skip the transform.

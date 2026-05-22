@@ -1,10 +1,4 @@
-export function LogoAg1({
-  height = 28,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoAg1({ height = 28, className }: { height?: number; className?: string }) {
   const width = (80 / 32) * height;
   return (
     <svg

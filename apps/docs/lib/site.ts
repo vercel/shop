@@ -12,10 +12,7 @@ export const docsDescription =
   "Documentation for Vercel Shop — an agent-native, fast-by-default Shopify storefront built on Next.js.";
 
 export function getBaseUrl() {
-  if (
-    process.env.VERCEL_ENV === "production" &&
-    process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ) {
+  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) {
     return new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`);
   }
 

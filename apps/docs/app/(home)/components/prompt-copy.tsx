@@ -3,6 +3,7 @@
 import { track } from "@vercel/analytics";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import {
   InputGroup,
   InputGroupAddon,
@@ -22,11 +23,7 @@ interface PromptCopyProps {
   agentCommand: string;
 }
 
-export const PromptCopy = ({
-  className,
-  command,
-  agentCommand,
-}: PromptCopyProps) => {
+export const PromptCopy = ({ className, command, agentCommand }: PromptCopyProps) => {
   const [mode, setMode] = useState<CopyMode>("cli");
   const [copied, setCopied] = useState(false);
 

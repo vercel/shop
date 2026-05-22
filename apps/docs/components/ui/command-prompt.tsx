@@ -14,6 +14,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { IconCheck } from "@/components/assets/icons/icon-check";
 import { IconCopy } from "@/components/assets/icons/icon-copy";
 import { cn } from "@/lib/utils";
@@ -33,9 +34,7 @@ type CommandPromptContextValue = {
   setCanShowGradient: (value: boolean) => void;
 };
 
-const CommandPromptContext = createContext<CommandPromptContextValue | null>(
-  null
-);
+const CommandPromptContext = createContext<CommandPromptContextValue | null>(null);
 
 function useCommandPromptContext(component: string) {
   const context = useContext(CommandPromptContext);
@@ -47,10 +46,7 @@ function useCommandPromptContext(component: string) {
   return context;
 }
 
-type CommandPromptRootProps = Omit<
-  ComponentPropsWithoutRef<"div">,
-  "onChange"
-> & {
+type CommandPromptRootProps = Omit<ComponentPropsWithoutRef<"div">, "onChange"> & {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
@@ -64,9 +60,7 @@ export function CommandPromptRoot({
   children,
   ...props
 }: CommandPromptRootProps): JSX.Element {
-  const [uncontrolledValue, setUncontrolledValue] = useState(
-    defaultValue ?? ""
-  );
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? "");
   const [copied, setCopied] = useState(false);
   const [activeCopyValue, setActiveCopyValue] = useState("");
   const [commandWidth, setCommandWidth] = useState<number>();
@@ -121,10 +115,7 @@ export function CommandPromptRoot({
         setCanShowGradient,
       }}
     >
-      <div
-        className={cn("w-full flex items-center flex-col gap-2", className)}
-        {...props}
-      >
+      <div className={cn("w-full flex items-center flex-col gap-2", className)} {...props}>
         {children}
       </div>
     </CommandPromptContext.Provider>
@@ -161,7 +152,7 @@ export function CommandPromptTrigger({
         "outline outline-2 outline-offset-2 outline-transparent focus-visible:outline-[var(--ds-focus-color)]",
         "text-gray-900 data-[active]:text-gray-1000 data-[active]:font-medium",
         "flex gap-1.5 items-center whitespace-nowrap",
-        className
+        className,
       )}
       data-active={active ? "" : undefined}
       onClick={(event) => {
@@ -181,13 +172,7 @@ export function CommandPromptTriggerDivider({
   className,
   ...props
 }: ComponentPropsWithoutRef<"div">): JSX.Element {
-  return (
-    <div
-      aria-hidden
-      className={cn("w-px h-3 bg-gray-400", className)}
-      {...props}
-    />
-  );
+  return <div aria-hidden className={cn("w-px h-3 bg-gray-400", className)} {...props} />;
 }
 
 export function CommandPromptSurface({
@@ -206,7 +191,7 @@ export function CommandPromptSurface({
     <motion.div
       className={cn(
         "relative flex items-center group gap-1 material-small transition-colors pl-5 py-2 pr-3 max-w-[calc(100vw-48px)] rounded-full",
-        className
+        className,
       )}
       layout
       onClick={(event) => {
@@ -216,9 +201,7 @@ export function CommandPromptSurface({
         context.copyActiveValue();
       }}
       transition={
-        shouldReduceMotion
-          ? { duration: 0 }
-          : { type: "spring", bounce: 0, duration: 0.4 }
+        shouldReduceMotion ? { duration: 0 } : { type: "spring", bounce: 0, duration: 0.4 }
       }
     >
       {children}
@@ -231,10 +214,7 @@ export function CommandPromptPrefix({
   ...props
 }: ComponentPropsWithoutRef<"span">): JSX.Element {
   return (
-    <span
-      className={cn("block text-label-16-mono! text-gray-500 pr-1", className)}
-      {...props}
-    />
+    <span className={cn("block text-label-16-mono! text-gray-500 pr-1", className)} {...props} />
   );
 }
 
@@ -267,7 +247,7 @@ export function CommandPromptViewport({
   const scrollObserverCleanup = useRef<(() => void) | null>(null);
   const items = Children.toArray(children)
     .filter((child): child is React.ReactElement<CommandPromptContentProps> =>
-      isValidElement<CommandPromptContentProps>(child)
+      isValidElement<CommandPromptContentProps>(child),
     )
     .map((child) => child.props);
   const activeItem = items.find((item) => item.value === context.value);
@@ -278,7 +258,7 @@ export function CommandPromptViewport({
       : Children.toArray(command)
           .filter(
             (child): child is string | number =>
-              typeof child === "string" || typeof child === "number"
+              typeof child === "string" || typeof child === "number",
           )
           .join("");
   const copyValue = activeItem?.copyValue ?? fallbackCopyValue;
@@ -313,16 +293,14 @@ export function CommandPromptViewport({
       }
       className={cn(
         "relative block min-w-0 overflow-hidden text-label-14-mono! text-gray-1000",
-        className
+        className,
       )}
       initial={false}
       onAnimationComplete={() => {
         setCanShowGradient(true);
       }}
       transition={
-        shouldReduceMotion
-          ? { duration: 0 }
-          : { type: "spring", bounce: 0, duration: 0.4 }
+        shouldReduceMotion ? { duration: 0 } : { type: "spring", bounce: 0, duration: 0.4 }
       }
     >
       <span
@@ -342,10 +320,8 @@ export function CommandPromptViewport({
               animate={{ opacity: 1, filter: "blur(0px)" }}
               className={cn(
                 "block whitespace-nowrap min-w-0 py-2",
-                canShowGradient && isOverflowing
-                  ? "overflow-x-auto"
-                  : "overflow-x-hidden",
-                child.props.className
+                canShowGradient && isOverflowing ? "overflow-x-auto" : "overflow-x-hidden",
+                child.props.className,
               )}
               exit={{ opacity: 0, filter: "blur(1px)" }}
               initial={{ opacity: 0, filter: "blur(1px)" }}
@@ -364,9 +340,7 @@ export function CommandPromptViewport({
                 observer.observe(element);
                 scrollObserverCleanup.current = () => observer.disconnect();
               }}
-              transition={
-                shouldReduceMotion ? { duration: 0 } : { duration: 0.15 }
-              }
+              transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.15 }}
             >
               {child.props.children}
             </motion.span>
@@ -381,9 +355,7 @@ export function CommandPromptViewport({
             className="pointer-events-none block z-10 absolute right-0 bg-gradient-to-r from-transparent to-background-100 top-0 bottom-0 w-4"
             exit={{ opacity: 0 }}
             initial={{ opacity: 0 }}
-            transition={
-              shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }
-            }
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.2 }}
           />
         )}
       </AnimatePresence>
@@ -391,9 +363,7 @@ export function CommandPromptViewport({
   );
 }
 
-export function CommandPromptContent(
-  _props: CommandPromptContentProps
-): JSX.Element | null {
+export function CommandPromptContent(_props: CommandPromptContentProps): JSX.Element | null {
   return null;
 }
 
@@ -412,7 +382,7 @@ export function CommandPromptCopy({
         "text-gray-1000 rounded-full border-none bg-transparent shrink-0 cursor-pointer relative size-8 flex items-center justify-center translate-x-0.5",
         "group-hover:bg-gray-alpha-100 hover:!bg-gray-alpha-200 transition-colors touch-manipulation",
         "outline-2 outline-offset-2 outline-transparent focus-visible:outline-[var(--ds-focus-color)]",
-        className
+        className,
       )}
       onClick={(event) => {
         onClick?.(event);
@@ -444,9 +414,7 @@ export function CommandPromptCopy({
             }}
             key="copy"
             transition={
-              shouldReduceMotion
-                ? { duration: 0 }
-                : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
+              shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
             }
           >
             <IconCopy className="block" size={16} />
@@ -474,9 +442,7 @@ export function CommandPromptCopy({
             }}
             key="check"
             transition={
-              shouldReduceMotion
-                ? { duration: 0 }
-                : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
+              shouldReduceMotion ? { duration: 0 } : { duration: 0.2, ease: [0.23, 1, 0.32, 1] }
             }
           >
             <IconCheck className="block" size={16} />

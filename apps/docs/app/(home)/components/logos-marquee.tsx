@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+
 import { LogoAg1 } from "@/components/assets/logos/logo-ag1";
 import { LogoBombas } from "@/components/assets/logos/logo-bombas";
 import { LogoMadeIn } from "@/components/assets/logos/logo-made-in";
@@ -27,10 +28,7 @@ export const LogosMarquee = () => (
   >
     <div className="flex w-max animate-marquee gap-16 pr-16 text-foreground md:gap-24 md:pr-24">
       {[...LOGOS, ...LOGOS].map((logo, index) => (
-        <div
-          key={`${logo.key}-${index}`}
-          className="flex shrink-0 items-center"
-        >
+        <div key={`${logo.key}-${index}`} className="flex shrink-0 items-center">
           {logo.node}
         </div>
       ))}

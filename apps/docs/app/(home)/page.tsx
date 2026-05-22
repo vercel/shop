@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+
+import { StorefrontHero } from "@/components/storefront-hero";
 import { Button } from "@/components/ui/button";
 import {
   CommandPromptContent,
@@ -13,13 +15,13 @@ import {
   CommandPromptViewport,
 } from "@/components/ui/command-prompt";
 import { homeDescription, homeSubtitle, homeTitle, siteName } from "@/lib/site";
+
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
 import { CartDemo } from "./components/cart-demo";
 import { CenteredSection } from "./components/centered-section";
-import { CTA } from "./components/cta";
-import { StorefrontHero } from "@/components/storefront-hero";
 import { ContentNegotiationDemo } from "./components/content-negotiation-demo";
+import { CTA } from "./components/cta";
 import { Hero } from "./components/hero";
 import { LogosMarquee } from "./components/logos-marquee";
 import { OneTwoSection } from "./components/one-two-section";
@@ -55,22 +57,14 @@ export const metadata: Metadata = {
 
 const HomePage = () => (
   <div className="container mx-auto max-w-[1448px]">
-    <Hero
-      badge="Vercel Shop is now in alpha"
-      description={homeSubtitle}
-      title={homeTitle}
-    >
+    <Hero badge="Vercel Shop is now in alpha" description={homeSubtitle} title={homeTitle}>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button asChild className="h-12 w-fit rounded-full px-5">
           <Link href="https://template.vercel.shop/" target="_blank">
             Go to Demo
           </Link>
         </Button>
-        <Button
-          asChild
-          className="h-12 w-fit rounded-full px-5"
-          variant="secondary"
-        >
+        <Button asChild className="h-12 w-fit rounded-full px-5" variant="secondary">
           <Link href="/docs">View Documentation</Link>
         </Button>
       </div>

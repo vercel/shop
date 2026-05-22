@@ -1,6 +1,7 @@
 import { type ToolSet, tool, type UIMessageStreamWriter } from "ai";
 import { localSearch } from "fromsrc";
 import z from "zod";
+
 import { docs } from "@/lib/fromsrc/content";
 
 const log = (message: string) => {
@@ -99,8 +100,7 @@ const search_docs = (writer: UIMessageStreamWriter) =>
 
         return `Found ${results.length} documentation pages for "${query}":\n\n${formatted}`;
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Unknown error";
+        const message = error instanceof Error ? error.message : "Unknown error";
         return `Error processing results: ${message}`;
       }
     },
@@ -110,11 +110,7 @@ const get_doc_page = tool({
   description:
     'Get the full content of a specific documentation page by slug path (e.g., "getting-started", "anatomy/cart")',
   inputSchema: z.object({
-    slug: z
-      .string()
-      .describe(
-        "The slug/path of the documentation page to retrieve"
-      ),
+    slug: z.string().describe("The slug/path of the documentation page to retrieve"),
   }),
   execute: async ({ slug }) => {
     log(`Getting doc page for: ${slug}`);

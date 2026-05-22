@@ -17,9 +17,7 @@ export const StaticBoundary = ({
   children: React.ReactNode;
   className?: string;
 }) => (
-  <div
-    className={`relative rounded-lg border border-blue-600 p-4 ${className ?? ""}`}
-  >
+  <div className={`relative rounded-lg border border-blue-600 p-4 ${className ?? ""}`}>
     <div className="absolute -translate-y-1/2 top-0 left-2">
       <StaticBadge />
     </div>

@@ -1,10 +1,4 @@
-export function LogoBombas({
-  height = 18,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoBombas({ height = 18, className }: { height?: number; className?: string }) {
   const width = (131 / 19) * height;
   return (
     <svg

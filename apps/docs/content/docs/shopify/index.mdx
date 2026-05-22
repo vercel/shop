@@ -14,14 +14,14 @@ For the API client and query patterns, see [Storefront API](/docs/reference/stor
 
 ## Concept mapping
 
-| Shopify concept | Template route | What renders it |
-|---|---|---|
-| Products | `/products/[handle]` | Product detail page with variants, gallery, buy section |
-| Collections | `/collections/[handle]` | Product grid with filtering, sorting, pagination |
-| Menus | Navigation, footer | Quick links bar (with hover panels), mobile sheet, footer columns |
-| Pages | `/pages/[slug]` | Marketing page renderer (requires CMS setup) |
-| Search | `/search` | Same grid as collections, driven by query param |
-| Cart | `/cart` + overlay | Cart context with optimistic updates |
+| Shopify concept | Template route          | What renders it                                                   |
+| --------------- | ----------------------- | ----------------------------------------------------------------- |
+| Products        | `/products/[handle]`    | Product detail page with variants, gallery, buy section           |
+| Collections     | `/collections/[handle]` | Product grid with filtering, sorting, pagination                  |
+| Menus           | Navigation, footer      | Quick links bar (with hover panels), mobile sheet, footer columns |
+| Pages           | `/pages/[slug]`         | Marketing page renderer (requires CMS setup)                      |
+| Search          | `/search`               | Same grid as collections, driven by query param                   |
+| Cart            | `/cart` + overlay       | Cart context with optimistic updates                              |
 
 ## Required menus
 
@@ -29,10 +29,10 @@ By default, the template uses hardcoded navigation links and an empty footer. Us
 
 When enabled, the template fetches menus by handle from **Online Store → Navigation** in Shopify admin. Common handles:
 
-| Menu handle | Where it renders | Structure |
-|---|---|---|
-| `main-menu` | Top navigation links | Flat list or 3-level hierarchy |
-| `footer` | Footer link columns | 2-level: column headings → links |
+| Menu handle | Where it renders     | Structure                        |
+| ----------- | -------------------- | -------------------------------- |
+| `main-menu` | Top navigation links | Flat list or 3-level hierarchy   |
+| `footer`    | Footer link columns  | 2-level: column headings → links |
 
 Menu items can link to collections, products, pages, or custom URLs.
 
@@ -50,16 +50,16 @@ The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` envir
 
 ### Supported topics
 
-| Webhook topic | Cache tags invalidated |
-|---|---|
-| `products/create` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
-| `products/update` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
-| `products/delete` | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
-| `collections/create` | `collections`, `products`, `menus`, `collection-{handle}` |
-| `collections/update` | `collections`, `products`, `menus`, `collection-{handle}` |
-| `collections/delete` | `collections`, `products`, `menus` |
-| `inventory_levels/*` | `products`, `collections` |
-| `metaobjects/*` | `cms:all` + type-specific tags (if using Shopify CMS) |
+| Webhook topic        | Cache tags invalidated                                                    |
+| -------------------- | ------------------------------------------------------------------------- |
+| `products/create`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/update`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/delete`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `collections/create` | `collections`, `products`, `menus`, `collection-{handle}`                 |
+| `collections/update` | `collections`, `products`, `menus`, `collection-{handle}`                 |
+| `collections/delete` | `collections`, `products`, `menus`                                        |
+| `inventory_levels/*` | `products`, `collections`                                                 |
+| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                     |
 
 ### Setting up webhooks
 
@@ -90,8 +90,8 @@ This means a product update in Shopify invalidates only that product's cache and
 
 ## Key files
 
-| File | Purpose |
-|------|---------|
-| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification |
-| `lib/shopify/operations/menu.ts` | Menu fetching by handle (used after `enable-shopify-menus` skill) |
-| `lib/shopify/client.ts` | Core Storefront API client |
+| File                                | Purpose                                                           |
+| ----------------------------------- | ----------------------------------------------------------------- |
+| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification                            |
+| `lib/shopify/operations/menu.ts`    | Menu fetching by handle (used after `enable-shopify-menus` skill) |
+| `lib/shopify/fetch.ts`              | Core Storefront API client                                        |

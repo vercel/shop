@@ -1,10 +1,4 @@
-export function IconCart({
-  size = 16,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function IconCart({ size = 16, className }: { size?: number; className?: string }) {
   return (
     <svg
       aria-hidden="true"

@@ -94,146 +94,26 @@ export function ShoePreviewImage({ className }: { className?: string }) {
         fill="var(--color-background-100)"
         stroke="currentColor"
       />
-      <line
-        stroke="currentColor"
-        x1="10.9678"
-        x2="10.9678"
-        y1="202.276"
-        y2="206.046"
-      />
-      <line
-        stroke="currentColor"
-        x1="21.2012"
-        x2="21.2012"
-        y1="202.545"
-        y2="206.854"
-      />
-      <line
-        stroke="currentColor"
-        x1="45.1709"
-        x2="45.1709"
-        y1="203.353"
-        y2="207.931"
-      />
-      <line
-        stroke="currentColor"
-        x1="57.5596"
-        x2="57.5596"
-        y1="203.892"
-        y2="207.931"
-      />
-      <line
-        stroke="currentColor"
-        x1="70.2178"
-        x2="70.2178"
-        y1="204.43"
-        y2="208.739"
-      />
-      <line
-        stroke="currentColor"
-        x1="83.4141"
-        x2="83.4141"
-        y1="204.969"
-        y2="209.278"
-      />
-      <line
-        stroke="currentColor"
-        x1="97.1494"
-        x2="97.1494"
-        y1="204.969"
-        y2="209.278"
-      />
-      <line
-        stroke="currentColor"
-        x1="109.808"
-        x2="109.808"
-        y1="205.777"
-        y2="209.817"
-      />
-      <line
-        stroke="currentColor"
-        x1="123.543"
-        x2="123.543"
-        y1="205.777"
-        y2="210.355"
-      />
-      <line
-        stroke="currentColor"
-        x1="136.47"
-        x2="136.47"
-        y1="206.315"
-        y2="211.163"
-      />
-      <line
-        stroke="currentColor"
-        x1="149.667"
-        x2="149.667"
-        y1="207.123"
-        y2="211.163"
-      />
-      <line
-        stroke="currentColor"
-        x1="163.133"
-        x2="163.133"
-        y1="207.931"
-        y2="211.971"
-      />
-      <line
-        stroke="currentColor"
-        x1="176.868"
-        x2="176.868"
-        y1="207.931"
-        y2="211.971"
-      />
-      <line
-        stroke="currentColor"
-        x1="191.95"
-        x2="191.95"
-        y1="208.201"
-        y2="212.24"
-      />
-      <line
-        stroke="currentColor"
-        x1="207.031"
-        x2="207.031"
-        y1="208.739"
-        y2="212.779"
-      />
-      <line
-        stroke="currentColor"
-        x1="221.036"
-        x2="221.036"
-        y1="208.47"
-        y2="212.51"
-      />
-      <line
-        stroke="currentColor"
-        x1="234.232"
-        x2="234.232"
-        y1="208.47"
-        y2="212.51"
-      />
-      <line
-        stroke="currentColor"
-        x1="246.891"
-        x2="246.891"
-        y1="208.201"
-        y2="212.24"
-      />
-      <line
-        stroke="currentColor"
-        x1="259.01"
-        x2="259.01"
-        y1="207.662"
-        y2="211.702"
-      />
-      <line
-        stroke="currentColor"
-        x1="270.321"
-        x2="270.321"
-        y1="206.585"
-        y2="210.625"
-      />
+      <line stroke="currentColor" x1="10.9678" x2="10.9678" y1="202.276" y2="206.046" />
+      <line stroke="currentColor" x1="21.2012" x2="21.2012" y1="202.545" y2="206.854" />
+      <line stroke="currentColor" x1="45.1709" x2="45.1709" y1="203.353" y2="207.931" />
+      <line stroke="currentColor" x1="57.5596" x2="57.5596" y1="203.892" y2="207.931" />
+      <line stroke="currentColor" x1="70.2178" x2="70.2178" y1="204.43" y2="208.739" />
+      <line stroke="currentColor" x1="83.4141" x2="83.4141" y1="204.969" y2="209.278" />
+      <line stroke="currentColor" x1="97.1494" x2="97.1494" y1="204.969" y2="209.278" />
+      <line stroke="currentColor" x1="109.808" x2="109.808" y1="205.777" y2="209.817" />
+      <line stroke="currentColor" x1="123.543" x2="123.543" y1="205.777" y2="210.355" />
+      <line stroke="currentColor" x1="136.47" x2="136.47" y1="206.315" y2="211.163" />
+      <line stroke="currentColor" x1="149.667" x2="149.667" y1="207.123" y2="211.163" />
+      <line stroke="currentColor" x1="163.133" x2="163.133" y1="207.931" y2="211.971" />
+      <line stroke="currentColor" x1="176.868" x2="176.868" y1="207.931" y2="211.971" />
+      <line stroke="currentColor" x1="191.95" x2="191.95" y1="208.201" y2="212.24" />
+      <line stroke="currentColor" x1="207.031" x2="207.031" y1="208.739" y2="212.779" />
+      <line stroke="currentColor" x1="221.036" x2="221.036" y1="208.47" y2="212.51" />
+      <line stroke="currentColor" x1="234.232" x2="234.232" y1="208.47" y2="212.51" />
+      <line stroke="currentColor" x1="246.891" x2="246.891" y1="208.201" y2="212.24" />
+      <line stroke="currentColor" x1="259.01" x2="259.01" y1="207.662" y2="211.702" />
+      <line stroke="currentColor" x1="270.321" x2="270.321" y1="206.585" y2="210.625" />
       <path
         d="M240.87 156.087C239.703 160.262 239.631 169.23 248.68 171.708C259.992 174.805 265.378 164.167 272.246 162.551C279.113 160.935 315.606 161.339 325.975 159.185C334.27 157.461 339.037 152.811 340.384 150.701"
         stroke="currentColor"
@@ -305,118 +185,22 @@ export function ShoePreviewImage({ className }: { className?: string }) {
         d="M251.643 119.46C248.626 117.844 245.718 117.979 244.64 118.248C245.179 118.652 246.904 119.811 245.987 122.288C245.07 124.764 245.852 123.769 242.216 130.906C239.884 135.484 247.468 137.774 249.892 133.869C251.302 131.597 253.932 126.597 254.336 125.52C254.74 124.442 255.413 121.48 251.643 119.46Z"
         stroke="currentColor"
       />
-      <circle
-        cx="264.705"
-        cy="150.836"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="266.859"
-        cy="145.719"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="268.475"
-        cy="140.871"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="270.091"
-        cy="134.407"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="278.44"
-        cy="137.1"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="286.789"
-        cy="139.794"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="295.946"
-        cy="142.217"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="304.295"
-        cy="146.796"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="313.72"
-        cy="145.18"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="318.03"
-        cy="148.95"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="308.335"
-        cy="149.489"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="297.831"
-        cy="149.758"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="288.405"
-        cy="150.028"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="277.094"
-        cy="149.758"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="278.44"
-        cy="144.103"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
-      <circle
-        cx="289.482"
-        cy="145.18"
-        fill="currentColor"
-        r="0.269319"
-        stroke="currentColor"
-      />
+      <circle cx="264.705" cy="150.836" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="266.859" cy="145.719" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="268.475" cy="140.871" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="270.091" cy="134.407" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="278.44" cy="137.1" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="286.789" cy="139.794" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="295.946" cy="142.217" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="304.295" cy="146.796" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="313.72" cy="145.18" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="318.03" cy="148.95" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="308.335" cy="149.489" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="297.831" cy="149.758" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="288.405" cy="150.028" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="277.094" cy="149.758" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="278.44" cy="144.103" fill="currentColor" r="0.269319" stroke="currentColor" />
+      <circle cx="289.482" cy="145.18" fill="currentColor" r="0.269319" stroke="currentColor" />
     </svg>
   );
 }

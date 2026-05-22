@@ -107,6 +107,12 @@ importers:
       next-themes:
         specifier: 0.4.6
         version: 0.4.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      oxfmt:
+        specifier: 0.50.0
+        version: 0.50.0
+      oxlint:
+        specifier: 1.65.0
+        version: 1.65.0
       postcss:
         specifier: 8.5.14
         version: 8.5.14

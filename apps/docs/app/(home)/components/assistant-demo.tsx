@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+
 import { AvatarTommy } from "@/components/assets/avatars/avatar-tommy";
 
 interface Shoe {
@@ -43,9 +44,7 @@ export const AssistantDemo = () => (
       {/* User message */}
       <div className="flex flex-col items-end gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-[13px] font-medium text-foreground">
-            Tommy Triangle
-          </span>
+          <span className="text-[13px] font-medium text-foreground">Tommy Triangle</span>
           <AvatarTommy className="size-5 rounded-full" />
         </div>
         <div className="relative rounded-2xl bg-gray-100 px-4 py-2 text-sm text-foreground">
@@ -67,9 +66,7 @@ export const AssistantDemo = () => (
 
       <div className="flex flex-col gap-3">
         {/* Assistant intro */}
-        <div className="text-sm text-foreground">
-          I have found some options for you:
-        </div>
+        <div className="text-sm text-foreground">I have found some options for you:</div>
 
         {/* Product grid */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -5,6 +5,7 @@ import { AdapterProvider, nextAdapter } from "fromsrc/client";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+
 import { Chat } from "@/components/fromsrc/chat";
 import { Footer } from "@/components/fromsrc/footer";
 import { Search } from "@/components/fromsrc/search";
@@ -45,7 +46,14 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html
-      className={cn(sans.variable, mono.variable, pixel.variable, pixelSquare.variable, pixelTriangle.variable, "antialiased")}
+      className={cn(
+        sans.variable,
+        mono.variable,
+        pixel.variable,
+        pixelSquare.variable,
+        pixelTriangle.variable,
+        "antialiased",
+      )}
       lang="en"
       suppressHydrationWarning
     >

@@ -31,9 +31,7 @@ export const ProductInfo = () => (
               className={cn(
                 "rounded-lg border bg-gray-100 py-2 text-center text-[11px] text-gray-500",
                 i < 6 && "hidden sm:block",
-                size === "10.0"
-                  ? "border-gray-alpha-400"
-                  : "border-transparent",
+                size === "10.0" ? "border-gray-alpha-400" : "border-transparent",
               )}
               key={size}
             >

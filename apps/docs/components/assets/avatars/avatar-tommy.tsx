@@ -1,10 +1,4 @@
-export function AvatarTommy({
-  size = 40,
-  className,
-}: {
-  size?: number;
-  className?: string;
-}) {
+export function AvatarTommy({ size = 40, className }: { size?: number; className?: string }) {
   return (
     <svg
       aria-hidden="true"

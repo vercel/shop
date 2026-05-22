@@ -2,8 +2,9 @@
 
 import type { Heading } from "fromsrc";
 import { TextIcon } from "lucide-react";
-import { PageActions } from "./actions";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { PageActions } from "./actions";
 
 interface ZigzagPath {
   path: string;
@@ -36,7 +37,8 @@ function buildPath(headings: Heading[], container: HTMLElement): ZigzagPath | nu
     const styles = getComputedStyle(element);
     const x = xOffset(item.level);
     const top = element.offsetTop + Number.parseFloat(styles.paddingTop);
-    const bottom = element.offsetTop + element.clientHeight - Number.parseFloat(styles.paddingBottom);
+    const bottom =
+      element.offsetTop + element.clientHeight - Number.parseFloat(styles.paddingBottom);
 
     w = Math.max(x, w);
     h = Math.max(h, bottom + 4);
@@ -83,7 +85,7 @@ export function Outline({ headings }: { headings: Heading[] }) {
           setActiveSet(new Set([current]));
         }
       },
-      { rootMargin: "-64px 0px -40% 0px", threshold: 0 }
+      { rootMargin: "-64px 0px -40% 0px", threshold: 0 },
     );
 
     for (const item of elements) observer.observe(item.el);
@@ -107,7 +109,9 @@ export function Outline({ headings }: { headings: Heading[] }) {
     const container = containerRef.current;
     if (!progress || !container || !svg) return;
 
-    const activeLinks = Array.from(container.querySelectorAll("a[data-active='true']")) as HTMLElement[];
+    const activeLinks = Array.from(
+      container.querySelectorAll("a[data-active='true']"),
+    ) as HTMLElement[];
     if (activeLinks.length === 0) {
       progress.style.height = "0px";
       progress.style.top = "0px";
@@ -119,7 +123,8 @@ export function Outline({ headings }: { headings: Heading[] }) {
     const firstStyles = getComputedStyle(first);
     const lastStyles = getComputedStyle(last);
     const top = first.offsetTop + Number.parseFloat(firstStyles.paddingTop);
-    const bottom = last.offsetTop + last.clientHeight - Number.parseFloat(lastStyles.paddingBottom) + 4;
+    const bottom =
+      last.offsetTop + last.clientHeight - Number.parseFloat(lastStyles.paddingBottom) + 4;
 
     progress.style.top = `${top}px`;
     progress.style.height = `${bottom - top}px`;
@@ -135,54 +140,59 @@ export function Outline({ headings }: { headings: Heading[] }) {
               On this page
             </p>
             <nav aria-label="table of contents" className="relative">
-          {svg && (
-            <>
-              <svg
-                className="absolute left-0 top-0 pointer-events-none"
-                width={svg.width}
-                height={svg.height}
-                aria-hidden="true"
-              >
-                <path d={svg.path} fill="none" className="stroke-foreground/10" strokeWidth="1" />
-              </svg>
-              <div
-                className="absolute left-0 pointer-events-none z-10"
-                style={{
-                  height: svg.height,
-                  width: svg.width,
-                  maskImage: `url("data:image/svg+xml,${encodeURIComponent(
-                    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`
-                  )}")`,
-                  maskSize: "100% 100%",
-                }}
-              >
-                <div
-                  ref={progressRef}
-                  className="absolute w-full bg-foreground transition-all duration-150 ease-out"
-                />
-              </div>
-            </>
-          )}
+              {svg && (
+                <>
+                  <svg
+                    className="absolute left-0 top-0 pointer-events-none"
+                    width={svg.width}
+                    height={svg.height}
+                    aria-hidden="true"
+                  >
+                    <path
+                      d={svg.path}
+                      fill="none"
+                      className="stroke-foreground/10"
+                      strokeWidth="1"
+                    />
+                  </svg>
+                  <div
+                    className="absolute left-0 pointer-events-none z-10"
+                    style={{
+                      height: svg.height,
+                      width: svg.width,
+                      maskImage: `url("data:image/svg+xml,${encodeURIComponent(
+                        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svg.width} ${svg.height}"><path d="${svg.path}" stroke="black" stroke-width="1" fill="none" /></svg>`,
+                      )}")`,
+                      maskSize: "100% 100%",
+                    }}
+                  >
+                    <div
+                      ref={progressRef}
+                      className="absolute w-full bg-foreground transition-all duration-150 ease-out"
+                    />
+                  </div>
+                </>
+              )}
 
-          <div ref={containerRef} className="flex flex-col">
-            {headings.map((heading) => {
-              const isActive = activeSet.has(heading.id);
-              return (
-                <a
-                  key={heading.id}
-                  href={`#${heading.id}`}
-                  data-active={isActive}
-                  className={`relative py-1.5 text-sm transition-colors ${
-                    isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  style={{ paddingLeft: padLeft(heading.level) }}
-                >
-                  {heading.text}
-                </a>
-              );
-            })}
-          </div>
-        </nav>
+              <div ref={containerRef} className="flex flex-col">
+                {headings.map((heading) => {
+                  const isActive = activeSet.has(heading.id);
+                  return (
+                    <a
+                      key={heading.id}
+                      href={`#${heading.id}`}
+                      data-active={isActive}
+                      className={`relative py-1.5 text-sm transition-colors ${
+                        isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      style={{ paddingLeft: padLeft(heading.level) }}
+                    >
+                      {heading.text}
+                    </a>
+                  );
+                })}
+              </div>
+            </nav>
           </>
         )}
         <PageActions />

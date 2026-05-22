@@ -2,15 +2,10 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import { IconCart } from "@/components/assets/icons/icon-cart";
 
-type Phase =
-  | "idle"
-  | "cursor-enter"
-  | "cursor-on-button"
-  | "press"
-  | "updated"
-  | "hold";
+type Phase = "idle" | "cursor-enter" | "cursor-on-button" | "press" | "updated" | "hold";
 
 interface Product {
   name: string;
@@ -103,10 +98,7 @@ export const CartDemo = () => {
   useEffect(() => clearTimeouts, [clearTimeouts]);
 
   const isUpdated = phase === "updated" || phase === "hold";
-  const showCursor =
-    phase === "cursor-enter" ||
-    phase === "cursor-on-button" ||
-    phase === "press";
+  const showCursor = phase === "cursor-enter" || phase === "cursor-on-button" || phase === "press";
   const isPressing = phase === "press";
 
   return (
@@ -131,18 +123,14 @@ export const CartDemo = () => {
       <div className="flex flex-col bg-background-200 xl:flex-row">
         {/* Products */}
         <div className="relative flex flex-col gap-1 border-b border-gray-alpha-400 p-5 xl:flex-[2] xl:border-b-0 xl:border-r">
-          <span className="mb-2 text-xs font-medium text-gray-700">
-            Products
-          </span>
+          <span className="mb-2 text-xs font-medium text-gray-700">Products</span>
           {products.map((product, i) => {
             const isFirst = i === 0;
             const isLast = i === products.length - 1;
             return (
               <div
                 className={`relative flex items-center gap-4 rounded px-2 ${
-                  isFirst
-                    ? "border border-gray-alpha-400 bg-background-100"
-                    : ""
+                  isFirst ? "border border-gray-alpha-400 bg-background-100" : ""
                 } ${!isFirst && !isLast ? "border-b border-gray-200" : ""}`}
                 key={product.name}
               >
@@ -163,9 +151,7 @@ export const CartDemo = () => {
                   />
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-xs text-foreground">
-                    {product.name}
-                  </span>
+                  <span className="text-xs text-foreground">{product.name}</span>
                   <span className="text-xs text-gray-600">{product.price}</span>
                 </div>
                 <button

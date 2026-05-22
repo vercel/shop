@@ -1,6 +1,6 @@
 import { BrowserChrome } from "./browser-chrome";
-import { StaticBoundary } from "./primitives";
 import { CartIndicator } from "./cart-indicator";
+import { StaticBoundary } from "./primitives";
 import { ProductInfo } from "./product-info";
 import { Recommendations } from "./recommendations";
 import { ShoePreviewImage } from "./shoe-preview-image";
@@ -11,9 +11,7 @@ export const StorefrontHero = () => (
       <div className="mt-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="size-4.5 bg-gray-400 rounded-full" />
-          <span className="text-[11px] font-medium text-gray-500">
-            ACME Online Store
-          </span>
+          <span className="text-[11px] font-medium text-gray-500">ACME Online Store</span>
         </div>
         <CartIndicator />
       </div>

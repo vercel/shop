@@ -5,11 +5,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
+
 import { MobileDocsBar } from "@/components/geistdocs/mobile-docs-bar";
 import { docs } from "@/lib/fromsrc/content";
 import { mdxComponents } from "@/lib/fromsrc/mdx-components";
 import { getDocsNavSections } from "@/lib/fromsrc/nav-sections";
 import { docsDescription, siteName } from "@/lib/site";
+
 import { Outline } from "../outline";
 
 interface Props {
@@ -62,76 +64,95 @@ export default async function DocsPage({ params }: Props) {
   }
 
   const headings = extractHeadings(doc.content).filter(
-    (heading) => heading.level >= 2 && heading.level <= 3
+    (heading) => heading.level >= 2 && heading.level <= 3,
   );
 
   const ordered = flatten(navigation as { items: Record<string, unknown>[] }[]);
   const fallback = allDocs.map((d) => ({ slug: d.slug, title: d.title }));
-  const { prev, next } = neighbors(
-    ordered.length > 0 ? ordered : fallback,
-    doc.slug
-  );
+  const { prev, next } = neighbors(ordered.length > 0 ? ordered : fallback, doc.slug);
 
   return (
     <div>
       <MobileDocsBar headings={headings} navigation={navSections} />
       <div className="grid w-full max-w-7xl mx-auto lg:grid-cols-[minmax(0,1fr)_14rem]">
-      <article className="min-w-0 px-6 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
-        <div className="max-w-[860px]">
-          <header className="mb-10">
-            <h1 className="font-sans text-3xl font-semibold tracking-tight">
-              {doc.title}
-            </h1>
-            {doc.description && (
-              <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>
-            )}
-          </header>
-          <div className="prose dark:prose-invert">
-            <MDXRemote
-              source={doc.content}
-              components={mdxComponents}
-              options={{ mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] } }}
-            />
-          </div>
+        <article className="min-w-0 px-6 py-8 pb-32 sm:px-8 sm:py-12 sm:pb-32 lg:px-12">
+          <div className="max-w-[860px]">
+            <header className="mb-10">
+              <h1 className="font-sans text-3xl font-semibold tracking-tight">{doc.title}</h1>
+              {doc.description && (
+                <p className="mt-3 text-lg text-muted-foreground">{doc.description}</p>
+              )}
+            </header>
+            <div className="prose dark:prose-invert">
+              <MDXRemote
+                source={doc.content}
+                components={mdxComponents}
+                options={{
+                  mdxOptions: { remarkPlugins: [remarkGfm], rehypePlugins: [rehypeSlug] },
+                }}
+              />
+            </div>
 
-          <nav className="mt-16 pt-6 border-t border-border flex justify-between gap-4">
-            {prev ? (
-              <Link
-                href={prev.slug ? `/docs/${prev.slug}` : "/docs"}
-                className="group flex items-center gap-3 py-3 px-4 rounded-xl border border-border hover:bg-muted/50 transition-colors flex-1"
-              >
-                <svg className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                </svg>
-                <div className="text-left">
-                  <div className="text-xs text-muted-foreground">Previous</div>
-                  <div className="text-sm font-medium">{prev.title}</div>
-                </div>
-              </Link>
-            ) : (
-              <div />
-            )}
-            {next ? (
-              <Link
-                href={next.slug ? `/docs/${next.slug}` : "/docs"}
-                className="group flex items-center gap-3 py-3 px-4 rounded-xl border border-border hover:bg-muted/50 transition-colors flex-1 justify-end"
-              >
-                <div className="text-right">
-                  <div className="text-xs text-muted-foreground">Next</div>
-                  <div className="text-sm font-medium">{next.title}</div>
-                </div>
-                <svg className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ) : (
-              <div />
-            )}
-          </nav>
-        </div>
-      </article>
-      <Outline headings={headings} />
-    </div>
+            <nav className="mt-16 pt-6 border-t border-border flex justify-between gap-4">
+              {prev ? (
+                <Link
+                  href={prev.slug ? `/docs/${prev.slug}` : "/docs"}
+                  className="group flex items-center gap-3 py-3 px-4 rounded-xl border border-border hover:bg-muted/50 transition-colors flex-1"
+                >
+                  <svg
+                    className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  <div className="text-left">
+                    <div className="text-xs text-muted-foreground">Previous</div>
+                    <div className="text-sm font-medium">{prev.title}</div>
+                  </div>
+                </Link>
+              ) : (
+                <div />
+              )}
+              {next ? (
+                <Link
+                  href={next.slug ? `/docs/${next.slug}` : "/docs"}
+                  className="group flex items-center gap-3 py-3 px-4 rounded-xl border border-border hover:bg-muted/50 transition-colors flex-1 justify-end"
+                >
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">Next</div>
+                    <div className="text-sm font-medium">{next.title}</div>
+                  </div>
+                  <svg
+                    className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </Link>
+              ) : (
+                <div />
+              )}
+            </nav>
+          </div>
+        </article>
+        <Outline headings={headings} />
+      </div>
     </div>
   );
 }

@@ -12,13 +12,13 @@ The template ships with several built-in surfaces that contribute to AEO/GEO. Th
 
 ## Surfaces in the template
 
-| Surface | What it does | Key files |
-|---------|--------------|-----------|
-| **Content negotiation** | Serves clean markdown to AI clients via `Accept: text/markdown` | `next.config.ts`, `app/md/**`, `lib/markdown/**` |
-| **Schema.org JSON-LD** | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data | `components/product-detail/schema.tsx`, `components/schema/**` |
-| **Sitemap** | Enumerates products, collections, and pages for crawlers | `app/sitemap.ts`, `lib/shopify/operations/sitemap.ts` |
-| **Robots** | Declares crawl policy, including allowances for known AI user agents | `app/robots.ts` |
-| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route | `lib/seo.ts`, route-level `generateMetadata` |
+| Surface                          | What it does                                                           | Key files                                                      |
+| -------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
+| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`        | `next.config.ts`, `app/md/**`, `lib/markdown/**`               |
+| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data | `components/product-detail/schema.tsx`, `components/schema/**` |
+| **Sitemap**                      | Enumerates products, collections, and pages for crawlers               | `app/sitemap.ts`, `lib/shopify/operations/sitemap.ts`          |
+| **Robots**                       | Declares crawl policy, including allowances for known AI user agents   | `app/robots.ts`                                                |
+| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route              | `lib/seo.ts`, route-level `generateMetadata`                   |
 
 The rest of this page goes deep on content negotiation. The other surfaces are documented inline in the linked files.
 
@@ -72,17 +72,17 @@ The `Vary: Accept` header ensures CDNs cache markdown and HTML responses separat
 
 ### Key files
 
-| File | Purpose |
-|------|---------|
-| `next.config.ts` | Rewrite rules matching `Accept: text/markdown` |
-| `app/md/products/[handle]/route.ts` | Product markdown route handler |
-| `app/md/collections/[handle]/route.ts` | Collection markdown route handler |
-| `app/md/search/route.ts` | Search markdown route handler |
-| `lib/markdown/product.ts` | `productToMarkdown()` converter |
-| `lib/markdown/collection.ts` | `collectionToMarkdown()` converter |
-| `lib/markdown/search.ts` | `searchResultsToMarkdown()` converter |
-| `lib/markdown/catalog.ts` | Shared product/filter/pagination formatting helpers |
-| `lib/markdown/utils.ts` | Formatting helpers (prices, tables, escaping) |
+| File                                   | Purpose                                             |
+| -------------------------------------- | --------------------------------------------------- |
+| `next.config.ts`                       | Rewrite rules matching `Accept: text/markdown`      |
+| `app/md/products/[handle]/route.ts`    | Product markdown route handler                      |
+| `app/md/collections/[handle]/route.ts` | Collection markdown route handler                   |
+| `app/md/search/route.ts`               | Search markdown route handler                       |
+| `lib/markdown/product.ts`              | `productToMarkdown()` converter                     |
+| `lib/markdown/collection.ts`           | `collectionToMarkdown()` converter                  |
+| `lib/markdown/search.ts`               | `searchResultsToMarkdown()` converter               |
+| `lib/markdown/catalog.ts`              | Shared product/filter/pagination formatting helpers |
+| `lib/markdown/utils.ts`                | Formatting helpers (prices, tables, escaping)       |
 
 ### Multi-locale
 

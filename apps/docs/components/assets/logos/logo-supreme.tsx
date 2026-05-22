@@ -1,10 +1,4 @@
-export function LogoSupreme({
-  height = 32,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoSupreme({ height = 32, className }: { height?: number; className?: string }) {
   const width = (280 / 97) * height;
   return (
     <svg

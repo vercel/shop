@@ -1,10 +1,4 @@
-export function LogoRuggable({
-  height = 28,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoRuggable({ height = 28, className }: { height?: number; className?: string }) {
   const width = (300 / 69) * height;
   return (
     <svg

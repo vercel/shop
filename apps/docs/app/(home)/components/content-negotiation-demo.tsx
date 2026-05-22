@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import { BrowserChrome } from "@/components/storefront-hero/browser-chrome";
 
 const CURL_COMMAND =
@@ -29,9 +30,7 @@ A premium cotton t-shirt with a relaxed fit.
 - **Origin:** Portugal`;
 
 export const ContentNegotiationDemo = () => {
-  const [phase, setPhase] = useState<
-    "idle" | "typing" | "loading" | "response"
-  >("idle");
+  const [phase, setPhase] = useState<"idle" | "typing" | "loading" | "response">("idle");
   const [charIndex, setCharIndex] = useState(0);
   const [responseLines, setResponseLines] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -61,10 +60,7 @@ export const ContentNegotiationDemo = () => {
       setTimeout(() => setPhase("loading"), 400);
       return;
     }
-    const timeout = setTimeout(
-      () => setCharIndex((i) => i + 1),
-      20 + Math.random() * 30,
-    );
+    const timeout = setTimeout(() => setCharIndex((i) => i + 1), 20 + Math.random() * 30);
     return () => clearTimeout(timeout);
   }, [phase, charIndex]);
 
@@ -77,32 +73,22 @@ export const ContentNegotiationDemo = () => {
   useEffect(() => {
     if (phase !== "response") return;
     if (responseLines >= lines.length) return;
-    const t = setTimeout(
-      () => setResponseLines((n) => n + 1),
-      30 + Math.random() * 20,
-    );
+    const t = setTimeout(() => setResponseLines((n) => n + 1), 30 + Math.random() * 20);
     return () => clearTimeout(t);
   }, [phase, responseLines, lines.length]);
 
   return (
     <BrowserChrome showLockIcon={false} url="Terminal">
-      <div
-        ref={ref}
-        className="flex h-64 flex-col gap-1 overflow-hidden sm:h-80"
-      >
+      <div ref={ref} className="flex h-64 flex-col gap-1 overflow-hidden sm:h-80">
         {phase !== "idle" && (
           <div className="flex items-start gap-2 animate-[fade-in_0.15s_ease]">
             <span className="font-mono text-xs leading-5 text-gray-1000">$</span>
             <span className="font-mono text-xs leading-5 text-gray-1000 break-all">
-              {phase === "typing"
-                ? CURL_COMMAND.slice(0, charIndex)
-                : CURL_COMMAND}
+              {phase === "typing" ? CURL_COMMAND.slice(0, charIndex) : CURL_COMMAND}
               <span
                 aria-hidden
                 className={`ml-0.5 inline-block h-3.5 w-[5px] align-middle bg-black/70 dark:bg-white/70 ${
-                  phase === "typing"
-                    ? "animate-[pulse_0.6s_ease-in-out_infinite]"
-                    : "invisible"
+                  phase === "typing" ? "animate-[pulse_0.6s_ease-in-out_infinite]" : "invisible"
                 }`}
               />
             </span>

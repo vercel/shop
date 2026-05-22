@@ -1,10 +1,4 @@
-export function LogoChatSdk({
-  height = 22,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoChatSdk({ height = 22, className }: { height?: number; className?: string }) {
   const width = (69 / 22) * height;
   return (
     <svg

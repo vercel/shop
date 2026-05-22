@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+
 import { Badge } from "@/components/ui/badge";
 
 interface HeroProps {

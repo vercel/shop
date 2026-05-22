@@ -6,14 +6,14 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/client.ts`. It wraps the native `fetch` API with Shopify authentication, variable hashing for cache keys, and error handling.
+All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/fetch.ts`. It wraps the native `fetch` API with Shopify authentication, variable hashing for cache keys, and error handling.
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
 ## shopifyFetch
 
 ```ts
-import { shopifyFetch } from "@/lib/shopify/client";
+import { shopifyFetch } from "@/lib/shopify/fetch";
 
 const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
   operation: "getProductByHandle",
@@ -34,11 +34,11 @@ The return type is generic - pass the expected shape of `data` from the GraphQL 
 
 Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2025-01/graphql.json` with headers:
 
-| Header | Value |
-|--------|-------|
-| `Content-Type` | `application/json` |
+| Header                              | Value                        |
+| ----------------------------------- | ---------------------------- |
+| `Content-Type`                      | `application/json`           |
 | `X-Shopify-Storefront-Access-Token` | Your public storefront token |
-| `Accept-Encoding` | `gzip, deflate` |
+| `Accept-Encoding`                   | `gzip, deflate`              |
 
 The URL includes query parameters for `operation` and a 12-character SHA-1 hash of the serialized variables. This ensures Next.js treats requests with different variables as distinct cache entries, even though they hit the same endpoint.
 
@@ -71,13 +71,13 @@ Always verify fields against the live Storefront API schema with `shopify-ai-too
 
 Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
 
-| Fragment | Covers |
-|----------|--------|
-| `MONEY_FRAGMENT` | `amount` and `currencyCode` on `MoneyV2` |
-| `IMAGE_FRAGMENT` | `url`, `altText`, `width`, `height` on `Image` |
-| `PRODUCT_VARIANT_FRAGMENT` | Variant price, options, image, availability |
-| `PRODUCT_FRAGMENT` | Full product: media, variants (up to 50), options with swatches, metafields, price ranges, SEO |
-| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields) |
+| Fragment                    | Covers                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `MONEY_FRAGMENT`            | `amount` and `currencyCode` on `MoneyV2`                                                       |
+| `IMAGE_FRAGMENT`            | `url`, `altText`, `width`, `height` on `Image`                                                 |
+| `PRODUCT_VARIANT_FRAGMENT`  | Variant price, options, image, availability                                                    |
+| `PRODUCT_FRAGMENT`          | Full product: media, variants (up to 50), options with swatches, metafields, price ranges, SEO |
+| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields)                                           |
 
 Embed fragments in a query with template literal interpolation: `` `${PRODUCT_FRAGMENT} query ...` ``.
 
@@ -87,7 +87,7 @@ Operation functions live in `lib/shopify/operations/` and follow a consistent pa
 
 ```ts
 import { cacheLife, cacheTag } from "next/cache";
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 import { PRODUCT_FRAGMENT } from "../fragments";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
@@ -121,18 +121,18 @@ Key elements:
 
 Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, sitemap, and recommendation queries. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
 
-| Tag pattern | Scope |
-|-------------|-------|
-| `products` | All product queries |
-| `product-{handle}` | Single product by handle |
-| `product-{numericId}` | Single product by Shopify numeric ID |
-| `recommendations-{handle}` | Product recommendations |
-| `collections` | All collection queries |
-| `collection-{handle}` | Single collection |
-| `menus` | Navigation menus |
-| `cart` | All cart operations |
+| Tag pattern                | Scope                                |
+| -------------------------- | ------------------------------------ |
+| `products`                 | All product queries                  |
+| `product-{handle}`         | Single product by handle             |
+| `product-{numericId}`      | Single product by Shopify numeric ID |
+| `recommendations-{handle}` | Product recommendations              |
+| `collections`              | All collection queries               |
+| `collection-{handle}`      | Single collection                    |
+| `menus`                    | Navigation menus                     |
+| `cart`                     | All cart operations                  |
 
-Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart-cache` - this is a hard requirement.
+Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart/server` - this is a hard requirement.
 
 ## Mutations
 
@@ -176,25 +176,25 @@ Set `DEBUG_SHOPIFY=true` to log every request with timing and a variable preview
 
 Every operation converts the Shopify response to a domain type before returning. Transforms live in `lib/shopify/transforms/`:
 
-| Transform | Input → Output |
-|-----------|---------------|
+| Transform                        | Input → Output                      |
+| -------------------------------- | ----------------------------------- |
 | `transformShopifyProductDetails` | `ShopifyProduct` → `ProductDetails` |
-| `transformShopifyCart` | `ShopifyCart` → `Cart` |
+| `transformShopifyCart`           | `ShopifyCart` → `Cart`              |
 
 Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
 
 ## Key files and tools
 
-| Resource | Purpose |
-|------|---------|
-| `lib/shopify/client.ts` | Core fetch wrapper with variable hashing and error handling |
-| `lib/shopify/fragments.ts` | Reusable GraphQL fragment definitions |
-| `lib/shopify/operations/products.ts` | Product queries: single, batch, search, recommendations |
-| `lib/shopify/operations/cart.ts` | Cart queries and mutations |
-| `lib/shopify/operations/collections.ts` | Collection queries |
-| `lib/shopify/operations/search.ts` | Predictive search |
-| `lib/shopify/operations/menu.ts` | Navigation menu queries |
-| `lib/shopify/transforms/product.ts` | Shopify product → domain type |
-| `lib/shopify/transforms/cart.ts` | Shopify cart → domain type |
-| `lib/cart-cache.ts` | `invalidateCartCache()` for mutation cache busting |
-| `shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
+| Resource                                | Purpose                                                     |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `lib/shopify/fetch.ts`                  | Core fetch wrapper with variable hashing and error handling |
+| `lib/shopify/fragments.ts`              | Reusable GraphQL fragment definitions                       |
+| `lib/shopify/operations/products.ts`    | Product queries: single, batch, search, recommendations     |
+| `lib/shopify/operations/cart.ts`        | Cart queries and mutations                                  |
+| `lib/shopify/operations/collections.ts` | Collection queries                                          |
+| `lib/shopify/operations/search.ts`      | Predictive search                                           |
+| `lib/shopify/operations/menu.ts`        | Navigation menu queries                                     |
+| `lib/shopify/transforms/product.ts`     | Shopify product → domain type                               |
+| `lib/shopify/transforms/cart.ts`        | Shopify cart → domain type                                  |
+| `lib/cart/server.ts`                    | `invalidateCartCache()` for mutation cache busting          |
+| `shopify-ai-toolkit`                    | Live Storefront and Customer Account schema inspection      |

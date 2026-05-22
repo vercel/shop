@@ -1,10 +1,4 @@
-export function LogoFlagsSdk({
-  height = 22,
-  className,
-}: {
-  height?: number;
-  className?: string;
-}) {
+export function LogoFlagsSdk({ height = 22, className }: { height?: number; className?: string }) {
   const width = (76 / 22) * height;
   return (
     <svg

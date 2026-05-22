@@ -1,7 +1,9 @@
 "use server";
 
 import { headers } from "next/headers";
+
 import type { Feedback } from "@/components/fromsrc/feedback";
+
 import { emotions } from "./emotions";
 
 const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
@@ -9,7 +11,7 @@ const baseUrl = `${protocol}://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTI
 
 export const sendFeedback = async (
   url: string,
-  feedback: Feedback
+  feedback: Feedback,
 ): Promise<{ success: boolean }> => {
   const emoji = emotions.find((e) => e.name === feedback.emotion)?.emoji;
   const endpoint = new URL("/feedback", "https://geistdocs.com/feedback");

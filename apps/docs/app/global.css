@@ -13,8 +13,7 @@
   --font-mono: "Geist Mono", ui-monospace, monospace;
   --font-heading: "GeistPixel-Grid", "Geist Mono", ui-monospace, monospace;
   --font-pixel-square: var(--font-geist-pixel-square), ui-monospace, monospace;
-  --font-pixel-triangle:
-    var(--font-geist-pixel-triangle), ui-monospace, monospace;
+  --font-pixel-triangle: var(--font-geist-pixel-triangle), ui-monospace, monospace;
   /* Geist border radii */
   --radius-xs: 0.125rem; /* 2px */
   --radius-sm: 0.25rem; /* 4px */
@@ -265,16 +264,14 @@
   --ds-shadow-border-base: 0 0 0 1px rgba(0, 0, 0, 0.08);
   --ds-shadow-menu:
     var(--ds-shadow-border-base), 0px 1px 1px rgba(0, 0, 0, 0.02),
-    0px 4px 8px -4px rgba(0, 0, 0, 0.04),
-    0px 16px 24px -8px rgba(0, 0, 0, 0.06), var(--ds-shadow-background-border);
+    0px 4px 8px -4px rgba(0, 0, 0, 0.04), 0px 16px 24px -8px rgba(0, 0, 0, 0.06),
+    var(--ds-shadow-background-border);
   --ds-shadow-small: 0px 2px 2px rgba(0, 0, 0, 0.04);
   --ds-shadow-border-small:
-    var(--ds-shadow-border-base), var(--ds-shadow-small),
-    var(--ds-shadow-background-border);
+    var(--ds-shadow-border-base), var(--ds-shadow-small), var(--ds-shadow-background-border);
   --ds-shadow-modal:
     var(--ds-shadow-border-base), 0px 1px 1px rgba(0, 0, 0, 0.02),
-    0px 8px 16px -4px rgba(0, 0, 0, 0.04),
-    0px 24px 32px -8px rgba(0, 0, 0, 0.06);
+    0px 8px 16px -4px rgba(0, 0, 0, 0.04), 0px 24px 32px -8px rgba(0, 0, 0, 0.06);
   --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(1 0 0);
@@ -410,12 +407,10 @@
   --ds-shadow-border-base: 0 0 0 1px rgba(255, 255, 255, 0.145);
   --ds-shadow-small: 0px 1px 2px rgba(0, 0, 0, 0.16);
   --ds-shadow-border-small:
-    var(--ds-shadow-border-base), var(--ds-shadow-small),
-    var(--ds-shadow-background-border);
+    var(--ds-shadow-border-base), var(--ds-shadow-small), var(--ds-shadow-background-border);
   --ds-shadow-modal:
     var(--ds-shadow-border-base), 0px 1px 1px rgba(0, 0, 0, 0.2),
-    0px 8px 16px -4px rgba(0, 0, 0, 0.3),
-    0px 24px 32px -8px rgba(0, 0, 0, 0.4);
+    0px 8px 16px -4px rgba(0, 0, 0, 0.3), 0px 24px 32px -8px rgba(0, 0, 0, 0.4);
   --ds-focus-color: var(--ds-blue-700);
 
   --background: oklch(0.145 0 0);
@@ -466,9 +461,7 @@
   h4,
   h5,
   h6 {
-    font-family:
-      var(--font-geist-pixel-grid), var(--font-geist-mono), ui-monospace,
-      monospace;
+    font-family: var(--font-geist-pixel-grid), var(--font-geist-mono), ui-monospace, monospace;
     font-weight: 400;
   }
 }

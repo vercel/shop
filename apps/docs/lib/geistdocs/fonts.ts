@@ -1,6 +1,6 @@
 import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
 import { GeistPixelGrid, GeistPixelSquare, GeistPixelTriangle } from "geist/font/pixel";
+import { GeistSans } from "geist/font/sans";
 
 export const sans = GeistSans;
 export const mono = GeistMono;

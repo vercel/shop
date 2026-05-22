@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
+
 import { IconSlashForward } from "@/components/assets/icons/icon-slash-forward";
 import { LogoAiElements } from "@/components/assets/logos/logo-ai-elements";
 import { LogoAiSdk } from "@/components/assets/logos/logo-ai-sdk";
@@ -48,11 +49,7 @@ type NavbarLogoProps = {
     }
 );
 
-export function NavbarLogo({
-  className,
-  href = "/",
-  ...props
-}: NavbarLogoProps) {
+export function NavbarLogo({ className, href = "/", ...props }: NavbarLogoProps) {
   const isOss = props.variant === "oss";
 
   return (
@@ -90,22 +87,20 @@ export function NavbarLogo({
               </NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid w-[200px] gap-0.5 p-2">
-                  {OSS_PRODUCT_LINKS.map(
-                    ({ href: productHref, logo: ProductLogo, height }) => (
-                      <li key={productHref}>
-                        <NavigationMenuLink asChild>
-                          <Link
-                            className="flex h-10 items-center gap-3 rounded-md px-3 py-2.5 text-gray-1000 text-sm outline-none transition-colors hover:bg-gray-100"
-                            href={productHref}
-                            rel="noopener"
-                            target="_blank"
-                          >
-                            <ProductLogo height={height} />
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                    ),
-                  )}
+                  {OSS_PRODUCT_LINKS.map(({ href: productHref, logo: ProductLogo, height }) => (
+                    <li key={productHref}>
+                      <NavigationMenuLink asChild>
+                        <Link
+                          className="flex h-10 items-center gap-3 rounded-md px-3 py-2.5 text-gray-1000 text-sm outline-none transition-colors hover:bg-gray-100"
+                          href={productHref}
+                          rel="noopener"
+                          target="_blank"
+                        >
+                          <ProductLogo height={height} />
+                        </Link>
+                      </NavigationMenuLink>
+                    </li>
+                  ))}
                 </ul>
               </NavigationMenuContent>
             </NavigationMenuItem>

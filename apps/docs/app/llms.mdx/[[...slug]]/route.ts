@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+
 import { docs } from "@/lib/fromsrc/content";
 
 export const revalidate = false;
