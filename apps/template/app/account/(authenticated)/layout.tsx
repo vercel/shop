@@ -22,8 +22,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
-  if (!isAuthEnabled) notFound();
-
   return (
     <Page className="flex flex-1 flex-col">
       <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
@@ -61,11 +59,13 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 }
 
 async function AccountGate({ children }: { children: React.ReactNode }) {
+  if (!isAuthEnabled) notFound();
   await requireCustomerSession();
   return <>{children}</>;
 }
 
 async function UserInfo() {
+  if (!isAuthEnabled) notFound();
   const session = await requireCustomerSession();
 
   return (

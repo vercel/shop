@@ -1,28 +1,20 @@
-"use client";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
-import { useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { isAuthEnabled } from "@/lib/auth";
 
-import { signIn } from "@/lib/auth/client";
+import { LoginRedirect } from "./login-redirect";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("seo");
+  return {
+    title: t("loginTitle"),
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function LoginPage() {
-  const t = useTranslations("common");
-
-  useEffect(() => {
-    signIn("/account");
-  }, []);
-
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="text-center">
-        <p className="text-muted-foreground">{t("loginRedirecting")}</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("loginNotRedirected")}{" "}
-          <button type="button" onClick={() => signIn("/account")} className="underline">
-            {t("loginClickHere")}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
+  if (!isAuthEnabled) notFound();
+  return <LoginRedirect />;
 }
