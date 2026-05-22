@@ -15,11 +15,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_AUTH_ENABLED: isAuthEnabled ? "1" : "",
   },
   experimental: {
-    cachedNavigations: true,
     inlineCss: true,
-    optimisticRouting: true,
     turbopackFileSystemCacheForDev: true,
-    varyParams: true,
   },
   images: {
     deviceSizes: [640, 828, 1200, 1920],
