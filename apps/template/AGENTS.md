@@ -177,7 +177,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It turns on automatically when all three server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are set. `next.config.ts` derives `NEXT_PUBLIC_AUTH_ENABLED` from their presence at build time and exposes it to the browser via `env`, so server and client agree at hydration (probing the server-only secrets directly inside a component causes mismatches under cache components). Don't set `NEXT_PUBLIC_AUTH_ENABLED` manually.
+Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When the flag is set, `next.config.ts` validates that the three required server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are present and throws a build error if any are missing. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client in agreement at hydration (safe for cache components).
 
 Key files:
 
