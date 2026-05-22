@@ -30,11 +30,11 @@ export const siteConfig = {
 } as const;
 
 export const auth = {
-  enabled: process.env.NEXT_PUBLIC_FEATURE_AUTH === "1",
+  enabled: process.env.NEXT_PUBLIC_ENABLE_AUTH === "1",
 } as const;
 
 export const agent = {
-  enabled: process.env.NEXT_PUBLIC_FEATURE_AGENT === "1",
+  enabled: process.env.NEXT_PUBLIC_ENABLE_AGENT === "1",
 } as const;
 
 export const navItems: MenuItem[] = [

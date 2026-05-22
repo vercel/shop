@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
-if (process.env.NEXT_PUBLIC_FEATURE_AUTH === "1") {
+if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
   const missing = [
     "BETTER_AUTH_SECRET",
     "SHOPIFY_CUSTOMER_CLIENT_ID",
@@ -10,8 +10,8 @@ if (process.env.NEXT_PUBLIC_FEATURE_AUTH === "1") {
 
   if (missing.length > 0) {
     throw new Error(
-      `NEXT_PUBLIC_FEATURE_AUTH=1 requires: ${missing.join(", ")}. ` +
-        `Set the missing variables or unset NEXT_PUBLIC_FEATURE_AUTH.`,
+      `NEXT_PUBLIC_ENABLE_AUTH=1 requires: ${missing.join(", ")}. ` +
+        `Set the missing variables or unset NEXT_PUBLIC_ENABLE_AUTH.`,
     );
   }
 }
