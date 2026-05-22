@@ -103,7 +103,7 @@ If `/api/chat` sits behind an existing WAF (Cloudflare, etc.), prefer that and k
 
 ## Configuration
 
-The agent can be disabled entirely by setting the `AI_AGENT_DISABLED` environment variable, which hides the agent button from the storefront.
+The agent is opt-in via `NEXT_PUBLIC_ENABLE_AGENT="1"`. When unset, the agent button is hidden from the storefront and the `/api/chat` route returns 404.
 
 ## Key files
 
