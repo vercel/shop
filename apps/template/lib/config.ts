@@ -29,6 +29,14 @@ export const siteConfig = {
   url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
 } as const;
 
+export const auth = {
+  enabled: process.env.NEXT_PUBLIC_FEATURE_AUTH === "1",
+} as const;
+
+export const agent = {
+  enabled: process.env.NEXT_PUBLIC_FEATURE_AGENT === "1",
+} as const;
+
 export const navItems: MenuItem[] = [
   {
     id: "default-nav-shop",

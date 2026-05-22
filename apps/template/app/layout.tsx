@@ -13,7 +13,7 @@ import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { siteConfig } from "@/lib/config";
+import { agent, siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
@@ -58,7 +58,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <CartOverlay locale={locale} />
             </Suspense>
             <Suspense>
-              <ActionBar>{process.env.AI_AGENT_DISABLED ? null : <AgentButton />}</ActionBar>
+              <ActionBar>{agent.enabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
