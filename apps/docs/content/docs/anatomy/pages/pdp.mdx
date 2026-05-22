@@ -10,19 +10,9 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP runs under Next.js 16 Cache Components with instant navigation:
+The PDP runs under Next.js 16 Cache Components. Product data is fetched through `"use cache"` operations with `cacheLife("max")` and a `product-{handle}` tag, so the page renders from cache on every request and is only rebuilt when a Shopify webhook invalidates the matching tag — ISR-style freshness with no per-request fetch (see [Shopify Integration](/docs/shopify) for the webhook setup).
 
-```ts
-// next.config.ts
-cacheComponents: true,
-
-// app/products/[handle]/page.tsx
-export const unstable_instant = true;
-```
-
-`cacheComponents: true` lets the static shell of the page serve instantly while anything that depends on `searchParams` (the selected variant) streams in behind Suspense. `unstable_instant = true` opts the route into instant navigation validation.
-
-The route passes promises — not awaited values — down into `ProductDetailSection`. Parts of the UI that don't depend on the selected variant (title, shared gallery images, uniformly-priced variants) render immediately; the color-specific gallery slot, variant-specific price, option highlight, and buy buttons each sit inside their own Suspense boundary so a `?variant=` change doesn't skeletonize the whole page.
+The only dynamic input is the `?variant=` query parameter. Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description, related products) renders straight from the cached product. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so a `?variant=` change streams the affected slot without skeletonizing the rest of the page.
 
 ## Variant selection
 
@@ -111,4 +101,4 @@ The page emits two JSON-LD schemas:
 | `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
 | `lib/product.ts`                                       | `computeSelection`, variant resolution, URL generation, color-image partitioning               |
 
-Sibling components (`color-picker`, `option-picker`, `product-info`, `product-price`, `schema`, `lightbox`, `about-item`, `shop-logo`) live next to `product-detail-section.tsx` and are easiest to discover by browsing that directory.
+The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.
