@@ -8,6 +8,10 @@ prerequisites:
 
 The storefront includes an AI shopping assistant powered by Claude via the Vercel AI SDK. It can search products, browse collections, manage the cart, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
 
+## Configuration
+
+The agent is opt-in via `NEXT_PUBLIC_ENABLE_AGENT="1"`. When unset, the agent button is hidden from the storefront and the `/api/chat` route returns 404.
+
 ## Architecture
 
 The agent runs as a `ToolLoopAgent` that streams responses back to a floating chat panel:
@@ -100,10 +104,6 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 - **Token cap** — set `maxOutputTokens` on the `ToolLoopAgent` defaults to bound worst-case gateway spend per call.
 
 If `/api/chat` sits behind an existing WAF (Cloudflare, etc.), prefer that and keep the token cap.
-
-## Configuration
-
-The agent is opt-in via `NEXT_PUBLIC_ENABLE_AGENT="1"`. When unset, the agent button is hidden from the storefront and the `/api/chat` route returns 404.
 
 ## Key files
 
