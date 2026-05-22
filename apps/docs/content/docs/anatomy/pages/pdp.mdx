@@ -22,13 +22,7 @@ Variants are selected via `searchParams`. Each option (color, size, etc.) render
 /products/classic-tee?variant=123456
 ```
 
-The page component receives `searchParams` as a promise and extracts the selected variant ID:
-
-```tsx
-const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
-```
-
-On the server, `computeSelection()` matches the numeric variant ID to the full variant object and returns `{ selectedOptions, selectedVariant, colorImages }` in one pass. These are threaded down as props - no client-side variant context or `useState` is involved. This means:
+The page receives `searchParams` as a promise, threads the variant ID through to `computeSelection()` on the server, and that function returns `{ selectedOptions, selectedVariant, colorImages }` in one pass — matching the numeric variant ID to the full variant object. The result is threaded down as props with no client-side variant context or `useState`. This means:
 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
