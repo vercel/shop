@@ -73,8 +73,8 @@ export const generateMetadata = async (): Promise<Metadata> => {
 
   return {
     alternates: buildAlternates({ pathname: "/" }),
-    description: t("defaultDescription"),
-    generator: "Vercel Shop",
+    description: t("defaultDescription", { name: siteConfig.name }),
+    generator: siteConfig.name,
     metadataBase: new URL(siteConfig.url),
     openGraph: {
       images: [{ url: "/og-default.png", width: 1200, height: 630 }],
