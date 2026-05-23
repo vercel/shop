@@ -19,7 +19,7 @@ export async function Footer({ locale }: { locale: string }) {
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <p className="text-sm text-muted-foreground leading-5">
-              {t("copyright", { name: siteConfig.name, year: String(new Date().getFullYear()) })}
+              {t("copyright", { name: siteConfig.name })}
             </p>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>

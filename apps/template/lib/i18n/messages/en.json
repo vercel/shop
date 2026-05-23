@@ -136,7 +136,7 @@
     "tryAgain": "Try again"
   },
   "footer": {
-    "copyright": "© {year} {name}. All rights reserved."
+    "copyright": "© {name}. All rights reserved."
   },
   "home": {
     "title": "Enterprise Commerce Template",
