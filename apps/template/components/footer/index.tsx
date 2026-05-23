@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Sections } from "@/components/ui/sections";
@@ -6,9 +7,10 @@ import type { MenuItem } from "@/lib/shopify/types/menu";
 
 import { SocialLinks } from "./social-links";
 
-export function Footer({ locale }: { locale: string }) {
+export async function Footer({ locale }: { locale: string }) {
   const { socialLinks } = siteConfig;
   const items = footerItems;
+  const t = await getTranslations("footer");
 
   return (
     <footer>
@@ -17,7 +19,7 @@ export function Footer({ locale }: { locale: string }) {
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <p className="text-sm text-muted-foreground leading-5">
-              &copy; Vercel Shop. All rights reserved.
+              {t("copyright", { name: siteConfig.name, year: String(new Date().getFullYear()) })}
             </p>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>

@@ -8,7 +8,7 @@ The footer renders at the bottom of every page. By default it displays a copyrig
 
 ## Default behavior
 
-The footer always renders. By default it shows a static copyright line ("Vercel Shop. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
+The footer always renders. By default it shows a copyright line ("© {year} {siteConfig.name}. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
 
 ## Social links
 
@@ -26,7 +26,7 @@ The default is an empty array, which hides the social links section entirely.
 
 ## Copyright
 
-The copyright line is a static string. To customize it, edit the `<p>` tag in `components/footer/index.tsx`.
+The copyright line uses the `footer.copyright` i18n key with the current year and `siteConfig.name` interpolated in. `siteConfig.name` reads from `NEXT_PUBLIC_SITE_NAME` and falls back to `"Vercel Shop"` — set that env var to brand your storefront. To change the wording (not just the name), edit the `footer.copyright` entry in `lib/i18n/messages/en.json`.
 
 ## Key files
 

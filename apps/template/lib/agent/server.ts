@@ -1,6 +1,7 @@
 import { stepCountIs, ToolLoopAgent, type ToolLoopAgentSettings } from "ai";
 
 import { catalog } from ".";
+import { siteConfig } from "../config";
 import type { Locale } from "../i18n";
 import type { ProductDetails } from "../types";
 import { addCartNoteTool } from "./tools/add-cart-note";
@@ -72,7 +73,7 @@ function dedent(strings: TemplateStringsArray, ...values: unknown[]): string {
 }
 
 const BASE_SYSTEM_PROMPT = dedent`
-You're a helpful shopping assistant for Vercel Shop. Never use emojis in your responses.
+You're a helpful shopping assistant for ${siteConfig.name}. Never use emojis in your responses.
 `;
 
 function createSystemPrompt(ctx: AgentContext) {
