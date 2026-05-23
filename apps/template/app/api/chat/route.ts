@@ -8,6 +8,7 @@ import {
 import { cookies } from "next/headers";
 
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
+import { agent as agentConfig } from "@/lib/config";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
@@ -84,6 +85,10 @@ async function resolvePageContext(
 }
 
 export async function POST(request: Request) {
+  if (!agentConfig.enabled) {
+    return new Response(null, { status: 404 });
+  }
+
   const body = await request.json();
   const store = await cookies();
   const { messages, chatId } = body;

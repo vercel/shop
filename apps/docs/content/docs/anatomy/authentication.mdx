@@ -7,17 +7,18 @@ The template includes built-in customer authentication using [better-auth](https
 
 Authentication is **opt-in via environment variables**. Without them, the storefront works as a guest-only experience and no auth UI is rendered.
 
-## Enabling authentication
+## Configuration
 
-Add these three server-only secrets to enable the auth UI:
+Set the feature flag and three server-only secrets:
 
 ```bash
+NEXT_PUBLIC_ENABLE_AUTH="1"
 BETTER_AUTH_SECRET="generate-with-openssl-rand-base64-32"
 SHOPIFY_CUSTOMER_CLIENT_ID="your-customer-client-id"
 SHOPIFY_CUSTOMER_CLIENT_SECRET="your-customer-client-secret"
 ```
 
-That's the only knob. `next.config.ts` derives `NEXT_PUBLIC_AUTH_ENABLED` at build time from the presence of all three secrets and exposes it via the `env` config so client and server agree at hydration. Don't set `NEXT_PUBLIC_AUTH_ENABLED` yourself — probing the server-only secrets directly inside a component (instead of going through the build-time flag) causes hydration mismatches under cache components.
+`next.config.ts` throws at build time if `NEXT_PUBLIC_ENABLE_AUTH="1"` is set without the three secrets. The flag must be `NEXT_PUBLIC_` so its value is available identically on server and client — probing the server-only secrets directly inside a component causes hydration mismatches under cache components.
 
 Generate the auth secret with `openssl rand -base64 32`. The client ID and secret come from Shopify's Customer Account API.
 
@@ -46,7 +47,7 @@ The API route at `/api/auth/[...all]` handles all OAuth callbacks, session manag
 
 ### Feature gating
 
-The `isAuthEnabled` flag (from `lib/auth`) reads `NEXT_PUBLIC_AUTH_ENABLED`, which `next.config.ts` derives from secret presence at build time. When `false`:
+The `isAuthEnabled` flag (from `lib/auth`) reads `auth.enabled` from `lib/config`, which is `process.env.NEXT_PUBLIC_ENABLE_AUTH === "1"`. When `false`:
 
 - The account icon does not appear in the nav
 - `/account/login` and `/account/*` return 404
@@ -117,7 +118,7 @@ function AccountMenu() {
 - The Customer Account API uses a separate GraphQL endpoint from the Storefront API — validate fields with the Shopify schema
 - Session cookies use `httpOnly` and `secure` flags automatically via better-auth
 - PKCE is enabled for the OAuth flow — never disable it
-- `isAuthEnabled` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components. The flag is derived at build time in `next.config.ts`; don't replace it with an inline `process.env.BETTER_AUTH_SECRET` check
+- `isAuthEnabled` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components. Don't replace it with an inline `process.env.BETTER_AUTH_SECRET` check
 
 ## Next steps
 
