@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
+import { isAuthEnabled } from "@/lib/auth";
+
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
 const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
@@ -73,76 +75,80 @@ function decodeIdTokenPayload(idToken: string): {
   return JSON.parse(decoded);
 }
 
-export const auth = betterAuth({
-  baseURL: authBaseUrl,
-  secret: process.env.BETTER_AUTH_SECRET,
+// Skip betterAuth construction when auth is disabled — calling it without a real
+// BETTER_AUTH_SECRET logs a default-secret warning at module load during build.
+export const auth = isAuthEnabled
+  ? betterAuth({
+      baseURL: authBaseUrl,
+      secret: process.env.BETTER_AUTH_SECRET,
 
-  session: {
-    expiresIn: 7 * 24 * 60 * 60,
-    updateAge: 24 * 60 * 60,
-    cookieCache: {
-      enabled: true,
-      maxAge: 7 * 24 * 60 * 60,
-    },
-  },
-
-  account: {
-    storeStateStrategy: "cookie",
-    storeAccountCookie: true,
-  },
-
-  plugins: [
-    genericOAuth({
-      config: [
-        {
-          providerId: "shopify",
-          clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
-          clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
-          discoveryUrl: SHOPIFY_STORE_DOMAIN
-            ? `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`
-            : undefined,
-          scopes: SHOPIFY_OIDC_SCOPES,
-          pkce: true,
-          accessType: "offline",
-          getUserInfo: async (tokens) => {
-            const idToken = tokens.idToken;
-            if (!idToken) {
-              throw new Error("No ID token received from Shopify");
-            }
-
-            const decoded = decodeIdTokenPayload(idToken);
-
-            const nameParts = [decoded.given_name, decoded.family_name].filter(Boolean);
-            let name = nameParts.join(" ");
-            if (!name) {
-              name = decoded.email?.split("@")[0] || "Customer";
-            }
-
-            return {
-              id: decoded.sub,
-              email: decoded.email,
-              emailVerified: decoded.email_verified ?? false,
-              name,
-              image: undefined,
-            };
-          },
-          mapProfileToUser: (profile) => {
-            return {
-              id: profile.id,
-              email: profile.email,
-              name: profile.name,
-              image: profile.image,
-              emailVerified: profile.emailVerified,
-            };
-          },
+      session: {
+        expiresIn: 7 * 24 * 60 * 60,
+        updateAge: 24 * 60 * 60,
+        cookieCache: {
+          enabled: true,
+          maxAge: 7 * 24 * 60 * 60,
         },
-      ],
-    }),
-  ],
+      },
 
-  basePath: "/api/auth",
-  trustedOrigins: getTrustedOrigins(authBaseUrl),
-});
+      account: {
+        storeStateStrategy: "cookie",
+        storeAccountCookie: true,
+      },
+
+      plugins: [
+        genericOAuth({
+          config: [
+            {
+              providerId: "shopify",
+              clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
+              clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
+              discoveryUrl: SHOPIFY_STORE_DOMAIN
+                ? `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`
+                : undefined,
+              scopes: SHOPIFY_OIDC_SCOPES,
+              pkce: true,
+              accessType: "offline",
+              getUserInfo: async (tokens) => {
+                const idToken = tokens.idToken;
+                if (!idToken) {
+                  throw new Error("No ID token received from Shopify");
+                }
+
+                const decoded = decodeIdTokenPayload(idToken);
+
+                const nameParts = [decoded.given_name, decoded.family_name].filter(Boolean);
+                let name = nameParts.join(" ");
+                if (!name) {
+                  name = decoded.email?.split("@")[0] || "Customer";
+                }
+
+                return {
+                  id: decoded.sub,
+                  email: decoded.email,
+                  emailVerified: decoded.email_verified ?? false,
+                  name,
+                  image: undefined,
+                };
+              },
+              mapProfileToUser: (profile) => {
+                return {
+                  id: profile.id,
+                  email: profile.email,
+                  name: profile.name,
+                  image: profile.image,
+                  emailVerified: profile.emailVerified,
+                };
+              },
+            },
+          ],
+        }),
+      ],
+
+      basePath: "/api/auth",
+      trustedOrigins: getTrustedOrigins(authBaseUrl),
+    })
+  : null;
 
 export type Auth = typeof auth;
 
@@ -158,6 +164,7 @@ export interface FullSession extends CustomerSession {
 }
 
 const getAuthSession = cache(async () => {
+  if (!auth) return null;
   const reqHeaders = await headers();
   return auth.api.getSession({ headers: reqHeaders });
 });
@@ -178,6 +185,7 @@ function mapCustomerSession(
 }
 
 const getAccessToken = cache(async (): Promise<string> => {
+  if (!auth) return "";
   const session = await getAuthSession();
   if (!session?.user) return "";
 
