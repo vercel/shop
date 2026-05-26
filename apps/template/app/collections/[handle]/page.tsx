@@ -8,10 +8,16 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
 
+const PLACEHOLDER_HANDLE = "__placeholder__";
+
 export async function generateStaticParams() {
-  const collections = await getCollections({ limit: 1 });
-  const first = collections[0];
-  return first ? [{ handle: first.handle }] : [];
+  try {
+    const collections = await getCollections({ limit: 1 });
+    const first = collections[0];
+    return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
+  } catch {
+    return [{ handle: PLACEHOLDER_HANDLE }];
+  }
 }
 
 export async function generateMetadata({
@@ -19,7 +25,7 @@ export async function generateMetadata({
 }: PageProps<"/collections/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
-  if (handle === "__placeholder__") {
+  if (handle === PLACEHOLDER_HANDLE) {
     notFound();
   }
 
@@ -86,7 +92,10 @@ export default async function CollectionPage({
   searchParams,
 }: PageProps<"/collections/[handle]">) {
   const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => handle);
+  const handlePromise = params.then(({ handle }) => {
+    if (handle === PLACEHOLDER_HANDLE) notFound();
+    return handle;
+  });
   const collectionPromise = handlePromise.then((handle) => getCollection(handle, locale));
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getCollectionResultsData({

@@ -53,9 +53,13 @@ async function buildProductMetadata(
 }
 
 export async function generateStaticParams() {
-  const { products } = await getCatalogProducts({ limit: 1 });
-  const first = products[0];
-  return first ? [{ handle: first.handle }] : [];
+  try {
+    const { products } = await getCatalogProducts({ limit: 1 });
+    const first = products[0];
+    return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
+  } catch {
+    return [{ handle: PLACEHOLDER_HANDLE }];
+  }
 }
 
 export async function generateMetadata({
