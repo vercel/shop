@@ -1,6 +1,6 @@
 ---
 title: Product Card
-description: The product card component - compound structure, variants, image and fallback behavior, and a recipe for adding a hover image carousel.
+description: The shared tile that displays a product's image, title, and price in grids and sliders.
 type: guide
 ---
 
@@ -8,19 +8,7 @@ The product card is the shared tile used wherever products appear in a list: the
 
 ## Composition
 
-The high-level `ProductCard` (`components/product-card/product-card.tsx`) is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known) and assembles the compound pieces from `components/product-card/components.tsx`:
-
-| Part                        | Element   | Purpose                                                                          |
-| --------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `ProductCard`               | `article` | Root wrapper. Carries the `default` / `featured` variant.                        |
-| `ProductCardBadge`          | `div`     | Optional corner badge (used by the `featured` variant).                          |
-| `ProductCardImageContainer` | `div`     | Holds the image and content; applies the `featured` gradient.                    |
-| `ProductCardImage`          | `div`     | Renders the featured image, the no-image fallback, and the out-of-stock overlay. |
-| `ProductCardContent`        | `div`     | Wraps the title and price.                                                       |
-| `ProductCardTitle`          | `h3`      | Product title, clamped to two lines.                                             |
-| `ProductCardPrice`          | `div`     | Price, optional compare-at price, and a discount badge.                          |
-
-Each part exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+The high-level `ProductCard` (`components/product-card/product-card.tsx`) is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known) and composes the smaller parts from `components/product-card/components.tsx` — the image container, image, content, title, price, and an optional badge. Each part exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
 
 ## Variants
 
@@ -46,17 +34,6 @@ When the product is unavailable, an out-of-stock overlay darkens the image and s
 ## Skeleton
 
 `ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads.
-
-## Where it's used
-
-| Surface                 | Component                                            |
-| ----------------------- | ---------------------------------------------------- |
-| Home featured grid      | `components/product/products-grid.tsx`               |
-| PDP related products    | `components/product/products-slider.tsx`             |
-| Collection (PLP) grid   | `components/collections/results-grid.tsx`            |
-| Infinite scroll batches | `components/collections/infinite-product-grid.tsx`   |
-| Search results          | `components/search/results.tsx`                      |
-| AI agent results        | `components/agent/registry.tsx` (`AgentProductCard`) |
 
 ## Recipes
 
