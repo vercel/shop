@@ -4,11 +4,11 @@ description: The shared tile that displays a product's image, title, and price i
 type: guide
 ---
 
-The product card is the shared tile used wherever products appear in a list: the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It is a compound component, so each piece can be composed independently while sharing the same styling hooks.
+Used in the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It is a compound component, so each piece can be composed independently while sharing the same styling hooks.
 
 ## Composition
 
-The high-level `ProductCard` (`components/product-card/product-card.tsx`) is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known) and composes the smaller parts from `components/product-card/components.tsx` — the image container, image, content, title, price, and an optional badge. Each part exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+`ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known). Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
 
 ## Variants
 
@@ -23,7 +23,7 @@ The badge label comes from the `product.featuredBadge` translation key, so it st
 
 `ProductCardImage` accepts `aspectRatio` of `square` (default), `portrait`, or `landscape`, applied via `data-[aspect-ratio=...]` selectors. The skeleton honors the same prop so the placeholder matches the loaded card.
 
-## Image and fallback behavior
+## Image fallback
 
 The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint (with a `bg-muted` background) and renders the product title centered as muted placeholder text. This keeps grids visually aligned even for products that are missing imagery.
 
