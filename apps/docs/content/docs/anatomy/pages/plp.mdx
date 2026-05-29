@@ -48,7 +48,7 @@ Sort changes use `useTransition` for non-blocking navigation.
 
 Products load progressively using an `InfiniteProductGrid` component backed by `IntersectionObserver`. When the user scrolls near the bottom, a server action fetches the next page using Shopify's cursor-based pagination (`endCursor`). A loading indicator appears while the next batch loads.
 
-The cursor resets automatically when filters or sort change. Each batch renders product cards inline using the same card primitives as the initial grid.
+The cursor resets automatically when filters or sort change. Each batch renders [product cards](/docs/anatomy/product-card) inline using the same card primitives as the initial grid.
 
 ## Toolbar
 

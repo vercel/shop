@@ -129,7 +129,6 @@ export interface ShopifyProductCard {
   vendor: string;
   availableForSale: boolean;
   featuredImage: ShopifyImage | null;
-  images?: ShopifyEdges<ShopifyImage>;
   priceRange: {
     minVariantPrice: ShopifyMoney;
   };
@@ -142,7 +141,6 @@ export interface ShopifyProductCard {
     image?: { url: string } | null;
     selectedOptions: Array<{ name: string; value: string }>;
   } | null;
-  variants?: ShopifyEdges<{ image: { url: string } | null }>;
 }
 
 function transformImage(image: ShopifyImage | null): Image | null {
@@ -284,34 +282,6 @@ function formatKey(key: string): string {
   return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-/** Excludes variant-specific images (e.g. color swatches); keeps the default variant's image. */
-function filterVariantImages(product: ShopifyProductCard): Image[] {
-  if (!product.images) return [];
-
-  const allImages = flattenEdges(product.images)
-    .map((img) => transformImage(img))
-    .filter(Boolean) as Image[];
-
-  if (!product.variants) return allImages;
-
-  // Collect all variant image URLs, then remove the default variant's URL
-  const defaultVariantImageUrl = product.selectedOrFirstAvailableVariant?.image?.url;
-  const otherVariantImageUrls = new Set<string>();
-  for (const variant of flattenEdges(product.variants)) {
-    if (variant.image?.url && variant.image.url !== defaultVariantImageUrl) {
-      otherVariantImageUrls.add(variant.image.url);
-    }
-  }
-
-  if (otherVariantImageUrls.size === 0) return allImages;
-
-  // Strip query params for comparison (Shopify CDN URLs may have different transforms)
-  const stripParams = (url: string) => url.split("?")[0];
-  const otherVariantBases = new Set([...otherVariantImageUrls].map(stripParams));
-
-  return allImages.filter((img) => !otherVariantBases.has(stripParams(img.url)));
-}
-
 export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
   return {
@@ -319,7 +289,6 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     handle: product.handle,
     title: product.title,
     featuredImage: transformImage(product.featuredImage),
-    images: filterVariantImages(product),
     price: product.priceRange.minVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,

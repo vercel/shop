@@ -166,13 +166,6 @@ export const PRODUCT_CARD_FRAGMENT = `
     featuredImage {
       ...ImageFields
     }
-    images(first: 5) {
-      edges {
-        node {
-          ...ImageFields
-        }
-      }
-    }
     priceRange {
       minVariantPrice {
         ...MoneyFields
@@ -192,15 +185,6 @@ export const PRODUCT_CARD_FRAGMENT = `
       selectedOptions {
         name
         value
-      }
-    }
-    variants(first: 50) {
-      edges {
-        node {
-          image {
-            url
-          }
-        }
       }
     }
   }

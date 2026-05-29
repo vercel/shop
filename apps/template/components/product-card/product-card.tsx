@@ -59,7 +59,6 @@ export async function ProductCard({
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
-            images={product.images}
             sizes={sizes}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
