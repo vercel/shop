@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
-const SHOPIFY_API_VERSION = "2025-01";
+const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "2026-04";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 
 if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_ACCESS_TOKEN) {
