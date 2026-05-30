@@ -13,13 +13,7 @@ This works because the template ships with structured context that agents read a
 - **`AGENTS.md`** - architecture rules and conventions. Tells the agent things like "every cart mutation must call `invalidateCartCache()`" or "components in `ui/` must not import domain types."
 - **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills, platform guidance, and live Shopify schema tooling.
 
-## Supported agents
-
-Any agent that reads markdown context files will work. The ones we've tested most:
-
-- [**Claude Code**](https://claude.ai/code) - Anthropic's CLI agent. Reads `AGENTS.md` and installed project plugins automatically.
-- [**Cursor**](https://cursor.sh) - reads repo context and docs, but does not use the Claude plugin install flow.
-- [**Codex**](https://openai.com/index/introducing-codex/) - reads repo context and docs, but does not use the Claude plugin install flow.
+For best results, use an agent that reads `AGENTS.md` and supports skills and project-scoped plugins - for example [Claude Code](https://claude.ai/code), [Cursor](https://cursor.sh), or [Codex](https://openai.com/index/introducing-codex/). Claude Code has the deepest integration via the plugin install flow; Cursor and Codex lean more on the repo context and docs.
 
 ## Setting up
 
