@@ -23,8 +23,8 @@ const nextConfig: NextConfig = {
     turbopackFileSystemCacheForDev: true,
   },
   images: {
-    deviceSizes: [640, 828, 1200, 1920],
-    imageSizes: [64, 128, 384],
+    deviceSizes: [1080, 1920],
+    imageSizes: [],
     minimumCacheTTL: 31536000,
     remotePatterns: [
       {
