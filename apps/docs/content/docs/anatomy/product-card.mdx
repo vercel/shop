@@ -1,0 +1,92 @@
+---
+title: Product Card
+description: The shared tile that displays a product's image, title, and price in grids and sliders.
+type: guide
+---
+
+Used in the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It is a compound component, so each piece can be composed independently while sharing the same styling hooks.
+
+## Composition
+
+`ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known). Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+
+## Variants
+
+`variant` is either `default` or `featured`:
+
+- **`default`** - the standard tile used in grids and sliders.
+- **`featured`** - adds a "Featured" badge (clipped corner ribbon) and a top-down gradient behind the image container. Used for highlighting hero products.
+
+The badge label comes from the `product.featuredBadge` translation key, so it stays localized.
+
+## Aspect ratio
+
+`ProductCardImage` accepts `aspectRatio` of `square` (default), `portrait`, or `landscape`, applied via `data-[aspect-ratio=...]` selectors. The skeleton honors the same prop so the placeholder matches the loaded card.
+
+## Image fallback
+
+The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint (with a `bg-muted` background) and renders the product title centered as muted placeholder text. This keeps grids visually aligned even for products that are missing imagery.
+
+When the product is unavailable, an out-of-stock overlay darkens the image and shows the localized out-of-stock label on top.
+
+> The card uses a single image by default. It intentionally does **not** ship a hover image carousel - see the recipe below to add one.
+
+## Skeleton
+
+`ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads.
+
+## Recipes
+
+Customizations you can apply to the card. Each recipe is a single prompt - paste it into your coding agent and let it implement the change.
+
+### Add a hover image carousel
+
+By default the card shows only the featured image. The template previously shipped a desktop hover carousel that revealed additional product images; it was removed as a default to keep grids lean and avoid fetching extra images on every card. This recipe re-adds it as an opt-in feature.
+
+```
+Add a hover image carousel to the product card.
+
+Data:
+- In lib/shopify/fragments.ts, add an `images(first: 5)` block (using ...ImageFields)
+  to PRODUCT_CARD_FRAGMENT, and add a `variants(first: 50)` block selecting each
+  variant's `image { url }`.
+- In lib/shopify/transforms/product.ts, restore an `images: Image[]` value on the
+  object returned by transformShopifyProductCard. Compute it with a
+  `filterVariantImages(product)` helper that flattens product.images, then excludes
+  any image whose URL (ignoring query params) matches a non-default variant's image -
+  so color-swatch variant images don't leak into the carousel. Add the matching
+  `images?` and `variants?` fields back to the ShopifyProductCard response interface.
+- In lib/types.ts, add `images: Image[]` back to the ProductCard interface.
+
+Component:
+- Create components/product-card/slideshow.tsx as a "use client" component
+  `ProductCardSlideshow` that takes `images` and `sizes`. It should skip the first
+  image (the featured one), render the rest in a horizontal snap-scroll track, and
+  show prev/next chevron buttons. It must be desktop-only and hover-revealed:
+  absolutely positioned, `hidden lg:block`, `opacity-0`, fading in on
+  `group-hover/image` (guard with `[@media(hover:hover)]`). Return null when there
+  are fewer than two slideshow images. The chevron click handlers must call
+  preventDefault/stopPropagation so they don't trigger the card's link navigation.
+
+Wiring:
+- In components/product-card/components.tsx, add an `images` prop to
+  ProductCardImage, restore the `group/image` class on the image wrapper div, and
+  render <ProductCardSlideshow images={images} sizes={sizes} /> when there is more
+  than one image and the product is not out of stock.
+- Pass `images={product.images}` to ProductCardImage in both
+  components/product-card/product-card.tsx and the ClientProductCard in
+  components/collections/infinite-product-grid.tsx.
+
+Verify: hover a multi-image card on desktop - the carousel fades in with working
+chevrons; single-image and no-image cards are unchanged; mobile shows no carousel.
+```
+
+## Key files
+
+| File                                       | Purpose                                      |
+| ------------------------------------------ | -------------------------------------------- |
+| `components/product-card/product-card.tsx` | High-level server component and link wrapper |
+| `components/product-card/components.tsx`   | Compound parts, image/fallback, skeleton     |
+| `lib/shopify/fragments.ts`                 | `PRODUCT_CARD_FRAGMENT` (card data shape)    |
+| `lib/shopify/transforms/product.ts`        | `transformShopifyProductCard`                |
+| `lib/types.ts`                             | `ProductCard` domain type                    |

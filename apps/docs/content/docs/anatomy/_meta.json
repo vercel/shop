@@ -1,4 +1,14 @@
 {
   "title": "Features",
-  "pages": ["agent", "authentication", "cart", "pages", "navigation", "footer", "aeo-geo", "webhooks"]
+  "pages": [
+    "agent",
+    "authentication",
+    "cart",
+    "pages",
+    "product-card",
+    "navigation",
+    "footer",
+    "aeo-geo",
+    "webhooks"
+  ]
 }

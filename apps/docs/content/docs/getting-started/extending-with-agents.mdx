@@ -8,33 +8,28 @@ prerequisites:
 
 Vercel Shop is built for agentic development. Instead of copy-pasting snippets from docs, you describe what you want and a coding agent handles the implementation - editing files, running commands, and validating the result.
 
-This works because the template ships with structured context that agents can read: an `AGENTS.md` file describing the architecture and project-scoped plugins that provide common storefront skills, platform-aware tooling, and live Shopify schema access.
+This works because the template ships with structured context that agents read automatically:
 
-## Supported agents
+- **`AGENTS.md`** - architecture rules and conventions. Tells the agent things like "every cart mutation must call `invalidateCartCache()`" or "components in `ui/` must not import domain types."
+- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills, platform guidance, and live Shopify schema tooling.
 
-Any agent that reads markdown context files will work. The ones we've tested most:
-
-- [**Claude Code**](https://claude.ai/code) - Anthropic's CLI agent. Reads `AGENTS.md` and installed project plugins automatically.
-- [**Cursor**](https://cursor.sh) - AI-powered editor with agent mode. It benefits from the repo context and docs, but does not use the Claude plugin install flow.
-- [**Codex**](https://openai.com/index/introducing-codex/) - OpenAI's coding agent. It benefits from the repo context and docs, but does not use the Claude plugin install flow.
+For best results, use an agent that reads `AGENTS.md` and supports skills and project-scoped plugins - for example [Claude Code](https://claude.ai/code), [Cursor](https://cursor.sh), or [Codex](https://openai.com/index/introducing-codex/). Claude Code has the deepest integration via the plugin install flow; Cursor and Codex lean more on the repo context and docs.
 
 ## Setting up
 
-After [creating your project](/docs/getting-started), `create-vercel-shop` installs the project plugins that the template expects:
+After [creating your project](/docs/getting-started), `create-vercel-shop` installs the project plugins:
 
 - `vercel-shop` for storefront skills plus bootstrap, drift, and upgrade-planning commands
 - `vercel-plugin` for generic Vercel and Next.js guidance
 - `shopify-ai-toolkit` for Shopify-aware tooling and schema access
 
-If you already have a project and only want the agent setup, run this from the project root instead:
+If you already have a project and only want the agent setup:
 
 ```bash
 npx create-vercel-shop@latest --no-template
 ```
 
-That skips the storefront scaffold and only installs the expected project-scoped plugins.
-
-If any of them are missing, rerun:
+If any plugins are missing, rerun:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes
@@ -42,45 +37,52 @@ npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-The combined plugin setup gives Claude Code both storefront-specific skills and the broader Vercel/Next.js guidance used across the stack.
+For upgrade work, the `vercel-shop` plugin also carries a template rollout log so agents can reason about change-level updates instead of guessing from a single scaffold version. New scaffolds record bootstrap metadata so agents can compare rollout entries against when a project was created.
 
-For upgrade work, the `vercel-shop` plugin also carries a template rollout log. That gives agents change-level context about template updates that downstream storefronts may want to adopt, instead of forcing them to guess from a single scaffold version. New scaffolds also record bootstrap metadata so agents can compare rollout entries against when a project was created.
+## Custom blocks in AGENTS.md
 
-## What are skills?
+Some sections of `AGENTS.md` are managed by external tools and wrapped in HTML comment markers:
 
-Skills are agent-ready guides that describe how to complete a specific task in your storefront. Each skill is a markdown file that contains:
+```md
+<!-- BEGIN:nextjs-agent-rules -->
 
-- **What to do** - the files to create or modify, the patterns to follow
-- **Why** - the reasoning behind the approach
-- **How to validate** - checks the agent runs to confirm the change works
+## This is NOT the Next.js you know
 
-When you ask your agent to enable a feature, it reads the relevant skill and executes each step - writing code, installing dependencies, updating configs - then verifies the result.
+...
 
-### Why skills work
+<!-- END:nextjs-agent-rules -->
+```
 
-Skills aren't generated on the fly. They're written and tested against the template, so the instructions match the actual codebase. This means:
+The owning tool can overwrite the content between `BEGIN` and `END` on upgrade without touching your custom instructions. To drop an opinionated block, delete everything from `BEGIN` to `END` - the rest of the file stays intact.
 
-- **Fewer hallucinations** - the agent follows a concrete plan instead of guessing
-- **Consistent patterns** - every skill follows the same conventions the template uses
-- **Validated output** - skills include verification steps so you know the change landed correctly
+The template ships with two blocks:
 
-### Running a skill
+| Block                | Owner       | What it contains                                                                                                                                                                                       |
+| -------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `nextjs-agent-rules` | Next.js     | Reminds agents this Next.js version has breaking changes and to read bundled docs before writing code. Refreshed on Next.js upgrade.                                                                   |
+| `vercel-shop-style`  | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. Remove the block if your team prefers different conventions.   |
 
-With Claude Code, run a storefront skill as a plugin command:
+Everything outside these markers is yours. Add team conventions or domain constraints anywhere else and no upgrade will overwrite them.
+
+## Skills
+
+Skills are agent-ready playbooks - markdown files that describe exactly how to complete a specific task. Each one names the files to touch, the patterns to follow, and the checks to run after. They're written and tested against the template, which means fewer hallucinations and consistent output.
+
+To run a storefront skill in Claude Code:
 
 ```bash
 /vercel-shop:enable-shopify-markets
 ```
 
-In Cursor or Codex, describe what you want and point the agent at the matching skill doc when useful:
+In Cursor or Codex, describe the task and reference the matching skill doc when helpful:
 
 ```
 Enable multi-locale support with Shopify Markets
 ```
 
-You can also follow any skill manually from the docs, or inspect the `vercel-shop` plugin source in the `vercel/shop` repository.
+You can also follow any skill manually from the docs, or inspect the source in the `vercel/shop` repository.
 
-## Available skills
+### Available skills
 
 <Cards>
   <Card title="Enable Shopify Markets" href="/docs/skills/enable-shopify-markets">
@@ -94,8 +96,53 @@ You can also follow any skill manually from the docs, or inspect the `vercel-sho
   </Card>
 </Cards>
 
-## Going beyond skills
+## Working effectively with an agent
 
-Skills cover the most common extensions, but agents aren't limited to them. You can ask your agent to do anything - restyle the product page, add a wishlist, integrate a third-party review system. The `AGENTS.md` file plus the installed project plugins give it enough context to work with the codebase directly.
+Skills cover the common path. Most of your work will be ad-hoc prompts - restyle the PDP, add a wishlist, integrate a review system. A few habits make this go much smoother.
 
-For best results, be specific about what you want and let the agent propose an approach before it starts writing code.
+### Let the agent propose first
+
+Before any code gets written, ask for the plan:
+
+```
+Add a size guide to the PDP. Before writing code, tell me your plan.
+```
+
+A good proposal names the files it will touch, the patterns it will follow, and how it will validate the result. Redirect there - not after the diff lands.
+
+### Be specific about what, where, and when
+
+Vague prompts get vague code. Compare:
+
+```
+add size guide
+```
+
+with:
+
+```
+Add a size guide accordion below the product description on the PDP.
+Pull sizing data from a product metafield called "sizing_guide".
+Only show the section when the metafield exists.
+```
+
+The second version names the placement, the data source, and the empty-state behavior - all things the agent would otherwise guess.
+
+### Iterate with targeted follow-ups
+
+After the first pass, refine in place rather than re-prompting the whole task:
+
+```
+Make the accordion closed by default on mobile
+```
+
+The agent retains context from the previous exchange.
+
+### When something breaks, name the failure
+
+Specific error messages and likely files beat "fix it":
+
+```
+The build fails with "Type 'string' is not assignable to type 'Money'".
+Check the transform in lib/shopify/transforms/product.ts.
+```

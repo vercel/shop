@@ -5,8 +5,6 @@ import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { cn } from "@/lib/utils";
 
-import { ProductCardSlideshow } from "./slideshow";
-
 interface ProductCardProps extends React.ComponentProps<"article"> {
   variant?: "default" | "featured";
 }
@@ -66,7 +64,6 @@ const aspectRatioClasses =
 interface ProductCardImageProps {
   src?: string | null;
   alt: string;
-  images?: Array<{ url: string; altText: string; width: number; height: number }>;
   sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
@@ -78,7 +75,6 @@ interface ProductCardImageProps {
 function ProductCardImage({
   src,
   alt,
-  images,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
@@ -86,13 +82,11 @@ function ProductCardImage({
   aspectRatio = "square",
   className,
 }: ProductCardImageProps) {
-  const hasSlideshow = images && images.length > 1;
-
   return (
     <div
       data-slot="product-card-image"
       data-aspect-ratio={aspectRatio}
-      className={cn("relative overflow-hidden bg-muted group/image", aspectRatioClasses, className)}
+      className={cn("relative overflow-hidden bg-muted", aspectRatioClasses, className)}
     >
       {src ? (
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
@@ -101,7 +95,6 @@ function ProductCardImage({
           {fallbackTitle}
         </div>
       )}
-      {hasSlideshow && !outOfStock && <ProductCardSlideshow images={images} sizes={sizes} />}
       {outOfStock && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
           <span className="text-destructive-foreground font-medium text-xs px-2 py-1 bg-destructive rounded">

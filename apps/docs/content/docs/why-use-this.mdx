@@ -1,24 +1,13 @@
 ---
 title: Why Use This
+description: Why we built Vercel Shop — an agent-first Shopify starter for Next.js on Vercel.
 type: overview
 ---
 
-## Composable commerce
+Most storefronts run on a full-stack commerce platform. The platform owns the theme, the rendering pipeline, the cart UI, and most of the surface customers see. It works until what you want to render exceeds what the theme supports, or the features you want to ship live on someone else's roadmap. Headless commerce moves the storefront onto your own stack. Your framework, your infrastructure, your render path. The commerce platform keeps doing commerce. Inventory, checkout, payments, tax.
 
-Composable commerce, headless commerce: both of these phrases describe roughly the same architectural decision, which is to let your commerce platform handle the commerce (inventory, checkout, payments, and the tax math you never want to be creative about) while you build the storefront yourself. Your framework, your infrastructure, your opinions about how a URL should work. People arrive here from different directions: faster pages, real control over product and cart experiences, or a site that can evolve without waiting on a new platform release. And increasingly, the demand for agentic commerce features - AI-powered search, conversational product discovery, and dynamic recommendations - all of which live in your frontend and all of which are evolving fast enough that you need the flexibility to adopt them as they arrive.
+Going headless means more of the stack is yours. Routing, caching, image optimization, and the rest of what a platform used to handle quietly. Templates and starters have tried to close that distance for a decade, and they keep failing in two ways: undernurtured (the README hasn't been touched since the framework had a different name), or so opinionated that customizing them costs you most of what you saved.
 
-## The complexity gap
+Meanwhile, the way teams write code has changed. Agentic development tools like Claude Code and Cursor keep getting meaningfully better at scaffolding across files, holding a framework's context, and producing software instead of suggestions. A starter aimed at agents isn't the same kind of artifact as a starter aimed at humans. It can be more opinionated and more flexible at the same time, because the opinions are documented in skills the agent reads, not enforced by abstractions you have to live with.
 
-Complexity has always been part of this story. When the platform isn't rendering your pages, you're responsible for everything it used to do for you: routing, caching, image optimization, and the dozen things you didn't realize were handled until they weren't. Templates and starters have tried to close this gap, but they can be undernurtured, or they're so opinionated that customizing them costs you most of the time you saved by not starting from scratch.
-
-## Agentic development
-
-The way teams write code has changed. Agentic development tools keep getting meaningfully better, and adoption grows by the day: agents that can scaffold across multiple files, hold the full context of a framework, an API, and a deployment target at once, and generate working software rather than suggestions. Teams using these tools are shipping features faster and with more confidence than ever.
-
-## Why Vercel Shop
-
-This is why we built Vercel Shop: an agent-first starter for building Shopify storefronts with Next.js, designed for how builders actually build now. Drop in your Shopify credentials and go. The project ships with robust skills that teach your agent how the codebase works, how the Shopify Storefront API behaves, and how to make changes that deploy cleanly to [Vercel](https://vercel.com).
-
-## Make it yours
-
-What you do with it from there is the point. Swap in your CMS. Connect your search provider. Integrate whatever you're convinced matters. We've been opinionated about the pieces that should be stable and open about the pieces that should move. The interesting parts are waiting for you.
+That's why we built Vercel Shop. It's a Shopify storefront in Next.js, deployed on [Vercel](https://vercel.com), with a set of skills that teach your agent how the codebase is shaped, how the Storefront API behaves, and how to keep changes deployable. Drop in your Shopify credentials and go. Swap in your CMS. Swap in your search. Wire up whatever you're convinced matters. The parts we kept stable are the boring ones on purpose.

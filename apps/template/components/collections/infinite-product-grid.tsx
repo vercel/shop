@@ -125,7 +125,6 @@ function ClientProductCard({
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
-            images={product.images}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
