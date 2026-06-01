@@ -1,0 +1,114 @@
+---
+title: Webhooks
+description: Shopify webhook handler that invalidates Next.js cache tags so storefront content updates near-instantly when products, collections, inventory, or CMS metaobjects change.
+type: guide
+---
+
+Read paths in the template are cached aggressively with `"use cache"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
+
+The handler ships in the template and runs with zero configuration in development. For production, set `SHOPIFY_WEBHOOK_SECRET` and register webhooks in Shopify Admin so a real signal flows in.
+
+## The endpoint
+
+```
+POST /api/webhooks/shopify
+```
+
+A single route handles every supported topic. Shopify sets the topic on each request via the `x-shopify-topic` header, and the handler dispatches to the appropriate tag set.
+
+## Topics and cache tags
+
+| Webhook topic        | Tags invalidated                                                          |
+| -------------------- | ------------------------------------------------------------------------- |
+| `products/create`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/update`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `products/delete`    | `products`, `collections`, `product-{handle}`, `recommendations-{handle}` |
+| `collections/create` | `collections`, `products`, `menus`, `collection-{handle}`                 |
+| `collections/update` | `collections`, `products`, `menus`, `collection-{handle}`                 |
+| `collections/delete` | `collections`, `products`, `menus`                                        |
+| `inventory_levels/*` | `products`, `collections`                                                 |
+| `metaobjects/*`      | `cms:all` plus type-specific tags (see below)                             |
+
+Product topics also try to derive a numeric product tag from `admin_graphql_api_id` so reads that cache by ID (not handle) are invalidated alongside handle-based reads.
+
+### Metaobject tags
+
+Metaobject topics inspect the payload's `type` field to invalidate narrower CMS tags. The exact mapping follows the conventions used by [Shopify CMS](/docs/skills/enable-shopify-cms):
+
+| Metaobject `type`            | Additional tags                  |
+| ---------------------------- | -------------------------------- |
+| `cms_page`                   | `cms:pages`, `cms:page:{slug}`   |
+| `cms_homepage`               | `cms:homepage`                   |
+| `cms_section`, `cms_hero`    | `cms:pages`, `cms:homepage`      |
+
+All metaobject topics also invalidate the broad `cms:all` tag as a safety net for unrecognized types.
+
+## How the handler works
+
+When a request arrives, the handler runs in this order:
+
+1. Reads the raw body as text — required for stable HMAC verification
+2. If `SHOPIFY_WEBHOOK_SECRET` is set, computes the HMAC-SHA256 of the body and compares it to `x-shopify-hmac-sha256` using `crypto.timingSafeEqual`. Mismatch returns `401`.
+3. Reads `x-shopify-topic`. Missing topic returns `400`.
+4. Dispatches on the topic prefix (`products/`, `collections/`, `inventory_levels/`, `metaobjects/`) and builds a tag list from the payload
+5. Calls `revalidateTag()` for each affected tag
+6. Returns `{ success, topic, tagsInvalidated }` for log inspection
+
+Payload parsing is wrapped in `try`/`catch`. If Shopify ever sends a body the handler can't parse, the generic tags still fire — coarse invalidation is better than none.
+
+> **Security note:** When `SHOPIFY_WEBHOOK_SECRET` is unset the handler skips signature verification. That's convenient in development but unsafe in production — always set the secret in deployed environments.
+
+## Setting up webhooks in Shopify
+
+1. Open **Shopify Admin → Settings → Notifications → Webhooks**
+2. Set the URL to `https://your-domain.com/api/webhooks/shopify`
+3. Choose **JSON** as the format
+4. Create a webhook for each topic in the table above
+5. Copy the webhook signing secret and set it as `SHOPIFY_WEBHOOK_SECRET` in your environment
+
+You can register only the topics you care about. Skipping `inventory_levels/*`, for example, just means inventory edits propagate at cache expiry instead of immediately.
+
+## Environment variables
+
+| Variable                  | When to set                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `SHOPIFY_WEBHOOK_SECRET`  | Required in any environment where Shopify posts to `/api/webhooks/shopify`. Without it, signature verification is skipped — fine for local testing, unsafe for production. |
+
+See [Environment Variables](/docs/reference/env-vars) for the full reference.
+
+## Verifying it works
+
+Send a request with no signature to confirm the route is mounted:
+
+```bash
+curl -X POST http://localhost:3000/api/webhooks/shopify \
+  -H "x-shopify-topic: products/update" \
+  -d '{"handle":"speaker"}'
+```
+
+In development (no secret set) you should see a JSON response listing the invalidated tags and a server log line:
+
+```
+[Shopify Webhook] Received: products/update
+[Shopify Webhook] Invalidated tags: products, collections, product-speaker, recommendations-speaker
+```
+
+For a real Shopify-signed request, use the **Send test notification** button on each webhook in Shopify Admin and watch your function logs.
+
+## Adding a new topic
+
+To handle a new Shopify topic:
+
+1. Register the webhook in Shopify Admin pointing at `/api/webhooks/shopify`
+2. Add a branch in `app/api/webhooks/shopify/route.ts` that matches the topic prefix and pushes the cache tags you want to invalidate
+3. Confirm the tags you're invalidating actually wrap the reads you care about — `cacheTag("...")` calls inside `lib/shopify/operations/` and `lib/cms/`
+
+If the new topic touches data not currently cached by tag, add a `cacheTag()` to the operation that reads it before the webhook will have any effect.
+
+## Key files
+
+| File                                | Purpose                                                       |
+| ----------------------------------- | ------------------------------------------------------------- |
+| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification and tag dispatch       |
+| `lib/shopify/utils.ts`              | `getNumericShopifyId()` — extracts numeric ID from GraphQL ID |
+| `.env.example`                      | Documents `SHOPIFY_WEBHOOK_SECRET`                            |
