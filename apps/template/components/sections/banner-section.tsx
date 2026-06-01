@@ -5,7 +5,6 @@ import Link from "next/link";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { Button } from "@/components/ui/button";
 import type { BannerSection as BannerSectionType } from "@/lib/types";
-import heroDefault from "@/public/hero.jpg";
 
 interface BannerSectionProps {
   hero: BannerSectionType;
@@ -15,12 +14,12 @@ interface BannerSectionProps {
 export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps) {
   const Heading = headingLevel;
   const video = hero.backgroundVideo;
-  const image = hero.backgroundImage ?? heroDefault;
-  const isStatic = typeof image === "object" && "src" in image;
+  const image = hero.backgroundImage;
+  const isStatic = image && typeof image === "object" && "src" in image;
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative grid bg-linear-to-b from-black via-neutral-950 to-neutral-900">
+      <div className="relative grid bg-foreground">
         <div className="col-start-1 row-start-1 hidden md:block md:aspect-[3/1]" />
 
         {video ? (
@@ -54,21 +53,19 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
             />
             <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
           </>
-        ) : (
-          image && (
-            <>
-              <Image
-                src={(image as { url: string }).url}
-                alt={(image as { alt: string }).alt}
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-            </>
-          )
-        )}
+        ) : image ? (
+          <>
+            <Image
+              src={(image as { url: string }).url}
+              alt={(image as { alt: string }).alt}
+              fill
+              className="object-cover"
+              priority
+              sizes="100vw"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
+          </>
+        ) : null}
 
         <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-10 lg:px-10">
           <div className="flex flex-col items-center text-center gap-2.5">
