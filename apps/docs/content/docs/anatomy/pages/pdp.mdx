@@ -33,6 +33,8 @@ The `getVariantUrl()` helper in `lib/product.ts` computes the target URL for eac
 
 Unavailable options render as inert `<span>` elements instead of links.
 
+Options with a single value render as a plain `Name: Value` label without a picker — there is no choice to surface, but the attribute is still useful information to the shopper (e.g. `Finish: Natural White Oak` on a one-variant product). Shopify's synthetic `Title: Default Title` option (emitted for products with no variant axes) is the only single-value option that is hidden entirely.
+
 ## Image gallery
 
 The gallery is handled by a single `ProductMedia` component that adapts to screen size:

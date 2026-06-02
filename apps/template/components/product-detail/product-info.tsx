@@ -58,16 +58,28 @@ function ProductInfoOptions({
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
-  const isDefaultOption = (opt: { values: { name: string }[] }) => opt.values.length === 1;
+  // Shopify emits a synthetic Title/Default Title option for products with no variant axes — hide it.
+  const isShopifyDefaultOption = (opt: ProductOption) =>
+    opt.name === "Title" && opt.values.length === 1 && opt.values[0]?.name === "Default Title";
+  const isSingleValueOption = (opt: ProductOption) => opt.values.length === 1;
 
-  const colorOptions = options.filter((opt) => isColorOption(opt) && !isDefaultOption(opt));
-  const otherOptions = options.filter((opt) => !isColorOption(opt) && !isDefaultOption(opt));
+  const renderable = options.filter((opt) => !isShopifyDefaultOption(opt));
+  const singleValueOptions = renderable.filter(isSingleValueOption);
+  const colorOptions = renderable.filter((opt) => !isSingleValueOption(opt) && isColorOption(opt));
+  const otherOptions = renderable.filter((opt) => !isSingleValueOption(opt) && !isColorOption(opt));
 
-  if (colorOptions.length === 0 && otherOptions.length === 0) return null;
+  if (singleValueOptions.length === 0 && colorOptions.length === 0 && otherOptions.length === 0)
+    return null;
 
   return (
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-5">
+        {singleValueOptions.map((option) => (
+          <p key={option.id} className="text-sm font-medium text-foreground/70">
+            {option.name}: <span className="text-foreground">{option.values[0]?.name}</span>
+          </p>
+        ))}
+
         {colorOptions.map((colorOption) => (
           <ColorPicker
             key={colorOption.id}
