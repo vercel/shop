@@ -8,7 +8,6 @@ appliesTo:
   - all
 paths:
   - apps/template/components/product/related-products-section.tsx
-  - apps/template/components/product/products-slider.tsx
   - apps/docs/content/docs/anatomy/pages/pdp.mdx
 ---
 
@@ -19,7 +18,7 @@ paths:
 - A `RECOMMENDATION_LIMIT` of `4` is applied via `recommendations.slice(0, 4)`. The Shopify recommendation API still returns its usual ~10 — only the first four are rendered.
 - The slider markup (`ProductsSlider` + the full-bleed `auto-cols-[58.33vw]` overflow grid) is replaced with `grid grid-cols-2 gap-5 lg:grid-cols-4`, matching the `FeaturedProducts` grid on the home page.
 - The fallback skeleton mirrors the loaded layout (four `ProductCardSkeleton`s in the same 2/4-col grid) instead of the prior carousel skeleton.
-- `components/product/products-slider.tsx` is deleted — it had only one consumer (this section). The underlying `Slider` primitive in `components/ui/slider.tsx` is untouched and remains available for other carousel needs.
+- `components/product/products-slider.tsx` stays in the template even though `RelatedProductsSection` no longer imports it. It's a small wrapper around the `Slider` primitives that storefronts (or future template sections) may want to opt back into for genuine carousel surfaces, so it stays available as a reference building block.
 - The `aspectRatio` prop on the exported skeleton is gone; no caller passed it, and the grid uses the default square card.
 
 Both PDP and cart page consume the same `RelatedProductsSection` component, so the cart's "you might also like" surface gets the same treatment.
@@ -38,7 +37,7 @@ Both PDP and cart page consume the same `RelatedProductsSection` component, so t
 ## Safe to skip when
 
 - The storefront has its own related-products layout that wants more than four cards or a scrollable row.
-- The storefront imports `ProductsSlider` from `components/product/products-slider.tsx` elsewhere — restore the file (it was a thin wrapper around `Slider` primitives) or migrate those call sites to use `Slider` directly.
+- The storefront wants `RelatedProductsSection` itself to keep the slider — re-wire it to `ProductsSlider` (which still lives at `components/product/products-slider.tsx`) instead of adopting this change.
 
 ## Validation
 
