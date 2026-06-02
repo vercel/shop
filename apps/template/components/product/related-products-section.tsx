@@ -1,33 +1,25 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import type { ProductCardAspectRatio } from "@/components/product-card/components";
-import { ProductCardSkeleton } from "@/components/product-card/product-card";
-import { ProductsSlider } from "@/components/product/products-slider";
+import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendations } from "@/lib/shopify/operations/products";
 
-export function RelatedProductsSectionSkeleton({
-  title,
-  aspectRatio = "square",
-}: {
-  title?: string;
-  aspectRatio?: ProductCardAspectRatio;
-}) {
+const RECOMMENDATION_LIMIT = 4;
+
+export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
   return (
-    <div className="overflow-x-clip">
-      <div className="mx-auto min-w-0 grid gap-4">
-        {title ? (
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
-        ) : (
-          <Skeleton className="h-9 w-48" />
-        )}
-        <div className="grid grid-flow-col gap-5 relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1rem)/2)] sm:px-0 lg:auto-cols-[calc((100%-2rem)/3)] xl:auto-cols-[calc((100%-3rem)/4)]">
-          {["a", "b", "c", "d"].map((key) => (
-            <ProductCardSkeleton key={key} aspectRatio={aspectRatio} />
-          ))}
-        </div>
+    <div className="grid gap-4">
+      {title ? (
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{title}</h2>
+      ) : (
+        <Skeleton className="h-9 w-48" />
+      )}
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+        {Array.from({ length: RECOMMENDATION_LIMIT }, (_, index) => (
+          <ProductCardSkeleton key={index} />
+        ))}
       </div>
     </div>
   );
@@ -42,7 +34,23 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
 
   if (recommendations.length === 0) return null;
 
-  return <ProductsSlider title={t("recommendations")} products={recommendations} locale={locale} />;
+  return (
+    <div className="grid gap-4">
+      <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">
+        {t("recommendations")}
+      </h2>
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+        {recommendations.slice(0, RECOMMENDATION_LIMIT).map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            locale={locale}
+            outOfStockText={t("outOfStock")}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export async function RelatedProductsSection({
