@@ -6,8 +6,6 @@
     "enable-i18n",
     "enable-shopify-markets",
     "enable-shopify-cms",
-    "enable-shopify-menus",
-    "enable-content-summarization",
-    "enable-virtual-try-on"
+    "enable-shopify-menus"
   ]
 }
