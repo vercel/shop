@@ -327,7 +327,7 @@ function BuyButtonsFallback({
     return (
       <div className="grid grid-cols-2 gap-2">
         <div className="h-12 rounded-lg bg-shop" />
-        <div className="h-12 rounded-lg bg-foreground" />
+        <div className="h-12 rounded-lg bg-primary" />
       </div>
     );
   }
@@ -342,7 +342,7 @@ function BuyButtonsFallback({
         <span className="text-sm font-medium">{t("buyWithShop")}</span>
         <ShopLogo className="h-4 w-auto" />
       </div>
-      <div className="flex items-center justify-center rounded-lg h-12 bg-foreground text-background text-sm font-medium">
+      <div className="flex items-center justify-center rounded-lg h-12 bg-primary text-primary-foreground text-sm font-medium">
         {allInStock ? t("addToCart") : t("outOfStock")}
       </div>
     </div>

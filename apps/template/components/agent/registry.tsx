@@ -151,7 +151,7 @@ export const { registry } = defineRegistry(catalog, {
           <div className="border-t px-2.5 py-2">
             <a
               href={props.checkoutUrl}
-              className="block w-full rounded-lg bg-foreground px-5 py-2 text-center font-medium text-background text-sm hover:bg-foreground/90"
+              className="block w-full rounded-lg bg-primary px-5 py-2 text-center font-medium text-primary-foreground text-sm hover:bg-primary/90"
             >
               {tCart("checkout")}
             </a>

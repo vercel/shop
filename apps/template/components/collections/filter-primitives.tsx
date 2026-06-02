@@ -307,7 +307,7 @@ function FilterPriceRange({
       <button
         type="button"
         onClick={() => onApply?.(minValue, maxValue)}
-        className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background transition-colors hover:bg-foreground/90"
+        className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
       >
         <CheckIcon className="size-4" />
       </button>

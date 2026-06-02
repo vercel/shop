@@ -225,7 +225,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                             onClick={() =>
                               navigate(`/search?q=${encodeURIComponent(query.trim())}`)
                             }
-                            className="inline-flex items-center justify-center rounded-lg bg-foreground text-background text-sm font-medium h-9 px-5 hover:bg-foreground/90 transition-colors"
+                            className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
                           >
                             {t("predictiveSearch.viewAllShort")}
                           </button>

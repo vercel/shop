@@ -80,7 +80,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
             setOverlayOpen(false);
             router.push("/");
           }}
-          className="h-12 px-8 bg-foreground text-background hover:bg-foreground/90"
+          className="h-12 px-8"
         >
           {t("continueShopping")}
         </Button>
@@ -104,7 +104,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
-          className="w-full h-12 justify-center bg-foreground text-background hover:bg-foreground/90"
+          className="w-full h-12 justify-center"
           disabled={isCheckingOut || isUpdatingCart}
           aria-label={t("proceedToCheckout")}
         >

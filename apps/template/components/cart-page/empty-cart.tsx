@@ -9,7 +9,7 @@ export async function Empty() {
       <h2 className="text-2xl sm:text-3xl font-semibold tracking-tighter">{t("empty")}</h2>
       <Link
         href="/"
-        className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-foreground text-background hover:bg-foreground/90 transition-colors"
+        className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         {t("continueShopping")}
       </Link>
