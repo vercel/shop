@@ -5,7 +5,6 @@ import {
   getSearchFacets,
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 function markdownHeaders(cacheControl: string): HeadersInit {
@@ -39,18 +38,16 @@ export async function GET(request: Request) {
         filters: shopifyFilters,
         locale,
       }),
-      getSearchFacets({ query, collection, filters: shopifyFilters, locale }),
+      getSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
     ]);
 
-    const transformedFilters = transformShopifyFilters(facets.filters, { activeFilters });
-    const hasPriceRange = facets.filters.some((filter) => filter.type === "PRICE_RANGE");
     const markdown = searchResultsToMarkdown({
       query,
       collection,
       products: results.products,
       total: facets.total,
-      filters: transformedFilters.filters,
-      priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
+      filters: facets.filters,
+      priceRange: facets.priceRange,
       activeFilters,
       pageInfo: results.pageInfo,
       locale,

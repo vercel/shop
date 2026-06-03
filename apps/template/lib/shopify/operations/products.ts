@@ -1,10 +1,11 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { PageInfo, ProductCard, ProductDetails } from "@/lib/types";
+import type { Filter, PageInfo, PriceRange, ProductCard, ProductDetails } from "@/lib/types";
 
 import { shopifyFetch } from "../fetch";
 import { PRODUCT_CARD_FRAGMENT, PRODUCT_FRAGMENT } from "../fragments";
+import { transformShopifyFilters } from "../transforms/filters";
 import {
   type ShopifyProduct,
   type ShopifyProductCard,
@@ -13,6 +14,8 @@ import {
 } from "../transforms/product";
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
+
+type ActiveFilters = Record<string, string | string[] | undefined>;
 
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);
@@ -405,16 +408,23 @@ export async function getFilteredCatalogProducts(
 }
 
 export async function getSearchFacets(params: {
+  activeFilters?: ActiveFilters;
   query?: string;
   collection?: string;
   filters?: ProductFilter[];
   locale?: string;
-}): Promise<{ filters: ShopifyFilter[]; total: number }> {
+}): Promise<{ filters: Filter[]; priceRange?: PriceRange; total: number }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
-  const { query, collection, filters = [], locale = defaultLocale } = params;
+  const {
+    activeFilters = {},
+    query,
+    collection,
+    filters = [],
+    locale = defaultLocale,
+  } = params;
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -439,8 +449,11 @@ export async function getSearchFacets(params: {
     },
   });
 
+  const transformed = transformShopifyFilters(data.search.productFilters, { activeFilters });
+
   return {
-    filters: data.search.productFilters,
+    filters: transformed.filters,
+    priceRange: transformed.priceRange,
     total: data.search.totalCount,
   };
 }
@@ -567,6 +580,7 @@ const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolea
 };
 
 export async function getCollectionProducts(params: {
+  activeFilters?: ActiveFilters;
   collection: string;
   limit?: number;
   sortKey?: string;
@@ -576,13 +590,15 @@ export async function getCollectionProducts(params: {
 }): Promise<{
   products: ProductCard[];
   pageInfo: PageInfo;
-  filters: ShopifyFilter[];
+  filters: Filter[];
+  priceRange?: PriceRange;
 }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", "collections", `collection-${params.collection}`);
 
   const {
+    activeFilters = {},
     collection,
     sortKey: rawSortKey = "best-matches",
     limit = 50,
@@ -636,11 +652,13 @@ export async function getCollectionProducts(params: {
   tagProducts(shopifyProducts);
 
   const products = shopifyProducts.map(transformShopifyProductCard);
+  const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
 
   return {
     products,
     pageInfo: data.collection.products.pageInfo,
-    filters: data.collection.products.filters,
+    filters: transformed.filters,
+    priceRange: transformed.priceRange,
   };
 }
 

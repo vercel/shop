@@ -7,9 +7,8 @@ import {
   getSearchFacets,
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
-import { type TransformedFilters, transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type { Collection } from "@/lib/types";
+import type { Collection, Filter, PriceRange } from "@/lib/types";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
 // Shopify's /collections/all is a Liquid-storefront convention with no Storefront API
@@ -29,7 +28,7 @@ export interface CollectionResultsData {
   sort?: string;
   filters: ProductFilter[];
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
-  transformedFilters: TransformedFilters;
+  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
 }
 
 export async function getCollectionSearchState(
@@ -55,6 +54,7 @@ export async function getCollectionResultsData({
   const [handle, { activeFilters, sort }] = await Promise.all([handlePromise, searchStatePromise]);
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const result = await getCollectionProducts({
+    activeFilters,
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
@@ -68,9 +68,7 @@ export async function getCollectionResultsData({
     sort,
     filters: shopifyFilters,
     result,
-    transformedFilters: transformShopifyFilters(result.filters, {
-      activeFilters,
-    }),
+    transformedFilters: { filters: result.filters, priceRange: result.priceRange },
   };
 }
 
@@ -121,7 +119,7 @@ export async function getAllProductsResultsData({
       filters: shopifyFilters,
       locale,
     }),
-    getSearchFacets({ filters: shopifyFilters, locale }),
+    getSearchFacets({ activeFilters, filters: shopifyFilters, locale }),
   ]);
 
   return {
@@ -133,7 +131,8 @@ export async function getAllProductsResultsData({
       products: products.products,
       pageInfo: products.pageInfo,
       filters: facets.filters,
+      priceRange: facets.priceRange,
     },
-    transformedFilters: transformShopifyFilters(facets.filters, { activeFilters }),
+    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
   };
 }
