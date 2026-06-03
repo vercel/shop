@@ -74,11 +74,24 @@ function ProductInfoOptions({
   return (
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-5">
-        {singleValueOptions.map((option) => (
-          <p key={option.id} className="text-sm font-medium text-foreground/70">
-            {option.name}: <span className="text-foreground">{option.values[0]?.name}</span>
-          </p>
-        ))}
+        {singleValueOptions.map((option) => {
+          const value = option.values[0];
+          return (
+            <p
+              key={option.id}
+              className="flex items-center gap-2 text-sm font-medium text-foreground/70"
+            >
+              {option.name}: <span className="text-foreground">{value?.name}</span>
+              {value?.swatch?.color && (
+                <span
+                  className="size-4 rounded-full border border-foreground/10"
+                  style={{ backgroundColor: value.swatch.color }}
+                  aria-hidden
+                />
+              )}
+            </p>
+          );
+        })}
 
         {colorOptions.map((colorOption) => (
           <ColorPicker
