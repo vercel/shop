@@ -27,15 +27,7 @@ export async function removeFromCartAction(itemId: string): Promise<CartActionRe
   }
 
   try {
-    const result = await removeFromCart([itemId]);
-
-    if (!result) {
-      return {
-        success: false,
-        error: "Failed to remove item from cart",
-      };
-    }
-
+    await removeFromCart([itemId]);
     const updatedCart = await getCart();
 
     return {
@@ -86,21 +78,13 @@ export async function updateCartQuantityAction(
       };
     }
 
-    const result = await updateCart([
+    await updateCart([
       {
         id: itemId,
         merchandiseId: item.merchandise.id,
         quantity,
       },
     ]);
-
-    if (!result) {
-      return {
-        success: false,
-        error: "Failed to update item quantity",
-      };
-    }
-
     const updatedCart = await getCart();
 
     return {
@@ -135,15 +119,7 @@ export async function addToCartAction(
   }
 
   try {
-    const result = await addToCart([{ merchandiseId, quantity }]);
-
-    if (!result) {
-      return {
-        success: false,
-        error: "Failed to add item to cart",
-      };
-    }
-
+    await addToCart([{ merchandiseId, quantity }]);
     const updatedCart = await getCart();
 
     return {
@@ -191,18 +167,11 @@ export async function syncCartLocaleAction(locale: string): Promise<CartActionRe
 
 export async function updateCartNoteAction(note: string): Promise<CartActionResult> {
   try {
-    const result = await updateCartNote(note);
-
-    if (!result) {
-      return {
-        success: false,
-        error: "Failed to update cart note",
-      };
-    }
+    const cart = await updateCartNote(note);
 
     return {
       success: true,
-      cart: result,
+      cart,
     };
   } catch (error) {
     console.error("Update cart note failed:", error);

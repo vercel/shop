@@ -4,6 +4,7 @@ import { invalidateCartCache } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
+import { type CartMutationPayload, unwrapCartMutation } from "../errors";
 import { shopifyFetch } from "../fetch";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
@@ -118,7 +119,7 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{ cartCreate: { cart: ShopifyCart } }>({
+  const data = await shopifyFetch<{ cartCreate: CartMutationPayload<ShopifyCart> }>({
     operation: "cartCreate",
     query: `
       ${CART_FRAGMENT}
@@ -126,6 +127,10 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
         cartCreate(input: $input) {
           cart {
             ...CartFields
+          }
+          userErrors {
+            field
+            message
           }
         }
       }
@@ -141,7 +146,7 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
     },
   });
 
-  const cart = transformShopifyCart(data.cartCreate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartCreate, "cartCreate"));
   invalidateCartCache();
   return cart;
 }
@@ -176,7 +181,7 @@ export async function addToCart(
     cartId = cart.id;
   }
 
-  const data = await shopifyFetch<{ cartLinesAdd: { cart: ShopifyCart } }>({
+  const data = await shopifyFetch<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>({
     operation: "cartLinesAdd",
     query: `
       ${CART_FRAGMENT}
@@ -185,13 +190,17 @@ export async function addToCart(
           cart {
             ...CartFields
           }
+          userErrors {
+            field
+            message
+          }
         }
       }
     `,
     variables: { cartId, lines },
   });
 
-  const cart = transformShopifyCart(data.cartLinesAdd.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesAdd, "cartLinesAdd"));
   invalidateCartCache();
   return cart;
 }
@@ -204,7 +213,7 @@ export async function updateCart(
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
-    cartLinesUpdate: { cart: ShopifyCart };
+    cartLinesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesUpdate",
     query: `
@@ -213,6 +222,10 @@ export async function updateCart(
         cartLinesUpdate(cartId: $cartId, lines: $lines) {
           cart {
             ...CartFields
+          }
+          userErrors {
+            field
+            message
           }
         }
       }
@@ -223,7 +236,7 @@ export async function updateCart(
     },
   });
 
-  const cart = transformShopifyCart(data.cartLinesUpdate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesUpdate, "cartLinesUpdate"));
   invalidateCartCache();
   return cart;
 }
@@ -233,7 +246,7 @@ export async function removeFromCart(lineIds: string[], cartIdOverride?: string)
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
-    cartLinesRemove: { cart: ShopifyCart };
+    cartLinesRemove: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesRemove",
     query: `
@@ -243,13 +256,17 @@ export async function removeFromCart(lineIds: string[], cartIdOverride?: string)
           cart {
             ...CartFields
           }
+          userErrors {
+            field
+            message
+          }
         }
       }
     `,
     variables: { cartId, lineIds },
   });
 
-  const cart = transformShopifyCart(data.cartLinesRemove.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesRemove, "cartLinesRemove"));
   invalidateCartCache();
   return cart;
 }
@@ -264,10 +281,7 @@ export async function updateCartBuyerIdentity(
   const country = countryCode ?? getCountryCode(locale);
 
   const data = await shopifyFetch<{
-    cartBuyerIdentityUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
     query: `
@@ -292,9 +306,9 @@ export async function updateCartBuyerIdentity(
     },
   });
 
-  if (!data.cartBuyerIdentityUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartBuyerIdentityUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -307,10 +321,7 @@ export async function linkCartToCustomer(
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
-    cartBuyerIdentityUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
     query: `
@@ -335,9 +346,9 @@ export async function linkCartToCustomer(
     },
   });
 
-  if (!data.cartBuyerIdentityUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartBuyerIdentityUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -350,10 +361,7 @@ export async function updateCartNote(
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
-    cartNoteUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartNoteUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartNoteUpdate",
     query: `
@@ -376,9 +384,7 @@ export async function updateCartNote(
     },
   });
 
-  if (!data.cartNoteUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartNoteUpdate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartNoteUpdate, "cartNoteUpdate"));
   invalidateCartCache();
   return cart;
 }
@@ -428,10 +434,7 @@ export async function addCartDeliveryAddress(address: {
       };
 
   const data = await shopifyFetch<{
-    cartDeliveryAddressesAdd: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartDeliveryAddressesAdd: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesAdd",
     query: `
@@ -461,9 +464,9 @@ export async function addCartDeliveryAddress(address: {
     },
   });
 
-  if (!data.cartDeliveryAddressesAdd.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartDeliveryAddressesAdd.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -554,10 +557,7 @@ export async function updateCartDeliveryAddress(
       };
 
   const data = await shopifyFetch<{
-    cartDeliveryAddressesUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartDeliveryAddressesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesUpdate",
     query: `
@@ -587,9 +587,9 @@ export async function updateCartDeliveryAddress(
     },
   });
 
-  if (!data.cartDeliveryAddressesUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartDeliveryAddressesUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartDeliveryAddressesUpdate, "cartDeliveryAddressesUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }
