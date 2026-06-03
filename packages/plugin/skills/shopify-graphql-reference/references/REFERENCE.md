@@ -9,7 +9,7 @@ Schema validation for this skill comes from the installed `Shopify/shopify-ai-to
 | Resource | Role |
 |------|------|
 | `Shopify/shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
-| `lib/shopify/client.ts` | `shopifyFetch()` GraphQL client |
+| `lib/shopify/fetch.ts` | `shopifyFetch()` GraphQL client |
 | `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
 | `lib/shopify/operations/*.ts` | Query and mutation entry points |
