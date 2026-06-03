@@ -738,7 +738,7 @@ export async function getProductById({
 }): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
-  cacheTag("products", `product-id-${id}`);
+  cacheTag("products");
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -755,6 +755,7 @@ export async function getProductById({
     return undefined;
   }
 
+  cacheTag(`product-${product.handle}`);
   tagProducts([product]);
 
   return transformShopifyProductDetails(product);
