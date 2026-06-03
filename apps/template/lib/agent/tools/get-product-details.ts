@@ -20,7 +20,14 @@ You can get handles from search results or the current page context.`,
       const { user } = getAgentContext();
 
       try {
-        const product = await getProduct(handle, user.locale);
+        const product = await getProduct({ handle, locale: user.locale });
+
+        if (!product) {
+          return {
+            success: false,
+            error: `Product not found: ${handle}`,
+          };
+        }
 
         return {
           success: true,

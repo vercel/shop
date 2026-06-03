@@ -9,7 +9,7 @@ Schema validation for this skill comes from the installed `Shopify/shopify-ai-to
 | Resource | Role |
 |------|------|
 | `Shopify/shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
-| `lib/shopify/client.ts` | `shopifyFetch()` GraphQL client |
+| `lib/shopify/fetch.ts` | `shopifyFetch()` GraphQL client |
 | `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
 | `lib/shopify/operations/*.ts` | Query and mutation entry points |
@@ -22,12 +22,19 @@ Every read operation should follow this pattern:
 
 ```tsx
 import { cacheLife, cacheTag } from "next/cache";
-import { getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopifyFetch } from "@/lib/shopify/client";
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { shopifyFetch } from "@/lib/shopify/fetch";
 import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
 import { transformShopifyProductDetails } from "@/lib/shopify/transforms/product";
+import type { ProductDetails } from "@/lib/types";
 
-export async function getProduct(handle: string, locale: string) {
+export async function getProduct({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("products");
@@ -36,15 +43,21 @@ export async function getProduct(handle: string, locale: string) {
     operation: "GetProduct",
     query: `
       ${PRODUCT_FRAGMENT}
-      query GetProduct($handle: String!)
-        @inContext(country: ${getCountryCode(locale)}, language: ${getLanguageCode(locale)}) {
+      query GetProduct($handle: String!, $country: CountryCode, $language: LanguageCode)
+        @inContext(country: $country, language: $language) {
         product(handle: $handle) {
           ...ProductFields
         }
       }
     `,
-    variables: { handle },
+    variables: {
+      handle,
+      country: getCountryCode(locale),
+      language: getLanguageCode(locale),
+    },
   });
+
+  if (!data.product) return undefined;
 
   return transformShopifyProductDetails(data.product);
 }

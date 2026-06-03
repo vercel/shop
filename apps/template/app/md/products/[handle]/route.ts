@@ -8,7 +8,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
 
   try {
-    const product = await getProduct(handle, locale);
+    const product = await getProduct({ handle, locale });
+
+    if (!product) {
+      return new Response(
+        `# Product Not Found\n\nThe product with handle \`${handle}\` could not be found.`,
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "text/markdown; charset=utf-8",
+            "Cache-Control": "public, max-age=3600, stale-while-revalidate=604800",
+            Vary: "Accept",
+            "X-Robots-Tag": "noindex",
+          },
+        },
+      );
+    }
+
     const markdown = productToMarkdown(product, locale);
 
     return new Response(markdown, {
@@ -19,21 +35,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         "X-Robots-Tag": "noindex",
       },
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const isNotFound = message.includes("Product not found");
-
+  } catch {
     return new Response(
-      isNotFound
-        ? `# Product Not Found\n\nThe product with handle \`${handle}\` could not be found.`
-        : `# Server Error\n\nAn error occurred while retrieving the product. Please try again later.`,
+      `# Server Error\n\nAn error occurred while retrieving the product. Please try again later.`,
       {
-        status: isNotFound ? 404 : 500,
+        status: 500,
         headers: {
           "Content-Type": "text/markdown; charset=utf-8",
-          "Cache-Control": isNotFound
-            ? "public, max-age=3600, stale-while-revalidate=604800"
-            : "no-cache, no-store, must-revalidate",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
           Vary: "Accept",
           "X-Robots-Tag": "noindex",
         },

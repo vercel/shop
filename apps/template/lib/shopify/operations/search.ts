@@ -50,11 +50,15 @@ const PREDICTIVE_SEARCH_QUERY = `
   }
 `;
 
-export async function predictiveSearch(
-  query: string,
-  locale: string = defaultLocale,
+export async function predictiveSearch({
   limit = 4,
-): Promise<PredictiveSearchResult> {
+  locale = defaultLocale,
+  query,
+}: {
+  limit?: number;
+  locale?: string;
+  query: string;
+}): Promise<PredictiveSearchResult> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 

@@ -62,20 +62,28 @@ Add Shopify metaobject-based CMS support to the shop template. This replaces the
 Implement three operations that return domain types from `lib/types.ts`:
 
 ```ts
-import { shopifyFetch } from "@/lib/shopify/client";
+import { defaultLocale } from "@/lib/i18n";
+import { shopifyFetch } from "@/lib/shopify/fetch";
 import type { Homepage, MarketingPage } from "@/lib/types";
 
-export async function getHomepage(locale: string): Promise<Homepage | null> {
+export async function getHomepage({
+  locale = defaultLocale,
+}: {
+  locale?: string;
+} = {}): Promise<Homepage | null> {
   "use cache";
   cacheLife("max");
   cacheTag("cms-content");
   // Query cms_homepage metaobject, transform to Homepage type
 }
 
-export async function getMarketingPage(
-  slug: string,
-  locale: string,
-): Promise<MarketingPage | null> {
+export async function getMarketingPage({
+  slug,
+  locale = defaultLocale,
+}: {
+  slug: string;
+  locale?: string;
+}): Promise<MarketingPage | null> {
   "use cache";
   cacheLife("max");
   cacheTag("cms-content");

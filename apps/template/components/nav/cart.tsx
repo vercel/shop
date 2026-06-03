@@ -1,13 +1,14 @@
 import { HandbagIcon } from "lucide-react";
 import { cookies } from "next/headers";
 
+import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
 
 import { CartIconClient } from "./cart-client";
 
 export async function CartIcon() {
   const cartId = (await cookies()).get("shopify_cartId")?.value;
-  const cart = cartId ? await getCart(cartId) : undefined;
+  const cart = cartId ? await withFallback(getCart(cartId), undefined) : undefined;
 
   return <CartIconClient initialCart={cart ?? null} />;
 }

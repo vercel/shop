@@ -30,7 +30,7 @@ export async function generateMetadata({
   }
 
   const [collection, t] = await Promise.all([
-    getCollection(handle, locale),
+    getCollection({ handle, locale }),
     getTranslations("seo"),
   ]);
 
@@ -96,7 +96,7 @@ export default async function CollectionPage({
     if (handle === PLACEHOLDER_HANDLE) notFound();
     return handle;
   });
-  const collectionPromise = handlePromise.then((handle) => getCollection(handle, locale));
+  const collectionPromise = handlePromise.then((handle) => getCollection({ handle, locale }));
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getCollectionResultsData({
     handlePromise,

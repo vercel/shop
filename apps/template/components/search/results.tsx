@@ -15,17 +15,20 @@ import {
   getSearchFacets,
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
-import type { TransformedFilters } from "@/lib/shopify/transforms/filters";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
+import type {
+  Filter,
+  PageInfo,
+  PriceRange,
+  ProductCard as ProductCardType,
+} from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {
   products: ProductCardType[];
   total: number;
   pageInfo: PageInfo;
-  transformedFilters: TransformedFilters;
+  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
   activeFilters: Record<string, string | string[] | undefined>;
   filters: ProductFilter[];
   query?: string;
@@ -56,14 +59,14 @@ export async function getSearchResultsData({
       filters: shopifyFilters,
       locale,
     }),
-    getSearchFacets({ query, collection, filters: shopifyFilters, locale }),
+    getSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
   ]);
 
   return {
     products: results.products,
     total: facets.total,
     pageInfo: results.pageInfo,
-    transformedFilters: transformShopifyFilters(facets.filters, { activeFilters }),
+    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
     activeFilters,
     filters: shopifyFilters,
     query,

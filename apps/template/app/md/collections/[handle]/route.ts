@@ -5,7 +5,6 @@ import {
   buildProductFiltersFromParams,
   getCollectionProducts,
 } from "@/lib/shopify/operations/products";
-import { transformShopifyFilters } from "@/lib/shopify/transforms/filters";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 function markdownHeaders(cacheControl: string): HeadersInit {
@@ -29,8 +28,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
 
   try {
     const [collection, result] = await Promise.all([
-      getCollection(handle, locale),
+      getCollection({ handle, locale }),
       getCollectionProducts({
+        activeFilters,
         collection: handle,
         sortKey: sort,
         limit: RESULTS_PER_PAGE,
@@ -50,13 +50,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       );
     }
 
-    const transformedFilters = transformShopifyFilters(result.filters, { activeFilters });
-    const hasPriceRange = result.filters.some((filter) => filter.type === "PRICE_RANGE");
     const markdown = collectionToMarkdown({
       collection,
       products: result.products,
-      filters: transformedFilters.filters,
-      priceRange: hasPriceRange ? transformedFilters.priceRange : undefined,
+      filters: result.filters,
+      priceRange: result.priceRange,
       activeFilters,
       pageInfo: result.pageInfo,
       locale,

@@ -1,84 +1,152 @@
-import { cookies } from "next/headers";
-
-import { invalidateCartCache } from "@/lib/cart/server";
+import {
+  getCartIdFromCookie,
+  invalidateCartCache,
+  setCartIdCookie,
+} from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
+import { type CartMutationPayload, unwrapCartMutation } from "../errors";
 import { shopifyFetch } from "../fetch";
+import { CART_FRAGMENT } from "../fragments";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
-const CART_FRAGMENT = `
-  fragment CartFields on Cart {
-    id
-    checkoutUrl
-    totalQuantity
-    note
-    lines(first: 50) {
-      edges {
-        node {
-          id
-          quantity
-          cost {
-            totalAmount {
+const GET_CART_QUERY = `
+  ${CART_FRAGMENT}
+  query getCart($cartId: ID!) {
+    cart(id: $cartId) {
+      ...CartFields
+    }
+  }
+`;
+
+const CART_CREATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    cartCreate(input: $input) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_ADD_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_REMOVE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_BUYER_IDENTITY_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_NOTE_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartNoteUpdate($cartId: ID!, $note: String!) {
+    cartNoteUpdate(cartId: $cartId, note: $note) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const GET_CART_SELECTABLE_ADDRESSES_QUERY = `
+  query getCartSelectableAddresses($cartId: ID!) {
+    cart(id: $cartId) {
+      selectableAddresses {
+        id
+      }
+    }
+  }
+`;
+
+const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
+    cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const GET_CART_DELIVERY_OPTIONS_QUERY = `
+  query getCartDeliveryOptions($cartId: ID!) {
+    cart(id: $cartId) {
+      deliveryGroups(first: 5) {
+        nodes {
+          deliveryOptions {
+            title
+            estimatedCost {
               amount
               currencyCode
             }
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              title
-              selectedOptions {
-                name
-                value
-              }
-              image {
-                url
-                altText
-                width
-                height
-              }
-              price {
-                amount
-                currencyCode
-              }
-              product {
-                id
-                title
-                handle
-                featuredImage {
-                  url
-                  altText
-                  width
-                  height
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    cost {
-      totalAmount {
-        amount
-        currencyCode
-      }
-      subtotalAmount {
-        amount
-        currencyCode
-      }
-      totalTaxAmount {
-        amount
-        currencyCode
-      }
-    }
-    deliveryGroups(first: 5) {
-      nodes {
-        selectedDeliveryOption {
-          title
-          estimatedCost {
-            amount
-            currencyCode
+            deliveryMethodType
           }
         }
       }
@@ -86,33 +154,36 @@ const CART_FRAGMENT = `
   }
 `;
 
+const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartSelectableAddressUpdateInput!]!) {
+    cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
 export async function getCart(cartId?: string): Promise<Cart | undefined> {
   if (!cartId) {
-    cartId = (await cookies()).get("shopify_cartId")?.value;
+    cartId = await getCartIdFromCookie();
   }
   if (!cartId) return undefined;
 
-  try {
-    const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
-      operation: "getCart",
-      query: `
-        ${CART_FRAGMENT}
-        query getCart($cartId: ID!) {
-          cart(id: $cartId) {
-            ...CartFields
-          }
-        }
-      `,
-      variables: { cartId },
-    });
+  const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
+    operation: "getCart",
+    query: GET_CART_QUERY,
+    variables: { cartId },
+  });
 
-    if (!data.cart) return undefined;
+  if (!data.cart) return undefined;
 
-    return transformShopifyCart(data.cart);
-  } catch (error) {
-    console.error("getCart failed:", error);
-    return undefined;
-  }
+  return transformShopifyCart(data.cart);
 }
 
 /**
@@ -123,18 +194,9 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{ cartCreate: { cart: ShopifyCart } }>({
+  const data = await shopifyFetch<{ cartCreate: CartMutationPayload<ShopifyCart> }>({
     operation: "cartCreate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-        cartCreate(input: $input) {
-          cart {
-            ...CartFields
-          }
-        }
-      }
-    `,
+    query: CART_CREATE_MUTATION,
     variables: {
       input: {
         buyerIdentity: {
@@ -146,7 +208,7 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
     },
   });
 
-  const cart = transformShopifyCart(data.cartCreate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartCreate, "cartCreate"));
   invalidateCartCache();
   return cart;
 }
@@ -155,13 +217,7 @@ export async function createCart(locale: string = defaultLocale): Promise<Cart> 
   const cart = await createCartWithoutCookie(locale);
 
   if (cart.id) {
-    (await cookies()).set("shopify_cartId", cart.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-    });
+    await setCartIdCookie(cart.id);
   }
 
   return cart;
@@ -173,7 +229,7 @@ export async function addToCart(
   locale: string = defaultLocale,
 ): Promise<Cart> {
   if (!cartId) {
-    cartId = (await cookies()).get("shopify_cartId")?.value;
+    cartId = await getCartIdFromCookie();
   }
 
   if (!cartId) {
@@ -181,22 +237,13 @@ export async function addToCart(
     cartId = cart.id;
   }
 
-  const data = await shopifyFetch<{ cartLinesAdd: { cart: ShopifyCart } }>({
+  const data = await shopifyFetch<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>({
     operation: "cartLinesAdd",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
-        cartLinesAdd(cartId: $cartId, lines: $lines) {
-          cart {
-            ...CartFields
-          }
-        }
-      }
-    `,
+    query: CART_LINES_ADD_MUTATION,
     variables: { cartId, lines },
   });
 
-  const cart = transformShopifyCart(data.cartLinesAdd.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesAdd, "cartLinesAdd"));
   invalidateCartCache();
   return cart;
 }
@@ -205,56 +252,38 @@ export async function updateCart(
   lines: { id: string; merchandiseId: string; quantity: number }[],
   cartIdOverride?: string,
 ): Promise<Cart> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
-    cartLinesUpdate: { cart: ShopifyCart };
+    cartLinesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
-        cartLinesUpdate(cartId: $cartId, lines: $lines) {
-          cart {
-            ...CartFields
-          }
-        }
-      }
-    `,
+    query: CART_LINES_UPDATE_MUTATION,
     variables: {
       cartId,
       lines: lines.map((line) => ({ id: line.id, quantity: line.quantity })),
     },
   });
 
-  const cart = transformShopifyCart(data.cartLinesUpdate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesUpdate, "cartLinesUpdate"));
   invalidateCartCache();
   return cart;
 }
 
 export async function removeFromCart(lineIds: string[], cartIdOverride?: string): Promise<Cart> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
-    cartLinesRemove: { cart: ShopifyCart };
+    cartLinesRemove: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesRemove",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-        cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
-          cart {
-            ...CartFields
-          }
-        }
-      }
-    `,
+    query: CART_LINES_REMOVE_MUTATION,
     variables: { cartId, lineIds },
   });
 
-  const cart = transformShopifyCart(data.cartLinesRemove.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesRemove, "cartLinesRemove"));
   invalidateCartCache();
   return cart;
 }
@@ -263,32 +292,16 @@ export async function updateCartBuyerIdentity(
   locale: string,
   countryCode?: string,
 ): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const country = countryCode ?? getCountryCode(locale);
 
   const data = await shopifyFetch<{
-    cartBuyerIdentityUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
-        cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
     variables: {
       cartId,
       buyerIdentity: {
@@ -297,9 +310,9 @@ export async function updateCartBuyerIdentity(
     },
   });
 
-  if (!data.cartBuyerIdentityUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartBuyerIdentityUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -308,30 +321,14 @@ export async function linkCartToCustomer(
   customerAccessToken: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
-    cartBuyerIdentityUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
-        cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
     variables: {
       cartId,
       buyerIdentity: {
@@ -340,9 +337,9 @@ export async function linkCartToCustomer(
     },
   });
 
-  if (!data.cartBuyerIdentityUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartBuyerIdentityUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -351,45 +348,27 @@ export async function updateCartNote(
   note: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
-    cartNoteUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartNoteUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartNoteUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartNoteUpdate($cartId: ID!, $note: String!) {
-        cartNoteUpdate(cartId: $cartId, note: $note) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_NOTE_UPDATE_MUTATION,
     variables: {
       cartId,
       note,
     },
   });
 
-  if (!data.cartNoteUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartNoteUpdate.cart);
+  const cart = transformShopifyCart(unwrapCartMutation(data.cartNoteUpdate, "cartNoteUpdate"));
   invalidateCartCache();
   return cart;
 }
 
 export async function getCartSelectableAddressId(): Promise<string | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -398,15 +377,7 @@ export async function getCartSelectableAddressId(): Promise<string | undefined> 
     } | null;
   }>({
     operation: "getCartSelectableAddresses",
-    query: `
-      query getCartSelectableAddresses($cartId: ID!) {
-        cart(id: $cartId) {
-          selectableAddresses {
-            id
-          }
-        }
-      }
-    `,
+    query: GET_CART_SELECTABLE_ADDRESSES_QUERY,
     variables: { cartId },
   });
 
@@ -419,7 +390,7 @@ export async function addCartDeliveryAddress(address: {
   zip?: string;
   customerAddressId?: string;
 }): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const addressInput = address.customerAddressId
@@ -433,26 +404,10 @@ export async function addCartDeliveryAddress(address: {
       };
 
   const data = await shopifyFetch<{
-    cartDeliveryAddressesAdd: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartDeliveryAddressesAdd: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesAdd",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
-        cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_DELIVERY_ADDRESSES_ADD_MUTATION,
     variables: {
       cartId,
       addresses: [
@@ -466,9 +421,9 @@ export async function addCartDeliveryAddress(address: {
     },
   });
 
-  if (!data.cartDeliveryAddressesAdd.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartDeliveryAddressesAdd.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd"),
+  );
   invalidateCartCache();
   return cart;
 }
@@ -480,64 +435,43 @@ export type CartShippingOption = {
 };
 
 export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return [];
 
-  try {
-    const data = await shopifyFetch<{
-      cart: {
-        deliveryGroups: {
-          nodes: Array<{
-            deliveryOptions: Array<{
-              title: string | null;
-              estimatedCost: { amount: string; currencyCode: string };
-              deliveryMethodType: string;
-            }>;
+  const data = await shopifyFetch<{
+    cart: {
+      deliveryGroups: {
+        nodes: Array<{
+          deliveryOptions: Array<{
+            title: string | null;
+            estimatedCost: { amount: string; currencyCode: string };
+            deliveryMethodType: string;
           }>;
-        };
-      } | null;
-    }>({
-      operation: "getCartDeliveryOptions",
-      query: `
-        query getCartDeliveryOptions($cartId: ID!) {
-          cart(id: $cartId) {
-            deliveryGroups(first: 5) {
-              nodes {
-                deliveryOptions {
-                  title
-                  estimatedCost {
-                    amount
-                    currencyCode
-                  }
-                  deliveryMethodType
-                }
-              }
-            }
-          }
-        }
-      `,
-      variables: { cartId },
-    });
+        }>;
+      };
+    } | null;
+  }>({
+    operation: "getCartDeliveryOptions",
+    query: GET_CART_DELIVERY_OPTIONS_QUERY,
+    variables: { cartId },
+  });
 
-    if (!data.cart) return [];
+  if (!data.cart) return [];
 
-    const seen = new Set<string>();
-    return data.cart.deliveryGroups.nodes
-      .flatMap((group) => group.deliveryOptions)
-      .filter((opt) => {
-        const key = opt.title ?? opt.deliveryMethodType;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .map((opt) => ({
-        title: opt.title ?? opt.deliveryMethodType,
-        estimatedCost: opt.estimatedCost,
-        deliveryMethodType: opt.deliveryMethodType,
-      }));
-  } catch {
-    return [];
-  }
+  const seen = new Set<string>();
+  return data.cart.deliveryGroups.nodes
+    .flatMap((group) => group.deliveryOptions)
+    .filter((opt) => {
+      const key = opt.title ?? opt.deliveryMethodType;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((opt) => ({
+      title: opt.title ?? opt.deliveryMethodType,
+      estimatedCost: opt.estimatedCost,
+      deliveryMethodType: opt.deliveryMethodType,
+    }));
 }
 
 export async function updateCartDeliveryAddress(
@@ -549,7 +483,7 @@ export async function updateCartDeliveryAddress(
     customerAddressId?: string;
   },
 ): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const addressInput = address.customerAddressId
@@ -563,26 +497,10 @@ export async function updateCartDeliveryAddress(
       };
 
   const data = await shopifyFetch<{
-    cartDeliveryAddressesUpdate: {
-      cart: ShopifyCart | null;
-      userErrors: Array<{ field?: string[]; message: string }>;
-    };
+    cartDeliveryAddressesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartSelectableAddressUpdateInput!]!) {
-        cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_DELIVERY_ADDRESSES_UPDATE_MUTATION,
     variables: {
       cartId,
       addresses: [
@@ -596,9 +514,9 @@ export async function updateCartDeliveryAddress(
     },
   });
 
-  if (!data.cartDeliveryAddressesUpdate.cart) return undefined;
-
-  const cart = transformShopifyCart(data.cartDeliveryAddressesUpdate.cart);
+  const cart = transformShopifyCart(
+    unwrapCartMutation(data.cartDeliveryAddressesUpdate, "cartDeliveryAddressesUpdate"),
+  );
   invalidateCartCache();
   return cart;
 }

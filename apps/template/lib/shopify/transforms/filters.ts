@@ -134,7 +134,7 @@ export function transformShopifyFilters(
 
   return {
     filters,
-    priceRange: priceFilter ? extractPriceRange(priceFilter) : { min: 0, max: 1000 },
+    priceRange: priceFilter ? extractPriceRange(priceFilter) : undefined,
   };
 }
 
