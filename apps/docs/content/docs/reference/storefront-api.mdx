@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/fetch.ts`. It wraps the native `fetch` API with Shopify authentication, variable hashing for cache keys, and error handling.
+All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/fetch.ts`. It wraps the native `fetch` API with Shopify authentication and error handling.
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
@@ -24,7 +24,7 @@ const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
 
 The function accepts three fields:
 
-- **operation** - the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter for cache key differentiation.
+- **operation** - the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter so network logs identify which call was made.
 - **query** - the full GraphQL query or mutation as a template string, including any fragment interpolations.
 - **variables** - an optional object passed as JSON in the request body. Never interpolate values into the query string directly.
 
@@ -32,15 +32,14 @@ The return type is generic - pass the expected shape of `data` from the GraphQL 
 
 ## Request details
 
-Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2025-01/graphql.json` with headers:
+Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2026-04/graphql.json` with headers:
 
 | Header                              | Value                        |
 | ----------------------------------- | ---------------------------- |
 | `Content-Type`                      | `application/json`           |
 | `X-Shopify-Storefront-Access-Token` | Your public storefront token |
-| `Accept-Encoding`                   | `gzip, deflate`              |
 
-The URL includes query parameters for `operation` and a 12-character SHA-1 hash of the serialized variables. This ensures Next.js treats requests with different variables as distinct cache entries, even though they hit the same endpoint.
+The operation name is appended as a query parameter (`?operation=getProductByHandle`) so calls are easy to identify in network logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
 
 ## Writing a query
 
