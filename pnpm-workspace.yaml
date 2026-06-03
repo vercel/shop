@@ -2,7 +2,10 @@ minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
   - "@next/*"
+  - "@types/react"
   - next
+  - react
+  - react-dom
 
 packages:
   - "apps/*"
