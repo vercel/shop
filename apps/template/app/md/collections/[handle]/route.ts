@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
 
   try {
     const [collection, result] = await Promise.all([
-      getCollection(handle, locale),
+      getCollection({ handle, locale }),
       getCollectionProducts({
         collection: handle,
         sortKey: sort,

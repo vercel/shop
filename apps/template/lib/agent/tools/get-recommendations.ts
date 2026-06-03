@@ -17,7 +17,7 @@ Returns AI-powered recommendations from Shopify.`,
       const { user } = getAgentContext();
 
       try {
-        const recommendations = await getProductRecommendations(handle, user.locale);
+        const recommendations = await getProductRecommendations({ handle, locale: user.locale });
 
         return {
           success: true,

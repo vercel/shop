@@ -1,7 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale } from "@/lib/i18n";
-
 import { shopifyFetch } from "../fetch";
 import type { Menu, MenuItem, MenuItemType } from "../types/menu";
 import { transformShopifyMenuItemUrl } from "../utils";
@@ -83,10 +81,7 @@ function transformMenu(menu: ShopifyMenuResponse["menu"]): Menu | null {
   };
 }
 
-export async function getMenu(
-  handle: string,
-  _locale: string = defaultLocale,
-): Promise<Menu | null> {
+export async function getMenu({ handle }: { handle: string }): Promise<Menu | null> {
   "use cache";
   cacheLife("max");
   cacheTag("menus");

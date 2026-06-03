@@ -48,13 +48,13 @@ async function resolvePageContext(
 
   if (pageType === "products" && segments.length >= 2) {
     const handle = segments[1];
-    const product = await withFallback(getProduct(handle, locale), undefined);
+    const product = await withFallback(getProduct({ handle, locale }), undefined);
     if (product) return { type: "product", product };
   }
 
   if (pageType === "collections" && segments.length >= 2) {
     const handle = segments[1];
-    const collection = await withFallback(getCollection(handle, locale), undefined);
+    const collection = await withFallback(getCollection({ handle, locale }), undefined);
     if (collection) return { type: "collection", handle, title: collection.title };
   }
 

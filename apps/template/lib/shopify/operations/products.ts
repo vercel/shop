@@ -37,10 +37,13 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
-export async function getProduct(
-  handle: string,
-  locale: string = defaultLocale,
-): Promise<ProductDetails | undefined> {
+export async function getProduct({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
@@ -650,10 +653,13 @@ const PRODUCT_RECOMMENDATIONS_QUERY = `
   }
 `;
 
-export async function getProductRecommendations(
-  handle: string,
-  locale: string = defaultLocale,
-): Promise<ProductCard[]> {
+export async function getProductRecommendations({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
   "use cache";
   cacheLife("max");
   cacheTag("products", `recommendations-${handle}`);
@@ -661,7 +667,7 @@ export async function getProductRecommendations(
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const product = await getProduct(handle, locale);
+  const product = await getProduct({ handle, locale });
   if (!product) {
     return [];
   }
@@ -723,10 +729,13 @@ function decodeShopifyId(id: string): string {
   return Buffer.from(id, "base64").toString("utf-8");
 }
 
-export async function getProductById(
-  id: string,
-  locale: string = defaultLocale,
-): Promise<ProductDetails | undefined> {
+export async function getProductById({
+  id,
+  locale = defaultLocale,
+}: {
+  id: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-id-${id}`);
@@ -752,10 +761,13 @@ export async function getProductById(
 }
 
 /** Results are returned in the same order as the input IDs. */
-export async function getProductsByIds(
-  ids: string[],
-  locale: string = defaultLocale,
-): Promise<ProductCard[]> {
+export async function getProductsByIds({
+  ids,
+  locale = defaultLocale,
+}: {
+  ids: string[];
+  locale?: string;
+}): Promise<ProductCard[]> {
   "use cache";
   cacheLife("max");
   cacheTag("products");
@@ -782,10 +794,13 @@ export async function getProductsByIds(
 }
 
 /** Results are reordered to match the input handle order. */
-export async function getProductsByHandles(
-  handles: string[],
-  locale: string = defaultLocale,
-): Promise<ProductCard[]> {
+export async function getProductsByHandles({
+  handles,
+  locale = defaultLocale,
+}: {
+  handles: string[];
+  locale?: string;
+}): Promise<ProductCard[]> {
   "use cache";
   cacheLife("max");
   cacheTag("products");

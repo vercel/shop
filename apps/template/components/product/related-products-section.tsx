@@ -37,7 +37,7 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
   const resolvedHandle = await handle;
   const [t, recommendations] = await Promise.all([
     getTranslations("product"),
-    getProductRecommendations(resolvedHandle, locale),
+    getProductRecommendations({ handle: resolvedHandle, locale }),
   ]);
 
   if (recommendations.length === 0) return null;

@@ -62,10 +62,13 @@ export async function getCollections({
   return transformShopifyCollections(rawCollections);
 }
 
-export async function getCollection(
-  handle: string,
-  locale: string = defaultLocale,
-): Promise<Collection | undefined> {
+export async function getCollection({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<Collection | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);

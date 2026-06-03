@@ -18,7 +18,7 @@ async function buildProductMetadata(
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const product = await getProduct(handle, locale);
+  const product = await getProduct({ handle, locale });
   if (!product) notFound();
   const images = product.featuredImage
     ? [
@@ -86,7 +86,7 @@ export default async function ProductPage({
   });
 
   const productPromise = handlePromise.then(async (handle) => {
-    const product = await getProduct(handle, locale);
+    const product = await getProduct({ handle, locale });
     if (!product) notFound();
     return product;
   });

@@ -8,7 +8,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
 
   try {
-    const product = await getProduct(handle, locale);
+    const product = await getProduct({ handle, locale });
 
     if (!product) {
       return new Response(

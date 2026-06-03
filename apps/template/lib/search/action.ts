@@ -14,7 +14,7 @@ export async function predictiveSearchAction(
     return { products: [], collections: [], queries: [] };
   }
 
-  return predictiveSearch(query.trim(), locale, 4);
+  return predictiveSearch({ query: query.trim(), locale, limit: 4 });
 }
 
 export async function loadMoreSearchProducts(params: {
