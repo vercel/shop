@@ -160,7 +160,7 @@ The client handles errors at two levels:
 
 **GraphQL errors** - if the response contains `errors` and no `data`, the client throws. If there are errors but `data` is also present (partial success), it logs a warning and returns the partial data.
 
-Individual operations add their own handling on top. For example, `getCart()` wraps the call in try-catch and returns `undefined` on failure, while `getProduct()` throws if the product isn't found.
+Individual operations follow a consistent contract on top of this: they **throw** on transport or GraphQL failure, and **return** `undefined`/`null`/`[]` when a resource is simply missing. For example, `getProduct()` returns `undefined` when the product isn't found (rather than throwing), and `getCart()` returns `undefined` when there's no cart. For render paths that should degrade gracefully instead of crashing on a transport error, wrap the call in the `withFallback(promise, fallback)` helper — e.g. `withFallback(getCart(), undefined)` in the nav and cart page.
 
 ## Debug logging
 
