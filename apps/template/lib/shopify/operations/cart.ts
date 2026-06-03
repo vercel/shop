@@ -6,82 +6,162 @@ import type { Cart } from "@/lib/types";
 
 import { type CartMutationPayload, unwrapCartMutation } from "../errors";
 import { shopifyFetch } from "../fetch";
+import { CART_FRAGMENT } from "../fragments";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
-const CART_FRAGMENT = `
-  fragment CartFields on Cart {
-    id
-    checkoutUrl
-    totalQuantity
-    note
-    lines(first: 50) {
-      edges {
-        node {
-          id
-          quantity
-          cost {
-            totalAmount {
+const GET_CART_QUERY = `
+  ${CART_FRAGMENT}
+  query getCart($cartId: ID!) {
+    cart(id: $cartId) {
+      ...CartFields
+    }
+  }
+`;
+
+const CART_CREATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    cartCreate(input: $input) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_ADD_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_LINES_REMOVE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_BUYER_IDENTITY_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const CART_NOTE_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartNoteUpdate($cartId: ID!, $note: String!) {
+    cartNoteUpdate(cartId: $cartId, note: $note) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const GET_CART_SELECTABLE_ADDRESSES_QUERY = `
+  query getCartSelectableAddresses($cartId: ID!) {
+    cart(id: $cartId) {
+      selectableAddresses {
+        id
+      }
+    }
+  }
+`;
+
+const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
+    cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;
+
+const GET_CART_DELIVERY_OPTIONS_QUERY = `
+  query getCartDeliveryOptions($cartId: ID!) {
+    cart(id: $cartId) {
+      deliveryGroups(first: 5) {
+        nodes {
+          deliveryOptions {
+            title
+            estimatedCost {
               amount
               currencyCode
             }
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              title
-              selectedOptions {
-                name
-                value
-              }
-              image {
-                url
-                altText
-                width
-                height
-              }
-              price {
-                amount
-                currencyCode
-              }
-              product {
-                id
-                title
-                handle
-                featuredImage {
-                  url
-                  altText
-                  width
-                  height
-                }
-              }
-            }
+            deliveryMethodType
           }
         }
       }
     }
-    cost {
-      totalAmount {
-        amount
-        currencyCode
+  }
+`;
+
+const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartSelectableAddressUpdateInput!]!) {
+    cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
+      cart {
+        ...CartFields
       }
-      subtotalAmount {
-        amount
-        currencyCode
-      }
-      totalTaxAmount {
-        amount
-        currencyCode
-      }
-    }
-    deliveryGroups(first: 5) {
-      nodes {
-        selectedDeliveryOption {
-          title
-          estimatedCost {
-            amount
-            currencyCode
-          }
-        }
+      userErrors {
+        field
+        message
       }
     }
   }
@@ -95,14 +175,7 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
 
   const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
     operation: "getCart",
-    query: `
-      ${CART_FRAGMENT}
-      query getCart($cartId: ID!) {
-        cart(id: $cartId) {
-          ...CartFields
-        }
-      }
-    `,
+    query: GET_CART_QUERY,
     variables: { cartId },
   });
 
@@ -121,20 +194,7 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
 
   const data = await shopifyFetch<{ cartCreate: CartMutationPayload<ShopifyCart> }>({
     operation: "cartCreate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-        cartCreate(input: $input) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_CREATE_MUTATION,
     variables: {
       input: {
         buyerIdentity: {
@@ -183,20 +243,7 @@ export async function addToCart(
 
   const data = await shopifyFetch<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>({
     operation: "cartLinesAdd",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
-        cartLinesAdd(cartId: $cartId, lines: $lines) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_LINES_ADD_MUTATION,
     variables: { cartId, lines },
   });
 
@@ -216,20 +263,7 @@ export async function updateCart(
     cartLinesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
-        cartLinesUpdate(cartId: $cartId, lines: $lines) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_LINES_UPDATE_MUTATION,
     variables: {
       cartId,
       lines: lines.map((line) => ({ id: line.id, quantity: line.quantity })),
@@ -249,20 +283,7 @@ export async function removeFromCart(lineIds: string[], cartIdOverride?: string)
     cartLinesRemove: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartLinesRemove",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-        cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_LINES_REMOVE_MUTATION,
     variables: { cartId, lineIds },
   });
 
@@ -284,20 +305,7 @@ export async function updateCartBuyerIdentity(
     cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
-        cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
     variables: {
       cartId,
       buyerIdentity: {
@@ -324,20 +332,7 @@ export async function linkCartToCustomer(
     cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartBuyerIdentityUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
-        cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
     variables: {
       cartId,
       buyerIdentity: {
@@ -364,20 +359,7 @@ export async function updateCartNote(
     cartNoteUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartNoteUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartNoteUpdate($cartId: ID!, $note: String!) {
-        cartNoteUpdate(cartId: $cartId, note: $note) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_NOTE_UPDATE_MUTATION,
     variables: {
       cartId,
       note,
@@ -399,15 +381,7 @@ export async function getCartSelectableAddressId(): Promise<string | undefined> 
     } | null;
   }>({
     operation: "getCartSelectableAddresses",
-    query: `
-      query getCartSelectableAddresses($cartId: ID!) {
-        cart(id: $cartId) {
-          selectableAddresses {
-            id
-          }
-        }
-      }
-    `,
+    query: GET_CART_SELECTABLE_ADDRESSES_QUERY,
     variables: { cartId },
   });
 
@@ -437,20 +411,7 @@ export async function addCartDeliveryAddress(address: {
     cartDeliveryAddressesAdd: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesAdd",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
-        cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_DELIVERY_ADDRESSES_ADD_MUTATION,
     variables: {
       cartId,
       addresses: [
@@ -495,24 +456,7 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
     } | null;
   }>({
     operation: "getCartDeliveryOptions",
-    query: `
-      query getCartDeliveryOptions($cartId: ID!) {
-        cart(id: $cartId) {
-          deliveryGroups(first: 5) {
-            nodes {
-              deliveryOptions {
-                title
-                estimatedCost {
-                  amount
-                  currencyCode
-                }
-                deliveryMethodType
-              }
-            }
-          }
-        }
-      }
-    `,
+    query: GET_CART_DELIVERY_OPTIONS_QUERY,
     variables: { cartId },
   });
 
@@ -560,20 +504,7 @@ export async function updateCartDeliveryAddress(
     cartDeliveryAddressesUpdate: CartMutationPayload<ShopifyCart>;
   }>({
     operation: "cartDeliveryAddressesUpdate",
-    query: `
-      ${CART_FRAGMENT}
-      mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartSelectableAddressUpdateInput!]!) {
-        cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
-          cart {
-            ...CartFields
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `,
+    query: CART_DELIVERY_ADDRESSES_UPDATE_MUTATION,
     variables: {
       cartId,
       addresses: [

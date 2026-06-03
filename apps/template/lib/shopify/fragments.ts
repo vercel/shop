@@ -57,6 +57,92 @@ export const METAFIELD_FRAGMENT = `
   }
 `;
 
+export const CART_FRAGMENT = `
+  ${IMAGE_FRAGMENT}
+  ${MONEY_FRAGMENT}
+  fragment CartFields on Cart {
+    id
+    checkoutUrl
+    totalQuantity
+    note
+    lines(first: 50) {
+      edges {
+        node {
+          id
+          quantity
+          cost {
+            totalAmount {
+              ...MoneyFields
+            }
+          }
+          merchandise {
+            ... on ProductVariant {
+              id
+              title
+              selectedOptions {
+                name
+                value
+              }
+              image {
+                ...ImageFields
+              }
+              price {
+                ...MoneyFields
+              }
+              product {
+                id
+                title
+                handle
+                featuredImage {
+                  ...ImageFields
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    cost {
+      totalAmount {
+        ...MoneyFields
+      }
+      subtotalAmount {
+        ...MoneyFields
+      }
+      totalTaxAmount {
+        ...MoneyFields
+      }
+    }
+    deliveryGroups(first: 5) {
+      nodes {
+        selectedDeliveryOption {
+          title
+          estimatedCost {
+            ...MoneyFields
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const COLLECTION_FIELDS_FRAGMENT = `
+  ${IMAGE_FRAGMENT}
+  fragment CollectionFields on Collection {
+    handle
+    title
+    description
+    image {
+      ...ImageFields
+    }
+    updatedAt
+    seo {
+      title
+      description
+    }
+  }
+`;
+
 export const PRODUCT_FRAGMENT = `
   ${IMAGE_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}

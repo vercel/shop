@@ -4,6 +4,7 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
 import { shopifyFetch } from "../fetch";
+import { COLLECTION_FIELDS_FRAGMENT } from "../fragments";
 import {
   type ShopifyCollection,
   transformShopifyCollection,
@@ -18,6 +19,28 @@ type CollectionResponse = {
   collection: ShopifyCollection | null;
 };
 
+const GET_COLLECTIONS_QUERY = `
+  ${COLLECTION_FIELDS_FRAGMENT}
+  query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    collections(first: $first) {
+      edges {
+        node {
+          ...CollectionFields
+        }
+      }
+    }
+  }
+`;
+
+const GET_COLLECTION_QUERY = `
+  ${COLLECTION_FIELDS_FRAGMENT}
+  query getCollection($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    collection(handle: $handle) {
+      ...CollectionFields
+    }
+  }
+`;
+
 export async function getCollections({
   limit = 250,
   locale = defaultLocale,
@@ -31,30 +54,7 @@ export async function getCollections({
 
   const data = await shopifyFetch<CollectionsResponse>({
     operation: "getCollections",
-    query: `
-      query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-        collections(first: $first) {
-          edges {
-            node {
-              handle
-              title
-              description
-              image {
-                url
-                altText
-                width
-                height
-              }
-              updatedAt
-              seo {
-                title
-                description
-              }
-            }
-          }
-        }
-      }
-    `,
+    query: GET_COLLECTIONS_QUERY,
     variables: { first: limit, country, language },
   });
 
@@ -78,26 +78,7 @@ export async function getCollection({
 
   const data = await shopifyFetch<CollectionResponse>({
     operation: "getCollection",
-    query: `
-      query getCollection($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-        collection(handle: $handle) {
-          handle
-          title
-          description
-          image {
-            url
-            altText
-            width
-            height
-          }
-          updatedAt
-          seo {
-            title
-            description
-          }
-        }
-      }
-    `,
+    query: GET_COLLECTION_QUERY,
     variables: { handle, country, language },
   });
 
