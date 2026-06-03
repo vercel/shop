@@ -32,13 +32,12 @@ The return type is generic - pass the expected shape of `data` from the GraphQL 
 
 ## Request details
 
-Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2025-01/graphql.json` with headers:
+Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2026-04/graphql.json` with headers:
 
 | Header                              | Value                        |
 | ----------------------------------- | ---------------------------- |
 | `Content-Type`                      | `application/json`           |
 | `X-Shopify-Storefront-Access-Token` | Your public storefront token |
-| `Accept-Encoding`                   | `gzip, deflate`              |
 
 The URL includes query parameters for `operation` and a 12-character SHA-1 hash of the serialized variables. This ensures Next.js treats requests with different variables as distinct cache entries, even though they hit the same endpoint.
 
