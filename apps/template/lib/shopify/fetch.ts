@@ -1,32 +1,9 @@
-import { createHash } from "node:crypto";
-
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "2026-04";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 
 const baseEndpoint = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
-
-function stableSerialize(value: unknown): string {
-  if (Array.isArray(value)) {
-    return `[${value.map(stableSerialize).join(",")}]`;
-  }
-
-  if (value && typeof value === "object") {
-    return `{${Object.entries(value)
-      .sort(([left], [right]) => left.localeCompare(right))
-      .map(([key, entryValue]) => `${JSON.stringify(key)}:${stableSerialize(entryValue)}`)
-      .join(",")}}`;
-  }
-
-  return JSON.stringify(value);
-}
-
-function buildVariableCacheKey(variables?: Record<string, unknown>): string {
-  if (!variables) return "";
-
-  return createHash("sha1").update(stableSerialize(variables)).digest("hex").slice(0, 12);
-}
 
 export async function shopifyFetch<T>({
   operation,
@@ -37,10 +14,7 @@ export async function shopifyFetch<T>({
   query: string;
   variables?: Record<string, unknown>;
 }): Promise<T> {
-  const variableCacheKey = buildVariableCacheKey(variables);
-  const endpoint = variableCacheKey
-    ? `${baseEndpoint}?operation=${operation}&variables=${variableCacheKey}`
-    : `${baseEndpoint}?operation=${operation}`;
+  const endpoint = `${baseEndpoint}?operation=${operation}`;
   const start = DEBUG ? performance.now() : 0;
 
   const response = await fetch(endpoint, {
