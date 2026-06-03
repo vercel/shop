@@ -418,13 +418,10 @@ export async function getSearchFacets(params: {
   cacheLife("max");
   cacheTag("products");
 
-  const {
-    activeFilters = {},
-    query,
-    collection,
-    filters = [],
-    locale = defaultLocale,
-  } = params;
+  const { activeFilters = {}, query, collection, filters = [], locale = defaultLocale } = params;
+  if (collection) {
+    cacheTag(`collection-${collection}`);
+  }
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 

@@ -74,6 +74,11 @@ export async function CollectionDetailPage({
                   </FilterPendingScope>
                 </FilterSidebarSheet>
               }
+              resultCount={
+                <Suspense fallback={<Skeleton className="h-4 w-20" />}>
+                  <CollectionResultCount dataPromise={collectionResultsDataPromise} />
+                </Suspense>
+              }
               sortSelect={
                 <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
                   <CollectionsSortSelect exclude={sortExclude} />
@@ -138,6 +143,16 @@ function CollectionHeaderFallback() {
       <Skeleton className="h-9 w-72 sm:h-10 md:h-12" />
     </div>
   );
+}
+
+async function CollectionResultCount({
+  dataPromise,
+}: {
+  dataPromise: Promise<CollectionResultsData>;
+}) {
+  const [data, t] = await Promise.all([dataPromise, getTranslations("search")]);
+  if (data.total === 0) return null;
+  return t("resultCount", { count: data.total });
 }
 
 async function CollectionFilterCountBadge({

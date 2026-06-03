@@ -28,6 +28,7 @@ export interface CollectionResultsData {
   sort?: string;
   filters: ProductFilter[];
   result: Awaited<ReturnType<typeof getCollectionProducts>>;
+  total: number;
   transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
 }
 
@@ -53,14 +54,17 @@ export async function getCollectionResultsData({
 }): Promise<CollectionResultsData> {
   const [handle, { activeFilters, sort }] = await Promise.all([handlePromise, searchStatePromise]);
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getCollectionProducts({
-    activeFilters,
-    collection: handle,
-    sortKey: sort,
-    limit: RESULTS_PER_PAGE,
-    filters: shopifyFilters,
-    locale,
-  });
+  const [result, facets] = await Promise.all([
+    getCollectionProducts({
+      activeFilters,
+      collection: handle,
+      sortKey: sort,
+      limit: RESULTS_PER_PAGE,
+      filters: shopifyFilters,
+      locale,
+    }),
+    getSearchFacets({ activeFilters, collection: handle, filters: shopifyFilters, locale }),
+  ]);
 
   return {
     activeFilters,
@@ -68,20 +72,9 @@ export async function getCollectionResultsData({
     sort,
     filters: shopifyFilters,
     result,
+    total: facets.total,
     transformedFilters: { filters: result.filters, priceRange: result.priceRange },
   };
-}
-
-export function getExactCollectionResultCount({
-  result,
-}: {
-  result: Awaited<ReturnType<typeof getCollectionProducts>>;
-}): number | undefined {
-  if (result.pageInfo.hasNextPage) {
-    return undefined;
-  }
-
-  return result.products.length;
 }
 
 function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
@@ -133,6 +126,7 @@ export async function getAllProductsResultsData({
       filters: facets.filters,
       priceRange: facets.priceRange,
     },
+    total: facets.total,
     transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
   };
 }
