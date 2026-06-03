@@ -54,7 +54,7 @@ export async function shopifyFetch<T>({
     headers: {
       "Content-Type": "application/json",
       "X-Shopify-Storefront-Access-Token": SHOPIFY_ACCESS_TOKEN || "",
-      "Accept-Encoding": "gzip, deflate",
+      "Accept-Encoding": "gzip, br",
     },
     body: JSON.stringify({ query, variables, operationName: operation }),
   });
