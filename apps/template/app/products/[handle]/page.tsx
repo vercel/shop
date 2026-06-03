@@ -18,7 +18,8 @@ async function buildProductMetadata(
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const product = await getProduct(handle, locale).catch(() => notFound());
+  const product = await getProduct(handle, locale);
+  if (!product) notFound();
   const images = product.featuredImage
     ? [
         {
@@ -84,9 +85,11 @@ export default async function ProductPage({
     return handle;
   });
 
-  const productPromise = handlePromise.then((handle) =>
-    getProduct(handle, locale).catch(() => notFound()),
-  );
+  const productPromise = handlePromise.then(async (handle) => {
+    const product = await getProduct(handle, locale);
+    if (!product) notFound();
+    return product;
+  });
 
   const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
 

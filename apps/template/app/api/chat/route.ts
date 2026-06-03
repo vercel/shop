@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
 import { agent as agentConfig } from "@/lib/config";
 import { defaultLocale, type Locale } from "@/lib/i18n";
+import { withFallback } from "@/lib/shopify/errors";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProduct } from "@/lib/shopify/operations/products";
@@ -46,25 +47,15 @@ async function resolvePageContext(
   const pageType = segments[0];
 
   if (pageType === "products" && segments.length >= 2) {
-    try {
-      const handle = segments[1];
-      const product = await getProduct(handle, locale);
-      return { type: "product", product };
-    } catch {
-      // Product not found — fall through to other branches.
-    }
+    const handle = segments[1];
+    const product = await withFallback(getProduct(handle, locale), undefined);
+    if (product) return { type: "product", product };
   }
 
   if (pageType === "collections" && segments.length >= 2) {
-    try {
-      const handle = segments[1];
-      const collection = await getCollection(handle, locale);
-      if (collection) {
-        return { type: "collection", handle, title: collection.title };
-      }
-    } catch {
-      // Collection not found — fall through to other branches.
-    }
+    const handle = segments[1];
+    const collection = await withFallback(getCollection(handle, locale), undefined);
+    if (collection) return { type: "collection", handle, title: collection.title };
   }
 
   if (pageType === "search") {

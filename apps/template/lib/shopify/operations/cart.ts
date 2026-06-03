@@ -92,27 +92,22 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
   }
   if (!cartId) return undefined;
 
-  try {
-    const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
-      operation: "getCart",
-      query: `
-        ${CART_FRAGMENT}
-        query getCart($cartId: ID!) {
-          cart(id: $cartId) {
-            ...CartFields
-          }
+  const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
+    operation: "getCart",
+    query: `
+      ${CART_FRAGMENT}
+      query getCart($cartId: ID!) {
+        cart(id: $cartId) {
+          ...CartFields
         }
-      `,
-      variables: { cartId },
-    });
+      }
+    `,
+    variables: { cartId },
+  });
 
-    if (!data.cart) return undefined;
+  if (!data.cart) return undefined;
 
-    return transformShopifyCart(data.cart);
-  } catch (error) {
-    console.error("getCart failed:", error);
-    return undefined;
-  }
+  return transformShopifyCart(data.cart);
 }
 
 /**
@@ -483,61 +478,57 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
   const cartId = (await cookies()).get("shopify_cartId")?.value;
   if (!cartId) return [];
 
-  try {
-    const data = await shopifyFetch<{
-      cart: {
-        deliveryGroups: {
-          nodes: Array<{
-            deliveryOptions: Array<{
-              title: string | null;
-              estimatedCost: { amount: string; currencyCode: string };
-              deliveryMethodType: string;
-            }>;
+  const data = await shopifyFetch<{
+    cart: {
+      deliveryGroups: {
+        nodes: Array<{
+          deliveryOptions: Array<{
+            title: string | null;
+            estimatedCost: { amount: string; currencyCode: string };
+            deliveryMethodType: string;
           }>;
-        };
-      } | null;
-    }>({
-      operation: "getCartDeliveryOptions",
-      query: `
-        query getCartDeliveryOptions($cartId: ID!) {
-          cart(id: $cartId) {
-            deliveryGroups(first: 5) {
-              nodes {
-                deliveryOptions {
-                  title
-                  estimatedCost {
-                    amount
-                    currencyCode
-                  }
-                  deliveryMethodType
+        }>;
+      };
+    } | null;
+  }>({
+    operation: "getCartDeliveryOptions",
+    query: `
+      query getCartDeliveryOptions($cartId: ID!) {
+        cart(id: $cartId) {
+          deliveryGroups(first: 5) {
+            nodes {
+              deliveryOptions {
+                title
+                estimatedCost {
+                  amount
+                  currencyCode
                 }
+                deliveryMethodType
               }
             }
           }
         }
-      `,
-      variables: { cartId },
-    });
+      }
+    `,
+    variables: { cartId },
+  });
 
-    if (!data.cart) return [];
+  if (!data.cart) return [];
 
-    const seen = new Set<string>();
-    return data.cart.deliveryGroups.nodes
-      .flatMap((group) => group.deliveryOptions)
-      .filter((opt) => {
-        const key = opt.title ?? opt.deliveryMethodType;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .map((opt) => ({
-        title: opt.title ?? opt.deliveryMethodType,
-        estimatedCost: opt.estimatedCost,
-        deliveryMethodType: opt.deliveryMethodType,
-      }));
-  } catch {
-    return [];
-  }
+  const seen = new Set<string>();
+  return data.cart.deliveryGroups.nodes
+    .flatMap((group) => group.deliveryOptions)
+    .filter((opt) => {
+      const key = opt.title ?? opt.deliveryMethodType;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .map((opt) => ({
+      title: opt.title ?? opt.deliveryMethodType,
+      estimatedCost: opt.estimatedCost,
+      deliveryMethodType: opt.deliveryMethodType,
+    }));
 }
 
 export async function updateCartDeliveryAddress(

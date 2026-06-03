@@ -15,6 +15,7 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
+import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,7 +42,10 @@ export default async function CartPage() {
 }
 
 async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages] = await Promise.all([getCart(), getMessages()]);
+  const [cart, messages] = await Promise.all([
+    withFallback(getCart(), undefined),
+    getMessages(),
+  ]);
 
   return (
     <NextIntlClientProvider messages={{ cart: messages.cart }}>

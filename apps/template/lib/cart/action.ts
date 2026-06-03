@@ -1,6 +1,7 @@
 "use server";
 
 import { isEnabledLocale } from "@/lib/i18n";
+import { withFallback } from "@/lib/shopify/errors";
 import {
   addToCart,
   getCart,
@@ -252,12 +253,6 @@ export async function buyNowAction(
 export async function prepareCheckoutAction(): Promise<{
   checkoutUrl: string | null;
 }> {
-  try {
-    const cart = await getCart();
-    return { checkoutUrl: cart?.checkoutUrl ?? null };
-  } catch (error) {
-    console.error("Prepare checkout failed:", error);
-    const cart = await getCart();
-    return { checkoutUrl: cart?.checkoutUrl ?? null };
-  }
+  const cart = await withFallback(getCart(), undefined);
+  return { checkoutUrl: cart?.checkoutUrl ?? null };
 }

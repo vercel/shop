@@ -37,7 +37,10 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
-export async function getProduct(handle: string, locale: string = defaultLocale) {
+export async function getProduct(
+  handle: string,
+  locale: string = defaultLocale,
+): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
@@ -53,7 +56,7 @@ export async function getProduct(handle: string, locale: string = defaultLocale)
   });
 
   if (!data.productByHandle) {
-    throw new Error(`Product not found: ${handle}`);
+    return undefined;
   }
 
   tagProducts([data.productByHandle]);
@@ -723,7 +726,7 @@ function decodeShopifyId(id: string): string {
 export async function getProductById(
   id: string,
   locale: string = defaultLocale,
-): Promise<ProductDetails> {
+): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-id-${id}`);
@@ -740,7 +743,7 @@ export async function getProductById(
 
   const product = data.node;
   if (!product) {
-    throw new Error(`Product not found: ${id}`);
+    return undefined;
   }
 
   tagProducts([product]);
