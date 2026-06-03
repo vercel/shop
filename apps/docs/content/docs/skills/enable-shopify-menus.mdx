@@ -49,7 +49,7 @@ import { getMenu } from "@/lib/shopify/operations/menu";
 Inside `Nav`, replace `const items = navItems;` with:
 
 ```tsx
-const menu = await getMenu("NAV_HANDLE", locale);
+const menu = await getMenu({ handle: "NAV_HANDLE" });
 const items = menu?.items ?? navItems;
 ```
 
@@ -70,7 +70,7 @@ import { getMenu } from "@/lib/shopify/operations/menu";
 Change the signature to `async` and replace `const items = footerItems;` with:
 
 ```tsx
-const menu = await getMenu("FOOTER_HANDLE", locale);
+const menu = await getMenu({ handle: "FOOTER_HANDLE" });
 const items = menu?.items ?? footerItems;
 ```
 
