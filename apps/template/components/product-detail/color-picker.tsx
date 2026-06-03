@@ -48,29 +48,14 @@ export function ColorPicker({
 
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
-          const isColorSwatch = !!value.swatch?.color;
-
           const swatch = (
             <div
               className={cn(
-                "aspect-square w-full transition-all overflow-hidden",
-                isColorSwatch ? "rounded-full" : "rounded-lg",
-                isColorSwatch
-                  ? isSelected
-                    ? "ring-1 ring-offset-2 ring-foreground/50"
-                    : "ring-1 ring-offset-2 ring-transparent"
-                  : isSelected
-                    ? "ring-1 ring-inset ring-foreground/50"
-                    : "ring-1 ring-transparent",
+                "aspect-square w-full rounded-lg transition-all overflow-hidden",
+                isSelected ? "ring-1 ring-inset ring-foreground/50" : "ring-1 ring-transparent",
               )}
             >
-              {value.swatch?.color ? (
-                <div
-                  className="size-full rounded-full border border-foreground/10"
-                  style={{ backgroundColor: value.swatch.color }}
-                  aria-label={`${value.name} (${value.swatch.color})`}
-                />
-              ) : imageUrl ? (
+              {imageUrl ? (
                 <Image
                   src={imageUrl}
                   width={200}
@@ -79,7 +64,10 @@ export function ColorPicker({
                   className="size-full rounded-lg border border-foreground/10 object-cover"
                 />
               ) : (
-                <div className="size-full rounded-lg border border-foreground/10 bg-accent" />
+                <div
+                  className="size-full rounded-lg border border-foreground/10 bg-accent"
+                  style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
+                />
               )}
             </div>
           );
