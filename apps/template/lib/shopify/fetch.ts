@@ -1,15 +1,9 @@
 import { createHash } from "node:crypto";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
-const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN;
+const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
+const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "2026-04";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
-
-if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_ACCESS_TOKEN) {
-  console.warn(
-    "Shopify environment variables not configured. Set SHOPIFY_STORE_DOMAIN and SHOPIFY_STOREFRONT_ACCESS_TOKEN.",
-  );
-}
 
 const baseEndpoint = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
@@ -53,7 +47,7 @@ export async function shopifyFetch<T>({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": SHOPIFY_ACCESS_TOKEN || "",
+      "X-Shopify-Storefront-Access-Token": SHOPIFY_ACCESS_TOKEN,
       "Accept-Encoding": "gzip, br",
     },
     body: JSON.stringify({ query, variables, operationName: operation }),

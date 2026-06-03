@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
+const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
+  (key) => !process.env[key],
+);
+
+if (missingShopify.length > 0) {
+  throw new Error(
+    `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
+  );
+}
+
 if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
   const missing = [
     "BETTER_AUTH_SECRET",
