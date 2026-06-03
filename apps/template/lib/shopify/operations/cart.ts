@@ -1,6 +1,8 @@
-import { cookies } from "next/headers";
-
-import { invalidateCartCache } from "@/lib/cart/server";
+import {
+  getCartIdFromCookie,
+  invalidateCartCache,
+  setCartIdCookie,
+} from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
@@ -169,7 +171,7 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
 
 export async function getCart(cartId?: string): Promise<Cart | undefined> {
   if (!cartId) {
-    cartId = (await cookies()).get("shopify_cartId")?.value;
+    cartId = await getCartIdFromCookie();
   }
   if (!cartId) return undefined;
 
@@ -215,13 +217,7 @@ export async function createCart(locale: string = defaultLocale): Promise<Cart> 
   const cart = await createCartWithoutCookie(locale);
 
   if (cart.id) {
-    (await cookies()).set("shopify_cartId", cart.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: "/",
-    });
+    await setCartIdCookie(cart.id);
   }
 
   return cart;
@@ -233,7 +229,7 @@ export async function addToCart(
   locale: string = defaultLocale,
 ): Promise<Cart> {
   if (!cartId) {
-    cartId = (await cookies()).get("shopify_cartId")?.value;
+    cartId = await getCartIdFromCookie();
   }
 
   if (!cartId) {
@@ -256,7 +252,7 @@ export async function updateCart(
   lines: { id: string; merchandiseId: string; quantity: number }[],
   cartIdOverride?: string,
 ): Promise<Cart> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
@@ -276,7 +272,7 @@ export async function updateCart(
 }
 
 export async function removeFromCart(lineIds: string[], cartIdOverride?: string): Promise<Cart> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
   const data = await shopifyFetch<{
@@ -296,7 +292,7 @@ export async function updateCartBuyerIdentity(
   locale: string,
   countryCode?: string,
 ): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const country = countryCode ?? getCountryCode(locale);
@@ -325,7 +321,7 @@ export async function linkCartToCustomer(
   customerAccessToken: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -352,7 +348,7 @@ export async function updateCartNote(
   note: string,
   cartIdOverride?: string,
 ): Promise<Cart | undefined> {
-  const cartId = cartIdOverride || (await cookies()).get("shopify_cartId")?.value;
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -372,7 +368,7 @@ export async function updateCartNote(
 }
 
 export async function getCartSelectableAddressId(): Promise<string | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const data = await shopifyFetch<{
@@ -394,7 +390,7 @@ export async function addCartDeliveryAddress(address: {
   zip?: string;
   customerAddressId?: string;
 }): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const addressInput = address.customerAddressId
@@ -439,7 +435,7 @@ export type CartShippingOption = {
 };
 
 export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return [];
 
   const data = await shopifyFetch<{
@@ -487,7 +483,7 @@ export async function updateCartDeliveryAddress(
     customerAddressId?: string;
   },
 ): Promise<Cart | undefined> {
-  const cartId = (await cookies()).get("shopify_cartId")?.value;
+  const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
   const addressInput = address.customerAddressId

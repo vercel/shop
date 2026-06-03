@@ -5,9 +5,8 @@ import {
   createUIMessageStreamResponse,
   safeValidateUIMessages,
 } from "ai";
-import { cookies } from "next/headers";
-
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
+import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
 import { agent as agentConfig } from "@/lib/config";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
@@ -81,7 +80,6 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const store = await cookies();
   const { messages, chatId } = body;
 
   if (!chatId) {
@@ -102,15 +100,15 @@ export async function POST(request: Request) {
   const page = await resolvePageContext(segments, locale, referer);
 
   // Get or create cart before streaming (cookies can't be set during stream)
-  let cartId = store.get("shopify_cartId")?.value;
+  let cartId = await getCartIdFromCookie();
   let newCartCookie: string | undefined;
 
   if (!cartId) {
     const newCart = await createCartWithoutCookie(locale);
-    cartId = newCart.id;
-    const secure = process.env.NODE_ENV === "production";
-    const maxAge = 60 * 60 * 24 * 7; // 7 days
-    newCartCookie = `shopify_cartId=${cartId}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure ? "; Secure" : ""}`;
+    if (newCart.id) {
+      cartId = newCart.id;
+      newCartCookie = buildCartIdSetCookieHeader(newCart.id);
+    }
   }
 
   return withAgentContext(
