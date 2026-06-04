@@ -167,7 +167,7 @@ Move every route file from `app/` into `app/[locale]/`:
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
 - `app/about/`, `app/account/`, `app/cart/`, `app/collections/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
-**Stay at `app/`:** `api/`, `sitemap.ts`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
+**Stay at `app/`:** `api/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
 
 In the moved layout, fix `import "./globals.css"` → `import "../globals.css"`.
 
@@ -286,6 +286,8 @@ export async function buildAlternates({ pathname, searchParams }: {...}): Promis
 
 ### Step 8: Sitemap per-locale entries
 
+**File:** `app/sitemap/[type]/[page]/route.ts`
+
 ```ts
 import { enabledLocales } from "@/lib/i18n";
 
@@ -295,7 +297,15 @@ function localizePath(locale: string, pathname: string): string {
   return `/${locale}${normalized}`;
 }
 
-// Inside sitemap(): one entry per locale per page.
+// Before renderSitemap(): one entry per locale per page.
+function localizeEntries(entries: SitemapEntry[]): SitemapEntry[] {
+  return entries.flatMap((entry) =>
+    enabledLocales.map((locale) => ({
+      ...entry,
+      pathname: localizePath(locale, entry.pathname),
+    })),
+  );
+}
 ```
 
 ### Step 9: `next.config.ts` rewrites/redirects on `/:locale/*`
@@ -336,7 +346,7 @@ params: { locale: "en-US", handle: "__placeholder__" }
 If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
 
 ```ts
-headers: [["x-vercel-ip-postal-code", null]]
+headers: [["x-vercel-ip-postal-code", null]];
 ```
 
 (See "Cache Components compatibility D/E" at the top.)
@@ -354,7 +364,7 @@ pnpm build         # should pass; routes prerender at /en-US, /en-GB, etc.
 pnpm dev           # then:
 curl -I /          # → 307 /en-US
 curl -I /products  # → 307 /en-US/products
-curl /sitemap.xml  # → entries with /en-US/... URLs
+curl /sitemap/static/1.xml  # → entries with /en-US/... URLs
 curl /en-US        # → 200 with <html lang="en-US">
 ```
 

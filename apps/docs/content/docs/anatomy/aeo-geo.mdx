@@ -12,13 +12,13 @@ The template ships with several built-in surfaces that contribute to AEO/GEO. Th
 
 ## Surfaces in the template
 
-| Surface                          | What it does                                                           | Key files                                                      |
-| -------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`        | `next.config.ts`, `app/md/**`, `lib/markdown/**`               |
-| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data | `components/product-detail/schema.tsx`, `components/schema/**` |
-| **Sitemap**                      | Enumerates products, collections, and pages for crawlers               | `app/sitemap.ts`, `lib/shopify/operations/sitemap.ts`          |
-| **Robots**                       | Declares crawl policy, including allowances for known AI user agents   | `app/robots.ts`                                                |
-| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route              | `lib/seo.ts`, route-level `generateMetadata`                   |
+| Surface                          | What it does                                                           | Key files                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`        | `next.config.ts`, `app/md/**`, `lib/markdown/**`                                                      |
+| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data | `components/product-detail/schema.tsx`, `components/schema/**`                                        |
+| **Sitemap**                      | Publishes a paged sitemap index for Shopify resources and static pages | `app/sitemap.xml/route.ts`, `app/sitemap/[type]/[page]/route.ts`, `lib/shopify/operations/sitemap.ts` |
+| **Robots**                       | Declares crawl policy, including allowances for known AI user agents   | `app/robots.ts`                                                                                       |
+| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route              | `lib/seo.ts`, route-level `generateMetadata`                                                          |
 
 The rest of this page goes deep on content negotiation. The other surfaces are documented inline in the linked files.
 

@@ -133,7 +133,7 @@ export default async function HomePage() {
 }
 ```
 
-Update `app/pages/[slug]/page.tsx` and `app/sitemap.ts` to use `getMarketingPage` and `getAllMarketingPageSlugs`.
+Update `app/pages/[slug]/page.tsx` to use `getMarketingPage`. Add the `/pages/[slug]` URLs from `getAllMarketingPageSlugs` to the static entries in `app/sitemap/[type]/[page]/route.ts`; this preserves the storefront CMS route instead of exposing Shopify's raw metaobject type path.
 
 ### 5. Add cache invalidation webhook
 

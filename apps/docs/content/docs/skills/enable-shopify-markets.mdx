@@ -234,7 +234,7 @@ export const { Link, redirect, usePathname, useRouter } = createNavigation(routi
 
 ## Step 5: Move Routes Under `app/[locale]/`
 
-Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.ts`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
+Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.xml/`, `sitemap/`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
 
 ```
 app/layout.tsx          → app/[locale]/layout.tsx
@@ -484,9 +484,9 @@ export function buildAlternates({
 
 ## Step 12: Update Sitemap with Per-Locale URLs
 
-**File:** `app/sitemap.ts`
+**File:** `app/sitemap/[type]/[page]/route.ts`
 
-Add per-locale URL generation. For each page entry, generate an entry for each enabled locale with `alternates.languages`:
+Add per-locale URL generation. For each page entry, generate an entry for each enabled locale:
 
 ```ts
 import { enabledLocales, localeSwitchingEnabled } from "@/lib/i18n";
@@ -495,9 +495,8 @@ function localizePath(locale: string, path: string): string {
   return path === "/" ? `/${locale}` : `/${locale}${path}`;
 }
 
-// When building sitemap entries, if localeSwitchingEnabled:
-// For each path, create entries for all enabled locales
-// and add alternates.languages pointing to all locale variants
+// Before renderSitemap(), if localeSwitchingEnabled:
+// For each path, create entries for all enabled locales.
 ```
 
 ---

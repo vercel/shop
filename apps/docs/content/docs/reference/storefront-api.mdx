@@ -127,18 +127,19 @@ Key elements:
 
 ## Caching
 
-Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, sitemap, and recommendation queries. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
+Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, and recommendation queries. Sitemap index and child-page reads use `cacheLife("hours")` because Shopify pages, blogs, and articles may change without one of the configured webhook topics firing. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
 
-| Tag pattern                | Scope                                |
-| -------------------------- | ------------------------------------ |
-| `products`                 | All product queries                  |
-| `product-{handle}`         | Single product by handle             |
-| `product-{numericId}`      | Single product by Shopify numeric ID |
-| `recommendations-{handle}` | Product recommendations              |
-| `collections`              | All collection queries               |
-| `collection-{handle}`      | Single collection                    |
-| `menus`                    | Navigation menus                     |
-| `cart`                     | All cart operations                  |
+| Tag pattern                | Scope                                 |
+| -------------------------- | ------------------------------------- |
+| `products`                 | All product queries                   |
+| `product-{handle}`         | Single product by handle              |
+| `product-{numericId}`      | Single product by Shopify numeric ID  |
+| `recommendations-{handle}` | Product recommendations               |
+| `collections`              | All collection queries                |
+| `collection-{handle}`      | Single collection                     |
+| `menus`                    | Navigation menus                      |
+| `sitemap`                  | Sitemap index and paged child queries |
+| `cart`                     | All cart operations                   |
 
 Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart/server` - this is a hard requirement.
 
