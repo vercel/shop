@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { Button } from "@/components/ui/button";
 import type { BannerSection as BannerSectionType } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface BannerSectionProps {
   hero: BannerSectionType;
@@ -16,10 +17,11 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
   const video = hero.backgroundVideo;
   const image = hero.backgroundImage;
   const isStatic = image && typeof image === "object" && "src" in image;
+  const hasMedia = Boolean(video || image);
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div className="relative grid bg-foreground">
+      <div className={cn("relative grid", hasMedia && "bg-foreground")}>
         <div className="col-start-1 row-start-1 hidden md:block md:aspect-[3/1]" />
 
         {video ? (
@@ -69,16 +71,31 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
 
         <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-10 lg:px-10">
           <div className="flex flex-col items-center text-center gap-2.5">
-            <Heading className="text-3xl md:text-5xl font-semibold text-white tracking-tight max-w-3xl">
+            <Heading
+              className={cn(
+                "text-3xl md:text-5xl font-semibold tracking-tight max-w-3xl",
+                hasMedia ? "text-white" : "text-foreground",
+              )}
+            >
               {hero.headline}
             </Heading>
             {hero.subheadline && (
-              <p className="text-sm md:text-base text-white max-w-xl">{hero.subheadline}</p>
+              <p
+                className={cn(
+                  "text-sm md:text-base max-w-xl",
+                  hasMedia ? "text-white" : "text-foreground",
+                )}
+              >
+                {hero.subheadline}
+              </p>
             )}
             {hero.ctaText && hero.ctaLink && (
               <Button
                 asChild
-                className="h-11 px-5 bg-background text-foreground hover:bg-background/90"
+                className={cn(
+                  "h-11 px-5",
+                  hasMedia && "bg-background text-foreground hover:bg-background/90",
+                )}
               >
                 <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>
