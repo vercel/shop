@@ -221,6 +221,18 @@ export async function applyDiscountCodeAction(code: string): Promise<CartActionR
       return { success: false, error: "Cart not found" };
     }
 
+    // Shopify accepts unknown codes and marks them applicable:false. Reject those
+    // (undo the apply, surface the warning as a form error — no chip, no banner).
+    const applied = result.cart.discountCodes.find(
+      (d) => d.code.toUpperCase() === normalized,
+    );
+    if (applied && !applied.applicable) {
+      const reverted = await updateCartDiscountCodes(existing);
+      const errorMessage =
+        result.warnings[0]?.message ?? "That discount code can't be applied to this cart";
+      return { success: false, cart: reverted?.cart, error: errorMessage };
+    }
+
     return { success: true, cart: result.cart, warnings: result.warnings };
   } catch (error) {
     console.error("Apply discount code failed:", error);
