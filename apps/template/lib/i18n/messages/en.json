@@ -33,6 +33,7 @@
     "addToCart": "Add to Cart",
     "adding": "Adding...",
     "addressPlaceholder": "Address will be added at checkout",
+    "applyDiscount": "Apply",
     "cartItemsLabel": "Cart items",
     "cartTotalIs": "Cart total is",
     "checkout": "Checkout",
@@ -44,6 +45,11 @@
       "overnight": "Delivery next business day",
       "standard": "Delivery in 5-7 business days"
     },
+    "discount": "Discount",
+    "discountCode": "Discount code",
+    "discountInvalidCode": "Enter a valid discount code",
+    "discountNotApplicable": "Not applicable",
+    "dismissWarnings": "Dismiss",
     "empty": "Your cart is empty",
     "emptyDescription": "Looks like you haven't added anything yet. Let's explore our products and find something great!",
     "estimatedTax": "Estimated Tax",
@@ -59,6 +65,7 @@
     "overnightShipping": "Overnight Shipping",
     "proceedToCheckout": "Proceed to Checkout",
     "redirecting": "Redirecting...",
+    "removeDiscount": "Remove discount",
     "removeItem": "Remove item",
     "reviewCartDescription": "Review your cart items and proceed to checkout",
     "shipping": "Shipping",
@@ -79,7 +86,8 @@
       "description": "Complete your order with these complementary products",
       "title": "You might also like"
     },
-    "viewFullCart": "View full cart"
+    "viewFullCart": "View full cart",
+    "warningsTitle": "Your cart was updated"
   },
   "category": {
     "activeFilters": "Active Filters",

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { DiscountForm } from "@/components/cart/discount-form";
 import { Price } from "@/components/product/price";
 import type { Cart } from "@/lib/types";
 
@@ -21,17 +22,20 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
   );
 
   return (
-    <div aria-label={t("estimatedTotal")}>
-      <div className="flex items-baseline justify-between">
-        <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
-        <Price
-          amount={subtotal.toString()}
-          currencyCode={currencyCode}
-          locale={locale}
-          className="text-xl font-medium text-foreground"
-        />
+    <div className="grid gap-2.5">
+      <DiscountForm cart={cart} locale={locale} />
+      <div aria-label={t("estimatedTotal")}>
+        <div className="flex items-baseline justify-between">
+          <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
+          <Price
+            amount={subtotal.toString()}
+            currencyCode={currencyCode}
+            locale={locale}
+            className="text-xl font-medium text-foreground"
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
       </div>
-      <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
     </div>
   );
 }

@@ -104,7 +104,7 @@ export async function POST(request: Request) {
   let newCartCookie: string | undefined;
 
   if (!cartId) {
-    const newCart = await createCartWithoutCookie(locale);
+    const { cart: newCart } = await createCartWithoutCookie(locale);
     if (newCart.id) {
       cartId = newCart.id;
       newCartCookie = buildCartIdSetCookieHeader(newCart.id);

@@ -75,6 +75,21 @@ export const CART_FRAGMENT = `
               ...MoneyFields
             }
           }
+          discountAllocations {
+            __typename
+            discountedAmount {
+              ...MoneyFields
+            }
+            ... on CartCodeDiscountAllocation {
+              code
+            }
+            ... on CartAutomaticDiscountAllocation {
+              title
+            }
+            ... on CartCustomDiscountAllocation {
+              title
+            }
+          }
           merchandise {
             ... on ProductVariant {
               id
@@ -110,6 +125,35 @@ export const CART_FRAGMENT = `
         ...MoneyFields
       }
       totalTaxAmount {
+        ...MoneyFields
+      }
+    }
+    discountCodes {
+      code
+      applicable
+    }
+    discountAllocations {
+      __typename
+      discountedAmount {
+        ...MoneyFields
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCustomDiscountAllocation {
+        title
+      }
+    }
+    appliedGiftCards {
+      id
+      lastCharacters
+      amountUsed {
+        ...MoneyFields
+      }
+      balance {
         ...MoneyFields
       }
     }

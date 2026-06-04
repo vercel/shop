@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
+import { DiscountForm } from "@/components/cart/discount-form";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -79,6 +80,7 @@ export function Summary({ locale }: SummaryProps) {
 
   return (
     <div className="space-y-5">
+      <DiscountForm cart={cart} locale={locale} />
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>

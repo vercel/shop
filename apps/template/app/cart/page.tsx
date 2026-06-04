@@ -9,6 +9,7 @@ import { Header } from "@/components/cart-page/header";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
 import { CartContextSync } from "@/components/cart/context-sync";
+import { CartWarnings } from "@/components/cart/warnings";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -57,6 +58,7 @@ async function CartContent({ locale }: { locale: Locale }) {
             <Container>
               <Sections>
                 <Header />
+                <CartWarnings />
                 <div className="grid gap-5 lg:grid-cols-12">
                   <div className="lg:col-span-8 xl:col-span-9">
                     <CartItemsList locale={locale} />

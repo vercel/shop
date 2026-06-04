@@ -8,15 +8,24 @@ import {
   removeFromCart,
   updateCart,
   updateCartBuyerIdentity,
+  updateCartDiscountCodes,
   updateCartNote,
 } from "@/lib/shopify/operations/cart";
-import type { Cart } from "@/lib/types";
+import type { Cart, CartWarning } from "@/lib/types";
 
 export type CartActionResult = {
-  success: boolean;
-  error?: string;
   cart?: Cart;
+  error?: string;
+  success: boolean;
+  warnings?: CartWarning[];
 };
+
+const MAX_DISCOUNT_CODE_LENGTH = 64;
+const DISCOUNT_CODE_PATTERN = /^[\x20-\x7E]+$/;
+
+function normalizeDiscountCode(code: string): string {
+  return code.trim().toUpperCase();
+}
 
 export async function removeFromCartAction(itemId: string): Promise<CartActionResult> {
   if (!itemId) {
@@ -27,12 +36,13 @@ export async function removeFromCartAction(itemId: string): Promise<CartActionRe
   }
 
   try {
-    await removeFromCart([itemId]);
+    const { warnings } = await removeFromCart([itemId]);
     const updatedCart = await getCart();
 
     return {
       success: true,
       cart: updatedCart,
+      warnings,
     };
   } catch (error) {
     console.error("Remove from cart failed:", error);
@@ -78,7 +88,7 @@ export async function updateCartQuantityAction(
       };
     }
 
-    await updateCart([
+    const { warnings } = await updateCart([
       {
         id: itemId,
         merchandiseId: item.merchandise.id,
@@ -90,6 +100,7 @@ export async function updateCartQuantityAction(
     return {
       success: true,
       cart: updatedCart,
+      warnings,
     };
   } catch (error) {
     console.error("Update cart quantity failed:", error);
@@ -119,12 +130,13 @@ export async function addToCartAction(
   }
 
   try {
-    await addToCart([{ merchandiseId, quantity }]);
+    const { warnings } = await addToCart([{ merchandiseId, quantity }]);
     const updatedCart = await getCart();
 
     return {
       success: true,
       cart: updatedCart,
+      warnings,
     };
   } catch (error) {
     console.error("Add to cart failed:", error);
@@ -145,16 +157,17 @@ export async function syncCartLocaleAction(locale: string): Promise<CartActionRe
   }
 
   try {
-    const cart = await updateCartBuyerIdentity(locale);
+    const result = await updateCartBuyerIdentity(locale);
 
     // No cart exists yet — nothing to sync, treat as success.
-    if (!cart) {
+    if (!result) {
       return { success: true };
     }
 
     return {
       success: true,
-      cart,
+      cart: result.cart,
+      warnings: result.warnings,
     };
   } catch (error) {
     console.error("Sync cart locale failed:", error);
@@ -167,17 +180,79 @@ export async function syncCartLocaleAction(locale: string): Promise<CartActionRe
 
 export async function updateCartNoteAction(note: string): Promise<CartActionResult> {
   try {
-    const cart = await updateCartNote(note);
+    const result = await updateCartNote(note);
 
     return {
       success: true,
-      cart,
+      cart: result?.cart,
+      warnings: result?.warnings,
     };
   } catch (error) {
     console.error("Update cart note failed:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to update cart note",
+    };
+  }
+}
+
+export async function applyDiscountCodeAction(code: string): Promise<CartActionResult> {
+  const normalized = normalizeDiscountCode(code);
+
+  if (!normalized) {
+    return { success: false, error: "Discount code is required" };
+  }
+  if (normalized.length > MAX_DISCOUNT_CODE_LENGTH) {
+    return { success: false, error: "Discount code is too long" };
+  }
+  if (!DISCOUNT_CODE_PATTERN.test(normalized)) {
+    return { success: false, error: "Discount code contains invalid characters" };
+  }
+
+  try {
+    const current = await withFallback(getCart(), undefined);
+    const existing = current?.discountCodes.map((d) => d.code.toUpperCase()) ?? [];
+    if (existing.includes(normalized)) {
+      return { success: true, cart: current };
+    }
+
+    const result = await updateCartDiscountCodes([...existing, normalized]);
+    if (!result) {
+      return { success: false, error: "Cart not found" };
+    }
+
+    return { success: true, cart: result.cart, warnings: result.warnings };
+  } catch (error) {
+    console.error("Apply discount code failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to apply discount code",
+    };
+  }
+}
+
+export async function removeDiscountCodeAction(code: string): Promise<CartActionResult> {
+  const normalized = normalizeDiscountCode(code);
+  if (!normalized) {
+    return { success: false, error: "Discount code is required" };
+  }
+
+  try {
+    const current = await withFallback(getCart(), undefined);
+    const existing = current?.discountCodes.map((d) => d.code) ?? [];
+    const next = existing.filter((c) => c.toUpperCase() !== normalized);
+
+    const result = await updateCartDiscountCodes(next);
+    if (!result) {
+      return { success: false, error: "Cart not found" };
+    }
+
+    return { success: true, cart: result.cart, warnings: result.warnings };
+  } catch (error) {
+    console.error("Remove discount code failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to remove discount code",
     };
   }
 }

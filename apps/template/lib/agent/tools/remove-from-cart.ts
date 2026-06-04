@@ -26,7 +26,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
       }
 
       try {
-        const updatedCart = await removeFromCart([lineId], cartId);
+        const { cart: updatedCart } = await removeFromCart([lineId], cartId);
 
         return {
           success: true,

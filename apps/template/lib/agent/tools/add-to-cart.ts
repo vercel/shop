@@ -32,7 +32,7 @@ If there are multiple variants (sizes, colors), ask the user which one they want
       }
 
       try {
-        const updatedCart = await addToCart(
+        const { cart: updatedCart } = await addToCart(
           [{ merchandiseId: variant_id, quantity }],
           cartId,
           user.locale,

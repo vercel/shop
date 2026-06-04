@@ -22,9 +22,9 @@ export function addCartNoteTool() {
       }
 
       try {
-        const updatedCart = await updateCartNote(note, cartId);
+        const result = await updateCartNote(note, cartId);
 
-        if (!updatedCart) {
+        if (!result) {
           return {
             success: false,
             error: "Failed to update cart note",
@@ -34,7 +34,7 @@ export function addCartNoteTool() {
         return {
           success: true,
           message: "Cart note updated",
-          cart: updatedCart,
+          cart: result.cart,
         };
       } catch (error) {
         console.error("Failed to add cart note:", error);

@@ -133,6 +133,9 @@ export interface Cart {
   };
   lines: CartLine[];
   shippingCost: Money | null;
+  discountCodes: DiscountCode[];
+  discountAllocations: DiscountAllocation[];
+  appliedGiftCards: AppliedGiftCard[];
 }
 
 export interface CartLine {
@@ -142,6 +145,29 @@ export interface CartLine {
     totalAmount: Money;
   };
   merchandise: CartMerchandise;
+  discountAllocations: DiscountAllocation[];
+}
+
+export interface DiscountCode {
+  code: string;
+  applicable: boolean;
+}
+
+export type DiscountAllocation =
+  | { kind: "code"; code: string; discountedAmount: Money }
+  | { kind: "automatic" | "custom"; title: string; discountedAmount: Money };
+
+export interface AppliedGiftCard {
+  amountUsed: Money;
+  balance: Money;
+  id: string;
+  lastCharacters: string;
+}
+
+export interface CartWarning {
+  code: string;
+  message: string;
+  target: string;
 }
 
 export interface CartMerchandise {
