@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
-    const productTags = ["products", "collections"];
+    const productTags = ["products", "collections", "sitemap"];
 
     // Pull handle/id from the payload for targeted invalidation.
     try {
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("collections/")) {
-    const collectionTags = ["collections", "products", "menus"];
+    const collectionTags = ["collections", "products", "menus", "sitemap"];
 
     try {
       const payload = JSON.parse(body);
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("metaobjects/")) {
-    const cmsTags = ["cms:all"];
+    const cmsTags = ["cms:all", "sitemap"];
 
     try {
       const payload = JSON.parse(body);
