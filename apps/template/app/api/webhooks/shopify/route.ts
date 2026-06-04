@@ -97,7 +97,7 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("metaobjects/")) {
-    const cmsTags = ["cms:all", "sitemap"];
+    const cmsTags = ["cms:all"];
 
     try {
       const payload = JSON.parse(body);

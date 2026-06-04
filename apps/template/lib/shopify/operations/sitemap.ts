@@ -2,14 +2,8 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { shopifyFetch } from "../fetch";
 
-export const SHOPIFY_SITEMAP_TYPES = [
-  "articles",
-  "blogs",
-  "collections",
-  "metaObjects",
-  "pages",
-  "products",
-] as const;
+// Only publish Shopify resources with matching storefront routes.
+export const SHOPIFY_SITEMAP_TYPES = ["collections", "products"] as const;
 
 export type ShopifySitemapType = (typeof SHOPIFY_SITEMAP_TYPES)[number];
 
@@ -20,11 +14,7 @@ export interface ShopifySitemapResource {
 }
 
 interface SitemapIndexResponse {
-  articles: SitemapPages;
-  blogs: SitemapPages;
   collections: SitemapPages;
-  metaObjects: SitemapPages;
-  pages: SitemapPages;
   products: SitemapPages;
 }
 
@@ -44,27 +34,7 @@ interface SitemapResourcesResponse {
 
 const SITEMAP_INDEX_QUERY = `
   query sitemapIndex {
-    articles: sitemap(type: ARTICLE) {
-      pagesCount {
-        count
-      }
-    }
-    blogs: sitemap(type: BLOG) {
-      pagesCount {
-        count
-      }
-    }
     collections: sitemap(type: COLLECTION) {
-      pagesCount {
-        count
-      }
-    }
-    metaObjects: sitemap(type: METAOBJECT) {
-      pagesCount {
-        count
-      }
-    }
-    pages: sitemap(type: PAGE) {
       pagesCount {
         count
       }
@@ -78,69 +48,14 @@ const SITEMAP_INDEX_QUERY = `
 `;
 
 const SITEMAP_RESOURCE_OPERATIONS: Record<ShopifySitemapType, string> = {
-  articles: "sitemapArticles",
-  blogs: "sitemapBlogs",
   collections: "sitemapCollections",
-  metaObjects: "sitemapMetaObjects",
-  pages: "sitemapPages",
   products: "sitemapProducts",
 };
 
 const SITEMAP_RESOURCE_QUERIES: Record<ShopifySitemapType, string> = {
-  articles: `
-    query sitemapArticles($page: Int!) {
-      sitemap(type: ARTICLE) {
-        resources(page: $page) {
-          items {
-            handle
-            updatedAt
-          }
-        }
-      }
-    }
-  `,
-  blogs: `
-    query sitemapBlogs($page: Int!) {
-      sitemap(type: BLOG) {
-        resources(page: $page) {
-          items {
-            handle
-            updatedAt
-          }
-        }
-      }
-    }
-  `,
   collections: `
     query sitemapCollections($page: Int!) {
       sitemap(type: COLLECTION) {
-        resources(page: $page) {
-          items {
-            handle
-            updatedAt
-          }
-        }
-      }
-    }
-  `,
-  metaObjects: `
-    query sitemapMetaObjects($page: Int!) {
-      sitemap(type: METAOBJECT) {
-        resources(page: $page) {
-          items {
-            handle
-            updatedAt
-            ... on SitemapResourceMetaobject {
-              type
-            }
-          }
-        }
-      }
-    }
-  `,
-  pages: `
-    query sitemapPages($page: Int!) {
-      sitemap(type: PAGE) {
         resources(page: $page) {
           items {
             handle

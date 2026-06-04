@@ -22,7 +22,7 @@ relatedSkills:
 
 Replace the single `app/sitemap.ts` metadata response with a sitemap index at `/sitemap.xml` and paged child sitemap route handlers at `/sitemap/[type]/[page].xml`.
 
-Shopify's sitemap API now supplies paged products, collections, pages, blogs, articles, and metaobjects. A static child sitemap keeps template-owned crawlable pages (`/`, `/about`, and `/collections/all`) discoverable. Product, collection, and metaobject webhooks invalidate the shared `sitemap` cache tag.
+Shopify's sitemap API now supplies paged products and collections, the Shopify resource routes rendered by the base template. A static child sitemap keeps template-owned crawlable pages (`/`, `/about`, and `/collections/all`) discoverable. Product and collection webhooks invalidate the shared `sitemap` cache tag.
 
 ## Why it matters
 
@@ -32,7 +32,7 @@ The old sitemap fetched every product handle into one response and truncated col
 
 - Storefront still uses the template's single `app/sitemap.ts`.
 - Catalogs may exceed 250 collections or are large enough that one product sitemap is expensive.
-- Storefront wants Shopify pages, blogs, articles, or public metaobjects represented in sitemap discovery.
+- Storefront wants a paged Shopify-backed sitemap that can be extended when additional resource routes are added.
 
 ## Safe to skip when
 

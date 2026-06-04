@@ -127,7 +127,7 @@ Key elements:
 
 ## Caching
 
-Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, and recommendation queries. Sitemap index and child-page reads use `cacheLife("hours")` because Shopify pages, blogs, and articles may change without one of the configured webhook topics firing. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
+Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, and recommendation queries. Sitemap index and child-page reads use `cacheLife("hours")` so they periodically refresh even when a configured webhook does not fire. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
 
 | Tag pattern                | Scope                                 |
 | -------------------------- | ------------------------------------- |
