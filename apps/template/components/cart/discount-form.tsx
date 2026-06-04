@@ -8,6 +8,7 @@ import { useCart } from "@/components/cart/context";
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cartDiscountAmount } from "@/lib/cart";
 import { applyDiscountCodeAction, removeDiscountCodeAction } from "@/lib/cart/action";
 import type { Cart, Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -17,15 +18,13 @@ interface DiscountFormProps {
   locale: string;
 }
 
-function sumAllocations(cart: Cart): Money | null {
-  if (cart.discountAllocations.length === 0) return null;
-  const currencyCode = cart.discountAllocations[0].discountedAmount.currencyCode;
-  const amount = cart.discountAllocations.reduce(
-    (sum, a) => sum + parseFloat(a.discountedAmount.amount),
-    0,
-  );
+function discountTotal(cart: Cart): Money | null {
+  const amount = cartDiscountAmount(cart);
   if (amount === 0) return null;
-  return { amount: amount.toString(), currencyCode };
+  return {
+    amount: amount.toString(),
+    currencyCode: cart.discountAllocations[0].discountedAmount.currencyCode,
+  };
 }
 
 export function DiscountForm({ cart, locale }: DiscountFormProps) {
@@ -69,7 +68,7 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
     });
   };
 
-  const totalDiscount = sumAllocations(cart);
+  const totalDiscount = discountTotal(cart);
 
   return (
     <div className="grid gap-2.5">
