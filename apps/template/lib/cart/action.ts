@@ -210,8 +210,16 @@ export async function applyDiscountCodeAction(code: string): Promise<CartActionR
   }
 
   try {
-    const current = await withFallback(getCart(), undefined);
-    const existing = current?.discountCodes.map((d) => d.code.toUpperCase()) ?? [];
+    // `cartDiscountCodesUpdate` replaces the entire code set, so we must read
+    // the current codes authoritatively before writing. A read failure has to
+    // surface as a failure here — falling back to `[]` would silently wipe
+    // every previously-applied code.
+    const current = await getCart();
+    if (!current) {
+      return { success: false, error: "Cart not found" };
+    }
+
+    const existing = current.discountCodes.map((d) => d.code.toUpperCase());
     if (existing.includes(normalized)) {
       return { success: true, cart: current };
     }
@@ -250,9 +258,16 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
   }
 
   try {
-    const current = await withFallback(getCart(), undefined);
-    const existing = current?.discountCodes.map((d) => d.code) ?? [];
-    const next = existing.filter((c) => c.toUpperCase() !== normalized);
+    // Same constraint as apply: the mutation replaces, so a read failure here
+    // would silently wipe every other applied code.
+    const current = await getCart();
+    if (!current) {
+      return { success: false, error: "Cart not found" };
+    }
+
+    const next = current.discountCodes
+      .map((d) => d.code)
+      .filter((c) => c.toUpperCase() !== normalized);
 
     const result = await updateCartDiscountCodes(next);
     if (!result) {
