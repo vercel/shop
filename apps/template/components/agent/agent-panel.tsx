@@ -145,6 +145,7 @@ function getToolStepStatus(state: string): "complete" | "active" | "pending" {
 const TOOL_METADATA: Record<string, { label: string; icon: LucideIcon }> = {
   searchProducts: { label: "Searching products", icon: SearchIcon },
   getProductDetails: { label: "Looking up product details", icon: PackageIcon },
+  resolveProductVariant: { label: "Resolving product options", icon: PackageIcon },
   getProductRecommendations: {
     label: "Finding recommendations",
     icon: SparklesIcon,

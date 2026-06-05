@@ -63,6 +63,23 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
               {item.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
             </p>
           )}
+
+          {item.components.length > 0 && (
+            <div className="mt-2 grid gap-2.5">
+              <p className="text-xs font-medium text-muted-foreground">{t("bundleIncludes")}</p>
+              <ul className="grid gap-2.5">
+                {item.components.map((component) => (
+                  <li
+                    key={component.id}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                  >
+                    <span className="truncate">{component.merchandise.product.title}</span>
+                    <span>x{component.quantity}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -72,7 +89,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             size="icon"
             className="size-7 rounded-full"
             onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
-            disabled={quantity === 1}
+            disabled={!item.canUpdateQuantity || quantity === 1}
             aria-label={t("decreaseQuantity")}
           >
             <MinusIcon className="size-3" />
@@ -88,7 +105,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             size="icon"
             className="size-7 rounded-full"
             onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
-            disabled={quantity === 99}
+            disabled={!item.canUpdateQuantity || quantity === 99}
             aria-label={t("increaseQuantity")}
           >
             <PlusIcon className="size-3" />
@@ -100,6 +117,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             size="icon"
             className="size-7 text-muted-foreground hover:text-foreground"
             onClick={() => updateItemOptimistic(item.id || "", 0)}
+            disabled={!item.canRemove}
             aria-label={t("removeItem")}
           >
             <Trash2Icon className="size-4" />

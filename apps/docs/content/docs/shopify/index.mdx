@@ -14,14 +14,14 @@ For the API client and query patterns, see [Storefront API](/docs/reference/stor
 
 ## Concept mapping
 
-| Shopify concept | Template route          | What renders it                                                   |
-| --------------- | ----------------------- | ----------------------------------------------------------------- |
-| Products        | `/products/[handle]`    | Product detail page with variants, gallery, buy section           |
-| Collections     | `/collections/[handle]` | Product grid with filtering, sorting, pagination                  |
-| Menus           | Navigation, footer      | Quick links bar (with hover panels), mobile sheet, footer columns |
-| Pages           | `/pages/[slug]`         | Marketing page renderer (requires CMS setup)                      |
-| Search          | `/search`               | Same grid as collections, driven by query param                   |
-| Cart            | `/cart` + overlay       | Cart context with optimistic updates                              |
+| Shopify concept | Template route          | What renders it                                                    |
+| --------------- | ----------------------- | ------------------------------------------------------------------ |
+| Products        | `/products/[handle]`    | High-variant and Combined Listing PDP with gallery and buy section |
+| Collections     | `/collections/[handle]` | Product grid with filtering, sorting, pagination                   |
+| Menus           | Navigation, footer      | Quick links bar (with hover panels), mobile sheet, footer columns  |
+| Pages           | `/pages/[slug]`         | Marketing page renderer (requires CMS setup)                       |
+| Search          | `/search`               | Same grid as collections, driven by query param                    |
+| Cart            | `/cart` + overlay       | Optimistic cart with componentized bundle lines                    |
 
 ## Required menus
 

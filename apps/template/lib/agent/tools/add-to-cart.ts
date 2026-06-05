@@ -11,7 +11,8 @@ export function addToCartTool() {
 
 IMPORTANT: You must use the variant_id (e.g., "gid://shopify/ProductVariant/..."), NOT the product_id.
 When the user is on a product page, the available variant IDs are provided in the context.
-If there are multiple variants (sizes, colors), ask the user which one they want before calling this tool.`,
+If there are multiple variants (sizes, colors), ask the user which one they want and resolve it with resolveProductVariant before calling this tool.
+Do not add customized bundle parents that require components but have no fixed components.`,
     inputSchema: z.object({
       variant_id: z
         .string()

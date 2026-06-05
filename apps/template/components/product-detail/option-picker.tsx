@@ -1,48 +1,28 @@
 import Link from "next/link";
 import type * as React from "react";
 
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
-import type { ProductOption, ProductVariant } from "@/lib/types";
+import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface OptionPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
-  selectedValue: string;
-  variants: ProductVariant[];
-  handle: string;
-  selectedOptions: SelectedOptions;
 }
 
-export function OptionPicker({
-  option,
-  selectedValue,
-  variants,
-  handle,
-  selectedOptions,
-  className,
-  ...props
-}: OptionPickerProps) {
+export function OptionPicker({ option, className, ...props }: OptionPickerProps) {
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">{option.name}</p>
       <div className="flex flex-wrap gap-2">
         {option.values.map((value) => {
-          const isSelected = selectedValue === value.name;
-
-          const isAvailable = variants.some(
-            (v) =>
-              v.availableForSale &&
-              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          );
-
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+          const isSelected = value.selected;
 
           const classes = cn(
             "grid px-5 py-2 text-center text-sm rounded-lg transition-all",
             isSelected
               ? "font-medium bg-primary text-primary-foreground"
               : "font-normal inset-ring inset-ring-foreground/15 text-foreground hover:inset-ring-foreground/35",
-            !isAvailable && "opacity-40 cursor-not-allowed line-through",
+            !value.available && "opacity-40",
+            !value.exists && "cursor-not-allowed line-through",
           );
 
           // Invisible medium-weight twin reserves the bold width so pills don't shift on selection.
@@ -55,7 +35,7 @@ export function OptionPicker({
             </>
           );
 
-          if (!isAvailable) {
+          if (!value.exists) {
             return (
               <span key={value.id} className={classes}>
                 {label}
@@ -64,7 +44,12 @@ export function OptionPicker({
           }
 
           return (
-            <Link key={value.id} href={href} scroll={false} className={classes}>
+            <Link
+              key={value.id}
+              href={value.href}
+              scroll={false}
+              className={cn(classes, "cursor-pointer")}
+            >
               {label}
             </Link>
           );

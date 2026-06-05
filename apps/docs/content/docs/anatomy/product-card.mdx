@@ -48,14 +48,10 @@ Add a hover image carousel to the product card.
 
 Data:
 - In lib/shopify/fragments.ts, add an `images(first: 5)` block (using ...ImageFields)
-  to PRODUCT_CARD_FRAGMENT, and add a `variants(first: 50)` block selecting each
-  variant's `image { url }`.
+  to PRODUCT_CARD_FRAGMENT.
 - In lib/shopify/transforms/product.ts, restore an `images: Image[]` value on the
-  object returned by transformShopifyProductCard. Compute it with a
-  `filterVariantImages(product)` helper that flattens product.images, then excludes
-  any image whose URL (ignoring query params) matches a non-default variant's image -
-  so color-swatch variant images don't leak into the carousel. Add the matching
-  `images?` and `variants?` fields back to the ShopifyProductCard response interface.
+  object returned by transformShopifyProductCard by flattening `product.images`. Add
+  the matching `images?` field to the ShopifyProductCard response interface.
 - In lib/types.ts, add `images: Image[]` back to the ProductCard interface.
 
 Component:

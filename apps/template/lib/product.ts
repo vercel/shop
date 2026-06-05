@@ -1,103 +1,71 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
 import type {
   Image,
   Money,
   ProductDetails,
   ProductOption,
+  ProductSelectionData,
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
 
 export type SelectedOptions = Record<string, string>;
 
-export interface ProductSelection {
+export interface ProductSelection extends ProductSelectionData {
   selectedOptions: SelectedOptions;
-  selectedVariant: ProductVariant | undefined;
   colorImages: Image[];
 }
 
 export function computeSelection(
   product: ProductDetails,
-  variantId: string | undefined,
+  selectionData?: ProductSelectionData,
 ): ProductSelection {
-  const { images, options, variants } = product;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const selectedVariant =
+    selectionData?.selectedVariant ??
+    product.variants.find((variant) => variant.id === product.defaultVariantId) ??
+    product.variants[0];
+  const options = selectionData?.options ?? product.options;
+  const variants = mergeVariants(product.variants, selectionData?.variants ?? []);
+  const selectedOptions = selectedOptionsToRecord(selectedVariant?.selectedOptions ?? []);
   const colorImages = hasColorImagePartitioning(options, variants)
-    ? getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions).colorImages
+    ? getPartitionedImagesForSelectedColor(product.images, options, variants, selectedOptions)
+        .colorImages
     : [];
-  return { selectedOptions, selectedVariant, colorImages };
+  return { selectedOptions, selectedVariant, colorImages, options, variants };
 }
 
-/** Called server-side so the initial HTML matches hydrated state (zero CLS). */
-export function computeInitialSelectedOptions(
-  variants: ProductVariant[],
-  initialVariantId?: string,
-): SelectedOptions {
-  if (initialVariantId) {
-    const matchedVariant = variants.find((v) => {
-      const numericId = getNumericShopifyId(v.id);
-      return numericId === initialVariantId;
-    });
-    if (matchedVariant) {
-      const opts: SelectedOptions = {};
-      for (const opt of matchedVariant.selectedOptions) {
-        opts[opt.name] = opt.value;
-      }
-      return opts;
+function mergeVariants(...groups: ProductVariant[][]): ProductVariant[] {
+  const variants = new Map<string, ProductVariant>();
+  for (const group of groups) {
+    for (const variant of group) {
+      variants.set(variant.id, variant);
     }
   }
-  return getInitialSelectedOptions(variants);
+  return [...variants.values()];
 }
 
-export function getInitialSelectedOptions(variants: ProductVariant[]): SelectedOptions {
-  const initial: SelectedOptions = {};
-  for (const option of variants[0]?.selectedOptions ?? []) {
-    initial[option.name] = option.value;
-  }
-  return initial;
+function selectedOptionsToRecord(options: SelectedOption[]): SelectedOptions {
+  return Object.fromEntries(options.map((option) => [option.name, option.value]));
 }
 
-export function resolveSelectedVariant(
-  variants: ProductVariant[],
-  selectedOptions: SelectedOptions,
-) {
-  if (Object.keys(selectedOptions).length === 0) {
-    return variants[0];
+export function getSelectedOptionsFromSearchParams(
+  options: ProductOption[],
+  searchParams: Record<string, string | string[] | undefined>,
+): SelectedOption[] {
+  const selectedOptions: SelectedOption[] = [];
+  for (const option of options) {
+    const rawValue = searchParams[option.name];
+    const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+    if (value && option.values.some((optionValue) => optionValue.name === value)) {
+      selectedOptions.push({ name: option.name, value });
+    }
   }
+  return selectedOptions;
+}
 
-  return (
-    variants.find((variant) =>
-      variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
-    ) ?? variants[0]
+function findSelectedVariant(variants: ProductVariant[], selectedOptions: SelectedOptions) {
+  return variants.find((variant) =>
+    variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
   );
-}
-
-export function getVariantUrl(
-  handle: string,
-  variants: ProductVariant[],
-  currentOptions: SelectedOptions,
-  optionName: string,
-  optionValue: string,
-): string {
-  const newOptions = { ...currentOptions, [optionName]: optionValue };
-
-  let variant = variants.find((v) =>
-    v.selectedOptions.every((opt) => newOptions[opt.name] === opt.value),
-  );
-
-  if (!variant) {
-    variant = variants.find((v) =>
-      v.selectedOptions.some((opt) => opt.name === optionName && opt.value === optionValue),
-    );
-  }
-
-  const numericId = variant ? getNumericShopifyId(variant.id) : null;
-  if (numericId) {
-    return `/products/${handle}?variant=${numericId}`;
-  }
-
-  return `/products/${handle}`;
 }
 
 /**
@@ -174,7 +142,7 @@ export function getImagesForSelectedColor(
     }
   }
 
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const selectedVariant = findSelectedVariant(variants, selectedOptions);
   const variantImageUrl = selectedVariant?.image?.url;
 
   if (variantImageUrl) {
@@ -257,7 +225,7 @@ export function getPartitionedImagesForSelectedColor(
     }
   }
 
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
+  const selectedVariant = findSelectedVariant(variants, selectedOptions);
   const variantImageUrl = selectedVariant?.image?.url;
 
   if (variantImageUrl) {
@@ -269,25 +237,6 @@ export function getPartitionedImagesForSelectedColor(
   }
 
   return { colorImages, otherImages };
-}
-
-/** When true, the price renders without waiting for searchParams to resolve the variant. */
-export function hasUniformPricing(variants: ProductVariant[]): boolean {
-  if (variants.length <= 1) return true;
-  const first = variants[0];
-  return variants.every(
-    (v) =>
-      v.price.amount === first.price.amount &&
-      v.price.currencyCode === first.price.currencyCode &&
-      v.compareAtPrice?.amount === first.compareAtPrice?.amount,
-  );
-}
-
-/** When true, buy-button labels can render in the Suspense fallback without variant resolution. */
-export function hasUniformStock(variants: ProductVariant[]): boolean {
-  if (variants.length <= 1) return true;
-  const first = variants[0];
-  return variants.every((v) => v.availableForSale === first.availableForSale);
 }
 
 /** True when the gallery depends on selected color (i.e. on searchParams). */

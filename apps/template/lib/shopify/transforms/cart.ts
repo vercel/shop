@@ -1,4 +1,3 @@
-import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   AppliedGiftCard,
   Cart,
@@ -45,6 +44,11 @@ interface ShopifyCartLine {
   };
   discountAllocations: ShopifyDiscountAllocation[];
   id: string;
+  instructions?: {
+    canRemove: boolean;
+    canUpdateQuantity: boolean;
+  };
+  lineComponents?: ShopifyCartLine[];
   merchandise: {
     id: string;
     image?: ShopifyImage | null;
@@ -75,13 +79,12 @@ export interface ShopifyCart {
   cost: {
     subtotalAmount: ShopifyMoney;
     totalAmount: ShopifyMoney;
-    totalTaxAmount: ShopifyMoney | null;
   };
   deliveryGroups?: { nodes: ShopifyDeliveryGroup[] };
   discountAllocations: ShopifyDiscountAllocation[];
   discountCodes: Array<{ applicable: boolean; code: string }>;
   id: string;
-  lines: ShopifyEdges<ShopifyCartLine>;
+  lines: { nodes: ShopifyCartLine[] };
   note: string | null;
   totalQuantity: number;
 }
@@ -150,9 +153,12 @@ function transformCartLine(line: ShopifyCartLine): CartLine {
   return {
     id: line.id,
     quantity: line.quantity,
+    canRemove: line.instructions?.canRemove ?? true,
+    canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
     cost: {
       totalAmount: line.cost.totalAmount,
     },
+    components: line.lineComponents?.map(transformCartLine) ?? [],
     merchandise: {
       id: line.merchandise.id,
       title: line.merchandise.title,
@@ -190,12 +196,8 @@ export function transformShopifyCart(cart: ShopifyCart): Cart {
     cost: {
       subtotalAmount: cart.cost.subtotalAmount,
       totalAmount: cart.cost.totalAmount,
-      totalTaxAmount: cart.cost.totalTaxAmount ?? {
-        amount: "0",
-        currencyCode: cart.cost.totalAmount.currencyCode,
-      },
     },
-    lines: flattenEdges(cart.lines).map(transformCartLine),
+    lines: cart.lines.nodes.map(transformCartLine),
     shippingCost: transformShippingCost(cart),
     discountCodes: transformDiscountCodes(cart.discountCodes),
     discountAllocations: transformDiscountAllocations(cart.discountAllocations),

@@ -55,7 +55,9 @@ The overlay content in `overlay-content.tsx` composes three sections: an empty s
 
 ## Overlay items
 
-Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect optimistic state. It renders the product image, title, variant options (color, size, etc.), quantity controls (+/- buttons), a remove button, and the line total. Quantity changes and removals dispatch through the cart context, which handles debouncing and server action calls.
+Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect optimistic state. It renders the product image, title, variant options (color, size, etc.), bundle components, quantity controls (+/- buttons), a remove button, and the line total. Quantity changes and removals dispatch through the cart context, which handles debouncing and server action calls.
+
+The controls honor Shopify's `CartLine.instructions.canUpdateQuantity` and `canRemove` flags instead of assuming every line is editable.
 
 ## Cart page
 
@@ -71,6 +73,10 @@ Below the items, a `RelatedProductsSection` shows product recommendations based 
 ## Shopify integration
 
 Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
+
+The cart fragment reads both `CartLine` and `ComponentizableCartLine`, preserving `lineComponents` as nested domain cart lines. This lets fixed and transformed bundles render as one parent with their included products. The `addToCart()` operation also accepts Shopify's optional `CartLineInput.parent` relationship as a foundation for app-specific customized bundle flows.
+
+The fragment intentionally does not query deprecated cart tax and duty amounts. Shopify finalizes those values at checkout, so storefront summaries show a taxes-and-shipping-at-checkout note instead of a misleading pre-checkout tax amount.
 
 The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
 

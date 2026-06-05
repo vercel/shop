@@ -2,29 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import type * as React from "react";
 
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
-import type { ProductOption, ProductVariant } from "@/lib/types";
+import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
-  selectedValue: string;
-  variants: ProductVariant[];
-  handle: string;
-  selectedOptions: SelectedOptions;
   hideImages?: boolean;
 }
 
-export function ColorPicker({
-  option,
-  selectedValue,
-  variants,
-  handle,
-  selectedOptions,
-  hideImages,
-  className,
-  ...props
-}: ColorPickerProps) {
+export function ColorPicker({ option, hideImages, className, ...props }: ColorPickerProps) {
+  const selectedValue = option.values.find((value) => value.selected)?.name ?? "";
+
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
@@ -32,21 +20,8 @@ export function ColorPicker({
       </p>
       <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
         {option.values.map((value) => {
-          const isSelected = selectedValue === value.name;
-
-          const isAvailable = variants.some(
-            (v) =>
-              v.availableForSale &&
-              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          );
-
-          const variantImage = variants.find((v) =>
-            v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          )?.image?.url;
-
-          const imageUrl = hideImages ? undefined : value.swatch?.image || variantImage;
-
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+          const isSelected = value.selected;
+          const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
 
           const swatch = (
             <div
@@ -73,7 +48,7 @@ export function ColorPicker({
             </div>
           );
 
-          if (!isAvailable) {
+          if (!value.exists) {
             return (
               <span
                 key={value.id}
@@ -88,9 +63,9 @@ export function ColorPicker({
           return (
             <Link
               key={value.id}
-              href={href}
+              href={value.href}
               scroll={false}
-              className="block"
+              className={cn("block cursor-pointer", !value.available && "opacity-40")}
               aria-label={`Select ${option.name}: ${value.name}`}
             >
               {swatch}

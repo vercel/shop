@@ -15,10 +15,10 @@ For Shopify admin setup and required token scopes, see [Storefront API Permissio
 ```ts
 import { shopifyFetch } from "@/lib/shopify/fetch";
 
-const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
+const data = await shopifyFetch<{ product: ShopifyProduct | null }>({
   operation: "getProductByHandle",
   query: GET_PRODUCT_BY_HANDLE_QUERY,
-  variables: { handle, country, language },
+  variables: { handle, selectedOptions: [], country, language },
 });
 ```
 
@@ -52,10 +52,11 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
   ${PRODUCT_FRAGMENT}
   query getProductByHandle(
     $handle: String!
+    $selectedOptions: [SelectedOptionInput!]!
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       ...ProductFields
     }
   }
@@ -70,13 +71,16 @@ Always verify fields against the live Storefront API schema with `shopify-ai-too
 
 Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
 
-| Fragment                    | Covers                                                                                          |
-| --------------------------- | ----------------------------------------------------------------------------------------------- |
-| `MONEY_FRAGMENT`            | `amount` and `currencyCode` on `MoneyV2`                                                        |
-| `IMAGE_FRAGMENT`            | `url`, `altText`, `width`, `height` on `Image`                                                  |
-| `PRODUCT_VARIANT_FRAGMENT`  | Variant price, options, image, availability                                                     |
-| `PRODUCT_FRAGMENT`          | Full product: media, variants (up to 250), options with swatches, metafields, price ranges, SEO |
-| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields)                                            |
+| Fragment                               | Covers                                                                                                                 |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `MONEY_FRAGMENT`                       | `amount` and `currencyCode` on `MoneyV2`                                                                               |
+| `IMAGE_FRAGMENT`                       | `url`, `altText`, `width`, `height` on `Image`                                                                         |
+| `PRODUCT_VARIANT_FRAGMENT`             | Representative variant price, options, image, availability, and owning product handle                                  |
+| `PURCHASABLE_PRODUCT_VARIANT_FRAGMENT` | Selected variant plus `requiresComponents`, fixed bundle `components`, and reverse `groupedBy` bundle relationships    |
+| `PRODUCT_SELECTION_FRAGMENT`           | Modern high-variant and Combined Listing selection fields                                                              |
+| `PRODUCT_FRAGMENT`                     | Full product metadata, media, exact variant count, modern selection data, price ranges, taxonomy, collections, and SEO |
+| `CART_FRAGMENT`                        | Ordinary and componentizable cart lines, nested bundle components, line instructions, costs, and delivery groups       |
+| `CATEGORY_PRODUCT_FRAGMENT`            | Lightweight product for listing pages (fewer fields)                                                                   |
 
 Embed fragments in a query with template literal interpolation: `` `${PRODUCT_FRAGMENT} query ...` ``.
 
@@ -98,36 +102,39 @@ export async function getProduct({
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
 
-  const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
+  const data = await shopifyFetch<{ product: ShopifyProduct | null }>({
     operation: "getProductByHandle",
     query: GET_PRODUCT_BY_HANDLE_QUERY,
     variables: {
       handle,
+      selectedOptions: [],
       country: getCountryCode(locale),
       language: getLanguageCode(locale),
     },
   });
 
-  if (!data.productByHandle) return undefined;
+  if (!data.product) return undefined;
 
-  return transformShopifyProductDetails(data.productByHandle);
+  return transformShopifyProductDetails(data.product);
 }
 ```
 
 Key elements:
 
-1. **`"use cache: remote"`** - stores the entry in Vercel's shared Runtime Cache, durable across serverless instances and requests
+1. **`"use cache"`** - lets this PDP product read resolve during prerender so the product body is baked into the static shell
 2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
 3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
 4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
-Read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and between requests rather than the per-instance in-memory store that plain `"use cache"` falls back to at runtime. Combined with webhook-driven `revalidateTag()` invalidation, reads stay cached until the underlying Shopify data changes. Tags follow a hierarchy:
+Most read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and requests. High-cardinality operations such as product selections, search, filters, sort, and cursors also use the remote cache with their function arguments as part of the key.
+
+The PDP's base `getProduct()` read is the deliberate exception: it uses plain `"use cache"` so it can resolve during prerender and bake the product body into the static shell. Combined with webhook-driven `revalidateTag()` invalidation, both cache modes stay fresh while preserving coherent PDP rendering. Tags follow a hierarchy:
 
 | Tag pattern                | Scope                                |
 | -------------------------- | ------------------------------------ |
@@ -161,6 +168,23 @@ export async function addToCart(lines: CartLineInput[], cartId: string, locale: 
 
 Shopify returns the full updated cart in every mutation response, so there's no need for a follow-up query.
 
+`addToCart()` accepts Shopify's optional `CartLineInput.parent` relationship for customized bundle and add-on flows. The default PDP only adds ordinary products and fixed bundle parents directly; customized component selection remains app-specific.
+
+The cart fragment omits deprecated tax and duty amount fields. Shopify finalizes those values at checkout, so the storefront presents a checkout-time tax note instead.
+
+## Product selection
+
+The template does not query an exhaustive variants connection. `getProductSelection()` sends selected option values to Shopify and combines:
+
+- `selectedOrFirstAvailableVariant(selectedOptions:)`
+- `adjacentVariants(selectedOptions:)`
+- `options.optionValues.firstSelectableVariant`
+- `encodedVariantExistence` and `encodedVariantAvailability`
+
+This avoids a historical `first: 50` cap, scales to Shopify's 2,048-variant product limit, and lets option values navigate across Combined Listing child product handles. `variantsCount.count` is used whenever the exact count is needed.
+
+Legacy `?variant=` URLs are resolved through a small `node(id:)` query that returns the variant's selected options, then feed the same selection operation.
+
 ## Error handling
 
 The client handles errors at two levels:
@@ -184,10 +208,11 @@ Set `DEBUG_SHOPIFY=true` to log every request with timing and a variable preview
 
 Every operation converts the Shopify response to a domain type before returning. Transforms live in `lib/shopify/transforms/`:
 
-| Transform                        | Input → Output                      |
-| -------------------------------- | ----------------------------------- |
-| `transformShopifyProductDetails` | `ShopifyProduct` → `ProductDetails` |
-| `transformShopifyCart`           | `ShopifyCart` → `Cart`              |
+| Transform                          | Input → Output                                     |
+| ---------------------------------- | -------------------------------------------------- |
+| `transformShopifyProductDetails`   | `ShopifyProduct` → `ProductDetails`                |
+| `transformShopifyProductSelection` | `ShopifyProductSelection` → `ProductSelectionData` |
+| `transformShopifyCart`             | `ShopifyCart` → `Cart`                             |
 
 Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
 

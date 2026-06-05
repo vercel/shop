@@ -16,7 +16,29 @@ The PDP renders any product that has a handle (URL slug) in Shopify. At minimum,
 - At least one **variant** (even single-option products have a default variant)
 - A **featured image** and optionally up to 10 media items (images or videos)
 
-The template fetches up to 250 variants per product and 10 media items.
+The template fetches up to 10 media items. It does not fetch a capped `variants(first: ...)` connection.
+
+## Modern product model
+
+The PDP uses Shopify's Storefront API 2026-04 product-selection fields rather than downloading every variant:
+
+- `variantsCount` reports the exact number of variants.
+- `options.optionValues` provides option values, swatches, and a first selectable variant.
+- `encodedVariantExistence` and `encodedVariantAvailability` determine whether each option combination exists and is available.
+- `selectedOrFirstAvailableVariant(selectedOptions:)` resolves the selected purchasable variant.
+- `adjacentVariants(selectedOptions:)` provides the nearby variants needed to update option state.
+
+This model supports Shopify's 2,048-variant product limit without truncating the picker at 50 variants. It also supports Combined Listings: an option value can resolve to a variant owned by another product, and the generated option link uses that product's handle.
+
+## Bundles
+
+For the selected variant, the PDP queries Shopify's bundle relationships:
+
+- `components` lists the items in a fixed bundle.
+- `groupedBy` lists up to 10 bundles that contain the selected component.
+- `requiresComponents` identifies customized bundle parents that cannot be purchased alone.
+
+Fixed bundles render their components and can be added normally. A customized bundle that requires shopper-selected components is disabled by the generic buy buttons until you add the app-specific bundle configuration UI and send the component lines through `CartLineInput.parent`.
 
 ## Metafields
 
@@ -74,9 +96,9 @@ Product recommendations on the PDP are powered by Shopify's recommendation API. 
 
 ## Key files
 
-| File                                 | Purpose                                                         |
-| ------------------------------------ | --------------------------------------------------------------- |
-| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                     |
-| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                   |
-| `lib/shopify/operations/products.ts` | Product fetch operations with caching                           |
-| `lib/product.ts`                     | Variant resolution, swatch detection, and option URL generation |
+| File                                 | Purpose                                            |
+| ------------------------------------ | -------------------------------------------------- |
+| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`        |
+| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform      |
+| `lib/shopify/operations/products.ts` | Product fetch operations with caching              |
+| `lib/product.ts`                     | Selection composition and color-image partitioning |

@@ -74,17 +74,48 @@ export interface ProductDetails extends ProductCard {
   tags: string[];
   updatedAt: string;
   variants: ProductVariant[];
+  variantsCount: number;
   videos: Video[];
+}
+
+export interface ProductSelectionData {
+  options: ProductOption[];
+  selectedVariant: ProductVariant | undefined;
+  variants: ProductVariant[];
 }
 
 export interface ProductVariant {
   availableForSale: boolean;
+  bundleParents: ProductVariantReference[];
   compareAtPrice?: Money;
+  components: ProductVariantComponent[];
   id: string;
   image: Image | null;
   price: Money;
+  productHandle: string;
+  requiresComponents: boolean;
   selectedOptions: SelectedOption[];
   title: string;
+}
+
+export interface ProductVariantReference {
+  availableForSale: boolean;
+  id: string;
+  image: Image | null;
+  price: Money;
+  product: {
+    id: string;
+    handle: string;
+    title: string;
+    featuredImage: Image | null;
+  };
+  selectedOptions: SelectedOption[];
+  title: string;
+}
+
+export interface ProductVariantComponent {
+  quantity: number;
+  variant: ProductVariantReference;
 }
 
 export interface ProductOption {
@@ -99,8 +130,13 @@ export interface OptionValueSwatch {
 }
 
 export interface OptionValue {
+  available: boolean;
+  exists: boolean;
+  href: string;
   id: string;
+  image?: string;
   name: string;
+  selected: boolean;
   swatch?: OptionValueSwatch;
 }
 
@@ -127,7 +163,6 @@ export interface Cart {
   cost: {
     subtotalAmount: Money;
     totalAmount: Money;
-    totalTaxAmount: Money;
   };
   discountAllocations: DiscountAllocation[];
   discountCodes: DiscountCode[];
@@ -139,6 +174,9 @@ export interface Cart {
 }
 
 export interface CartLine {
+  canRemove: boolean;
+  canUpdateQuantity: boolean;
+  components: CartLine[];
   cost: {
     totalAmount: Money;
   };
