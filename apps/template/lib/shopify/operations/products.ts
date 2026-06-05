@@ -1,16 +1,26 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Filter, PageInfo, PriceRange, ProductCard, ProductDetails } from "@/lib/types";
+import type {
+  Filter,
+  PageInfo,
+  PriceRange,
+  ProductCard,
+  ProductDetails,
+  ProductSelectionData,
+  SelectedOption,
+} from "@/lib/types";
 
 import { shopifyFetch } from "../fetch";
-import { PRODUCT_CARD_FRAGMENT, PRODUCT_FRAGMENT } from "../fragments";
+import { PRODUCT_CARD_FRAGMENT, PRODUCT_FRAGMENT, PRODUCT_SELECTION_FRAGMENT } from "../fragments";
 import { transformShopifyFilters } from "../transforms/filters";
 import {
   type ShopifyProduct,
   type ShopifyProductCard,
+  type ShopifyProductSelection,
   transformShopifyProductCard,
   transformShopifyProductDetails,
+  transformShopifyProductSelection,
 } from "../transforms/product";
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
@@ -33,8 +43,8 @@ function tagProducts(products: Array<{ id: string }>): void {
 
 const GET_PRODUCT_BY_HANDLE_QUERY = `
   ${PRODUCT_FRAGMENT}
-  query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+  query getProductByHandle($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
       ...ProductFields
     }
   }
@@ -54,20 +64,97 @@ export async function getProduct({
   const language = getLanguageCode(locale);
 
   const data = await shopifyFetch<{
-    productByHandle: ShopifyProduct;
+    product: ShopifyProduct | null;
   }>({
     operation: "getProductByHandle",
     query: GET_PRODUCT_BY_HANDLE_QUERY,
-    variables: { handle, country, language },
+    variables: { handle, selectedOptions: [], country, language },
   });
 
-  if (!data.productByHandle) {
+  if (!data.product) {
     return undefined;
   }
 
-  tagProducts([data.productByHandle]);
+  tagProducts([data.product]);
 
-  return transformShopifyProductDetails(data.productByHandle);
+  return transformShopifyProductDetails(data.product);
+}
+
+const GET_PRODUCT_SELECTION_QUERY = `
+  ${PRODUCT_SELECTION_FRAGMENT}
+  query getProductSelection($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      ...ProductSelectionFields
+    }
+  }
+`;
+
+export async function getProductSelection({
+  handle,
+  selectedOptions,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  selectedOptions: SelectedOption[];
+  locale?: string;
+}): Promise<ProductSelectionData | undefined> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `product-${handle}`);
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const data = await shopifyFetch<{
+    product: ShopifyProductSelection | null;
+  }>({
+    operation: "getProductSelection",
+    query: GET_PRODUCT_SELECTION_QUERY,
+    variables: { handle, selectedOptions, country, language },
+  });
+
+  if (!data.product) return undefined;
+
+  return transformShopifyProductSelection(data.product);
+}
+
+const GET_PRODUCT_VARIANT_SELECTED_OPTIONS_QUERY = `
+  query getProductVariantSelectedOptions($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    node(id: $id) {
+      ... on ProductVariant {
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
+  }
+`;
+
+export async function getProductVariantSelectedOptions({
+  variantId,
+  locale = defaultLocale,
+}: {
+  variantId: string;
+  locale?: string;
+}): Promise<SelectedOption[]> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+  const id = variantId.startsWith("gid://")
+    ? variantId
+    : `gid://shopify/ProductVariant/${variantId}`;
+
+  const data = await shopifyFetch<{
+    node: { selectedOptions: SelectedOption[] } | null;
+  }>({
+    operation: "getProductVariantSelectedOptions",
+    query: GET_PRODUCT_VARIANT_SELECTED_OPTIONS_QUERY,
+    variables: { id, country, language },
+  });
+
+  return data.node?.selectedOptions ?? [];
 }
 
 const CATALOG_PRODUCTS_QUERY = `

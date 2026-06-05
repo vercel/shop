@@ -30,7 +30,7 @@ AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → Shopify to
 
 The agent adapts its instructions based on where the user is browsing. Page context is resolved server-side from the `Referer` header:
 
-- **Product page** - the full product is injected into the prompt with all variants, prices, availability, and variant IDs ready for "add to cart"
+- **Product page** - the product, exact variant count, options, and a representative selectable variant set are injected into the prompt; the agent resolves exact choices on demand
 - **Collection page** - the collection handle and title are included
 - **Search page** - the active search query is passed through
 - **Cart page** - the agent knows the user is viewing their cart
@@ -40,17 +40,18 @@ The system prompt also includes the user's locale so the agent responds in the c
 
 ## Tools
 
-The agent has 11 tools organized into three groups. All tools access the agent context (chat ID, cart ID, locale, page) via AsyncLocalStorage.
+The agent has 12 tools organized into three groups. All tools access the agent context (chat ID, cart ID, locale, page) via AsyncLocalStorage.
 
 ### Product discovery
 
-| Tool                        | Purpose                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `searchProducts`            | Keyword search with sorting (best matches, price low/high) - returns up to 10 results |
-| `getProductDetails`         | Full product info: title, description, price, variants, availability, images          |
-| `getProductRecommendations` | AI-powered similar products (up to 5)                                                 |
-| `listCollections`           | All store categories                                                                  |
-| `browseCollection`          | Products within a collection with sorting                                             |
+| Tool                        | Purpose                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `searchProducts`            | Keyword search with sorting (best matches, price low/high) - returns up to 10 results                       |
+| `getProductDetails`         | Product info, exact variant count, mapped options, representative variants, and bundle relationships        |
+| `resolveProductVariant`     | Resolves the user's exact option choices to a purchasable Shopify variant without downloading every variant |
+| `getProductRecommendations` | AI-powered similar products (up to 5)                                                                       |
+| `listCollections`           | All store categories                                                                                        |
+| `browseCollection`          | Products within a collection with sorting                                                                   |
 
 ### Cart management
 
@@ -74,9 +75,11 @@ The agent doesn't just return text - it renders rich UI components via json-rend
 
 - **AgentProductCard** - clickable card with image, title, price, compare-at price, and availability
 - **AgentProductGrid** - 2-column responsive grid wrapping multiple product cards
-- **AgentCartSummary** - full cart breakdown with line item thumbnails, subtotal, tax, total, and checkout button
+- **AgentCartSummary** - full cart breakdown with line item thumbnails, bundle components, subtotal, total, checkout-time tax note, and checkout button
 - **AgentCartConfirmation** - success card shown after adding an item to cart
 - **AgentVariantPicker** - display-only variant selector with option groups and availability status
+
+For high-variant products and Combined Listings, the picker is intentionally representative. After the shopper specifies options, the agent calls `resolveProductVariant` to obtain the exact variant ID and owning product handle before adding it to cart. Customized bundle parents that require shopper-selected components are not added by the generic agent flow.
 
 These components are registered in a json-render registry and rendered client-side from specs embedded in the assistant's streamed messages.
 

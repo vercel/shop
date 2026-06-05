@@ -14,8 +14,8 @@ export const IMAGE_FRAGMENT = `
   }
 `;
 
-// Note: Does not include IMAGE_FRAGMENT - expects parent to include it
 export const PRODUCT_VARIANT_FRAGMENT = `
+  ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   fragment ProductVariantFields on ProductVariant {
     id
@@ -33,6 +33,95 @@ export const PRODUCT_VARIANT_FRAGMENT = `
     }
     image {
       ...ImageFields
+    }
+    product {
+      handle
+    }
+  }
+`;
+
+export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `
+  fragment BundleComponentVariantFields on ProductVariant {
+    id
+    title
+    availableForSale
+    price {
+      ...MoneyFields
+    }
+    selectedOptions {
+      name
+      value
+    }
+    image {
+      ...ImageFields
+    }
+    product {
+      id
+      title
+      handle
+      featuredImage {
+        ...ImageFields
+      }
+    }
+  }
+`;
+
+export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `
+  ${PRODUCT_VARIANT_FRAGMENT}
+  ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
+  fragment PurchasableProductVariantFields on ProductVariant {
+    ...ProductVariantFields
+    requiresComponents
+    groupedBy(first: 10) {
+      nodes {
+        ...BundleComponentVariantFields
+      }
+    }
+    components(first: 30) {
+      nodes {
+        quantity
+        productVariant {
+          ...BundleComponentVariantFields
+        }
+      }
+    }
+  }
+`;
+
+export const PRODUCT_SELECTION_FRAGMENT = `
+  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+  fragment ProductSelectionFields on Product {
+    handle
+    encodedVariantExistence
+    encodedVariantAvailability
+    options {
+      id
+      name
+      optionValues {
+        id
+        name
+        firstSelectableVariant {
+          ...ProductVariantFields
+        }
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+      }
+    }
+    selectedOrFirstAvailableVariant(
+      selectedOptions: $selectedOptions
+      ignoreUnknownOptions: true
+      caseInsensitiveMatch: true
+    ) {
+      ...PurchasableProductVariantFields
+    }
+    adjacentVariants(selectedOptions: $selectedOptions) {
+      ...ProductVariantFields
     }
   }
 `;
@@ -60,61 +149,118 @@ export const METAFIELD_FRAGMENT = `
 export const CART_FRAGMENT = `
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
+  fragment CartLineFields on CartLine {
+    id
+    quantity
+    instructions {
+      canRemove
+      canUpdateQuantity
+    }
+    cost {
+      totalAmount {
+        ...MoneyFields
+      }
+    }
+    discountAllocations {
+      __typename
+      discountedAmount {
+        ...MoneyFields
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCustomDiscountAllocation {
+        title
+      }
+    }
+    merchandise {
+      ... on ProductVariant {
+        id
+        title
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          ...ImageFields
+        }
+        price {
+          ...MoneyFields
+        }
+        product {
+          id
+          title
+          handle
+          featuredImage {
+            ...ImageFields
+          }
+        }
+      }
+    }
+  }
+  fragment ComponentizableCartLineFields on ComponentizableCartLine {
+    id
+    quantity
+    cost {
+      totalAmount {
+        ...MoneyFields
+      }
+    }
+    discountAllocations {
+      __typename
+      discountedAmount {
+        ...MoneyFields
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCustomDiscountAllocation {
+        title
+      }
+    }
+    merchandise {
+      ... on ProductVariant {
+        id
+        title
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          ...ImageFields
+        }
+        price {
+          ...MoneyFields
+        }
+        product {
+          id
+          title
+          handle
+          featuredImage {
+            ...ImageFields
+          }
+        }
+      }
+    }
+    lineComponents {
+      ...CartLineFields
+    }
+  }
   fragment CartFields on Cart {
     id
     checkoutUrl
     totalQuantity
     note
     lines(first: 50) {
-      edges {
-        node {
-          id
-          quantity
-          cost {
-            totalAmount {
-              ...MoneyFields
-            }
-          }
-          discountAllocations {
-            __typename
-            discountedAmount {
-              ...MoneyFields
-            }
-            ... on CartCodeDiscountAllocation {
-              code
-            }
-            ... on CartAutomaticDiscountAllocation {
-              title
-            }
-            ... on CartCustomDiscountAllocation {
-              title
-            }
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              title
-              selectedOptions {
-                name
-                value
-              }
-              image {
-                ...ImageFields
-              }
-              price {
-                ...MoneyFields
-              }
-              product {
-                id
-                title
-                handle
-                featuredImage {
-                  ...ImageFields
-                }
-              }
-            }
-          }
-        }
+      nodes {
+        ...CartLineFields
+        ...ComponentizableCartLineFields
       }
     }
     cost {
@@ -122,9 +268,6 @@ export const CART_FRAGMENT = `
         ...MoneyFields
       }
       subtotalAmount {
-        ...MoneyFields
-      }
-      totalTaxAmount {
         ...MoneyFields
       }
     }
@@ -188,8 +331,7 @@ export const COLLECTION_FIELDS_FRAGMENT = `
 `;
 
 export const PRODUCT_FRAGMENT = `
-  ${IMAGE_FRAGMENT}
-  ${PRODUCT_VARIANT_FRAGMENT}
+  ${PRODUCT_SELECTION_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
   fragment ProductFields on Product {
     id
@@ -243,30 +385,10 @@ export const PRODUCT_FRAGMENT = `
         ...MoneyFields
       }
     }
-    variants(first: 250) {
-      edges {
-        node {
-          ...ProductVariantFields
-        }
-      }
+    variantsCount {
+      count
     }
-    options {
-      id
-      name
-      values
-      optionValues {
-        id
-        name
-        swatch {
-          color
-          image {
-            previewImage {
-              url
-            }
-          }
-        }
-      }
-    }
+    ...ProductSelectionFields
     seo {
       title
       description

@@ -7,6 +7,15 @@ import { shopifyFetch } from "../fetch";
 import { CART_FRAGMENT } from "../fragments";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
+export interface CartLineInput {
+  merchandiseId: string;
+  quantity: number;
+  parent?: {
+    lineId?: string;
+    merchandiseId?: string;
+  };
+}
+
 const WARNINGS_QUERY_FRAGMENT = `
   warnings {
     code
@@ -264,7 +273,7 @@ export async function createCart(locale: string = defaultLocale): Promise<CartMu
 }
 
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[],
+  lines: CartLineInput[],
   cartId?: string,
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {

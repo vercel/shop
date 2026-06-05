@@ -1,6 +1,5 @@
 import type * as React from "react";
 
-import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -39,24 +38,11 @@ function ProductInfoHeader({
 }
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
-  variants: ProductVariant[];
   options: ProductOption[];
-  selectedOptions: SelectedOptions;
-  handle: string;
-  t: ProductTranslator;
   hideImages?: boolean;
 }
 
-function ProductInfoOptions({
-  variants,
-  options,
-  selectedOptions,
-  handle,
-  t,
-  hideImages,
-  className,
-  ...props
-}: ProductInfoOptionsProps) {
+function ProductInfoOptions({ options, hideImages, className, ...props }: ProductInfoOptionsProps) {
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
@@ -83,27 +69,11 @@ function ProductInfoOptions({
         ))}
 
         {colorOptions.map((colorOption) => (
-          <ColorPicker
-            key={colorOption.id}
-            option={colorOption}
-            selectedValue={selectedOptions[colorOption.name] ?? ""}
-            variants={variants}
-            handle={handle}
-            selectedOptions={selectedOptions}
-            t={t}
-            hideImages={hideImages}
-          />
+          <ColorPicker key={colorOption.id} option={colorOption} hideImages={hideImages} />
         ))}
 
         {otherOptions.map((option) => (
-          <OptionPicker
-            key={option.id}
-            option={option}
-            selectedValue={selectedOptions[option.name] ?? ""}
-            variants={variants}
-            handle={handle}
-            selectedOptions={selectedOptions}
-          />
+          <OptionPicker key={option.id} option={option} />
         ))}
       </div>
     </div>

@@ -7,9 +7,14 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { getLocale } from "@/lib/params";
-import { computeSelection } from "@/lib/product";
+import { computeSelection, getSelectedOptionsFromSearchParams } from "@/lib/product";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCatalogProducts, getProduct } from "@/lib/shopify/operations/products";
+import {
+  getCatalogProducts,
+  getProduct,
+  getProductSelection,
+  getProductVariantSelectedOptions,
+} from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -85,8 +90,23 @@ export default async function ProductPage({
 
   // Keep searchParams unawaited so only the variant-dependent UI streams; the
   // product body resolves here and renders into the static shell.
-  const selectionPromise = searchParams.then((sp) =>
-    computeSelection(product, sp?.variant as string | undefined),
+  const selectedOptionsPromise = searchParams.then(async (sp) => {
+    const selectedOptions = getSelectedOptionsFromSearchParams(product.options, sp);
+    if (selectedOptions.length > 0) return selectedOptions;
+
+    const rawVariantId = sp.variant;
+    const variantId = Array.isArray(rawVariantId) ? rawVariantId[0] : rawVariantId;
+    return variantId ? getProductVariantSelectedOptions({ variantId, locale }) : [];
+  });
+
+  const selectionDataPromise = selectedOptionsPromise.then((selectedOptions) =>
+    selectedOptions.length > 0
+      ? getProductSelection({ handle, selectedOptions, locale })
+      : undefined,
+  );
+
+  const selectionPromise = selectionDataPromise.then((selectionData) =>
+    computeSelection(product, selectionData),
   );
 
   return (

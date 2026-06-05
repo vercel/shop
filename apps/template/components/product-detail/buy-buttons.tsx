@@ -77,11 +77,14 @@ export function BuyButtons({
     return null;
   }
 
+  const requiresBundleConfiguration =
+    selectedVariant.requiresComponents && selectedVariant.components.length === 0;
   const isOutOfStock = !selectedVariant.availableForSale;
 
   const getButtonText = () => {
     if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
     if (isAddingToCart) return t("addingToCart");
+    if (requiresBundleConfiguration) return t("bundleConfigurationRequired");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");
   };
@@ -94,7 +97,7 @@ export function BuyButtons({
           "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
           !availableForSale && "invisible",
         )}
-        disabled={isOutOfStock || isBuyingNow}
+        disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
         onClick={handleBuyNow}
       >
         {isBuyingNow ? (
@@ -108,7 +111,7 @@ export function BuyButtons({
       </button>
       <Button
         type="button"
-        disabled={isOutOfStock}
+        disabled={isOutOfStock || requiresBundleConfiguration}
         onClick={handleAddToCart}
         className="flex-1 justify-center h-12"
       >

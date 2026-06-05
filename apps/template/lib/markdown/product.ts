@@ -23,6 +23,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push(`- **Category**: ${escapeMarkdown(categoryPath)}`);
   }
   sections.push(`- **Available**: ${product.availableForSale ? "Yes" : "No"}`);
+  sections.push(`- **Variant count**: ${product.variantsCount}`);
   sections.push("");
 
   sections.push("## Pricing");
@@ -66,11 +67,21 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   }
 
   if (product.variants.length > 0) {
-    sections.push("## Variants");
+    sections.push("## Selectable Variants");
+    sections.push("");
+    sections.push(
+      "This is the current selectable variant set used by the storefront, not an exhaustive variant export.",
+    );
     sections.push("");
 
     const optionNames = product.options.map((o) => o.name);
-    const headers = ["Variant", ...optionNames.map(escapeMarkdown), "Price", "Available"];
+    const headers = [
+      "Product handle",
+      "Variant",
+      ...optionNames.map(escapeMarkdown),
+      "Price",
+      "Available",
+    ];
 
     const rows = product.variants.map((variant) => {
       const optionValues = optionNames.map((name) => {
@@ -78,6 +89,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
         return escapeMarkdown(option?.value || "-");
       });
       return [
+        escapeMarkdown(variant.productHandle),
         escapeMarkdown(variant.title),
         ...optionValues,
         formatPrice(variant.price, locale),

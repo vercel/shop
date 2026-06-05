@@ -13,6 +13,7 @@ import { getRecommendationsTool } from "./tools/get-recommendations";
 import { listCollectionsTool } from "./tools/list-collections";
 import { navigateTool } from "./tools/navigate";
 import { removeFromCartTool } from "./tools/remove-from-cart";
+import { resolveProductVariantTool } from "./tools/resolve-product-variant";
 import { searchProductsTool } from "./tools/search-products";
 import { updateCartItemTool } from "./tools/update-cart-item";
 
@@ -112,6 +113,9 @@ function createSystemPrompt(ctx: AgentContext) {
         return `  - "${v.title}" (${options}) - ${v.price.amount} ${v.price.currencyCode} [${stock}]\n    variant_id: ${v.id}`;
       })
       .join("\n");
+    const optionInfo = product.options
+      .map((option) => `  - ${option.name}: ${option.values.map((value) => value.name).join(", ")}`)
+      .join("\n");
 
     prompt += dedent`\n
       ## Current Page Context
@@ -122,19 +126,24 @@ function createSystemPrompt(ctx: AgentContext) {
       - Handle: ${product.handle}
       - Price: ${product.price.amount} ${product.price.currencyCode}${product.compareAtPrice ? ` (was ${product.compareAtPrice.amount} ${product.compareAtPrice.currencyCode})` : ""}
       - Available: ${product.availableForSale ? "Yes" : "No"}
+      - Variant count: ${product.variantsCount}
       - Image: ${product.featuredImage?.url || "none"}
 
       Description: ${product.description}
 
-      ### Available Variants
+      ### Options
+      ${optionInfo}
+
+      ### Current Selectable Variants
       ${variantInfo}
 
       When the user asks about "this product", "this item", or the current product, render an AgentProductCard for it using the data above (price as "${product.price.amount} ${product.price.currencyCode}"${product.compareAtPrice ? `, compareAtPrice as "${product.compareAtPrice.amount} ${product.compareAtPrice.currencyCode}"` : ""}).
 
       When the user says "add this to cart", "add to cart", or similar:
-      1. If there's only one variant, use that variant_id directly
+      1. If the variant count is one, use that variant_id directly
       2. If there are multiple variants, ask which one they want (size, color, etc.)
-      3. Use the exact variant_id from the list above when calling addToCart
+      3. Resolve the user's option choices with resolveProductVariant. The list above is representative for complex products and is not necessarily exhaustive.
+      4. Use the exact resolved variant_id when calling addToCart. Do not add a customized bundle that requires components but has no fixed components.
     `;
   } else if (page?.type === "collection") {
     prompt += dedent`\n
@@ -168,9 +177,9 @@ function createSystemPrompt(ctx: AgentContext) {
         "For a single product detail result, use one AgentProductCard without an AgentProductGrid wrapper.",
         "Pass price and compareAtPrice strings directly from tool results as props.",
         "Include conversational text before or after the product cards to provide context.",
-        "When getCart returns a non-empty cart (empty: false), ALWAYS render an AgentCartSummary with the cart data. Pass items (including image), subtotal, total, tax, totalQuantity, and checkoutUrl directly from the tool result.",
+        "When getCart returns a non-empty cart (empty: false), ALWAYS render an AgentCartSummary with the cart data. Pass items (including image and bundle components), subtotal, total, totalQuantity, and checkoutUrl directly from the tool result.",
         "After a successful addToCart call, ALWAYS render an AgentCartConfirmation. Use product data from your context (prior search results, product details, or page context) to populate image, title, variant, and price props.",
-        "When a user wants to add a product to cart but hasn't specified a variant, and the product has multiple variants, render an AgentVariantPicker with the product's variants from getProductDetails. Then ask the user which variant they'd like. Do NOT use AgentVariantPicker for single-variant products.",
+        "When a user wants to add a product to cart but hasn't specified a variant, and getProductDetails reports variantCount greater than one, render an AgentVariantPicker with its representative variants and options. Then ask which options they want and call resolveProductVariant before addToCart. Do NOT use AgentVariantPicker when variantCount is one.",
       ],
     });
 
@@ -189,6 +198,7 @@ const defaults: ToolLoopAgentSettings = {
 const tools = {
   searchProducts: searchProductsTool(),
   getProductDetails: getProductDetailsTool(),
+  resolveProductVariant: resolveProductVariantTool(),
   getProductRecommendations: getRecommendationsTool(),
   listCollections: listCollectionsTool(),
   browseCollection: browseCollectionTool(),

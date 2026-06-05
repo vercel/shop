@@ -40,7 +40,6 @@ Use this when the user asks "what's in my cart?", "how much is my order?", or wh
           totalQuantity: cart.totalQuantity,
           subtotal: `${cart.cost.subtotalAmount.amount} ${cart.cost.subtotalAmount.currencyCode}`,
           total: `${cart.cost.totalAmount.amount} ${cart.cost.totalAmount.currencyCode}`,
-          tax: `${cart.cost.totalTaxAmount.amount} ${cart.cost.totalTaxAmount.currencyCode}`,
           note: cart.note,
           checkoutUrl: cart.checkoutUrl,
           items: cart.lines.map((line) => ({
@@ -55,6 +54,11 @@ Use this when the user asks "what's in my cart?", "how much is my order?", or wh
             totalPrice: `${line.cost.totalAmount.amount} ${line.cost.totalAmount.currencyCode}`,
             handle: line.merchandise.product.handle,
             merchandiseId: line.merchandise.id,
+            components: line.components.map((component) => ({
+              productTitle: component.merchandise.product.title,
+              variantTitle: component.merchandise.title,
+              quantity: component.quantity,
+            })),
           })),
           cart,
         };

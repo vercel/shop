@@ -100,7 +100,6 @@ function computeCartWithPending(
       cost: {
         subtotalAmount: { amount: "0", currencyCode: "USD" },
         totalAmount: { amount: "0", currencyCode: "USD" },
-        totalTaxAmount: { amount: "0", currencyCode: "USD" },
       },
       lines: pendingLines,
       shippingCost: null,
@@ -255,12 +254,15 @@ export function CartProvider({
   ): CartLine => ({
     id: `optimistic-${variantId}`,
     quantity: qty,
+    canRemove: true,
+    canUpdateQuantity: true,
     cost: {
       totalAmount: {
         amount: (parseFloat(info.price.amount) * qty).toString(),
         currencyCode: info.price.currencyCode,
       },
     },
+    components: [],
     merchandise: {
       id: variantId,
       title: info.variantTitle,
