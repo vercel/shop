@@ -174,7 +174,7 @@ The cart fragment omits deprecated tax and duty amount fields. Shopify finalizes
 
 ## Product selection
 
-The template does not query an exhaustive variants connection. `getProductSelection()` sends selected option values to Shopify and combines:
+The template does not query an exhaustive variants connection. The PDP starts a low-cardinality cached `getProduct()` read and an uncached `getProductSelection()` request in parallel. The selection operation uses:
 
 - `selectedOrFirstAvailableVariant(selectedOptions:)`
 - `adjacentVariants(selectedOptions:)`
@@ -183,7 +183,9 @@ The template does not query an exhaustive variants connection. `getProductSelect
 
 This avoids a historical `first: 50` cap, scales to Shopify's 2,048-variant product limit, and lets option values navigate across Combined Listing child product handles. `variantsCount.count` is used whenever the exact count is needed.
 
-Legacy `?variant=` URLs are resolved through a small `node(id:)` query that returns the variant's selected options, then feed the same selection operation.
+`getProductSelection()` uses `cache: "no-store"` because selected option combinations have high cardinality. It is also used by tools that need to resolve an exact option combination, such as the shopping agent. Product cards and PDP option links use option-name query parameters rather than numeric variant IDs.
+
+Inbound Shopify Liquid links using `?variant=:variantId` are resolved by a separate uncached `node(id:)` query. The route permanently redirects to the equivalent option-name URL while preserving attribution parameters. Product metadata continues to canonicalize variants to the base product path, preserving migration SEO without storing variant-ID entries in Runtime Cache.
 
 ## Error handling
 

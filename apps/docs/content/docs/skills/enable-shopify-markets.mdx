@@ -358,7 +358,7 @@ export function proxy(request: NextRequest) {
 }
 ```
 
-> **Note:** Product selection stays in query parameters: option-name params are canonical and legacy `?variant=` links remain supported. The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
+> **Note:** Normalized product selection stays in option-name query parameters. Shopify-standard `?variant=` migration links permanently redirect to that format. The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
 
 ---
 
@@ -577,7 +577,7 @@ After completing all steps, verify the implementation:
    - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
    - Product prices render in the correct currency for each locale
 3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Variants**: Confirm option-name query params and legacy `?variant=` links survive locale-prefixed navigation
+4. **Variants**: Confirm option-name query params survive locale-prefixed navigation and Liquid `?variant=` links redirect within the active locale
 5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
 6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries
 

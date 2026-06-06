@@ -48,18 +48,29 @@ function selectedOptionsToRecord(options: SelectedOption[]): SelectedOptions {
 }
 
 export function getSelectedOptionsFromSearchParams(
-  options: ProductOption[],
   searchParams: Record<string, string | string[] | undefined>,
 ): SelectedOption[] {
-  const selectedOptions: SelectedOption[] = [];
-  for (const option of options) {
-    const rawValue = searchParams[option.name];
-    const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
-    if (value && option.values.some((optionValue) => optionValue.name === value)) {
-      selectedOptions.push({ name: option.name, value });
-    }
-  }
-  return selectedOptions;
+  return Object.entries(searchParams)
+    .filter(([name]) => !isIgnoredProductSearchParam(name))
+    .map(([name, rawValue]) => {
+      const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+      return value ? { name, value } : null;
+    })
+    .filter((option): option is SelectedOption => option !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function isIgnoredProductSearchParam(name: string): boolean {
+  const normalizedName = name.toLowerCase();
+  return (
+    normalizedName === "_gl" ||
+    normalizedName === "dclid" ||
+    normalizedName === "fbclid" ||
+    normalizedName === "gclid" ||
+    normalizedName === "msclkid" ||
+    normalizedName === "variant" ||
+    normalizedName.startsWith("utm_")
+  );
 }
 
 function findSelectedVariant(variants: ProductVariant[], selectedOptions: SelectedOptions) {

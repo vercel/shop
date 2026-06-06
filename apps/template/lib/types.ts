@@ -45,7 +45,6 @@ export interface ProductCard {
   availableForSale: boolean;
   compareAtPrice?: Money;
   defaultVariantId?: string;
-  defaultVariantNumericId?: string;
   defaultVariantSelectedOptions?: SelectedOption[];
   featuredImage: Image | null;
   handle: string;
@@ -103,17 +102,14 @@ export interface ProductVariant {
 }
 
 export interface ProductVariantReference {
-  availableForSale: boolean;
   id: string;
   image: Image | null;
-  price: Money;
   product: {
     id: string;
     handle: string;
     title: string;
     featuredImage: Image | null;
   };
-  selectedOptions: SelectedOption[];
   title: string;
 }
 

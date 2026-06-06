@@ -44,14 +44,6 @@ export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `
   fragment BundleComponentVariantFields on ProductVariant {
     id
     title
-    availableForSale
-    price {
-      ...MoneyFields
-    }
-    selectedOptions {
-      name
-      value
-    }
     image {
       ...ImageFields
     }

@@ -34,7 +34,7 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 - `encodedVariantExistence` and `encodedVariantAvailability`
 - `variantsCount`
 
-PDP option links now use option-name query parameters and can navigate across Combined Listing child product handles. Legacy `?variant=` links remain supported by resolving the variant ID to selected options.
+PDP and product-card links use option-name query parameters and can navigate across Combined Listing child product handles. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
 
 The same change adds Shopify bundle awareness:
 
@@ -73,7 +73,11 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 - `ProductVariant` gains `productHandle`, `requiresComponents`, `components`, and `bundleParents`.
 - `CartLine` gains nested `components`, `canRemove`, and `canUpdateQuantity`.
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
-- Canonical PDP option links use option names and values. Preserve legacy `?variant=` support for product-card links, bookmarks, and Shopify-compatible inbound URLs.
+- PDP and product-card links use option names and values. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
+- Keep `getProduct()` keyed only by handle and locale. Selected option combinations belong in the uncached `getProductSelection()` path.
+- Start base product and selection requests in parallel; do not await the product before resolving selected options.
+- Keep the variant-ID compatibility lookup uncached; it must not add variant IDs to Runtime Cache.
+- Pass only the selected variant fields required by client buy controls; keep bundle relationship arrays on the server.
 - Customized bundle selection remains app-specific. Add its picker and component inputs before enabling direct purchase for a `requiresComponents` variant with no fixed components.
 
 ## Validation
@@ -81,10 +85,11 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 1. Validate the final product and cart GraphQL operations against Storefront API 2026-04.
 2. Open a product with more than 50 variants and confirm all option values render with correct existence and availability state.
 3. Change a Combined Listing option and confirm the URL can move to the selected child product handle.
-4. Open a legacy `/products/:handle?variant=:id` URL and confirm it resolves to the same selected options.
-5. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
-6. Open a component product and confirm bundles returned by `groupedBy` render.
-7. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
-8. Confirm a customized bundle parent without selected components cannot be added directly.
-9. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
-10. Run `pnpm --filter template lint`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.
+4. Open a Liquid `/products/:handle?variant=:id` link and confirm it permanently redirects to the matching option-name URL.
+5. Confirm a selected-option PDP starts the base-product and selection operations in parallel and that only the base product uses persistent caching.
+6. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
+7. Open a component product and confirm bundles returned by `groupedBy` render.
+8. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
+9. Confirm a customized bundle parent without selected components cannot be added directly.
+10. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
+11. Run `pnpm --filter template lint`, `pnpm --filter template test`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.
