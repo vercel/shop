@@ -6,10 +6,12 @@ const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 const baseEndpoint = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
 export async function shopifyFetch<T>({
+  cache,
   operation,
   query,
   variables,
 }: {
+  cache?: RequestCache;
   operation: string;
   query: string;
   variables?: Record<string, unknown>;
@@ -18,6 +20,7 @@ export async function shopifyFetch<T>({
   const start = DEBUG ? performance.now() : 0;
 
   const response = await fetch(endpoint, {
+    cache,
     method: "POST",
     headers: {
       "Content-Type": "application/json",

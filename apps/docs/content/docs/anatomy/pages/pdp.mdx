@@ -14,7 +14,7 @@ The PDP runs under Next.js 16 Cache Components, with a deliberate split between 
 
 Two structural choices keep that copy coherent, and both are load-bearing. The product promise is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the body at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — the symptom is a React hydration mismatch and product copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag` — that governs freshness (how quickly edits surface), not coherence.
 
-The dynamic input is the selected option values in `searchParams`. Rather than block the whole page on that lookup, the route leaves `searchParams` unawaited and passes the resulting selection promise into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, description, related products) renders from the product resolved at the top of the page, baked into the static shell. Anything that does (the color-specific gallery slot, variant-specific price, option state, bundle relationships, buy buttons) sits inside its own Suspense boundary so an option change streams the affected slot without skeletonizing the rest of the page.
+The dynamic input is the selected option values in `searchParams`. The compact `getProductSelection()` response uses `cache: "no-store"`, and `ProductDetailSection` keeps every selection-dependent region in its own Suspense boundary so option changes do not skeletonize the product body.
 
 ## Variant selection
 
@@ -24,7 +24,7 @@ Variants are selected via option-name query parameters:
 /products/classic-tee?Color=Black&Size=Medium
 ```
 
-The route passes those values to `getProductSelection()`, which resolves the current variant and option state with Shopify's `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` then combines that response with the cached product and returns the selected variant, mapped options, representative variants, and color images.
+The route passes those values to `getProductSelection()`, whose compact fragment resolves the current variant and option state with Shopify's `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` combines that response with the cached base product and derives the selected option record and color images.
 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
@@ -33,7 +33,11 @@ The route passes those values to `getProductSelection()`, which resolves the cur
 - Combined Listing option links can navigate to the owning child product handle
 - Existing but out-of-stock combinations remain navigable; combinations that do not exist render as inert elements
 
-Legacy `/products/:handle?variant=:variantId` links remain supported. The route resolves the variant ID to selected options, then uses the same modern selection query.
+### Liquid storefront migration
+
+Shopify Liquid themes use `/products/:handle?variant=:variantId` for variant deep links. The headless PDP accepts those URLs as migration inputs, resolves the variant through a small `cache: "no-store"` query, and issues a permanent redirect to the normalized option-name URL. This preserves indexed links, backlinks, ads, emails, and bookmarks while moving shoppers onto the headless URL format. Campaign and ad-click query parameters are preserved through the redirect.
+
+The compatibility lookup is never stored in Runtime Cache, so imported Liquid links do not create high-cardinality variant entries. Product metadata keeps the base product path as the canonical URL, consolidating variant combinations as one product for search engines.
 
 ### High-variant products
 
@@ -70,7 +74,7 @@ The buy section includes stock status and two action buttons:
 - **Buy with Shop** - creates a Shopify checkout and redirects to it, styled per [Shopify's brand guidelines](https://help.shopify.com/en/manual/payments/shop-pay/assets)
 - **Add to Cart** - adds the item optimistically to the cart drawer
 
-A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity.
+A single `BuyButtons` component renders identically on both mobile and desktop. It receives only the selected variant fields needed for cart interactivity; bundle relationship arrays stay in server components instead of being serialized to the client.
 
 Fixed bundle variants render their component products above the buy buttons. Component products also show the bundles returned by Shopify's `groupedBy` relationship. Customized bundle parents with `requiresComponents: true` and no fixed components show a disabled "Choose bundle items" action because their picker and component-line inputs are app-specific.
 

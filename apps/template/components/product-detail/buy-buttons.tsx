@@ -8,10 +8,20 @@ import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { buyNowAction } from "@/lib/cart/action";
 import { variantToOptimisticInfo } from "@/lib/product";
-import type { Image, ProductVariant } from "@/lib/types";
+import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { ShopLogo } from "./shop-logo";
+
+export interface BuyButtonVariant {
+  id: string;
+  title: string;
+  availableForSale: boolean;
+  image: Image | null;
+  price: Money;
+  requiresBundleConfiguration: boolean;
+  selectedOptions: SelectedOption[];
+}
 
 export function BuyButtons({
   selectedVariant,
@@ -20,7 +30,7 @@ export function BuyButtons({
   featuredImage,
   availableForSale = true,
 }: {
-  selectedVariant: ProductVariant | undefined;
+  selectedVariant: BuyButtonVariant | undefined;
   title: string;
   handle: string;
   featuredImage: Image | null;
@@ -77,8 +87,7 @@ export function BuyButtons({
     return null;
   }
 
-  const requiresBundleConfiguration =
-    selectedVariant.requiresComponents && selectedVariant.components.length === 0;
+  const requiresBundleConfiguration = selectedVariant.requiresBundleConfiguration;
   const isOutOfStock = !selectedVariant.availableForSale;
 
   const getButtonText = () => {

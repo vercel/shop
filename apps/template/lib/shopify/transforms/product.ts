@@ -1,4 +1,3 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -15,6 +14,8 @@ import type {
   SelectedOption,
   Video,
 } from "@/lib/types";
+
+import { encodedVariantSet } from "../variant-encoding";
 
 interface ShopifyImage {
   url: string;
@@ -42,9 +43,6 @@ interface ShopifyBundleComponentProduct {
 interface ShopifyBundleComponentVariant {
   id: string;
   title: string;
-  availableForSale: boolean;
-  price: ShopifyMoney;
-  selectedOptions: SelectedOption[];
   image: ShopifyImage | null;
   product: ShopifyBundleComponentProduct;
 }
@@ -263,9 +261,6 @@ function transformVariantReference(
   return {
     id: variant.id,
     title: variant.title,
-    availableForSale: variant.availableForSale,
-    price: variant.price,
-    selectedOptions: variant.selectedOptions,
     image: transformImage(variant.image),
     product: {
       id: variant.product.id,
@@ -336,80 +331,6 @@ function buildEncodingKey(
   return Object.keys(selectedOptions)
     .map((name) => mappings[name]?.[selectedOptions[name]])
     .filter((index): index is number => index !== undefined);
-}
-
-function decodeEncodedVariant(encodedVariantField: string): number[][] {
-  if (!encodedVariantField) return [];
-  if (!encodedVariantField.startsWith("v1_")) {
-    throw new Error("Unsupported option value encoding");
-  }
-
-  const encoded = encodedVariantField.replace(/^v1_/, "");
-  const tokenizer = /[ :,-]/g;
-  const combinations: number[][] = [];
-  const current: number[] = [];
-  let depth = 0;
-  let index = 0;
-  let rangeStart: number | null = null;
-  let token: RegExpExecArray | null;
-
-  while ((token = tokenizer.exec(encoded))) {
-    const operation = token[0];
-    const valueIndex = Number.parseInt(encoded.slice(index, token.index)) || 0;
-
-    if (rangeStart !== null) {
-      for (; rangeStart < valueIndex; rangeStart++) {
-        current[depth] = rangeStart;
-        combinations.push([...current]);
-      }
-      rangeStart = null;
-    }
-
-    current[depth] = valueIndex;
-
-    if (operation === "-") {
-      rangeStart = valueIndex;
-    } else if (operation === ":") {
-      depth++;
-    } else {
-      if (operation === " " || (operation === "," && encoded[token.index - 1] !== ",")) {
-        combinations.push([...current]);
-      }
-      if (operation === ",") {
-        current.pop();
-        depth--;
-      }
-    }
-
-    index = tokenizer.lastIndex;
-  }
-
-  const finalIndex = encoded.match(/\d+$/)?.[0];
-  if (finalIndex) {
-    const valueIndex = Number.parseInt(finalIndex);
-    if (rangeStart !== null) {
-      for (; rangeStart <= valueIndex; rangeStart++) {
-        current[depth] = rangeStart;
-        combinations.push([...current]);
-      }
-    } else {
-      combinations.push([valueIndex]);
-    }
-  }
-
-  return combinations;
-}
-
-function encodedVariantSet(encodedVariantField: string): Set<string> {
-  const combinations = new Set<string>();
-
-  for (const combination of decodeEncodedVariant(encodedVariantField)) {
-    for (let length = 1; length <= combination.length; length++) {
-      combinations.add(combination.slice(0, length).join(","));
-    }
-  }
-
-  return combinations;
 }
 
 function getSelectionVariants(product: ShopifyProductSelection): ShopifyVariant[] {
@@ -576,9 +497,6 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }
@@ -596,9 +514,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,

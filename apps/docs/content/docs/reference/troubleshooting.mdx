@@ -19,9 +19,11 @@ The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry
 
 ## Variant selection not working
 
-PDP option links use option-name query parameters such as `?Color=Black&Size=Medium`. If option links change the URL but the page does not update, check that `app/products/[handle]/page.tsx` passes those values to `getProductSelection()` and that the query includes `selectedOrFirstAvailableVariant`, `adjacentVariants`, and the encoded variant fields.
+PDP option links use option-name query parameters such as `?Color=Black&Size=Medium`. If option links change the URL but the page does not update, check that `app/products/[handle]/page.tsx` passes those values to the uncached `getProductSelection()` operation and that the query includes `selectedOrFirstAvailableVariant`, `adjacentVariants`, and the encoded variant fields.
 
-Legacy `?variant=123` links should still work through `getProductVariantSelectedOptions()`. For Combined Listings, confirm the generated option link can change the product handle to the selected variant's owning product.
+For Combined Listings, confirm the generated option link can change the product handle to the selected variant's owning product.
+
+Existing Liquid links such as `?variant=123` should permanently redirect to an option-name URL. If they do not, verify `getProductVariantRouteSelection()` can resolve the numeric ID and that the Storefront token can access the variant.
 
 If every option appears unavailable, verify the local encoded-variant decoder still matches Shopify's current `v1_` encoding and that `options.optionValues` are queried in Shopify's option order.
 

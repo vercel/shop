@@ -12,6 +12,7 @@ import {
   ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
+import { getProductUrl } from "@/lib/product-url";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
 interface InfiniteProductGridProps<TParams> {
@@ -114,9 +115,7 @@ function ClientProductCard({
   locale: string;
   outOfStockText: string;
 }) {
-  const href = product.defaultVariantNumericId
-    ? `/products/${product.handle}?variant=${product.defaultVariantNumericId}`
-    : `/products/${product.handle}`;
+  const href = getProductUrl(product.handle, product.defaultVariantSelectedOptions);
 
   return (
     <Link href={href} prefetch={true}>

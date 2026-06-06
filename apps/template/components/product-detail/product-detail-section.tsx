@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
@@ -232,9 +232,22 @@ async function ResolvedBuyButtons({
   selectionPromise: Promise<ProductSelection>;
 }) {
   const { selectedVariant } = await selectionPromise;
+  const buyButtonVariant: BuyButtonVariant | undefined = selectedVariant
+    ? {
+        id: selectedVariant.id,
+        title: selectedVariant.title,
+        availableForSale: selectedVariant.availableForSale,
+        image: selectedVariant.image,
+        price: selectedVariant.price,
+        requiresBundleConfiguration:
+          selectedVariant.requiresComponents && selectedVariant.components.length === 0,
+        selectedOptions: selectedVariant.selectedOptions,
+      }
+    : undefined;
+
   return (
     <BuyButtons
-      selectedVariant={selectedVariant}
+      selectedVariant={buyButtonVariant}
       title={title}
       handle={handle}
       featuredImage={featuredImage}

@@ -8,7 +8,8 @@
     "dev:https": "next dev --experimental-https",
     "format": "oxfmt",
     "lint": "oxlint . && oxfmt --check",
-    "start": "next start"
+    "start": "next start",
+    "test": "tsx --test lib/*.test.ts lib/shopify/*.test.ts"
   },
   "dependencies": {
     "@ai-sdk/react": "3.0.199",
@@ -45,5 +46,8 @@
     "typescript": "6.0.3",
     "use-stick-to-bottom": "1.1.6",
     "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "tsx": "4.22.4"
   }
 }

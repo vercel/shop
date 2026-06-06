@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
@@ -8,12 +8,13 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { getLocale } from "@/lib/params";
 import { computeSelection, getSelectedOptionsFromSearchParams } from "@/lib/product";
+import { getProductUrl } from "@/lib/product-url";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   getCatalogProducts,
   getProduct,
   getProductSelection,
-  getProductVariantSelectedOptions,
+  getProductVariantRouteSelection,
 } from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
@@ -82,29 +83,26 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const [{ handle }, sp, locale] = await Promise.all([params, searchParams, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
+
+  const rawVariantId = sp.variant;
+  const variantId = Array.isArray(rawVariantId) ? rawVariantId[0] : rawVariantId;
+  if (variantId) {
+    const routeSelection = await getProductVariantRouteSelection({ variantId, locale });
+    if (routeSelection) {
+      permanentRedirect(getProductUrl(routeSelection.handle, routeSelection.selectedOptions, sp));
+    }
+  }
 
   const product = await getProduct({ handle, locale });
   if (!product) notFound();
 
-  // Keep searchParams unawaited so only the variant-dependent UI streams; the
-  // product body resolves here and renders into the static shell.
-  const selectedOptionsPromise = searchParams.then(async (sp) => {
-    const selectedOptions = getSelectedOptionsFromSearchParams(product.options, sp);
-    if (selectedOptions.length > 0) return selectedOptions;
-
-    const rawVariantId = sp.variant;
-    const variantId = Array.isArray(rawVariantId) ? rawVariantId[0] : rawVariantId;
-    return variantId ? getProductVariantSelectedOptions({ variantId, locale }) : [];
-  });
-
-  const selectionDataPromise = selectedOptionsPromise.then((selectedOptions) =>
+  const selectedOptions = getSelectedOptionsFromSearchParams(sp);
+  const selectionDataPromise =
     selectedOptions.length > 0
       ? getProductSelection({ handle, selectedOptions, locale })
-      : undefined,
-  );
-
+      : Promise.resolve(undefined);
   const selectionPromise = selectionDataPromise.then((selectionData) =>
     computeSelection(product, selectionData),
   );

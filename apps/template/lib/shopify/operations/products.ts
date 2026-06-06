@@ -98,15 +98,13 @@ export async function getProductSelection({
   selectedOptions: SelectedOption[];
   locale?: string;
 }): Promise<ProductSelectionData | undefined> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
   const data = await shopifyFetch<{
     product: ShopifyProductSelection | null;
   }>({
+    cache: "no-store",
     operation: "getProductSelection",
     query: GET_PRODUCT_SELECTION_QUERY,
     variables: { handle, selectedOptions, country, language },
@@ -117,10 +115,13 @@ export async function getProductSelection({
   return transformShopifyProductSelection(data.product);
 }
 
-const GET_PRODUCT_VARIANT_SELECTED_OPTIONS_QUERY = `
-  query getProductVariantSelectedOptions($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+const GET_PRODUCT_VARIANT_ROUTE_SELECTION_QUERY = `
+  query getProductVariantRouteSelection($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     node(id: $id) {
       ... on ProductVariant {
+        product {
+          handle
+        }
         selectedOptions {
           name
           value
@@ -130,16 +131,13 @@ const GET_PRODUCT_VARIANT_SELECTED_OPTIONS_QUERY = `
   }
 `;
 
-export async function getProductVariantSelectedOptions({
+export async function getProductVariantRouteSelection({
   variantId,
   locale = defaultLocale,
 }: {
   variantId: string;
   locale?: string;
-}): Promise<SelectedOption[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
+}): Promise<{ handle: string; selectedOptions: SelectedOption[] } | undefined> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
   const id = variantId.startsWith("gid://")
@@ -147,14 +145,23 @@ export async function getProductVariantSelectedOptions({
     : `gid://shopify/ProductVariant/${variantId}`;
 
   const data = await shopifyFetch<{
-    node: { selectedOptions: SelectedOption[] } | null;
+    node: {
+      product: { handle: string };
+      selectedOptions: SelectedOption[];
+    } | null;
   }>({
-    operation: "getProductVariantSelectedOptions",
-    query: GET_PRODUCT_VARIANT_SELECTED_OPTIONS_QUERY,
+    cache: "no-store",
+    operation: "getProductVariantRouteSelection",
+    query: GET_PRODUCT_VARIANT_ROUTE_SELECTION_QUERY,
     variables: { id, country, language },
   });
 
-  return data.node?.selectedOptions ?? [];
+  if (!data.node) return undefined;
+
+  return {
+    handle: data.node.product.handle,
+    selectedOptions: data.node.selectedOptions,
+  };
 }
 
 const CATALOG_PRODUCTS_QUERY = `
@@ -801,7 +808,7 @@ const GET_PRODUCTS_BY_HANDLES_QUERY = `
 
 const GET_PRODUCT_BY_ID_QUERY = `
   ${PRODUCT_FRAGMENT}
-  query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+  query getProductById($id: ID!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     node(id: $id) {
       ... on Product {
         ...ProductFields
@@ -846,7 +853,7 @@ export async function getProductById({
   const data = await shopifyFetch<{ node: ShopifyProduct | null }>({
     operation: "getProductById",
     query: GET_PRODUCT_BY_ID_QUERY,
-    variables: { id: gid, country, language },
+    variables: { id: gid, selectedOptions: [], country, language },
   });
 
   const product = data.node;

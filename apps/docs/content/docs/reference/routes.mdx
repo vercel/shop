@@ -27,10 +27,10 @@ type: reference
 
 ## Variant URLs
 
-PDP option links use option-name query parameters so Shopify can resolve high-variant products and Combined Listings without loading every variant. Legacy Shopify `variant` URLs remain accepted:
+PDP option links use option-name query parameters so Shopify can resolve high-variant products and Combined Listings without loading every variant. Shopify-standard Liquid variant URLs remain valid migration inputs and permanently redirect to the equivalent option-name URL:
 
 | URL                                              | Purpose                                                            |
 | ------------------------------------------------ | ------------------------------------------------------------------ |
-| `/products/:handle?Color=Black&Size=Medium`      | Canonical PDP option-selection URL                                 |
-| `/products/:handle?variant=:variantId`           | Legacy-compatible URL; resolves the ID to selected options first   |
+| `/products/:handle?Color=Black&Size=Medium`      | Normalized PDP option-selection URL                                |
+| `/products/:handle?variant=:variantId`           | Liquid migration URL; permanently redirects to the normalized URL  |
 | `/products/:combinedChild?Color=Blue&Size=Large` | Combined Listing selection using the owning child product's handle |
