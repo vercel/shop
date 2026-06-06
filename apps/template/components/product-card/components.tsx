@@ -86,12 +86,12 @@ function ProductCardImage({
     <div
       data-slot="product-card-image"
       data-aspect-ratio={aspectRatio}
-      className={cn("relative overflow-hidden bg-muted", aspectRatioClasses, className)}
+      className={cn("relative overflow-hidden", aspectRatioClasses, className)}
     >
       {src ? (
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-muted-foreground font-medium text-xl p-2 text-center">
+        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground font-medium text-xl p-2 text-center">
           {fallbackTitle}
         </div>
       )}

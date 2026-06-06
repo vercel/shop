@@ -210,7 +210,7 @@ function GridItem({
   eager: boolean;
 }) {
   return (
-    <div className="relative w-full overflow-hidden bg-accent aspect-square">
+    <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
         <MediaVideo
           item={item}
