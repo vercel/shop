@@ -484,11 +484,13 @@ export function CartProvider({
         clearTimeout(debounce.timer);
       }
 
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- clear timers held at unmount, not at effect setup
       for (const [, pending] of lineOpsRef.current) {
         if (pending.timer !== null) {
           clearTimeout(pending.timer);
         }
       }
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- clear the latest request-id map at unmount
       latestLineRequestIdRef.current.clear();
     };
   }, []);

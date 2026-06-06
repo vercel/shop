@@ -231,9 +231,7 @@ export async function applyDiscountCodeAction(code: string): Promise<CartActionR
 
     // Shopify accepts unknown codes and marks them applicable:false. Reject those
     // (undo the apply, surface the warning as a form error — no chip, no banner).
-    const applied = result.cart.discountCodes.find(
-      (d) => d.code.toUpperCase() === normalized,
-    );
+    const applied = result.cart.discountCodes.find((d) => d.code.toUpperCase() === normalized);
     if (applied && !applied.applicable) {
       const reverted = await updateCartDiscountCodes(existing);
       const errorMessage =

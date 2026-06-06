@@ -1,8 +1,4 @@
-import {
-  getCartIdFromCookie,
-  invalidateCartCache,
-  setCartIdCookie,
-} from "@/lib/cart/server";
+import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart, CartWarning } from "@/lib/types";
 
@@ -203,7 +199,10 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
 
 export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
 
-function applyMutation(payload: CartMutationPayload<ShopifyCart>, operation: string): CartMutationResult {
+function applyMutation(
+  payload: CartMutationPayload<ShopifyCart>,
+  operation: string,
+): CartMutationResult {
   const { cart, warnings } = unwrapCartMutation(payload, operation);
   return { cart: transformShopifyCart(cart), warnings };
 }
@@ -229,7 +228,9 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
  * Use in streaming contexts (e.g., the AI agent) where `cookies().set()` won't work.
  * The caller is responsible for setting the cookie via response headers.
  */
-export async function createCartWithoutCookie(locale: string = defaultLocale): Promise<CartMutationResult> {
+export async function createCartWithoutCookie(
+  locale: string = defaultLocale,
+): Promise<CartMutationResult> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 

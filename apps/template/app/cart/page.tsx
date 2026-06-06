@@ -43,10 +43,7 @@ export default async function CartPage() {
 }
 
 async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages] = await Promise.all([
-    withFallback(getCart(), undefined),
-    getMessages(),
-  ]);
+  const [cart, messages] = await Promise.all([withFallback(getCart(), undefined), getMessages()]);
 
   return (
     <NextIntlClientProvider messages={{ cart: messages.cart }}>
