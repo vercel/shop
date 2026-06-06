@@ -72,26 +72,14 @@ export function ColorPicker({
             </div>
           );
 
-          const label = imageUrl ? (
-            <span
-              className={cn(
-                "text-sm font-medium transition-opacity text-center",
-                isSelected ? "text-foreground" : "text-foreground/50",
-              )}
-            >
-              {value.name}
-            </span>
-          ) : null;
-
           if (!isAvailable) {
             return (
               <span
                 key={value.id}
-                className="flex flex-col items-center gap-2 opacity-40 cursor-not-allowed"
+                className="block opacity-40 cursor-not-allowed"
                 aria-label={`${option.name}: ${value.name} (unavailable)`}
               >
                 {swatch}
-                {label}
               </span>
             );
           }
@@ -101,11 +89,10 @@ export function ColorPicker({
               key={value.id}
               href={href}
               scroll={false}
-              className="flex flex-col items-center gap-2"
+              className="block"
               aria-label={`Select ${option.name}: ${value.name}`}
             >
               {swatch}
-              {label}
             </Link>
           );
         })}
