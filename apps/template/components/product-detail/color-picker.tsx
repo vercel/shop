@@ -72,7 +72,7 @@ export function ColorPicker({
             </div>
           );
 
-          const label = (
+          const label = imageUrl ? (
             <span
               className={cn(
                 "text-sm font-medium transition-opacity text-center",
@@ -81,7 +81,7 @@ export function ColorPicker({
             >
               {value.name}
             </span>
-          );
+          ) : null;
 
           if (!isAvailable) {
             return (
