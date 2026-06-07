@@ -24,12 +24,13 @@ Generate the auth secret with `openssl rand -base64 32`. The client ID and secre
 
 ### Shopify Admin setup
 
-1. Go to **Shopify Admin → Settings → Customer accounts**
-2. Enable **Customer Account API**
-3. Create a **Customer Account API client** (under "API clients")
-4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
-5. Copy the client ID and client secret to your environment variables
-6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+1. Enable customer accounts: **Shopify Admin → Settings → Customer accounts → Edit**, choose **Customer accounts**, and Save
+2. Install the **Headless** sales channel from the Shopify App Store — Customer Account API credentials live there, not under Settings
+3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
+4. Set the client type to **Confidential** — the template authenticates with a client secret, so a public (PKCE-only) client will not work. The toggle is at the top of the Customer Account API settings
+5. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/oauth2/callback/shopify`
+6. Copy the client ID and client secret to `SHOPIFY_CUSTOMER_CLIENT_ID` and `SHOPIFY_CUSTOMER_CLIENT_SECRET`
+7. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
 
 See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
@@ -75,7 +76,7 @@ The account pages use a `(authenticated)` route group so the auth-gated layout a
 ### Session flow
 
 1. Customer visits `/account/login` → auto-redirected to Shopify OIDC
-2. After Shopify consent → redirected to `/api/auth/callback/shopify`
+2. After Shopify consent → redirected to `/api/auth/oauth2/callback/shopify`
 3. better-auth exchanges the code for tokens, decodes the ID token, and creates a session
 4. Session stored in an `httpOnly` cookie with PKCE verification
 
