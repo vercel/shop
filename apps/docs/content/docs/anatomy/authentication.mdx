@@ -67,7 +67,7 @@ Authentication uses Shopify-native URL paths:
 | `/account/profile`     | View and edit the customer's name; email shown read-only.                   |
 | `/account/orders`      | Paginated order history (cursor-based, newest first).                       |
 | `/account/orders/[id]` | Order detail: line items, totals, shipping address, and a status-page link. |
-| `/account/addresses`   | Address book with create, edit, delete, and default selection.             |
+| `/account/addresses`   | Address book with create, edit, delete, and default selection.              |
 
 The account pages use a `(authenticated)` route group so the auth-gated layout applies to protected pages without blocking `/account/login`.
 
@@ -124,12 +124,12 @@ function AccountMenu() {
 
 The account pages read and write customer data through the Shopify Customer Account API — a separate GraphQL endpoint and schema from the Storefront API.
 
-| Module                                | Purpose                                                                                                                                          |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lib/shopify/fetch.ts`                | `customerAccountFetch()` — POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` (the `shopId` is derived from the OIDC discovery document's `issuer` and cached) with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). The endpoint is **not** on the storefront domain. |
-| `lib/shopify/operations/customer.ts`  | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`. |
-| `lib/shopify/transforms/customer.ts`  | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                     |
-| `lib/customer/action.ts`              | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.   |
+| Module                               | Purpose                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/shopify/fetch.ts`               | `customerAccountFetch()` — POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` (the `shopId` is derived from the OIDC discovery document's `issuer` and cached) with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). The endpoint is **not** on the storefront domain. |
+| `lib/shopify/operations/customer.ts` | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`.                                                                                                                                                                 |
+| `lib/shopify/transforms/customer.ts` | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                                                                                                                                                                                                          |
+| `lib/customer/action.ts`             | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.                                                                                                                                                                                         |
 
 Order and profile pages are read-only server components wrapped in Suspense. Addresses and profile editing use client forms that call the server actions. Order requests are per-customer `POST`s, so responses are never shared across customers.
 
