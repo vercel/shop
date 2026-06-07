@@ -60,14 +60,14 @@ This means auth infrastructure has zero runtime cost when disabled.
 
 Authentication uses Shopify-native URL paths:
 
-| Route                  | Description                                                           |
-| ---------------------- | --------------------------------------------------------------------- |
-| `/account/login`       | Auto-redirects to Shopify OIDC. Not indexed by search engines.        |
-| `/account`             | Redirects to `/account/profile`.                                      |
-| `/account/profile`     | Displays customer name and email.                                     |
-| `/account/orders`      | Order history (scaffold — wire with Customer Account API operations). |
-| `/account/orders/[id]` | Order detail (scaffold).                                              |
-| `/account/addresses`   | Address book (scaffold).                                              |
+| Route                  | Description                                                                 |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `/account/login`       | Auto-redirects to Shopify OIDC. Not indexed by search engines.              |
+| `/account`             | Redirects to `/account/profile`.                                            |
+| `/account/profile`     | View and edit the customer's name; email shown read-only.                   |
+| `/account/orders`      | Paginated order history (cursor-based, newest first).                       |
+| `/account/orders/[id]` | Order detail: line items, totals, shipping address, and a status-page link. |
+| `/account/addresses`   | Address book with create, edit, delete, and default selection.             |
 
 The account pages use a `(authenticated)` route group so the auth-gated layout applies to protected pages without blocking `/account/login`.
 
@@ -120,6 +120,23 @@ function AccountMenu() {
 }
 ```
 
+### Account data
+
+The account pages read and write customer data through the Shopify Customer Account API — a separate GraphQL endpoint and schema from the Storefront API.
+
+| Module                                | Purpose                                                                                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `lib/shopify/fetch.ts`                | `customerAccountFetch()` — POSTs to `https://{domain}/customer/api/{version}/graphql` with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). |
+| `lib/shopify/operations/customer.ts`  | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`. |
+| `lib/shopify/transforms/customer.ts`  | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                     |
+| `lib/customer/action.ts`              | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.   |
+
+Order and profile pages are read-only server components wrapped in Suspense. Addresses and profile editing use client forms that call the server actions. Order requests are per-customer `POST`s, so responses are never shared across customers.
+
+Status values (`fulfillmentStatus`, `financialStatus`) are raw Shopify enums (e.g. `FULFILLED`, `PAID`); they're humanized at the display layer rather than stored in locale catalogs.
+
+> The address form collects ISO codes for country (`territoryCode`) and region (`zoneCode`) as plain text inputs. Storefronts that want country/region dropdowns can layer a picker on top — the underlying `CustomerAddressInput` is unchanged.
+
 ## Guardrails
 
 - Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
@@ -129,6 +146,6 @@ function AccountMenu() {
 - PKCE is enabled for the OAuth flow — never disable it
 - `isAuthEnabled` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components. Don't replace it with an inline `process.env.BETTER_AUTH_SECRET` check
 
-## Next steps
+## Extending
 
-The account pages are scaffolds. To populate them with real data, create Customer Account API operations in `lib/shopify/operations/customer.ts` for fetching profile, orders, and addresses using the access token from `requireSession()`.
+To add more account data — store credit, subscriptions, draft orders, or richer order fields — add an operation in `lib/shopify/operations/customer.ts`, a transform in `lib/shopify/transforms/customer.ts`, and a matching domain type in `lib/types.ts`. Validate any new fields against the live Customer Account API schema before adding them. Mutations should run through a `"use server"` action in `lib/customer/action.ts` so input validation and `revalidatePath` stay in one place.

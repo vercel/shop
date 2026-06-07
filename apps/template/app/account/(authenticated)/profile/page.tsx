@@ -2,8 +2,9 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { AccountPageHeader } from "@/components/account/page-header";
+import { ProfileForm } from "@/components/account/profile-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomerSession } from "@/lib/auth/server";
+import { getCustomerProfile } from "@/lib/shopify/operations/customer";
 
 export default async function ProfilePage() {
   const t = await getTranslations("account");
@@ -19,41 +20,30 @@ export default async function ProfilePage() {
 }
 
 async function ProfileContent() {
-  const [session, t] = await Promise.all([getCustomerSession(), getTranslations("account")]);
+  const profile = await getCustomerProfile();
+  if (!profile) return null;
 
-  return (
-    <div className="space-y-4">
-      <div className="rounded-lg border p-4">
-        <dl className="grid gap-3 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-muted-foreground">{t("name")}</dt>
-            <dd className="font-medium">
-              {[session?.firstName, session?.lastName].filter(Boolean).join(" ") || "-"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">{t("email")}</dt>
-            <dd className="font-medium">{session?.email || "-"}</dd>
-          </div>
-        </dl>
-      </div>
-    </div>
-  );
+  return <ProfileForm profile={profile} />;
 }
 
 function ProfileSkeleton() {
   return (
-    <div className="rounded-lg border p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-12" />
-          <Skeleton className="h-4 w-28" />
+    <div className="grid max-w-md gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-1.5">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-9 w-full" />
         </div>
-        <div className="space-y-1.5">
-          <Skeleton className="h-3 w-12" />
-          <Skeleton className="h-4 w-36" />
+        <div className="grid gap-1.5">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-9 w-full" />
         </div>
       </div>
+      <div className="grid gap-1.5">
+        <Skeleton className="h-4 w-16" />
+        <Skeleton className="h-9 w-full" />
+      </div>
+      <Skeleton className="h-9 w-24 rounded-lg" />
     </div>
   );
 }
