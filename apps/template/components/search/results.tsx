@@ -16,12 +16,7 @@ import {
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type {
-  Filter,
-  PageInfo,
-  PriceRange,
-  ProductCard as ProductCardType,
-} from "@/lib/types";
+import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {

@@ -192,9 +192,9 @@ function joinOr(field: string, values: string[]): string {
 
 // QueryRoot.products has no productFilters arg, so filters are encoded into the query string; variantOption/productMetafield are dropped.
 function buildCatalogQuery(args: {
-  query?: string;
   collection?: string;
   filters: ProductFilter[];
+  query?: string;
 }): string {
   const parts: string[] = [];
 
@@ -321,8 +321,8 @@ export function buildProductFiltersFromParams(
 }
 
 type CatalogProductsResult = {
-  products: ProductCard[];
   pageInfo: PageInfo;
+  products: ProductCard[];
 };
 
 type CatalogProductsParams = {
@@ -331,21 +331,21 @@ type CatalogProductsParams = {
 };
 
 type FilteredCatalogProductsParams = CatalogProductsParams & {
-  query?: string;
   collection?: string;
-  sortKey?: string;
   cursor?: string;
   filters?: ProductFilter[];
+  query?: string;
+  sortKey?: string;
 };
 
 async function fetchCatalogProducts({
-  query,
   collection,
-  sortKey: rawSortKey = "best-matches",
-  limit = 50,
   cursor,
   filters = [],
+  limit = 50,
   locale = defaultLocale,
+  query,
+  sortKey: rawSortKey = "best-matches",
 }: FilteredCatalogProductsParams): Promise<CatalogProductsResult> {
   const sortConfig = CATALOG_SORT_KEY_MAP[rawSortKey] ?? CATALOG_SORT_KEY_MAP["best-matches"];
   const country = getCountryCode(locale);
@@ -382,8 +382,8 @@ async function fetchCatalogProducts({
   tagProducts(shopifyProducts);
 
   return {
-    products: shopifyProducts.map(transformShopifyProductCard),
     pageInfo: data.products.pageInfo,
+    products: shopifyProducts.map(transformShopifyProductCard),
   };
 }
 
@@ -409,22 +409,16 @@ export async function getFilteredCatalogProducts(
 
 export async function getSearchFacets(params: {
   activeFilters?: ActiveFilters;
-  query?: string;
   collection?: string;
   filters?: ProductFilter[];
   locale?: string;
+  query?: string;
 }): Promise<{ filters: Filter[]; priceRange?: PriceRange; total: number }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
-  const {
-    activeFilters = {},
-    query,
-    collection,
-    filters = [],
-    locale = defaultLocale,
-  } = params;
+  const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -462,26 +456,26 @@ export async function getSearchFacets(params: {
 // (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
 // silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
 export async function searchIndexProducts(params: {
-  query?: string;
   collection?: string;
-  sortKey?: string;
-  limit?: number;
   cursor?: string;
   filters?: ProductFilter[];
+  limit?: number;
   locale?: string;
-}): Promise<{ products: ProductCard[]; total: number; pageInfo: PageInfo }> {
+  query?: string;
+  sortKey?: string;
+}): Promise<{ pageInfo: PageInfo; products: ProductCard[]; total: number }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
   const {
-    query,
     collection,
-    sortKey: rawSortKey = "best-matches",
-    limit = 50,
     cursor,
     filters = [],
+    limit = 50,
     locale = defaultLocale,
+    query,
+    sortKey: rawSortKey = "best-matches",
   } = params;
 
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
@@ -522,9 +516,9 @@ export async function searchIndexProducts(params: {
   tagProducts(shopifyProducts);
 
   return {
+    pageInfo: data.search.pageInfo,
     products: shopifyProducts.map(transformShopifyProductCard),
     total: data.search.totalCount,
-    pageInfo: data.search.pageInfo,
   };
 }
 
@@ -582,16 +576,16 @@ const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolea
 export async function getCollectionProducts(params: {
   activeFilters?: ActiveFilters;
   collection: string;
-  limit?: number;
-  sortKey?: string;
   cursor?: string;
   filters?: ProductFilter[];
+  limit?: number;
   locale?: string;
+  sortKey?: string;
 }): Promise<{
-  products: ProductCard[];
-  pageInfo: PageInfo;
   filters: Filter[];
+  pageInfo: PageInfo;
   priceRange?: PriceRange;
+  products: ProductCard[];
 }> {
   "use cache: remote";
   cacheLife("max");
@@ -600,11 +594,11 @@ export async function getCollectionProducts(params: {
   const {
     activeFilters = {},
     collection,
-    sortKey: rawSortKey = "best-matches",
-    limit = 50,
     cursor,
     filters = [],
+    limit = 50,
     locale = defaultLocale,
+    sortKey: rawSortKey = "best-matches",
   } = params;
 
   const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
@@ -636,14 +630,14 @@ export async function getCollectionProducts(params: {
 
   if (!data.collection) {
     return {
-      products: [],
+      filters: [],
       pageInfo: {
         hasNextPage: false,
         hasPreviousPage: false,
         startCursor: null,
         endCursor: null,
       },
-      filters: [],
+      products: [],
     };
   }
 
@@ -655,10 +649,10 @@ export async function getCollectionProducts(params: {
   const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
 
   return {
-    products,
-    pageInfo: data.collection.products.pageInfo,
     filters: transformed.filters,
+    pageInfo: data.collection.products.pageInfo,
     priceRange: transformed.priceRange,
+    products,
   };
 }
 
