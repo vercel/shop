@@ -126,7 +126,7 @@ The account pages read and write customer data through the Shopify Customer Acco
 
 | Module                                | Purpose                                                                                                                                          |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lib/shopify/fetch.ts`                | `customerAccountFetch()` — POSTs to `https://{domain}/customer/api/{version}/graphql` with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). |
+| `lib/shopify/fetch.ts`                | `customerAccountFetch()` — POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` (the `shopId` is derived from the OIDC discovery document's `issuer` and cached) with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). The endpoint is **not** on the storefront domain. |
 | `lib/shopify/operations/customer.ts`  | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`. |
 | `lib/shopify/transforms/customer.ts`  | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                     |
 | `lib/customer/action.ts`              | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.   |

@@ -34,7 +34,7 @@ The account pages were scaffolds — `/account/orders`, `/account/orders/[id]`, 
 
 The data layer is new and mirrors the existing Storefront layer:
 
-- `lib/shopify/fetch.ts` gains `customerAccountFetch()`, which POSTs to `https://{domain}/customer/api/{version}/graphql` with the customer's OAuth access token as the raw `Authorization` header (no `Bearer` prefix) — a separate endpoint and schema from the Storefront API.
+- `lib/shopify/fetch.ts` gains `customerAccountFetch()`, which POSTs to the Customer Account API GraphQL endpoint with the customer's OAuth access token as the raw `Authorization` header (no `Bearer` prefix) — a separate endpoint and schema from the Storefront API. The endpoint is `https://shopify.com/{shopId}/account/customer/api/{version}/graphql`; the `shopId` is derived from the OIDC discovery document's `issuer` (the storefront-domain path 302s to HTML and must not be used) and cached for the process lifetime.
 - `lib/shopify/operations/customer.ts` holds the queries and mutations; each resolves the access token through `requireSession()`.
 - `lib/shopify/transforms/customer.ts` maps responses to provider-agnostic types in `lib/types.ts`.
 - `lib/customer/action.ts` provides `"use server"` actions for the address and profile forms (validation, `userErrors` surfacing, `revalidatePath`).
