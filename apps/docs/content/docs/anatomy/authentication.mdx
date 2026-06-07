@@ -80,6 +80,14 @@ The account pages use a `(authenticated)` route group so the auth-gated layout a
 3. better-auth exchanges the code for tokens, decodes the ID token, and creates a session
 4. Session stored in an `httpOnly` cookie with PKCE verification
 
+### Logout
+
+Logout is **local-only**. `signOut()` (`lib/auth/client.ts`) calls better-auth's sign-out endpoint to clear the session cookie, then redirects to `/`. The template does **not** call Shopify's OIDC `end_session_endpoint`, so the customer's session at Shopify's identity provider is not terminated — better-auth's `genericOAuth` plugin has no RP-initiated logout support to do this automatically.
+
+The practical consequence: the storefront session ends, but a later **Sign in** can silently re-authenticate via SSO with no credential prompt. This is fine for most storefronts but surprising on a shared device. It also means the **Logout URI** configured in the Customer Account API settings is unused.
+
+To fully end the Shopify session, implement RP-initiated logout: redirect the customer to the provider's `end_session_endpoint` (from the OIDC discovery document) with `id_token_hint` and a `post_logout_redirect_uri`. That redirect URI must be registered exactly in the Customer Account API **Logout URI** setting — Shopify does not support wildcard logout URIs, so each one (including any preview domains) must be added explicitly.
+
 ### Nav account icon
 
 The nav uses a fixed-size container (`size-5`) with the fallback icon rendered inline and the async `NavAccount` component positioned absolutely on top via Suspense. This ensures the icon space is always reserved and there is no layout shift when the Suspense boundary resolves.
