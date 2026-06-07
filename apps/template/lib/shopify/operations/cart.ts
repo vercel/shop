@@ -446,8 +446,8 @@ export async function getCartSelectableAddressId(): Promise<string | undefined> 
 export async function addCartDeliveryAddress(address: {
   city?: string;
   countryCode: string;
-  zip?: string;
   customerAddressId?: string;
+  zip?: string;
 }): Promise<CartMutationResult | undefined> {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
@@ -486,9 +486,9 @@ export async function addCartDeliveryAddress(address: {
 }
 
 export type CartShippingOption = {
-  title: string;
-  estimatedCost: { amount: string; currencyCode: string };
   deliveryMethodType: string;
+  estimatedCost: { amount: string; currencyCode: string };
+  title: string;
 };
 
 export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
@@ -500,9 +500,9 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
       deliveryGroups: {
         nodes: Array<{
           deliveryOptions: Array<{
-            title: string | null;
-            estimatedCost: { amount: string; currencyCode: string };
             deliveryMethodType: string;
+            estimatedCost: { amount: string; currencyCode: string };
+            title: string | null;
           }>;
         }>;
       };
@@ -525,9 +525,9 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
       return true;
     })
     .map((opt) => ({
-      title: opt.title ?? opt.deliveryMethodType,
-      estimatedCost: opt.estimatedCost,
       deliveryMethodType: opt.deliveryMethodType,
+      estimatedCost: opt.estimatedCost,
+      title: opt.title ?? opt.deliveryMethodType,
     }));
 }
 
@@ -536,8 +536,8 @@ export async function updateCartDeliveryAddress(
   address: {
     city?: string;
     countryCode: string;
-    zip?: string;
     customerAddressId?: string;
+    zip?: string;
   },
 ): Promise<CartMutationResult | undefined> {
   const cartId = await getCartIdFromCookie();
