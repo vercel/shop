@@ -1,16 +1,10 @@
 import { notFound } from "next/navigation";
 
 import { siteConfig } from "@/lib/config";
-import {
-  getShopifySitemapPage,
-  type ShopifySitemapType,
-} from "@/lib/shopify/operations/sitemap";
+import { getShopifySitemapPage, type ShopifySitemapType } from "@/lib/shopify/operations/sitemap";
 
 function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function toAbsoluteUrl(pathname: string): string {
@@ -36,7 +30,11 @@ function renderStatic(): Response {
   return xmlResponse(urlsetWrap(entry));
 }
 
-async function renderShard(type: ShopifySitemapType, page: number, segment: string): Promise<Response> {
+async function renderShard(
+  type: ShopifySitemapType,
+  page: number,
+  segment: string,
+): Promise<Response> {
   const { items } = await getShopifySitemapPage(type, page);
 
   const entries = items
@@ -50,7 +48,10 @@ async function renderShard(type: ShopifySitemapType, page: number, segment: stri
   return xmlResponse(urlsetWrap(entries));
 }
 
-export async function GET(_req: Request, { params }: { params: Promise<{ shard: string }> }): Promise<Response> {
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ shard: string }> },
+): Promise<Response> {
   const { shard } = await params;
   const id = shard.endsWith(".xml") ? shard.slice(0, -".xml".length) : shard;
 

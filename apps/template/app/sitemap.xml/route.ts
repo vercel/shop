@@ -2,10 +2,7 @@ import { siteConfig } from "@/lib/config";
 import { getShopifySitemapPagesCount } from "@/lib/shopify/operations/sitemap";
 
 function escapeXml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function GET(): Promise<Response> {
@@ -21,7 +18,9 @@ export async function GET(): Promise<Response> {
   ];
 
   const entries = childIds
-    .map((id) => `  <sitemap><loc>${escapeXml(`${siteConfig.url}/sitemap/${id}.xml`)}</loc></sitemap>`)
+    .map(
+      (id) => `  <sitemap><loc>${escapeXml(`${siteConfig.url}/sitemap/${id}.xml`)}</loc></sitemap>`,
+    )
     .join("\n");
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

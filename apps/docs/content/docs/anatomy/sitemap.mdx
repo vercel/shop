@@ -10,12 +10,12 @@ The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `
 
 ## URLs
 
-| URL                            | Contents                                  |
-| ------------------------------ | ----------------------------------------- |
-| `/sitemap.xml`                 | Sitemap index listing every child shard   |
-| `/sitemap/static.xml`          | Home page                                 |
-| `/sitemap/products-{n}.xml`    | Up to 250 products per shard              |
-| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard           |
+| URL                            | Contents                                |
+| ------------------------------ | --------------------------------------- |
+| `/sitemap.xml`                 | Sitemap index listing every child shard |
+| `/sitemap/static.xml`          | Home page                               |
+| `/sitemap/products-{n}.xml`    | Up to 250 products per shard            |
+| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard         |
 
 `{n}` is 1-indexed and runs to the `pagesCount` Shopify returns for each type.
 
@@ -29,9 +29,9 @@ The template scopes sitemaps to products and collections. Shopify's `SitemapType
 
 ## Key files
 
-| File                                    | Purpose                                                    |
-| --------------------------------------- | ---------------------------------------------------------- |
-| `app/sitemap.xml/route.ts`              | Sitemap index — lists every shard                          |
-| `app/sitemap/[shard]/route.ts`          | Child sitemaps — `static`, `products-{n}`, `collections-{n}` |
-| `lib/shopify/operations/sitemap.ts`     | `getShopifySitemapPagesCount`, `getShopifySitemapPage`     |
-| `app/robots.ts`                         | Declares `/sitemap.xml` as the entry point                 |
+| File                                | Purpose                                                      |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `app/sitemap.xml/route.ts`          | Sitemap index — lists every shard                            |
+| `app/sitemap/[shard]/route.ts`      | Child sitemaps — `static`, `products-{n}`, `collections-{n}` |
+| `lib/shopify/operations/sitemap.ts` | `getShopifySitemapPagesCount`, `getShopifySitemapPage`       |
+| `app/robots.ts`                     | Declares `/sitemap.xml` as the entry point                   |

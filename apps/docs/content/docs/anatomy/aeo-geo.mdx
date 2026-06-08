@@ -12,13 +12,13 @@ The template ships with several built-in surfaces that contribute to AEO/GEO. Th
 
 ## Surfaces in the template
 
-| Surface                          | What it does                                                           | Key files                                                      |
-| -------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
-| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`        | `next.config.ts`, `app/md/**`, `lib/markdown/**`               |
-| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data | `components/product-detail/schema.tsx`, `components/schema/**` |
+| Surface                          | What it does                                                                         | Key files                                                      |
+| -------------------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`                      | `next.config.ts`, `app/md/**`, `lib/markdown/**`               |
+| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data               | `components/product-detail/schema.tsx`, `components/schema/**` |
 | **Sitemap**                      | [Sitemap index + paged children](/docs/anatomy/sitemap) for products and collections | `app/sitemap.xml/route.ts`, `app/sitemap/[shard]/route.ts`     |
-| **Robots**                       | Declares crawl policy and blocks faceted (sort/filter) collection URLs | `app/robots.ts`                                                |
-| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route              | `lib/seo.ts`, route-level `generateMetadata`                   |
+| **Robots**                       | Declares crawl policy and blocks faceted (sort/filter) collection URLs               | `app/robots.ts`                                                |
+| **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route                            | `lib/seo.ts`, route-level `generateMetadata`                   |
 
 The rest of this page goes deep on content negotiation. The other surfaces are documented inline in the linked files.
 
