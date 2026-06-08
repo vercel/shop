@@ -11,6 +11,7 @@ import { prepareCheckoutAction } from "@/lib/cart/action";
 import { useCart } from "./context";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
+import { CartWarnings } from "./warnings";
 
 interface OverlayContentProps {
   locale: string;
@@ -90,12 +91,14 @@ export function OverlayContent({ locale }: OverlayContentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Items List - Scrollable */}
-      <ul className="flex-1 overflow-y-auto px-5 space-y-5" aria-label={t("cartItemsLabel")}>
-        {displayCart.lines.map((item) => (
-          <OverlayItem key={item.id} item={item} locale={locale} />
-        ))}
-      </ul>
+      <div className="flex-1 overflow-y-auto px-5 space-y-5">
+        <CartWarnings />
+        <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
+          {displayCart.lines.map((item) => (
+            <OverlayItem key={item.id} item={item} locale={locale} />
+          ))}
+        </ul>
+      </div>
 
       {/* Summary Section */}
       <footer className="px-5 py-5 space-y-5">

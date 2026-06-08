@@ -24,12 +24,13 @@ Generate the auth secret with `openssl rand -base64 32`. The client ID and secre
 
 ### Shopify Admin setup
 
-1. Go to **Shopify Admin → Settings → Customer accounts**
-2. Enable **Customer Account API**
-3. Create a **Customer Account API client** (under "API clients")
-4. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/callback/shopify`
-5. Copy the client ID and client secret to your environment variables
-6. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+1. Enable customer accounts: **Shopify Admin → Settings → Customer accounts → Edit**, choose **Customer accounts**, and Save
+2. Install the **Headless** sales channel from the Shopify App Store — Customer Account API credentials live there, not under Settings
+3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
+4. Set the client type to **Confidential** — the template authenticates with a client secret, so a public (PKCE-only) client will not work. The toggle is at the top of the Customer Account API settings
+5. Set the redirect URI to `{YOUR_DOMAIN}/api/auth/oauth2/callback/shopify`
+6. Copy the client ID and client secret to `SHOPIFY_CUSTOMER_CLIENT_ID` and `SHOPIFY_CUSTOMER_CLIENT_SECRET`
+7. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
 
 See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
@@ -59,14 +60,14 @@ This means auth infrastructure has zero runtime cost when disabled.
 
 Authentication uses Shopify-native URL paths:
 
-| Route                  | Description                                                           |
-| ---------------------- | --------------------------------------------------------------------- |
-| `/account/login`       | Auto-redirects to Shopify OIDC. Not indexed by search engines.        |
-| `/account`             | Redirects to `/account/profile`.                                      |
-| `/account/profile`     | Displays customer name and email.                                     |
-| `/account/orders`      | Order history (scaffold — wire with Customer Account API operations). |
-| `/account/orders/[id]` | Order detail (scaffold).                                              |
-| `/account/addresses`   | Address book (scaffold).                                              |
+| Route                  | Description                                                                 |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `/account/login`       | Auto-redirects to Shopify OIDC. Not indexed by search engines.              |
+| `/account`             | Redirects to `/account/profile`.                                            |
+| `/account/profile`     | View and edit the customer's name; email shown read-only.                   |
+| `/account/orders`      | Paginated order history (cursor-based, newest first).                       |
+| `/account/orders/[id]` | Order detail: line items, totals, shipping address, and a status-page link. |
+| `/account/addresses`   | Address book with create, edit, delete, and default selection.              |
 
 The account pages use a `(authenticated)` route group so the auth-gated layout applies to protected pages without blocking `/account/login`.
 
@@ -75,9 +76,17 @@ The account pages use a `(authenticated)` route group so the auth-gated layout a
 ### Session flow
 
 1. Customer visits `/account/login` → auto-redirected to Shopify OIDC
-2. After Shopify consent → redirected to `/api/auth/callback/shopify`
+2. After Shopify consent → redirected to `/api/auth/oauth2/callback/shopify`
 3. better-auth exchanges the code for tokens, decodes the ID token, and creates a session
 4. Session stored in an `httpOnly` cookie with PKCE verification
+
+### Logout
+
+Logout is **local-only**. `signOut()` (`lib/auth/client.ts`) calls better-auth's sign-out endpoint to clear the session cookie, then redirects to `/`. The template does **not** call Shopify's OIDC `end_session_endpoint`, so the customer's session at Shopify's identity provider is not terminated — better-auth's `genericOAuth` plugin has no RP-initiated logout support to do this automatically.
+
+The practical consequence: the storefront session ends, but a later **Sign in** can silently re-authenticate via SSO with no credential prompt. This is fine for most storefronts but surprising on a shared device. It also means the **Logout URI** configured in the Customer Account API settings is unused.
+
+To fully end the Shopify session, implement RP-initiated logout: redirect the customer to the provider's `end_session_endpoint` (from the OIDC discovery document) with `id_token_hint` and a `post_logout_redirect_uri`. That redirect URI must be registered exactly in the Customer Account API **Logout URI** setting — Shopify does not support wildcard logout URIs, so each one (including any preview domains) must be added explicitly.
 
 ### Nav account icon
 
@@ -111,6 +120,23 @@ function AccountMenu() {
 }
 ```
 
+### Account data
+
+The account pages read and write customer data through the Shopify Customer Account API — a separate GraphQL endpoint and schema from the Storefront API.
+
+| Module                               | Purpose                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/shopify/fetch.ts`               | `customerAccountFetch()` — POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` (the `shopId` is derived from the OIDC discovery document's `issuer` and cached) with the customer's access token as the raw `Authorization` header (no `Bearer` prefix). The endpoint is **not** on the storefront domain. |
+| `lib/shopify/operations/customer.ts` | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`.                                                                                                                                                                 |
+| `lib/shopify/transforms/customer.ts` | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                                                                                                                                                                                                          |
+| `lib/customer/action.ts`             | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.                                                                                                                                                                                         |
+
+Order and profile pages are read-only server components wrapped in Suspense. Addresses and profile editing use client forms that call the server actions. Order requests are per-customer `POST`s, so responses are never shared across customers.
+
+Status values (`fulfillmentStatus`, `financialStatus`) are raw Shopify enums (e.g. `FULFILLED`, `PAID`); they're humanized at the display layer rather than stored in locale catalogs.
+
+> The address form collects ISO codes for country (`territoryCode`) and region (`zoneCode`) as plain text inputs. Storefronts that want country/region dropdowns can layer a picker on top — the underlying `CustomerAddressInput` is unchanged.
+
 ## Guardrails
 
 - Never expose access tokens to the client — `getSession()` and `requireSession()` are server-only
@@ -120,6 +146,6 @@ function AccountMenu() {
 - PKCE is enabled for the OAuth flow — never disable it
 - `isAuthEnabled` must read a `NEXT_PUBLIC_` variable — server-only env vars cause hydration mismatches with cache components. Don't replace it with an inline `process.env.BETTER_AUTH_SECRET` check
 
-## Next steps
+## Extending
 
-The account pages are scaffolds. To populate them with real data, create Customer Account API operations in `lib/shopify/operations/customer.ts` for fetching profile, orders, and addresses using the access token from `requireSession()`.
+To add more account data — store credit, subscriptions, draft orders, or richer order fields — add an operation in `lib/shopify/operations/customer.ts`, a transform in `lib/shopify/transforms/customer.ts`, and a matching domain type in `lib/types.ts`. Validate any new fields against the live Customer Account API schema before adding them. Mutations should run through a `"use server"` action in `lib/customer/action.ts` so input validation and `revalidatePath` stay in one place.

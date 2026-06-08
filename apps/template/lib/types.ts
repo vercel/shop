@@ -23,68 +23,68 @@ export interface Money {
 }
 
 export interface Image {
-  url: string;
   altText: string;
-  width: number;
   height: number;
+  url: string;
+  width: number;
 }
 
 export interface Video {
-  url: string;
-  previewImage: Image | null;
-  width: number;
   height: number;
+  previewImage: Image | null;
+  url: string;
+  width: number;
 }
 
 export interface SEO {
-  title: string;
   description: string;
+  title: string;
 }
 
 export interface ProductCard {
-  id: string;
-  handle: string;
-  title: string;
-  featuredImage: Image | null;
-  price: Money;
-  compareAtPrice?: Money;
-  vendor?: string;
   availableForSale: boolean;
+  compareAtPrice?: Money;
   defaultVariantId?: string;
   defaultVariantNumericId?: string;
   defaultVariantSelectedOptions?: SelectedOption[];
+  featuredImage: Image | null;
+  handle: string;
+  id: string;
+  price: Money;
+  title: string;
+  vendor?: string;
 }
 
 export interface ProductDetails extends ProductCard {
+  category?: Category | null;
+  categoryId?: string;
+  collectionHandles: string[];
+  currencyCode: string;
   description: string;
   descriptionHtml: string;
   images: Image[];
-  videos: Video[];
-  variants: ProductVariant[];
-  options: ProductOption[];
-  tags: string[];
-  seo: SEO;
-  category?: Category | null;
-  updatedAt: string;
-  priceRange: {
-    minVariantPrice: Money;
-    maxVariantPrice: Money;
-  };
-  currencyCode: string;
   manufacturerName: string;
-  categoryId?: string;
-  collectionHandles: string[];
   metafields?: Metafield[];
+  options: ProductOption[];
+  priceRange: {
+    maxVariantPrice: Money;
+    minVariantPrice: Money;
+  };
+  seo: SEO;
+  tags: string[];
+  updatedAt: string;
+  variants: ProductVariant[];
+  videos: Video[];
 }
 
 export interface ProductVariant {
-  id: string;
-  title: string;
   availableForSale: boolean;
-  price: Money;
   compareAtPrice?: Money;
-  selectedOptions: SelectedOption[];
+  id: string;
   image: Image | null;
+  price: Money;
+  selectedOptions: SelectedOption[];
+  title: string;
 }
 
 export interface ProductOption {
@@ -116,120 +116,146 @@ export interface Metafield {
 }
 
 export interface Category {
+  ancestors: Category[];
   id: string;
   name: string;
-  ancestors: Category[];
 }
 
 export interface Cart {
-  id: string | undefined;
+  appliedGiftCards: AppliedGiftCard[];
   checkoutUrl: string;
-  totalQuantity: number;
-  note: string | null;
   cost: {
     subtotalAmount: Money;
     totalAmount: Money;
     totalTaxAmount: Money;
   };
+  discountAllocations: DiscountAllocation[];
+  discountCodes: DiscountCode[];
+  id: string | undefined;
   lines: CartLine[];
+  note: string | null;
   shippingCost: Money | null;
+  totalQuantity: number;
 }
 
 export interface CartLine {
-  id: string | undefined;
-  quantity: number;
   cost: {
     totalAmount: Money;
   };
+  discountAllocations: DiscountAllocation[];
+  id: string | undefined;
   merchandise: CartMerchandise;
+  quantity: number;
+}
+
+export interface DiscountCode {
+  applicable: boolean;
+  code: string;
+}
+
+export type DiscountAllocation =
+  | { kind: "code"; code: string; discountedAmount: Money }
+  | { kind: "automatic" | "custom"; title: string; discountedAmount: Money };
+
+export interface AppliedGiftCard {
+  amountUsed: Money;
+  balance: Money;
+  id: string;
+  lastCharacters: string;
+}
+
+export interface CartWarning {
+  code: string;
+  message: string;
+  target: string;
 }
 
 export interface CartMerchandise {
   id: string;
-  title: string;
   image?: Image;
   price?: Money;
-  selectedOptions: SelectedOption[];
   product: CartProduct;
+  selectedOptions: SelectedOption[];
+  title: string;
 }
 
 export interface CartProduct {
-  id: string;
-  handle: string;
-  title: string;
   featuredImage: Image;
+  handle: string;
+  id: string;
+  title: string;
 }
 
 export interface Collection {
-  handle: string;
-  title: string;
   description: string;
+  handle: string;
   image?: Image | null;
-  seo: SEO;
   path: string;
+  seo: SEO;
+  title: string;
   updatedAt: string;
 }
 
-export type FilterType = "list" | "price" | "boolean";
+export type FilterType = "boolean" | "list" | "price";
 
 export interface FilterValue {
+  count: number;
   id: string;
   label: string;
   value: string;
-  count: number;
 }
 
 export interface Filter {
   id: string;
   label: string;
-  type: FilterType;
   paramKey: string;
+  type: FilterType;
   values: FilterValue[];
 }
 
 export interface PriceRange {
-  min: number;
   max: number;
+  min: number;
 }
 
 export interface CategoryNavItem {
+  count: number;
+  href: string;
   id: string;
   label: string;
   slug: string;
-  count: number;
-  href: string;
 }
 
 export interface PageInfo {
+  endCursor: string | null;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
-  endCursor: string | null;
   startCursor: string | null;
 }
 
 export interface ProductListResult {
-  products: ProductCard[];
-  totalCount: number;
-  pageInfo: PageInfo;
   filters?: Filter[];
+  pageInfo: PageInfo;
   priceRange?: PriceRange;
+  products: ProductCard[];
   subcategories?: CategoryNavItem[];
+  totalCount: number;
 }
 
 export interface PredictiveSearchProduct {
-  id: string;
-  handle: string;
-  title: string;
-  featuredImage: Image | null;
-  price: Money;
-  compareAtPrice?: Money;
-  vendor?: string;
   availableForSale: boolean;
+  compareAtPrice?: Money;
+  featuredImage: Image | null;
+  handle: string;
+  id: string;
+  price: Money;
+  title: string;
+  vendor?: string;
 }
 
 export interface SearchSuggestion {
-  text: string;
   styledText: string;
+  text: string;
 }
 
 export interface PredictiveSearchCollection {
@@ -238,29 +264,100 @@ export interface PredictiveSearchCollection {
 }
 
 export interface PredictiveSearchResult {
-  products: PredictiveSearchProduct[];
   collections: PredictiveSearchCollection[];
+  products: PredictiveSearchProduct[];
   queries: SearchSuggestion[];
 }
 
 export interface MarketingImage {
-  url: string;
   alt: string;
-  width?: number;
   height?: number;
+  url: string;
+  width?: number;
 }
 
 export interface MarketingVideo {
-  url: string;
   previewImage?: MarketingImage | null;
+  url: string;
 }
 
 export interface BannerSection {
-  id: string;
-  headline: string;
-  subheadline: string | null;
   backgroundImage?: MarketingImage | StaticImageData | null;
   backgroundVideo?: MarketingVideo | null;
-  ctaText: string | null;
   ctaLink: string | null;
+  ctaText: string | null;
+  headline: string;
+  id: string;
+  subheadline: string | null;
+}
+
+// Customer account — populated from the Shopify Customer Account API (a separate
+// schema from the Storefront API). Status fields hold raw Shopify enum values
+// (e.g. "FULFILLED", "PAID"); humanize them at the display layer.
+
+export interface CustomerProfile {
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+}
+
+export interface OrderLineItem {
+  image: Image | null;
+  quantity: number;
+  title: string;
+  totalPrice: Money | null;
+  variantTitle: string | null;
+}
+
+export interface CustomerOrderSummary {
+  financialStatus: string | null;
+  fulfillmentStatus: string;
+  id: string;
+  name: string;
+  number: number;
+  processedAt: string;
+  totalPrice: Money;
+}
+
+export interface CustomerOrder extends CustomerOrderSummary {
+  lineItems: OrderLineItem[];
+  shippingAddress: CustomerAddress | null;
+  statusPageUrl: string;
+  subtotal: Money | null;
+  totalShipping: Money | null;
+  totalTax: Money | null;
+}
+
+export interface CustomerOrdersPage {
+  orders: CustomerOrderSummary[];
+  pageInfo: PageInfo;
+}
+
+export interface CustomerAddress {
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  company: string | null;
+  firstName: string | null;
+  formatted: string[];
+  id: string;
+  isDefault: boolean;
+  lastName: string | null;
+  phoneNumber: string | null;
+  territoryCode: string | null;
+  zip: string | null;
+  zoneCode: string | null;
+}
+
+export interface CustomerAddressInput {
+  address1?: string;
+  address2?: string;
+  city?: string;
+  company?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  territoryCode?: string;
+  zip?: string;
+  zoneCode?: string;
 }

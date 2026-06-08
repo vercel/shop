@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -15,11 +14,6 @@ interface NavSection {
   title: string;
   items: NavItem[];
 }
-
-const COMING_SOON_HREFS = new Set([
-  "/docs/skills/enable-content-summarization",
-  "/docs/skills/enable-virtual-try-on",
-]);
 
 export function DocsSidebar({ navigation }: { navigation: NavSection[] }) {
   const pathname = usePathname();
@@ -35,7 +29,6 @@ export function DocsSidebar({ navigation }: { navigation: NavSection[] }) {
               )}
               {section.items.map((item) => {
                 const active = pathname === item.href;
-                const comingSoon = COMING_SOON_HREFS.has(item.href);
                 return (
                   <Link
                     aria-current={active ? "page" : undefined}
@@ -47,11 +40,6 @@ export function DocsSidebar({ navigation }: { navigation: NavSection[] }) {
                     key={item.href}
                   >
                     <span className="min-w-0 truncate">{item.title}</span>
-                    {comingSoon && (
-                      <Badge className="ml-auto rounded-full" variant="secondary">
-                        Coming soon
-                      </Badge>
-                    )}
                   </Link>
                 );
               })}

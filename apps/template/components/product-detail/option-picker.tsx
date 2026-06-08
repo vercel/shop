@@ -24,9 +24,7 @@ export function OptionPicker({
 }: OptionPickerProps) {
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
-      <p className="text-sm font-medium text-foreground/70">
-        {option.name}: <span className="text-foreground">{selectedValue}</span>
-      </p>
+      <p className="text-sm font-medium text-foreground/70">{option.name}</p>
       <div className="flex flex-wrap gap-2">
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;

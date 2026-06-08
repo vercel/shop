@@ -1,3 +1,5 @@
+import type { CartWarning } from "@/lib/types";
+
 export async function withFallback<T>(promise: Promise<T>, fallback: T): Promise<T> {
   try {
     return await promise;
@@ -14,6 +16,7 @@ export interface UserError {
 export interface CartMutationPayload<T> {
   cart: T | null;
   userErrors: UserError[];
+  warnings?: CartWarning[];
 }
 
 export class ShopifyUserError extends Error {
@@ -26,12 +29,15 @@ export class ShopifyUserError extends Error {
   }
 }
 
-export function unwrapCartMutation<T>(payload: CartMutationPayload<T>, operation: string): T {
+export function unwrapCartMutation<T>(
+  payload: CartMutationPayload<T>,
+  operation: string,
+): { cart: T; warnings: CartWarning[] } {
   if (payload.userErrors && payload.userErrors.length > 0) {
     throw new ShopifyUserError(payload.userErrors, operation);
   }
   if (!payload.cart) {
     throw new Error(`Shopify ${operation}: cart missing from response`);
   }
-  return payload.cart;
+  return { cart: payload.cart, warnings: payload.warnings ?? [] };
 }

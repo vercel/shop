@@ -35,11 +35,11 @@ Product topics also try to derive a numeric product tag from `admin_graphql_api_
 
 Metaobject topics inspect the payload's `type` field to invalidate narrower CMS tags. The exact mapping follows the conventions used by [Shopify CMS](/docs/skills/enable-shopify-cms):
 
-| Metaobject `type`            | Additional tags                  |
-| ---------------------------- | -------------------------------- |
-| `cms_page`                   | `cms:pages`, `cms:page:{slug}`   |
-| `cms_homepage`               | `cms:homepage`                   |
-| `cms_section`, `cms_hero`    | `cms:pages`, `cms:homepage`      |
+| Metaobject `type`         | Additional tags                |
+| ------------------------- | ------------------------------ |
+| `cms_page`                | `cms:pages`, `cms:page:{slug}` |
+| `cms_homepage`            | `cms:homepage`                 |
+| `cms_section`, `cms_hero` | `cms:pages`, `cms:homepage`    |
 
 All metaobject topics also invalidate the broad `cms:all` tag as a safety net for unrecognized types.
 
@@ -70,9 +70,9 @@ You can register only the topics you care about. Skipping `inventory_levels/*`, 
 
 ## Environment variables
 
-| Variable                  | When to set                                                                        |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| `SHOPIFY_WEBHOOK_SECRET`  | Required in any environment where Shopify posts to `/api/webhooks/shopify`. Without it, signature verification is skipped — fine for local testing, unsafe for production. |
+| Variable                 | When to set                                                                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SHOPIFY_WEBHOOK_SECRET` | Required in any environment where Shopify posts to `/api/webhooks/shopify`. Without it, signature verification is skipped — fine for local testing, unsafe for production. |
 
 See [Environment Variables](/docs/reference/env-vars) for the full reference.
 

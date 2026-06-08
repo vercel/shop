@@ -57,10 +57,10 @@ The owning tool can overwrite the content between `BEGIN` and `END` on upgrade w
 
 The template ships with two blocks:
 
-| Block                | Owner       | What it contains                                                                                                                                                                                       |
-| -------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `nextjs-agent-rules` | Next.js     | Reminds agents this Next.js version has breaking changes and to read bundled docs before writing code. Refreshed on Next.js upgrade.                                                                   |
-| `vercel-shop-style`  | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. Remove the block if your team prefers different conventions.   |
+| Block                | Owner       | What it contains                                                                                                                                                                                     |
+| -------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nextjs-agent-rules` | Next.js     | Reminds agents this Next.js version has breaking changes and to read bundled docs before writing code. Refreshed on Next.js upgrade.                                                                 |
+| `vercel-shop-style`  | Vercel Shop | Code style conventions: alphabetized exports and keys, no barrel files, push `"use client"` to leaves, naming rules, Tailwind patterns. Remove the block if your team prefers different conventions. |
 
 Everything outside these markers is yours. Add team conventions or domain constraints anywhere else and no upgrade will overwrite them.
 

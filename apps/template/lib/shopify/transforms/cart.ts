@@ -1,5 +1,14 @@
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
-import type { Cart, CartLine, CartProduct, Image, Money } from "@/lib/types";
+import type {
+  AppliedGiftCard,
+  Cart,
+  CartLine,
+  CartProduct,
+  DiscountAllocation,
+  DiscountCode,
+  Image,
+  Money,
+} from "@/lib/types";
 
 interface ShopifyMoney {
   amount: string;
@@ -13,47 +22,68 @@ interface ShopifyImage {
   height: number;
 }
 
-interface ShopifyCartLine {
+interface ShopifyDiscountAllocation {
+  __typename:
+    | "CartAutomaticDiscountAllocation"
+    | "CartCodeDiscountAllocation"
+    | "CartCustomDiscountAllocation";
+  code?: string;
+  discountedAmount: ShopifyMoney;
+  title?: string;
+}
+
+interface ShopifyAppliedGiftCard {
+  amountUsed: ShopifyMoney;
+  balance: ShopifyMoney;
   id: string;
-  quantity: number;
+  lastCharacters: string;
+}
+
+interface ShopifyCartLine {
   cost: {
     totalAmount: ShopifyMoney;
   };
+  discountAllocations: ShopifyDiscountAllocation[];
+  id: string;
   merchandise: {
     id: string;
-    title: string;
     image?: ShopifyImage | null;
     price?: ShopifyMoney;
-    selectedOptions: Array<{ name: string; value: string }>;
     product: {
-      id: string;
-      handle: string;
-      title: string;
       description?: string;
       featuredImage: ShopifyImage | null;
+      handle: string;
+      id: string;
+      title: string;
     };
+    selectedOptions: Array<{ name: string; value: string }>;
+    title: string;
   };
+  quantity: number;
 }
 
 interface ShopifyDeliveryGroup {
   selectedDeliveryOption: {
-    title: string | null;
     estimatedCost: ShopifyMoney;
+    title: string | null;
   } | null;
 }
 
 export interface ShopifyCart {
-  id: string;
+  appliedGiftCards: ShopifyAppliedGiftCard[];
   checkoutUrl: string;
-  totalQuantity: number;
-  note: string | null;
   cost: {
     subtotalAmount: ShopifyMoney;
     totalAmount: ShopifyMoney;
     totalTaxAmount: ShopifyMoney | null;
   };
-  lines: ShopifyEdges<ShopifyCartLine>;
   deliveryGroups?: { nodes: ShopifyDeliveryGroup[] };
+  discountAllocations: ShopifyDiscountAllocation[];
+  discountCodes: Array<{ applicable: boolean; code: string }>;
+  id: string;
+  lines: ShopifyEdges<ShopifyCartLine>;
+  note: string | null;
+  totalQuantity: number;
 }
 
 function transformImage(image: ShopifyImage | null): Image {
@@ -74,6 +104,48 @@ function transformCartProduct(product: ShopifyCartLine["merchandise"]["product"]
   };
 }
 
+function transformDiscountAllocation(
+  allocation: ShopifyDiscountAllocation,
+): DiscountAllocation | null {
+  if (allocation.__typename === "CartCodeDiscountAllocation") {
+    if (!allocation.code) return null;
+    return {
+      kind: "code",
+      code: allocation.code,
+      discountedAmount: allocation.discountedAmount,
+    };
+  }
+  const kind = allocation.__typename === "CartAutomaticDiscountAllocation" ? "automatic" : "custom";
+  return {
+    kind,
+    title: allocation.title ?? "",
+    discountedAmount: allocation.discountedAmount,
+  };
+}
+
+function transformDiscountAllocations(
+  allocations: ShopifyDiscountAllocation[],
+): DiscountAllocation[] {
+  return allocations
+    .map(transformDiscountAllocation)
+    .filter((a): a is DiscountAllocation => a !== null);
+}
+
+function transformDiscountCodes(
+  codes: Array<{ applicable: boolean; code: string }>,
+): DiscountCode[] {
+  return codes.map(({ code, applicable }) => ({ code, applicable }));
+}
+
+function transformAppliedGiftCards(cards: ShopifyAppliedGiftCard[]): AppliedGiftCard[] {
+  return cards.map((c) => ({
+    id: c.id,
+    lastCharacters: c.lastCharacters,
+    amountUsed: c.amountUsed,
+    balance: c.balance,
+  }));
+}
+
 function transformCartLine(line: ShopifyCartLine): CartLine {
   return {
     id: line.id,
@@ -89,6 +161,7 @@ function transformCartLine(line: ShopifyCartLine): CartLine {
       selectedOptions: line.merchandise.selectedOptions,
       product: transformCartProduct(line.merchandise.product),
     },
+    discountAllocations: transformDiscountAllocations(line.discountAllocations),
   };
 }
 
@@ -124,5 +197,8 @@ export function transformShopifyCart(cart: ShopifyCart): Cart {
     },
     lines: flattenEdges(cart.lines).map(transformCartLine),
     shippingCost: transformShippingCost(cart),
+    discountCodes: transformDiscountCodes(cart.discountCodes),
+    discountAllocations: transformDiscountAllocations(cart.discountAllocations),
+    appliedGiftCards: transformAppliedGiftCards(cart.appliedGiftCards),
   };
 }

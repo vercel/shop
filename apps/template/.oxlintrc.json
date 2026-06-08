@@ -4,9 +4,17 @@
     "correctness": "warn",
     "suspicious": "warn"
   },
-  "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**", "app/.well-known/**"],
+  "ignorePatterns": [
+    ".next/**",
+    "dist/**",
+    "build/**",
+    ".claude/**",
+    "app/.well-known/**",
+    "components/ai-elements/**"
+  ],
   "plugins": ["typescript", "react", "nextjs"],
   "rules": {
+    "no-underscore-dangle": ["warn", { "allow": ["__typename"] }],
     "no-unused-vars": "off",
     "react/react-in-jsx-scope": "off"
   },

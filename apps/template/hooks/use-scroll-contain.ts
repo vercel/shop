@@ -46,7 +46,6 @@ export function useScrollContain(
     e.preventDefault();
   });
 
-  // oxlint-disable-next-line react/exhaustive-deps -- ref is stable; enabled changing to true coincides with the panel mounting
   useEffect(() => {
     if (!enabled) return;
     const panel = ref.current;
@@ -61,5 +60,5 @@ export function useScrollContain(
       panel.removeEventListener("touchstart", onTouchStart);
       panel.removeEventListener("touchmove", onTouchMove);
     };
-  }, [enabled]);
+  }, [enabled, ref]);
 }

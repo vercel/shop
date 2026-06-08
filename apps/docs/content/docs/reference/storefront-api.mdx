@@ -70,13 +70,13 @@ Always verify fields against the live Storefront API schema with `shopify-ai-too
 
 Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
 
-| Fragment                    | Covers                                                                                         |
-| --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `MONEY_FRAGMENT`            | `amount` and `currencyCode` on `MoneyV2`                                                       |
-| `IMAGE_FRAGMENT`            | `url`, `altText`, `width`, `height` on `Image`                                                 |
-| `PRODUCT_VARIANT_FRAGMENT`  | Variant price, options, image, availability                                                    |
-| `PRODUCT_FRAGMENT`          | Full product: media, variants (up to 50), options with swatches, metafields, price ranges, SEO |
-| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields)                                           |
+| Fragment                    | Covers                                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `MONEY_FRAGMENT`            | `amount` and `currencyCode` on `MoneyV2`                                                        |
+| `IMAGE_FRAGMENT`            | `url`, `altText`, `width`, `height` on `Image`                                                  |
+| `PRODUCT_VARIANT_FRAGMENT`  | Variant price, options, image, availability                                                     |
+| `PRODUCT_FRAGMENT`          | Full product: media, variants (up to 250), options with swatches, metafields, price ranges, SEO |
+| `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields)                                            |
 
 Embed fragments in a query with template literal interpolation: `` `${PRODUCT_FRAGMENT} query ...` ``.
 

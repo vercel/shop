@@ -5,6 +5,7 @@ import {
   createUIMessageStreamResponse,
   safeValidateUIMessages,
 } from "ai";
+
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
 import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
 import { agent as agentConfig } from "@/lib/config";
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
   let newCartCookie: string | undefined;
 
   if (!cartId) {
-    const newCart = await createCartWithoutCookie(locale);
+    const { cart: newCart } = await createCartWithoutCookie(locale);
     if (newCart.id) {
       cartId = newCart.id;
       newCartCookie = buildCartIdSetCookieHeader(newCart.id);

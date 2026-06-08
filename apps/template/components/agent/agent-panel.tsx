@@ -398,7 +398,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [open]);
+  }, [open, onOpenChange, triggerRef]);
 
   useScrollContain(panelRef, open);
 

@@ -28,7 +28,10 @@ Use the lineId from getCart results, not the product or variant ID.`,
       }
 
       try {
-        const updatedCart = await updateCart([{ id: lineId, merchandiseId, quantity }], cartId);
+        const { cart: updatedCart } = await updateCart(
+          [{ id: lineId, merchandiseId, quantity }],
+          cartId,
+        );
 
         return {
           success: true,

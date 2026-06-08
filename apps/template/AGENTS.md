@@ -38,7 +38,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### Ordering & Organization
 
-- Alphabetize named export specifiers, i18n JSON keys (within each section and at the top level), string union type members, and config object keys.
+- Alphabetize named export specifiers, object destructuring patterns, interface and type properties, config object keys, i18n JSON keys (within each section and at the top level), and string union type members.
 - No barrel files — never create an `index.ts` that only re-exports. Import from the source file directly.
 - oxfmt handles import sorting automatically via `pnpm format`.
 

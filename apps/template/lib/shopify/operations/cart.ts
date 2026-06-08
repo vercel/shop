@@ -1,15 +1,19 @@
-import {
-  getCartIdFromCookie,
-  invalidateCartCache,
-  setCartIdCookie,
-} from "@/lib/cart/server";
+import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Cart } from "@/lib/types";
+import type { Cart, CartWarning } from "@/lib/types";
 
 import { type CartMutationPayload, unwrapCartMutation } from "../errors";
 import { shopifyFetch } from "../fetch";
 import { CART_FRAGMENT } from "../fragments";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
+
+const WARNINGS_QUERY_FRAGMENT = `
+  warnings {
+    code
+    message
+    target
+  }
+`;
 
 const GET_CART_QUERY = `
   ${CART_FRAGMENT}
@@ -31,6 +35,7 @@ const CART_CREATE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -46,6 +51,7 @@ const CART_LINES_ADD_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -61,6 +67,7 @@ const CART_LINES_UPDATE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -76,6 +83,7 @@ const CART_LINES_REMOVE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -91,6 +99,7 @@ const CART_BUYER_IDENTITY_UPDATE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -106,6 +115,23 @@ const CART_NOTE_UPDATE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
+    }
+  }
+`;
+
+const CART_DISCOUNT_CODES_UPDATE_MUTATION = `
+  ${CART_FRAGMENT}
+  mutation cartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
+    cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
+      cart {
+        ...CartFields
+      }
+      userErrors {
+        field
+        message
+      }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -131,6 +157,7 @@ const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
@@ -165,9 +192,20 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
         field
         message
       }
+      ${WARNINGS_QUERY_FRAGMENT}
     }
   }
 `;
+
+export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
+
+function applyMutation(
+  payload: CartMutationPayload<ShopifyCart>,
+  operation: string,
+): CartMutationResult {
+  const { cart, warnings } = unwrapCartMutation(payload, operation);
+  return { cart: transformShopifyCart(cart), warnings };
+}
 
 export async function getCart(cartId?: string): Promise<Cart | undefined> {
   if (!cartId) {
@@ -190,7 +228,9 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
  * Use in streaming contexts (e.g., the AI agent) where `cookies().set()` won't work.
  * The caller is responsible for setting the cookie via response headers.
  */
-export async function createCartWithoutCookie(locale: string = defaultLocale): Promise<Cart> {
+export async function createCartWithoutCookie(
+  locale: string = defaultLocale,
+): Promise<CartMutationResult> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -208,33 +248,33 @@ export async function createCartWithoutCookie(locale: string = defaultLocale): P
     },
   });
 
-  const cart = transformShopifyCart(unwrapCartMutation(data.cartCreate, "cartCreate"));
+  const result = applyMutation(data.cartCreate, "cartCreate");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
-export async function createCart(locale: string = defaultLocale): Promise<Cart> {
-  const cart = await createCartWithoutCookie(locale);
+export async function createCart(locale: string = defaultLocale): Promise<CartMutationResult> {
+  const result = await createCartWithoutCookie(locale);
 
-  if (cart.id) {
-    await setCartIdCookie(cart.id);
+  if (result.cart.id) {
+    await setCartIdCookie(result.cart.id);
   }
 
-  return cart;
+  return result;
 }
 
 export async function addToCart(
   lines: { merchandiseId: string; quantity: number }[],
   cartId?: string,
   locale: string = defaultLocale,
-): Promise<Cart> {
+): Promise<CartMutationResult> {
   if (!cartId) {
     cartId = await getCartIdFromCookie();
   }
 
   if (!cartId) {
-    const cart = await createCart(locale);
-    cartId = cart.id;
+    const created = await createCart(locale);
+    cartId = created.cart.id;
   }
 
   const data = await shopifyFetch<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>({
@@ -243,15 +283,15 @@ export async function addToCart(
     variables: { cartId, lines },
   });
 
-  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesAdd, "cartLinesAdd"));
+  const result = applyMutation(data.cartLinesAdd, "cartLinesAdd");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
 export async function updateCart(
   lines: { id: string; merchandiseId: string; quantity: number }[],
   cartIdOverride?: string,
-): Promise<Cart> {
+): Promise<CartMutationResult> {
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
@@ -266,12 +306,15 @@ export async function updateCart(
     },
   });
 
-  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesUpdate, "cartLinesUpdate"));
+  const result = applyMutation(data.cartLinesUpdate, "cartLinesUpdate");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
-export async function removeFromCart(lineIds: string[], cartIdOverride?: string): Promise<Cart> {
+export async function removeFromCart(
+  lineIds: string[],
+  cartIdOverride?: string,
+): Promise<CartMutationResult> {
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
@@ -283,15 +326,15 @@ export async function removeFromCart(lineIds: string[], cartIdOverride?: string)
     variables: { cartId, lineIds },
   });
 
-  const cart = transformShopifyCart(unwrapCartMutation(data.cartLinesRemove, "cartLinesRemove"));
+  const result = applyMutation(data.cartLinesRemove, "cartLinesRemove");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
 export async function updateCartBuyerIdentity(
   locale: string,
   countryCode?: string,
-): Promise<Cart | undefined> {
+): Promise<CartMutationResult | undefined> {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
@@ -310,17 +353,15 @@ export async function updateCartBuyerIdentity(
     },
   });
 
-  const cart = transformShopifyCart(
-    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
-  );
+  const result = applyMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
 export async function linkCartToCustomer(
   customerAccessToken: string,
   cartIdOverride?: string,
-): Promise<Cart | undefined> {
+): Promise<CartMutationResult | undefined> {
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
@@ -337,17 +378,15 @@ export async function linkCartToCustomer(
     },
   });
 
-  const cart = transformShopifyCart(
-    unwrapCartMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate"),
-  );
+  const result = applyMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
 export async function updateCartNote(
   note: string,
   cartIdOverride?: string,
-): Promise<Cart | undefined> {
+): Promise<CartMutationResult | undefined> {
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
@@ -362,9 +401,29 @@ export async function updateCartNote(
     },
   });
 
-  const cart = transformShopifyCart(unwrapCartMutation(data.cartNoteUpdate, "cartNoteUpdate"));
+  const result = applyMutation(data.cartNoteUpdate, "cartNoteUpdate");
   invalidateCartCache();
-  return cart;
+  return result;
+}
+
+export async function updateCartDiscountCodes(
+  discountCodes: string[],
+  cartIdOverride?: string,
+): Promise<CartMutationResult | undefined> {
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
+  if (!cartId) return undefined;
+
+  const data = await shopifyFetch<{
+    cartDiscountCodesUpdate: CartMutationPayload<ShopifyCart>;
+  }>({
+    operation: "cartDiscountCodesUpdate",
+    query: CART_DISCOUNT_CODES_UPDATE_MUTATION,
+    variables: { cartId, discountCodes },
+  });
+
+  const result = applyMutation(data.cartDiscountCodesUpdate, "cartDiscountCodesUpdate");
+  invalidateCartCache();
+  return result;
 }
 
 export async function getCartSelectableAddressId(): Promise<string | undefined> {
@@ -387,9 +446,9 @@ export async function getCartSelectableAddressId(): Promise<string | undefined> 
 export async function addCartDeliveryAddress(address: {
   city?: string;
   countryCode: string;
-  zip?: string;
   customerAddressId?: string;
-}): Promise<Cart | undefined> {
+  zip?: string;
+}): Promise<CartMutationResult | undefined> {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
@@ -421,17 +480,15 @@ export async function addCartDeliveryAddress(address: {
     },
   });
 
-  const cart = transformShopifyCart(
-    unwrapCartMutation(data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd"),
-  );
+  const result = applyMutation(data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd");
   invalidateCartCache();
-  return cart;
+  return result;
 }
 
 export type CartShippingOption = {
-  title: string;
-  estimatedCost: { amount: string; currencyCode: string };
   deliveryMethodType: string;
+  estimatedCost: { amount: string; currencyCode: string };
+  title: string;
 };
 
 export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
@@ -443,9 +500,9 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
       deliveryGroups: {
         nodes: Array<{
           deliveryOptions: Array<{
-            title: string | null;
-            estimatedCost: { amount: string; currencyCode: string };
             deliveryMethodType: string;
+            estimatedCost: { amount: string; currencyCode: string };
+            title: string | null;
           }>;
         }>;
       };
@@ -468,9 +525,9 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
       return true;
     })
     .map((opt) => ({
-      title: opt.title ?? opt.deliveryMethodType,
-      estimatedCost: opt.estimatedCost,
       deliveryMethodType: opt.deliveryMethodType,
+      estimatedCost: opt.estimatedCost,
+      title: opt.title ?? opt.deliveryMethodType,
     }));
 }
 
@@ -479,10 +536,10 @@ export async function updateCartDeliveryAddress(
   address: {
     city?: string;
     countryCode: string;
-    zip?: string;
     customerAddressId?: string;
+    zip?: string;
   },
-): Promise<Cart | undefined> {
+): Promise<CartMutationResult | undefined> {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
@@ -514,9 +571,7 @@ export async function updateCartDeliveryAddress(
     },
   });
 
-  const cart = transformShopifyCart(
-    unwrapCartMutation(data.cartDeliveryAddressesUpdate, "cartDeliveryAddressesUpdate"),
-  );
+  const result = applyMutation(data.cartDeliveryAddressesUpdate, "cartDeliveryAddressesUpdate");
   invalidateCartCache();
-  return cart;
+  return result;
 }

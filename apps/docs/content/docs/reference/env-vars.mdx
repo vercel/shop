@@ -25,11 +25,11 @@ Both optional features are opt-in via explicit `NEXT_PUBLIC_ENABLE_*` flags. The
 
 Required when `NEXT_PUBLIC_ENABLE_AUTH="1"`. Powers built-in customer authentication via [better-auth](https://www.better-auth.com/) and Shopify Customer Account API OIDC.
 
-| Variable                         | Description                                                                                              |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `BETTER_AUTH_SECRET`             | Secret for signing sessions. Generate with `openssl rand -base64 32`.                                    |
-| `SHOPIFY_CUSTOMER_CLIENT_ID`     | Customer Account API client ID. Found in **Shopify Admin → Settings → Customer accounts → API clients**. |
-| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Found in the same location as the client ID.                         |
+| Variable                         | Description                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `BETTER_AUTH_SECRET`             | Secret for signing sessions. Generate with `openssl rand -base64 32`.                                   |
+| `SHOPIFY_CUSTOMER_CLIENT_ID`     | Customer Account API client ID. Found in **Sales channels → Headless → Customer Account API**.          |
+| `SHOPIFY_CUSTOMER_CLIENT_SECRET` | Customer Account API client secret. Same location as the client ID; requires a **Confidential** client. |
 
 ## Optional
 

@@ -13,7 +13,7 @@ import {
 import { addToCartAction } from "@/lib/cart/action";
 import { removeFromCartAction, updateCartQuantityAction } from "@/lib/cart/action";
 import type { OptimisticProductInfo } from "@/lib/product";
-import type { Cart, CartLine } from "@/lib/types";
+import type { Cart, CartLine, CartWarning } from "@/lib/types";
 
 const DEBOUNCE_MS = 400;
 
@@ -104,6 +104,9 @@ function computeCartWithPending(
       },
       lines: pendingLines,
       shippingCost: null,
+      discountCodes: [],
+      discountAllocations: [],
+      appliedGiftCards: [],
     } as Cart;
   }
 
@@ -153,22 +156,25 @@ function applyPendingLineOperations(
 }
 
 type CartContextType = {
-  cart: Cart | null;
-  cartWithPending: Cart | null;
-  setCart: (cart: Cart | null) => void;
-  isOverlayOpen: boolean;
-  setOverlayOpen: (open: boolean) => void;
-  openOverlay: () => void;
-  isAddingToCart: boolean;
   addToCartOptimistic: (
     variantId: string,
     quantity: number,
     productInfo?: OptimisticProductInfo,
   ) => Promise<boolean>;
+  cart: Cart | null;
+  cartWithPending: Cart | null;
+  clearWarnings: () => void;
+  isAddingToCart: boolean;
+  isOverlayOpen: boolean;
+  isUpdatingCart: boolean;
+  lastWarnings: CartWarning[];
+  openOverlay: () => void;
   pendingQuantity: number;
+  setCart: (cart: Cart | null) => void;
+  setOverlayOpen: (open: boolean) => void;
+  setWarnings: (warnings: CartWarning[]) => void;
   /** quantity=0 removes the item. */
   updateItemOptimistic: (lineId: string, quantity: number) => void;
-  isUpdatingCart: boolean;
 };
 
 type LineOperation = {
@@ -181,17 +187,20 @@ type LineOperation = {
 const CartContext = createContext<CartContextType | null>(null);
 
 const serverFallbackCartContext: CartContextType = {
+  addToCartOptimistic: async () => false,
   cart: null,
   cartWithPending: null,
-  setCart: () => {},
-  isOverlayOpen: false,
-  setOverlayOpen: () => {},
-  openOverlay: () => {},
+  clearWarnings: () => {},
   isAddingToCart: false,
-  addToCartOptimistic: async () => false,
-  pendingQuantity: 0,
-  updateItemOptimistic: () => {},
+  isOverlayOpen: false,
   isUpdatingCart: false,
+  lastWarnings: [],
+  openOverlay: () => {},
+  pendingQuantity: 0,
+  setCart: () => {},
+  setOverlayOpen: () => {},
+  setWarnings: () => {},
+  updateItemOptimistic: () => {},
 };
 
 export function CartProvider({
@@ -208,6 +217,8 @@ export function CartProvider({
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [pendingQuantity, setPendingQuantity] = useState(0);
   const [pendingLines, setPendingLines] = useState<CartLine[]>([]);
+  const [lastWarnings, setLastWarnings] = useState<CartWarning[]>([]);
+  const clearWarnings = useCallback(() => setLastWarnings([]), []);
 
   const [isUpdatingCart, setIsUpdatingCart] = useState(false);
   const inFlightCountRef = useRef(0);
@@ -263,6 +274,7 @@ export function CartProvider({
         featuredImage: info.image,
       },
     },
+    discountAllocations: [],
   });
 
   const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(new Map());
@@ -333,6 +345,7 @@ export function CartProvider({
 
             if (result.success && result.cart) {
               setCartInternal(result.cart);
+              setLastWarnings(result.warnings ?? []);
             }
           } catch (error) {
             console.error("Failed to add item to cart:", error);
@@ -387,6 +400,7 @@ export function CartProvider({
         // state — the debounce timer will fire the final request.
         if (!pending || pending.targetQuantity === quantity) {
           setCartInternal(result.cart);
+          setLastWarnings(result.warnings ?? []);
           lineOpsRef.current.delete(lineId);
         }
       } else if (originalCart) {
@@ -422,6 +436,7 @@ export function CartProvider({
         const result = await removeFromCartAction(lineId);
         if (result.success && result.cart) {
           setCartInternal(result.cart);
+          setLastWarnings(result.warnings ?? []);
         } else {
           setCartInternal(originalCart);
         }
@@ -469,11 +484,13 @@ export function CartProvider({
         clearTimeout(debounce.timer);
       }
 
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- clear timers held at unmount, not at effect setup
       for (const [, pending] of lineOpsRef.current) {
         if (pending.timer !== null) {
           clearTimeout(pending.timer);
         }
       }
+      // oxlint-disable-next-line react-hooks/exhaustive-deps -- clear the latest request-id map at unmount
       latestLineRequestIdRef.current.clear();
     };
   }, []);
@@ -493,17 +510,20 @@ export function CartProvider({
   return (
     <CartContext.Provider
       value={{
+        addToCartOptimistic,
         cart: displayCart,
         cartWithPending,
-        setCart: setCartInternal,
-        isOverlayOpen,
-        setOverlayOpen,
-        openOverlay,
+        clearWarnings,
         isAddingToCart,
-        addToCartOptimistic,
-        pendingQuantity,
-        updateItemOptimistic,
+        isOverlayOpen,
         isUpdatingCart,
+        lastWarnings,
+        openOverlay,
+        pendingQuantity,
+        setCart: setCartInternal,
+        setOverlayOpen,
+        setWarnings: setLastWarnings,
+        updateItemOptimistic,
       }}
     >
       {children}

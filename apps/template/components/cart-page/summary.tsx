@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
+import { DiscountForm } from "@/components/cart/discount-form";
+import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 import { cn, formatPrice } from "@/lib/utils";
 
@@ -71,19 +73,21 @@ export function Summary({ locale }: SummaryProps) {
 
   if (!cart) return null;
 
-  const subtotal = cart.lines.reduce(
+  const lineSubtotal = cart.lines.reduce(
     (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
     0,
   );
+  const estimatedTotal = Math.max(0, lineSubtotal - cartDiscountAmount(cart));
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
   return (
     <div className="space-y-5">
+      <DiscountForm cart={cart} locale={locale} />
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
           <span className="text-xl font-medium text-foreground">
-            {formatPrice(subtotal, currencyCode, locale)}
+            {formatPrice(estimatedTotal, currencyCode, locale)}
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
