@@ -25,7 +25,11 @@ Both the page count and each page of resources are cached with `cacheLife("max")
 
 ## Adding more resource types
 
-The template scopes sitemaps to products and collections. Shopify's `SitemapType` enum also covers `PAGE`, `BLOG`, `ARTICLE`, and `METAOBJECT`. To add one, extend `ShopifySitemapType` in `lib/shopify/operations/sitemap.ts`, then add a branch in `app/sitemap/[shard]/route.ts` that maps the resource to a URL path. The shard index in `app/sitemap.xml/route.ts` picks up new types automatically.
+The template scopes sitemaps to products and collections. Shopify's `SitemapType` enum also covers `PAGE`, `BLOG`, `ARTICLE`, and `METAOBJECT`. Both routes name those two types explicitly, so adding one touches three places:
+
+1. **`lib/shopify/operations/sitemap.ts`** — extend the `ShopifySitemapType` union.
+2. **`app/sitemap.xml/route.ts`** — fetch the new type's `getShopifySitemapPagesCount(...)` and spread its `{type}-{n}` ids into the index alongside the product and collection shards. The index lists only what you add here — it does not discover new types on its own.
+3. **`app/sitemap/[shard]/route.ts`** — widen the shard regex and the type mapping so the new `{type}-{n}` segments resolve, then map each item to its URL path.
 
 ## Key files
 
