@@ -23,7 +23,7 @@ PDP option links use option-name query parameters such as `?Color=Black&Size=Med
 
 For Combined Listings, confirm the generated option link can change the product handle to the selected variant's owning product.
 
-Existing Liquid links such as `?variant=123` should permanently redirect to an option-name URL. If they do not, verify `getProductVariantRouteSelection()` can resolve the numeric ID and that the Storefront token can access the variant.
+Existing Liquid links such as `?variant=123` should permanently redirect to an option-name URL. If they do not, verify the query matcher in `proxy.ts` is preserved, `getProductVariantRouteSelection()` can resolve the numeric ID, and the Storefront token can access the variant.
 
 If every option appears unavailable, verify the local encoded-variant decoder still matches Shopify's current `v1_` encoding and that `options.optionValues` are queried in Shopify's option order.
 

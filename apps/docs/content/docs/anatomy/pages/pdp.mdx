@@ -35,9 +35,9 @@ The route passes those values to `getProductSelection()`, whose compact fragment
 
 ### Liquid storefront migration
 
-Shopify Liquid themes use `/products/:handle?variant=:variantId` for variant deep links. The headless PDP accepts those URLs as migration inputs, resolves the variant through a small `cache: "no-store"` query, and issues a permanent redirect to the normalized option-name URL. This preserves indexed links, backlinks, ads, emails, and bookmarks while moving shoppers onto the headless URL format. Campaign and ad-click query parameters are preserved through the redirect.
+Shopify Liquid themes use `/products/:handle?variant=:variantId` for variant deep links. A query-matched product proxy accepts those URLs as migration inputs, resolves the variant through a small `cache: "no-store"` query, and issues a permanent redirect to the normalized option-name URL before the PDP renders. This preserves indexed links, backlinks, ads, emails, and bookmarks while moving shoppers onto the headless URL format. Campaign and ad-click query parameters are preserved through the redirect.
 
-The compatibility lookup is never stored in Runtime Cache, so imported Liquid links do not create high-cardinality variant entries. Product metadata keeps the base product path as the canonical URL, consolidating variant combinations as one product for search engines.
+Requests without `variant` do not match the compatibility proxy, so normal PDPs remain prerenderable and pay no additional lookup. The compatibility lookup is never stored in Runtime Cache, so imported Liquid links do not create high-cardinality variant entries. Product metadata keeps the base product path as the canonical URL, consolidating variant combinations as one product for search engines.
 
 ### High-variant products
 

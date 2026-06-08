@@ -27,7 +27,7 @@ type: reference
 
 ## Variant URLs
 
-PDP option links use option-name query parameters so Shopify can resolve high-variant products and Combined Listings without loading every variant. Shopify-standard Liquid variant URLs remain valid migration inputs and permanently redirect to the equivalent option-name URL:
+PDP option links use option-name query parameters so Shopify can resolve high-variant products and Combined Listings without loading every variant. Shopify-standard Liquid variant URLs remain valid migration inputs and permanently redirect to the equivalent option-name URL. The compatibility redirect runs in the query-matched `proxy.ts`, so ordinary PDP requests remain prerenderable:
 
 | URL                                              | Purpose                                                            |
 | ------------------------------------------------ | ------------------------------------------------------------------ |
