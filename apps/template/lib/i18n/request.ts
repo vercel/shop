@@ -5,6 +5,7 @@ import type enMessages from "./messages/en.json";
 
 const messageLoaders = {
   "en-US": () => import("./messages/en.json"),
+  "fr-FR": () => import("./messages/fr.json"),
 } as const;
 
 export default getRequestConfig(async () => {
