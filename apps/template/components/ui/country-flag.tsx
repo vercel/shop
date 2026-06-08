@@ -7,6 +7,7 @@ const COUNTRY_CODES: Record<string, string> = {
   "en-GB": "GB",
   "es-ES": "ES",
   "de-DE": "DE",
+  "fr-CA": "CA",
   "fr-FR": "FR",
   "nl-NL": "NL",
   "pt-PT": "PT",

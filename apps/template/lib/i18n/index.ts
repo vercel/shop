@@ -1,10 +1,10 @@
-export const locales = ["en-US", "fr-FR"] as const;
+export const locales = ["en-US", "fr-CA"] as const;
 
 export type Locale = (typeof locales)[number];
 
 // Deployment-level locale mode. By default the storefront runs in single-locale
 // mode, but additional locales can be enabled here when the app is ready.
-export const defaultLocale: Locale = "fr-FR";
+export const defaultLocale: Locale = "fr-CA";
 export const enabledLocales: readonly Locale[] = [defaultLocale];
 export const localeSwitchingEnabled = enabledLocales.length > 1;
 
@@ -27,7 +27,7 @@ export function resolveLocale(value: string | null | undefined): Locale {
 
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
   "en-US": { currency: "USD", symbol: "$" },
-  "fr-FR": { currency: "EUR", symbol: "€" },
+  "fr-CA": { currency: "CAD", symbol: "$" },
 };
 
 export type LocaleData = {
