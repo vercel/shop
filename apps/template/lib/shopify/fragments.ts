@@ -243,7 +243,7 @@ export const PRODUCT_FRAGMENT = `
         ...MoneyFields
       }
     }
-    variants(first: 50) {
+    variants(first: 250) {
       edges {
         node {
           ...ProductVariantFields
