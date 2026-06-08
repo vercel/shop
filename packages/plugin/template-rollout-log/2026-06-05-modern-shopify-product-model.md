@@ -8,11 +8,13 @@ appliesTo:
   - all
 paths:
   - apps/template/app/products/[handle]/page.tsx
+  - apps/template/proxy.ts
   - apps/template/components/product-detail/
   - apps/template/components/cart/
   - apps/template/lib/agent/
   - apps/template/lib/product.ts
   - apps/template/lib/shopify/fragments.ts
+  - apps/template/lib/shopify/operations/product-variant-route.ts
   - apps/template/lib/shopify/operations/cart.ts
   - apps/template/lib/shopify/operations/products.ts
   - apps/template/lib/shopify/transforms/cart.ts
@@ -34,7 +36,7 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 - `encodedVariantExistence` and `encodedVariantAvailability`
 - `variantsCount`
 
-PDP and product-card links use option-name query parameters and can navigate across Combined Listing child product handles. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
+PDP and product-card links use option-name query parameters and can navigate across Combined Listing child product handles. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
 
 The same change adds Shopify bundle awareness:
 
@@ -76,7 +78,7 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 - PDP and product-card links use option names and values. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
 - Keep `getProduct()` keyed only by handle and locale. Selected option combinations belong in the uncached `getProductSelection()` path.
 - Start base product and selection requests in parallel; do not await the product before resolving selected options.
-- Keep the variant-ID compatibility lookup uncached; it must not add variant IDs to Runtime Cache.
+- Keep the variant-ID compatibility lookup uncached and isolated in the query-matched product proxy; it must not add variant IDs to Runtime Cache or make ordinary PDPs dynamic.
 - Pass only the selected variant fields required by client buy controls; keep bundle relationship arrays on the server.
 - Customized bundle selection remains app-specific. Add its picker and component inputs before enabling direct purchase for a `requiresComponents` variant with no fixed components.
 

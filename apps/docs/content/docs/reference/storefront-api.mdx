@@ -132,7 +132,7 @@ Key elements:
 
 ## Caching
 
-Most read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and requests. High-cardinality operations such as product selections, search, filters, sort, and cursors also use the remote cache with their function arguments as part of the key.
+Most stable read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and requests. Search, filters, sort, and cursor reads also use the remote cache with their function arguments as part of the key; the high-cardinality product selection read is uncached.
 
 The PDP's base `getProduct()` read is the deliberate exception: it uses plain `"use cache"` so it can resolve during prerender and bake the product body into the static shell. Combined with webhook-driven `revalidateTag()` invalidation, both cache modes stay fresh while preserving coherent PDP rendering. Tags follow a hierarchy:
 
@@ -185,7 +185,7 @@ This avoids a historical `first: 50` cap, scales to Shopify's 2,048-variant prod
 
 `getProductSelection()` uses `cache: "no-store"` because selected option combinations have high cardinality. It is also used by tools that need to resolve an exact option combination, such as the shopping agent. Product cards and PDP option links use option-name query parameters rather than numeric variant IDs.
 
-Inbound Shopify Liquid links using `?variant=:variantId` are resolved by a separate uncached `node(id:)` query. The route permanently redirects to the equivalent option-name URL while preserving attribution parameters. Product metadata continues to canonicalize variants to the base product path, preserving migration SEO without storing variant-ID entries in Runtime Cache.
+Inbound Shopify Liquid links using `?variant=:variantId` are resolved by a separate uncached `node(id:)` query in the query-matched product proxy. The proxy permanently redirects to the equivalent option-name URL while preserving attribution parameters. Requests without `variant` bypass that proxy matcher, so normal PDP prerendering and cached base-product reads are unchanged. Product metadata continues to canonicalize variants to the base product path, preserving migration SEO without storing variant-ID entries in Runtime Cache.
 
 ## Error handling
 

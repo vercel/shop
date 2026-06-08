@@ -351,7 +351,7 @@ export function proxy(request: NextRequest) {
 }
 ```
 
-> **Note:** Product variant selection stays on Shopify's standard `?variant=` query parameter. The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
+> **Note:** Extend the template's existing `proxy.ts`; do not replace its Liquid `?variant=` compatibility branch. Run that branch with the locale parsed from the product pathname before delegating to next-intl. The variant lookup remains query-gated and uncached, while the built-in content negotiation rewrite in `next.config.ts` continues to handle markdown negotiation.
 
 ---
 
