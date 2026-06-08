@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
+  partialPrefetching: true,
   reactCompiler: true,
   async rewrites() {
     return {
