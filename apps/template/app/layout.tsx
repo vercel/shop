@@ -11,6 +11,7 @@ import { AnalyticsComponents } from "@/components/analytics";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
+import { MessagingBar } from "@/components/messaging-bar";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { agent, siteConfig } from "@/lib/config";
@@ -49,6 +50,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
+            <MessagingBar />
             <Nav locale={locale} />
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
