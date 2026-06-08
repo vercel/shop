@@ -2,61 +2,70 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { shopifyFetch } from "../fetch";
 
-interface ProductHandleNode {
+export type ShopifySitemapType = "COLLECTION" | "PRODUCT";
+
+export interface SitemapResource {
   handle: string;
   updatedAt: string;
 }
 
-interface ProductsPage {
-  edges: Array<{ node: ProductHandleNode }>;
-  pageInfo: {
-    hasNextPage: boolean;
-    endCursor: string | null;
-  };
-}
-
-const GET_PRODUCT_HANDLES_QUERY = `
-  query getProductHandlesForSitemap($first: Int!, $after: String) {
-    products(first: $first, after: $after) {
-      edges {
-        node {
-          handle
-          updatedAt
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
+const GET_SITEMAP_PAGES_COUNT_QUERY = `
+  query getSitemapPagesCount($type: SitemapType!) {
+    sitemap(type: $type) {
+      pagesCount {
+        count
       }
     }
   }
 `;
 
-const PAGE_SIZE = 250;
+const GET_SITEMAP_PAGE_QUERY = `
+  query getSitemapPage($type: SitemapType!, $page: Int!) {
+    sitemap(type: $type) {
+      resources(page: $page) {
+        hasNextPage
+        items {
+          handle
+          updatedAt
+        }
+      }
+    }
+  }
+`;
 
-export async function getAllProductHandles(): Promise<ProductHandleNode[]> {
+function cacheTagFor(type: ShopifySitemapType): string {
+  return type === "PRODUCT" ? "products" : "collections";
+}
+
+export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache";
   cacheLife("max");
-  cacheTag("products");
+  cacheTag(cacheTagFor(type));
 
-  const products: ProductHandleNode[] = [];
-  let after: string | null = null;
-  let hasNextPage = true;
+  const data = await shopifyFetch<{ sitemap: { pagesCount: { count: number } } }>({
+    operation: "getSitemapPagesCount",
+    query: GET_SITEMAP_PAGES_COUNT_QUERY,
+    variables: { type },
+  });
 
-  while (hasNextPage) {
-    const pageData: { products: ProductsPage } = await shopifyFetch({
-      operation: "getProductHandlesForSitemap",
-      query: GET_PRODUCT_HANDLES_QUERY,
-      variables: {
-        first: PAGE_SIZE,
-        after,
-      },
-    });
+  return data.sitemap.pagesCount.count;
+}
 
-    products.push(...pageData.products.edges.map((edge) => edge.node));
-    hasNextPage = pageData.products.pageInfo.hasNextPage;
-    after = pageData.products.pageInfo.endCursor;
-  }
+export async function getShopifySitemapPage(
+  type: ShopifySitemapType,
+  page: number,
+): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
+  "use cache";
+  cacheLife("max");
+  cacheTag(cacheTagFor(type));
 
-  return products;
+  const data = await shopifyFetch<{
+    sitemap: { resources: { hasNextPage: boolean; items: SitemapResource[] } };
+  }>({
+    operation: "getSitemapPage",
+    query: GET_SITEMAP_PAGE_QUERY,
+    variables: { type, page },
+  });
+
+  return data.sitemap.resources;
 }

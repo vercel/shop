@@ -122,7 +122,7 @@ export default async function HomePage() {
 }
 ```
 
-Update `app/pages/[slug]/page.tsx` and `app/sitemap.ts` to use `getMarketingPage` and `getAllMarketingPageSlugs`.
+Update `app/pages/[slug]/page.tsx` to use `getMarketingPage` and `getAllMarketingPageSlugs`. To index CMS pages in the sitemap, add a `cms-pages-{n}` shard type to `app/sitemap/[shard]/route.ts` and include it in `app/sitemap.xml/route.ts`.
 
 ### 5. Add cache invalidation webhook
 

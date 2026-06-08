@@ -227,7 +227,7 @@ export const { Link, redirect, usePathname, useRouter } = createNavigation(routi
 
 ## Step 5: Move Routes Under `app/[locale]/`
 
-Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.ts`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
+Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.xml/`, `sitemap/`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
 
 ```
 app/layout.tsx          → app/[locale]/layout.tsx
@@ -336,7 +336,7 @@ Add a `proxy.ts` with next-intl middleware for locale routing:
 ```ts
 export const config = {
   matcher: [
-    "/((?!.well-known|api|sitemaps|webhooks|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    "/((?!.well-known|api|webhooks|_next/static|_next/image|favicon.ico|sitemap.xml|sitemap/|robots.txt).*)",
   ],
 };
 
@@ -477,9 +477,9 @@ export function buildAlternates({
 
 ## Step 12: Update Sitemap with Per-Locale URLs
 
-**File:** `app/sitemap.ts`
+**File:** `app/sitemap/[shard]/route.ts`
 
-Add per-locale URL generation. For each page entry, generate an entry for each enabled locale with `alternates.languages`:
+Sitemap children are emitted as raw XML by the shard route handler. For each resource, emit one `<url>` per enabled locale, and inside each `<url>` emit `<xhtml:link rel="alternate" hreflang="..." href="..." />` siblings pointing at the other locale variants. Add `xmlns:xhtml="http://www.w3.org/1999/xhtml"` to the `<urlset>` opening tag.
 
 ```ts
 import { enabledLocales, localeSwitchingEnabled } from "@/lib/i18n";
@@ -488,10 +488,11 @@ function localizePath(locale: string, path: string): string {
   return path === "/" ? `/${locale}` : `/${locale}${path}`;
 }
 
-// When building sitemap entries, if localeSwitchingEnabled:
-// For each path, create entries for all enabled locales
-// and add alternates.languages pointing to all locale variants
+// Inside renderShard(): if localeSwitchingEnabled, for each item iterate
+// enabledLocales and emit a <url> per locale with <xhtml:link> alternates.
 ```
+
+`app/sitemap.xml/route.ts` (the index) doesn't need locale handling — it lists shard URLs which stay locale-agnostic.
 
 ---
 

@@ -172,7 +172,7 @@ Move every route file from `app/` into `app/[locale]/`:
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
 - `app/about/`, `app/account/`, `app/cart/`, `app/collections/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
-**Stay at `app/`:** `api/`, `sitemap.ts`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
+**Stay at `app/`:** `api/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
 
 In the moved layout, fix `import "./globals.css"` → `import "../globals.css"`.
 
@@ -291,17 +291,21 @@ export async function buildAlternates({ pathname, searchParams }: {...}): Promis
 
 ### Step 8: Sitemap per-locale entries
 
+Edit `app/sitemap/[shard]/route.ts`. For every resource, emit one `<url>` per enabled locale and add `<xhtml:link rel="alternate" hreflang="..." href="..." />` siblings inside each `<url>` pointing at the other locale variants. Add `xmlns:xhtml="http://www.w3.org/1999/xhtml"` to the `<urlset>` opening tag.
+
 ```ts
 import { enabledLocales } from "@/lib/i18n";
 
 function localizePath(locale: string, pathname: string): string {
   if (pathname === "/") return `/${locale}`;
-  const normalized = pathname.startsWith("/") ? pathname : `/${pathname}`;
-  return `/${locale}${normalized}`;
+  return `/${locale}${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
 }
 
-// Inside sitemap(): one entry per locale per page.
+// Inside renderShard(): for each item, for each locale, emit a <url> with
+// a <loc> at the localized path and an <xhtml:link> per other locale.
 ```
+
+`app/sitemap.xml/route.ts` (the index) doesn't need locale handling — it only lists shard URLs, which stay locale-agnostic.
 
 ### Step 9: `next.config.ts` rewrites/redirects on `/:locale/*`
 
@@ -359,7 +363,8 @@ pnpm build         # should pass; routes prerender at /en-US, /en-GB, etc.
 pnpm dev           # then:
 curl -I /          # → 307 /en-US
 curl -I /products  # → 307 /en-US/products
-curl /sitemap.xml  # → entries with /en-US/... URLs
+curl /sitemap.xml             # → sitemapindex listing shards
+curl /sitemap/products-1.xml  # → entries with /en-US/... URLs + xhtml:link alternates
 curl /en-US        # → 200 with <html lang="en-US">
 ```
 
