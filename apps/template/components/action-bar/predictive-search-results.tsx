@@ -245,10 +245,10 @@ function LoadingSkeleton() {
     <div className="space-y-2.5">
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
         <div key={key} className="flex items-center gap-2.5">
-          <div className="size-10 rounded-md bg-muted animate-pulse shrink-0" />
+          <div className="size-10 rounded-md bg-skeleton animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
-            <div className="h-3.5 w-3/4 rounded bg-muted animate-pulse" />
-            <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+            <div className="h-3.5 w-3/4 rounded bg-skeleton animate-pulse" />
+            <div className="h-3 w-1/2 rounded bg-skeleton animate-pulse" />
           </div>
         </div>
       ))}
