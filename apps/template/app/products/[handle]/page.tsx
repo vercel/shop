@@ -73,8 +73,6 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export const unstable_instant = true;
-
 export default async function ProductPage({
   params,
   searchParams,
