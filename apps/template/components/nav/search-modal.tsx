@@ -319,10 +319,10 @@ function LoadingSkeleton() {
     <div className="px-4 py-3 space-y-3">
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
         <div key={key} className="flex items-center gap-3">
-          <div className="size-14 bg-skeleton animate-pulse shrink-0" />
+          <div className="size-14 bg-accent animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
-            <div className="h-3.5 w-3/4 rounded bg-skeleton animate-pulse" />
-            <div className="h-3 w-1/3 rounded bg-skeleton animate-pulse" />
+            <div className="h-3.5 w-3/4 rounded bg-accent animate-pulse" />
+            <div className="h-3 w-1/3 rounded bg-accent animate-pulse" />
           </div>
         </div>
       ))}

@@ -197,12 +197,12 @@ function ProductCardSkeleton({
     >
       <div
         data-aspect-ratio={aspectRatio}
-        className={cn("bg-skeleton animate-pulse", aspectRatioClasses)}
+        className={cn("bg-accent animate-pulse", aspectRatioClasses)}
       />
       <div className="py-2.5 h-18 box-content grid gap-2">
-        <div className="h-4 w-full bg-skeleton animate-pulse" />
-        <div className="h-4 w-3/4 bg-skeleton animate-pulse" />
-        <div className="h-4 w-12 bg-skeleton animate-pulse" />
+        <div className="h-4 w-full bg-accent animate-pulse" />
+        <div className="h-4 w-3/4 bg-accent animate-pulse" />
+        <div className="h-4 w-12 bg-accent animate-pulse" />
       </div>
     </div>
   );
