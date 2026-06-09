@@ -51,8 +51,10 @@ export function computeInitialSelectedOptions(
 }
 
 export function getInitialSelectedOptions(variants: ProductVariant[]): SelectedOptions {
+  // Prefer the first purchasable variant so a bare PDP URL opens on a buyable option.
+  const defaultVariant = variants.find((v) => v.availableForSale) ?? variants[0];
   const initial: SelectedOptions = {};
-  for (const option of variants[0]?.selectedOptions ?? []) {
+  for (const option of defaultVariant?.selectedOptions ?? []) {
     initial[option.name] = option.value;
   }
   return initial;

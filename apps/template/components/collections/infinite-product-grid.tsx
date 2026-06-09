@@ -114,12 +114,8 @@ function ClientProductCard({
   locale: string;
   outOfStockText: string;
 }) {
-  const href = product.defaultVariantNumericId
-    ? `/products/${product.handle}?variant=${product.defaultVariantNumericId}`
-    : `/products/${product.handle}`;
-
   return (
-    <Link href={href}>
+    <Link href={`/products/${product.handle}`}>
       <ProductCardRoot>
         <ProductCardImageContainer>
           <ProductCardImage
