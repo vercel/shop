@@ -54,65 +54,13 @@ next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages.
 
 ### C. Don't swap `next/link` to next-intl's `<Link>`
 
-The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
-
-```
-Error: Route "/[locale]/..." accessed [...] which is not defined in the `samples` of `unstable_instant`.
-```
-
-or a generic "blocking route" prerender failure.
+The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers a "blocking route" prerender failure — the route tries to read request data while being statically prerendered.
 
 **Do this instead:** keep `next/link` and let `proxy.ts` middleware redirect unprefixed paths (`/products/foo` → `/en-US/products/foo`). Internal links work; there's a one-time middleware redirect on click for unprefixed hrefs. Trade a few redirects for a clean prerender.
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### D. `unstable_instant` samples need `locale` in `params`
-
-Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
-
-```
-Error: Route "/[locale]/products/[handle]" accessed root param "locale"
-       which is not defined in the `samples` of `unstable_instant`.
-```
-
-Fix:
-
-```ts
-export const unstable_instant = {
-  samples: [
-    {
-      params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
-      searchParams: { variant: "1" },
-      cookies: [{ name: "shopify_cartId", value: null }],
-    },
-  ],
-};
-```
-
-### E. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
-
-This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
-
-```ts
-samples: [
-  {
-    params: { locale: "en-US", handle: "__placeholder__" },
-    searchParams: { variant: "1" },
-    cookies: [{ name: "shopify_cartId", value: null }],
-    headers: [["x-vercel-ip-postal-code", null]], // ← add this
-  },
-],
-```
-
-`null` means "header may be absent." If you forget, the build error is explicit:
-
-```
-Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
-       defined in the `samples` of `unstable_instant`. Add it to the
-       sample's `headers` array, or `["...", null]` if it should be absent.
-```
-
-### F. `redirect()` from next-intl doesn't return `never`
+### D. `redirect()` from next-intl doesn't return `never`
 
 ```ts
 // BREAKS: TS doesn't narrow `session` after redirect
@@ -205,9 +153,8 @@ const messageLoaders: Record<string, () => Promise<{ default: typeof enMessages 
 // We intentionally do NOT destructure `{ locale }` from the callback args.
 // next-intl populates that arg from the `x-next-intl-locale` request header,
 // and reading request headers from inside a cached tree forces the route
-// dynamic — every `unstable_instant` sample then needs an explicit
-// `headers: [["x-next-intl-locale", null]]` declaration. Going straight to
-// `getLocale()` (which reads `next/root-params`) keeps the lookup cacheable.
+// dynamic, defeating the cache. Going straight to `getLocale()` (which reads
+// `next/root-params`) keeps the lookup cacheable.
 export default getRequestConfig(async () => {
   const requested = await getLocale();
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
@@ -329,23 +276,7 @@ export const generateStaticParams = async () => {
 };
 ```
 
-### Step 12: Patch `unstable_instant` samples
-
-Walk every route file that exports `unstable_instant` and add `locale` to each sample's `params`:
-
-```ts
-params: { locale: "en-US", handle: "__placeholder__" }
-```
-
-If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
-
-```ts
-headers: [["x-vercel-ip-postal-code", null]]
-```
-
-(See "Cache Components compatibility D/E" at the top.)
-
-### Step 13: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
+### Step 12: (Conditional) Re-enable `LocaleCurrencySelector` in the megamenu
 
 Only if the `enable-shopify-menus` skill has already been run and `components/nav/megamenu/index.tsx` exists. The selector component lives at `components/nav/locale-currency.tsx` (with a fallback at `locale-currency-fallback.tsx`). Wire it into both `MegamenuDesktop` and `MegamenuMobile` per the original instructions.
 
