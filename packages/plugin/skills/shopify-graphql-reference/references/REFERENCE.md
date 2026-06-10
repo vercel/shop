@@ -9,8 +9,11 @@ Schema validation for this skill comes from the installed `Shopify/shopify-ai-to
 | Resource | Role |
 |------|------|
 | `Shopify/shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
-| `lib/shopify/fetch.ts` | `shopifyFetch()` GraphQL client |
-| `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
+| `lib/shopify/storefront.ts` | Shared `@shopify/storefront-api-client` instance (`storefront`) |
+| `lib/shopify/errors.ts` | `assertStorefrontOk()` response contract |
+| `.graphqlrc.ts` + `pnpm codegen` | Validates `#graphql` queries against the live schema; types in `lib/shopify/types/generated/` |
+| `lib/shopify/fetch.ts` | `customerAccountFetch()` for the separate Customer Account API |
+| `lib/shopify/fragments.ts` | Shared `#graphql` fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
 | `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
 | `lib/shopify/operations/*.ts` | Query and mutation entry points |
 | `lib/shopify/transforms/*.ts` | Shopify-to-domain mapping helpers |
@@ -23,10 +26,21 @@ Every read operation should follow this pattern:
 ```tsx
 import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopifyFetch } from "@/lib/shopify/fetch";
+import { assertStorefrontOk } from "@/lib/shopify/errors";
 import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
+import { storefront } from "@/lib/shopify/storefront";
 import { transformShopifyProductDetails } from "@/lib/shopify/transforms/product";
 import type { ProductDetails } from "@/lib/types";
+
+const GET_PRODUCT_QUERY = `#graphql
+  ${PRODUCT_FRAGMENT}
+  query GetProduct($handle: String!, $country: CountryCode, $language: LanguageCode)
+    @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      ...ProductFields
+    }
+  }
+` as const;
 
 export async function getProduct({
   handle,
@@ -39,29 +53,23 @@ export async function getProduct({
   cacheLife("max");
   cacheTag("products");
 
-  const data = await shopifyFetch<{ product: ShopifyProduct }>({
-    operation: "GetProduct",
-    query: `
-      ${PRODUCT_FRAGMENT}
-      query GetProduct($handle: String!, $country: CountryCode, $language: LanguageCode)
-        @inContext(country: $country, language: $language) {
-        product(handle: $handle) {
-          ...ProductFields
-        }
-      }
-    `,
+  const response = await storefront.request<{ product: ShopifyProduct }>(GET_PRODUCT_QUERY, {
     variables: {
       handle,
       country: getCountryCode(locale),
       language: getLanguageCode(locale),
     },
   });
+  assertStorefrontOk(response, "GetProduct");
+  const { data } = response;
 
   if (!data.product) return undefined;
 
   return transformShopifyProductDetails(data.product);
 }
 ```
+
+> Tag every query and fragment with `#graphql` and end the declaration with `as const`, then run `pnpm --filter template codegen` — it validates the query against the live schema and fails on unknown fields. A raw selection snippet that isn't a valid standalone document must be inlined into the operation, not interpolated (codegen only resolves interpolations of other `#graphql` consts by name).
 
 ## Fragment hierarchy
 
@@ -128,15 +136,16 @@ const products = flattenEdges(data.collection.products);
 
 ### Write a new read operation
 
-1. Define the GraphQL query using existing fragments where possible.
-2. Add `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
-3. Call `shopifyFetch` with the query and variables object.
-4. Transform the response before returning it.
+1. Define the `#graphql ... as const` query using existing fragments where possible.
+2. Run `pnpm --filter template codegen` to validate it against the live schema.
+3. Add `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
+4. Call `storefront.request<ResponseType>(QUERY, { variables })`, then `assertStorefrontOk(response, name)`.
+5. Transform the response before returning it.
 
 ### Write a mutation
 
-1. Define the mutation and typed response shape.
-2. Call `shopifyFetch` without read-cache directives.
+1. Define the `#graphql ... as const` mutation and typed response shape; run codegen.
+2. Call `storefront.request` without read-cache directives, then `assertStorefrontOk`.
 3. Call `invalidateCartCache()` if cart state changed.
 4. Return transformed domain data.
 

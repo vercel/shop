@@ -1,5 +1,27 @@
 import type { CartWarning } from "@/lib/types";
 
+interface StorefrontResponse<T> {
+  data?: T;
+  errors?: { graphQLErrors?: unknown[]; message?: string };
+}
+
+export function assertStorefrontOk<T>(
+  response: StorefrontResponse<T>,
+  operation: string,
+): asserts response is { data: T; errors?: StorefrontResponse<T>["errors"] } {
+  if (response.errors && !response.data) {
+    const detail = response.errors.message ?? JSON.stringify(response.errors.graphQLErrors);
+    throw new Error(`Shopify ${operation} failed: ${detail}`);
+  }
+  if (response.errors) {
+    const detail = JSON.stringify(response.errors.graphQLErrors ?? response.errors.message);
+    console.warn(`[shopify] ${operation} returned partial errors: ${detail}`);
+  }
+  if (!response.data) {
+    throw new Error(`Shopify ${operation}: no data returned`);
+  }
+}
+
 export async function withFallback<T>(promise: Promise<T>, fallback: T): Promise<T> {
   try {
     return await promise;

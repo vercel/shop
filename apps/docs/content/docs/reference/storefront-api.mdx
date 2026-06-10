@@ -6,49 +6,42 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Shopify data flows through a single `shopifyFetch` function in `lib/shopify/fetch.ts`. It wraps the native `fetch` API with Shopify authentication and error handling.
+All Storefront API data flows through a shared client built with [`@shopify/storefront-api-client`](https://www.npmjs.com/package/@shopify/storefront-api-client), exported as `storefront` from `lib/shopify/storefront.ts`. Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-## shopifyFetch
+> The Customer Account API is a separate endpoint and schema. It still uses the hand-rolled `customerAccountFetch` in `lib/shopify/fetch.ts` and is not covered by the Storefront client or codegen.
+
+## storefront.request
 
 ```ts
-import { shopifyFetch } from "@/lib/shopify/fetch";
+import { assertStorefrontOk } from "@/lib/shopify/errors";
+import { storefront } from "@/lib/shopify/storefront";
 
-const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
-  operation: "getProductByHandle",
-  query: GET_PRODUCT_BY_HANDLE_QUERY,
-  variables: { handle, country, language },
-});
+const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
+  GET_PRODUCT_BY_HANDLE_QUERY,
+  { variables: { handle, country, language } },
+);
+assertStorefrontOk(response, "getProductByHandle");
+const { data } = response;
 ```
 
-The function accepts three fields:
-
-- **operation** - the GraphQL operation name. Must match the name in the query string. Appended to the request URL as a query parameter so network logs identify which call was made.
-- **query** - the full GraphQL query or mutation as a template string, including any fragment interpolations.
-- **variables** - an optional object passed as JSON in the request body. Never interpolate values into the query string directly.
-
-The return type is generic - pass the expected shape of `data` from the GraphQL response as the type parameter.
+- **query** (first argument) - the full `#graphql`-tagged query or mutation, including any fragment interpolations.
+- **variables** - passed in the options object as JSON in the request body. Never interpolate values into the query string directly.
+- The generic is the expected shape of `data`. Codegen validates the query against the schema; this type describes the response for transforms and is narrowed to non-null by `assertStorefrontOk`.
 
 ## Request details
 
-Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2026-04/graphql.json` with headers:
-
-| Header                              | Value                        |
-| ----------------------------------- | ---------------------------- |
-| `Content-Type`                      | `application/json`           |
-| `X-Shopify-Storefront-Access-Token` | Your public storefront token |
-
-The operation name is appended as a query parameter (`?operation=getProductByHandle`) so calls are easy to identify in network logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
+The client `POST`s to `https://{SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three behaviors the SDK doesn't provide on its own: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and `DEBUG_SHOPIFY` timing logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
 
 ## Writing a query
 
-Define the query as a template string, interpolating shared fragments at the top:
+Define the query as a template string. Start it with the `#graphql` tag (so codegen parses it) and end the declaration with `as const` (so its literal type propagates through fragment interpolation). Interpolate shared fragments at the top:
 
 ```ts
 import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
 
-const GET_PRODUCT_BY_HANDLE_QUERY = `
+const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   ${PRODUCT_FRAGMENT}
   query getProductByHandle(
     $handle: String!
@@ -59,10 +52,16 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `
       ...ProductFields
     }
   }
-`;
+` as const;
 ```
 
 The `@inContext` directive passes country and language for localized pricing and content. Use `getCountryCode(locale)` and `getLanguageCode(locale)` from `lib/i18n` to extract these from a locale string.
+
+## Codegen
+
+`pnpm --filter template codegen` runs `graphql-codegen` (configured in `.graphqlrc.ts`). It pulls the Storefront schema from Shopify's direct-proxy endpoint for the configured `SHOPIFY_API_VERSION`, parses every `#graphql`-tagged query, and **fails if any field, argument, or type is invalid** — automating the "never guess field names" rule. Output lands in `lib/shopify/types/generated/` and is committed, so builds and deploys need no network access to a schema. Re-run after changing a query, or use `codegen:watch` while iterating.
+
+Because codegen resolves interpolations of other `#graphql` consts by name, every fragment in `lib/shopify/fragments.ts` is also tagged `#graphql ... as const`. A raw selection snippet that isn't a valid standalone document (it can't be `#graphql`-tagged) must be inlined into each operation rather than interpolated.
 
 Always verify fields against the live Storefront API schema with `shopify-ai-toolkit` or [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) when adding or modifying queries - don't guess field names.
 
@@ -78,7 +77,7 @@ Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
 | `PRODUCT_FRAGMENT`          | Full product: media, variants (up to 250), options with swatches, metafields, price ranges, SEO |
 | `CATEGORY_PRODUCT_FRAGMENT` | Lightweight product for listing pages (fewer fields)                                            |
 
-Embed fragments in a query with template literal interpolation: `` `${PRODUCT_FRAGMENT} query ...` ``.
+Each fragment is declared as `` `#graphql ...` as const `` and embedded in a query with template literal interpolation: `` `#graphql ${PRODUCT_FRAGMENT} query ...` as const ``.
 
 ## Writing an operation function
 
@@ -86,8 +85,8 @@ Operation functions live in `lib/shopify/operations/` and follow a consistent pa
 
 ```ts
 import { cacheLife, cacheTag } from "next/cache";
-import { shopifyFetch } from "../fetch";
-import { PRODUCT_FRAGMENT } from "../fragments";
+import { assertStorefrontOk } from "../errors";
+import { storefront } from "../storefront";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { ProductDetails } from "@/lib/types";
 
@@ -102,15 +101,18 @@ export async function getProduct({
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
 
-  const data = await shopifyFetch<{ productByHandle: ShopifyProduct }>({
-    operation: "getProductByHandle",
-    query: GET_PRODUCT_BY_HANDLE_QUERY,
-    variables: {
-      handle,
-      country: getCountryCode(locale),
-      language: getLanguageCode(locale),
+  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
+    GET_PRODUCT_BY_HANDLE_QUERY,
+    {
+      variables: {
+        handle,
+        country: getCountryCode(locale),
+        language: getLanguageCode(locale),
+      },
     },
-  });
+  );
+  assertStorefrontOk(response, "getProductByHandle");
+  const { data } = response;
 
   if (!data.productByHandle) return undefined;
 
@@ -144,18 +146,18 @@ Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in se
 
 ## Mutations
 
-Cart mutations use the same `shopifyFetch` function but are not cached. They call Shopify `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove` mutations:
+Cart mutations use the same `storefront.request` client but are not cached. They call Shopify `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove` mutations:
 
 ```ts
 export async function addToCart(lines: CartLineInput[], cartId: string, locale: string) {
-  const data = await shopifyFetch<{ cartLinesAdd: { cart: ShopifyCart } }>({
-    operation: "addToCart",
-    query: ADD_TO_CART_MUTATION,
-    variables: { cartId, lines, country: getCountryCode(locale) },
-  });
+  const response = await storefront.request<{ cartLinesAdd: { cart: ShopifyCart } }>(
+    ADD_TO_CART_MUTATION,
+    { variables: { cartId, lines, country: getCountryCode(locale) } },
+  );
+  assertStorefrontOk(response, "addToCart");
 
   invalidateCartCache();
-  return transformShopifyCart(data.cartLinesAdd.cart);
+  return transformShopifyCart(response.data.cartLinesAdd.cart);
 }
 ```
 
@@ -163,21 +165,23 @@ Shopify returns the full updated cart in every mutation response, so there's no 
 
 ## Error handling
 
-The client handles errors at two levels:
+`@shopify/storefront-api-client` never throws on its own — `request()` resolves to `{ data?, errors? }`. The template applies its contract through `assertStorefrontOk(response, operation)` in `lib/shopify/errors.ts`:
 
-**HTTP errors** - a non-200 response throws immediately with the status code and text.
+**Transport / GraphQL failure** - if `errors` is present and there's no `data`, it throws with the operation name and error detail.
 
-**GraphQL errors** - if the response contains `errors` and no `data`, the client throws. If there are errors but `data` is also present (partial success), it logs a warning and returns the partial data.
+**Partial success** - if there are `errors` but `data` is also present, it logs a warning and lets the operation use the partial data.
+
+**Narrowing** - on success it narrows `response.data` to non-null, so the operation can read it without optional chaining on the top level.
 
 Individual operations follow a consistent contract on top of this: they **throw** on transport or GraphQL failure, and **return** `undefined`/`null`/`[]` when a resource is simply missing. For example, `getProduct()` returns `undefined` when the product isn't found (rather than throwing), and `getCart()` returns `undefined` when there's no cart. For render paths that should degrade gracefully instead of crashing on a transport error, wrap the call in the `withFallback(promise, fallback)` helper — e.g. `withFallback(getCart(), undefined)` in the nav and cart page.
 
 ## Debug logging
 
-Set `DEBUG_SHOPIFY=true` to log every request with timing and a variable preview:
+Set `DEBUG_SHOPIFY=true` to log every request with its operation name and timing (emitted from the `customFetchApi` wrapper):
 
 ```
-[shopify] getProductByHandle 45ms handle=blue-widget
-[shopify] searchProducts 120ms query=tee first=50 after=cursor123
+[shopify] getProductByHandle 45ms
+[shopify] searchProducts 120ms
 ```
 
 ## Transforms
@@ -195,8 +199,12 @@ Domain types are defined in `lib/types.ts` and are provider-agnostic. Components
 
 | Resource                                | Purpose                                                     |
 | --------------------------------------- | ----------------------------------------------------------- |
-| `lib/shopify/fetch.ts`                  | Core fetch wrapper with variable hashing and error handling |
-| `lib/shopify/fragments.ts`              | Reusable GraphQL fragment definitions                       |
+| `lib/shopify/storefront.ts`             | Shared `@shopify/storefront-api-client` instance + `customFetchApi` |
+| `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers |
+| `lib/shopify/fetch.ts`                  | `customerAccountFetch` for the separate Customer Account API |
+| `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)       |
+| `lib/shopify/types/generated/`          | Generated, committed Storefront types + schema snapshot     |
+| `lib/shopify/fragments.ts`              | Reusable `#graphql` fragment definitions                    |
 | `lib/shopify/operations/products.ts`    | Product queries: single, batch, search, recommendations     |
 | `lib/shopify/operations/cart.ts`        | Cart queries and mutations                                  |
 | `lib/shopify/operations/collections.ts` | Collection queries                                          |

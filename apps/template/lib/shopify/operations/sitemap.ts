@@ -1,6 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk } from "../errors";
+import { storefront } from "../storefront";
 
 export type ShopifySitemapType = "COLLECTION" | "PRODUCT";
 
@@ -9,7 +10,7 @@ export interface SitemapResource {
   updatedAt: string;
 }
 
-const GET_SITEMAP_PAGES_COUNT_QUERY = `
+const GET_SITEMAP_PAGES_COUNT_QUERY = `#graphql
   query getSitemapPagesCount($type: SitemapType!) {
     sitemap(type: $type) {
       pagesCount {
@@ -17,9 +18,9 @@ const GET_SITEMAP_PAGES_COUNT_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const GET_SITEMAP_PAGE_QUERY = `
+const GET_SITEMAP_PAGE_QUERY = `#graphql
   query getSitemapPage($type: SitemapType!, $page: Int!) {
     sitemap(type: $type) {
       resources(page: $page) {
@@ -31,7 +32,7 @@ const GET_SITEMAP_PAGE_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 function cacheTagFor(type: ShopifySitemapType): string {
   return type === "PRODUCT" ? "products" : "collections";
@@ -42,13 +43,13 @@ export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Pro
   cacheLife("max");
   cacheTag(cacheTagFor(type));
 
-  const data = await shopifyFetch<{ sitemap: { pagesCount: { count: number } } }>({
-    operation: "getSitemapPagesCount",
-    query: GET_SITEMAP_PAGES_COUNT_QUERY,
-    variables: { type },
-  });
+  const response = await storefront.request<{ sitemap: { pagesCount: { count: number } } }>(
+    GET_SITEMAP_PAGES_COUNT_QUERY,
+    { variables: { type } },
+  );
+  assertStorefrontOk(response, "getSitemapPagesCount");
 
-  return data.sitemap.pagesCount.count;
+  return response.data.sitemap.pagesCount.count;
 }
 
 export async function getShopifySitemapPage(
@@ -59,13 +60,10 @@ export async function getShopifySitemapPage(
   cacheLife("max");
   cacheTag(cacheTagFor(type));
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     sitemap: { resources: { hasNextPage: boolean; items: SitemapResource[] } };
-  }>({
-    operation: "getSitemapPage",
-    query: GET_SITEMAP_PAGE_QUERY,
-    variables: { type, page },
-  });
+  }>(GET_SITEMAP_PAGE_QUERY, { variables: { type, page } });
+  assertStorefrontOk(response, "getSitemapPage");
 
-  return data.sitemap.resources;
+  return response.data.sitemap.resources;
 }

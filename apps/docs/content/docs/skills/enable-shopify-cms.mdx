@@ -63,7 +63,8 @@ Implement three operations that return domain types from `lib/types.ts`:
 
 ```ts
 import { defaultLocale } from "@/lib/i18n";
-import { shopifyFetch } from "@/lib/shopify/fetch";
+import { assertStorefrontOk } from "@/lib/shopify/errors";
+import { storefront } from "@/lib/shopify/storefront";
 import type { Homepage, MarketingPage } from "@/lib/types";
 
 export async function getHomepage({

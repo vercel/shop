@@ -1,10 +1,11 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk } from "../errors";
+import { storefront } from "../storefront";
 import { type ShopifyMenuResponse, transformShopifyMenu } from "../transforms/menu";
 import type { Menu } from "../types/menu";
 
-const MENU_ITEM_FIELDS_FRAGMENT = `
+const MENU_ITEM_FIELDS_FRAGMENT = `#graphql
   fragment MenuItemFields on MenuItem {
     id
     title
@@ -17,9 +18,9 @@ const MENU_ITEM_FIELDS_FRAGMENT = `
       ... on Page { handle }
     }
   }
-`;
+` as const;
 
-const GET_MENU_QUERY = `
+const GET_MENU_QUERY = `#graphql
   query getMenu($handle: String!) {
     menu(handle: $handle) {
       id
@@ -37,18 +38,17 @@ const GET_MENU_QUERY = `
     }
   }
   ${MENU_ITEM_FIELDS_FRAGMENT}
-`;
+` as const;
 
 export async function getMenu({ handle }: { handle: string }): Promise<Menu | null> {
   "use cache";
   cacheLife("max");
   cacheTag("menus");
 
-  const data = await shopifyFetch<ShopifyMenuResponse>({
-    operation: "getMenu",
-    query: GET_MENU_QUERY,
+  const response = await storefront.request<ShopifyMenuResponse>(GET_MENU_QUERY, {
     variables: { handle },
   });
+  assertStorefrontOk(response, "getMenu");
 
-  return transformShopifyMenu(data.menu);
+  return transformShopifyMenu(response.data.menu);
 }

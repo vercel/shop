@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "codegen": "graphql-codegen",
+    "codegen:watch": "graphql-codegen --watch",
     "dev": "next dev",
     "dev:https": "next dev --experimental-https",
     "format": "oxfmt",
@@ -12,8 +14,11 @@
   },
   "dependencies": {
     "@ai-sdk/react": "3.0.199",
+    "@graphql-codegen/cli": "6.3.1",
     "@json-render/core": "0.19.0",
     "@json-render/react": "0.19.0",
+    "@shopify/api-codegen-preset": "2.0.0",
+    "@shopify/storefront-api-client": "1.0.10",
     "@tailwindcss/postcss": "4.3.0",
     "@tailwindcss/typography": "0.5.19",
     "@types/node": "25.9.1",

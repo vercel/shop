@@ -1,14 +1,15 @@
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { PredictiveSearchResult } from "@/lib/types";
 
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk } from "../errors";
 import { IMAGE_FRAGMENT, MONEY_FRAGMENT } from "../fragments";
+import { storefront } from "../storefront";
 import {
   type ShopifyPredictiveSearchResult,
   transformPredictiveSearchResult,
 } from "../transforms/search";
 
-const PREDICTIVE_SEARCH_QUERY = `
+const PREDICTIVE_SEARCH_QUERY = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   query predictiveSearch($query: String!, $limit: Int!, $limitScope: PredictiveSearchLimitScope, $types: [PredictiveSearchType!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
@@ -48,7 +49,7 @@ const PREDICTIVE_SEARCH_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 export async function predictiveSearch({
   limit = 4,
@@ -62,11 +63,9 @@ export async function predictiveSearch({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     predictiveSearch: ShopifyPredictiveSearchResult;
-  }>({
-    operation: "predictiveSearch",
-    query: PREDICTIVE_SEARCH_QUERY,
+  }>(PREDICTIVE_SEARCH_QUERY, {
     variables: {
       query,
       limit,
@@ -76,6 +75,8 @@ export async function predictiveSearch({
       language,
     },
   });
+  assertStorefrontOk(response, "predictiveSearch");
+  const { data } = response;
 
   if (!data.predictiveSearch) {
     return { products: [], collections: [], queries: [] };

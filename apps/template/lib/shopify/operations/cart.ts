@@ -2,29 +2,21 @@ import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Cart, CartWarning } from "@/lib/types";
 
-import { type CartMutationPayload, unwrapCartMutation } from "../errors";
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk, type CartMutationPayload, unwrapCartMutation } from "../errors";
 import { CART_FRAGMENT } from "../fragments";
+import { storefront } from "../storefront";
 import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
 
-const WARNINGS_QUERY_FRAGMENT = `
-  warnings {
-    code
-    message
-    target
-  }
-`;
-
-const GET_CART_QUERY = `
+const GET_CART_QUERY = `#graphql
   ${CART_FRAGMENT}
   query getCart($cartId: ID!) {
     cart(id: $cartId) {
       ...CartFields
     }
   }
-`;
+` as const;
 
-const CART_CREATE_MUTATION = `
+const CART_CREATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     cartCreate(input: $input) {
@@ -35,12 +27,16 @@ const CART_CREATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_LINES_ADD_MUTATION = `
+const CART_LINES_ADD_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
     cartLinesAdd(cartId: $cartId, lines: $lines) {
@@ -51,12 +47,16 @@ const CART_LINES_ADD_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_LINES_UPDATE_MUTATION = `
+const CART_LINES_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
     cartLinesUpdate(cartId: $cartId, lines: $lines) {
@@ -67,12 +67,16 @@ const CART_LINES_UPDATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_LINES_REMOVE_MUTATION = `
+const CART_LINES_REMOVE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
     cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
@@ -83,12 +87,16 @@ const CART_LINES_REMOVE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_BUYER_IDENTITY_UPDATE_MUTATION = `
+const CART_BUYER_IDENTITY_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
     cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
@@ -99,12 +107,16 @@ const CART_BUYER_IDENTITY_UPDATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_NOTE_UPDATE_MUTATION = `
+const CART_NOTE_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartNoteUpdate($cartId: ID!, $note: String!) {
     cartNoteUpdate(cartId: $cartId, note: $note) {
@@ -115,12 +127,16 @@ const CART_NOTE_UPDATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const CART_DISCOUNT_CODES_UPDATE_MUTATION = `
+const CART_DISCOUNT_CODES_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
     cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
@@ -131,22 +147,28 @@ const CART_DISCOUNT_CODES_UPDATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
-    }
-  }
-`;
-
-const GET_CART_SELECTABLE_ADDRESSES_QUERY = `
-  query getCartSelectableAddresses($cartId: ID!) {
-    cart(id: $cartId) {
-      selectableAddresses {
-        id
+      warnings {
+        code
+        message
+        target
       }
     }
   }
-`;
+` as const;
 
-const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `
+const GET_CART_SELECTABLE_ADDRESSES_QUERY = `#graphql
+  query getCartSelectableAddresses($cartId: ID!) {
+    cart(id: $cartId) {
+      delivery {
+        addresses {
+          id
+        }
+      }
+    }
+  }
+` as const;
+
+const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartDeliveryAddressesAdd($cartId: ID!, $addresses: [CartSelectableAddressInput!]!) {
     cartDeliveryAddressesAdd(cartId: $cartId, addresses: $addresses) {
@@ -157,12 +179,16 @@ const CART_DELIVERY_ADDRESSES_ADD_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
-const GET_CART_DELIVERY_OPTIONS_QUERY = `
+const GET_CART_DELIVERY_OPTIONS_QUERY = `#graphql
   query getCartDeliveryOptions($cartId: ID!) {
     cart(id: $cartId) {
       deliveryGroups(first: 5) {
@@ -179,9 +205,9 @@ const GET_CART_DELIVERY_OPTIONS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
+const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartDeliveryAddressesUpdate($cartId: ID!, $addresses: [CartSelectableAddressUpdateInput!]!) {
     cartDeliveryAddressesUpdate(cartId: $cartId, addresses: $addresses) {
@@ -192,10 +218,14 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `
         field
         message
       }
-      ${WARNINGS_QUERY_FRAGMENT}
+      warnings {
+        code
+        message
+        target
+      }
     }
   }
-`;
+` as const;
 
 export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
 
@@ -213,11 +243,11 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
   }
   if (!cartId) return undefined;
 
-  const data = await shopifyFetch<{ cart: ShopifyCart | null }>({
-    operation: "getCart",
-    query: GET_CART_QUERY,
+  const response = await storefront.request<{ cart: ShopifyCart | null }>(GET_CART_QUERY, {
     variables: { cartId },
   });
+  assertStorefrontOk(response, "getCart");
+  const { data } = response;
 
   if (!data.cart) return undefined;
 
@@ -234,21 +264,23 @@ export async function createCartWithoutCookie(
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{ cartCreate: CartMutationPayload<ShopifyCart> }>({
-    operation: "cartCreate",
-    query: CART_CREATE_MUTATION,
-    variables: {
-      input: {
-        buyerIdentity: {
-          countryCode: country,
+  const response = await storefront.request<{ cartCreate: CartMutationPayload<ShopifyCart> }>(
+    CART_CREATE_MUTATION,
+    {
+      variables: {
+        input: {
+          buyerIdentity: {
+            countryCode: country,
+          },
         },
+        country,
+        language,
       },
-      country,
-      language,
     },
-  });
+  );
+  assertStorefrontOk(response, "cartCreate");
 
-  const result = applyMutation(data.cartCreate, "cartCreate");
+  const result = applyMutation(response.data.cartCreate, "cartCreate");
   invalidateCartCache();
   return result;
 }
@@ -277,13 +309,13 @@ export async function addToCart(
     cartId = created.cart.id;
   }
 
-  const data = await shopifyFetch<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>({
-    operation: "cartLinesAdd",
-    query: CART_LINES_ADD_MUTATION,
-    variables: { cartId, lines },
-  });
+  const response = await storefront.request<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>(
+    CART_LINES_ADD_MUTATION,
+    { variables: { cartId, lines } },
+  );
+  assertStorefrontOk(response, "cartLinesAdd");
 
-  const result = applyMutation(data.cartLinesAdd, "cartLinesAdd");
+  const result = applyMutation(response.data.cartLinesAdd, "cartLinesAdd");
   invalidateCartCache();
   return result;
 }
@@ -295,18 +327,17 @@ export async function updateCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartLinesUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartLinesUpdate",
-    query: CART_LINES_UPDATE_MUTATION,
+  }>(CART_LINES_UPDATE_MUTATION, {
     variables: {
       cartId,
       lines: lines.map((line) => ({ id: line.id, quantity: line.quantity })),
     },
   });
+  assertStorefrontOk(response, "cartLinesUpdate");
 
-  const result = applyMutation(data.cartLinesUpdate, "cartLinesUpdate");
+  const result = applyMutation(response.data.cartLinesUpdate, "cartLinesUpdate");
   invalidateCartCache();
   return result;
 }
@@ -318,15 +349,14 @@ export async function removeFromCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartLinesRemove: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartLinesRemove",
-    query: CART_LINES_REMOVE_MUTATION,
+  }>(CART_LINES_REMOVE_MUTATION, {
     variables: { cartId, lineIds },
   });
+  assertStorefrontOk(response, "cartLinesRemove");
 
-  const result = applyMutation(data.cartLinesRemove, "cartLinesRemove");
+  const result = applyMutation(response.data.cartLinesRemove, "cartLinesRemove");
   invalidateCartCache();
   return result;
 }
@@ -340,11 +370,9 @@ export async function updateCartBuyerIdentity(
 
   const country = countryCode ?? getCountryCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartBuyerIdentityUpdate",
-    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
+  }>(CART_BUYER_IDENTITY_UPDATE_MUTATION, {
     variables: {
       cartId,
       buyerIdentity: {
@@ -352,8 +380,9 @@ export async function updateCartBuyerIdentity(
       },
     },
   });
+  assertStorefrontOk(response, "cartBuyerIdentityUpdate");
 
-  const result = applyMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
+  const result = applyMutation(response.data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
   invalidateCartCache();
   return result;
 }
@@ -365,11 +394,9 @@ export async function linkCartToCustomer(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartBuyerIdentityUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartBuyerIdentityUpdate",
-    query: CART_BUYER_IDENTITY_UPDATE_MUTATION,
+  }>(CART_BUYER_IDENTITY_UPDATE_MUTATION, {
     variables: {
       cartId,
       buyerIdentity: {
@@ -377,8 +404,9 @@ export async function linkCartToCustomer(
       },
     },
   });
+  assertStorefrontOk(response, "cartBuyerIdentityUpdate");
 
-  const result = applyMutation(data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
+  const result = applyMutation(response.data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
   invalidateCartCache();
   return result;
 }
@@ -390,18 +418,17 @@ export async function updateCartNote(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartNoteUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartNoteUpdate",
-    query: CART_NOTE_UPDATE_MUTATION,
+  }>(CART_NOTE_UPDATE_MUTATION, {
     variables: {
       cartId,
       note,
     },
   });
+  assertStorefrontOk(response, "cartNoteUpdate");
 
-  const result = applyMutation(data.cartNoteUpdate, "cartNoteUpdate");
+  const result = applyMutation(response.data.cartNoteUpdate, "cartNoteUpdate");
   invalidateCartCache();
   return result;
 }
@@ -413,15 +440,14 @@ export async function updateCartDiscountCodes(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartDiscountCodesUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartDiscountCodesUpdate",
-    query: CART_DISCOUNT_CODES_UPDATE_MUTATION,
+  }>(CART_DISCOUNT_CODES_UPDATE_MUTATION, {
     variables: { cartId, discountCodes },
   });
+  assertStorefrontOk(response, "cartDiscountCodesUpdate");
 
-  const result = applyMutation(data.cartDiscountCodesUpdate, "cartDiscountCodesUpdate");
+  const result = applyMutation(response.data.cartDiscountCodesUpdate, "cartDiscountCodesUpdate");
   invalidateCartCache();
   return result;
 }
@@ -430,17 +456,16 @@ export async function getCartSelectableAddressId(): Promise<string | undefined> 
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cart: {
-      selectableAddresses: Array<{ id: string }>;
+      delivery: { addresses: Array<{ id: string }> };
     } | null;
-  }>({
-    operation: "getCartSelectableAddresses",
-    query: GET_CART_SELECTABLE_ADDRESSES_QUERY,
+  }>(GET_CART_SELECTABLE_ADDRESSES_QUERY, {
     variables: { cartId },
   });
+  assertStorefrontOk(response, "getCartSelectableAddresses");
 
-  return data.cart?.selectableAddresses?.[0]?.id;
+  return response.data.cart?.delivery?.addresses?.[0]?.id;
 }
 
 export async function addCartDeliveryAddress(address: {
@@ -462,11 +487,9 @@ export async function addCartDeliveryAddress(address: {
         },
       };
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartDeliveryAddressesAdd: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartDeliveryAddressesAdd",
-    query: CART_DELIVERY_ADDRESSES_ADD_MUTATION,
+  }>(CART_DELIVERY_ADDRESSES_ADD_MUTATION, {
     variables: {
       cartId,
       addresses: [
@@ -479,8 +502,9 @@ export async function addCartDeliveryAddress(address: {
       ],
     },
   });
+  assertStorefrontOk(response, "cartDeliveryAddressesAdd");
 
-  const result = applyMutation(data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd");
+  const result = applyMutation(response.data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd");
   invalidateCartCache();
   return result;
 }
@@ -495,7 +519,7 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return [];
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cart: {
       deliveryGroups: {
         nodes: Array<{
@@ -507,11 +531,11 @@ export async function getCartDeliveryOptions(): Promise<CartShippingOption[]> {
         }>;
       };
     } | null;
-  }>({
-    operation: "getCartDeliveryOptions",
-    query: GET_CART_DELIVERY_OPTIONS_QUERY,
+  }>(GET_CART_DELIVERY_OPTIONS_QUERY, {
     variables: { cartId },
   });
+  assertStorefrontOk(response, "getCartDeliveryOptions");
+  const { data } = response;
 
   if (!data.cart) return [];
 
@@ -553,11 +577,9 @@ export async function updateCartDeliveryAddress(
         },
       };
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     cartDeliveryAddressesUpdate: CartMutationPayload<ShopifyCart>;
-  }>({
-    operation: "cartDeliveryAddressesUpdate",
-    query: CART_DELIVERY_ADDRESSES_UPDATE_MUTATION,
+  }>(CART_DELIVERY_ADDRESSES_UPDATE_MUTATION, {
     variables: {
       cartId,
       addresses: [
@@ -570,8 +592,12 @@ export async function updateCartDeliveryAddress(
       ],
     },
   });
+  assertStorefrontOk(response, "cartDeliveryAddressesUpdate");
 
-  const result = applyMutation(data.cartDeliveryAddressesUpdate, "cartDeliveryAddressesUpdate");
+  const result = applyMutation(
+    response.data.cartDeliveryAddressesUpdate,
+    "cartDeliveryAddressesUpdate",
+  );
   invalidateCartCache();
   return result;
 }

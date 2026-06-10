@@ -27,10 +27,15 @@ Never guess field names. The live Shopify schema is the source of truth.
 
 ## 2. Write the query
 
-Create the GraphQL query as a template string. Interpolate any shared fragments from `lib/shopify/fragments.ts` at the top. Include `@inContext` if the data is locale-sensitive:
+Create the GraphQL query as a template string. Two conventions make it work with codegen (step 4):
+
+- Start the string with the `#graphql` comment tag so codegen picks it up.
+- End the declaration with `as const` so its literal type flows through fragment interpolation.
+
+Interpolate any shared fragments from `lib/shopify/fragments.ts` at the top. Include `@inContext` if the data is locale-sensitive:
 
 ```ts
-const PRIVACY_POLICY_QUERY = `
+const PRIVACY_POLICY_QUERY = `#graphql
   query getPrivacyPolicy($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
     shop {
@@ -41,10 +46,10 @@ const PRIVACY_POLICY_QUERY = `
       }
     }
   }
-`;
+` as const;
 ```
 
-The operation name (`getPrivacyPolicy`) must match the `operation` field you pass to `shopifyFetch`.
+Queries must be **named** (`getPrivacyPolicy`) — codegen skips anonymous operations.
 
 ## 3. Define the response type
 
@@ -62,30 +67,41 @@ interface ShopifyPrivacyPolicyResponse {
 }
 ```
 
-This is a local type scoped to your operation file - it maps directly to the GraphQL response shape.
+This is a local type scoped to your operation file - it maps directly to the GraphQL response shape. You pass it to `storefront.request<T>()` (step 5) as the explicit response type.
 
-## 4. Write the operation function
+## 4. Validate the query with codegen
 
-Create a new file in `lib/shopify/operations/` or add to an existing one. The function calls `shopifyFetch`, applies caching, and returns the result:
+Run codegen to check your query against the live Storefront schema:
+
+```bash
+pnpm --filter template codegen
+```
+
+Codegen parses every `#graphql`-tagged query and **fails the command if a field, argument, or type doesn't exist** — this is what enforces "never guess field names" automatically. It writes generated types to `lib/shopify/types/generated/` (committed to the repo; no network at build time). Re-run it whenever you add or change a query, or use `pnpm --filter template codegen:watch` while iterating.
+
+## 5. Write the operation function
+
+Create a new file in `lib/shopify/operations/` or add to an existing one. The function calls `storefront.request`, asserts the response is OK, applies caching, and returns the result:
 
 ```ts
 import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopifyFetch } from "../client";
+import { assertStorefrontOk } from "../errors";
+import { storefront } from "../storefront";
 
 export async function getPrivacyPolicy(locale: string = defaultLocale) {
   "use cache";
   cacheLife("max");
   cacheTag("policies");
 
-  const data = await shopifyFetch<ShopifyPrivacyPolicyResponse>({
-    operation: "getPrivacyPolicy",
-    query: PRIVACY_POLICY_QUERY,
+  const response = await storefront.request<ShopifyPrivacyPolicyResponse>(PRIVACY_POLICY_QUERY, {
     variables: {
       country: getCountryCode(locale),
       language: getLanguageCode(locale),
     },
   });
+  assertStorefrontOk(response, "getPrivacyPolicy");
+  const { data } = response;
 
   return data.shop.privacyPolicy;
 }
@@ -93,13 +109,15 @@ export async function getPrivacyPolicy(locale: string = defaultLocale) {
 
 Key points:
 
+- **`storefront`** is the shared `@shopify/storefront-api-client` instance from `lib/shopify/storefront.ts`. Pass your response type as the generic; the query is the first argument and variables go in the options object.
+- **`assertStorefrontOk(response, name)`** throws on a transport/GraphQL failure (no `data`), warns on partial errors, and narrows `response.data` to non-null.
 - **`"use cache"`** uses the local Next.js cache for stable, low-cardinality reads
 - **`cacheLife("max")`** caches until you manually invalidate
 - **`cacheTag("policies")`** lets you invalidate with `revalidateTag("policies")` later
 - Use `"use cache: remote"` instead for high-cardinality reads that depend on search, filters, sort, or cursors
 - Always pass `locale` and extract `country`/`language` from it
 
-## 5. Add a transform (if needed)
+## 6. Add a transform (if needed)
 
 If the Shopify response shape differs from how your components want to consume the data, add a transform in `lib/shopify/transforms/`. This keeps Shopify-specific types out of your UI:
 
@@ -124,7 +142,7 @@ return data.shop.privacyPolicy ? transformShopifyPolicy(data.shop.privacyPolicy)
 
 For simple responses where the shape already matches your needs, you can skip the transform.
 
-## 6. Use it in a page
+## 7. Use it in a page
 
 Call the operation from a Server Component:
 
@@ -149,20 +167,22 @@ export default async function PrivacyPolicyPage() {
 
 ## Writing a mutation
 
-Mutations follow the same pattern but without caching directives. If the mutation modifies cart state, you must call `invalidateCartCache()` afterward:
+Mutations follow the same pattern but without caching directives. Tag the mutation string with `#graphql ... as const` just like a query. If the mutation modifies cart state, you must call `invalidateCartCache()` afterward:
 
 ```ts
 import { invalidateCartCache } from "@/lib/cart/server";
+import { assertStorefrontOk } from "../errors";
+import { storefront } from "../storefront";
 
 export async function updateCartNote(note: string, cartId: string) {
-  const data = await shopifyFetch<{ cartNoteUpdate: { cart: ShopifyCart } }>({
-    operation: "updateCartNote",
-    query: UPDATE_CART_NOTE_MUTATION,
-    variables: { cartId, note },
-  });
+  const response = await storefront.request<{ cartNoteUpdate: { cart: ShopifyCart } }>(
+    UPDATE_CART_NOTE_MUTATION,
+    { variables: { cartId, note } },
+  );
+  assertStorefrontOk(response, "updateCartNote");
 
   invalidateCartCache();
-  return transformShopifyCart(data.cartNoteUpdate.cart);
+  return transformShopifyCart(response.data.cartNoteUpdate.cart);
 }
 ```
 
@@ -170,10 +190,12 @@ Expose mutations to the client through server actions in `components/cart/action
 
 ## Checklist
 
-- [ ] Verified field names against the live Storefront API schema
-- [ ] Operation name in the query string matches the `operation` parameter
+- [ ] Query string starts with `#graphql` and the declaration ends with `as const`
+- [ ] Query/mutation is **named** so codegen can parse it
+- [ ] `pnpm --filter template codegen` passes (validates fields against the live schema) and generated types are committed
 - [ ] Variables passed as an object, never interpolated into the query
 - [ ] `@inContext` directive included if data is locale-sensitive
+- [ ] `storefront.request<ResponseType>(QUERY, { variables })` followed by `assertStorefrontOk(response, name)`
 - [ ] `"use cache"` or `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
 - [ ] Transform added if the Shopify response shape needs mapping
 - [ ] Components import domain types from `lib/types`, not Shopify response types

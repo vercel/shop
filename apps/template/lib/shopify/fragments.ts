@@ -1,21 +1,21 @@
-export const MONEY_FRAGMENT = `
+export const MONEY_FRAGMENT = `#graphql
   fragment MoneyFields on MoneyV2 {
     amount
     currencyCode
   }
-`;
+` as const;
 
-export const IMAGE_FRAGMENT = `
+export const IMAGE_FRAGMENT = `#graphql
   fragment ImageFields on Image {
     url
     altText
     width
     height
   }
-`;
+` as const;
 
 // Note: Does not include IMAGE_FRAGMENT - expects parent to include it
-export const PRODUCT_VARIANT_FRAGMENT = `
+export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${MONEY_FRAGMENT}
   fragment ProductVariantFields on ProductVariant {
     id
@@ -35,9 +35,9 @@ export const PRODUCT_VARIANT_FRAGMENT = `
       ...ImageFields
     }
   }
-`;
+` as const;
 
-export const TAXONOMY_CATEGORY_FRAGMENT = `
+export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
   fragment TaxonomyCategoryFields on TaxonomyCategory {
     id
     name
@@ -46,18 +46,18 @@ export const TAXONOMY_CATEGORY_FRAGMENT = `
       name
     }
   }
-`;
+` as const;
 
-export const METAFIELD_FRAGMENT = `
+export const METAFIELD_FRAGMENT = `#graphql
   fragment MetafieldFields on Metafield {
     key
     namespace
     value
     type
   }
-`;
+` as const;
 
-export const CART_FRAGMENT = `
+export const CART_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   fragment CartFields on Cart {
@@ -168,9 +168,9 @@ export const CART_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
-export const COLLECTION_FIELDS_FRAGMENT = `
+export const COLLECTION_FIELDS_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   fragment CollectionFields on Collection {
     handle
@@ -185,9 +185,9 @@ export const COLLECTION_FIELDS_FRAGMENT = `
       description
     }
   }
-`;
+` as const;
 
-export const PRODUCT_FRAGMENT = `
+export const PRODUCT_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
@@ -282,9 +282,9 @@ export const PRODUCT_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
-export const PRODUCT_CARD_FRAGMENT = `
+export const PRODUCT_CARD_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   fragment ProductCardFields on Product {
@@ -318,4 +318,4 @@ export const PRODUCT_CARD_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
