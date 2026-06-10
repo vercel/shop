@@ -37,9 +37,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const unstable_instant = true;
+export const instant = true;
 
-export const unstable_prefetch = "force-runtime";
+export const prefetch = "allow-runtime";
 
 // Storefront `search()` only supports RELEVANCE and PRICE sort keys.
 const ALL_PRODUCTS_SORT_EXCLUDE = [

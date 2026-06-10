@@ -57,7 +57,7 @@ next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages.
 The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
 
 ```
-Error: Route "/[locale]/..." accessed [...] which is not defined in the `samples` of `unstable_instant`.
+Error: Route "/[locale]/..." accessed [...] which is not defined in the `unstable_samples` of `instant`.
 ```
 
 or a generic "blocking route" prerender failure.
@@ -66,20 +66,20 @@ or a generic "blocking route" prerender failure.
 
 If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
 
-### D. `unstable_instant` samples need `locale` in `params`
+### D. `instant` samples need `locale` in `params`
 
-Any route that exports `unstable_instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
+Any route that exports `instant` (currently: products `[handle]`, collections `[handle]`, search) needs `locale` added to every sample, or the build fails:
 
 ```
 Error: Route "/[locale]/products/[handle]" accessed root param "locale"
-       which is not defined in the `samples` of `unstable_instant`.
+       which is not defined in the `unstable_samples` of `instant`.
 ```
 
 Fix:
 
 ```ts
-export const unstable_instant = {
-  samples: [
+export const instant = {
+  unstable_samples: [
     {
       params: { locale: "en-US", handle: "__placeholder__" }, // ← add locale
       searchParams: { variant: "1" },
@@ -89,12 +89,12 @@ export const unstable_instant = {
 };
 ```
 
-### E. `unstable_instant` samples need `headers` declarations if any layout-level server component reads `headers()`
+### E. `instant` samples need `headers` declarations if any layout-level server component reads `headers()`
 
-This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `unstable_instant` sample in the app must declare the headers it might access:
+This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `instant` sample in the app must declare the headers it might access:
 
 ```ts
-samples: [
+unstable_samples: [
   {
     params: { locale: "en-US", handle: "__placeholder__" },
     searchParams: { variant: "1" },
@@ -108,7 +108,7 @@ samples: [
 
 ```
 Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
-       defined in the `samples` of `unstable_instant`. Add it to the
+       defined in the `unstable_samples` of `instant`. Add it to the
        sample's `headers` array, or `["...", null]` if it should be absent.
 ```
 
@@ -205,7 +205,7 @@ const messageLoaders: Record<string, () => Promise<{ default: typeof enMessages 
 // We intentionally do NOT destructure `{ locale }` from the callback args.
 // next-intl populates that arg from the `x-next-intl-locale` request header,
 // and reading request headers from inside a cached tree forces the route
-// dynamic — every `unstable_instant` sample then needs an explicit
+// dynamic — every `instant` sample then needs an explicit
 // `headers: [["x-next-intl-locale", null]]` declaration. Going straight to
 // `getLocale()` (which reads `next/root-params`) keeps the lookup cacheable.
 export default getRequestConfig(async () => {
@@ -329,9 +329,9 @@ export const generateStaticParams = async () => {
 };
 ```
 
-### Step 12: Patch `unstable_instant` samples
+### Step 12: Patch `instant` samples
 
-Walk every route file that exports `unstable_instant` and add `locale` to each sample's `params`:
+Walk every route file that exports `instant` and add `locale` to each sample's `params`:
 
 ```ts
 params: { locale: "en-US", handle: "__placeholder__" }
