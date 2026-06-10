@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { getProductUrl } from "@/lib/product-url";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -28,6 +29,10 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const unitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
     : parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const productUrl = getProductUrl(
+    item.merchandise.product.handle,
+    item.merchandise.selectedOptions,
+  );
 
   return (
     <li
@@ -35,7 +40,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       aria-label={`${item.merchandise.product.title} - ${formatPrice(unitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
-        href={`/products/${item.merchandise.product.handle}`}
+        href={productUrl}
         className="shrink-0 relative w-16 h-16 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
@@ -49,10 +54,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
 
       <div className="flex-1 min-w-0 flex flex-col gap-2 py-0.5">
         <div>
-          <Link
-            href={`/products/${item.merchandise.product.handle}`}
-            className="hover:opacity-70 transition-opacity"
-          >
+          <Link href={productUrl} className="hover:opacity-70 transition-opacity">
             <h3 className="font-medium text-sm text-foreground line-clamp-2">
               {item.merchandise.product.title}
             </h3>
