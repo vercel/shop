@@ -31,7 +31,7 @@ export const HomeBrowser = () => (
         </div>
       </div>
 
-      {/* Featured products carousel */}
+      {/* Products grid */}
       <DynamicBoundary label="Products" className="mb-3">
         <div className="mb-2 h-3 w-28 rounded bg-black/10 dark:bg-white/10" />
         <div className="grid grid-cols-5 gap-2">
