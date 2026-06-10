@@ -44,7 +44,7 @@ function MenuLink({ url, children, className }: MenuLinkProps) {
     );
   }
   return (
-    <Link href={url} className={className}>
+    <Link href={url} className={className} prefetch={true}>
       {children}
     </Link>
   );
