@@ -1,18 +1,18 @@
 ---
 title: Home
-description: The storefront landing page - hero, featured products, and promotional content.
+description: The storefront landing page - hero, products, and promotional content.
 type: guide
 ---
 
 <HomeBrowser />
 
-The home page is a server component that renders a hero banner and a featured products grid. Product data is fetched server-side from Shopify.
+The home page is a server component that renders a hero banner and a products grid. Product data is fetched server-side from Shopify.
 
 ## Hero section
 
 A full-width banner with a background image or autoplaying background video, gradient overlay, headline, subheadline, and a CTA link. On mobile, the hero height comes from its vertical padding; on medium screens and up, it keeps a wide `3 / 1` aspect ratio.
 
-By default, when no `backgroundImage` or `backgroundVideo` is provided, the hero renders with no background — the headline and subheadline use `text-foreground` and the CTA uses the default (primary) button variant, so the banner blends into the page above the featured products grid. When media is present, the banner switches to a dark `bg-foreground` container with the existing gradient overlay, white text, and a light CTA so the copy stays legible against the image or video. To add a background image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`), which enables automatic blur placeholders and prevents layout shift, or a remote URL object (`{ url: "https://...", alt: "..." }`).
+By default, when no `backgroundImage` or `backgroundVideo` is provided, the hero renders with no background — the headline and subheadline use `text-foreground` and the CTA uses the default (primary) button variant, so the banner blends into the page above the products grid. When media is present, the banner switches to a dark `bg-foreground` container with the existing gradient overlay, white text, and a light CTA so the copy stays legible against the image or video. To add a background image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`), which enables automatic blur placeholders and prevents layout shift, or a remote URL object (`{ url: "https://...", alt: "..." }`).
 
 To use a video hero, pass `backgroundVideo: { url: "https://...", previewImage: { url: "https://...", alt: "..." } }`. Videos use the shared `AutoPlayVideo` component, so they autoplay when visible and pause when off-screen. When both `backgroundVideo` and `backgroundImage` are present, the video is used.
 
@@ -20,9 +20,9 @@ The headline and CTA are configurable through the `BannerSection` component's `h
 
 On mobile, the subheadline and CTA text are hidden to keep the banner compact.
 
-## Featured products grid
+## Products grid
 
-A responsive grid showing up to 8 products fetched via `getProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a [product card](/docs/anatomy/product-card) with:
+A responsive grid showing the top 8 products fetched via `getCatalogProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a [product card](/docs/anatomy/product-card) with:
 
 - Featured image, with a muted title-text fallback when the product has no image
 - Out-of-stock overlay when unavailable
@@ -32,7 +32,7 @@ The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. A `Produ
 
 ## Data fetching
 
-Products are fetched server-side with `getCollectionProducts({ collection: "frontpage", limit: 8, locale })`, which pulls from Shopify's default `frontpage` collection so merchants can curate the home page from the Shopify admin. The result is cached with `cacheLife("max")` and product- and collection-level cache tags for granular revalidation. To feature a different collection, change `collectionHandle` (and `collectionUrl`) on the `FeaturedProducts` call in `app/page.tsx`.
+Products are fetched server-side with `getCatalogProducts({ limit: 8, locale })`, which pulls the top products across the entire catalog (best-selling order) rather than a curated collection. The result is cached with `cacheLife("max")` and product-level cache tags for granular revalidation. The section heading and its "view all" link are set by the `title` and `collectionUrl` props on the `ProductsGrid` call in `app/page.tsx`, which point at `/collections/all` by default.
 
 ## Key files
 
