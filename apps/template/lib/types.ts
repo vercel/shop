@@ -45,7 +45,6 @@ export interface ProductCard {
   availableForSale: boolean;
   compareAtPrice?: Money;
   defaultVariantId?: string;
-  defaultVariantSelectedOptions?: SelectedOption[];
   featuredImage: Image | null;
   handle: string;
   id: string;

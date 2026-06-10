@@ -36,7 +36,7 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 - `encodedVariantExistence` and `encodedVariantAvailability`
 - `variantsCount`
 
-PDP and product-card links use option-name query parameters and can navigate across Combined Listing child product handles. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
+PDP option links use option-name query parameters and can navigate across Combined Listing child product handles. Product cards link to the bare product path so card navigations stay on the prerendered PDP shell; cart line items link with the carted variant's option parameters. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
 
 The same change adds Shopify bundle awareness:
 
@@ -76,7 +76,7 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 - `ProductVariant` gains `productHandle`, `requiresComponents`, `components`, and `bundleParents`.
 - `CartLine` gains nested `components`, `canRemove`, and `canUpdateQuantity`.
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
-- PDP and product-card links use option names and values. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
+- PDP option links and cart line items use option names and values; product cards link to the bare product path so card navigations hit the prerendered shell instead of the uncached selection lookup. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
 - Keep `getProduct()` keyed only by handle and locale. Selected option combinations belong in the uncached `getProductSelection()` path.
 - Start base product and selection requests in parallel; do not await the product before resolving selected options.
 - Keep the variant-ID compatibility lookup uncached and isolated in the query-matched product proxy; it must not add variant IDs to Runtime Cache or make ordinary PDPs dynamic.

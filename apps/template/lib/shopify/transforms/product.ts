@@ -183,7 +183,6 @@ export interface ShopifyProductCard {
     id: string;
     availableForSale: boolean;
     image?: { url: string } | null;
-    selectedOptions: Array<{ name: string; value: string }>;
   } | null;
 }
 
@@ -497,7 +496,6 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }
 
@@ -521,7 +519,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     defaultVariantId: defaultVariant?.id,
-    defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,
     ...extractMediaFromProduct(product),

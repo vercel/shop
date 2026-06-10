@@ -426,10 +426,6 @@ export const PRODUCT_CARD_FRAGMENT = `
       image {
         url
       }
-      selectedOptions {
-        name
-        value
-      }
     }
   }
 `;
