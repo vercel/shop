@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import { getCollectionProducts } from "@/lib/shopify/operations/products";
+import { getCatalogProducts } from "@/lib/shopify/operations/products";
 import { cn } from "@/lib/utils";
 
 interface ProductsGridSkeletonProps {
@@ -22,21 +22,14 @@ export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonP
   );
 }
 
-interface FeaturedProductsProps {
-  title: string;
+interface ProductsGridProps {
+  collectionUrl?: string;
   limit: number;
   locale: Locale;
-  collectionHandle: string;
-  collectionUrl?: string;
+  title: string;
 }
 
-export async function FeaturedProducts({
-  title,
-  limit,
-  locale,
-  collectionHandle,
-  collectionUrl,
-}: FeaturedProductsProps) {
+export async function ProductsGrid({ collectionUrl, limit, locale, title }: ProductsGridProps) {
   const t = await getTranslations("product");
 
   return (
@@ -53,33 +46,22 @@ export async function FeaturedProducts({
         )}
       </div>
       <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
-        <FeaturedProductsGrid
-          collectionHandle={collectionHandle}
-          limit={limit}
-          locale={locale}
-          outOfStockText={t("outOfStock")}
-        />
+        <ProductsGridContent limit={limit} locale={locale} outOfStockText={t("outOfStock")} />
       </Suspense>
     </div>
   );
 }
 
-async function FeaturedProductsGrid({
-  collectionHandle,
+async function ProductsGridContent({
   limit,
   locale,
   outOfStockText,
 }: {
-  collectionHandle: string;
   limit: number;
   locale: Locale;
   outOfStockText: string;
 }) {
-  const { products } = await getCollectionProducts({
-    collection: collectionHandle,
-    limit,
-    locale,
-  });
+  const { products } = await getCatalogProducts({ limit, locale });
 
   if (products.length === 0) return null;
 

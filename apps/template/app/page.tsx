@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { FeaturedProducts } from "@/components/product/products-grid";
+import { ProductsGrid } from "@/components/product/products-grid";
 import { BannerSection } from "@/components/sections/banner-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -46,12 +46,11 @@ export default async function HomePage() {
         />
 
         <Container>
-          <FeaturedProducts
-            title="Featured Products"
+          <ProductsGrid
+            title="Products"
             limit={8}
             locale={locale}
-            collectionHandle="frontpage"
-            collectionUrl="/collections/frontpage"
+            collectionUrl="/collections/all"
           />
         </Container>
       </Sections>
