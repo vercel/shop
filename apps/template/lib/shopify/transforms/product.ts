@@ -15,7 +15,7 @@ import type {
   Video,
 } from "@/lib/types";
 
-import { encodedVariantSet } from "../variant-encoding";
+import { allEncodedVariantsAvailable, encodedVariantSet } from "../variant-encoding";
 
 interface ShopifyImage {
   url: string;
@@ -501,6 +501,13 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
   };
 }
 
+function hasUniformPriceRange(product: ShopifyProduct): boolean {
+  const { compareAtPriceRange, priceRange } = product;
+  if (priceRange.minVariantPrice.amount !== priceRange.maxVariantPrice.amount) return false;
+  if (!compareAtPriceRange) return true;
+  return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
+}
+
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   const selection = transformProductSelectionOrFallback(product);
   const defaultVariant = selection.selectedVariant;
@@ -520,6 +527,11 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     ...extractMediaFromProduct(product),
     variants: selection.variants,
     variantsCount: product.variantsCount.count,
+    allVariantsInStock: allEncodedVariantsAvailable(
+      product.encodedVariantExistence,
+      product.encodedVariantAvailability,
+    ),
+    hasUniformPricing: hasUniformPriceRange(product),
     options: selection.options,
     tags: product.tags,
     seo: {

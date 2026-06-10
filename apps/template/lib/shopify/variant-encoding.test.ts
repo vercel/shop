@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { decodeEncodedVariant, encodedVariantSet } from "./variant-encoding.ts";
+import {
+  allEncodedVariantsAvailable,
+  decodeEncodedVariant,
+  encodedVariantSet,
+} from "./variant-encoding.ts";
 
 test("decodes nested option combinations", () => {
   assert.deepEqual(decodeEncodedVariant("v1_0:0:0,1:0-1,,1:0:0-1,1:1,,2:0:1,1:0,,"), [
@@ -35,4 +39,12 @@ test("adds prefixes used for partial option availability", () => {
 
 test("rejects unsupported encoding versions", () => {
   assert.throws(() => decodeEncodedVariant("v2_0"), /Unsupported option value encoding/);
+});
+
+test("reports every existing variant available when the encodings match", () => {
+  assert.equal(allEncodedVariantsAvailable("v1_0:0-1,1:0,", "v1_0:0-1,1:0,"), true);
+});
+
+test("reports unavailable variants when availability is a subset of existence", () => {
+  assert.equal(allEncodedVariantsAvailable("v1_0:0-1,1:0,", "v1_0:0,1:0,"), false);
 });

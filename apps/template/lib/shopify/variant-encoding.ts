@@ -71,3 +71,12 @@ export function encodedVariantSet(encodedVariantField: string): Set<string> {
 
   return combinations;
 }
+
+export function allEncodedVariantsAvailable(
+  encodedVariantExistence: string,
+  encodedVariantAvailability: string,
+): boolean {
+  const existence = encodedVariantSet(encodedVariantExistence);
+  const availability = encodedVariantSet(encodedVariantAvailability);
+  return existence.size === availability.size && [...existence].every((c) => availability.has(c));
+}

@@ -55,6 +55,7 @@ export interface ProductCard {
 }
 
 export interface ProductDetails extends ProductCard {
+  allVariantsInStock: boolean;
   category?: Category | null;
   categoryId?: string;
   collectionHandles: string[];
@@ -65,6 +66,7 @@ export interface ProductDetails extends ProductCard {
   currencyCode: string;
   description: string;
   descriptionHtml: string;
+  hasUniformPricing: boolean;
   images: Image[];
   manufacturerName: string;
   metafields?: Metafield[];

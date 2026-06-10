@@ -71,7 +71,8 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 ## Adoption notes
 
 - `ProductDetails.variants` is now a representative selectable set, not an exhaustive export. Use `ProductDetails.variantsCount` for the exact count and `getProductSelection()` to resolve a choice.
-- Do not infer uniform pricing, uniform stock, or single-variant status from `ProductDetails.variants`; the old `hasUniformPricing()` and `hasUniformStock()` helpers are removed.
+- Do not infer uniform pricing, uniform stock, or single-variant status from `ProductDetails.variants`. Use the exact signals instead: `ProductDetails.hasUniformPricing` (equal `priceRange` and `compareAtPriceRange` bounds), `ProductDetails.allVariantsInStock` (`encodedVariantExistence` equals `encodedVariantAvailability`), and `ProductDetails.variantsCount === 1`.
+- Keep the eager PDP paths these signals enable: uniform-price products render the price in the prerendered shell, single-variant products render options and buy buttons eagerly, and uniform-stock products render a labeled buy-button fallback. Selection-dependent Suspense streaming is only for regions selection can actually change.
 - `ProductVariant` gains `productHandle`, `requiresComponents`, `components`, and `bundleParents`.
 - `CartLine` gains nested `components`, `canRemove`, and `canUpdateQuantity`.
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
@@ -89,9 +90,10 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 3. Change a Combined Listing option and confirm the URL can move to the selected child product handle.
 4. Open a Liquid `/products/:handle?variant=:id` link and confirm it permanently redirects to the matching option-name URL.
 5. Confirm a selected-option PDP starts the base-product and selection operations in parallel and that only the base product uses persistent caching.
-6. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
-7. Open a component product and confirm bundles returned by `groupedBy` render.
-8. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
-9. Confirm a customized bundle parent without selected components cannot be added directly.
-10. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
-11. Run `pnpm --filter template lint`, `pnpm --filter template test`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.
+6. Confirm a uniform-price product renders its price in the prerendered HTML, and a single-variant product renders its buy buttons there.
+7. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
+8. Open a component product and confirm bundles returned by `groupedBy` render.
+9. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
+10. Confirm a customized bundle parent without selected components cannot be added directly.
+11. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
+12. Run `pnpm --filter template lint`, `pnpm --filter template test`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.

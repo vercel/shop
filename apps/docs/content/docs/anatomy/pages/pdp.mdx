@@ -16,6 +16,8 @@ Two structural choices keep that copy coherent, and both are load-bearing. The p
 
 The dynamic input is the selected option values in `searchParams`. The compact `getProductSelection()` response uses `cache: "no-store"`, and `ProductDetailSection` keeps every selection-dependent region in its own Suspense boundary so option changes do not skeletonize the product body.
 
+Suspense streaming is reserved for regions a selection can actually change. The base product carries exact signals that let everything else render in the prerendered shell: when `priceRange` and `compareAtPriceRange` bounds are equal (`hasUniformPricing`) the price renders eagerly, when `variantsCount` is `1` the option pickers and buy buttons render eagerly, and when `encodedVariantExistence` equals `encodedVariantAvailability` (`allVariantsInStock`) the buy-button fallback renders with real labels instead of placeholders. A simple product therefore ships its price and buy controls in the static HTML; only products with genuinely variant-dependent prices or stock stream those regions.
+
 ## Variant selection
 
 Variants are selected via option-name query parameters:
