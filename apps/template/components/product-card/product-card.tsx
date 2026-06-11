@@ -46,7 +46,6 @@ export async function ProductCard({
           : `/products/${product.handle}`
       }
       className={className}
-      prefetch={true}
     >
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
