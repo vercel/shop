@@ -132,7 +132,7 @@ Key elements:
 
 ## Caching
 
-Most stable read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and requests. Search, filters, sort, and cursor reads also use the remote cache with their function arguments as part of the key; the high-cardinality product selection read is uncached.
+Most stable read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and requests. Search, filters, sort, and cursor reads also use the remote cache with their function arguments as part of the key. The high-cardinality product selection read uses the same remote cache with `cacheLife("minutes")`, keeping its working set transient.
 
 The PDP's base `getProduct()` read is the deliberate exception: it uses plain `"use cache"` so it can resolve during prerender and bake the product body into the static shell. Combined with webhook-driven `revalidateTag()` invalidation, both cache modes stay fresh while preserving coherent PDP rendering. Tags follow a hierarchy:
 
@@ -174,7 +174,7 @@ The cart fragment omits deprecated tax and duty amount fields. Shopify finalizes
 
 ## Product selection
 
-The template does not query an exhaustive variants connection. The PDP starts a low-cardinality cached `getProduct()` read and an uncached `getProductSelection()` request in parallel. The selection operation uses:
+The template does not query an exhaustive variants connection. The PDP uses the static-shell `getProduct()` read plus a short-TTL `getProductSelection()` request for option-dependent regions. The selection operation uses:
 
 - `selectedOrFirstAvailableVariant(selectedOptions:)`
 - `adjacentVariants(selectedOptions:)`
@@ -183,7 +183,7 @@ The template does not query an exhaustive variants connection. The PDP starts a 
 
 This avoids a historical `first: 50` cap, scales to Shopify's 2,048-variant product limit, and lets option values navigate across Combined Listing child product handles. `variantsCount.count` is used whenever the exact count is needed.
 
-`getProductSelection()` uses `cache: "no-store"` because selected option combinations have high cardinality. It is also used by tools that need to resolve an exact option combination, such as the shopping agent. Product cards and PDP option links use option-name query parameters rather than numeric variant IDs.
+`getProductSelection()` uses `"use cache: remote"` with `cacheLife("minutes")`, keyed by canonically sorted options. The short TTL keeps the high-cardinality combination keyspace transient while reusing recently resolved selections. It is also used by tools that need to resolve an exact option combination, such as the shopping agent. Product cards link to the bare product path; PDP option links use option-name query parameters rather than numeric variant IDs.
 
 Inbound Shopify Liquid links using `?variant=:variantId` are resolved by a separate uncached `node(id:)` query in the query-matched product proxy. The proxy permanently redirects to the equivalent option-name URL while preserving attribution parameters. Requests without `variant` bypass that proxy matcher, so normal PDP prerendering and cached base-product reads are unchanged. Product metadata continues to canonicalize variants to the base product path, preserving migration SEO without storing variant-ID entries in Runtime Cache.
 
