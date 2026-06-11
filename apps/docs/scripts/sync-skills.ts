@@ -19,6 +19,35 @@ function stripFrontmatter(content: string): string {
   return content.trim();
 }
 
+// SKILL.md files are plain markdown, but the docs render them as MDX.
+// Escape `{`/`}` (JSX expressions) and `<` (JSX elements) in prose so
+// markdown like "Shipping to {postal}" doesn't crash the MDX compiler.
+// Fenced code blocks and inline code spans are left untouched.
+function escapeMdxProse(segment: string): string {
+  return segment.replace(/([{}])/g, "\\$1").replace(/<(?!https?:\/\/)(?=[A-Za-z/])/g, "\\<");
+}
+
+function escapeMdxLine(line: string): string {
+  // Split on inline code spans (one or more backticks) and only escape
+  // the segments outside of them.
+  const parts = line.split(/(`+[^`]*`+)/g);
+  return parts.map((part, i) => (i % 2 === 1 ? part : escapeMdxProse(part))).join("");
+}
+
+function escapeMdx(content: string): string {
+  const lines = content.split("\n");
+  let inFence = false;
+  return lines
+    .map((line) => {
+      if (/^\s*(```|~~~)/.test(line)) {
+        inFence = !inFence;
+        return line;
+      }
+      return inFence ? line : escapeMdxLine(line);
+    })
+    .join("\n");
+}
+
 const BEGIN_RE = /\{\/\* BEGIN SKILL CONTENT: (.+?) \*\/\}/;
 const END_RE = (skill: string) =>
   new RegExp(`\\{/\\* END SKILL CONTENT: ${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} \\*/\\}`);
@@ -51,7 +80,7 @@ for (const file of mdxFiles) {
     continue;
   }
 
-  const skillContent = stripFrontmatter(skillRaw);
+  const skillContent = escapeMdx(stripFrontmatter(skillRaw));
   const endRe = END_RE(skillName);
   const endMatch = mdx.match(endRe);
 

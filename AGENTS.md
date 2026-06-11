@@ -4,7 +4,7 @@ This is a monorepo for developing a template, docs site, and skills for using Ne
 
 ## Docs
 
-The docs app is in apps/docs using [fromsrc](https://www.fromsrc.com).
+The docs app is in apps/docs using the package-based Geistdocs architecture ([`@vercel/geistdocs`](https://www.npmjs.com/package/@vercel/geistdocs)). See apps/docs/AGENTS.md for editing conventions.
 
 ## Template
 

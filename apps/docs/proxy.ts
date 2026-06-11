@@ -1,26 +1,30 @@
-import { type NextFetchEvent, type NextRequest, NextResponse } from "next/server";
+import { createProxy } from "@vercel/geistdocs/proxy";
+import { NextResponse } from "next/server";
 
-const MDX_EXTENSION_PATTERN = /\.mdx?$/;
+import { config as geistdocsConfig } from "@/lib/geistdocs/config";
+import { trackMdRequest } from "@/lib/geistdocs/md-tracking";
 
-const proxy = (request: NextRequest, _context: NextFetchEvent) => {
-  const pathname = request.nextUrl.pathname;
+// Static assets served from public/ (homepage images, fonts, media). These
+// must bypass the i18n rewrite, which would otherwise send them to
+// /en/<asset> and 404. OG images are excluded from the bypass because they
+// are app routes under /[lang]/og/ that rely on the locale rewrite.
+const STATIC_ASSET_PATTERN = /\.(?:png|jpe?g|gif|svg|webp|avif|ico|woff2?|ttf|otf|mp4|webm)$/i;
+const OG_ROUTE_PATTERN = /^\/(?:[\w-]+\/)?og\//;
 
-  // Handle .md/.mdx URL requests — rewrite to /llms.mdx/ routes
-  if (
-    (pathname === "/docs.md" || pathname === "/docs.mdx" || pathname.startsWith("/docs/")) &&
-    (pathname.endsWith(".md") || pathname.endsWith(".mdx"))
-  ) {
-    const stripped = pathname.replace(MDX_EXTENSION_PATTERN, "");
-    const slug = stripped === "/docs" ? "" : stripped.replace(/^\/docs\//, "");
-    const target = slug ? `/llms.mdx/${slug}` : "/llms.mdx";
-    return NextResponse.rewrite(new URL(target, request.nextUrl));
-  }
-
-  return NextResponse.next();
-};
+const proxy = createProxy({
+  config: geistdocsConfig,
+  trackMarkdownRequest: trackMdRequest,
+  before: ({ request }) => {
+    const { pathname } = request.nextUrl;
+    if (STATIC_ASSET_PATTERN.test(pathname) && !OG_ROUTE_PATTERN.test(pathname)) {
+      return NextResponse.next();
+    }
+    return null;
+  },
+});
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
+  matcher: ["/((?!api(?:/|$)|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)"],
 };
 
 export default proxy;

@@ -1,16 +1,11 @@
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
+
+const withMDX = createMDX();
 
 const config: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
-  },
-  outputFileTracingIncludes: {
-    // fromsrc reads markdown files directly from content/docs at runtime.
-    // Ensure serverless API routes bundle those files in preview/prod.
-    "/api/chat": ["./content/docs/**/*"],
-    "/api/chat/route": ["./content/docs/**/*"],
-    "/api/search": ["./content/docs/**/*"],
-    "/api/search/route": ["./content/docs/**/*"],
   },
 
   images: {
@@ -20,12 +15,8 @@ const config: NextConfig = {
         protocol: "https",
         hostname: "placehold.co",
       },
-      {
-        protocol: "https",
-        hostname: "vercel.com",
-      },
     ],
   },
 };
 
-export default config;
+export default withMDX(config);

@@ -69,7 +69,7 @@ or a generic "blocking route" prerender failure.
 
 **Do this instead:** keep `next/link` and let `proxy.ts` middleware redirect unprefixed paths (`/products/foo` → `/en-US/products/foo`). Internal links work; there's a one-time middleware redirect on click for unprefixed hrefs. Trade a few redirects for a clean prerender.
 
-If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/${await getLocale()}/account/login` ``.
+If you must locale-prefix a programmatic URL (server actions, `redirect()`, `permanentRedirect()`), build the path yourself: `` `/$\{await getLocale()\}/account/login` ``.
 
 ### D. `instant` samples need `locale` in `params`
 
@@ -96,7 +96,7 @@ export const instant = {
 
 ### E. `instant` samples need `headers` declarations if any layout-level server component reads `headers()`
 
-This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to {postal}" bar reading `x-vercel-ip-postal-code` — every `instant` sample in the app must declare the headers it might access:
+This is easy to forget. If you (or a downstream skill) adds a server component to the layout that calls `headers()` — e.g. a "Shipping to \{postal\}" bar reading `x-vercel-ip-postal-code` — every `instant` sample in the app must declare the headers it might access:
 
 ```ts
 unstable_samples: [
@@ -345,7 +345,7 @@ params: { locale: "en-US", handle: "__placeholder__" }
 If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
 
 ```ts
-headers: [["x-vercel-ip-postal-code", null]]
+headers: [["x-vercel-ip-postal-code", null]];
 ```
 
 (See "Cache Components compatibility D/E" at the top.)

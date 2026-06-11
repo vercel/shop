@@ -1,5 +1,5 @@
 {
-  "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**"],
+  "ignorePatterns": [".next/**", "dist/**", "build/**", ".claude/**", ".source/**"],
   "semi": true,
   "singleQuote": false,
   "sortImports": {},
