@@ -98,13 +98,33 @@ export async function getProductSelection({
   selectedOptions: SelectedOption[];
   locale?: string;
 }): Promise<ProductSelectionData | undefined> {
+  // Sorting canonicalizes the cache key so option order can't mint duplicate entries.
+  return getCachedProductSelection({
+    handle,
+    selectedOptions: [...selectedOptions].sort((a, b) => a.name.localeCompare(b.name)),
+    locale,
+  });
+}
+
+async function getCachedProductSelection({
+  handle,
+  selectedOptions,
+  locale,
+}: {
+  handle: string;
+  selectedOptions: SelectedOption[];
+  locale: string;
+}): Promise<ProductSelectionData | undefined> {
+  // Keep the high-cardinality selection working set transient.
+  "use cache: remote";
+  cacheLife("minutes");
+  cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
   const data = await shopifyFetch<{
     product: ShopifyProductSelection | null;
   }>({
-    cache: "no-store",
     operation: "getProductSelection",
     query: GET_PRODUCT_SELECTION_QUERY,
     variables: { handle, selectedOptions, country, language },

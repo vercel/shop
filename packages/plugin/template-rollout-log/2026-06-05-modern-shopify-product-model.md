@@ -36,7 +36,7 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 - `encodedVariantExistence` and `encodedVariantAvailability`
 - `variantsCount`
 
-PDP option links use option-name query parameters and can navigate across Combined Listing child product handles. Product cards link to the bare product path so card navigations stay on the prerendered PDP shell; cart line items link with the carted variant's option parameters. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts a cached base-product read and a compact uncached selection request in parallel, avoiding both request waterfalls and high-cardinality runtime-cache entries.
+PDP option links use option-name query parameters and can navigate across Combined Listing child product handles. Product cards link to the bare product path so card navigations stay on the prerendered PDP shell; cart line items link with the carted variant's option parameters. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts a cached base-product read and a compact short-TTL cached selection request in parallel, avoiding request waterfalls. The selection cache (`"use cache: remote"`, `cacheLife("minutes")`, canonically sorted option keys) exists so runtime prefetching can resolve option navigations before the click; its short lifetime keeps the per-combination keyspace transient rather than persistent.
 
 The same change adds Shopify bundle awareness:
 
@@ -76,8 +76,8 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 - `ProductVariant` gains `productHandle`, `requiresComponents`, `components`, and `bundleParents`.
 - `CartLine` gains nested `components`, `canRemove`, and `canUpdateQuantity`.
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
-- PDP option links and cart line items use option names and values; product cards link to the bare product path so card navigations hit the prerendered shell instead of the uncached selection lookup. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
-- Keep `getProduct()` keyed only by handle and locale. Selected option combinations belong in the uncached `getProductSelection()` path.
+- PDP option links and cart line items use option names and values; product cards link to the bare product path so card navigations hit the prerendered shell without any selection lookup. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
+- Keep `getProduct()` keyed only by handle and locale with `cacheLife("max")`. Selected option combinations belong in `getProductSelection()`, which must stay short-TTL cached (`cacheLife("minutes")`, sorted option keys): cached enough that runtime prefetch resolves option navigations without Suspense fallbacks, short enough that combination entries never accumulate. Do not revert it to `no-store` — uncached reads stop runtime prefetches and reintroduce shells on every option click.
 - Start base product and selection requests in parallel; do not await the product before resolving selected options.
 - Keep the variant-ID compatibility lookup uncached and isolated in the query-matched product proxy; it must not add variant IDs to Runtime Cache or make ordinary PDPs dynamic.
 - Pass only the selected variant fields required by client buy controls; keep bundle relationship arrays on the server.
@@ -89,11 +89,12 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 2. Open a product with more than 50 variants and confirm all option values render with correct existence and availability state.
 3. Change a Combined Listing option and confirm the URL can move to the selected child product handle.
 4. Open a Liquid `/products/:handle?variant=:id` link and confirm it permanently redirects to the matching option-name URL.
-5. Confirm a selected-option PDP starts the base-product and selection operations in parallel and that only the base product uses persistent caching.
-6. Confirm a uniform-price product renders its price in the prerendered HTML, and a single-variant product renders its buy buttons there.
-7. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
-8. Open a component product and confirm bundles returned by `groupedBy` render.
-9. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
-10. Confirm a customized bundle parent without selected components cannot be added directly.
-11. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
-12. Run `pnpm --filter template lint`, `pnpm --filter template test`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.
+5. Confirm a selected-option PDP starts the base-product and selection operations in parallel, with the base product on `cacheLife("max")` and the selection on `cacheLife("minutes")`.
+6. With `prefetch = "allow-runtime"`, confirm clicking an option link navigates without Suspense fallbacks once its prefetch has completed (Navigation Inspector or production deployment).
+7. Confirm a uniform-price product renders its price in the prerendered HTML, and a single-variant product renders its buy buttons there.
+8. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
+9. Open a component product and confirm bundles returned by `groupedBy` render.
+10. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.
+11. Confirm a customized bundle parent without selected components cannot be added directly.
+12. Ask the shopping agent to select options on a high-variant product and confirm it calls `resolveProductVariant` before `addToCart`.
+13. Run `pnpm --filter template lint`, `pnpm --filter template test`, `pnpm --filter template build`, `pnpm --filter docs lint`, and `pnpm --filter docs build`.
