@@ -47,6 +47,7 @@ export function OptionPicker({ option, className, ...props }: OptionPickerProps)
             <Link
               key={value.id}
               href={value.href}
+              prefetch={true}
               scroll={false}
               className={cn(classes, "cursor-pointer")}
             >

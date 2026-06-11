@@ -90,7 +90,7 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 3. Change a Combined Listing option and confirm the URL can move to the selected child product handle.
 4. Open a Liquid `/products/:handle?variant=:id` link and confirm it permanently redirects to the matching option-name URL.
 5. Confirm a selected-option PDP starts the base-product and selection operations in parallel, with the base product on `cacheLife("max")` and the selection on `cacheLife("minutes")`.
-6. With `prefetch = "allow-runtime"`, confirm clicking an option link navigates without Suspense fallbacks once its prefetch has completed (Navigation Inspector or production deployment).
+6. With `prefetch = "allow-runtime"` on the route and `prefetch={true}` on the option and color picker links (both are required — a default `Link` only prefetches the App Shell), confirm clicking an option link navigates without Suspense fallbacks once its prefetch has completed (Navigation Inspector or production deployment).
 7. Confirm a uniform-price product renders its price in the prerendered HTML, and a single-variant product renders its buy buttons there.
 8. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
 9. Open a component product and confirm bundles returned by `groupedBy` render.

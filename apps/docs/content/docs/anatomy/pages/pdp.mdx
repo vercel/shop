@@ -16,6 +16,8 @@ Two structural choices keep that copy coherent, and both are load-bearing. The p
 
 The dynamic input is the selected option values in `searchParams`. Selection responses use `"use cache: remote"` with `cacheLife("minutes")` and canonically sorted option keys, keeping the per-combination working set transient while making recently resolved selections reusable and availability no more than minutes stale. Shopify validates stock again at add-to-cart. `ProductDetailSection` keeps every selection-dependent region in its own Suspense boundary so option changes do not skeletonize the product body.
 
+Two prefetch opt-ins make option clicks instant, and both are required: the route exports `prefetch = "allow-runtime"` (permits runtime prefetching), and the option and color picker links set `prefetch={true}` — without it a `Link` only prefetches the per-route App Shell, so the runtime prefetch never fires and every option click pays a server roundtrip.
+
 Suspense streaming is reserved for regions a selection can actually change. The base product carries exact signals that let everything else render in the prerendered shell: when `priceRange` and `compareAtPriceRange` bounds are equal (`hasUniformPricing`) the price renders eagerly, when `variantsCount` is `1` the option pickers and buy buttons render eagerly, and when `encodedVariantExistence` equals `encodedVariantAvailability` (`allVariantsInStock`) the buy-button fallback renders with real labels instead of placeholders. A simple product therefore ships its price and buy controls in the static HTML; only products with genuinely variant-dependent prices or stock stream those regions.
 
 ## Variant selection
