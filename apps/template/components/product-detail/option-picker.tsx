@@ -38,10 +38,10 @@ export function OptionPicker({
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "px-5 py-2 text-sm font-medium rounded-lg border transition-all",
+            "px-5 py-2 text-sm font-medium rounded-lg transition-all",
             isSelected
-              ? "border-foreground text-foreground"
-              : "border-border text-foreground/50 hover:border-foreground/50",
+              ? "inset-ring-2 inset-ring-foreground text-foreground"
+              : "inset-ring inset-ring-border text-foreground/50 hover:inset-ring-foreground/50",
             !isAvailable && "opacity-40 cursor-not-allowed line-through",
           );
 
