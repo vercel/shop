@@ -69,6 +69,7 @@ export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `
         ...BundleComponentVariantFields
       }
     }
+    # 30 is Shopify's per-bundle component maximum, so this can never truncate
     components(first: 30) {
       nodes {
         quantity
