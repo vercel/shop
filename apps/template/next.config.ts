@@ -28,6 +28,14 @@ if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // Experiment: all three timings set to Next's INFINITE_CACHE sentinel (0xfffffffe) to test cache durability.
+  cacheLife: {
+    supermax: {
+      expire: 0xfffffffe,
+      revalidate: 0xfffffffe,
+      stale: 0xfffffffe,
+    },
+  },
   experimental: {
     inlineCss: true,
     turbopackFileSystemCacheForDev: true,

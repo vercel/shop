@@ -48,7 +48,7 @@ export async function getProduct({
   locale?: string;
 }): Promise<ProductDetails | undefined> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -391,7 +391,7 @@ export async function getCatalogProducts(
   params: CatalogProductsParams,
 ): Promise<CatalogProductsResult> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   return fetchCatalogProducts(params);
@@ -401,7 +401,7 @@ export async function getFilteredCatalogProducts(
   params: FilteredCatalogProductsParams,
 ): Promise<CatalogProductsResult> {
   "use cache: remote";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   return fetchCatalogProducts(params);
@@ -415,7 +415,7 @@ export async function getSearchFacets(params: {
   query?: string;
 }): Promise<{ filters: Filter[]; priceRange?: PriceRange; total: number }> {
   "use cache: remote";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
@@ -465,7 +465,7 @@ export async function searchIndexProducts(params: {
   sortKey?: string;
 }): Promise<{ pageInfo: PageInfo; products: ProductCard[]; total: number }> {
   "use cache: remote";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   const {
@@ -588,7 +588,7 @@ export async function getCollectionProducts(params: {
   products: ProductCard[];
 }> {
   "use cache: remote";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products", "collections", `collection-${params.collection}`);
 
   const {
@@ -673,7 +673,7 @@ export async function getProductRecommendations({
   locale?: string;
 }): Promise<ProductCard[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products", `recommendations-${handle}`);
 
   const country = getCountryCode(locale);
@@ -749,7 +749,7 @@ export async function getProductById({
   locale?: string;
 }): Promise<ProductDetails | undefined> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   const country = getCountryCode(locale);
@@ -782,7 +782,7 @@ export async function getProductsByIds({
   locale?: string;
 }): Promise<ProductCard[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   if (ids.length === 0) {
@@ -815,7 +815,7 @@ export async function getProductsByHandles({
   locale?: string;
 }): Promise<ProductCard[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("products");
 
   if (handles.length === 0) {

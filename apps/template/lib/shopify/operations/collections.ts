@@ -46,7 +46,7 @@ export async function getCollections({
   locale = defaultLocale,
 }: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("collections");
 
   const country = getCountryCode(locale);
@@ -70,7 +70,7 @@ export async function getCollection({
   locale?: string;
 }): Promise<Collection | undefined> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag("collections", `collection-${handle}`);
 
   const country = getCountryCode(locale);

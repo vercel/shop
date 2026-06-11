@@ -39,7 +39,7 @@ function cacheTagFor(type: ShopifySitemapType): string {
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag(cacheTagFor(type));
 
   const data = await shopifyFetch<{ sitemap: { pagesCount: { count: number } } }>({
@@ -56,7 +56,7 @@ export async function getShopifySitemapPage(
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache";
-  cacheLife("max");
+  cacheLife("supermax");
   cacheTag(cacheTagFor(type));
 
   const data = await shopifyFetch<{
