@@ -40,13 +40,11 @@ export function ProductDetailSection({
   locale: Locale;
 }) {
   return (
-    <Suspense fallback={<ProductDetailSectionSkeleton />}>
-      <ProductDetailSectionContent
-        productPromise={productPromise}
-        selectionPromise={selectionPromise}
-        locale={locale}
-      />
-    </Suspense>
+    <ProductDetailSectionContent
+      productPromise={productPromise}
+      selectionPromise={selectionPromise}
+      locale={locale}
+    />
   );
 }
 
@@ -84,8 +82,15 @@ async function ProductDetailSectionContent({
         ]}
       />
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaArea product={product} selectionPromise={selectionPromise} />
-        <ProductInfoArea product={product} selectionPromise={selectionPromise} locale={locale} />
+        <ProductMediaArea
+          product={product}
+          selectionPromise={selectionPromise}
+        />
+        <ProductInfoArea
+          product={product}
+          selectionPromise={selectionPromise}
+          locale={locale}
+        />
       </div>
     </>
   );
@@ -111,13 +116,22 @@ function ProductMediaArea({
 
   return (
     <ProductMedia
-      otherImages={getSharedImages(product.images, product.options, product.variants)}
+      otherImages={getSharedImages(
+        product.images,
+        product.options,
+        product.variants,
+      )}
       videos={product.videos}
       title={product.title}
       className="lg:col-span-6"
       desktopSlot={
-        <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
-          <ResolvedColorImageGrid title={product.title} selectionPromise={selectionPromise} />
+        <Suspense
+          fallback={<Skeleton className="w-full rounded-none aspect-square" />}
+        >
+          <ResolvedColorImageGrid
+            title={product.title}
+            selectionPromise={selectionPromise}
+          />
         </Suspense>
       }
       mobileSlot={
@@ -128,7 +142,10 @@ function ProductMediaArea({
             </div>
           }
         >
-          <ResolvedColorImageCarousel title={product.title} selectionPromise={selectionPromise} />
+          <ResolvedColorImageCarousel
+            title={product.title}
+            selectionPromise={selectionPromise}
+          />
         </Suspense>
       }
     />
@@ -168,19 +185,31 @@ async function ProductInfoArea({
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
-  const { variants, options, handle, title, featuredImage, descriptionHtml, availableForSale } =
-    product;
+  const {
+    variants,
+    options,
+    handle,
+    title,
+    featuredImage,
+    descriptionHtml,
+    availableForSale,
+  } = product;
   const uniformPrice = hasUniformPricing(variants);
   const uniformStock = hasUniformStock(variants);
   const singleVariant = variants.length === 1;
-  const eagerSelection = singleVariant ? computeSelection(product, undefined) : null;
-  const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
+  const eagerSelection = singleVariant
+    ? computeSelection(product, undefined)
+    : null;
+  const t =
+    uniformStock && !singleVariant ? await getTranslations("product") : null;
   const allInStock = variants[0]?.availableForSale ?? true;
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
       <div data-slot="product-info-header">
-        <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
+        <h1 className="font-semibold text-foreground tracking-tight text-3xl">
+          {title}
+        </h1>
         {uniformPrice ? (
           variants[0] && (
             <ProductPrice
@@ -192,7 +221,10 @@ async function ProductInfoArea({
           )
         ) : (
           <Suspense fallback={<div className="h-6" aria-hidden />}>
-            <ResolvedProductPrice selectionPromise={selectionPromise} locale={locale} />
+            <ResolvedProductPrice
+              selectionPromise={selectionPromise}
+              locale={locale}
+            />
           </Suspense>
         )}
       </div>
@@ -234,7 +266,9 @@ async function ProductInfoArea({
           availableForSale={availableForSale}
         />
       ) : (
-        <Suspense fallback={<BuyButtonsFallback t={t} allInStock={allInStock} />}>
+        <Suspense
+          fallback={<BuyButtonsFallback t={t} allInStock={allInStock} />}
+        >
           <ResolvedBuyButtons
             title={title}
             handle={handle}
