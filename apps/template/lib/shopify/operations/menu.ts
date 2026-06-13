@@ -40,7 +40,7 @@ const GET_MENU_QUERY = `
 `;
 
 export async function getMenu({ handle }: { handle: string }): Promise<Menu | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("menus");
 

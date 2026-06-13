@@ -10,7 +10,7 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP runs under Next.js 16 Cache Components. Product data is fetched through `"use cache"` operations with `cacheLife("max")` and a `product-{handle}` tag, so the page renders from cache on every request and is only rebuilt when a Shopify webhook invalidates the matching tag — ISR-style freshness with no per-request fetch (see [Shopify Integration](/docs/shopify) for the webhook setup).
+The PDP runs under Next.js 16 Cache Components. Product data is fetched through `"use cache: remote"` operations with `cacheLife("max")` and a `product-{handle}` tag, so the page renders from the shared Runtime Cache on every request and is only rebuilt when a Shopify webhook invalidates the matching tag — ISR-style freshness with no per-request fetch (see [Shopify Integration](/docs/shopify) for the webhook setup).
 
 The only dynamic input is the `?variant=` query parameter. Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description, related products) renders straight from the cached product. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so a `?variant=` change streams the affected slot without skeletonizing the rest of the page.
 

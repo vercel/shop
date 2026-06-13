@@ -35,7 +35,7 @@ export async function getProduct({
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("products");
 
@@ -112,7 +112,7 @@ const products = flattenEdges(data.collection.products);
 ## Guardrails
 
 - Always verify fields against the live schema with `shopify-ai-toolkit`.
-- Stable, low-cardinality reads need `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
+- Reads need `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`. `"use cache: remote"` uses Vercel's shared Runtime Cache (durable across serverless instances); plain `"use cache"` is per-instance in-memory at runtime and only persists for build-prerendered params.
 - Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
 - Transform Shopify responses to domain types before returning them from operations.
 - Cart mutations must call `invalidateCartCache()`.
@@ -129,7 +129,7 @@ const products = flattenEdges(data.collection.products);
 ### Write a new read operation
 
 1. Define the GraphQL query using existing fragments where possible.
-2. Add `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
+2. Add `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
 3. Call `shopifyFetch` with the query and variables object.
 4. Transform the response before returning it.
 

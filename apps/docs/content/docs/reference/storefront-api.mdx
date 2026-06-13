@@ -39,7 +39,7 @@ Every request is a `POST` to `https://{SHOPIFY_STORE_DOMAIN}/api/2026-04/graphql
 | `Content-Type`                      | `application/json`           |
 | `X-Shopify-Storefront-Access-Token` | Your public storefront token |
 
-The operation name is appended as a query parameter (`?operation=getProductByHandle`) so calls are easy to identify in network logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
+The operation name is appended as a query parameter (`?operation=getProductByHandle`) so calls are easy to identify in network logs. Cache isolation between different variables comes from the `"use cache: remote"` wrappers in `lib/shopify/operations/`, which key on function arguments.
 
 ## Writing a query
 
@@ -98,7 +98,7 @@ export async function getProduct({
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
 
@@ -120,14 +120,14 @@ export async function getProduct({
 
 Key elements:
 
-1. **`"use cache"`** - uses the local Next.js cache for stable, low-cardinality reads
+1. **`"use cache: remote"`** - stores the entry in Vercel's shared Runtime Cache, durable across serverless instances and requests
 2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
 3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
 4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
-Read operations use `"use cache"` with `cacheLife("max")` and one or more cache tags when their inputs are stable, such as product detail, collection, menu, sitemap, and recommendation queries. High-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"` instead. Tags follow a hierarchy:
+Read operations use `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. The remote directive stores entries in Vercel's shared Runtime Cache, so they persist across serverless instances and between requests rather than the per-instance in-memory store that plain `"use cache"` falls back to at runtime. Combined with webhook-driven `revalidateTag()` invalidation, reads stay cached until the underlying Shopify data changes. Tags follow a hierarchy:
 
 | Tag pattern                | Scope                                |
 | -------------------------- | ------------------------------------ |

@@ -71,7 +71,7 @@ export async function getHomepage({
 }: {
   locale?: string;
 } = {}): Promise<Homepage | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
   // Query cms_homepage metaobject, transform to Homepage type
@@ -84,7 +84,7 @@ export async function getMarketingPage({
   slug: string;
   locale?: string;
 }): Promise<MarketingPage | null> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
   // Query cms_page metaobject by slug, transform to MarketingPage type
@@ -93,7 +93,7 @@ export async function getMarketingPage({
 export async function getAllMarketingPageSlugs(): Promise<
   Array<{ slug: string; updatedAt: string }>
 > {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("cms-content");
   // Query all cms_page metaobjects, return slugs

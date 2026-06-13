@@ -4,7 +4,7 @@ description: Shopify webhook handler that invalidates Next.js cache tags so stor
 type: guide
 ---
 
-Read paths in the template are cached aggressively with `"use cache"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
+Read paths in the template are cached aggressively with `"use cache: remote"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
 
 The handler ships in the template and runs with zero configuration in development. For production, set `SHOPIFY_WEBHOOK_SECRET` and register webhooks in Shopify Admin so a real signal flows in.
 
