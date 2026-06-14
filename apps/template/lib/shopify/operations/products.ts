@@ -47,7 +47,7 @@ export async function getProduct({
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
   const country = getCountryCode(locale);

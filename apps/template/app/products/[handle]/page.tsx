@@ -81,22 +81,16 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => {
-    if (handle === PLACEHOLDER_HANDLE) notFound();
-    return handle;
-  });
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const productPromise = handlePromise.then(async (handle) => {
-    const product = await getProduct({ handle, locale });
-    if (!product) notFound();
-    return product;
-  });
+  const product = await getProduct({ handle, locale });
+  if (!product) notFound();
 
-  const variantIdPromise = searchParams.then((sp) => sp?.variant as string | undefined);
-
-  const selectionPromise = Promise.all([productPromise, variantIdPromise]).then(
-    ([product, variantId]) => computeSelection(product, variantId),
+  // Keep searchParams unawaited so only the variant-dependent UI streams; the
+  // product body resolves here and renders into the static shell.
+  const selectionPromise = searchParams.then((sp) =>
+    computeSelection(product, sp?.variant as string | undefined),
   );
 
   return (
@@ -104,11 +98,11 @@ export default async function ProductPage({
       <Container className="bg-background">
         <Sections>
           <ProductDetailSection
-            productPromise={productPromise}
+            product={product}
             selectionPromise={selectionPromise}
             locale={locale}
           />
-          <RelatedProductsSection handle={handlePromise} locale={locale} />
+          <RelatedProductsSection handle={handle} locale={locale} />
         </Sections>
       </Container>
     </Page>

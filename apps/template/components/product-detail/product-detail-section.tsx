@@ -31,36 +31,14 @@ import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export function ProductDetailSection({
-  productPromise,
+  product,
   selectionPromise,
   locale,
 }: {
-  productPromise: Promise<ProductDetails>;
+  product: ProductDetails;
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
-  return (
-    <Suspense fallback={<ProductDetailSectionSkeleton />}>
-      <ProductDetailSectionContent
-        productPromise={productPromise}
-        selectionPromise={selectionPromise}
-        locale={locale}
-      />
-    </Suspense>
-  );
-}
-
-async function ProductDetailSectionContent({
-  productPromise,
-  selectionPromise,
-  locale,
-}: {
-  productPromise: Promise<ProductDetails>;
-  selectionPromise: Promise<ProductSelection>;
-  locale: Locale;
-}) {
-  const product = await productPromise;
-
   return (
     <>
       <ProductSchema
