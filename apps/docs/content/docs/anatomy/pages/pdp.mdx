@@ -10,9 +10,11 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP runs under Next.js 16 Cache Components. Product data is fetched through `"use cache: remote"` operations with `cacheLife("max")` and a `product-{handle}` tag, so the page renders from the shared Runtime Cache on every request and is only rebuilt when a Shopify webhook invalidates the matching tag — ISR-style freshness with no per-request fetch (see [Shopify Integration](/docs/shopify) for the webhook setup).
+The PDP runs under Next.js 16 Cache Components, with a deliberate split between what gets baked into the static prerender and what streams per request. Product data is fetched with `getProduct` — plain `"use cache"`, `cacheLife("max")`, and a `product-{handle}` tag — and **awaited at the top of the page**, so the product body (title, description, gallery, JSON-LD) is rendered into the **static shell** as a single, coherent copy.
 
-The only dynamic input is the `?variant=` query parameter. Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description, related products) renders straight from the cached product. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so a `?variant=` change streams the affected slot without skeletonizing the rest of the page.
+Two structural choices keep that copy coherent, and both are load-bearing. The product promise is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the body at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — the symptom is a React hydration mismatch and product copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag` — that governs freshness (how quickly edits surface), not coherence.
+
+The only dynamic input is the `?variant=` query parameter. Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description) renders from the product resolved at the top of the page, baked into the static shell. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so a `?variant=` change streams the affected slot without skeletonizing the rest of the page.
 
 ## Variant selection
 
@@ -91,7 +93,7 @@ The page emits two JSON-LD schemas:
 
 | File                                                   | Purpose                                                                                        |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `app/products/[handle]/page.tsx`                       | Route entry: metadata, rendering config, kicks off product + selection promises                |
+| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams variant selection |
 | `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD |
 | `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                            |
 | `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
