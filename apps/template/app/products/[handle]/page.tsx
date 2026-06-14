@@ -73,10 +73,6 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export const instant = true;
-
-export const prefetch = "allow-runtime";
-
 export default async function ProductPage({
   params,
   searchParams,
