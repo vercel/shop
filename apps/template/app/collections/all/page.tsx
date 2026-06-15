@@ -37,10 +37,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export const instant = true;
-
-export const prefetch = "allow-runtime";
-
 // Storefront `search()` only supports RELEVANCE and PRICE sort keys.
 const ALL_PRODUCTS_SORT_EXCLUDE = [
   "best-selling",
@@ -51,9 +47,10 @@ const ALL_PRODUCTS_SORT_EXCLUDE = [
 ];
 
 export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
-  const locale = await getLocale();
-  const handlePromise = Promise.resolve(ALL_PRODUCTS_HANDLE);
-  const collectionPromise = getAllProductsCollection();
+  const [locale, collection] = await Promise.all([getLocale(), getAllProductsCollection()]);
+
+  // Keep searchParams unawaited so only the results/filters/sort stream; the
+  // collection header resolves here and renders into the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getAllProductsResultsData({
     locale,
@@ -62,9 +59,9 @@ export default async function AllProductsPage({ searchParams }: PageProps<"/coll
 
   return (
     <CollectionDetailPage
-      handlePromise={handlePromise}
-      collectionPromise={collectionPromise}
+      collection={collection}
       collectionResultsDataPromise={collectionResultsDataPromise}
+      handle={ALL_PRODUCTS_HANDLE}
       locale={locale}
       searchStatePromise={searchStatePromise}
       sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}

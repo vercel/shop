@@ -69,7 +69,9 @@ export async function getCollection({
   handle: string;
   locale?: string;
 }): Promise<Collection | undefined> {
-  "use cache: remote";
+  // Plain "use cache" (not remote) so the resolved collection bakes into the
+  // PLP static shell; "use cache: remote" defers to request time and won't inline.
+  "use cache";
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);
 
