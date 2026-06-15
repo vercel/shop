@@ -303,14 +303,14 @@ function BuyButtonsFallback({
 }) {
   if (!t) {
     return (
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-2.5">
         <div className="h-12 rounded-lg bg-shop" />
         <div className="h-12 rounded-lg bg-primary" />
       </div>
     );
   }
   return (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-2 gap-2.5">
       <div
         className={cn(
           "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
