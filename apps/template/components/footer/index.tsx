@@ -2,8 +2,9 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Sections } from "@/components/ui/sections";
-import { footerItems, siteConfig } from "@/lib/config";
+import { agent, footerItems, siteConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/types/menu";
+import { cn } from "@/lib/utils";
 
 import { SocialLinks } from "./social-links";
 
@@ -14,7 +15,8 @@ export async function Footer({ locale }: { locale: string }) {
 
   return (
     <footer>
-      <div className="mx-auto px-5 pt-10 pb-22 lg:px-10">
+      {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
+      <div className={cn("mx-auto px-5 pt-20 pb-10 lg:px-10", agent.enabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">

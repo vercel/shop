@@ -38,24 +38,34 @@ export function OptionPicker({
           const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "px-5 py-2 text-sm font-medium rounded-lg border transition-all",
+            "grid px-5 py-2 text-center text-sm rounded-lg transition-all",
             isSelected
-              ? "border-foreground text-foreground"
-              : "border-border text-foreground/50 hover:border-foreground/50",
+              ? "font-medium bg-primary text-primary-foreground"
+              : "font-normal inset-ring inset-ring-foreground/15 text-foreground hover:inset-ring-foreground/35",
             !isAvailable && "opacity-40 cursor-not-allowed line-through",
+          );
+
+          // Invisible medium-weight twin reserves the bold width so pills don't shift on selection.
+          const label = (
+            <>
+              <span className="col-start-1 row-start-1">{value.name}</span>
+              <span aria-hidden="true" className="invisible col-start-1 row-start-1 font-medium">
+                {value.name}
+              </span>
+            </>
           );
 
           if (!isAvailable) {
             return (
               <span key={value.id} className={classes}>
-                {value.name}
+                {label}
               </span>
             );
           }
 
           return (
             <Link key={value.id} href={href} scroll={false} className={classes}>
-              {value.name}
+              {label}
             </Link>
           );
         })}
