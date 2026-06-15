@@ -1,7 +1,6 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
@@ -15,7 +14,6 @@ import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
@@ -23,21 +21,24 @@ import type { Collection } from "@/lib/types";
 import { FilterPendingScope, FilterTransitionProvider } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
-  handlePromise,
-  collectionPromise,
+  collection,
   collectionResultsDataPromise,
+  handle,
   locale,
   searchStatePromise,
   sortExclude,
 }: {
-  handlePromise: Promise<string>;
-  collectionPromise: Promise<Collection | undefined>;
+  collection: Collection;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
+  handle: string;
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
-  const tSearch = await getTranslations("search");
+  const [tSearch, tBreadcrumb] = await Promise.all([
+    getTranslations("search"),
+    getTranslations("collections.breadcrumb"),
+  ]);
   const filtersLabel = tSearch("filters");
   const sortByLabel = tSearch("sortBy");
 
@@ -46,12 +47,11 @@ export async function CollectionDetailPage({
       <Page className="pt-2.5 md:pt-10">
         <Container>
           <Sections className="gap-5">
-            <Suspense fallback={<CollectionHeaderFallback />}>
-              <CollectionHeader
-                collectionPromise={collectionPromise}
-                handlePromise={handlePromise}
-              />
-            </Suspense>
+            <CollectionHeader
+              collection={collection}
+              handle={handle}
+              homeLabel={tBreadcrumb("home")}
+            />
 
             <CollectionToolbar
               filterSheet={
@@ -94,27 +94,19 @@ export async function CollectionDetailPage({
   );
 }
 
-async function CollectionHeader({
-  collectionPromise,
-  handlePromise,
+function CollectionHeader({
+  collection,
+  handle,
+  homeLabel,
 }: {
-  collectionPromise: Promise<Collection | undefined>;
-  handlePromise: Promise<string>;
+  collection: Collection;
+  handle: string;
+  homeLabel: string;
 }) {
-  const [collection, handle, t] = await Promise.all([
-    collectionPromise,
-    handlePromise,
-    getTranslations("collections.breadcrumb"),
-  ]);
-
-  if (!collection) {
-    notFound();
-  }
-
   const { title, description, updatedAt } = collection;
 
   const breadcrumbItems = [
-    { name: t("home"), path: "/" },
+    { name: homeLabel, path: "/" },
     { name: title, path: `/collections/${handle}` },
   ];
 
@@ -129,14 +121,6 @@ async function CollectionHeader({
         {description && <p className="mt-1 text-muted-foreground">{description}</p>}
       </div>
     </>
-  );
-}
-
-function CollectionHeaderFallback() {
-  return (
-    <div>
-      <Skeleton className="h-9 w-72 sm:h-10 md:h-12" />
-    </div>
   );
 }
 

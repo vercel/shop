@@ -43,15 +43,15 @@ export async function getCollectionSearchState(
 }
 
 export async function getCollectionResultsData({
-  handlePromise,
+  handle,
   locale,
   searchStatePromise,
 }: {
-  handlePromise: Promise<string>;
+  handle: string;
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const [handle, { activeFilters, sort }] = await Promise.all([handlePromise, searchStatePromise]);
+  const { activeFilters, sort } = await searchStatePromise;
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const result = await getCollectionProducts({
     activeFilters,

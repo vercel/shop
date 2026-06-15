@@ -83,32 +83,30 @@ export async function generateMetadata({
   };
 }
 
-export const instant = true;
-
-export const prefetch = "allow-runtime";
-
 export default async function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/collections/[handle]">) {
-  const locale = await getLocale();
-  const handlePromise = params.then(({ handle }) => {
-    if (handle === PLACEHOLDER_HANDLE) notFound();
-    return handle;
-  });
-  const collectionPromise = handlePromise.then((handle) => getCollection({ handle, locale }));
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  if (handle === PLACEHOLDER_HANDLE) notFound();
+
+  const collection = await getCollection({ handle, locale });
+  if (!collection) notFound();
+
+  // Keep searchParams unawaited so only the results/filters/sort stream; the
+  // collection header resolves here and renders into the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getCollectionResultsData({
-    handlePromise,
+    handle,
     locale,
     searchStatePromise,
   });
 
   return (
     <CollectionDetailPage
-      handlePromise={handlePromise}
-      collectionPromise={collectionPromise}
+      collection={collection}
       collectionResultsDataPromise={collectionResultsDataPromise}
+      handle={handle}
       locale={locale}
       searchStatePromise={searchStatePromise}
     />
