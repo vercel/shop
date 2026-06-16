@@ -28,7 +28,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Placeholder homepage; copy is inline so the file can be replaced wholesale.
 export default async function HomePage() {
   const locale = await getLocale();
 
