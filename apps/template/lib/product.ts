@@ -272,15 +272,17 @@ export function getPartitionedImagesForSelectedColor(
 }
 
 /** When true, the price renders without waiting for searchParams to resolve the variant. */
-export function hasUniformPricing(variants: ProductVariant[]): boolean {
-  if (variants.length <= 1) return true;
-  const first = variants[0];
-  return variants.every(
-    (v) =>
-      v.price.amount === first.price.amount &&
-      v.price.currencyCode === first.price.currencyCode &&
-      v.compareAtPrice?.amount === first.compareAtPrice?.amount,
-  );
+export function hasUniformPricing(
+  priceRange: ProductDetails["priceRange"],
+  compareAtPriceRange?: ProductDetails["compareAtPriceRange"],
+): boolean {
+  const { maxVariantPrice, minVariantPrice } = priceRange;
+  const priceUniform =
+    minVariantPrice.amount === maxVariantPrice.amount &&
+    minVariantPrice.currencyCode === maxVariantPrice.currencyCode;
+  if (!priceUniform) return false;
+  if (!compareAtPriceRange) return true;
+  return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
 }
 
 /** When true, buy-button labels can render in the Suspense fallback without variant resolution. */

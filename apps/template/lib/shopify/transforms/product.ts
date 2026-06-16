@@ -331,6 +331,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     category: transformCategory(product.category),
     updatedAt: product.updatedAt,
     priceRange: product.priceRange,
+    compareAtPriceRange: product.compareAtPriceRange ?? undefined,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
     manufacturerName: product.vendor,
     categoryId: product.category?.id,

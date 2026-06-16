@@ -148,7 +148,7 @@ async function ProductInfoArea({
 }) {
   const { variants, options, handle, title, featuredImage, descriptionHtml, availableForSale } =
     product;
-  const uniformPrice = hasUniformPricing(variants);
+  const uniformPrice = hasUniformPricing(product.priceRange, product.compareAtPriceRange);
   const uniformStock = hasUniformStock(variants);
   const singleVariant = variants.length === 1;
   const eagerSelection = singleVariant ? computeSelection(product, undefined) : null;
@@ -160,14 +160,12 @@ async function ProductInfoArea({
       <div data-slot="product-info-header">
         <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
         {uniformPrice ? (
-          variants[0] && (
-            <ProductPrice
-              amount={variants[0].price.amount}
-              currencyCode={variants[0].price.currencyCode}
-              compareAtAmount={variants[0].compareAtPrice?.amount}
-              locale={locale}
-            />
-          )
+          <ProductPrice
+            amount={product.priceRange.minVariantPrice.amount}
+            currencyCode={product.priceRange.minVariantPrice.currencyCode}
+            compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
+            locale={locale}
+          />
         ) : (
           <Suspense fallback={<div className="h-6" aria-hidden />}>
             <ResolvedProductPrice selectionPromise={selectionPromise} locale={locale} />
