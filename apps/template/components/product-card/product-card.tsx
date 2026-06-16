@@ -46,7 +46,7 @@ export async function ProductCard({
           : `/products/${product.handle}`
       }
       className={className}
-      prefetch={true}
+      unstable_dynamicOnHover
     >
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (

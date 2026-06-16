@@ -7,3 +7,10 @@ declare module "next-intl" {
     Messages: typeof messages;
   }
 }
+
+// Supported by the app-router runtime + gated behind experimental.dynamicOnHover, but absent from next/link's public LinkProps. Remove when upstream types catch up.
+declare module "next/link" {
+  interface LinkProps<RouteInferType = any> {
+    unstable_dynamicOnHover?: boolean;
+  }
+}

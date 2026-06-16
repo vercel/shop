@@ -46,7 +46,7 @@ function MenuLink({ url, children, className }: MenuLinkProps) {
     );
   }
   return (
-    <Link href={url} className={className} prefetch={true}>
+    <Link href={url} className={className} unstable_dynamicOnHover>
       {children}
     </Link>
   );

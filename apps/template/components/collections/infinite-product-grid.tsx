@@ -119,7 +119,7 @@ function ClientProductCard({
     : `/products/${product.handle}`;
 
   return (
-    <Link href={href} prefetch={true}>
+    <Link href={href} unstable_dynamicOnHover>
       <ProductCardRoot>
         <ProductCardImageContainer>
           <ProductCardImage

@@ -29,6 +29,7 @@ if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
 const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
+    dynamicOnHover: true,
     inlineCss: true,
     turbopackFileSystemCacheForDev: true,
   },
