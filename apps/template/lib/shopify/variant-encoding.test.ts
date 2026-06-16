@@ -33,6 +33,10 @@ test("decodes ranges", () => {
   assert.deepEqual(decodeEncodedVariant("v1_0-2"), [[0], [1], [2]]);
 });
 
+test("preserves prefixes when the encoding has no trailing delimiter", () => {
+  assert.deepEqual(decodeEncodedVariant("v1_0:1"), [[0, 1]]);
+});
+
 test("adds prefixes used for partial option availability", () => {
   assert.deepEqual([...encodedVariantSet("v1_0:1,")], ["0", "0,1"]);
 });
@@ -47,4 +51,8 @@ test("reports every existing variant available when the encodings match", () => 
 
 test("reports unavailable variants when availability is a subset of existence", () => {
   assert.equal(allEncodedVariantsAvailable("v1_0:0-1,1:0,", "v1_0:0,1:0,"), false);
+});
+
+test("does not infer uniform availability from missing encodings", () => {
+  assert.equal(allEncodedVariantsAvailable(null, null), false);
 });

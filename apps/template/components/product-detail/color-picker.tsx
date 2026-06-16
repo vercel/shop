@@ -67,7 +67,6 @@ export function ColorPicker({ option, hideImages, className, ...props }: ColorPi
             <Link
               key={value.id}
               href={value.href}
-              prefetch={true}
               scroll={false}
               className={cn("block cursor-pointer", !value.available && "opacity-40")}
               aria-label={`Select ${option.name}: ${value.name}`}

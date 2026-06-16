@@ -38,7 +38,7 @@ Menu items can link to collections, products, pages, or custom URLs.
 
 ## Webhooks and cache invalidation
 
-All read operations are cached with `"use cache: remote"` and `cacheLife("max")`. Without webhooks, changes in Shopify won't appear until the cache expires. To get near-instant updates, configure Shopify webhooks to hit the template's invalidation endpoint.
+Most read operations use `"use cache: remote"` and `cacheLife("max")`. The PDP base-product read uses plain `"use cache"` so it can be baked into the static shell, while option selections use the remote cache with `cacheLife("minutes")`. Without webhooks, long-lived entries won't update until their cache lifetime expires. To get near-instant updates, configure Shopify webhooks to hit the template's invalidation endpoint.
 
 ### Webhook endpoint
 

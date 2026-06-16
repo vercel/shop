@@ -1,4 +1,4 @@
-export function decodeEncodedVariant(encodedVariantField: string): number[][] {
+export function decodeEncodedVariant(encodedVariantField: string | null | undefined): number[][] {
   if (!encodedVariantField) return [];
   if (!encodedVariantField.startsWith("v1_")) {
     throw new Error("Unsupported option value encoding");
@@ -53,14 +53,15 @@ export function decodeEncodedVariant(encodedVariantField: string): number[][] {
         combinations.push([...current]);
       }
     } else {
-      combinations.push([valueIndex]);
+      current[depth] = valueIndex;
+      combinations.push([...current]);
     }
   }
 
   return combinations;
 }
 
-export function encodedVariantSet(encodedVariantField: string): Set<string> {
+export function encodedVariantSet(encodedVariantField: string | null | undefined): Set<string> {
   const combinations = new Set<string>();
 
   for (const combination of decodeEncodedVariant(encodedVariantField)) {
@@ -73,9 +74,10 @@ export function encodedVariantSet(encodedVariantField: string): Set<string> {
 }
 
 export function allEncodedVariantsAvailable(
-  encodedVariantExistence: string,
-  encodedVariantAvailability: string,
+  encodedVariantExistence: string | null | undefined,
+  encodedVariantAvailability: string | null | undefined,
 ): boolean {
+  if (!encodedVariantExistence || !encodedVariantAvailability) return false;
   const existence = encodedVariantSet(encodedVariantExistence);
   const availability = encodedVariantSet(encodedVariantAvailability);
   return existence.size === availability.size && [...existence].every((c) => availability.has(c));

@@ -52,4 +52,4 @@ A variant with `requiresComponents` and no fixed components; not purchasable thr
 ## Flagged ambiguities
 
 - "caching the variants" was used to mean both the pre-2026 full-variant-array cache and per-**Selection** cache entries — resolved: the modern model caches the base product (webhook-fresh, per handle) and **Selections** (minutes-fresh, per sorted option combination) separately; see ADR-0001.
-- "instant navigation" was used to mean both router-cache hits and runtime-prefetched navigations — resolved: the guarantee is runtime prefetch resolving the **Selection** before the click; the router cache only masks its absence for previously visited URLs.
+- "instant navigation" was used to mean both static-shell navigation and runtime-prefetched **Selections** — resolved: the PDP keeps the product body coherent in the static shell and does not use route-wide runtime prefetching; a first option navigation may stream selection-dependent regions, while recently visited selections can resolve from cache.

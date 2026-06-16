@@ -16,7 +16,7 @@ Two structural choices keep that copy coherent, and both are load-bearing. The p
 
 The dynamic input is the selected option values in `searchParams`. Selection responses use `"use cache: remote"` with `cacheLife("minutes")` and canonically sorted option keys, keeping the per-combination working set transient while making recently resolved selections reusable and availability no more than minutes stale. Shopify validates stock again at add-to-cart. `ProductDetailSection` keeps every selection-dependent region in its own Suspense boundary so option changes do not skeletonize the product body.
 
-Two prefetch opt-ins make option clicks instant, and both are required: the route exports `prefetch = "allow-runtime"` (permits runtime prefetching), and the option and color picker links set `prefetch={true}` — without it a `Link` only prefetches the per-route App Shell, so the runtime prefetch never fires and every option click pays a server roundtrip.
+Option links use the default static-shell prefetch. Do not add route-wide `prefetch = "allow-runtime"` or force full prefetches from the pickers: that would render a second request-time copy of the product body and can tear from the frozen shell. A first visit to an option URL may stream the selection-dependent regions; recently resolved selections reuse the short-TTL cache.
 
 Suspense streaming is reserved for regions a selection can actually change. The base product carries exact signals that let everything else render in the prerendered shell: when `priceRange` and `compareAtPriceRange` bounds are equal (`hasUniformPricing`) the price renders eagerly, when `variantsCount` is `1` the option pickers and buy buttons render eagerly, and when `encodedVariantExistence` equals `encodedVariantAvailability` (`allVariantsInStock`) the buy-button fallback renders with real labels instead of placeholders. A simple product therefore ships its price and buy controls in the static HTML; only products with genuinely variant-dependent prices or stock stream those regions.
 
@@ -105,12 +105,12 @@ The page emits two JSON-LD schemas:
 
 ## Key files
 
-| File                                                   | Purpose                                                                                        |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| File                                                   | Purpose                                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams variant selection |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD |
-| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                            |
-| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
-| `lib/product.ts`                                       | `computeSelection`, option-param parsing, and color-image partitioning                         |
+| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD         |
+| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                    |
+| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                           |
+| `lib/product.ts`                                       | `computeSelection`, option-param parsing, and color-image partitioning                                 |
 
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.
