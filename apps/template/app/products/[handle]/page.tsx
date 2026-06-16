@@ -84,15 +84,18 @@ export default async function ProductPage({
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const product = await getProduct({ handle, locale });
+  const productPromise = getProduct({ handle, locale });
+  const selectionDataPromise = searchParams
+    .then(getSelectedOptionsFromSearchParams)
+    .then((selectedOptions) =>
+      selectedOptions.length > 0
+        ? getProductSelection({ handle, selectedOptions, locale })
+        : undefined,
+    );
+
+  const product = await productPromise;
   if (!product) notFound();
 
-  const selectedOptionsPromise = searchParams.then(getSelectedOptionsFromSearchParams);
-  const selectionDataPromise = selectedOptionsPromise.then((selectedOptions) =>
-    selectedOptions.length > 0
-      ? getProductSelection({ handle, selectedOptions, locale })
-      : undefined,
-  );
   const selectionPromise = selectionDataPromise.then((selectionData) =>
     computeSelection(product, selectionData),
   );

@@ -125,8 +125,8 @@ type ShopifyMediaNode = ShopifyMediaImageNode | ShopifyVideoNode | ShopifyOtherM
 
 export interface ShopifyProductSelection {
   handle: string;
-  encodedVariantAvailability: string;
-  encodedVariantExistence: string;
+  encodedVariantAvailability: string | null;
+  encodedVariantExistence: string | null;
   options: ShopifyOption[];
   selectedOrFirstAvailableVariant: ShopifyVariant | null;
   adjacentVariants: ShopifyVariant[];
