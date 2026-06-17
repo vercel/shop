@@ -261,6 +261,8 @@ interface FilterPriceRangeProps extends React.ComponentProps<"div"> {
   onMaxChange?: (value: string) => void;
   onApply?: (min: string, max: string) => void;
   currencySymbol?: string;
+  fromPlaceholder?: string;
+  toPlaceholder?: string;
 }
 
 function FilterPriceRange({
@@ -270,6 +272,8 @@ function FilterPriceRange({
   onMaxChange,
   onApply,
   currencySymbol = "$",
+  fromPlaceholder = "From",
+  toPlaceholder = "To",
   className,
   ...props
 }: FilterPriceRangeProps) {
@@ -285,7 +289,7 @@ function FilterPriceRange({
           type="number"
           step="0.01"
           min="0"
-          placeholder="From"
+          placeholder={fromPlaceholder}
           value={minValue}
           onChange={(e) => onMinChange?.(e.target.value)}
           className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -298,7 +302,7 @@ function FilterPriceRange({
           type="number"
           step="0.01"
           min="0"
-          placeholder="To"
+          placeholder={toPlaceholder}
           value={maxValue}
           onChange={(e) => onMaxChange?.(e.target.value)}
           className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"

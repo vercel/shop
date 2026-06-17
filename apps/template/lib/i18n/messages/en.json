@@ -138,6 +138,8 @@
     "noProducts": "No products found in this category",
     "pages": "pages",
     "price": "Price",
+    "priceFrom": "From",
+    "priceTo": "To",
     "productCount": "{count, plural, one {# product} other {# products}}",
     "size": "Size",
     "sortBy": "Sort",
@@ -178,9 +180,10 @@
     "copyright": "© {name}. All rights reserved."
   },
   "home": {
-    "title": "Enterprise Commerce Template",
-    "viewAllProducts": "See All Products",
-    "viewSampleProduct": "View Sample Product"
+    "ctaText": "Shop Now",
+    "headline": "Agentic Infrastructure for Commerce",
+    "productsTitle": "Products",
+    "subheadline": "A production-ready, agent-friendly Shopify storefront built on Next.js."
   },
   "nav": {
     "account": "Account",
@@ -294,6 +297,8 @@
     "selectVariantLabel": "Select {name}: {value}",
     "sku": "SKU",
     "stockLeft": "({stock} left)",
+    "swatchAlt": "{value} swatch",
+    "unavailableVariantLabel": "{name}: {value} (unavailable)",
     "viewAll": "View All",
     "viewImage": "View image {current} of {total}",
     "visitStore": "Visit the store"

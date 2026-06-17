@@ -28,9 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Placeholder homepage; copy is inline so the file can be replaced wholesale.
 export default async function HomePage() {
-  const locale = await getLocale();
+  const [locale, t] = await Promise.all([getLocale(), getTranslations("home")]);
 
   return (
     <Page className="pt-0">
@@ -38,16 +37,16 @@ export default async function HomePage() {
         <BannerSection
           hero={{
             id: "homepage-hero",
-            headline: "Agentic Infrastructure for Commerce",
-            subheadline: "A production-ready, agent-friendly Shopify storefront built on Next.js.",
-            ctaText: "Shop Now",
+            headline: t("headline"),
+            subheadline: t("subheadline"),
+            ctaText: t("ctaText"),
             ctaLink: "/collections/all",
           }}
         />
 
         <Container>
           <ProductsGrid
-            title="Products"
+            title={t("productsTitle")}
             limit={8}
             locale={locale}
             collectionUrl="/collections/all"

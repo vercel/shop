@@ -234,6 +234,8 @@ export function CollectionFilterSidebarClient({
                 onMinChange={setMinInput}
                 onMaxChange={setMaxInput}
                 onApply={applyPriceRange}
+                fromPlaceholder={tCategory("priceFrom")}
+                toPlaceholder={tCategory("priceTo")}
               />
             </FilterSectionContent>
           </FilterSection>

@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import Link from "next/link";
 import type * as React from "react";
@@ -15,7 +16,7 @@ interface ColorPickerProps extends React.ComponentProps<"div"> {
   hideImages?: boolean;
 }
 
-export function ColorPicker({
+export async function ColorPicker({
   option,
   selectedValue,
   variants,
@@ -25,6 +26,8 @@ export function ColorPicker({
   className,
   ...props
 }: ColorPickerProps) {
+  const t = await getTranslations("product");
+
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
@@ -61,7 +64,7 @@ export function ColorPicker({
                   src={imageUrl}
                   width={200}
                   height={200}
-                  alt={`${value.name} swatch`}
+                  alt={t("swatchAlt", { value: value.name })}
                   className="size-full object-cover"
                 />
               ) : (
@@ -78,7 +81,7 @@ export function ColorPicker({
               <span
                 key={value.id}
                 className="block opacity-40 cursor-not-allowed"
-                aria-label={`${option.name}: ${value.name} (unavailable)`}
+                aria-label={t("unavailableVariantLabel", { name: option.name, value: value.name })}
               >
                 {swatch}
               </span>
@@ -91,7 +94,7 @@ export function ColorPicker({
               href={href}
               scroll={false}
               className="block"
-              aria-label={`Select ${option.name}: ${value.name}`}
+              aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
             >
               {swatch}
             </Link>
