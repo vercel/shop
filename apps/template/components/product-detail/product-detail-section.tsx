@@ -152,7 +152,8 @@ async function ProductInfoArea({
   const uniformStock = hasUniformStock(variants);
   const singleVariant = variants.length === 1;
   const eagerSelection = singleVariant ? computeSelection(product, undefined) : null;
-  const t = uniformStock && !singleVariant ? await getTranslations("product") : null;
+  const t = await getTranslations("product");
+  const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = variants[0]?.availableForSale ?? true;
 
   return (
@@ -179,6 +180,7 @@ async function ProductInfoArea({
           options={options}
           selectedOptions={eagerSelection.selectedOptions}
           handle={handle}
+          t={t}
         />
       ) : (
         <Suspense
@@ -188,6 +190,7 @@ async function ProductInfoArea({
               options={options}
               selectedOptions={{}}
               handle={handle}
+              t={t}
               hideImages
             />
           }
@@ -197,6 +200,7 @@ async function ProductInfoArea({
             options={options}
             handle={handle}
             selectionPromise={selectionPromise}
+            t={t}
           />
         </Suspense>
       )}
@@ -210,7 +214,7 @@ async function ProductInfoArea({
           availableForSale={availableForSale}
         />
       ) : (
-        <Suspense fallback={<BuyButtonsFallback t={t} allInStock={allInStock} />}>
+        <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
           <ResolvedBuyButtons
             title={title}
             handle={handle}
@@ -250,11 +254,13 @@ async function ResolvedProductInfoOptions({
   options,
   handle,
   selectionPromise,
+  t,
 }: {
   variants: ProductDetails["variants"];
   options: ProductDetails["options"];
   handle: string;
   selectionPromise: Promise<ProductSelection>;
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
   const { selectedOptions } = await selectionPromise;
   return (
@@ -263,6 +269,7 @@ async function ResolvedProductInfoOptions({
       options={options}
       selectedOptions={selectedOptions}
       handle={handle}
+      t={t}
     />
   );
 }

@@ -5,7 +5,7 @@ import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { AboutItem } from "./about-item";
-import { ColorPicker } from "./color-picker";
+import { ColorPicker, type ProductTranslator } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { ProductPrice } from "./product-price";
 
@@ -43,6 +43,7 @@ interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
   options: ProductOption[];
   selectedOptions: SelectedOptions;
   handle: string;
+  t: ProductTranslator;
   hideImages?: boolean;
 }
 
@@ -51,6 +52,7 @@ function ProductInfoOptions({
   options,
   selectedOptions,
   handle,
+  t,
   hideImages,
   className,
   ...props
@@ -88,6 +90,7 @@ function ProductInfoOptions({
             variants={variants}
             handle={handle}
             selectedOptions={selectedOptions}
+            t={t}
             hideImages={hideImages}
           />
         ))}

@@ -7,27 +7,29 @@ import { type SelectedOptions, getVariantUrl } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"product">>>;
+
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
   selectedValue: string;
   variants: ProductVariant[];
   handle: string;
   selectedOptions: SelectedOptions;
+  t: ProductTranslator;
   hideImages?: boolean;
 }
 
-export async function ColorPicker({
+export function ColorPicker({
   option,
   selectedValue,
   variants,
   handle,
   selectedOptions,
+  t,
   hideImages,
   className,
   ...props
 }: ColorPickerProps) {
-  const t = await getTranslations("product");
-
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
