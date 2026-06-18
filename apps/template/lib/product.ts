@@ -1,18 +1,6 @@
-import type {
-  Image,
-  Money,
-  ProductDetails,
-  ProductOption,
-  ProductVariant,
-  SelectedOption,
-} from "@/lib/types";
+import type { Image, Money, ProductDetails, ProductOption, SelectedOption } from "@/lib/types";
 
 export type SelectedOptions = Record<string, string>;
-
-export interface ProductSelection {
-  selectedOptions: SelectedOptions;
-  selectedVariant: ProductVariant | undefined;
-}
 
 /** Selected options from `?color=Blue&size=XS` params, keyed by canonical option name. */
 export function parseSelectedOptions(
@@ -59,28 +47,55 @@ export function buildOptionUrl(
   return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
 }
 
-/** Representative variant images (one per option value, from firstSelectableVariant). */
-function colorImageUrls(options: ProductOption[]): Set<string> {
-  const urls = new Set<string>();
-  for (const option of options) {
-    for (const value of option.values) {
-      if (value.image) urls.add(value.image);
-    }
-  }
-  return urls;
+/** The color option, detected by swatch data or name — the only axis that partitions the gallery. */
+function findColorOption(options: ProductOption[]): ProductOption | undefined {
+  return options.find(
+    (option) =>
+      option.values.some((value) => value.swatch?.color || value.swatch?.image) ||
+      option.name.toLowerCase().includes("color"),
+  );
 }
 
-/** True when the gallery should lead with a color-specific (selected-variant) image. */
+/**
+ * True only when the color axis has multiple values with distinct representative
+ * images — so the gallery should lead with the selected color's image. Other
+ * multi-value axes (size, etc.) share imagery and must not trigger a streamed slot.
+ */
 export function hasColorImagePartitioning(options: ProductOption[]): boolean {
-  return options.some((option) => option.values.filter((value) => value.image).length > 1);
+  const color = findColorOption(options);
+  if (!color || color.values.length <= 1) return false;
+  return color.values.filter((value) => value.image).length > 1;
 }
 
 /** Product images that aren't a specific color's representative image. */
 export function getSharedImages(images: Image[], options: ProductOption[]): Image[] {
-  const colorUrls = colorImageUrls(options);
+  const color = findColorOption(options);
+  if (!color) return images;
+  const colorUrls = new Set(
+    color.values.map((value) => value.image).filter((url): url is string => Boolean(url)),
+  );
   if (colorUrls.size === 0) return images;
   const shared = images.filter((image) => !colorUrls.has(image.url));
   return shared.length > 0 ? shared : images;
+}
+
+/** The selected color's representative image, resolved from options alone (no variant query). */
+export function getSelectedColorImage(
+  product: ProductDetails,
+  selectedOptions: SelectedOptions,
+): Image | undefined {
+  const color = findColorOption(product.options);
+  if (!color) return undefined;
+  const value = color.values.find((v) => v.name === selectedOptions[color.name]);
+  if (!value?.image) return undefined;
+  return (
+    product.images.find((image) => image.url === value.image) ?? {
+      url: value.image,
+      altText: product.title,
+      width: 0,
+      height: 0,
+    }
+  );
 }
 
 /** When true, the price renders without waiting for searchParams to resolve the variant. */
