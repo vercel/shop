@@ -105,7 +105,7 @@ function createSystemPrompt(ctx: AgentContext) {
     `;
   } else if (page?.type === "product") {
     const { product } = page;
-    const variantInfo = product.variants
+    const variantInfo = (product.variants ?? [])
       .map((v) => {
         const options = v.selectedOptions.map((o) => `${o.name}: ${o.value}`).join(", ");
         const stock = v.availableForSale ? "in stock" : "out of stock";

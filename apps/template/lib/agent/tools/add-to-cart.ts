@@ -41,7 +41,7 @@ If there are multiple variants (sizes, colors), ask the user which one they want
         let productInfo = "";
         if (page?.type === "product") {
           const { product } = page;
-          const variant = product.variants.find((v) => v.id === variant_id);
+          const variant = product.variants?.find((v) => v.id === variant_id);
           if (variant) {
             productInfo = ` (${product.title} - ${variant.title})`;
           }

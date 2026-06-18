@@ -8,7 +8,7 @@ Used in the home featured grid, collection (PLP) and search grids, the related-p
 
 ## Composition
 
-`ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` (appending `?variant=` when a default variant id is known). Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+`ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` — the bare product URL, which renders the first-available (default) variant. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
 
 ## Variants
 

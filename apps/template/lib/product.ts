@@ -1,4 +1,3 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
 import type {
   Image,
   Money,
@@ -13,262 +12,75 @@ export type SelectedOptions = Record<string, string>;
 export interface ProductSelection {
   selectedOptions: SelectedOptions;
   selectedVariant: ProductVariant | undefined;
-  colorImages: Image[];
 }
 
-export function computeSelection(
-  product: ProductDetails,
-  variantId: string | undefined,
-): ProductSelection {
-  const { images, options, variants } = product;
-  const selectedOptions = computeInitialSelectedOptions(variants, variantId);
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const colorImages = hasColorImagePartitioning(options, variants)
-    ? getPartitionedImagesForSelectedColor(images, options, variants, selectedOptions).colorImages
-    : [];
-  return { selectedOptions, selectedVariant, colorImages };
-}
-
-/** Called server-side so the initial HTML matches hydrated state (zero CLS). */
-export function computeInitialSelectedOptions(
-  variants: ProductVariant[],
-  initialVariantId?: string,
+/** Selected options from `?color=Blue&size=XS` params, keyed by canonical option name. */
+export function parseSelectedOptions(
+  options: ProductOption[],
+  searchParams: Record<string, string | string[] | undefined>,
 ): SelectedOptions {
-  if (initialVariantId) {
-    const matchedVariant = variants.find((v) => {
-      const numericId = getNumericShopifyId(v.id);
-      return numericId === initialVariantId;
-    });
-    if (matchedVariant) {
-      const opts: SelectedOptions = {};
-      for (const opt of matchedVariant.selectedOptions) {
-        opts[opt.name] = opt.value;
-      }
-      return opts;
-    }
+  const selected: SelectedOptions = {};
+  for (const option of options) {
+    const raw = searchParams[option.name.toLowerCase()];
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (value === undefined) continue;
+    const match = option.values.find((v) => v.name.toLowerCase() === value.toLowerCase());
+    selected[option.name] = match?.name ?? value;
   }
-  return getInitialSelectedOptions(variants);
+  return selected;
 }
 
-export function getInitialSelectedOptions(variants: ProductVariant[]): SelectedOptions {
-  const initial: SelectedOptions = {};
-  for (const option of variants[0]?.selectedOptions ?? []) {
-    initial[option.name] = option.value;
+/** The default variant's options — the selection shown when no params are present. */
+export function defaultSelectedOptions(product: ProductDetails): SelectedOptions {
+  const selected: SelectedOptions = {};
+  for (const option of product.defaultVariant?.selectedOptions ??
+    product.defaultVariantSelectedOptions ??
+    []) {
+    selected[option.name] = option.value;
   }
-  return initial;
+  return selected;
 }
 
-export function resolveSelectedVariant(
-  variants: ProductVariant[],
-  selectedOptions: SelectedOptions,
-) {
-  if (Object.keys(selectedOptions).length === 0) {
-    return variants[0];
-  }
-
-  return (
-    variants.find((variant) =>
-      variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
-    ) ?? variants[0]
-  );
+export function toSelectedOptionList(selectedOptions: SelectedOptions): SelectedOption[] {
+  return Object.entries(selectedOptions).map(([name, value]) => ({ name, value }));
 }
 
-export function getVariantUrl(
+/** Option-based PDP URL, e.g. `/products/handle?color=Blue&size=XS`. */
+export function buildOptionUrl(
   handle: string,
-  variants: ProductVariant[],
   currentOptions: SelectedOptions,
   optionName: string,
   optionValue: string,
 ): string {
-  const newOptions = { ...currentOptions, [optionName]: optionValue };
-
-  let variant = variants.find((v) =>
-    v.selectedOptions.every((opt) => newOptions[opt.name] === opt.value),
+  const next = { ...currentOptions, [optionName]: optionValue };
+  const parts = Object.entries(next).map(
+    ([name, value]) => `${encodeURIComponent(name.toLowerCase())}=${encodeURIComponent(value)}`,
   );
-
-  if (!variant) {
-    variant = variants.find((v) =>
-      v.selectedOptions.some((opt) => opt.name === optionName && opt.value === optionValue),
-    );
-  }
-
-  const numericId = variant ? getNumericShopifyId(variant.id) : null;
-  if (numericId) {
-    return `/products/${handle}?variant=${numericId}`;
-  }
-
-  return `/products/${handle}`;
+  return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
 }
 
-/**
- * Falls back to all product images when no color option exists, only one color
- * is available, or no variant images are assigned.
- */
-export function getImagesForSelectedColor(
-  images: Image[],
-  options: ProductOption[],
-  variants: ProductVariant[],
-  selectedOptions: SelectedOptions,
-): Image[] {
-  // Find the color option using swatch data (locale-agnostic) first, then
-  // fall back to the English name for stores without swatches configured.
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
-
-  if (!colorOption) return images;
-
-  const selectedColor = selectedOptions[colorOption.name];
-  if (!selectedColor) return images;
-
-  // Only one color means all images belong to it
-  if (colorOption.values.length <= 1) return images;
-
-  const colorToImageUrls = new Map<string, Set<string>>();
-  for (const variant of variants) {
-    if (!variant.image) continue;
-    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
-    if (!colorOpt) continue;
-
-    let urls = colorToImageUrls.get(colorOpt.value);
-    if (!urls) {
-      urls = new Set<string>();
-      colorToImageUrls.set(colorOpt.value, urls);
-    }
-    urls.add(variant.image.url);
-  }
-
-  if (colorToImageUrls.size === 0) return images;
-
-  const otherColorImageUrls = new Set<string>();
-  for (const [color, urls] of colorToImageUrls) {
-    if (color !== selectedColor) {
-      for (const url of urls) {
-        otherColorImageUrls.add(url);
-      }
+/** Representative variant images (one per option value, from firstSelectableVariant). */
+function colorImageUrls(options: ProductOption[]): Set<string> {
+  const urls = new Set<string>();
+  for (const option of options) {
+    for (const value of option.values) {
+      if (value.image) urls.add(value.image);
     }
   }
-
-  // Images shared with the selected color must not be excluded.
-  const selectedColorUrls = colorToImageUrls.get(selectedColor);
-  if (selectedColorUrls) {
-    for (const url of selectedColorUrls) {
-      otherColorImageUrls.delete(url);
-    }
-  }
-
-  const filtered = images.filter((img) => !otherColorImageUrls.has(img.url));
-
-  if (filtered.length === 0) return images;
-
-  const colorImages: typeof filtered = [];
-  const sharedImages: typeof filtered = [];
-
-  for (const img of filtered) {
-    if (selectedColorUrls?.has(img.url)) {
-      colorImages.push(img);
-    } else {
-      sharedImages.push(img);
-    }
-  }
-
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const variantImageUrl = selectedVariant?.image?.url;
-
-  if (variantImageUrl) {
-    const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
-    if (variantIdx > 0) {
-      const [variantImage] = colorImages.splice(variantIdx, 1);
-      colorImages.unshift(variantImage);
-    }
-  }
-
-  return [...colorImages, ...sharedImages];
+  return urls;
 }
 
-export function getPartitionedImagesForSelectedColor(
-  images: Image[],
-  options: ProductOption[],
-  variants: ProductVariant[],
-  selectedOptions: SelectedOptions,
-): { colorImages: Image[]; otherImages: Image[] } {
-  // Find the color option using swatch data (locale-agnostic) first, then
-  // fall back to the English name for stores without swatches configured.
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
+/** True when the gallery should lead with a color-specific (selected-variant) image. */
+export function hasColorImagePartitioning(options: ProductOption[]): boolean {
+  return options.some((option) => option.values.filter((value) => value.image).length > 1);
+}
 
-  if (!colorOption) return { colorImages: [], otherImages: images };
-
-  const selectedColor = selectedOptions[colorOption.name];
-  if (!selectedColor) return { colorImages: [], otherImages: images };
-
-  if (colorOption.values.length <= 1) return { colorImages: images, otherImages: [] };
-
-  const colorToImageUrls = new Map<string, Set<string>>();
-  for (const variant of variants) {
-    if (!variant.image) continue;
-    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
-    if (!colorOpt) continue;
-
-    let urls = colorToImageUrls.get(colorOpt.value);
-    if (!urls) {
-      urls = new Set<string>();
-      colorToImageUrls.set(colorOpt.value, urls);
-    }
-    urls.add(variant.image.url);
-  }
-
-  if (colorToImageUrls.size === 0) return { colorImages: [], otherImages: images };
-
-  const otherColorImageUrls = new Set<string>();
-  for (const [color, urls] of colorToImageUrls) {
-    if (color !== selectedColor) {
-      for (const url of urls) {
-        otherColorImageUrls.add(url);
-      }
-    }
-  }
-
-  // Images shared with the selected color must not be excluded.
-  const selectedColorUrls = colorToImageUrls.get(selectedColor);
-  if (selectedColorUrls) {
-    for (const url of selectedColorUrls) {
-      otherColorImageUrls.delete(url);
-    }
-  }
-
-  const filtered = images.filter((img) => !otherColorImageUrls.has(img.url));
-
-  if (filtered.length === 0) return { colorImages: [], otherImages: images };
-
-  const colorImages: Image[] = [];
-  const otherImages: Image[] = [];
-
-  for (const img of filtered) {
-    if (selectedColorUrls?.has(img.url)) {
-      colorImages.push(img);
-    } else {
-      otherImages.push(img);
-    }
-  }
-
-  const selectedVariant = resolveSelectedVariant(variants, selectedOptions);
-  const variantImageUrl = selectedVariant?.image?.url;
-
-  if (variantImageUrl) {
-    const variantIdx = colorImages.findIndex((img) => img.url === variantImageUrl);
-    if (variantIdx > 0) {
-      const [variantImage] = colorImages.splice(variantIdx, 1);
-      colorImages.unshift(variantImage);
-    }
-  }
-
-  return { colorImages, otherImages };
+/** Product images that aren't a specific color's representative image. */
+export function getSharedImages(images: Image[], options: ProductOption[]): Image[] {
+  const colorUrls = colorImageUrls(options);
+  if (colorUrls.size === 0) return images;
+  const shared = images.filter((image) => !colorUrls.has(image.url));
+  return shared.length > 0 ? shared : images;
 }
 
 /** When true, the price renders without waiting for searchParams to resolve the variant. */
@@ -285,57 +97,15 @@ export function hasUniformPricing(
   return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
 }
 
-/** When true, buy-button labels can render in the Suspense fallback without variant resolution. */
-export function hasUniformStock(variants: ProductVariant[]): boolean {
-  if (variants.length <= 1) return true;
-  const first = variants[0];
-  return variants.every((v) => v.availableForSale === first.availableForSale);
-}
-
-/** True when the gallery depends on selected color (i.e. on searchParams). */
-export function hasColorImagePartitioning(
-  options: ProductOption[],
-  variants: ProductVariant[],
-): boolean {
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
-
-  if (!colorOption || colorOption.values.length <= 1) return false;
-
-  return variants.some(
-    (v) => v.image && v.selectedOptions.some((opt) => opt.name === colorOption.name),
-  );
-}
-
-/** Images not assigned to any color variant — can render without waiting for searchParams. */
-export function getSharedImages(
-  images: Image[],
-  options: ProductOption[],
-  variants: ProductVariant[],
-): Image[] {
-  const colorOption = options.find(
-    (opt) =>
-      opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-      opt.name.toLowerCase().includes("color"),
-  );
-
-  if (!colorOption || colorOption.values.length <= 1) return images;
-
-  const allColorImageUrls = new Set<string>();
-  for (const variant of variants) {
-    if (!variant.image) continue;
-    const colorOpt = variant.selectedOptions.find((opt) => opt.name === colorOption.name);
-    if (colorOpt) {
-      allColorImageUrls.add(variant.image.url);
-    }
-  }
-
-  if (allColorImageUrls.size === 0) return images;
-
-  return images.filter((img) => !allColorImageUrls.has(img.url));
+/**
+ * True when every existing option combination is in stock, so buy-button labels
+ * can render in the Suspense fallback without resolving the variant. Derived from
+ * the encoded availability/existence tries (equal ⇒ nothing is sold out).
+ */
+export function hasUniformStock(product: ProductDetails): boolean {
+  const { encodedVariantAvailability, encodedVariantExistence } = product;
+  if (!encodedVariantExistence) return true;
+  return encodedVariantAvailability === encodedVariantExistence;
 }
 
 export type OptimisticProductInfo = {

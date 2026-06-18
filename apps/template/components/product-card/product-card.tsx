@@ -39,15 +39,7 @@ export async function ProductCard({
   const t = isFeatured ? await getTranslations("product") : null;
 
   return (
-    <Link
-      href={
-        product.defaultVariantNumericId
-          ? `/products/${product.handle}?variant=${product.defaultVariantNumericId}`
-          : `/products/${product.handle}`
-      }
-      className={className}
-      prefetch={true}
-    >
+    <Link href={`/products/${product.handle}`} className={className} prefetch={true}>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>

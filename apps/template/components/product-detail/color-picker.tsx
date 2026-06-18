@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type * as React from "react";
 
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
-import type { ProductOption, ProductVariant } from "@/lib/types";
+import { buildOptionUrl, type SelectedOptions } from "@/lib/product";
+import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"product">>>;
@@ -12,7 +12,7 @@ export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"produ
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
   selectedValue: string;
-  variants: ProductVariant[];
+  available: Set<string> | undefined;
   handle: string;
   selectedOptions: SelectedOptions;
   t: ProductTranslator;
@@ -22,7 +22,7 @@ interface ColorPickerProps extends React.ComponentProps<"div"> {
 export function ColorPicker({
   option,
   selectedValue,
-  variants,
+  available,
   handle,
   selectedOptions,
   t,
@@ -39,19 +39,11 @@ export function ColorPicker({
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
 
-          const isAvailable = variants.some(
-            (v) =>
-              v.availableForSale &&
-              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          );
+          const isAvailable = !available || available.has(value.name);
 
-          const variantImage = variants.find((v) =>
-            v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          )?.image?.url;
+          const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
 
-          const imageUrl = hideImages ? undefined : value.swatch?.image || variantImage;
-
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+          const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const swatch = (
             <div

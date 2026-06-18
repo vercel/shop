@@ -16,7 +16,7 @@ The PDP renders any product that has a handle (URL slug) in Shopify. At minimum,
 - At least one **variant** (even single-option products have a default variant)
 - A **featured image** and optionally up to 10 media items (images or videos)
 
-The template fetches up to 250 variants per product and 10 media items.
+The PDP shell fetches the product's options and Shopify's encoded variant-availability data (not the full variant list) plus up to 10 media items; the selected variant is resolved per request from its options. The AI agent and markdown routes still fetch the full variant list (up to 250) via `getProductWithVariants`.
 
 ## Metafields
 
@@ -79,4 +79,4 @@ Product recommendations on the PDP are powered by Shopify's recommendation API. 
 | `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                     |
 | `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                   |
 | `lib/shopify/operations/products.ts` | Product fetch operations with caching                           |
-| `lib/product.ts`                     | Variant resolution, swatch detection, and option URL generation |
+| `lib/product.ts`                     | Option parsing, default selection, and option URL generation    |

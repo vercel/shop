@@ -7,9 +7,19 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { getLocale } from "@/lib/params";
-import { computeSelection } from "@/lib/product";
+import {
+  defaultSelectedOptions,
+  parseSelectedOptions,
+  type ProductSelection,
+  type SelectedOptions,
+  toSelectedOptionList,
+} from "@/lib/product";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCatalogProducts, getProduct } from "@/lib/shopify/operations/products";
+import {
+  getCatalogProducts,
+  getProduct,
+  getProductVariant,
+} from "@/lib/shopify/operations/products";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -84,10 +94,22 @@ export default async function ProductPage({
   if (!product) notFound();
 
   // Keep searchParams unawaited so only the variant-dependent UI streams; the
-  // product body resolves here and renders into the static shell.
-  const selectionPromise = searchParams.then((sp) =>
-    computeSelection(product, sp?.variant as string | undefined),
-  );
+  // product body resolves here and renders into the static shell. The selected
+  // variant is a per-selection Shopify query — skipped when no option params are
+  // present (the cached default variant already covers that case).
+  const selectionPromise: Promise<ProductSelection> = searchParams.then(async (sp) => {
+    const fromUrl = parseSelectedOptions(product.options, sp ?? {});
+    const selectedOptions: SelectedOptions = { ...defaultSelectedOptions(product), ...fromUrl };
+    const selectedVariant =
+      Object.keys(fromUrl).length === 0
+        ? product.defaultVariant
+        : await getProductVariant({
+            handle,
+            locale,
+            selectedOptions: toSelectedOptionList(selectedOptions),
+          });
+    return { selectedOptions, selectedVariant };
+  });
 
   return (
     <Page className="pt-0">

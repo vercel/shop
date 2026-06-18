@@ -9,7 +9,7 @@ type: reference
 | Route                   | File                                | Description                                                                                        |
 | ----------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/`                     | `app/page.tsx`                      | Home page with hero, products grid, info section                                                   |
-| `/products/[handle]`    | `app/products/[handle]/page.tsx`    | Product detail page; `?variant=` selects a specific variant                                        |
+| `/products/[handle]`    | `app/products/[handle]/page.tsx`    | Product detail page; `?color=…&size=…` option params select a variant                              |
 | `/collections/[handle]` | `app/collections/[handle]/page.tsx` | Collection listing with filters, sort, pagination                                                  |
 | `/collections/all`      | `app/collections/[handle]/page.tsx` | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
 | `/search`               | `app/search/page.tsx`               | Search results (same grid as collections)                                                          |
@@ -27,8 +27,9 @@ type: reference
 
 ## Variant URLs
 
-Product variant selection uses Shopify's standard `variant` query parameter directly on the product route:
+Product variant selection uses one query parameter per option, keyed by the lowercased option name:
 
 | URL                                    | Purpose                                                   |
 | -------------------------------------- | --------------------------------------------------------- |
-| `/products/:handle?variant=:variantId` | Opens the product page with the matching variant selected |
+| `/products/:handle?color=Blue&size=XS` | Opens the product page with the matching variant selected |
+| `/products/:handle`                    | No options selected — renders the first available variant |

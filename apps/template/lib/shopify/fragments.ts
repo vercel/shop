@@ -243,12 +243,10 @@ export const PRODUCT_FRAGMENT = `
         ...MoneyFields
       }
     }
-    variants(first: 250) {
-      edges {
-        node {
-          ...ProductVariantFields
-        }
-      }
+    encodedVariantExistence
+    encodedVariantAvailability
+    selectedOrFirstAvailableVariant {
+      ...ProductVariantFields
     }
     options {
       id
@@ -265,6 +263,11 @@ export const PRODUCT_FRAGMENT = `
             }
           }
         }
+        firstSelectableVariant {
+          image {
+            ...ImageFields
+          }
+        }
       }
     }
     seo {
@@ -278,6 +281,23 @@ export const PRODUCT_FRAGMENT = `
       edges {
         node {
           handle
+        }
+      }
+    }
+  }
+`;
+
+// Extends the slim shell with the full variant matrix. Used by the AI agent and
+// markdown routes, which enumerate variants; the PDP uses the slim ProductFields
+// plus a per-selection variant query instead.
+export const PRODUCT_WITH_VARIANTS_FRAGMENT = `
+  ${PRODUCT_FRAGMENT}
+  fragment ProductWithVariantsFields on Product {
+    ...ProductFields
+    variants(first: 250) {
+      edges {
+        node {
+          ...ProductVariantFields
         }
       }
     }

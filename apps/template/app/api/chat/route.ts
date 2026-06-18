@@ -13,7 +13,7 @@ import { defaultLocale, type Locale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProductWithVariants } from "@/lib/shopify/operations/products";
 
 function parseReferer(referer: string | null): {
   locale: Locale;
@@ -48,7 +48,7 @@ async function resolvePageContext(
 
   if (pageType === "products" && segments.length >= 2) {
     const handle = segments[1];
-    const product = await withFallback(getProduct({ handle, locale }), undefined);
+    const product = await withFallback(getProductWithVariants({ handle, locale }), undefined);
     if (product) return { type: "product", product };
   }
 

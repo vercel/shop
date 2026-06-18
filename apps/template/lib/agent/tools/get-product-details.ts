@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProductWithVariants } from "@/lib/shopify/operations/products";
 
 import { getAgentContext } from "../server";
 
@@ -20,7 +20,7 @@ You can get handles from search results or the current page context.`,
       const { user } = getAgentContext();
 
       try {
-        const product = await getProduct({ handle, locale: user.locale });
+        const product = await getProductWithVariants({ handle, locale: user.locale });
 
         if (!product) {
           return {
@@ -43,7 +43,7 @@ You can get handles from search results or the current page context.`,
             vendor: product.vendor,
             tags: product.tags,
             images: product.images.map((img) => img.url),
-            variants: product.variants.map((v) => ({
+            variants: (product.variants ?? []).map((v) => ({
               id: v.id,
               title: v.title,
               available: v.availableForSale,

@@ -64,8 +64,14 @@ export interface ProductDetails extends ProductCard {
     minVariantPrice: Money;
   };
   currencyCode: string;
+  /** Selected-or-first-available variant; powers the eager/no-params render. */
+  defaultVariant?: ProductVariant;
   description: string;
   descriptionHtml: string;
+  /** Trie of option-value combinations with an available variant (Storefront 2024-10+). */
+  encodedVariantAvailability?: string;
+  /** Trie of option-value combinations that exist (Storefront 2024-10+). */
+  encodedVariantExistence?: string;
   images: Image[];
   manufacturerName: string;
   metafields?: Metafield[];
@@ -77,7 +83,8 @@ export interface ProductDetails extends ProductCard {
   seo: SEO;
   tags: string[];
   updatedAt: string;
-  variants: ProductVariant[];
+  /** Only populated by getProductWithVariants (agent + markdown); the PDP omits it. */
+  variants?: ProductVariant[];
   videos: Video[];
 }
 
@@ -104,6 +111,8 @@ export interface OptionValueSwatch {
 
 export interface OptionValue {
   id: string;
+  /** Representative variant image for this value (first selectable variant). */
+  image?: string;
   name: string;
   swatch?: OptionValueSwatch;
 }

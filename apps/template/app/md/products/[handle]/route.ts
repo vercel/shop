@@ -1,6 +1,6 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { productToMarkdown } from "@/lib/markdown/product";
-import { getProduct } from "@/lib/shopify/operations/products";
+import { getProductWithVariants } from "@/lib/shopify/operations/products";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
@@ -8,7 +8,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
 
   try {
-    const product = await getProduct({ handle, locale });
+    const product = await getProductWithVariants({ handle, locale });
 
     if (!product) {
       return new Response(

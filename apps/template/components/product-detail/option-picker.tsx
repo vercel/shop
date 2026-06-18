@@ -1,14 +1,14 @@
 import Link from "next/link";
 import type * as React from "react";
 
-import { type SelectedOptions, getVariantUrl } from "@/lib/product";
-import type { ProductOption, ProductVariant } from "@/lib/types";
+import { buildOptionUrl, type SelectedOptions } from "@/lib/product";
+import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface OptionPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
   selectedValue: string;
-  variants: ProductVariant[];
+  available: Set<string> | undefined;
   handle: string;
   selectedOptions: SelectedOptions;
 }
@@ -16,7 +16,7 @@ interface OptionPickerProps extends React.ComponentProps<"div"> {
 export function OptionPicker({
   option,
   selectedValue,
-  variants,
+  available,
   handle,
   selectedOptions,
   className,
@@ -29,13 +29,9 @@ export function OptionPicker({
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
 
-          const isAvailable = variants.some(
-            (v) =>
-              v.availableForSale &&
-              v.selectedOptions.some((opt) => opt.name === option.name && opt.value === value.name),
-          );
+          const isAvailable = !available || available.has(value.name);
 
-          const href = getVariantUrl(handle, variants, selectedOptions, option.name, value.name);
+          const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const classes = cn(
             "grid px-5 py-2 text-center text-sm rounded-lg transition-all",

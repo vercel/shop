@@ -1,16 +1,32 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Filter, PageInfo, PriceRange, ProductCard, ProductDetails } from "@/lib/types";
+import type {
+  Filter,
+  PageInfo,
+  PriceRange,
+  ProductCard,
+  ProductDetails,
+  ProductVariant,
+  SelectedOption,
+} from "@/lib/types";
 
 import { shopifyFetch } from "../fetch";
-import { PRODUCT_CARD_FRAGMENT, PRODUCT_FRAGMENT } from "../fragments";
+import {
+  IMAGE_FRAGMENT,
+  PRODUCT_CARD_FRAGMENT,
+  PRODUCT_FRAGMENT,
+  PRODUCT_VARIANT_FRAGMENT,
+  PRODUCT_WITH_VARIANTS_FRAGMENT,
+} from "../fragments";
 import { transformShopifyFilters } from "../transforms/filters";
 import {
   type ShopifyProduct,
   type ShopifyProductCard,
+  type ShopifyVariant,
   transformShopifyProductCard,
   transformShopifyProductDetails,
+  transformVariant,
 } from "../transforms/product";
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
@@ -58,6 +74,89 @@ export async function getProduct({
   }>({
     operation: "getProductByHandle",
     query: GET_PRODUCT_BY_HANDLE_QUERY,
+    variables: { handle, country, language },
+  });
+
+  if (!data.productByHandle) {
+    return undefined;
+  }
+
+  tagProducts([data.productByHandle]);
+
+  return transformShopifyProductDetails(data.productByHandle);
+}
+
+const GET_PRODUCT_VARIANT_QUERY = `
+  ${IMAGE_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
+  query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
+        ...ProductVariantFields
+      }
+    }
+  }
+`;
+
+// Resolves the active variant from selected options (the suspended PDP query).
+// Empty selectedOptions returns the first available variant — matches the
+// no-params / partial-selection fallback the PDP relies on.
+export async function getProductVariant({
+  handle,
+  locale = defaultLocale,
+  selectedOptions,
+}: {
+  handle: string;
+  locale?: string;
+  selectedOptions: SelectedOption[];
+}): Promise<ProductVariant | undefined> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("products", `product-${handle}`);
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const data = await shopifyFetch<{
+    productByHandle: { selectedOrFirstAvailableVariant: ShopifyVariant | null } | null;
+  }>({
+    operation: "getProductVariant",
+    query: GET_PRODUCT_VARIANT_QUERY,
+    variables: { handle, selectedOptions, country, language },
+  });
+
+  const variant = data.productByHandle?.selectedOrFirstAvailableVariant;
+  return variant ? transformVariant(variant) : undefined;
+}
+
+const GET_PRODUCT_WITH_VARIANTS_QUERY = `
+  ${PRODUCT_WITH_VARIANTS_FRAGMENT}
+  query getProductWithVariants($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      ...ProductWithVariantsFields
+    }
+  }
+`;
+
+// Slim shell + full variant matrix; for the AI agent and markdown routes that
+// enumerate variants. The PDP uses getProduct + getProductVariant instead.
+export async function getProductWithVariants({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("products", `product-${handle}`);
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const data = await shopifyFetch<{
+    productByHandle: ShopifyProduct;
+  }>({
+    operation: "getProductWithVariants",
+    query: GET_PRODUCT_WITH_VARIANTS_QUERY,
     variables: { handle, country, language },
   });
 
@@ -713,11 +812,11 @@ const GET_PRODUCTS_BY_HANDLES_QUERY = `
 `;
 
 const GET_PRODUCT_BY_ID_QUERY = `
-  ${PRODUCT_FRAGMENT}
+  ${PRODUCT_WITH_VARIANTS_FRAGMENT}
   query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     node(id: $id) {
       ... on Product {
-        ...ProductFields
+        ...ProductWithVariantsFields
       }
     }
   }

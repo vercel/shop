@@ -14,26 +14,26 @@ The PDP runs under Next.js 16 Cache Components, with a deliberate split between 
 
 Two structural choices keep that copy coherent, and both are load-bearing. The product promise is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the body at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — the symptom is a React hydration mismatch and product copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag` — that governs freshness (how quickly edits surface), not coherence.
 
-The only dynamic input is the `?variant=` query parameter. Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description) renders from the product resolved at the top of the page, baked into the static shell. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so a `?variant=` change streams the affected slot without skeletonizing the rest of the page.
+The only dynamic input is the selected-options query (`?color=Blue&size=XS`). Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description) renders from the product resolved at the top of the page, baked into the static shell. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so an option change streams the affected slot without skeletonizing the rest of the page. The chosen variant itself is resolved by a second, per-selection Shopify query (`getProductVariant`) rather than from an inline variant list — so the cached shell stays small and the price/availability reflect the exact selection.
 
 ## Variant selection
 
-Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with Shopify's `?variant` query parameter:
+Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with one query parameter per option, keyed by the lowercased option name:
 
 ```
-/products/classic-tee?variant=123456
+/products/classic-tee?color=Blue&size=XS
 ```
 
-The page receives `searchParams` as a promise, threads the variant ID through to `computeSelection()` on the server, and that function returns `{ selectedOptions, selectedVariant, colorImages }` in one pass — matching the numeric variant ID to the full variant object. The result is threaded down as props with no client-side variant context or `useState`. This means:
+The page receives `searchParams` as a promise. `parseSelectedOptions()` reads the option params (merged with the default variant's options for anything unset) into a `selectedOptions` record, and `getProductVariant({ handle, selectedOptions })` resolves the matching variant via Shopify's `selectedOrFirstAvailableVariant(selectedOptions:)` field. The result is threaded down as props with no client-side variant context or `useState`. This means:
 
 - Every variant selection is a navigation, giving you browser back/forward for free
-- URLs are shareable - opening a link loads the exact variant
+- URLs are shareable and human-readable - opening a link loads the exact variant
 - The page is fully server-rendered with zero layout shift
-- Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
+- Option links use `scroll={false}` to prevent the page from jumping to the top on selection
 
-The `getVariantUrl()` helper in `lib/product.ts` computes the target URL for each option. When a user selects a new option value, it finds the matching variant (or falls back to the first variant with that option) and returns the URL with the correct `variant` query parameter.
+The `buildOptionUrl()` helper in `lib/product.ts` computes the target URL for each option — a pure merge of the current selection with the changed option, no variant lookup required. When no option params are present, the page skips the variant query and renders the cached default variant.
 
-Unavailable options render as inert `<span>` elements instead of links.
+Swatch availability comes from Shopify's `encodedVariantAvailability` field, decoded in `lib/shopify/encoded-variants.ts` into the set of in-stock values per option. Unavailable options render as inert `<span>` elements instead of links.
 
 Options with a single value render as a plain `Name: Value` label without a picker — there is no choice to surface, but the attribute is still useful information to the shopper (e.g. `Finish: Natural White Oak` on a one-variant product). Shopify's synthetic `Title: Default Title` option (emitted for products with no variant axes) is the only single-value option that is hidden entirely.
 
@@ -49,15 +49,11 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing `?variant` does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product.ts`:
+When a product's options carry representative images (each value's `firstSelectableVariant` image, exposed as `OptionValue.image`), the gallery leads with the selected variant's image. The shared media — product images that aren't a specific color's representative image, via `getSharedImages()` in `lib/product.ts` — renders immediately in the static shell, while the leading color slot streams behind a small Suspense fallback so changing the selection does not skeletonize the whole gallery. The slot resolves the selected variant from `getProductVariant` and renders its single image at the front.
 
-1. Identifies the color option via swatch data or option name
-2. Collects variant images assigned to each color
-3. Excludes images belonging to other colors
-4. Preserves shared/unassigned images
-5. Moves the selected variant's image to the front
+If no option has representative images (one color, or no color option), all product images are shown.
 
-If a product has only one color or no color option, all images are shown.
+Because selection is option-driven, the gallery no longer filters out _every_ image belonging to other colors — that required the full inline variant list, which the PDP no longer fetches. It leads with the selected variant's image followed by the shared media instead.
 
 ## Buy section
 
@@ -93,10 +89,11 @@ The page emits two JSON-LD schemas:
 
 | File                                                   | Purpose                                                                                        |
 | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams variant selection |
+| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams the per-selection variant query |
 | `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD |
 | `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                            |
 | `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
-| `lib/product.ts`                                       | `computeSelection`, variant resolution, URL generation, color-image partitioning               |
+| `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, shared-image helpers              |
+| `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability + variant count   |
 
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.

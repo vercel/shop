@@ -24,7 +24,7 @@ interface ShopifyMoney {
   currencyCode: string;
 }
 
-interface ShopifyVariant {
+export interface ShopifyVariant {
   id: string;
   title: string;
   availableForSale: boolean;
@@ -43,6 +43,7 @@ interface ShopifyOptionValue {
   id: string;
   name: string;
   swatch: ShopifyOptionValueSwatch | null;
+  firstSelectableVariant?: { image: ShopifyImage | null } | null;
 }
 
 interface ShopifyOption {
@@ -111,7 +112,10 @@ export interface ShopifyProduct {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;
   } | null;
-  variants: ShopifyEdges<ShopifyVariant>;
+  encodedVariantAvailability?: string | null;
+  encodedVariantExistence?: string | null;
+  selectedOrFirstAvailableVariant?: ShopifyVariant | null;
+  variants?: ShopifyEdges<ShopifyVariant>;
   options: ShopifyOption[];
   seo: {
     title: string | null;
@@ -211,7 +215,7 @@ function transformCategory(category: ShopifyCategory | null | undefined): Catego
   };
 }
 
-function transformVariant(variant: ShopifyVariant): ProductVariant {
+export function transformVariant(variant: ShopifyVariant): ProductVariant {
   return {
     id: variant.id,
     title: variant.title,
@@ -234,9 +238,11 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSw
 
 function transformOption(option: ShopifyOption): ProductOption {
   const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
+  const imageLookup = new Map<string, string | undefined>();
   if (option.optionValues) {
     for (const ov of option.optionValues) {
       swatchLookup.set(ov.name, transformSwatch(ov.swatch));
+      imageLookup.set(ov.name, ov.firstSelectableVariant?.image?.url);
     }
   }
 
@@ -246,6 +252,7 @@ function transformOption(option: ShopifyOption): ProductOption {
     values: option.values.map(
       (value): OptionValue => ({
         id: value,
+        image: imageLookup.get(value),
         name: value,
         swatch: swatchLookup.get(value),
       }),
@@ -302,8 +309,12 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
 }
 
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
-  const variants = flattenEdges(product.variants).map(transformVariant);
-  const defaultVariant = variants.find((v) => v.availableForSale);
+  const variants = product.variants
+    ? flattenEdges(product.variants).map(transformVariant)
+    : undefined;
+  const defaultVariant = product.selectedOrFirstAvailableVariant
+    ? transformVariant(product.selectedOrFirstAvailableVariant)
+    : (variants?.find((v) => v.availableForSale) ?? variants?.[0]);
   return {
     id: product.id,
     handle: product.handle,
@@ -313,6 +324,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
+    defaultVariant,
     defaultVariantId: defaultVariant?.id,
     defaultVariantNumericId: defaultVariant
       ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
@@ -320,6 +332,8 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,
+    encodedVariantAvailability: product.encodedVariantAvailability ?? undefined,
+    encodedVariantExistence: product.encodedVariantExistence ?? undefined,
     ...extractMediaFromProduct(product),
     variants,
     options: product.options.map(transformOption),

@@ -65,7 +65,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  if (product.variants.length > 0) {
+  if (product.variants && product.variants.length > 0) {
     sections.push("## Variants");
     sections.push("");
 

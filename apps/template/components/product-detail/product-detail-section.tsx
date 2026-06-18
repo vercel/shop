@@ -20,13 +20,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
-  computeSelection,
+  defaultSelectedOptions,
   getSharedImages,
   hasColorImagePartitioning,
   hasUniformPricing,
   hasUniformStock,
   type ProductSelection,
 } from "@/lib/product";
+import { countEncodedVariants, getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +52,7 @@ export function ProductDetailSection({
           manufacturerName: product.manufacturerName,
           currencyCode: product.currencyCode,
           priceRange: product.priceRange,
-          variants: product.variants,
+          offerCount: countEncodedVariants(product.encodedVariantExistence) || 1,
           availableForSale: product.availableForSale,
         }}
       />
@@ -76,7 +77,7 @@ function ProductMediaArea({
   product: ProductDetails;
   selectionPromise: Promise<ProductSelection>;
 }) {
-  if (!hasColorImagePartitioning(product.options, product.variants)) {
+  if (!hasColorImagePartitioning(product.options)) {
     return (
       <ProductMedia
         otherImages={product.images}
@@ -89,7 +90,7 @@ function ProductMediaArea({
 
   return (
     <ProductMedia
-      otherImages={getSharedImages(product.images, product.options, product.variants)}
+      otherImages={getSharedImages(product.images, product.options)}
       videos={product.videos}
       title={product.title}
       className="lg:col-span-6"
@@ -120,9 +121,9 @@ async function ResolvedColorImageGrid({
   title: string;
   selectionPromise: Promise<ProductSelection>;
 }) {
-  const { colorImages } = await selectionPromise;
-  if (colorImages.length === 0) return null;
-  return <ColorImageGrid images={colorImages} title={title} />;
+  const { selectedVariant } = await selectionPromise;
+  if (!selectedVariant?.image) return null;
+  return <ColorImageGrid images={[selectedVariant.image]} title={title} />;
 }
 
 async function ResolvedColorImageCarousel({
@@ -132,9 +133,9 @@ async function ResolvedColorImageCarousel({
   title: string;
   selectionPromise: Promise<ProductSelection>;
 }) {
-  const { colorImages } = await selectionPromise;
-  if (colorImages.length === 0) return null;
-  return <ColorImageCarouselItems images={colorImages} title={title} />;
+  const { selectedVariant } = await selectionPromise;
+  if (!selectedVariant?.image) return null;
+  return <ColorImageCarouselItems images={[selectedVariant.image]} title={title} />;
 }
 
 async function ProductInfoArea({
@@ -146,15 +147,17 @@ async function ProductInfoArea({
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
-  const { variants, options, handle, title, featuredImage, descriptionHtml, availableForSale } =
-    product;
+  const { options, handle, title, featuredImage, descriptionHtml, availableForSale } = product;
   const uniformPrice = hasUniformPricing(product.priceRange, product.compareAtPriceRange);
-  const uniformStock = hasUniformStock(variants);
-  const singleVariant = variants.length === 1;
-  const eagerSelection = singleVariant ? computeSelection(product, undefined) : null;
+  const uniformStock = hasUniformStock(product);
+  const singleVariant = countEncodedVariants(product.encodedVariantExistence) <= 1;
+  const availableValues = getAvailableOptionValues(options, product.encodedVariantAvailability);
+  const eagerSelection = singleVariant
+    ? { selectedOptions: defaultSelectedOptions(product), selectedVariant: product.defaultVariant }
+    : null;
   const t = await getTranslations("product");
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
-  const allInStock = variants[0]?.availableForSale ?? true;
+  const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
@@ -176,7 +179,7 @@ async function ProductInfoArea({
 
       {eagerSelection ? (
         <ProductInfoOptions
-          variants={variants}
+          availableValues={availableValues}
           options={options}
           selectedOptions={eagerSelection.selectedOptions}
           handle={handle}
@@ -186,9 +189,9 @@ async function ProductInfoArea({
         <Suspense
           fallback={
             <ProductInfoOptions
-              variants={variants}
+              availableValues={availableValues}
               options={options}
-              selectedOptions={{}}
+              selectedOptions={defaultSelectedOptions(product)}
               handle={handle}
               t={t}
               hideImages
@@ -196,7 +199,7 @@ async function ProductInfoArea({
           }
         >
           <ResolvedProductInfoOptions
-            variants={variants}
+            availableValues={availableValues}
             options={options}
             handle={handle}
             selectionPromise={selectionPromise}
@@ -250,13 +253,13 @@ async function ResolvedProductPrice({
 }
 
 async function ResolvedProductInfoOptions({
-  variants,
+  availableValues,
   options,
   handle,
   selectionPromise,
   t,
 }: {
-  variants: ProductDetails["variants"];
+  availableValues: Map<string, Set<string>>;
   options: ProductDetails["options"];
   handle: string;
   selectionPromise: Promise<ProductSelection>;
@@ -265,7 +268,7 @@ async function ResolvedProductInfoOptions({
   const { selectedOptions } = await selectionPromise;
   return (
     <ProductInfoOptions
-      variants={variants}
+      availableValues={availableValues}
       options={options}
       selectedOptions={selectedOptions}
       handle={handle}

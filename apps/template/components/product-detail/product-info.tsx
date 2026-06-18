@@ -39,7 +39,7 @@ function ProductInfoHeader({
 }
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
-  variants: ProductVariant[];
+  availableValues: Map<string, Set<string>>;
   options: ProductOption[];
   selectedOptions: SelectedOptions;
   handle: string;
@@ -48,7 +48,7 @@ interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
 }
 
 function ProductInfoOptions({
-  variants,
+  availableValues,
   options,
   selectedOptions,
   handle,
@@ -87,7 +87,7 @@ function ProductInfoOptions({
             key={colorOption.id}
             option={colorOption}
             selectedValue={selectedOptions[colorOption.name] ?? ""}
-            variants={variants}
+            available={availableValues.get(colorOption.name)}
             handle={handle}
             selectedOptions={selectedOptions}
             t={t}
@@ -100,7 +100,7 @@ function ProductInfoOptions({
             key={option.id}
             option={option}
             selectedValue={selectedOptions[option.name] ?? ""}
-            variants={variants}
+            available={availableValues.get(option.name)}
             handle={handle}
             selectedOptions={selectedOptions}
           />

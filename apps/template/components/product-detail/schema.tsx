@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/config";
-import type { Image, Money, ProductVariant } from "@/lib/types";
+import type { Image, Money } from "@/lib/types";
 
 interface ProductSchemaData {
   id: string;
@@ -13,7 +13,7 @@ interface ProductSchemaData {
     minVariantPrice: Money;
     maxVariantPrice: Money;
   };
-  variants: ProductVariant[];
+  offerCount: number;
   availableForSale: boolean;
 }
 
@@ -37,7 +37,7 @@ function generateProductSchema(product: ProductSchemaData) {
       priceCurrency: product.currencyCode,
       lowPrice: product.priceRange.minVariantPrice.amount,
       highPrice: product.priceRange.maxVariantPrice.amount,
-      offerCount: product.variants.length,
+      offerCount: product.offerCount,
       availability: product.availableForSale
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
