@@ -22,7 +22,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/collections/[handle]">): Promise<Metadata> {
+}: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === PLACEHOLDER_HANDLE) {
@@ -41,7 +41,7 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: buildAlternates({
+      alternates: await buildAlternates({
         pathname: `/collections/${handle}`,
       }),
       openGraph: buildOpenGraph({
@@ -65,7 +65,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: buildAlternates({
+    alternates: await buildAlternates({
       pathname: `/collections/${collection.handle}`,
     }),
     openGraph: buildOpenGraph({
@@ -86,7 +86,7 @@ export async function generateMetadata({
 export default async function CollectionPage({
   params,
   searchParams,
-}: PageProps<"/collections/[handle]">) {
+}: PageProps<"/[locale]/collections/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 

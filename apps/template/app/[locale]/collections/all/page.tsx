@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    alternates: buildAlternates({
+    alternates: await buildAlternates({
       pathname: `/collections/${ALL_PRODUCTS_HANDLE}`,
     }),
     openGraph: buildOpenGraph({
@@ -46,7 +46,9 @@ const ALL_PRODUCTS_SORT_EXCLUDE = [
   "product-name-descending",
 ];
 
-export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
+export default async function AllProductsPage({
+  searchParams,
+}: PageProps<"/[locale]/collections/all">) {
   const [locale, collection] = await Promise.all([getLocale(), getAllProductsCollection()]);
 
   // Keep searchParams unawaited so only the results/filters/sort stream; the

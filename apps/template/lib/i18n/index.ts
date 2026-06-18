@@ -1,11 +1,11 @@
-export const locales = ["en-US"] as const;
+export const locales = ["en-CA", "en-US", "fr-CA"] as const;
 
 export type Locale = (typeof locales)[number];
 
-// Deployment-level locale mode. By default the storefront runs in single-locale
-// mode, but additional locales can be enabled here when the app is ready.
+// Deployment-level locale mode. Enterprise demo runs all locales with a
+// URL-prefixed switcher; the default deployment ships single-locale.
 export const defaultLocale: Locale = "en-US";
-export const enabledLocales: readonly Locale[] = [defaultLocale];
+export const enabledLocales: readonly Locale[] = locales;
 export const localeSwitchingEnabled = enabledLocales.length > 1;
 
 export function isLocale(value: string): value is Locale {
@@ -26,7 +26,9 @@ export function resolveLocale(value: string | null | undefined): Locale {
 }
 
 const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
+  "en-CA": { currency: "CAD", symbol: "$" },
   "en-US": { currency: "USD", symbol: "$" },
+  "fr-CA": { currency: "CAD", symbol: "$" },
 };
 
 export type LocaleData = {
@@ -44,7 +46,8 @@ export function getLocaleData(locale: string): LocaleData {
 
   // Native language name (e.g., "Deutsch" for de-DE).
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
-  const languageName = languageNames.of(lang) ?? lang;
+  const rawLanguageName = languageNames.of(lang) ?? lang;
+  const languageName = rawLanguageName.charAt(0).toUpperCase() + rawLanguageName.slice(1);
 
   const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
   const currencyName = currencyNames.of(currencyData.currency) ?? currencyData.currency;
@@ -78,7 +81,9 @@ export type LocaleOption = {
 };
 
 export function getEnabledLocaleOptions(): LocaleOption[] {
-  return enabledLocales.map((locale) => {
+  const ordered = [defaultLocale, ...enabledLocales.filter((locale) => locale !== defaultLocale)];
+
+  return ordered.map((locale) => {
     const data = getLocaleData(locale);
 
     return {

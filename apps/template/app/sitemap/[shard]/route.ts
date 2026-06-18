@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { siteConfig } from "@/lib/config";
+import { enabledLocales } from "@/lib/i18n";
 import { getShopifySitemapPage, type ShopifySitemapType } from "@/lib/shopify/operations/sitemap";
 
 function escapeXml(value: string): string {
@@ -13,10 +14,34 @@ function toAbsoluteUrl(pathname: string): string {
 
 function urlsetWrap(body: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${body}
 </urlset>
 `;
+}
+
+function localizePath(locale: string, pathname: string): string {
+  if (pathname === "/") return `/${locale}`;
+  return `/${locale}${pathname.startsWith("/") ? pathname : `/${pathname}`}`;
+}
+
+// One <url> per enabled locale, each carrying the full set of hreflang
+// alternates (including itself) so crawlers can resolve every translation.
+function localizedUrls(pathname: string, lastmod?: string): string {
+  const alternates = enabledLocales
+    .map((locale) => {
+      const href = escapeXml(toAbsoluteUrl(localizePath(locale, pathname)));
+      return `    <xhtml:link rel="alternate" hreflang="${locale}" href="${href}" />`;
+    })
+    .join("\n");
+
+  return enabledLocales
+    .map((locale) => {
+      const loc = escapeXml(toAbsoluteUrl(localizePath(locale, pathname)));
+      const lastmodLine = lastmod ? `\n    <lastmod>${escapeXml(lastmod)}</lastmod>` : "";
+      return `  <url>\n    <loc>${loc}</loc>${lastmodLine}\n${alternates}\n  </url>`;
+    })
+    .join("\n");
 }
 
 function xmlResponse(body: string): Response {
@@ -26,8 +51,7 @@ function xmlResponse(body: string): Response {
 }
 
 function renderStatic(): Response {
-  const entry = `  <url><loc>${escapeXml(toAbsoluteUrl("/"))}</loc></url>`;
-  return xmlResponse(urlsetWrap(entry));
+  return xmlResponse(urlsetWrap(localizedUrls("/")));
 }
 
 async function renderShard(
@@ -38,11 +62,7 @@ async function renderShard(
   const { items } = await getShopifySitemapPage(type, page);
 
   const entries = items
-    .map((item) => {
-      const loc = escapeXml(toAbsoluteUrl(`/${segment}/${item.handle}`));
-      const lastmod = escapeXml(item.updatedAt);
-      return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`;
-    })
+    .map((item) => localizedUrls(`/${segment}/${item.handle}`, item.updatedAt))
     .join("\n");
 
   return xmlResponse(urlsetWrap(entries));

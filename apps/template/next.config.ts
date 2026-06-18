@@ -50,18 +50,18 @@ const nextConfig: NextConfig = {
     return {
       beforeFiles: [
         {
-          source: "/collections/:handle",
-          destination: "/md/collections/:handle",
+          source: "/:locale/collections/:handle",
+          destination: "/md/collections/:handle?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/products/:handle",
-          destination: "/md/products/:handle",
+          source: "/:locale/products/:handle",
+          destination: "/md/products/:handle?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/search",
-          destination: "/md/search",
+          source: "/:locale/search",
+          destination: "/md/search?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],

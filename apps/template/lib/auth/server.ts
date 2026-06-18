@@ -3,9 +3,11 @@ import { betterAuth } from "better-auth/minimal";
 import { genericOAuth } from "better-auth/plugins";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { locale as rootLocale } from "next/root-params";
 import { cache } from "react";
 
 import { isAuthEnabled } from "@/lib/auth";
+import { defaultLocale } from "@/lib/i18n";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
@@ -222,13 +224,13 @@ export const getSession = cache(async (): Promise<FullSession | null> => {
 
 export async function requireCustomerSession(): Promise<CustomerSession> {
   const session = await getCustomerSession();
-  if (!session) redirect("/account/login");
+  if (!session) redirect(`/${(await rootLocale()) ?? defaultLocale}/account/login`);
 
   return session;
 }
 
 export async function requireSession(): Promise<FullSession> {
   const session = await getSession();
-  if (!session) redirect("/account/login");
+  if (!session) redirect(`/${(await rootLocale()) ?? defaultLocale}/account/login`);
   return session;
 }

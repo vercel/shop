@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
 import { siteConfig } from "./config";
+import { defaultLocale, enabledLocales } from "./i18n";
+import { getLocale } from "./params";
 
 type SearchParamsInput =
   | URLSearchParams
@@ -50,17 +52,33 @@ export function buildCanonicalPath(pathname: string, searchParams?: SearchParams
   return query ? `${normalizedPath}?${query}` : normalizedPath;
 }
 
-export function buildAlternates({
+function withLocalePath(locale: string, pathname: string): string {
+  const normalized = normalizePath(pathname);
+  return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
+}
+
+export async function buildAlternates({
   pathname,
   searchParams,
 }: {
   pathname: string;
   searchParams?: SearchParamsInput;
-}): Metadata["alternates"] {
-  const canonical = buildCanonicalPath(pathname, searchParams);
+}): Promise<Metadata["alternates"]> {
+  const locale = await getLocale();
+  const canonical = buildCanonicalPath(withLocalePath(locale, pathname), searchParams);
+
+  const languages: Record<string, string> = {};
+  for (const candidate of enabledLocales) {
+    languages[candidate] = buildCanonicalPath(withLocalePath(candidate, pathname), searchParams);
+  }
+  languages["x-default"] = buildCanonicalPath(
+    withLocalePath(defaultLocale, pathname),
+    searchParams,
+  );
 
   return {
     canonical,
+    languages,
   };
 }
 
