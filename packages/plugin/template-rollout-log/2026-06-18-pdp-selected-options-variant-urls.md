@@ -44,11 +44,19 @@ carries:
 - `options.optionValues.firstSelectableVariant.image` — a representative image per option value,
   threaded onto `OptionValue.image` for swatches and the color gallery.
 
-Price and add-to-cart depend on `getProductVariant({ handle, selectedOptions })`, which calls
+The page derives two promises from `searchParams`. A **fast** `selectedOptionsPromise` (URL only)
+drives the picker highlight and the color image, so they resolve at `searchParams` speed. A
+separate `variantPromise` resolves the variant for price + add-to-cart via
+`getProductVariant({ handle, selectedOptions })`, which calls
 `selectedOrFirstAvailableVariant(selectedOptions:, ignoreUnknownOptions: true,
 caseInsensitiveMatch: true)`. It is `use cache` + `cacheTag("products", \`product-${handle}\`)`,
 so each option combination is cached and invalidates with the product. When no option params are
-present, the page skips the round-trip and uses the cached default variant.
+present, the page skips the round-trip and uses the cached default variant. Keeping the picker off
+the network promise is what prevents the selected option from snapping in after load.
+
+Gallery partitioning is restricted to the **color** axis (multiple values with distinct
+representative images); the leading color image comes from `getSelectedColorImage()` on the fast
+options promise — no variant query. Non-color axes (size, finish) keep a fully static gallery.
 
 Consumers that genuinely enumerate the full matrix — the AI agent page context
 (`app/api/chat/route.ts`), `getProductDetails`, and the markdown route — now call the new
