@@ -47,6 +47,8 @@ The gallery is handled by a single `ProductMedia` component that adapts to scree
 
 Both layouts receive pre-filtered images as props from the server.
 
+When a product has no images or videos at all, `ProductMedia` renders a single `ImagePlaceholder` (`components/ui/image-placeholder.tsx`) sized to the gallery's `aspect-square` footprint — full-bleed on mobile, full-width within the media column on desktop — so the page keeps its two-column shape instead of collapsing.
+
 ### Color-based image filtering
 
 When the **color** option has multiple values with distinct representative images (each value's `firstSelectableVariant` image, exposed as `OptionValue.image`), the gallery leads with the selected color's image. The shared media — product images that aren't a specific color's representative image, via `getSharedImages()` in `lib/product.ts` — renders immediately in the static shell, while the leading color slot streams behind a small Suspense fallback so changing the selection does not skeletonize the whole gallery. The slot resolves from the fast options promise via `getSelectedColorImage()` (no variant query), so it streams at `searchParams` speed. Non-color axes like size or finish never trigger a streamed slot — those products keep a fully static gallery.

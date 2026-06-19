@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -352,7 +353,13 @@ export function ProductMedia({
     ...otherImages.map((image): MediaItem => ({ type: "image", image })),
   ];
 
-  if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) return null;
+  if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) {
+    return (
+      <div className={className}>
+        <ImagePlaceholder className="aspect-square -mx-5 w-[calc(100%+2.5rem)] lg:mx-0 lg:w-full" />
+      </div>
+    );
+  }
 
   const hasColorSlot = !!mobileSlot || !!desktopSlot;
 

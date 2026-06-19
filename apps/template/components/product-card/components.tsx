@@ -3,6 +3,7 @@ import type * as React from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { cn } from "@/lib/utils";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
@@ -67,7 +68,6 @@ interface ProductCardImageProps {
   sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
-  fallbackTitle?: string;
   aspectRatio?: ProductCardAspectRatio;
   className?: string;
 }
@@ -78,7 +78,6 @@ function ProductCardImage({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
-  fallbackTitle,
   aspectRatio = "square",
   className,
 }: ProductCardImageProps) {
@@ -91,9 +90,7 @@ function ProductCardImage({
       {src ? (
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-muted text-muted-foreground font-medium text-xl p-2 text-center">
-          {fallbackTitle}
-        </div>
+        <ImagePlaceholder className="size-full" />
       )}
       {outOfStock && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

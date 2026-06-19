@@ -55,7 +55,6 @@ export async function ProductCard({
             sizes={sizes}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
-            fallbackTitle={product.title}
             aspectRatio={aspectRatio}
           />
           <ProductCardContent>

@@ -25,7 +25,7 @@ The badge label comes from the `product.featuredBadge` translation key, so it st
 
 ## Image fallback
 
-The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint (with a `bg-muted` background) and renders the product title centered as muted placeholder text. This keeps grids visually aligned even for products that are missing imagery.
+The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint and renders the shared `ImagePlaceholder` (`components/ui/image-placeholder.tsx`): a white square centering a muted Lucide image icon sized relative to the box. This keeps grids visually aligned even for products that are missing imagery.
 
 When the product is unavailable, an out-of-stock overlay darkens the image and shows the localized out-of-stock label on top.
 
