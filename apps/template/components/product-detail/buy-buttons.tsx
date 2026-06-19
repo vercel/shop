@@ -8,10 +8,23 @@ import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { buyNowAction } from "@/lib/cart/action";
 import { variantToOptimisticInfo } from "@/lib/product";
-import type { Image, ProductVariant } from "@/lib/types";
+import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { ShopLogo } from "./shop-logo";
+
+// Client-facing projection of the selected variant — only the fields the buy
+// controls need. Bundle relationship arrays stay on the server; the gating they
+// imply is collapsed to the requiresBundleConfiguration boolean.
+export interface BuyButtonVariant {
+  availableForSale: boolean;
+  id: string;
+  image: Image | null;
+  price: Money;
+  requiresBundleConfiguration: boolean;
+  selectedOptions: SelectedOption[];
+  title: string;
+}
 
 export function BuyButtons({
   selectedVariant,
@@ -20,7 +33,7 @@ export function BuyButtons({
   featuredImage,
   availableForSale = true,
 }: {
-  selectedVariant: ProductVariant | undefined;
+  selectedVariant: BuyButtonVariant | undefined;
   title: string;
   handle: string;
   featuredImage: Image | null;
@@ -77,11 +90,13 @@ export function BuyButtons({
     return null;
   }
 
+  const requiresBundleConfiguration = selectedVariant.requiresBundleConfiguration;
   const isOutOfStock = !selectedVariant.availableForSale;
 
   const getButtonText = () => {
     if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
     if (isAddingToCart) return t("addingToCart");
+    if (requiresBundleConfiguration) return t("bundleConfigurationRequired");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");
   };
@@ -94,7 +109,7 @@ export function BuyButtons({
           "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
           !availableForSale && "invisible",
         )}
-        disabled={isOutOfStock || isBuyingNow}
+        disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
         onClick={handleBuyNow}
       >
         {isBuyingNow ? (
@@ -108,7 +123,7 @@ export function BuyButtons({
       </button>
       <Button
         type="button"
-        disabled={isOutOfStock}
+        disabled={isOutOfStock || requiresBundleConfiguration}
         onClick={handleAddToCart}
         className="flex-1 justify-center h-12"
       >

@@ -234,6 +234,7 @@
       "home": "Home",
       "toggleMenu": "Toggle menu"
     },
+    "bundleConfigurationRequired": "Choose bundle items",
     "bundleIncludes": "Bundle includes",
     "buyNow": "Buy now",
     "buyWithShop": "Buy with",

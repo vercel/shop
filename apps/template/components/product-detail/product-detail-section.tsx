@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
@@ -226,7 +226,7 @@ async function ProductInfoArea({
 
       {eagerSelection ? (
         <BuyButtons
-          selectedVariant={eagerSelection.selectedVariant}
+          selectedVariant={toBuyButtonVariant(eagerSelection.selectedVariant)}
           title={title}
           handle={handle}
           featuredImage={featuredImage}
@@ -316,6 +316,21 @@ async function ResolvedProductInfoOptions({
   );
 }
 
+// Bundle relationship arrays stay server-side; the client buy controls only need
+// the gating boolean (a customized bundle parent has no fixed components to ship).
+function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVariant | undefined {
+  if (!variant) return undefined;
+  return {
+    availableForSale: variant.availableForSale,
+    id: variant.id,
+    image: variant.image,
+    price: variant.price,
+    requiresBundleConfiguration: variant.requiresComponents && variant.components.length === 0,
+    selectedOptions: variant.selectedOptions,
+    title: variant.title,
+  };
+}
+
 async function ResolvedBuyButtons({
   title,
   handle,
@@ -332,7 +347,7 @@ async function ResolvedBuyButtons({
   const selectedVariant = await variantPromise;
   return (
     <BuyButtons
-      selectedVariant={selectedVariant}
+      selectedVariant={toBuyButtonVariant(selectedVariant)}
       title={title}
       handle={handle}
       featuredImage={featuredImage}
