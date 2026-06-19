@@ -228,11 +228,13 @@
     "addingQuantity": "Adding {quantity}...",
     "addingToCart": "Adding to Cart...",
     "addToCart": "Add to Cart",
+    "availableInBundles": "Available in bundles",
     "brand": "Brand",
     "breadcrumb": {
       "home": "Home",
       "toggleMenu": "Toggle menu"
     },
+    "bundleIncludes": "Bundle includes",
     "buyNow": "Buy now",
     "buyWithShop": "Buy with",
     "color": "Color",

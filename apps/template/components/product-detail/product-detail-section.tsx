@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { BundleComponents } from "@/components/product-detail/bundle-components";
+import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
@@ -244,23 +244,32 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      <ProductInfoDescription descriptionHtml={descriptionHtml} />
-
       <Suspense fallback={null}>
-        <ResolvedBundleComponents variantPromise={variantPromise} />
+        <ResolvedBundleRelationships variantPromise={variantPromise} />
       </Suspense>
+
+      <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
   );
 }
 
-async function ResolvedBundleComponents({
+async function ResolvedBundleRelationships({
   variantPromise,
 }: {
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const selectedVariant = await variantPromise;
   if (!selectedVariant) return null;
-  return <BundleComponents variant={selectedVariant} />;
+  if (selectedVariant.components.length === 0 && selectedVariant.bundleParents.length === 0) {
+    return null;
+  }
+  const t = await getTranslations("product");
+  return (
+    <div className="grid gap-5">
+      <BundleComponents components={selectedVariant.components} title={t("bundleIncludes")} />
+      <BundleParents variants={selectedVariant.bundleParents} title={t("availableInBundles")} />
+    </div>
+  );
 }
 
 async function ResolvedProductPrice({
