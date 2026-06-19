@@ -9,6 +9,8 @@ import type {
   ProductDetails,
   ProductOption,
   ProductVariant,
+  ProductVariantComponent,
+  ProductVariantReference,
   Video,
 } from "@/lib/types";
 
@@ -24,6 +26,18 @@ interface ShopifyMoney {
   currencyCode: string;
 }
 
+interface ShopifyBundleComponentVariant {
+  id: string;
+  title: string;
+  image: ShopifyImage | null;
+  product: {
+    id: string;
+    title: string;
+    handle: string;
+    featuredImage: ShopifyImage | null;
+  };
+}
+
 export interface ShopifyVariant {
   id: string;
   title: string;
@@ -32,6 +46,12 @@ export interface ShopifyVariant {
   compareAtPrice: ShopifyMoney | null;
   selectedOptions: Array<{ name: string; value: string }>;
   image: ShopifyImage | null;
+  // Bundle relationships — present only on variants fetched via PurchasableProductVariantFields.
+  requiresComponents?: boolean;
+  groupedBy?: { nodes: ShopifyBundleComponentVariant[] };
+  components?: {
+    nodes: Array<{ quantity: number; productVariant: ShopifyBundleComponentVariant }>;
+  };
 }
 
 interface ShopifyOptionValueSwatch {
@@ -216,6 +236,32 @@ function transformCategory(category: ShopifyCategory | null | undefined): Catego
   };
 }
 
+function transformVariantReference(
+  variant: ShopifyBundleComponentVariant,
+): ProductVariantReference {
+  return {
+    id: variant.id,
+    image: transformImage(variant.image),
+    product: {
+      featuredImage: transformImage(variant.product.featuredImage),
+      handle: variant.product.handle,
+      id: variant.product.id,
+      title: variant.product.title,
+    },
+    title: variant.title,
+  };
+}
+
+function transformBundleComponent(component: {
+  quantity: number;
+  productVariant: ShopifyBundleComponentVariant;
+}): ProductVariantComponent {
+  return {
+    quantity: component.quantity,
+    variant: transformVariantReference(component.productVariant),
+  };
+}
+
 export function transformVariant(variant: ShopifyVariant): ProductVariant {
   return {
     id: variant.id,
@@ -225,6 +271,9 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     compareAtPrice: variant.compareAtPrice ?? undefined,
     selectedOptions: variant.selectedOptions,
     image: transformImage(variant.image),
+    bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
+    components: variant.components?.nodes.map(transformBundleComponent) ?? [],
+    requiresComponents: variant.requiresComponents ?? false,
   };
 }
 

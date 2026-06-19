@@ -16,8 +16,8 @@ import {
   IMAGE_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_FRAGMENT,
-  PRODUCT_VARIANT_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
+  PURCHASABLE_PRODUCT_VARIANT_FRAGMENT,
 } from "../fragments";
 import { transformShopifyFilters } from "../transforms/filters";
 import {
@@ -88,11 +88,11 @@ export async function getProduct({
 
 const GET_PRODUCT_VARIANT_QUERY = `
   ${IMAGE_FRAGMENT}
-  ${PRODUCT_VARIANT_FRAGMENT}
+  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
   query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
-        ...ProductVariantFields
+        ...PurchasableProductVariantFields
       }
     }
   }
