@@ -171,7 +171,6 @@ export interface Cart {
   cost: {
     subtotalAmount: Money;
     totalAmount: Money;
-    totalTaxAmount: Money;
   };
   discountAllocations: DiscountAllocation[];
   discountCodes: DiscountCode[];
@@ -183,6 +182,12 @@ export interface Cart {
 }
 
 export interface CartLine {
+  /** Shopify edit instruction — false for a fixed bundle's component lines. */
+  canRemove: boolean;
+  /** Shopify edit instruction — false for a fixed bundle's component lines. */
+  canUpdateQuantity: boolean;
+  /** Nested bundle component lines; empty for ordinary lines. */
+  components: CartLine[];
   cost: {
     totalAmount: Money;
   };

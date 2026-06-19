@@ -103,64 +103,124 @@ export const METAFIELD_FRAGMENT = `
   }
 `;
 
+// A bundle's component lines carry Shopify edit instructions (e.g. canRemove:false
+// so a shopper can't pull one product out of a fixed bundle); the parent bundle line
+// is a ComponentizableCartLine whose lineComponents are ordinary CartLines.
 export const CART_FRAGMENT = `
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
+  fragment CartLineFields on CartLine {
+    id
+    quantity
+    instructions {
+      canRemove
+      canUpdateQuantity
+    }
+    cost {
+      totalAmount {
+        ...MoneyFields
+      }
+    }
+    discountAllocations {
+      __typename
+      discountedAmount {
+        ...MoneyFields
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCustomDiscountAllocation {
+        title
+      }
+    }
+    merchandise {
+      ... on ProductVariant {
+        id
+        title
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          ...ImageFields
+        }
+        price {
+          ...MoneyFields
+        }
+        product {
+          id
+          title
+          handle
+          featuredImage {
+            ...ImageFields
+          }
+        }
+      }
+    }
+  }
+  fragment ComponentizableCartLineFields on ComponentizableCartLine {
+    id
+    quantity
+    cost {
+      totalAmount {
+        ...MoneyFields
+      }
+    }
+    discountAllocations {
+      __typename
+      discountedAmount {
+        ...MoneyFields
+      }
+      ... on CartCodeDiscountAllocation {
+        code
+      }
+      ... on CartAutomaticDiscountAllocation {
+        title
+      }
+      ... on CartCustomDiscountAllocation {
+        title
+      }
+    }
+    merchandise {
+      ... on ProductVariant {
+        id
+        title
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          ...ImageFields
+        }
+        price {
+          ...MoneyFields
+        }
+        product {
+          id
+          title
+          handle
+          featuredImage {
+            ...ImageFields
+          }
+        }
+      }
+    }
+    lineComponents {
+      ...CartLineFields
+    }
+  }
   fragment CartFields on Cart {
     id
     checkoutUrl
     totalQuantity
     note
     lines(first: 50) {
-      edges {
-        node {
-          id
-          quantity
-          cost {
-            totalAmount {
-              ...MoneyFields
-            }
-          }
-          discountAllocations {
-            __typename
-            discountedAmount {
-              ...MoneyFields
-            }
-            ... on CartCodeDiscountAllocation {
-              code
-            }
-            ... on CartAutomaticDiscountAllocation {
-              title
-            }
-            ... on CartCustomDiscountAllocation {
-              title
-            }
-          }
-          merchandise {
-            ... on ProductVariant {
-              id
-              title
-              selectedOptions {
-                name
-                value
-              }
-              image {
-                ...ImageFields
-              }
-              price {
-                ...MoneyFields
-              }
-              product {
-                id
-                title
-                handle
-                featuredImage {
-                  ...ImageFields
-                }
-              }
-            }
-          }
-        }
+      nodes {
+        ...CartLineFields
+        ...ComponentizableCartLineFields
       }
     }
     cost {
@@ -168,9 +228,6 @@ export const CART_FRAGMENT = `
         ...MoneyFields
       }
       subtotalAmount {
-        ...MoneyFields
-      }
-      totalTaxAmount {
         ...MoneyFields
       }
     }

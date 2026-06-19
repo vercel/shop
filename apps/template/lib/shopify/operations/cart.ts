@@ -263,8 +263,20 @@ export async function createCart(locale: string = defaultLocale): Promise<CartMu
   return result;
 }
 
+// Shopify's CartLineInput. `parent` links a line to a bundle/add-on parent —
+// the foundation for app-specific customized bundle flows; the default PDP only
+// adds ordinary products and fixed bundle parents directly (no parent).
+export interface CartLineInput {
+  merchandiseId: string;
+  parent?: {
+    lineId?: string;
+    merchandiseId?: string;
+  };
+  quantity: number;
+}
+
 export async function addToCart(
-  lines: { merchandiseId: string; quantity: number }[],
+  lines: CartLineInput[],
   cartId?: string,
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {
