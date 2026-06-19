@@ -92,7 +92,7 @@ The buy section includes stock status and two action buttons:
 
 A single `BuyButtons` component renders identically on both mobile and desktop. It receives only the selected variant fields needed for cart interactivity; bundle relationship arrays stay in server components instead of being serialized to the client.
 
-Fixed bundle variants render their component products above the buy buttons. When a bundle has no media, the PDP uses a centered purchase layout instead of reserving an empty gallery column. Component products also show the bundles returned by Shopify's `groupedBy` relationship, deduplicated by bundle product rather than listing every compatible bundle variant. Customized bundle parents with `requiresComponents: true` and no fixed components show a disabled "Choose bundle items" action because their picker and component-line inputs are app-specific.
+Fixed bundle variants render their component products above the buy buttons. When a bundle has no media, the selected components become a visual composition gallery beside the sticky purchase controls instead of leaving the media column empty. Component products also show the bundles returned by Shopify's `groupedBy` relationship, deduplicated by bundle product rather than listing every compatible bundle variant. Customized bundle parents with `requiresComponents: true` and no fixed components show a disabled "Choose bundle items" action because their picker and component-line inputs are app-specific.
 
 ## Related Products
 

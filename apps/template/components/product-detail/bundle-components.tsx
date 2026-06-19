@@ -10,6 +10,64 @@ interface BundleComponentsProps {
   title: string;
 }
 
+interface BundleCompositionProps {
+  components: ProductVariantComponent[];
+  optionNames: string[];
+}
+
+export function BundleComposition({ components, optionNames }: BundleCompositionProps) {
+  if (components.length === 0) return null;
+
+  const orderedComponents = components.toSorted(({ variant: a }, { variant: b }) => {
+    const aIndex = optionNames.findIndex((name) => name.startsWith(a.product.title));
+    const bIndex = optionNames.findIndex((name) => name.startsWith(b.product.title));
+    return (aIndex < 0 ? optionNames.length : aIndex) - (bIndex < 0 ? optionNames.length : bIndex);
+  });
+
+  return (
+    <ul className="grid grid-cols-2 gap-2.5 lg:col-span-6" data-slot="bundle-composition">
+      {orderedComponents.map(({ quantity, variant }) => {
+        const image = variant.image ?? variant.product.featuredImage;
+        return (
+          <li key={variant.id}>
+            <Link
+              href={getProductVariantUrl(variant.product.handle, variant.id)}
+              className="group grid cursor-pointer gap-3"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
+                {image ? (
+                  <Image
+                    src={image.url}
+                    alt={image.altText || variant.product.title}
+                    fill
+                    sizes="(min-width: 1024px) 30vw, 50vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  />
+                ) : (
+                  <span className="flex size-full items-center justify-center p-5 text-center text-sm font-medium text-muted-foreground">
+                    {variant.product.title}
+                  </span>
+                )}
+              </div>
+              <span className="flex items-start justify-between gap-2.5 px-1">
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-medium">
+                    {variant.product.title}
+                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {variant.title}
+                  </span>
+                </span>
+                <span className="shrink-0 text-sm text-muted-foreground">x{quantity}</span>
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export function BundleComponents({ components, title }: BundleComponentsProps) {
   if (components.length === 0) return null;
 

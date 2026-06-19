@@ -1,7 +1,11 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
-import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
+import {
+  BundleComponents,
+  BundleComposition,
+  BundleParents,
+} from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
@@ -39,6 +43,11 @@ export function ProductDetailSection({
   locale: Locale;
 }) {
   const hasMedia = product.images.length > 0 || product.videos.length > 0;
+  const defaultSelection = computeSelection(product);
+  const defaultBundleComponents = defaultSelection.selectedVariant?.components ?? [];
+  const optionNames = product.options.map(({ name }) => name);
+  const hasBundleComposition = !hasMedia && defaultBundleComponents.length > 0;
+  const hasVisual = hasMedia || hasBundleComposition;
 
   return (
     <>
@@ -65,16 +74,28 @@ export function ProductDetailSection({
       <div
         className={cn(
           "grid gap-10",
-          hasMedia ? "lg:grid-cols-10 lg:items-start lg:gap-5" : "mx-auto w-full max-w-3xl",
+          hasVisual ? "lg:grid-cols-10 lg:items-start lg:gap-5" : "mx-auto w-full max-w-3xl",
         )}
       >
         {hasMedia ? (
           <ProductMediaArea product={product} selectionPromise={selectionPromise} />
+        ) : hasBundleComposition ? (
+          <Suspense
+            fallback={
+              <BundleComposition components={defaultBundleComponents} optionNames={optionNames} />
+            }
+          >
+            <ResolvedBundleComposition
+              optionNames={optionNames}
+              selectionPromise={selectionPromise}
+            />
+          </Suspense>
         ) : null}
         <ProductInfoArea
-          hasMedia={hasMedia}
+          hasVisual={hasVisual}
           product={product}
           selectionPromise={selectionPromise}
+          showBundleComponents={!hasBundleComposition}
           locale={locale}
         />
       </div>
@@ -150,15 +171,30 @@ async function ResolvedColorImageCarousel({
   return <ColorImageCarouselItems images={colorImages} title={title} />;
 }
 
+async function ResolvedBundleComposition({
+  optionNames,
+  selectionPromise,
+}: {
+  optionNames: string[];
+  selectionPromise: Promise<ProductSelection>;
+}) {
+  const { selectedVariant } = await selectionPromise;
+  return (
+    <BundleComposition components={selectedVariant?.components ?? []} optionNames={optionNames} />
+  );
+}
+
 async function ProductInfoArea({
-  hasMedia,
+  hasVisual,
   product,
   selectionPromise,
+  showBundleComponents,
   locale,
 }: {
-  hasMedia: boolean;
+  hasVisual: boolean;
   product: ProductDetails;
   selectionPromise: Promise<ProductSelection>;
+  showBundleComponents: boolean;
   locale: Locale;
 }) {
   const { options, handle, title, featuredImage, descriptionHtml, availableForSale } = product;
@@ -170,7 +206,7 @@ async function ProductInfoArea({
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
 
   return (
-    <div className={cn("grid gap-10", hasMedia && "lg:sticky lg:top-20 lg:col-span-4")}>
+    <div className={cn("grid gap-10", hasVisual && "lg:sticky lg:top-20 lg:col-span-4")}>
       <div data-slot="product-info-header">
         <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
         {product.hasUniformPricing ? (
@@ -196,10 +232,16 @@ async function ProductInfoArea({
       )}
 
       {eagerSelection ? (
-        <BundleRelationships selectedVariant={eagerSelection.selectedVariant} />
+        <BundleRelationships
+          selectedVariant={eagerSelection.selectedVariant}
+          showComponents={showBundleComponents}
+        />
       ) : (
         <Suspense fallback={null}>
-          <ResolvedBundleRelationships selectionPromise={selectionPromise} />
+          <ResolvedBundleRelationships
+            selectionPromise={selectionPromise}
+            showComponents={showBundleComponents}
+          />
         </Suspense>
       )}
 
@@ -273,17 +315,21 @@ async function ResolvedProductInfoOptions({
 
 async function ResolvedBundleRelationships({
   selectionPromise,
+  showComponents,
 }: {
   selectionPromise: Promise<ProductSelection>;
+  showComponents: boolean;
 }) {
   const { selectedVariant } = await selectionPromise;
-  return <BundleRelationships selectedVariant={selectedVariant} />;
+  return <BundleRelationships selectedVariant={selectedVariant} showComponents={showComponents} />;
 }
 
 async function BundleRelationships({
   selectedVariant,
+  showComponents,
 }: {
   selectedVariant: ProductVariant | undefined;
+  showComponents: boolean;
 }) {
   if (!selectedVariant) return null;
   if (selectedVariant.components.length === 0 && selectedVariant.bundleParents.length === 0) {
@@ -292,7 +338,9 @@ async function BundleRelationships({
   const t = await getTranslations("product");
   return (
     <>
-      <BundleComponents components={selectedVariant.components} title={t("bundleIncludes")} />
+      {showComponents ? (
+        <BundleComponents components={selectedVariant.components} title={t("bundleIncludes")} />
+      ) : null}
       <BundleParents variants={selectedVariant.bundleParents} title={t("availableInBundles")} />
     </>
   );
