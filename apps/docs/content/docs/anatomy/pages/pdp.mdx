@@ -17,7 +17,7 @@ The PDP has two finite public URL forms:
 
 Product data is fetched with `getProduct` using plain `"use cache"`, `cacheLife("max")`, and a `product-{handle}` tag. This lets the product body resolve during prerender and keeps the PDP as a Partial Prerendered route instead of making every request block on `searchParams`.
 
-The route passes `searchParams` into a selection promise consumed only by selection-dependent Suspense boundaries. When a numeric variant is present, that promise performs two operations:
+The route passes `searchParams` into a selection promise consumed only by selection-dependent Suspense boundaries. When a numeric variant is present, the promise first checks the cached product's representative variants. The default variant needs no additional operation, and a known representative variant already supplies its owning handle and selected options. Unknown IDs fall back to two operations:
 
 1. `getProductVariantRouteSelection()` performs an uncached `node(id:)` lookup to validate the numeric ID and retrieve its owning product handle and selected options.
 2. `getProductSelection()` resolves the modern Shopify selection fields with `"use cache: remote"` and `cacheLife("minutes")`.
@@ -36,7 +36,7 @@ Variants are selected via concrete query URLs:
 /products/classic-tee?variant=123456789
 ```
 
-The route lookup supplies Shopify's own selected options to `getProductSelection()`. Its compact fragment resolves the current variant and option state with `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` combines that response with the cached base product and derives the selected option record and color images.
+The representative variant or fallback route lookup supplies Shopify's own selected options to `getProductSelection()`. Its compact fragment resolves the current variant and option state with `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` combines that response with the cached base product and derives the selected option record and color images.
 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
@@ -51,7 +51,7 @@ The base route ignores option-name query parameters. This prevents arbitrary par
 
 Shopify Liquid themes use the same `/products/:handle?variant=:variantId` deep-link contract. The public PDP route handles that query directly; there is no internal variant path or rewrite.
 
-The PDP validates the ID with Shopify. If a Combined Listing variant belongs to another product, the route permanently redirects to that product's handle while keeping `?variant=:variantId`. The validation lookup uses `cache: "no-store"` so arbitrary inbound IDs do not create Runtime Cache entries.
+The PDP validates IDs that are not already represented in the cached product with Shopify. If a Combined Listing variant belongs to another product, the route permanently redirects to that child product's canonical handle while keeping `?variant=:variantId`. Generated option links already use the owning handle, so this redirect is only a fallback for external or stale cross-handle links. The validation lookup uses `cache: "no-store"` so arbitrary inbound IDs do not create Runtime Cache entries.
 
 Product metadata keeps the base product path as the canonical URL, consolidating variants as one product for search engines.
 

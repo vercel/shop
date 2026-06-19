@@ -39,7 +39,7 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 
 PDP option links use finite Shopify-standard `/products/:handle?variant=:variantId` URLs and can navigate across Combined Listing child product handles. Product cards link to the bare product path; cart line items link to the carted variant URL. The PDP resolves numeric variant queries directly while product metadata canonicalizes to the base product.
 
-The PDP keeps the cached base product in a Partial Prerendered shell. For an exact variant query, a selection promise validates the numeric ID through an uncached lookup and resolves the compact selection with `"use cache: remote"` and `cacheLife("minutes")`. Only variant-dependent regions consume that promise. This avoids a public partial-selection keyspace without turning every PDP request into blocking SSR.
+The PDP keeps the cached base product in a Partial Prerendered shell. For an exact variant query, a selection promise first resolves the ID from the cached representative variants and falls back to an uncached lookup only for unknown IDs. It resolves non-default selections with `"use cache: remote"` and `cacheLife("minutes")`. Only variant-dependent regions consume that promise. This avoids a public partial-selection keyspace without turning every PDP request into blocking SSR.
 
 The same change adds Shopify bundle awareness:
 
@@ -82,7 +82,7 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
 - PDP option links and cart line items use `/products/:handle?variant=:variantId`; product cards link to the bare product path. The exact query contract remains compatible with Liquid storefront links.
 - Keep `getProduct()` keyed only by handle and locale with plain `"use cache"` and `cacheLife("max")`. Concrete variant selections belong in `getProductSelection()`, which stays short-TTL cached.
-- Keep the variant-ID lookup uncached. It validates arbitrary inbound IDs before the selected options enter the shared selection cache.
+- Resolve the default and known representative variant IDs from `getProduct()` first. Keep the fallback ID lookup uncached so arbitrary inbound IDs cannot enter the shared selection cache before Shopify validates them.
 - Do not use arbitrary search parameters as the default PDP selection contract. Storefronts that require incomplete shareable choices should adopt the `enable-partial-product-selection` skill and its validation guardrails.
 - Pass only the selected variant fields required by client buy controls; keep bundle relationship arrays on the server.
 - Customized bundle selection remains app-specific. Add its picker and component inputs before enabling direct purchase for a `requiresComponents` variant with no fixed components.

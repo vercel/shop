@@ -10,19 +10,19 @@ import {
   getProduct,
   getProductSelection,
 } from "@/lib/shopify/operations/products";
-import { getNumericShopifyId } from "@/lib/shopify/utils";
+import type { ProductDetails } from "@/lib/types";
 
 import { buildProductMetadata, ProductPageContent } from "./product-page";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
 async function resolveVariantSelection({
-  handle,
   locale,
+  product,
   searchParams,
 }: {
-  handle: string;
   locale: string;
+  product: ProductDetails;
   searchParams: PageProps<"/products/[handle]">["searchParams"];
 }) {
   const query = await searchParams;
@@ -30,22 +30,25 @@ async function resolveVariantSelection({
   const variant = typeof rawVariant === "string" && /^\d+$/.test(rawVariant) ? rawVariant : null;
   if (!variant) return undefined;
 
-  const routeSelection = await getProductVariantRouteSelection({ variantId: variant, locale });
+  const variantGid = `gid://shopify/ProductVariant/${variant}`;
+  if (product.defaultVariantId === variantGid) return undefined;
+
+  const knownVariant = product.variants.find(({ id }) => id === variantGid);
+  const routeSelection = knownVariant
+    ? { handle: knownVariant.productHandle, selectedOptions: knownVariant.selectedOptions }
+    : await getProductVariantRouteSelection({ variantId: variant, locale });
   if (!routeSelection) return undefined;
-  if (routeSelection.handle !== handle) {
+  if (routeSelection.handle !== product.handle) {
     permanentRedirect(getProductVariantUrl(routeSelection.handle, variant, query));
   }
 
   const selectionData = await getProductSelection({
-    handle,
+    handle: product.handle,
     selectedOptions: routeSelection.selectedOptions,
     locale,
   });
 
-  return selectionData?.selectedVariant &&
-    getNumericShopifyId(selectionData.selectedVariant.id) === variant
-    ? selectionData
-    : undefined;
+  return selectionData?.selectedVariant?.id === variantGid ? selectionData : undefined;
 }
 
 export async function generateStaticParams() {
@@ -75,13 +78,11 @@ export default async function ProductPage({
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const productPromise = getProduct({ handle, locale });
-  const selectionDataPromise = resolveVariantSelection({ handle, locale, searchParams });
-  const product = await productPromise;
+  const product = await getProduct({ handle, locale });
   if (!product) notFound();
 
-  const selectionPromise = selectionDataPromise.then((selectionData) =>
-    computeSelection(product, selectionData),
+  const selectionPromise = resolveVariantSelection({ locale, product, searchParams }).then(
+    (selectionData) => computeSelection(product, selectionData),
   );
 
   return (

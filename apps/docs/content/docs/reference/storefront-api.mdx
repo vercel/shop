@@ -174,7 +174,7 @@ The cart fragment omits deprecated tax and duty amount fields. Shopify finalizes
 
 ## Product selection
 
-The template does not query an exhaustive variants connection. The PDP starts with `getProduct()` in its prerendered shell and derives the default selection from that cached product when no valid variant ID is present. For `/products/:handle?variant=:variantId`, a selection promise uses `getProductVariantRouteSelection()` to validate the numeric ID and retrieve Shopify's selected options, then passes those options to `getProductSelection()`. Only selection-dependent Suspense regions consume that promise. The selection operation uses:
+The template does not query an exhaustive variants connection. The PDP starts with `getProduct()` in its prerendered shell and derives the default selection from that cached product when no valid variant ID is present. For `/products/:handle?variant=:variantId`, a selection promise first checks the cached product's representative variants. The default variant needs no additional query, known representative variants already contain their selected options, and only unknown IDs use `getProductVariantRouteSelection()` for validation. The selected options then pass to `getProductSelection()`. Only selection-dependent Suspense regions consume that promise. The selection operation uses:
 
 - `selectedOrFirstAvailableVariant(selectedOptions:)`
 - `adjacentVariants(selectedOptions:)`
@@ -185,7 +185,7 @@ This avoids a historical `first: 50` cap, scales to Shopify's 2,048-variant prod
 
 `getProductSelection()` uses `"use cache: remote"` with `cacheLife("minutes")`, keyed by canonically sorted options. Only Shopify-validated concrete variant selections from the public PDP route reach this cache. It is also used by tools that need to resolve an exact option combination, such as the shopping agent. Product cards link to the bare product path; PDP option and cart links use the exact numeric `variant` query parameter.
 
-Shopify Liquid links already use the public `?variant=:variantId` contract. The PDP performs the uncached `node(id:)` validation directly and corrects the handle for Combined Listings before calling the shared selection operation. There is no rewrite or internal variant route. Product metadata canonicalizes variants to the base product path.
+Shopify Liquid links already use the public `?variant=:variantId` contract. When the cached representative set cannot identify the ID, the PDP performs the uncached `node(id:)` validation directly. A cross-handle Combined Listing link redirects to the owning child product before calling the shared selection operation. There is no rewrite or internal variant route. Product metadata canonicalizes variants to the base product path.
 
 The uncached lookup is deliberate: caching arbitrary inbound numeric IDs would create the same unbounded cache-key problem the concrete route contract avoids. Option-name query parameters do not affect the default PDP. Storefronts that need progressive partial selections can install the `enable-partial-product-selection` skill.
 

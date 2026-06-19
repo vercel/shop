@@ -21,7 +21,7 @@ The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry
 
 PDP option links use `/products/:handle?variant=:variantId`. If an option link does not select the expected variant, check that the transformed option value has a numeric variant ID and the selected variant's owning product handle.
 
-The PDP first calls `getProductVariantRouteSelection()` with `cache: "no-store"`, then calls `getProductSelection()` with Shopify's selected options. Confirm the lookup returns the same numeric variant ID after selection. For Combined Listings, the route should permanently redirect when Shopify reports a different owning product handle.
+The PDP first checks the cached product's representative variants. It calls `getProductVariantRouteSelection()` with `cache: "no-store"` only when that set does not contain the requested ID, then calls `getProductSelection()` with Shopify's selected options. Confirm the final selection returns the same numeric variant ID. For external or stale Combined Listing links, the route should permanently redirect when Shopify reports a different owning product handle.
 
 Existing Liquid links such as `?variant=123` should render the selected variant directly. If they do not, verify `app/products/[handle]/page.tsx` still reads and validates the numeric query value.
 
