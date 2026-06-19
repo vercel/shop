@@ -29,10 +29,10 @@ type: reference
 
 PDP option and cart links use Shopify's numeric `variant` query parameter. This keeps the public selection space finite while Shopify still resolves high-variant products and Combined Listings without loading every variant.
 
-| URL                                           | Purpose                                                           |
-| --------------------------------------------- | ----------------------------------------------------------------- |
-| `/products/:handle`                           | Base PDP with Shopify's default selection                         |
-| `/products/:handle?variant=:variantId`        | Concrete variant URL; resolved directly by the blocking PDP route |
-| `/products/:combinedChild?variant=:variantId` | Combined Listing variant using the owning child product handle    |
+| URL                                           | Purpose                                                              |
+| --------------------------------------------- | -------------------------------------------------------------------- |
+| `/products/:handle`                           | Base PDP with Shopify's default selection                            |
+| `/products/:handle?variant=:variantId`        | Concrete variant URL; selection regions resolve within the PPR route |
+| `/products/:combinedChild?variant=:variantId` | Combined Listing variant using the owning child product handle       |
 
 Arbitrary option-name query parameters do not select a variant. Progressive partial selection is an opt-in storefront capability rather than a default route behavior.

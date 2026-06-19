@@ -16,7 +16,37 @@ import { buildProductMetadata, ProductPageContent } from "./product-page";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
-export const instant = false;
+async function resolveVariantSelection({
+  handle,
+  locale,
+  searchParams,
+}: {
+  handle: string;
+  locale: string;
+  searchParams: PageProps<"/products/[handle]">["searchParams"];
+}) {
+  const query = await searchParams;
+  const rawVariant = query.variant;
+  const variant = typeof rawVariant === "string" && /^\d+$/.test(rawVariant) ? rawVariant : null;
+  if (!variant) return undefined;
+
+  const routeSelection = await getProductVariantRouteSelection({ variantId: variant, locale });
+  if (!routeSelection) return undefined;
+  if (routeSelection.handle !== handle) {
+    permanentRedirect(getProductVariantUrl(routeSelection.handle, variant, query));
+  }
+
+  const selectionData = await getProductSelection({
+    handle,
+    selectedOptions: routeSelection.selectedOptions,
+    locale,
+  });
+
+  return selectionData?.selectedVariant &&
+    getNumericShopifyId(selectionData.selectedVariant.id) === variant
+    ? selectionData
+    : undefined;
+}
 
 export async function generateStaticParams() {
   try {
@@ -42,41 +72,19 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale, query] = await Promise.all([params, getLocale(), searchParams]);
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const rawVariant = query.variant;
-  const variant = typeof rawVariant === "string" && /^\d+$/.test(rawVariant) ? rawVariant : null;
-  const [product, routeSelection] = await Promise.all([
-    getProduct({ handle, locale }),
-    variant ? getProductVariantRouteSelection({ variantId: variant, locale }) : undefined,
-  ]);
-
+  const productPromise = getProduct({ handle, locale });
+  const selectionDataPromise = resolveVariantSelection({ handle, locale, searchParams });
+  const product = await productPromise;
   if (!product) notFound();
-  if (!variant || !routeSelection) {
-    return (
-      <ProductPageContent locale={locale} product={product} selection={computeSelection(product)} />
-    );
-  }
 
-  if (routeSelection.handle !== handle) {
-    permanentRedirect(getProductVariantUrl(routeSelection.handle, variant, query));
-  }
-
-  const selectionData = await getProductSelection({
-    handle,
-    selectedOptions: routeSelection.selectedOptions,
-    locale,
-  });
-  const isExactVariant =
-    selectionData?.selectedVariant &&
-    getNumericShopifyId(selectionData.selectedVariant.id) === variant;
+  const selectionPromise = selectionDataPromise.then((selectionData) =>
+    computeSelection(product, selectionData),
+  );
 
   return (
-    <ProductPageContent
-      locale={locale}
-      product={product}
-      selection={computeSelection(product, isExactVariant ? selectionData : undefined)}
-    />
+    <ProductPageContent locale={locale} product={product} selectionPromise={selectionPromise} />
   );
 }

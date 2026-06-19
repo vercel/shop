@@ -25,6 +25,8 @@ The PDP first calls `getProductVariantRouteSelection()` with `cache: "no-store"`
 
 Existing Liquid links such as `?variant=123` should render the selected variant directly. If they do not, verify `app/products/[handle]/page.tsx` still reads and validates the numeric query value.
 
+The route should remain Partial Prerendered in `next build` output. If it becomes fully dynamic, check that `page.tsx` does not await `searchParams` before rendering and that only selection-dependent Suspense regions consume the selection promise.
+
 Option-name query parameters are intentionally ignored by the default template. Use the `enable-partial-product-selection` skill only when the storefront needs shareable incomplete choices.
 
 If every option appears unavailable, verify the local encoded-variant decoder still matches Shopify's current `v1_` encoding and that `options.optionValues` are queried in Shopify's option order.

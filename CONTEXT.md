@@ -33,14 +33,14 @@ A variant with `requiresComponents` and no fixed components; not purchasable thr
 
 ## Relationships
 
-- The base PDP computes its default **Selection** from the cached product; a **Concrete variant URL** resolves its selected options and short-TTL **Selection** before rendering
+- The base PDP prerenders the cached product shell; a **Concrete variant URL** resolves its selected options and short-TTL **Selection** inside variant-dependent server Suspense regions
 - A **Combined Listing** option value may move the **Concrete variant URL** to a different product handle
 - A **Fixed bundle** keeps its components grouped as nested cart lines; a **Customized bundle** cannot enter the cart without component inputs
 
 ## Example dialogue
 
-> **Dev:** "Why does a variant navigation wait before painting?"
-> **Domain expert:** "The concrete variant route resolves the whole **Selection** before rendering so price, media, options, and buy controls arrive together."
+> **Dev:** "Why can parts of a variant navigation stream?"
+> **Domain expert:** "The cached product shell does not wait for request parameters. Only regions that require the concrete **Selection** suspend while the server resolves it."
 
 > **Dev:** "Can I count variants with `product.variants.length`?"
 > **Domain expert:** "No — that's the **representative variant set**. Use `variantsCount`."

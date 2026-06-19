@@ -10,9 +10,11 @@ export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"produ
 
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
+  t: ProductTranslator;
+  hideImages?: boolean;
 }
 
-export function ColorPicker({ option, className, ...props }: ColorPickerProps) {
+export function ColorPicker({ option, t, hideImages, className, ...props }: ColorPickerProps) {
   const selectedValue = option.values.find((value) => value.selected)?.name ?? "";
 
   return (
@@ -23,7 +25,7 @@ export function ColorPicker({ option, className, ...props }: ColorPickerProps) {
       <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
         {option.values.map((value) => {
           const isSelected = value.selected;
-          const imageUrl = value.swatch?.image || value.image;
+          const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
 
           const swatch = (
             <div
@@ -68,7 +70,7 @@ export function ColorPicker({ option, className, ...props }: ColorPickerProps) {
               href={value.href}
               scroll={false}
               className={cn("block cursor-pointer", !value.available && "opacity-40")}
-              aria-label={`Select ${option.name}: ${value.name}`}
+              aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
             >
               {swatch}
             </Link>

@@ -55,17 +55,21 @@ export async function buildProductMetadata(
 export function ProductPageContent({
   locale,
   product,
-  selection,
+  selectionPromise,
 }: {
   locale: Locale;
   product: ProductDetails;
-  selection: ProductSelection;
+  selectionPromise: Promise<ProductSelection>;
 }) {
   return (
     <Page className="pt-0">
       <Container className="bg-background">
         <Sections>
-          <ProductDetailSection product={product} selection={selection} locale={locale} />
+          <ProductDetailSection
+            product={product}
+            selectionPromise={selectionPromise}
+            locale={locale}
+          />
           <RelatedProductsSection handle={product.handle} locale={locale} />
         </Sections>
       </Container>
