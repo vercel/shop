@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { getProductVariantUrl } from "@/lib/product-url";
 import type { ProductVariantComponent, ProductVariantReference } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface BundleComponentsProps {
   components: ProductVariantComponent[];
@@ -13,6 +15,7 @@ export function BundleComponents({ components, title }: BundleComponentsProps) {
 
   return (
     <BundleProductList
+      columns
       items={components.map(({ quantity, variant }) => ({ quantity, variant }))}
       title={title}
     />
@@ -27,26 +30,44 @@ interface BundleParentsProps {
 export function BundleParents({ variants, title }: BundleParentsProps) {
   if (variants.length === 0) return null;
 
-  return <BundleProductList items={variants.map((variant) => ({ variant }))} title={title} />;
+  const products = new Map<string, ProductVariantReference>();
+  for (const variant of variants) {
+    if (!products.has(variant.product.id)) products.set(variant.product.id, variant);
+  }
+
+  return (
+    <BundleProductList
+      items={[...products.values()].map((variant) => ({ variant }))}
+      showVariantTitle={false}
+      title={title}
+    />
+  );
 }
 
 interface BundleProductListProps {
+  columns?: boolean;
   items: Array<{ quantity?: number; variant: ProductVariantReference }>;
+  showVariantTitle?: boolean;
   title: string;
 }
 
-function BundleProductList({ items, title }: BundleProductListProps) {
+function BundleProductList({
+  columns,
+  items,
+  showVariantTitle = true,
+  title,
+}: BundleProductListProps) {
   return (
     <div className="grid gap-2.5" data-slot="bundle-components">
       <h2 className="text-sm font-medium text-foreground/70">{title}</h2>
-      <ul className="grid gap-2.5">
+      <ul className={cn("grid gap-2.5", columns && "sm:grid-cols-2")}>
         {items.map(({ quantity, variant }) => {
           const image = variant.image ?? variant.product.featuredImage;
           return (
             <li key={variant.id}>
               <Link
-                href={`/products/${variant.product.handle}`}
-                className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:border-foreground/30"
+                href={getProductVariantUrl(variant.product.handle, variant.id)}
+                className="flex h-full cursor-pointer items-center gap-2.5 rounded-lg border border-border p-2.5 transition-colors hover:border-foreground/30"
               >
                 {image ? (
                   <Image
@@ -61,11 +82,13 @@ function BundleProductList({ items, title }: BundleProductListProps) {
                   <span className="block truncate text-sm font-medium">
                     {variant.product.title}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {variant.title}
-                  </span>
+                  {showVariantTitle ? (
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {variant.title}
+                    </span>
+                  ) : null}
                 </span>
-                {quantity ? (
+                {quantity !== undefined ? (
                   <span className="text-sm text-muted-foreground">x{quantity}</span>
                 ) : null}
               </Link>

@@ -44,7 +44,7 @@ The PDP keeps the cached base product in a Partial Prerendered shell. For an exa
 The same change adds Shopify bundle awareness:
 
 - Selected variants expose `requiresComponents`, fixed bundle `components`, and reverse `groupedBy` relationships.
-- PDPs render fixed bundle contents and bundles containing the selected component.
+- PDPs render fixed bundle contents and deduplicated bundle products containing the selected component. Media-less bundle parents use a centered purchase layout rather than an empty gallery column.
 - Generic buy buttons disable customized bundle parents that require an app-specific component picker.
 - Cart queries preserve `ComponentizableCartLine.lineComponents` and honor line edit/remove instructions when Shopify exposes them.
 - `addToCart()` accepts optional `CartLineInput.parent` data for downstream customized bundle flows.

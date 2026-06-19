@@ -38,6 +38,8 @@ export function ProductDetailSection({
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
 }) {
+  const hasMedia = product.images.length > 0 || product.videos.length > 0;
+
   return (
     <>
       <ProductSchema
@@ -60,9 +62,21 @@ export function ProductDetailSection({
           { name: product.title, path: `/products/${product.handle}` },
         ]}
       />
-      <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaArea product={product} selectionPromise={selectionPromise} />
-        <ProductInfoArea product={product} selectionPromise={selectionPromise} locale={locale} />
+      <div
+        className={cn(
+          "grid gap-10",
+          hasMedia ? "lg:grid-cols-10 lg:items-start lg:gap-5" : "mx-auto w-full max-w-3xl",
+        )}
+      >
+        {hasMedia ? (
+          <ProductMediaArea product={product} selectionPromise={selectionPromise} />
+        ) : null}
+        <ProductInfoArea
+          hasMedia={hasMedia}
+          product={product}
+          selectionPromise={selectionPromise}
+          locale={locale}
+        />
       </div>
     </>
   );
@@ -137,10 +151,12 @@ async function ResolvedColorImageCarousel({
 }
 
 async function ProductInfoArea({
+  hasMedia,
   product,
   selectionPromise,
   locale,
 }: {
+  hasMedia: boolean;
   product: ProductDetails;
   selectionPromise: Promise<ProductSelection>;
   locale: Locale;
@@ -154,7 +170,7 @@ async function ProductInfoArea({
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
 
   return (
-    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+    <div className={cn("grid gap-10", hasMedia && "lg:sticky lg:top-20 lg:col-span-4")}>
       <div data-slot="product-info-header">
         <h1 className="font-semibold text-foreground tracking-tight text-3xl">{title}</h1>
         {product.hasUniformPricing ? (
