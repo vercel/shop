@@ -187,7 +187,8 @@ async function ProductInfoArea({
             locale={locale}
           />
         ) : (
-          <Suspense fallback={<div className="h-6" aria-hidden />}>
+          // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
+          <Suspense fallback={<div className="h-7" aria-hidden />}>
             <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
           </Suspense>
         )}
