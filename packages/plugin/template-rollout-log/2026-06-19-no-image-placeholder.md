@@ -12,6 +12,7 @@ paths:
   - apps/template/components/product-card/product-card.tsx
   - apps/template/components/collections/infinite-product-grid.tsx
   - apps/template/components/agent/registry.tsx
+  - apps/template/components/product-detail/bundle-components.tsx
   - apps/template/components/product-detail/product-media.tsx
   - apps/docs/content/docs/anatomy/product-card.mdx
   - apps/docs/content/docs/anatomy/pages/home.mdx
@@ -25,6 +26,7 @@ Products with no imagery now render a consistent placeholder instead of ad-hoc t
 - New shared primitive `ImagePlaceholder` (`components/ui/image-placeholder.tsx`): a white square that centers a muted Lucide `ImageIcon`. The icon is sized relative to the box (`w-1/3`, capped at `10rem`), so the same component reads correctly at card scale and at PDP-gallery scale.
 - `ProductCardImage` renders `ImagePlaceholder` (filling the aspect-ratio box) when `featuredImage` is missing, replacing the previous `bg-muted` box that showed the product title as placeholder text. The now-unused `fallbackTitle` prop is removed from `ProductCardImage` and its call sites.
 - `ProductMedia` no longer returns `null` when a product has no images or videos. It renders a single `ImagePlaceholder` at the gallery's `aspect-square` footprint — full-bleed on mobile (`-mx-5`), full-width within the media column on desktop — so the PDP keeps its two-column shape.
+- The PDP bundle lists ("Bundle includes" / "Available in bundles", `bundle-components.tsx`) render a `size-12` `ImagePlaceholder` for a component or parent with no image instead of dropping the thumbnail, so rows stay aligned.
 
 ## Why it matters
 

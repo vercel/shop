@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { ProductVariantComponent, ProductVariantReference } from "@/lib/types";
 
 interface BundleListItem {
@@ -78,7 +79,9 @@ function BundleProductList({ items, title }: BundleProductListProps) {
                   height={48}
                   className="size-12 rounded-md object-cover"
                 />
-              ) : null}
+              ) : (
+                <ImagePlaceholder className="size-12 shrink-0 rounded-md" />
+              )}
               <span className="min-w-0 flex-1 truncate font-medium text-sm">{item.title}</span>
               {item.quantity && item.quantity > 1 ? (
                 <span className="text-foreground/50 text-sm">×{item.quantity}</span>
