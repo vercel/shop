@@ -2,6 +2,14 @@
 
 This file provides guidance for agents working in the template.
 
+## Agent Scaffold Experiment
+
+This branch intentionally removes the default homepage and global storefront presentation. Build an original visual system and composition instead of recreating the Vercel Shop reference design.
+
+The creative surface includes markup, layout, navigation, typography, color, spacing, motion, product cards, media galleries, and cart presentation. Preserve the existing route structure, Shopify operations and transforms, cache behavior, metadata helpers, and optimistic cart state unless the task explicitly changes commerce behavior.
+
+`app/page.tsx` loads homepage product data and passes it to `components/storefront/home-view.tsx`. Treat `HomeView` as a blank canvas. The root layout still provides localization and optimistic cart state without prescribing a header, footer, cart overlay, font, or page structure.
+
 ## Recommended Project Plugins
 
 These project-scoped plugins are not required to run the template, but they make agent work in this codebase substantially better. If you're working with an agent that supports them, install with:
@@ -31,8 +39,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always verify Shopify GraphQL fields against the live schema** before adding or changing fields. Use `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference` if available, otherwise consult the Shopify Storefront / Customer Account API docs. Never guess Shopify field names.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
-
-<!-- BEGIN:vercel-shop-style -->
 
 ## Code Style
 
@@ -80,20 +86,10 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
 
-### Spacing
-
-- `Container` provides horizontal padding and max-width only. It does **not** manage vertical spacing.
-- `Page` (`components/ui/page.tsx`) owns page-level top padding. It defaults to `pt-10` and accepts `className` for overrides — `<Page className="pt-0">` for pages whose first child is flush to the nav (home, PDP), or `<Page className="pt-2.5 md:pt-10">` for search and collection where the title sits tighter to the nav on mobile. `Page` deliberately has no bottom padding; the gap above the footer comes from the footer's own `pt-20`. `Page` doesn't set `flex` by default; layouts that need to fill viewport height (account layout, `not-found`) add `flex flex-1 flex-col` via `className`.
-- For vertical rhythm between sibling sections, wrap them in `<Sections>` (`components/ui/sections.tsx`). Default `gap-10`; override per page via `className` (e.g. `<Sections className="gap-5">`). `<Sections>` happily mixes full-bleed and contained children since each child can be a `<Container>`, a banner, or anything else.
-- Inside a single section, prefer `grid gap-*` on the immediate parent. Don't add `mb-*` / `mt-*` / `my-*` / `space-y-*` to children for inter-sibling spacing.
-- Canonical gap scale: `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Don't invent new values for the same job.
-- Padding _inside_ a component (button, card, carousel breathing room via `py-*`) is fine. Negative-margin breakouts (`-mx-5`) are fine.
-- This convention is rolled out across the template. New pages should use `<Page>` + `<Sections>` from day one — never put `py-*` on `<Container>`.
-
 ### Tailwind & Styling
 
-- **Solve it the Tailwind way, not in `globals.css`.** When you reach for new styling, the first move is a Tailwind utility on the element — not a rule in `app/globals.css`. If the value isn't already a token, register it in `@theme` (e.g. `--font-display: var(--font-bricolage)`) so it becomes a real utility (`font-display`) you can apply per element. Reserve `globals.css` for things that genuinely can't be expressed as a per-element class: theme tokens (`@theme`), CSS resets in `@layer base`, `@keyframes`, and one-off utilities under `@layer utilities` that compose into many components. Adding global element rules (`h1, h2, h3 { ... }`, `a { ... }`) couples styling to markup invisibly and is almost always avoidable.
-- **Watch out for `@theme inline`**: with the `inline` keyword Tailwind inlines the value into utility-class declarations rather than emitting a `:root` CSS variable. So `@theme inline { --font-display: var(--font-bricolage) }` produces a working `font-display` utility but does **not** make `var(--font-display)` resolvable from arbitrary CSS. Reference the underlying variable (`var(--font-bricolage)`) directly if you need it outside a utility.
+- Establish a distinct visual system for the requested storefront. Existing components and tokens are implementation examples, not design constraints.
+- Prefer Tailwind utilities on elements. Register reusable project tokens in `@theme` and reserve `globals.css` for tokens, resets, keyframes, and genuinely shared utilities.
 - Prefer `data-[attr=value]` selectors over conditional class assembly.
 - Use `cn()` (from `@/lib/utils`) when classes must be conditional.
 - Use `data-slot` attributes as stable styling hooks on compound components.
@@ -128,8 +124,6 @@ Don't write:
 - Multi-paragraph docstrings on simple functions. If the JSDoc fits on one line, inline it; if you reach for multiple paragraphs, that's a signal to split or rename, not to write more prose.
 
 Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other tooling directives — those are not prose comments.
-
-<!-- END:vercel-shop-style -->
 
 ## Overview
 
