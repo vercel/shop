@@ -1,0 +1,79 @@
+---
+name: enable-partial-product-selection
+description: Add progressive, shareable partial option selections to a Vercel Shop PDP when a merchant needs configurator-style URLs instead of the template's finite concrete variant routes.
+---
+
+# Enable Partial Product Selection
+
+The template deliberately links only to concrete variants at `/products/:handle?variant=:variantId`. Use this skill only when the storefront must preserve incomplete choices, such as a furniture configurator, made-to-order flow, campaign landing page that preselects one attribute, or a catalog where shoppers commonly choose options in any order.
+
+Partial selections create an open-ended URL and cache-key space. Keep them out of the route or ISR cache, validate them against the product's actual options, and render one coherent server response.
+
+## Before you start
+
+Read:
+
+- `app/products/[handle]/page.tsx`
+- `components/product-detail/product-detail-section.tsx`
+- `lib/product.ts`
+- `lib/shopify/operations/products.ts`
+- `lib/shopify/transforms/product.ts`
+
+Confirm with the user which URL contract they need:
+
+- **Server-rendered partial URLs:** incomplete choices are shareable and SEO-readable, but every selection request blocks on Shopify.
+- **Client-only draft selection:** the URL changes only after a concrete variant exists. This preserves the template's finite server cache and is usually preferable when incomplete choices do not need to be shared.
+
+Do not implement partial URLs merely to shorten exact variant URLs. They are a product behavior decision.
+
+## Server-rendered partial URLs
+
+### 1. Define a strict URL schema
+
+Use only option names that exist on the fetched product. Preserve ordinary attribution parameters separately. Reject duplicate option keys, unknown option names, invalid values, and values that are not scalar strings.
+
+Canonicalize accepted option pairs in product option order before passing them to `getProductSelection()`. Never pass raw `searchParams` into a cached function.
+
+### 2. Keep partial selections out of ISR
+
+Await the request parameters and the selection before rendering. Do not create static params for partial combinations, rewrite arbitrary combinations to generated paths, or put the route response in a persistent full-page cache.
+
+`getProductSelection()` may retain its short shared `cacheLife("minutes")` policy after validation. The bounded TTL reuses common combinations without turning every arbitrary query string into a durable entry.
+
+### 3. Render a single selection
+
+Resolve the product and selection at the route level, call `computeSelection()`, and pass the resolved value into `ProductDetailSection`. Do not restore per-region selection Suspense boundaries unless the user explicitly accepts multiple paints.
+
+Keep metadata canonicalized to `/products/:handle`. Add `noindex` only if the merchant wants partial combinations excluded from crawling entirely.
+
+### 4. Generate partial links deliberately
+
+Update the option transform so each link carries the currently accepted choices plus the changed option. Use `scroll={false}` and preserve attribution parameters only when required.
+
+When a complete selection resolves to a concrete variant, choose one policy and document it:
+
+- Keep the option-name URL for stable back/forward behavior.
+- Redirect to `/products/:handle?variant=:variantId` to return to the finite exact-selection contract.
+
+For Combined Listings, use the selected variant's owning product handle. Never assume the original handle remains correct.
+
+### 5. Preserve Liquid compatibility
+
+Keep `?variant=:numericId` as the exact-selection contract. Preserve attribution parameters and direct numeric query handling when adding partial URLs. Do not cache the variant-ID lookup merely to support arbitrary inbound IDs.
+
+## Client-only draft selection
+
+Keep incomplete choices in client state. Query or navigate only when the choices identify a concrete variant, then use `/products/:handle?variant=:variantId`.
+
+This avoids arbitrary server cache keys and can feel more immediate, but incomplete choices are not shareable and the initial server HTML cannot reflect them. Use this only when those tradeoffs match the storefront.
+
+## Verification
+
+1. Unknown query keys and invalid option values do not enter `getProductSelection()`.
+2. Partial selections render one coherent response without selection fallbacks replacing visible content.
+3. Complete selections resolve the exact variant, including products with more than 250 variants.
+4. Combined Listing selections move to the owning product handle.
+5. Back, forward, refresh, and copied URLs preserve the intended partial state.
+6. Product metadata keeps the base product canonical URL.
+7. Liquid `?variant=` links retain campaign parameters and land on the configured selection URL.
+8. Run `pnpm --filter template lint`, `pnpm --filter template test`, and `pnpm --filter template build`.

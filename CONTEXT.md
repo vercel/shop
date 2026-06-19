@@ -12,18 +12,15 @@ _Avoid_: variant lookup, variant resolution (those describe the query, not the s
 The small set of variants a product carries (`selectedOrFirstAvailableVariant`, `adjacentVariants`, `firstSelectableVariant` per option value) — enough to render and navigate, never an exhaustive export.
 _Avoid_: "all variants", "the variants list"
 
-**Eager path**:
-A PDP region rendered into the prerendered shell because data proves selection cannot change it (`hasUniformPricing`, `variantsCount === 1`, `allVariantsInStock`).
-
 **Freshness gradient**:
 The deliberate policy that data gets fresher as purchase intent deepens: browse = webhook-fresh cache, selection = minutes-fresh cache, add-to-cart = live Shopify validation.
 
-**Option-name URL**:
-The canonical variant deep-link dialect: `?Color=Black&Size=Medium`, localized per locale, expressing full or partial selections.
-_Avoid_: variant URL (ambiguous with the Liquid dialect)
+**Concrete variant URL**:
+The default variant deep-link dialect: `/products/<handle>?variant=<numeric variant id>`. It names one Shopify variant, so the public selection space is finite.
+_Avoid_: selection URL (ambiguous with opt-in partial selection)
 
-**Liquid variant URL**:
-The legacy `?variant=<numeric id>` dialect — accepted as migration input and as the locale-invariant cross-locale bridge, always 308-redirected to an option-name URL by the proxy.
+**Partial selection URL**:
+An opt-in configurator URL such as `?Color=Black` that expresses an incomplete option choice. The default template does not expose this route space; use the `enable-partial-product-selection` skill when a merchant needs it.
 
 **Combined Listing**:
 A Shopify product whose option values resolve to variants owned by other (child) products; selecting such a value navigates to the child product's handle.
@@ -36,20 +33,19 @@ A variant with `requiresComponents` and no fixed components; not purchasable thr
 
 ## Relationships
 
-- A **Selection** is computed from the cached base product plus a short-TTL **Selection** query; only regions a **Selection** can change stream behind Suspense — everything else takes the **eager path**
-- An **Option-name URL** expresses a **Selection**; a **Liquid variant URL** is translated into one by the proxy
-- A **Combined Listing** option value may move the **Option-name URL** to a different product handle
+- The base PDP computes its default **Selection** from the cached product; a **Concrete variant URL** resolves its selected options and short-TTL **Selection** before rendering
+- A **Combined Listing** option value may move the **Concrete variant URL** to a different product handle
 - A **Fixed bundle** keeps its components grouped as nested cart lines; a **Customized bundle** cannot enter the cart without component inputs
 
 ## Example dialogue
 
-> **Dev:** "The PDP shows a skeleton for the price — is the **Selection** broken?"
-> **Domain expert:** "Only if the product has uniform pricing. Then the price is on the **eager path** and belongs in the prerendered shell; a skeleton there is a regression. If variant prices differ, the price legitimately streams with the **Selection**."
+> **Dev:** "Why does a variant navigation wait before painting?"
+> **Domain expert:** "The concrete variant route resolves the whole **Selection** before rendering so price, media, options, and buy controls arrive together."
 
 > **Dev:** "Can I count variants with `product.variants.length`?"
 > **Domain expert:** "No — that's the **representative variant set**. Use `variantsCount`."
 
 ## Flagged ambiguities
 
-- "caching the variants" was used to mean both the pre-2026 full-variant-array cache and per-**Selection** cache entries — resolved: the modern model caches the base product (webhook-fresh, per handle) and **Selections** (minutes-fresh, per sorted option combination) separately; see ADR-0001.
-- "instant navigation" was used to mean both static-shell navigation and runtime-prefetched **Selections** — resolved: the PDP keeps the product body coherent in the static shell and does not use route-wide runtime prefetching; a first option navigation may stream selection-dependent regions, while recently visited selections can resolve from cache.
+- "caching the variants" was used to mean both the pre-2026 full-variant-array cache and per-**Selection** cache entries — resolved: the modern model caches the base product (webhook-fresh, per handle) and concrete **Selections** (minutes-fresh, per selected option combination) separately; see ADR-0001.
+- "variant URL" was used for option-name queries and exact Shopify IDs — resolved: the template exposes finite **Concrete variant URLs** using `?variant=<id>`. **Partial selection URLs** are opt-in.

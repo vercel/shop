@@ -351,15 +351,15 @@ export function proxy(request: NextRequest) {
 }
 ```
 
-> **Note:** Extend the template's existing `proxy.ts`; do not replace its Liquid `?variant=` compatibility branch. Run that branch with the locale parsed from the product pathname before delegating to next-intl. The variant lookup remains query-gated and uncached, while the built-in content negotiation rewrite in `next.config.ts` continues to handle markdown negotiation.
+> **Note:** The default template has no `proxy.ts`. Preserve content negotiation in `next.config.ts` and the numeric `?variant=` handling in `app/products/[handle]/page.tsx`; the PDP validates the owning handle in the active locale.
 
-### Localized option parameters and locale boundaries
+### Variant URLs and locale boundaries
 
-Option-name query parameters are localized strings: the same variant is `?Color=Black` on `/en` and `?Farbe=Schwarz` on `/de`, because option names and values come from the `@inContext` language, and Shopify's `selectedOrFirstAvailableVariant` does not match names across languages. Within one locale this is self-consistent — links are generated and resolved in the same language. The rules below keep the cross-locale boundaries correct:
+Numeric Shopify variant IDs are locale-invariant. Exact variant query URLs therefore avoid copying localized option names and values between locales:
 
-1. **Locale switcher on a PDP**: build the target-locale URL as `/{locale}/products/{handle}?variant={numericVariantId}` using the selected variant's ID (locale-invariant). The locale-aware `?variant=` proxy branch resolves it in the target locale's context and permanently redirects to that locale's localized option parameters. Do not copy option-name parameters across locales verbatim — they will silently fall back to the first available variant.
-2. **Never auto-rewrite a deep link's locale** (e.g. geo-IP redirects that move `/de/...?Farbe=Schwarz` to `/en/...`). If a banner or redirect offers another locale, route it through the `?variant=` form as above.
-3. **Cross-locale `hreflang` alternates and canonicals** keep pointing at the bare product path (no option parameters), which is already the template's canonicalization behavior — localized parameters never reach search engines as alternates of each other.
+1. **Locale switcher on a PDP**: preserve `/products/{handle}?variant={numericVariantId}` and change only the locale prefix.
+2. **Combined Listings**: let the target-locale variant route validate the owning product handle and permanently redirect if Shopify returns a different localized handle.
+3. **Cross-locale `hreflang` alternates and canonicals** keep pointing at the bare product path. Variant pages canonicalize to the product rather than advertising every variant as a separate indexed page.
 
 ---
 
@@ -578,6 +578,6 @@ After completing all steps, verify the implementation:
    - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
    - Product prices render in the correct currency for each locale
 3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Variants**: Confirm option links use the active locale's option names within each locale, that switching locales on a PDP routes through `?variant={id}` and lands on the target locale's localized option parameters, and that Liquid `?variant=` links redirect within the active locale
+4. **Variants**: Confirm option and cart links use locale-prefixed `/products/:handle?variant=:variantId` URLs, locale switching preserves the numeric variant ID, and Combined Listing handles are corrected within the active locale
 5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
 6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries

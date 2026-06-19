@@ -358,7 +358,15 @@ export function proxy(request: NextRequest) {
 }
 ```
 
-> **Note:** Extend the template's existing `proxy.ts`; do not replace its Liquid `?variant=` compatibility branch. Run that branch with the locale parsed from the product pathname before delegating to next-intl. The variant lookup remains query-gated and uncached, while the built-in content negotiation rewrite in `next.config.ts` continues to handle markdown negotiation.
+> **Note:** The default template has no `proxy.ts`. Preserve content negotiation in `next.config.ts` and the numeric `?variant=` handling in `app/products/[handle]/page.tsx`; the PDP validates the owning handle in the active locale.
+
+### Variant URLs and locale boundaries
+
+Numeric Shopify variant IDs are locale-invariant. Exact variant query URLs therefore avoid copying localized option names and values between locales:
+
+1. **Locale switcher on a PDP**: preserve `/products/{handle}?variant={numericVariantId}` and change only the locale prefix.
+2. **Combined Listings**: let the target-locale variant route validate the owning product handle and permanently redirect if Shopify returns a different localized handle.
+3. **Cross-locale `hreflang` alternates and canonicals** keep pointing at the bare product path. Variant pages canonicalize to the product rather than advertising every variant as a separate indexed page.
 
 ---
 
@@ -577,7 +585,7 @@ After completing all steps, verify the implementation:
    - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
    - Product prices render in the correct currency for each locale
 3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Variants**: Confirm option-name query params survive locale-prefixed navigation and Liquid `?variant=` links redirect within the active locale
+4. **Variants**: Confirm option and cart links use locale-prefixed `/products/:handle?variant=:variantId` URLs, locale switching preserves the numeric variant ID, and Combined Listing handles are corrected within the active locale
 5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
 6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries
 

@@ -1,65 +1,32 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { getProductUrl } from "./product-url.ts";
-import { getSelectedOptionsFromSearchParams } from "./product.ts";
+import { getProductVariantUrl } from "./product-url.ts";
 
-test("maps option query parameters to a stable Shopify selection", () => {
-  assert.deepEqual(
-    getSelectedOptionsFromSearchParams({
-      Size: "Medium",
-      Color: ["Black", "Blue"],
-    }),
-    [
-      { name: "Color", value: "Black" },
-      { name: "Size", value: "Medium" },
-    ],
-  );
-});
-
-test("ignores compatibility and tracking parameters", () => {
-  assert.deepEqual(
-    getSelectedOptionsFromSearchParams({
-      Color: "Black",
-      fbclid: "facebook",
-      gclid: "google",
-      utm_source: "newsletter",
-      variant: "123",
-    }),
-    [{ name: "Color", value: "Black" }],
-  );
-});
-
-test("builds product links from selected option values", () => {
+test("builds concrete product variant URLs", () => {
   assert.equal(
-    getProductUrl("classic-tee", [
-      { name: "Color", value: "Black" },
-      { name: "Size", value: "Medium" },
-    ]),
-    "/products/classic-tee?Color=Black&Size=Medium",
+    getProductVariantUrl("classic-tee", "gid://shopify/ProductVariant/123"),
+    "/products/classic-tee?variant=123",
   );
 });
 
-test("omits Shopify's synthetic default option from product links", () => {
-  assert.equal(
-    getProductUrl("gift-card", [{ name: "Title", value: "Default Title" }]),
-    "/products/gift-card",
+test("accepts numeric product variant ids", () => {
+  assert.equal(getProductVariantUrl("classic-tee", "123"), "/products/classic-tee?variant=123");
+});
+
+test("rejects malformed product variant ids", () => {
+  assert.throws(
+    () => getProductVariantUrl("classic-tee", "../../account"),
+    /Invalid Shopify product variant ID/,
   );
 });
 
 test("preserves attribution parameters while replacing a Liquid variant parameter", () => {
   assert.equal(
-    getProductUrl(
-      "classic-tee",
-      [
-        { name: "Color", value: "Black" },
-        { name: "Size", value: "Medium" },
-      ],
-      {
-        utm_campaign: "spring",
-        variant: "123",
-      },
-    ),
-    "/products/classic-tee?Color=Black&Size=Medium&utm_campaign=spring",
+    getProductVariantUrl("classic-tee", "123", {
+      utm_campaign: "spring",
+      variant: "123",
+    }),
+    "/products/classic-tee?variant=123&utm_campaign=spring",
   );
 });

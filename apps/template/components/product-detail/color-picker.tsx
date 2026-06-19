@@ -10,10 +10,9 @@ export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"produ
 
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   option: ProductOption;
-  hideImages?: boolean;
 }
 
-export function ColorPicker({ option, hideImages, className, ...props }: ColorPickerProps) {
+export function ColorPicker({ option, className, ...props }: ColorPickerProps) {
   const selectedValue = option.values.find((value) => value.selected)?.name ?? "";
 
   return (
@@ -24,7 +23,7 @@ export function ColorPicker({ option, hideImages, className, ...props }: ColorPi
       <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
         {option.values.map((value) => {
           const isSelected = value.selected;
-          const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
+          const imageUrl = value.swatch?.image || value.image;
 
           const swatch = (
             <div

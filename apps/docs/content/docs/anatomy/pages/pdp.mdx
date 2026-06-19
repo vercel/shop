@@ -10,38 +10,48 @@ The Product Detail Page renders a single product with variant selection, an imag
 
 ## Rendering strategy
 
-The PDP runs under Next.js 16 Cache Components, with a deliberate split between what gets baked into the static prerender and what streams per request. Product data is fetched with `getProduct` — plain `"use cache"`, `cacheLife("max")`, and a `product-{handle}` tag — and **awaited at the top of the page**, so the product body (title, description, gallery, JSON-LD) is rendered into the **static shell** as a single, coherent copy.
+The PDP has two finite public URL forms:
 
-Two structural choices keep that copy coherent, and both are load-bearing. The product promise is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the body at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — the symptom is a React hydration mismatch and product copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag` — that governs freshness (how quickly edits surface), not coherence.
+- `/products/:handle` renders Shopify's default selection from the cached base product.
+- `/products/:handle?variant=:variantId` validates and renders one concrete Shopify variant.
 
-The dynamic input is the selected option values in `searchParams`. Selection responses use `"use cache: remote"` with `cacheLife("minutes")` and canonically sorted option keys, keeping the per-combination working set transient while making recently resolved selections reusable and availability no more than minutes stale. Shopify validates stock again at add-to-cart. `ProductDetailSection` keeps every selection-dependent region in its own Suspense boundary so option changes do not skeletonize the product body.
+Product data is fetched with `getProduct` using plain `"use cache"`, `cacheLife("max")`, and a `product-{handle}` tag. Because the same route awaits `searchParams` and blocks on exact variant resolution, PDP requests are server-rendered even though the base product data is cached.
 
-Option links use the default static-shell prefetch. Do not add route-wide `prefetch = "allow-runtime"` or force full prefetches from the pickers: that would render a second request-time copy of the product body and can tear from the frozen shell. A first visit to an option URL may stream the selection-dependent regions; recently resolved selections reuse the short-TTL cache.
+The PDP route sets `instant = false` and blocks on two operations when a numeric variant is present:
 
-Suspense streaming is reserved for regions a selection can actually change. The base product carries exact signals that let everything else render in the prerendered shell: when `priceRange` and `compareAtPriceRange` bounds are equal (`hasUniformPricing`) the price renders eagerly, when `variantsCount` is `1` the option pickers and buy buttons render eagerly, and when `encodedVariantExistence` equals `encodedVariantAvailability` (`allVariantsInStock`) the buy-button fallback renders with real labels instead of placeholders. A simple product therefore ships its price and buy controls in the static HTML; only products with genuinely variant-dependent prices or stock stream those regions.
+1. `getProductVariantRouteSelection()` performs an uncached `node(id:)` lookup to validate the numeric ID and retrieve its owning product handle and selected options.
+2. `getProductSelection()` resolves the modern Shopify selection fields with `"use cache: remote"` and `cacheLife("minutes")`.
+
+The route validates that the returned selected variant matches the URL ID, then passes a resolved `ProductSelection` into `ProductDetailSection`. Media, price, options, bundle relationships, and buy controls render together. There are no selection-specific Suspense fallbacks or client-side selection state.
+
+Related products still use their own Suspense boundary because they are independent recommendations rather than part of the selected product state.
 
 ## Variant selection
 
-Variants are selected via option-name query parameters:
+Variants are selected via concrete query URLs:
 
 ```
-/products/classic-tee?Color=Black&Size=Medium
+/products/classic-tee?variant=123456789
 ```
 
-The route passes those values to `getProductSelection()`, whose compact fragment resolves the current variant and option state with Shopify's `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` combines that response with the cached base product and derives the selected option record and color images.
+The route lookup supplies Shopify's own selected options to `getProductSelection()`. Its compact fragment resolves the current variant and option state with `selectedOrFirstAvailableVariant`, `adjacentVariants`, and encoded variant fields. `computeSelection()` combines that response with the cached base product and derives the selected option record and color images.
 
 - Every variant selection is a navigation, giving you browser back/forward for free
 - URLs are shareable - opening a link loads the exact variant
-- The page is fully server-rendered with zero layout shift
+- The page is fully server-rendered as one selection paint
 - Variant links use `scroll={false}` to prevent the page from jumping to the top on selection
 - Combined Listing option links can navigate to the owning child product handle
 - Existing but out-of-stock combinations remain navigable; combinations that do not exist render as inert elements
 
-### Liquid storefront migration
+The base route ignores option-name query parameters. This prevents arbitrary partial choices from creating an open-ended PDP cache and rendering space. Merchants that need configurator-style partial links can adopt the `enable-partial-product-selection` skill, which adds validation and cache guardrails.
 
-Shopify Liquid themes use `/products/:handle?variant=:variantId` for variant deep links. A query-matched product proxy accepts those URLs as migration inputs, resolves the variant through a small `cache: "no-store"` query, and issues a permanent redirect to the normalized option-name URL before the PDP renders. This preserves indexed links, backlinks, ads, emails, and bookmarks while moving shoppers onto the headless URL format. Campaign and ad-click query parameters are preserved through the redirect.
+### Liquid storefront compatibility
 
-Requests without `variant` do not match the compatibility proxy, so normal PDPs remain prerenderable and pay no additional lookup. The compatibility lookup is never stored in Runtime Cache, so imported Liquid links do not create high-cardinality variant entries. Product metadata keeps the base product path as the canonical URL, consolidating variant combinations as one product for search engines.
+Shopify Liquid themes use the same `/products/:handle?variant=:variantId` deep-link contract. A static `beforeFiles` rewrite in `next.config.ts` routes numeric values to the internal blocking variant page while preserving the public URL and campaign parameters. The rewrite itself does not call Shopify.
+
+The PDP validates the ID with Shopify. If a Combined Listing variant belongs to another product, the route permanently redirects to that product's handle while keeping `?variant=:variantId`. The validation lookup uses `cache: "no-store"` so arbitrary inbound IDs do not create Runtime Cache entries.
+
+Product metadata keeps the base product path as the canonical URL, consolidating variants as one product for search engines.
 
 ### High-variant products
 
@@ -61,7 +71,7 @@ Both layouts receive pre-filtered images as props from the server.
 
 ### Color-based image filtering
 
-When a product has color variants, the gallery shows only images relevant to the selected color. Shared images render immediately, while the color-specific slot streams behind a small Suspense fallback so changing an option does not skeletonize the whole gallery. The `getPartitionedImagesForSelectedColor()` function in `lib/product.ts`:
+When a product has color variants, the gallery shows only images relevant to the selected color. Shared and selected-color images are computed before the route renders. The `getPartitionedImagesForSelectedColor()` function in `lib/product.ts`:
 
 1. Identifies the color option via swatch data or option name
 2. Collects variant images assigned to each color
@@ -105,12 +115,13 @@ The page emits two JSON-LD schemas:
 
 ## Key files
 
-| File                                                   | Purpose                                                                                                |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams variant selection |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD         |
-| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                    |
-| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                           |
-| `lib/product.ts`                                       | `computeSelection`, option-param parsing, and color-image partitioning                                 |
+| File                                                   | Purpose                                                                                 |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `app/products/[handle]/page.tsx`                       | Blocking PDP route: default selection or validated exact variant                        |
+| `app/products/[handle]/product-page.tsx`               | Shared product layout and canonical metadata                                            |
+| `components/product-detail/product-detail-section.tsx` | Orchestrates resolved media, options, pricing, bundles, and buy controls; emits JSON-LD |
+| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                     |
+| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                            |
+| `lib/product.ts`                                       | `computeSelection` and color-image partitioning                                         |
 
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.

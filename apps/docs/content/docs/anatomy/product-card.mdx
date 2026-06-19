@@ -8,7 +8,7 @@ Used in the home featured grid, collection (PLP) and search grids, the related-p
 
 ## Composition
 
-`ProductCard` is a server component that wraps the product in a `Link` to the bare `/products/[handle]` path — never option query parameters — so card navigations land on the fully prerendered PDP instead of triggering the per-request variant-selection lookup. Option-name parameters (`?Color=Black&Size=Medium`) are reserved for links that reference a specific variant, such as cart line items. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+`ProductCard` is a server component that wraps the product in a `Link` to the bare `/products/[handle]` path, so card navigations land on the prerendered PDP with Shopify's default selection. Links that reference a specific variant, such as cart line items and PDP option values, use `/products/:handle?variant=:variantId`. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
 
 ## Variants
 

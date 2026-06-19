@@ -39,10 +39,9 @@ function ProductInfoHeader({
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
   options: ProductOption[];
-  hideImages?: boolean;
 }
 
-function ProductInfoOptions({ options, hideImages, className, ...props }: ProductInfoOptionsProps) {
+function ProductInfoOptions({ options, className, ...props }: ProductInfoOptionsProps) {
   const isColorOption = (opt: ProductOption) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
@@ -69,7 +68,7 @@ function ProductInfoOptions({ options, hideImages, className, ...props }: Produc
         ))}
 
         {colorOptions.map((colorOption) => (
-          <ColorPicker key={colorOption.id} option={colorOption} hideImages={hideImages} />
+          <ColorPicker key={colorOption.id} option={colorOption} />
         ))}
 
         {otherOptions.map((option) => (

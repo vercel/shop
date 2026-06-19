@@ -47,32 +47,6 @@ function selectedOptionsToRecord(options: SelectedOption[]): SelectedOptions {
   return Object.fromEntries(options.map((option) => [option.name, option.value]));
 }
 
-export function getSelectedOptionsFromSearchParams(
-  searchParams: Record<string, string | string[] | undefined>,
-): SelectedOption[] {
-  return Object.entries(searchParams)
-    .filter(([name]) => !isIgnoredProductSearchParam(name))
-    .map(([name, rawValue]) => {
-      const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
-      return value ? { name, value } : null;
-    })
-    .filter((option): option is SelectedOption => option !== null)
-    .sort((a, b) => a.name.localeCompare(b.name));
-}
-
-function isIgnoredProductSearchParam(name: string): boolean {
-  const normalizedName = name.toLowerCase();
-  return (
-    normalizedName === "_gl" ||
-    normalizedName === "dclid" ||
-    normalizedName === "fbclid" ||
-    normalizedName === "gclid" ||
-    normalizedName === "msclkid" ||
-    normalizedName === "variant" ||
-    normalizedName.startsWith("utm_")
-  );
-}
-
 function findSelectedVariant(variants: ProductVariant[], selectedOptions: SelectedOptions) {
   return variants.find((variant) =>
     variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),

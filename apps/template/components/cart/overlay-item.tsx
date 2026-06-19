@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { getProductUrl } from "@/lib/product-url";
+import { getProductVariantUrl } from "@/lib/product-url";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -29,10 +29,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const unitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
     : parseFloat(item.cost.totalAmount.amount) / item.quantity;
-  const productUrl = getProductUrl(
-    item.merchandise.product.handle,
-    item.merchandise.selectedOptions,
-  );
+  const productUrl = getProductVariantUrl(item.merchandise.product.handle, item.merchandise.id);
 
   return (
     <li

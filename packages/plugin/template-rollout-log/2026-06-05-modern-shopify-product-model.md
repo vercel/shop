@@ -8,11 +8,11 @@ appliesTo:
   - all
 paths:
   - apps/template/app/products/[handle]/page.tsx
-  - apps/template/proxy.ts
   - apps/template/components/product-detail/
   - apps/template/components/cart/
   - apps/template/lib/agent/
   - apps/template/lib/product.ts
+  - apps/template/lib/product-url.ts
   - apps/template/lib/shopify/fragments.ts
   - apps/template/lib/shopify/operations/product-variant-route.ts
   - apps/template/lib/shopify/operations/cart.ts
@@ -24,6 +24,7 @@ paths:
   - apps/docs/content/docs/anatomy/cart.mdx
   - apps/docs/content/docs/reference/storefront-api.mdx
   - apps/docs/content/docs/shopify/pdp.mdx
+  - packages/plugin/skills/enable-partial-product-selection/
 ---
 
 ## Summary
@@ -36,7 +37,9 @@ The template replaces its capped `variants(first: 50)` PDP model with Shopify St
 - `encodedVariantExistence` and `encodedVariantAvailability`
 - `variantsCount`
 
-PDP option links use option-name query parameters and can navigate across Combined Listing child product handles. Product cards link to the bare product path so card navigations stay on the prerendered PDP shell; cart line items link with the carted variant's option parameters. Shopify-standard Liquid `?variant=` links remain valid migration inputs and permanently redirect to the normalized option-name URL while product metadata canonicalizes to the base product path. A query-matched proxy performs that compatibility lookup before rendering, so normal PDP routes remain prerenderable and do not execute proxy code. The PDP starts its base-product and compact selection reads together, then awaits only the base product at the route level so the product body remains baked into the static shell. The selection cache (`"use cache: remote"`, `cacheLife("minutes")`, canonically sorted option keys) keeps recently resolved combinations reusable while its short lifetime prevents the per-combination keyspace from becoming persistent.
+PDP option links use finite Shopify-standard `/products/:handle?variant=:variantId` URLs and can navigate across Combined Listing child product handles. Product cards link to the bare product path; cart line items link to the carted variant URL. The PDP resolves numeric variant queries directly while product metadata canonicalizes to the base product.
+
+The PDP renders Shopify's default selection when no valid variant ID is present. For an exact variant query, the same route validates the numeric ID through an uncached lookup, resolves the compact selection with `"use cache: remote"` and `cacheLife("minutes")`, and blocks rendering until the whole selection is ready. This avoids a public partial-selection keyspace and keeps media, price, options, bundle relationships, and buy controls in one render.
 
 The same change adds Shopify bundle awareness:
 
@@ -72,15 +75,14 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 
 - `ProductDetails.variants` is now a representative selectable set, not an exhaustive export. Use `ProductDetails.variantsCount` for the exact count and `getProductSelection()` to resolve a choice.
 - Do not infer uniform pricing, uniform stock, or single-variant status from `ProductDetails.variants`. Use the exact signals instead: `ProductDetails.hasUniformPricing` (equal `priceRange` and `compareAtPriceRange` bounds), `ProductDetails.allVariantsInStock` (`encodedVariantExistence` equals `encodedVariantAvailability`), and `ProductDetails.variantsCount === 1`.
-- Keep the eager PDP paths these signals enable: uniform-price products render the price in the prerendered shell, single-variant products render options and buy buttons eagerly, and uniform-stock products render a labeled buy-button fallback. Selection-dependent Suspense streaming is only for regions selection can actually change.
+- The PDP blocks on request parameters. It renders either the default selection or a complete concrete variant without selection-specific Suspense fallbacks.
 - `ProductVariant` gains `productHandle`, `requiresComponents`, `components`, and `bundleParents`.
 - `CartLine` gains nested `components`, `canRemove`, and `canUpdateQuantity`.
 - `Cart.cost.totalTaxAmount` is removed because Shopify deprecated it in Storefront API 2025-01.
-- PDP option links and cart line items use option names and values; product cards link to the bare product path so card navigations hit the prerendered shell without any selection lookup. Numeric `?variant=` URLs are accepted for Liquid-store migration and permanently redirect to the normalized option-name URL.
-- Keep `getProduct()` keyed only by handle and locale with plain `"use cache"` and `cacheLife("max")` so it can render into the static shell. Selected option combinations belong in `getProductSelection()`, which must stay short-TTL cached (`cacheLife("minutes")`, sorted option keys) so recently viewed combinations are reusable without accumulating permanently.
-- Start base product and selection requests together, but await the product at the route level and pass only the selection promise into Suspense boundaries.
-- Keep option links on the default static-shell prefetch. Do not add route-wide `prefetch = "allow-runtime"` or force full prefetches from the pickers; that can re-render the product body at request time and tear from the frozen shell.
-- Keep the variant-ID compatibility lookup uncached and isolated in the query-matched product proxy; it must not add variant IDs to Runtime Cache or make ordinary PDPs dynamic.
+- PDP option links and cart line items use `/products/:handle?variant=:variantId`; product cards link to the bare product path. The exact query contract remains compatible with Liquid storefront links.
+- Keep `getProduct()` keyed only by handle and locale with plain `"use cache"` and `cacheLife("max")`. Concrete variant selections belong in `getProductSelection()`, which stays short-TTL cached.
+- Keep the variant-ID lookup uncached. It validates arbitrary inbound IDs before the selected options enter the shared selection cache.
+- Do not use arbitrary search parameters as the default PDP selection contract. Storefronts that require incomplete shareable choices should adopt the `enable-partial-product-selection` skill and its validation guardrails.
 - Pass only the selected variant fields required by client buy controls; keep bundle relationship arrays on the server.
 - Customized bundle selection remains app-specific. Add its picker and component inputs before enabling direct purchase for a `requiresComponents` variant with no fixed components.
 
@@ -88,11 +90,11 @@ Shopify's bundle model adds relationships at both product-variant and cart-line 
 
 1. Validate the final product and cart GraphQL operations against Storefront API 2026-04.
 2. Open a product with more than 50 variants and confirm all option values render with correct existence and availability state.
-3. Change a Combined Listing option and confirm the URL can move to the selected child product handle.
-4. Open a Liquid `/products/:handle?variant=:id` link and confirm it permanently redirects to the matching option-name URL.
-5. Confirm a selected-option PDP starts the base-product and selection operations together, with the base product on plain `"use cache"` / `cacheLife("max")` and the selection on `"use cache: remote"` / `cacheLife("minutes")`.
-6. Confirm the PDP does not export `prefetch = "allow-runtime"` and option picker links do not force `prefetch={true}`; a first option navigation may stream only the selection-dependent regions.
-7. Confirm a uniform-price product renders its price in the prerendered HTML, and a single-variant product renders its buy buttons there.
+3. Change a Combined Listing option and confirm the concrete variant URL moves to the selected child product handle.
+4. Open a Liquid `/products/:handle?variant=:id` link and confirm the URL remains unchanged while the exact variant renders.
+5. Confirm arbitrary option-name query parameters do not select a variant or enter the selection cache.
+6. Confirm a concrete variant request blocks until media, price, options, bundle relationships, and buy controls can render together.
+7. Confirm the base product path renders Shopify's default selection without a selection lookup.
 8. Open a fixed bundle PDP and confirm its component products render and the bundle can be added.
 9. Open a component product and confirm bundles returned by `groupedBy` render.
 10. Confirm bundle components remain grouped in the cart and line controls honor Shopify's instructions.

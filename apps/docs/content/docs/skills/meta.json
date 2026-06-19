@@ -5,6 +5,7 @@
     "enable-analytics",
     "enable-i18n",
     "enable-shopify-markets",
+    "enable-partial-product-selection",
     "enable-shopify-cms",
     "enable-shopify-menus"
   ]

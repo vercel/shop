@@ -1,20 +1,20 @@
-import type { SelectedOption } from "@/lib/types";
+import { getNumericShopifyId } from "@/lib/shopify/utils";
 
-export function getProductUrl(
+export function getProductVariantUrl(
   handle: string,
-  selectedOptions: SelectedOption[] = [],
+  variantId: string,
   searchParams: Record<string, string | string[] | undefined> = {},
 ): string {
   const params = new URLSearchParams();
-  const optionNames = new Set(selectedOptions.map((option) => option.name));
-
-  for (const option of selectedOptions) {
-    if (option.name === "Title" && option.value === "Default Title") continue;
-    params.set(option.name, option.value);
+  const numericVariantId = /^\d+$/.test(variantId) ? variantId : getNumericShopifyId(variantId);
+  if (!numericVariantId || !/^\d+$/.test(numericVariantId)) {
+    throw new Error(`Invalid Shopify product variant ID: ${variantId}`);
   }
 
+  params.set("variant", numericVariantId);
+
   for (const [name, rawValue] of Object.entries(searchParams)) {
-    if (name.toLowerCase() === "variant" || optionNames.has(name)) continue;
+    if (name.toLowerCase() === "variant") continue;
     const values = Array.isArray(rawValue) ? rawValue : [rawValue];
     for (const value of values) {
       if (value) params.append(name, value);
@@ -22,5 +22,5 @@ export function getProductUrl(
   }
 
   const query = params.toString();
-  return `/products/${handle}${query ? `?${query}` : ""}`;
+  return `/products/${handle}?${query}`;
 }

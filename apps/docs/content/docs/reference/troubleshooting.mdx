@@ -19,11 +19,13 @@ The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry
 
 ## Variant selection not working
 
-PDP option links use option-name query parameters such as `?Color=Black&Size=Medium`. If option links change the URL but the page does not update, check that `app/products/[handle]/page.tsx` passes those values to the uncached `getProductSelection()` operation and that the query includes `selectedOrFirstAvailableVariant`, `adjacentVariants`, and the encoded variant fields.
+PDP option links use `/products/:handle?variant=:variantId`. If an option link does not select the expected variant, check that the transformed option value has a numeric variant ID and the selected variant's owning product handle.
 
-For Combined Listings, confirm the generated option link can change the product handle to the selected variant's owning product.
+The PDP first calls `getProductVariantRouteSelection()` with `cache: "no-store"`, then calls `getProductSelection()` with Shopify's selected options. Confirm the lookup returns the same numeric variant ID after selection. For Combined Listings, the route should permanently redirect when Shopify reports a different owning product handle.
 
-Existing Liquid links such as `?variant=123` should permanently redirect to an option-name URL. If they do not, verify the query matcher in `proxy.ts` is preserved, `getProductVariantRouteSelection()` can resolve the numeric ID, and the Storefront token can access the variant.
+Existing Liquid links such as `?variant=123` should render the selected variant directly. If they do not, verify `app/products/[handle]/page.tsx` still reads and validates the numeric query value.
+
+Option-name query parameters are intentionally ignored by the default template. Use the `enable-partial-product-selection` skill only when the storefront needs shareable incomplete choices.
 
 If every option appears unavailable, verify the local encoded-variant decoder still matches Shopify's current `v1_` encoding and that `options.optionValues` are queried in Shopify's option order.
 

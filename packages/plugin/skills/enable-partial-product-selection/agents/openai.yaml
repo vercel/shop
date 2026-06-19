@@ -1,0 +1,4 @@
+interface:
+  display_name: "Enable Partial Product Selection"
+  short_description: "Add progressive PDP option selection"
+  default_prompt: "Use $enable-partial-product-selection to add partial product selection URLs and server resolution to this storefront."

@@ -1,61 +1,22 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 
-import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
-import { Container } from "@/components/ui/container";
-import { Page } from "@/components/ui/page";
-import { Sections } from "@/components/ui/sections";
 import { getLocale } from "@/lib/params";
-import { computeSelection, getSelectedOptionsFromSearchParams } from "@/lib/product";
-import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { computeSelection } from "@/lib/product";
+import { getProductVariantUrl } from "@/lib/product-url";
+import { getProductVariantRouteSelection } from "@/lib/shopify/operations/product-variant-route";
 import {
   getCatalogProducts,
   getProduct,
   getProductSelection,
 } from "@/lib/shopify/operations/products";
+import { getNumericShopifyId } from "@/lib/shopify/utils";
+
+import { buildProductMetadata, ProductPageContent } from "./product-page";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
-async function buildProductMetadata(
-  handle: string,
-  locale: string,
-  canonicalPath: string,
-): Promise<Metadata> {
-  const product = await getProduct({ handle, locale });
-  if (!product) notFound();
-  const images = product.featuredImage
-    ? [
-        {
-          url: product.featuredImage.url,
-          width: product.featuredImage.width,
-          height: product.featuredImage.height,
-          alt: product.featuredImage.altText,
-        },
-      ]
-    : ["/og-default.png"];
-
-  return {
-    title: product.seo.title,
-    description: product.seo.description,
-    alternates: buildAlternates({
-      pathname: canonicalPath,
-    }),
-    openGraph: buildOpenGraph({
-      title: product.seo.title,
-      description: product.seo.description,
-      url: canonicalPath,
-      type: "website",
-      images,
-    }),
-    twitter: {
-      card: "summary_large_image",
-      title: product.seo.title,
-      description: product.seo.description,
-      images,
-    },
-  };
-}
+export const instant = false;
 
 export async function generateStaticParams() {
   try {
@@ -81,37 +42,41 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const [{ handle }, locale, query] = await Promise.all([params, getLocale(), searchParams]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const productPromise = getProduct({ handle, locale });
-  const selectionDataPromise = searchParams
-    .then(getSelectedOptionsFromSearchParams)
-    .then((selectedOptions) =>
-      selectedOptions.length > 0
-        ? getProductSelection({ handle, selectedOptions, locale })
-        : undefined,
-    );
+  const rawVariant = query.variant;
+  const variant = typeof rawVariant === "string" && /^\d+$/.test(rawVariant) ? rawVariant : null;
+  const [product, routeSelection] = await Promise.all([
+    getProduct({ handle, locale }),
+    variant ? getProductVariantRouteSelection({ variantId: variant, locale }) : undefined,
+  ]);
 
-  const product = await productPromise;
   if (!product) notFound();
+  if (!variant || !routeSelection) {
+    return (
+      <ProductPageContent locale={locale} product={product} selection={computeSelection(product)} />
+    );
+  }
 
-  const selectionPromise = selectionDataPromise.then((selectionData) =>
-    computeSelection(product, selectionData),
-  );
+  if (routeSelection.handle !== handle) {
+    permanentRedirect(getProductVariantUrl(routeSelection.handle, variant, query));
+  }
+
+  const selectionData = await getProductSelection({
+    handle,
+    selectedOptions: routeSelection.selectedOptions,
+    locale,
+  });
+  const isExactVariant =
+    selectionData?.selectedVariant &&
+    getNumericShopifyId(selectionData.selectedVariant.id) === variant;
 
   return (
-    <Page className="pt-0">
-      <Container className="bg-background">
-        <Sections>
-          <ProductDetailSection
-            product={product}
-            selectionPromise={selectionPromise}
-            locale={locale}
-          />
-          <RelatedProductsSection handle={handle} locale={locale} />
-        </Sections>
-      </Container>
-    </Page>
+    <ProductPageContent
+      locale={locale}
+      product={product}
+      selection={computeSelection(product, isExactVariant ? selectionData : undefined)}
+    />
   );
 }

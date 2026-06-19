@@ -1,3 +1,4 @@
+import { getProductVariantUrl } from "@/lib/product-url";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -381,16 +382,15 @@ function transformOptions(product: ShopifyProductSelection): ProductOption[] {
         const variant =
           variantsBySelection.get(selectedOptionsKey(targetOptions)) ??
           value.firstSelectableVariant;
-        const query = new URLSearchParams(
-          variant ? selectedOptionsToRecord(variant.selectedOptions) : targetOptions,
-        ).toString();
 
         return {
           id: value.id,
           name: value.name,
           available: availability.has(encodingKey.join(",")),
           exists: existence.has(encodingKey.join(",")),
-          href: `/products/${variant?.product.handle ?? product.handle}${query ? `?${query}` : ""}`,
+          href: variant
+            ? getProductVariantUrl(variant.product.handle, variant.id)
+            : `/products/${product.handle}`,
           image: variant?.image?.url,
           selected: selectedOptions[option.name] === value.name,
           swatch: transformSwatch(value.swatch),

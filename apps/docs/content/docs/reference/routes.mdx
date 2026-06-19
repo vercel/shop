@@ -9,7 +9,7 @@ type: reference
 | Route                   | File                                | Description                                                                                        |
 | ----------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/`                     | `app/page.tsx`                      | Home page with hero, products grid, info section                                                   |
-| `/products/[handle]`    | `app/products/[handle]/page.tsx`    | Product detail page; option-name query params select a variant                                     |
+| `/products/[handle]`    | `app/products/[handle]/page.tsx`    | Product detail page with Shopify's default selection                                               |
 | `/collections/[handle]` | `app/collections/[handle]/page.tsx` | Collection listing with filters, sort, pagination                                                  |
 | `/collections/all`      | `app/collections/[handle]/page.tsx` | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
 | `/search`               | `app/search/page.tsx`               | Search results (same grid as collections)                                                          |
@@ -27,10 +27,12 @@ type: reference
 
 ## Variant URLs
 
-PDP option links use option-name query parameters so Shopify can resolve high-variant products and Combined Listings without loading every variant. Shopify-standard Liquid variant URLs remain valid migration inputs and permanently redirect to the equivalent option-name URL. The compatibility redirect runs in the query-matched `proxy.ts`, so ordinary PDP requests remain prerenderable:
+PDP option and cart links use Shopify's numeric `variant` query parameter. This keeps the public selection space finite while Shopify still resolves high-variant products and Combined Listings without loading every variant.
 
-| URL                                              | Purpose                                                            |
-| ------------------------------------------------ | ------------------------------------------------------------------ |
-| `/products/:handle?Color=Black&Size=Medium`      | Normalized PDP option-selection URL                                |
-| `/products/:handle?variant=:variantId`           | Liquid migration URL; permanently redirects to the normalized URL  |
-| `/products/:combinedChild?Color=Blue&Size=Large` | Combined Listing selection using the owning child product's handle |
+| URL                                           | Purpose                                                           |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| `/products/:handle`                           | Base PDP with Shopify's default selection                         |
+| `/products/:handle?variant=:variantId`        | Concrete variant URL; resolved directly by the blocking PDP route |
+| `/products/:combinedChild?variant=:variantId` | Combined Listing variant using the owning child product handle    |
+
+Arbitrary option-name query parameters do not select a variant. Progressive partial selection is an opt-in storefront capability rather than a default route behavior.
