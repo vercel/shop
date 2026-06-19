@@ -1,4 +1,4 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
+import { getNumericShopifyId } from "./shopify/utils.ts";
 
 export function getProductVariantUrl(
   handle: string,
