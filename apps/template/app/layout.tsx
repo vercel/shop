@@ -13,22 +13,12 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, messages, t] = await Promise.all([
-    getLocale(),
-    getMessages(),
-    getTranslations("accessibility"),
-  ]);
+  const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
 
   return (
     <html lang={locale}>
       <head />
-      <body className="min-h-dvh bg-background text-foreground antialiased">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-5 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:ring-2 focus:ring-foreground focus:outline-none"
-        >
-          {t("skipToContent")}
-        </a>
+      <body>
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>

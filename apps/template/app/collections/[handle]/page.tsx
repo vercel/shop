@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { CollectionView, CollectionViewFallback } from "@/components/storefront/collection-view";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -103,12 +104,13 @@ export default async function CollectionPage({
   });
 
   return (
-    <CollectionDetailPage
-      collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
-      handle={handle}
-      locale={locale}
-      searchStatePromise={searchStatePromise}
-    />
+    <Suspense fallback={<CollectionViewFallback handle={handle} locale={locale} />}>
+      <CollectionView
+        collection={collection}
+        collectionResultsDataPromise={collectionResultsDataPromise}
+        locale={locale}
+        searchStatePromise={searchStatePromise}
+      />
+    </Suspense>
   );
 }

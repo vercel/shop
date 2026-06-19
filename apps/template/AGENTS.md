@@ -4,11 +4,13 @@ This file provides guidance for agents working in the template.
 
 ## Agent Scaffold Experiment
 
-This branch intentionally removes the default homepage and global storefront presentation. Build an original visual system and composition instead of recreating the Vercel Shop reference design.
+This branch intentionally removes presentation from every user-facing route. Build an original visual system and composition instead of recreating the Vercel Shop reference design.
 
 The creative surface includes markup, layout, navigation, typography, color, spacing, motion, product cards, media galleries, and cart presentation. Preserve the existing route structure, Shopify operations and transforms, cache behavior, metadata helpers, and optimistic cart state unless the task explicitly changes commerce behavior.
 
-`app/page.tsx` loads homepage product data and passes it to `components/storefront/home-view.tsx`. Treat `HomeView` as a blank canvas. The root layout still provides localization and optimistic cart state without prescribing a header, footer, cart overlay, font, or page structure.
+Route files preserve their data loading, streaming, metadata, redirects, 404s, auth gates, and optimistic state. They pass data into inert views under `components/storefront/`. Treat those views as blank canvases. The root layout still provides localization and optimistic cart state without prescribing a header, footer, cart overlay, font, or page structure.
+
+Existing components outside `components/storefront/` retain implementation knowledge from the reference template. Do not reuse their visual composition by default. Extract behavior when it is useful, then create presentation suited to the requested brand.
 
 ## Recommended Project Plugins
 
@@ -146,8 +148,8 @@ pnpm format
 - `app/` for routes
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/types.ts` for provider-agnostic domain types
-- `components/ui/` for presentational primitives
-- `components/product/` for domain-aware product wrappers
+- `components/storefront/` for inert route canvases and typed view contracts
+- `components/` for reference behavior and presentation that agents may selectively replace
 - `next.config.ts` rewrites for variant URL resolution
 
 ## Data Flow
@@ -173,7 +175,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When the flag is set, `next.config.ts` validates that the three required server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are present and throws a build error if any are missing. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client in agreement at hydration (safe for cache components).
 
-Key files:
+Behavioral key files:
 
 - `lib/auth/index.ts` — universal `isAuthEnabled` flag (safe to import from server and client code)
 - `lib/auth/server.ts` — better-auth config with Shopify OIDC, plus `getCustomerSession()`, `requireSession()`, etc.
@@ -181,10 +183,9 @@ Key files:
 - `app/api/auth/[...all]/route.ts` — OAuth callback handler
 - `app/account/(authenticated)/` — auth-gated account pages
 - `app/account/login/` — login redirect (outside auth gate)
-- `components/nav/account.tsx` — nav icon (async, inside Suspense)
-- `components/account/` — sidebar, tabs, page header, sign-out button
+- `app/account/(authenticated)/` — auth-gated blank account canvases
 
-The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
+The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
 
 ## Shopify GraphQL Workflow
 
@@ -199,7 +200,6 @@ The nav uses a fixed `size-5` container with the fallback icon rendered inline a
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
 - Components import domain types from `@/lib/types`, not Shopify response types.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
-- Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
 
 ## Configuration
 

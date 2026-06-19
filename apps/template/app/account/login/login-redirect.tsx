@@ -1,28 +1,13 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 import { signIn } from "@/lib/auth/client";
 
 export function LoginRedirect() {
-  const t = useTranslations("common");
-
   useEffect(() => {
     signIn("/account");
   }, []);
 
-  return (
-    <div className="flex flex-1 items-center justify-center">
-      <div className="text-center">
-        <p className="text-muted-foreground">{t("loginRedirecting")}</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("loginNotRedirected")}{" "}
-          <button type="button" onClick={() => signIn("/account")} className="underline">
-            {t("loginClickHere")}
-          </button>
-        </p>
-      </div>
-    </div>
-  );
+  return <div data-storefront-canvas="account-login" />;
 }

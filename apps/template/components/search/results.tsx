@@ -10,65 +10,8 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
-import {
-  buildProductFiltersFromParams,
-  getSearchFacets,
-  searchIndexProducts,
-} from "@/lib/shopify/operations/products";
-import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
+import type { SearchResultsData } from "@/lib/search/server";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
-
-export interface SearchResultsData {
-  products: ProductCardType[];
-  total: number;
-  pageInfo: PageInfo;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
-  activeFilters: Record<string, string | string[] | undefined>;
-  filters: ProductFilter[];
-  query?: string;
-  collection?: string;
-  sort?: string;
-}
-
-export async function getSearchResultsData({
-  query,
-  sort,
-  collection,
-  locale,
-  activeFilters,
-}: {
-  query?: string;
-  sort?: string;
-  collection?: string;
-  locale: Locale;
-  activeFilters: Record<string, string | string[] | undefined>;
-}): Promise<SearchResultsData> {
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const [results, facets] = await Promise.all([
-    searchIndexProducts({
-      query,
-      collection,
-      sortKey: sort,
-      limit: RESULTS_PER_PAGE,
-      filters: shopifyFilters,
-      locale,
-    }),
-    getSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
-  ]);
-
-  return {
-    products: results.products,
-    total: facets.total,
-    pageInfo: results.pageInfo,
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
-    activeFilters,
-    filters: shopifyFilters,
-    query,
-    collection,
-    sort,
-  };
-}
 
 export async function SearchResultsGrid({
   locale,

@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
-import { Container } from "@/components/ui/container";
-import { Page } from "@/components/ui/page";
-import { Sections } from "@/components/ui/sections";
+import { ProductView, ProductViewFallback } from "@/components/storefront/product-view";
 import { getLocale } from "@/lib/params";
 import {
   defaultSelectedOptions,
@@ -113,18 +110,13 @@ export default async function ProductPage({
   });
 
   return (
-    <Page className="pt-0">
-      <Container className="bg-background">
-        <Sections>
-          <ProductDetailSection
-            product={product}
-            selectedOptionsPromise={selectedOptionsPromise}
-            variantPromise={variantPromise}
-            locale={locale}
-          />
-          <RelatedProductsSection handle={handle} locale={locale} />
-        </Sections>
-      </Container>
-    </Page>
+    <Suspense fallback={<ProductViewFallback handle={handle} locale={locale} />}>
+      <ProductView
+        locale={locale}
+        product={product}
+        selectedOptionsPromise={selectedOptionsPromise}
+        variantPromise={variantPromise}
+      />
+    </Suspense>
   );
 }

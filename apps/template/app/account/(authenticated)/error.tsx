@@ -1,7 +1,5 @@
 "use client";
 
-import { ErrorBoundaryContent } from "@/components/ui/error-boundary-content";
-
 export default function AccountError({ reset }: { reset: () => void }) {
-  return <ErrorBoundaryContent reset={reset} />;
+  return <div data-reset-available={Boolean(reset)} data-storefront-canvas="account-error" />;
 }

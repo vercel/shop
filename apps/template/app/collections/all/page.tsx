@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
 
-import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { CollectionView, CollectionViewFallback } from "@/components/storefront/collection-view";
 import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
@@ -58,13 +59,14 @@ export default async function AllProductsPage({ searchParams }: PageProps<"/coll
   });
 
   return (
-    <CollectionDetailPage
-      collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
-      handle={ALL_PRODUCTS_HANDLE}
-      locale={locale}
-      searchStatePromise={searchStatePromise}
-      sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}
-    />
+    <Suspense fallback={<CollectionViewFallback handle={ALL_PRODUCTS_HANDLE} locale={locale} />}>
+      <CollectionView
+        collection={collection}
+        collectionResultsDataPromise={collectionResultsDataPromise}
+        locale={locale}
+        searchStatePromise={searchStatePromise}
+        sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}
+      />
+    </Suspense>
   );
 }
