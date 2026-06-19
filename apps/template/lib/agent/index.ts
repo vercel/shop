@@ -40,17 +40,23 @@ export const catalog = defineCatalog(schema, {
             quantity: z.number(),
             totalPrice: z.string(),
             handle: z.string(),
+            components: z.array(
+              z.object({
+                productTitle: z.string(),
+                quantity: z.number(),
+                variantTitle: z.string(),
+              }),
+            ),
           }),
         ),
         subtotal: z.string(),
         total: z.string(),
-        tax: z.string(),
         totalQuantity: z.number(),
         checkoutUrl: z.string(),
       }),
       description:
         "A rich cart summary card showing line items with thumbnails, quantities, " +
-        "prices, cost breakdown (subtotal/tax/total), and a checkout button. " +
+        "prices, any bundle components, cost breakdown (subtotal/total), and a checkout button. " +
         "Use when getCart returns a non-empty cart.",
     },
 

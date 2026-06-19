@@ -80,7 +80,6 @@ export const { registry } = defineRegistry(catalog, {
       const locale = useLocale();
       const tCart = useTranslations("cart");
       const subtotal = parsePriceString(props.subtotal);
-      const tax = parsePriceString(props.tax);
       const total = parsePriceString(props.total);
 
       return (
@@ -119,6 +118,22 @@ export const { registry } = defineRegistry(catalog, {
                       <span className="text-muted-foreground text-xs">{item.options}</span>
                     )}
                     <span className="text-muted-foreground text-xs">Qty: {item.quantity}</span>
+                    {item.components?.length ? (
+                      <div className="mt-0.5 grid gap-0.5">
+                        <span className="font-medium text-muted-foreground text-xs">
+                          {tCart("bundleIncludes")}
+                        </span>
+                        {item.components.map((component) => (
+                          <span
+                            key={`${component.productTitle}-${component.variantTitle}`}
+                            className="text-muted-foreground text-xs"
+                          >
+                            {component.productTitle}
+                            {component.quantity > 1 ? ` ×${component.quantity}` : ""}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                   <Price
                     amount={itemPrice.amount}
@@ -139,14 +154,11 @@ export const { registry } = defineRegistry(catalog, {
                 locale={locale}
               />
             </div>
-            <div className="flex justify-between text-muted-foreground text-sm">
-              <span>Tax</span>
-              <Price amount={tax.amount} currencyCode={tax.currencyCode} locale={locale} />
-            </div>
             <div className="mt-1 flex justify-between border-t pt-1 font-medium text-sm">
               <span>Total</span>
               <Price amount={total.amount} currencyCode={total.currencyCode} locale={locale} />
             </div>
+            <p className="mt-1 text-muted-foreground text-xs">{tCart("taxesAndShippingNote")}</p>
           </div>
           <div className="border-t px-2.5 py-2">
             <a

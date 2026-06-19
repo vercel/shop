@@ -54,6 +54,11 @@ Use this when the user asks "what's in my cart?", "how much is my order?", or wh
             totalPrice: `${line.cost.totalAmount.amount} ${line.cost.totalAmount.currencyCode}`,
             handle: line.merchandise.product.handle,
             merchandiseId: line.merchandise.id,
+            components: line.components.map((component) => ({
+              productTitle: component.merchandise.product.title,
+              quantity: component.quantity,
+              variantTitle: component.merchandise.title,
+            })),
           })),
           cart,
         };

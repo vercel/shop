@@ -168,7 +168,7 @@ function createSystemPrompt(ctx: AgentContext) {
         "For a single product detail result, use one AgentProductCard without an AgentProductGrid wrapper.",
         "Pass price and compareAtPrice strings directly from tool results as props.",
         "Include conversational text before or after the product cards to provide context.",
-        "When getCart returns a non-empty cart (empty: false), ALWAYS render an AgentCartSummary with the cart data. Pass items (including image), subtotal, total, tax, totalQuantity, and checkoutUrl directly from the tool result.",
+        "When getCart returns a non-empty cart (empty: false), ALWAYS render an AgentCartSummary with the cart data. Pass items (including image and any bundle components), subtotal, total, totalQuantity, and checkoutUrl directly from the tool result.",
         "After a successful addToCart call, ALWAYS render an AgentCartConfirmation. Use product data from your context (prior search results, product details, or page context) to populate image, title, variant, and price props.",
         "When a user wants to add a product to cart but hasn't specified a variant, and the product has multiple variants, render an AgentVariantPicker with the product's variants from getProductDetails. Then ask the user which variant they'd like. Do NOT use AgentVariantPicker for single-variant products.",
       ],
