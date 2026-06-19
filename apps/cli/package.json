@@ -9,6 +9,9 @@
 		"directory": "apps/cli"
 	},
 	"shopTemplateVersion": "0.1.0",
+	"scripts": {
+		"test": "node --test index.test.mjs"
+	},
 	"type": "module",
 	"version": "0.3.0"
 }

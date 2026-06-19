@@ -19,7 +19,7 @@ For best results, use an agent that reads `AGENTS.md` and supports skills and pr
 
 After [creating your project](/docs/getting-started), `create-vercel-shop` installs the project plugins:
 
-- `vercel-shop` for storefront skills plus bootstrap, drift, and upgrade-planning commands
+- `vercel-shop` for initialization and storefront skills plus drift and upgrade-planning commands
 - `vercel-plugin` for generic Vercel and Next.js guidance
 - `shopify-ai-toolkit` for Shopify-aware tooling and schema access
 
@@ -38,6 +38,8 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
 For upgrade work, the `vercel-shop` plugin also carries a template rollout log so agents can reason about change-level updates instead of guessing from a single scaffold version. New scaffolds record bootstrap metadata so agents can compare rollout entries against when a project was created.
+
+To initialize a storefront from an agent, use the `init-vercel-shop` skill and provide an explicit target directory. The skill delegates filesystem changes to `create-vercel-shop`, verifies the generated project and bootstrap metadata, and reports any plugin installation that needs a retry.
 
 ## Custom blocks in AGENTS.md
 
@@ -72,6 +74,12 @@ To run a storefront skill in Claude Code:
 
 ```bash
 /vercel-shop:enable-shopify-markets
+```
+
+For a new project:
+
+```bash
+/vercel-shop:init-vercel-shop
 ```
 
 In Cursor or Codex, describe the task and reference the matching skill doc when helpful:

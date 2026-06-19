@@ -6,7 +6,6 @@ import test from 'node:test';
 
 import {
   createExecutionPlan,
-  DEFAULT_PROJECT_NAME,
   main,
   readTemplateVersion,
 } from './index.mjs';
@@ -114,13 +113,13 @@ test('main prompts for a project name when none is given and stdin is a TTY', as
   }
 });
 
-test('main uses the default name when stdin is not a TTY and no name is given', async () => {
+test('main requires an explicit target when stdin is not a TTY', async () => {
   const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
   const scaffoldDirs = [];
   let promptCalls = 0;
 
   try {
-    await main({
+    const exitCode = await main({
       cliArgs: [],
       cwd: tempRoot,
       isTTY: false,
@@ -134,8 +133,9 @@ test('main uses the default name when stdin is not a TTY and no name is given', 
       },
     });
 
+    assert.equal(exitCode, 1);
     assert.equal(promptCalls, 0);
-    assert.deepEqual(scaffoldDirs, [join(tempRoot, DEFAULT_PROJECT_NAME)]);
+    assert.deepEqual(scaffoldDirs, []);
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }

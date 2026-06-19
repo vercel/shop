@@ -230,7 +230,13 @@ export async function main({
 
   let projectName = plan.positionalName;
   if (!plan.noTemplate && projectName === null) {
-    projectName = isTTY ? await prompt() : DEFAULT_PROJECT_NAME;
+    if (!isTTY) {
+      console.error(
+        'A target directory is required in non-interactive environments. Run: npx create-vercel-shop@latest <target-directory>',
+      );
+      return 1;
+    }
+    projectName = await prompt();
   }
 
   const projectDir = projectName ? resolve(plan.cwd, projectName) : plan.cwd;
