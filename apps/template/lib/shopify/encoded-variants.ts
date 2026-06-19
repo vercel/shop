@@ -78,16 +78,6 @@ function v1Decoder(encoded: string): number[][] {
   return result;
 }
 
-/** Count of existing variants from an encoded existence trie (0 on missing/invalid). */
-export function countEncodedVariants(encoded: string | undefined): number {
-  if (!encoded) return 0;
-  try {
-    return decodeEncodedVariant(encoded).length;
-  } catch {
-    return 0;
-  }
-}
-
 // Maps decoded availability combinations to the set of in-stock value names per
 // option. Falls back to "all available" on missing data, decode failure, or the
 // empty result Shopify returns for synthetic single-option products (a known

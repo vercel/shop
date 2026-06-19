@@ -56,6 +56,8 @@ export interface ProductCard {
 }
 
 export interface ProductDetails extends ProductCard {
+  /** True when every existing variant is in stock (existence trie == availability trie). */
+  allVariantsInStock: boolean;
   category?: Category | null;
   categoryId?: string;
   collectionHandles: string[];
@@ -72,6 +74,8 @@ export interface ProductDetails extends ProductCard {
   encodedVariantAvailability?: string;
   /** Trie of option-value combinations that exist (Storefront 2024-10+). */
   encodedVariantExistence?: string;
+  /** True when min/max price (and compare-at) bounds match, so price renders without a variant. */
+  hasUniformPricing: boolean;
   images: Image[];
   manufacturerName: string;
   metafields?: Metafield[];
@@ -85,6 +89,8 @@ export interface ProductDetails extends ProductCard {
   updatedAt: string;
   /** Only populated by getProductWithVariants (agent + markdown); the PDP omits it. */
   variants?: ProductVariant[];
+  /** Exact variant count from Shopify; authoritative single-variant signal (=== 1). */
+  variantsCount: number;
   videos: Video[];
 }
 

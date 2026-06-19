@@ -24,11 +24,9 @@ import {
   getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
-  hasUniformPricing,
-  hasUniformStock,
   type SelectedOptions,
 } from "@/lib/product";
-import { countEncodedVariants, getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
+import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +53,7 @@ export function ProductDetailSection({
           manufacturerName: product.manufacturerName,
           currencyCode: product.currencyCode,
           priceRange: product.priceRange,
-          offerCount: countEncodedVariants(product.encodedVariantExistence) || 1,
+          offerCount: product.variantsCount,
           availableForSale: product.availableForSale,
         }}
       />
@@ -164,9 +162,9 @@ async function ProductInfoArea({
   locale: Locale;
 }) {
   const { options, handle, title, featuredImage, descriptionHtml, availableForSale } = product;
-  const uniformPrice = hasUniformPricing(product.priceRange, product.compareAtPriceRange);
-  const uniformStock = hasUniformStock(product);
-  const singleVariant = countEncodedVariants(product.encodedVariantExistence) <= 1;
+  const uniformPrice = product.hasUniformPricing;
+  const uniformStock = product.allVariantsInStock;
+  const singleVariant = product.variantsCount === 1;
   const availableValues = getAvailableOptionValues(options, product.encodedVariantAvailability);
   const eagerSelection = singleVariant
     ? { selectedOptions: defaultSelectedOptions(product), selectedVariant: product.defaultVariant }

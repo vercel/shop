@@ -245,6 +245,9 @@ export const PRODUCT_FRAGMENT = `
     }
     encodedVariantExistence
     encodedVariantAvailability
+    variantsCount {
+      count
+    }
     selectedOrFirstAvailableVariant {
       ...ProductVariantFields
     }

@@ -114,6 +114,7 @@ export interface ShopifyProduct {
   } | null;
   encodedVariantAvailability?: string | null;
   encodedVariantExistence?: string | null;
+  variantsCount: { count: number };
   selectedOrFirstAvailableVariant?: ShopifyVariant | null;
   variants?: ShopifyEdges<ShopifyVariant>;
   options: ShopifyOption[];
@@ -308,6 +309,16 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
   };
 }
 
+function hasUniformPriceRange(product: ShopifyProduct): boolean {
+  const { compareAtPriceRange, priceRange } = product;
+  if (priceRange.minVariantPrice.amount !== priceRange.maxVariantPrice.amount) return false;
+  if (priceRange.minVariantPrice.currencyCode !== priceRange.maxVariantPrice.currencyCode) {
+    return false;
+  }
+  if (!compareAtPriceRange) return true;
+  return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
+}
+
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   const variants = product.variants
     ? flattenEdges(product.variants).map(transformVariant)
@@ -324,6 +335,11 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
+    allVariantsInStock:
+      !product.encodedVariantExistence ||
+      product.encodedVariantExistence === product.encodedVariantAvailability,
+    hasUniformPricing: hasUniformPriceRange(product),
+    variantsCount: product.variantsCount.count,
     defaultVariant,
     defaultVariantId: defaultVariant?.id,
     defaultVariantNumericId: defaultVariant

@@ -98,31 +98,6 @@ export function getSelectedColorImage(
   );
 }
 
-/** When true, the price renders without waiting for searchParams to resolve the variant. */
-export function hasUniformPricing(
-  priceRange: ProductDetails["priceRange"],
-  compareAtPriceRange?: ProductDetails["compareAtPriceRange"],
-): boolean {
-  const { maxVariantPrice, minVariantPrice } = priceRange;
-  const priceUniform =
-    minVariantPrice.amount === maxVariantPrice.amount &&
-    minVariantPrice.currencyCode === maxVariantPrice.currencyCode;
-  if (!priceUniform) return false;
-  if (!compareAtPriceRange) return true;
-  return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
-}
-
-/**
- * True when every existing option combination is in stock, so buy-button labels
- * can render in the Suspense fallback without resolving the variant. Derived from
- * the encoded availability/existence tries (equal ⇒ nothing is sold out).
- */
-export function hasUniformStock(product: ProductDetails): boolean {
-  const { encodedVariantAvailability, encodedVariantExistence } = product;
-  if (!encodedVariantExistence) return true;
-  return encodedVariantAvailability === encodedVariantExistence;
-}
-
 export type OptimisticProductInfo = {
   variantTitle: string;
   productTitle: string;
