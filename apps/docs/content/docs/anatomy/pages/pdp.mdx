@@ -66,10 +66,12 @@ A single `BuyButtons` component renders identically on both mobile and desktop. 
 
 ### Bundles
 
-For the selected variant, `bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
+`bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
 
-- **Bundle includes** — a fixed bundle's component products, from the variant's `components` (`BundleComponents`).
-- **Available in bundles** — bundles containing the current product, collapsed to one link per bundle, from the variant's `groupedBy` (`BundleParents`).
+- **Bundle includes** — a fixed bundle's component products, from `components` (`BundleComponents`).
+- **Available in bundles** — bundles containing the current product, collapsed to one link per bundle, from `groupedBy` (`BundleParents`).
+
+These are product-level facts (which products a bundle contains / which bundles a product belongs to), so they render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query — no layout shift on load.
 
 A customized bundle parent (`requiresComponents` with no fixed `components`) disables the buy buttons with a "Choose bundle items" label, since the generic storefront can't configure it. The bundle relationship arrays stay server-side; `BuyButtons` receives only a `requiresBundleConfiguration` boolean.
 

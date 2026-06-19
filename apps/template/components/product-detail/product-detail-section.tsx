@@ -244,30 +244,29 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      <Suspense fallback={null}>
-        <ResolvedBundleRelationships variantPromise={variantPromise} />
-      </Suspense>
+      <BundleRelationships variant={product.defaultVariant} t={t} />
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
   );
 }
 
-async function ResolvedBundleRelationships({
-  variantPromise,
+// Bundle relationships are product-level (which products a bundle contains / which
+// bundles a product belongs to), so they render eagerly from the cached default
+// variant in the static shell rather than streaming in behind the variant query.
+function BundleRelationships({
+  variant,
+  t,
 }: {
-  variantPromise: Promise<ProductVariant | undefined>;
+  variant: ProductVariant | undefined;
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
-  const selectedVariant = await variantPromise;
-  if (!selectedVariant) return null;
-  if (selectedVariant.components.length === 0 && selectedVariant.bundleParents.length === 0) {
-    return null;
-  }
-  const t = await getTranslations("product");
+  if (!variant) return null;
+  if (variant.components.length === 0 && variant.bundleParents.length === 0) return null;
   return (
     <div className="grid gap-5">
-      <BundleComponents components={selectedVariant.components} title={t("bundleIncludes")} />
-      <BundleParents variants={selectedVariant.bundleParents} title={t("availableInBundles")} />
+      <BundleComponents components={variant.components} title={t("bundleIncludes")} />
+      <BundleParents variants={variant.bundleParents} title={t("availableInBundles")} />
     </div>
   );
 }

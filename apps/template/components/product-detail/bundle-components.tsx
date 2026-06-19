@@ -8,7 +8,6 @@ interface BundleListItem {
   image: ProductVariantReference["image"];
   key: string;
   quantity?: number;
-  subtitle?: string;
   title: string;
 }
 
@@ -25,7 +24,6 @@ export function BundleComponents({ components, title }: BundleComponentsProps) {
       image: variant.image ?? variant.product.featuredImage,
       key: variant.id,
       quantity,
-      subtitle: variant.title,
       title: variant.product.title,
     }),
   );
@@ -81,12 +79,7 @@ function BundleProductList({ items, title }: BundleProductListProps) {
                   className="size-12 rounded-md object-cover"
                 />
               ) : null}
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium text-sm">{item.title}</span>
-                {item.subtitle ? (
-                  <span className="block truncate text-foreground/50 text-xs">{item.subtitle}</span>
-                ) : null}
-              </span>
+              <span className="min-w-0 flex-1 truncate font-medium text-sm">{item.title}</span>
               {item.quantity && item.quantity > 1 ? (
                 <span className="text-foreground/50 text-sm">×{item.quantity}</span>
               ) : null}
