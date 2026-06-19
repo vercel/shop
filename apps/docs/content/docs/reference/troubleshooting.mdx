@@ -10,6 +10,12 @@ The most common cause is missing Storefront API permissions. In your Shopify adm
 
 Also check that your products are set to the **Online Store** and **Headless** sales channels in Shopify admin.
 
+## Bundles not appearing (404 on the storefront)
+
+A bundle that is **ACTIVE** in Shopify admin but 404s on the storefront is almost always missing from your **Headless** sales channel. The free Shopify Bundles app publishes a new bundle to the **Online Store** channel only, while the template's Storefront token reads from Headless — so `getProduct()` returns nothing and the route renders `notFound()`.
+
+Fix it in admin: open the bundle product → **Publishing** → add your Headless channel. Then, because product reads are cached with `cacheLife("max")`, redeploy (or fire a product webhook) so the cached "not found" clears. The bundle's component products must be on Headless too, or their relationships won't resolve.
+
 ## Cart not persisting across page loads
 
 The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Common causes:

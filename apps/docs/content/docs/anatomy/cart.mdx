@@ -55,7 +55,13 @@ The overlay content in `overlay-content.tsx` composes three sections: an empty s
 
 ## Overlay items
 
-Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect optimistic state. It renders the product image, title, variant options (color, size, etc.), quantity controls (+/- buttons), a remove button, and the line total. Quantity changes and removals dispatch through the cart context, which handles debouncing and server action calls.
+Each line item in `overlay-item.tsx` reads from `cartWithPending` to reflect optimistic state. It renders the product image, title, variant options (color, size, etc.), any bundle components, quantity controls (+/- buttons), a remove button, and the line total. Quantity changes and removals dispatch through the cart context, which handles debouncing and server action calls. The controls honor Shopify's `canUpdateQuantity` and `canRemove` instructions rather than assuming every line is editable, so a fixed bundle's component lines can't be pulled out from under the parent.
+
+### Bundles and taxes
+
+The cart fragment reads both `CartLine` and `ComponentizableCartLine`, preserving each bundle parent's `lineComponents` as nested domain cart lines (`CartLine.components`). Fixed and transformed bundles therefore render as one parent line listing its included products. `addToCart()` also accepts Shopify's optional `CartLineInput.parent` relationship as a foundation for app-specific customized bundle flows.
+
+The fragment intentionally omits the deprecated cart tax and duty amounts (removed from the Storefront API in 2025-01). Shopify finalizes those at checkout, so summaries show a taxes-and-shipping-at-checkout note instead of a misleading pre-checkout figure.
 
 ## Cart page
 

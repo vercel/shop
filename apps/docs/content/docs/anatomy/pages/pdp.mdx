@@ -64,6 +64,15 @@ The buy section includes stock status and two action buttons:
 
 A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity.
 
+### Bundles
+
+For the selected variant, `bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
+
+- **Bundle includes** — a fixed bundle's component products, from the variant's `components` (`BundleComponents`).
+- **Available in bundles** — bundles containing the current product, collapsed to one link per bundle, from the variant's `groupedBy` (`BundleParents`).
+
+A customized bundle parent (`requiresComponents` with no fixed `components`) disables the buy buttons with a "Choose bundle items" label, since the generic storefront can't configure it. The bundle relationship arrays stay server-side; `BuyButtons` receives only a `requiresBundleConfiguration` boolean.
+
 ## Related Products
 
 Below the product details, a `RelatedProductsSection` component fetches related products from Shopify's recommendation API. It renders inside a `Suspense` boundary with a skeleton grid fallback.
@@ -87,13 +96,14 @@ The page emits two JSON-LD schemas:
 
 ## Key files
 
-| File                                                   | Purpose                                                                                        |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| File                                                   | Purpose                                                                                                              |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams the per-selection variant query |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD |
-| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                            |
-| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                   |
-| `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, color-image helpers               |
-| `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability                   |
+| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD                       |
+| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                                  |
+| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                                         |
+| `components/product-detail/bundle-components.tsx`      | Renders a bundle's contents and the bundles a product is part of                                                     |
+| `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, color-image helpers                                     |
+| `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability                                        |
 
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.

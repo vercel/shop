@@ -72,11 +72,23 @@ Products must be assigned to at least one collection to appear on collection lis
 
 Product recommendations on the PDP are powered by Shopify's recommendation API. No configuration is needed - Shopify generates recommendations automatically based on purchase history and product similarity.
 
+## Bundles
+
+The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships, fetched for the selected variant in `PurchasableProductVariantFields`:
+
+- `components` — the items in a **fixed bundle** (each component variant and its quantity).
+- `groupedBy` — up to 10 bundles that contain the current product (the reverse relationship).
+- `requiresComponents` — marks a **customized bundle** parent that can't be purchased without shopper-selected components.
+
+Fixed bundles (such as those created with the free **Shopify Bundles** app) render their contents and add to cart normally. A customized bundle whose parent sets `requiresComponents` but has no fixed `components` is disabled by the buy buttons until you build an app-specific component picker and send the component lines through `CartLineInput.parent`.
+
+> **Publish bundles to your Headless channel.** The Shopify Bundles app publishes a new bundle to the **Online Store** channel only, but the template reads from your **Headless** channel. A bundle that 404s on the storefront while showing fine in admin is almost always missing from Headless — add it under the product's **Publishing** section. See [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
+
 ## Key files
 
-| File                                 | Purpose                                                         |
-| ------------------------------------ | --------------------------------------------------------------- |
-| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                     |
-| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                   |
-| `lib/shopify/operations/products.ts` | Product fetch operations with caching                           |
-| `lib/product.ts`                     | Option parsing, default selection, and option URL generation    |
+| File                                 | Purpose                                                      |
+| ------------------------------------ | ------------------------------------------------------------ |
+| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                  |
+| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                |
+| `lib/shopify/operations/products.ts` | Product fetch operations with caching                        |
+| `lib/product.ts`                     | Option parsing, default selection, and option URL generation |
