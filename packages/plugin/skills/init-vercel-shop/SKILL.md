@@ -25,4 +25,10 @@ Ask for the target directory if the user did not provide one. Always pass it exp
    npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
    ```
 
-Return the generated project path and whether plugin installation needs a retry.
+6. Ask one optional follow-up: **Connect an existing Shopify store now?**
+
+   If yes, ask only for the store's admin URL or `.myshopify.com` domain, then read [references/storefront-token.md](references/storefront-token.md) and follow its automated Shopify CLI flow. Try to reuse or create a public Storefront token before asking the user to visit the Headless channel.
+
+   If no, finish with the normal environment setup as the next step.
+
+Return the generated project path, whether a Shopify store was connected, and whether plugin installation needs a retry.
