@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 
 const HomePage = () => (
   <div className="container mx-auto max-w-[1448px]">
-    <Hero badge="Vercel Shop is now in alpha" description={homeSubtitle} title={homeTitle}>
+    <Hero description={homeSubtitle} title={homeTitle}>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button asChild className="h-12 w-fit rounded-full px-5">
           <Link href="https://template.vercel.shop/" target="_blank">
