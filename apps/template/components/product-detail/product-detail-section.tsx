@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
+import { BundleComponents } from "@/components/product-detail/bundle-components";
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import {
   ProductInfoDescription,
@@ -244,8 +245,22 @@ async function ProductInfoArea({
       )}
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
+
+      <Suspense fallback={null}>
+        <ResolvedBundleComponents variantPromise={variantPromise} />
+      </Suspense>
     </div>
   );
+}
+
+async function ResolvedBundleComponents({
+  variantPromise,
+}: {
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
+  const selectedVariant = await variantPromise;
+  if (!selectedVariant) return null;
+  return <BundleComponents variant={selectedVariant} />;
 }
 
 async function ResolvedProductPrice({
