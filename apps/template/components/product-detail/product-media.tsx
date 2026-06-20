@@ -11,10 +11,15 @@ import { cn } from "@/lib/utils";
 
 import { Lightbox, LightboxTrigger } from "./lightbox";
 
-type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
+type MediaItem =
+  | { type: "image"; image: ImageType }
+  | { type: "placeholder" }
+  | { type: "video"; video: Video };
 
 function mediaKey(item: MediaItem) {
-  return item.type === "video" ? item.video.url : item.image.url;
+  if (item.type === "image") return item.image.url;
+  if (item.type === "video") return item.video.url;
+  return "placeholder";
 }
 
 function MediaImage({
@@ -160,6 +165,8 @@ function Carousel({
             >
               {item.type === "video" ? (
                 <MediaVideo item={item} sizes="100vw" priority={priority || eager} />
+              ) : item.type === "placeholder" ? (
+                <ImagePlaceholder className="size-full" />
               ) : (
                 <MediaImage
                   item={item}
@@ -217,6 +224,8 @@ function GridItem({
           sizes="(min-width: 1024px) 25vw, 50vw"
           priority={priority || eager}
         />
+      ) : item.type === "placeholder" ? (
+        <ImagePlaceholder className="size-full" />
       ) : (
         <LightboxTrigger item={item}>
           <MediaImage
@@ -238,33 +247,35 @@ function Grid({
   mediaItems,
   title,
   hasColorSlot,
+  interactive = true,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
+  interactive?: boolean;
   children?: React.ReactNode;
 }) {
-  return (
-    <Lightbox label={title}>
-      <div className="grid grid-cols-2 gap-2.5">
-        {children}
-        {mediaItems.map((item, idx) => {
-          const priority = !hasColorSlot && idx === 0;
-          return (
-            <GridItem
-              key={mediaKey(item)}
-              item={item}
-              title={title}
-              idx={idx}
-              priority={priority}
-              eager
-            />
-          );
-        })}
-      </div>
-    </Lightbox>
+  const grid = (
+    <div className="grid grid-cols-2 gap-2.5">
+      {children}
+      {mediaItems.map((item, idx) => {
+        const priority = !hasColorSlot && idx === 0;
+        return (
+          <GridItem
+            key={mediaKey(item)}
+            item={item}
+            title={title}
+            idx={idx}
+            priority={priority}
+            eager
+          />
+        );
+      })}
+    </div>
   );
+
+  return interactive ? <Lightbox label={title}>{grid}</Lightbox> : grid;
 }
 
 /**
@@ -352,25 +363,24 @@ export function ProductMedia({
     ...otherImages.map((image): MediaItem => ({ type: "image", image })),
   ];
 
-  if (sharedMediaItems.length === 0 && !desktopSlot && !mobileSlot) {
-    return (
-      <div className={className}>
-        <ImagePlaceholder className="aspect-square -mx-5 w-[calc(100%+2.5rem)] lg:mx-0 lg:w-full" />
-      </div>
-    );
-  }
-
   const hasColorSlot = !!mobileSlot || !!desktopSlot;
+  const isEmpty = sharedMediaItems.length === 0 && !hasColorSlot;
+  const mediaItems: MediaItem[] = isEmpty ? [{ type: "placeholder" }] : sharedMediaItems;
 
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={sharedMediaItems} title={title} hasColorSlot={hasColorSlot}>
+        <Carousel mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot}>
           {mobileSlot}
         </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={sharedMediaItems} title={title} hasColorSlot={hasColorSlot}>
+        <Grid
+          mediaItems={mediaItems}
+          title={title}
+          hasColorSlot={hasColorSlot}
+          interactive={!isEmpty}
+        >
           {desktopSlot}
         </Grid>
       </div>
