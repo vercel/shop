@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
@@ -58,6 +59,10 @@ export function ProductDetailSection({
           offerCount: product.variantsCount,
           availableForSale: product.availableForSale,
         }}
+      />
+      <ProductOpenGraph
+        availableForSale={product.availableForSale}
+        price={product.priceRange.minVariantPrice}
       />
       <BreadcrumbSchema
         items={[

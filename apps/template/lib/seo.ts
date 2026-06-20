@@ -68,7 +68,7 @@ export function buildOpenGraph({
   title,
   description,
   url,
-  type = "website",
+  type,
   images = ["/og-default.png"],
 }: {
   title: string;
@@ -85,8 +85,10 @@ export function buildOpenGraph({
       }
   >;
 }): Metadata["openGraph"] {
+  // Omitting `type` emits no og:type, letting product pages own og:type=product
+  // via a dedicated meta block (Next only emits og:type when the key is present).
   return {
-    type,
+    ...(type ? { type } : {}),
     title,
     description,
     url,
