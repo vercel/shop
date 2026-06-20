@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
+import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
@@ -245,6 +246,8 @@ async function ProductInfoArea({
       )}
 
       <BundleRelationships variant={product.defaultVariant} t={t} />
+
+      <ComplementaryProducts handle={handle} locale={locale} title={t("pairsWith")} />
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>

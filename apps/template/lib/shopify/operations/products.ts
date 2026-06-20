@@ -785,12 +785,48 @@ export async function getCollectionProducts(
 
 const PRODUCT_RECOMMENDATIONS_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
-  query productRecommendations($productId: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productRecommendations(productId: $productId) {
+  query productRecommendations($productId: ID!, $intent: ProductRecommendationIntent, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productId: $productId, intent: $intent) {
       ...ProductCardFields
     }
   }
 `;
+
+// RELATED is Shopify's auto-generated "you may also like" set; COMPLEMENTARY is the
+// merchant-curated "pair it with" set configured in the Search & Discovery app.
+type RecommendationIntent = "COMPLEMENTARY" | "RELATED";
+
+async function fetchRecommendations({
+  handle,
+  intent,
+  locale,
+}: {
+  handle: string;
+  intent: RecommendationIntent;
+  locale: string;
+}): Promise<ProductCard[]> {
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const product = await getProduct({ handle, locale });
+  if (!product) {
+    return [];
+  }
+
+  const data = await shopifyFetch<{ productRecommendations: ShopifyProductCard[] }>({
+    operation: "productRecommendations",
+    query: PRODUCT_RECOMMENDATIONS_QUERY,
+    variables: { productId: product.id, intent, country, language },
+  });
+
+  if (!data.productRecommendations) {
+    return [];
+  }
+
+  tagProducts(data.productRecommendations);
+
+  return data.productRecommendations.map(transformShopifyProductCard);
+}
 
 export async function getProductRecommendations({
   handle,
@@ -803,27 +839,21 @@ export async function getProductRecommendations({
   cacheLife("max");
   cacheTag("products", `recommendations-${handle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
+  return fetchRecommendations({ handle, intent: "RELATED", locale });
+}
 
-  const product = await getProduct({ handle, locale });
-  if (!product) {
-    return [];
-  }
+export async function getComplementaryProducts({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `complementary-${handle}`);
 
-  const data = await shopifyFetch<{ productRecommendations: ShopifyProductCard[] }>({
-    operation: "productRecommendations",
-    query: PRODUCT_RECOMMENDATIONS_QUERY,
-    variables: { productId: product.id, country, language },
-  });
-
-  if (!data.productRecommendations) {
-    return [];
-  }
-
-  tagProducts(data.productRecommendations);
-
-  return data.productRecommendations.map(transformShopifyProductCard);
+  return fetchRecommendations({ handle, intent: "COMPLEMENTARY", locale });
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `

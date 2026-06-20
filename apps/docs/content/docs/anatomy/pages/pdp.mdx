@@ -47,7 +47,7 @@ The gallery is handled by a single `ProductMedia` component that adapts to scree
 
 Both layouts receive pre-filtered images as props from the server.
 
-When a product has no images or videos at all, `ProductMedia` renders a single `ImagePlaceholder` (`components/ui/image-placeholder.tsx`) sized to the gallery's `aspect-square` footprint — full-bleed on mobile, full-width within the media column on desktop — so the page keeps its two-column shape instead of collapsing.
+When a product has no images or videos at all, `ProductMedia` renders a single `ImagePlaceholder` (`components/ui/image-placeholder.tsx`) as if it were the gallery's only image — flowing through the same grid/carousel path as a real media item: one `aspect-square` cell in the desktop grid, a single full-bleed item in the mobile carousel. The placeholder has no lightbox trigger (there is nothing to enlarge), so the desktop grid skips the `Lightbox` wrapper entirely in this case. This keeps the gallery consistent with a one-image product instead of special-casing a full-width block.
 
 ### Color-based image filtering
 
@@ -76,6 +76,12 @@ A single `BuyButtons` component renders identically on both mobile and desktop. 
 These are product-level facts (which products a bundle contains / which bundles a product belongs to), so they render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query — no layout shift on load.
 
 A customized bundle parent (`requiresComponents` with no fixed `components`) disables the buy buttons with a "Choose bundle items" label, since the generic storefront can't configure it. The bundle relationship arrays stay server-side; `BuyButtons` receives only a `requiresBundleConfiguration` boolean.
+
+### Complementary products
+
+`complementary-products.tsx` renders the merchant-curated "Pairs well with" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
+
+Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. `getComplementaryProducts()` is a cached (`use cache: remote`) operation, so its result is baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to four products as thumbnail + title + price rows and renders nothing when none are configured.
 
 ## Related Products
 
