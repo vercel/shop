@@ -6,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -314,18 +313,18 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
 }
 
 export function ProductMediaSkeleton({ className }: { className?: string }) {
-  const tile = "w-full rounded-none aspect-square";
+  const tile = "aspect-square w-full animate-pulse";
   return (
     <div className={className}>
       <div className="grid gap-5 lg:hidden -mx-5">
-        <Skeleton className={tile} />
+        <ImagePlaceholder className={tile} />
         <div className="h-1.5" />
       </div>
       <div className="hidden lg:grid grid-cols-2 gap-2.5">
-        <Skeleton className={tile} />
-        <Skeleton className={tile} />
-        <Skeleton className={tile} />
-        <Skeleton className={tile} />
+        <ImagePlaceholder className={tile} />
+        <ImagePlaceholder className={tile} />
+        <ImagePlaceholder className={tile} />
+        <ImagePlaceholder className={tile} />
       </div>
     </div>
   );

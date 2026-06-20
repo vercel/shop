@@ -192,9 +192,9 @@ function ProductCardSkeleton({
       data-slot="product-card-skeleton"
       className={cn("flex flex-col overflow-hidden", className)}
     >
-      <div
+      <ImagePlaceholder
         data-aspect-ratio={aspectRatio}
-        className={cn("bg-accent animate-pulse", aspectRatioClasses)}
+        className={cn("animate-pulse", aspectRatioClasses)}
       />
       <div className="py-2.5 h-18 box-content grid gap-2">
         <div className="h-4 w-full bg-accent animate-pulse" />

@@ -25,7 +25,7 @@ The badge label comes from the `product.featuredBadge` translation key, so it st
 
 ## Image fallback
 
-The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint and renders the shared `ImagePlaceholder` (`components/ui/image-placeholder.tsx`): a white square centering a muted Lucide image icon sized relative to the box. This keeps grids visually aligned even for products that are missing imagery.
+The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint and renders the shared `ImagePlaceholder` (`components/ui/image-placeholder.tsx`): a white square centering a Lucide image icon tinted with the skeleton color (`text-accent`) and sized relative to the box. This keeps grids visually aligned even for products that are missing imagery, and makes the empty state read as a settled version of the loading skeleton.
 
 When the product is unavailable, an out-of-stock overlay darkens the image and shows the localized out-of-stock label on top.
 
@@ -33,7 +33,7 @@ When the product is unavailable, an out-of-stock overlay darkens the image and s
 
 ## Skeleton
 
-`ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads.
+`ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block (the same `ImagePlaceholder`, pulsing via `animate-pulse`) plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads. Because the loading block and the no-image fallback are the same element, the only visual difference between "still loading" and "no image" is the pulse.
 
 ## Recipes
 
