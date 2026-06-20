@@ -51,7 +51,6 @@ async function buildProductMetadata(
       title: product.seo.title,
       description: product.seo.description,
       url: canonicalPath,
-      type: "website",
       images,
     }),
     twitter: {
