@@ -119,7 +119,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
   return (
     <h3
       data-slot="product-card-title"
-      className={cn("text-sm font-semibold text-main-foreground line-clamp-2", className)}
+      className={cn("text-sm font-semibold text-main-foreground line-clamp-1", className)}
       {...props}
     >
       {children}
@@ -196,9 +196,8 @@ function ProductCardSkeleton({
         data-aspect-ratio={aspectRatio}
         className={cn("animate-pulse", aspectRatioClasses)}
       />
-      <div className="py-2.5 h-18 box-content grid gap-2">
+      <div className="py-2.5 h-12 box-content grid gap-2">
         <div className="h-4 w-full bg-accent animate-pulse" />
-        <div className="h-4 w-3/4 bg-accent animate-pulse" />
         <div className="h-4 w-12 bg-accent animate-pulse" />
       </div>
     </div>
