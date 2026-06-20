@@ -20,7 +20,7 @@ paths:
 The PDP now surfaces Shopify's merchant-curated [complementary products](https://help.shopify.com/en/manual/online-store/search-and-discovery/product-recommendations) — the "Pair it with" set — as a compact "Pairs well with" list in the product info column, beside the buy section.
 
 - A new `getComplementaryProducts()` operation calls the same `productRecommendations` query as related products but with `intent: COMPLEMENTARY`. `getProductRecommendations()` is unchanged in behavior — it now delegates to a shared `fetchRecommendations()` helper with the default `intent: RELATED`.
-- `complementary-products.tsx` renders up to four products as thumbnail + title + price rows, modeled on `bundle-components.tsx`. It streams in behind a `Suspense` boundary (its own recommendation fetch, unlike the cached-shell bundle relationships) and collapses to nothing when no complementary products are configured.
+- `complementary-products.tsx` renders up to four products as thumbnail + title + price rows, modeled on `bundle-components.tsx`. `getComplementaryProducts()` is a cached (`use cache: remote`) operation, so the section renders eagerly into the prerendered PPR/ISR document — no fallback and no layout shift on cached hits — and renders nothing when no complementary products are configured.
 - The list reuses the existing `ProductCard` domain type and `transformShopifyProductCard` — no new types.
 
 ## Why it matters

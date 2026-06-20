@@ -81,7 +81,7 @@ A customized bundle parent (`requiresComponents` with no fixed `components`) dis
 
 `complementary-products.tsx` renders the merchant-curated "Pairs well with" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
 
-Unlike bundle relationships (free on the cached default variant), complementary products need their own recommendation fetch, so the section **streams in behind a `Suspense` boundary** with a compact-list skeleton — the same pattern as the price and option pickers. It shows up to four products as thumbnail + title + price rows and collapses to nothing when none are configured.
+Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. `getComplementaryProducts()` is a cached (`use cache: remote`) operation, so its result is baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to four products as thumbnail + title + price rows and renders nothing when none are configured.
 
 ## Related Products
 

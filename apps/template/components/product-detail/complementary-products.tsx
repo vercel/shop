@@ -2,32 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getComplementaryProducts } from "@/lib/shopify/operations/products";
 import type { ProductCard } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
 const COMPLEMENTARY_LIMIT = 4;
-
-export function ComplementaryProductsSkeleton({ title }: { title: string }) {
-  return (
-    <div className="grid gap-2.5" data-slot="complementary-products">
-      <h2 className="font-medium text-foreground/70 text-sm">{title}</h2>
-      <ul className="grid gap-2.5">
-        {Array.from({ length: COMPLEMENTARY_LIMIT }, (_, index) => (
-          <li
-            key={index}
-            className="flex items-center gap-2.5 rounded-lg border border-border p-2.5"
-          >
-            <Skeleton className="size-12 shrink-0 rounded-md" />
-            <Skeleton className="h-4 flex-1" />
-            <Skeleton className="h-4 w-12 shrink-0" />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export async function ComplementaryProducts({
   handle,
