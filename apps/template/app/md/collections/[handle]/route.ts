@@ -1,3 +1,9 @@
+import {
+  ALL_PRODUCTS_HANDLE,
+  getAllProductsCollection,
+  getAllProductsResultsData,
+  getCollectionSearchState,
+} from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { getCollection } from "@/lib/shopify/operations/collections";
@@ -20,13 +26,39 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
   const { handle } = await params;
   const url = new URL(request.url);
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
-  const sort = url.searchParams.get("sort") ?? undefined;
-  const cursor = url.searchParams.get("cursor") ?? undefined;
   const searchParams = searchParamsToRecord(url.searchParams);
-  const activeFilters = parseFiltersFromSearchParams(searchParams);
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
 
   try {
+    // /collections/all is a virtual route with no Shopify equivalent; mirror the HTML
+    // page's data path so the same URL is legible to markdown-negotiating agents.
+    if (handle === ALL_PRODUCTS_HANDLE) {
+      const searchStatePromise = getCollectionSearchState(Promise.resolve(searchParams));
+      const [collection, data] = await Promise.all([
+        getAllProductsCollection(),
+        getAllProductsResultsData({ locale, searchStatePromise }),
+      ]);
+
+      const markdown = collectionToMarkdown({
+        collection,
+        products: data.result.products,
+        filters: data.result.filters,
+        priceRange: data.result.priceRange,
+        activeFilters: data.activeFilters,
+        pageInfo: data.result.pageInfo,
+        locale,
+        sort: data.sort,
+      });
+
+      return new Response(markdown, {
+        headers: markdownHeaders("public, max-age=86400, stale-while-revalidate=604800"),
+      });
+    }
+
+    const sort = url.searchParams.get("sort") ?? undefined;
+    const cursor = url.searchParams.get("cursor") ?? undefined;
+    const activeFilters = parseFiltersFromSearchParams(searchParams);
+    const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+
     const [collection, result] = await Promise.all([
       getCollection({ handle, locale }),
       getCollectionProducts({

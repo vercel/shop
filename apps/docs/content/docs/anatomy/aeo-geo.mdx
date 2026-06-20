@@ -18,6 +18,7 @@ The template ships with several built-in surfaces that contribute to AEO/GEO. Th
 | **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data               | `components/product-detail/schema.tsx`, `components/schema/**` |
 | **Sitemap**                      | [Sitemap index + paged children](/docs/anatomy/sitemap) for products and collections | `app/sitemap.xml/route.ts`, `app/sitemap/[shard]/route.ts`     |
 | **Robots**                       | Declares crawl policy and blocks faceted (sort/filter) collection URLs               | `app/robots.ts`                                                |
+| **`llms.txt`**                   | Curated `/llms.txt` index of collections and discovery links for AI agents           | `app/llms.txt/route.ts`, `lib/markdown/llms.ts`                |
 | **OpenGraph & Twitter metadata** | Provides title, description, and image previews per route                            | `lib/seo.ts`, route-level `generateMetadata`                   |
 
 The rest of this page goes deep on content negotiation. The other surfaces are documented inline in the linked files.
@@ -87,3 +88,16 @@ The `Vary: Accept` header ensures CDNs cache markdown and HTML responses separat
 ### Multi-locale
 
 If you have enabled Shopify Markets, the rewrite fires before locale routing — no additional configuration is needed. Pass a `?locale=` query parameter to the markdown endpoint for locale-specific pricing and collection/search context.
+
+## llms.txt
+
+`/llms.txt` is a curated, machine-readable index of the storefront — an [emerging convention](https://llmstxt.org) that is to AI agents what `robots.txt` is to crawlers. It links to the search entry point, the collection catalog, and the sitemap/robots discovery surfaces, and tells agents that those pages also serve clean Markdown under `Accept: text/markdown` (the content negotiation above).
+
+The route is dynamic: collections are pulled live from Shopify and capped so the file stays a concise index rather than an exhaustive dump — the full URL set lives in the [sitemap](/docs/anatomy/sitemap). Because the links honor content negotiation, the virtual `/collections/all` catalog page is served as Markdown too, not just HTML.
+
+### Key files
+
+| File                    | Purpose                                                      |
+| ----------------------- | ------------------------------------------------------------ |
+| `app/llms.txt/route.ts` | Route handler; fetches collections and serves `text/plain`   |
+| `lib/markdown/llms.ts`  | `llmsTxt()` generator that builds the index from the catalog |
