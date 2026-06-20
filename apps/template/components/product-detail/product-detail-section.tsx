@@ -4,6 +4,10 @@ import { Suspense } from "react";
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import {
+  ComplementaryProducts,
+  ComplementaryProductsSkeleton,
+} from "@/components/product-detail/complementary-products";
+import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/product-detail/product-info";
@@ -245,6 +249,10 @@ async function ProductInfoArea({
       )}
 
       <BundleRelationships variant={product.defaultVariant} t={t} />
+
+      <Suspense fallback={<ComplementaryProductsSkeleton title={t("pairsWith")} />}>
+        <ComplementaryProducts handle={handle} locale={locale} title={t("pairsWith")} />
+      </Suspense>
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>
