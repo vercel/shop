@@ -12,8 +12,8 @@ import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
 import {
   buildProductFiltersFromParams,
+  fetchSearchIndexProducts,
   getSearchFacets,
-  searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
@@ -46,7 +46,7 @@ export async function getSearchResultsData({
 }): Promise<SearchResultsData> {
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const [results, facets] = await Promise.all([
-    searchIndexProducts({
+    fetchSearchIndexProducts({
       query,
       collection,
       sortKey: sort,

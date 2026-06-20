@@ -1,6 +1,6 @@
 "use server";
 
-import { getCollectionProducts } from "@/lib/shopify/operations/products";
+import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
@@ -11,7 +11,7 @@ export async function loadMoreCollectionProducts(params: {
   filters?: ProductFilter[];
   locale: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
-  const result = await getCollectionProducts({
+  const result = await fetchCollectionProducts({
     collection: params.collection,
     cursor: params.cursor,
     sortKey: params.sortKey,

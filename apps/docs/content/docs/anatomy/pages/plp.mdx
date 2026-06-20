@@ -14,7 +14,9 @@ The collection PLP splits, like the [PDP](/docs/anatomy/pages/pdp), between what
 
 Two structural choices keep that copy coherent. The resolved collection is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the header at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — a React hydration mismatch and copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag`.
 
-The dynamic inputs are the filter, sort, and cursor `searchParams`. Rather than block the whole page on them, the route passes the `searchParams` promise — unawaited — into the results data. The header renders from the collection resolved at the top; the toolbar's result count, filter sidebar, sort select, and the product grid each sit inside their own Suspense boundary so changing a filter or sort streams the affected slot without skeletonizing the header. `getCollectionProducts` and the facet reads stay `"use cache: remote"` — they key on the request-time filter/sort/cursor inputs and are served from the shared Runtime Cache, not the per-route shell.
+The dynamic inputs are the filter, sort, and cursor `searchParams`. Rather than block the whole page on them, the route passes the `searchParams` promise — unawaited — into the results data. The header renders from the collection resolved at the top; the toolbar's result count, filter sidebar, sort select, and the product grid each sit inside their own Suspense boundary so changing a filter or sort streams the affected slot without skeletonizing the header.
+
+The product-grid read is deliberately **uncached** — `fetchCollectionProducts` (and `fetchSearchIndexProducts` for `/collections/all` and `/search`) calls Shopify live on every request, inside its Suspense boundary. Caching it was the source of a duplicate-at-the-page-boundary bug: the first page and each cursor page were stored as independent `cacheLife("max")` snapshots taken at different times, so a first page's `endCursor` could be resolved against a later, drifted ordering and re-emit the boundary product as a duplicate. Reading every page live keeps the cursor handoff consistent within a scroll session. The facet reads (`getSearchFacets`) and the collection header stay cached; on `/collections/[handle]` the facet counts ride along inside the same live product query, while `/collections/all` and `/search` keep them in the separately-cached `getSearchFacets` read. The cached wrappers `getCollectionProducts` / `searchIndexProducts` remain for non-paginated consumers (the `/md` routes and agent tools).
 
 The `/search` route is different: its body is fully request-driven (the query lives entirely in `searchParams`), so there is no cacheable collection body to bake into a shell, and it does not follow this await-at-top pattern.
 
@@ -56,9 +58,9 @@ Sort changes use `useTransition` for non-blocking navigation.
 
 ## Infinite scroll
 
-Products load progressively using an `InfiniteProductGrid` component backed by `IntersectionObserver`. When the user scrolls near the bottom, a server action fetches the next page using Shopify's cursor-based pagination (`endCursor`). A loading indicator appears while the next batch loads.
+Products load progressively using an `InfiniteProductGrid` component backed by `IntersectionObserver`. When the user scrolls near the bottom, a server action fetches the next page using Shopify's cursor-based pagination (`endCursor`). That load-more read is uncached, like the initial grid (see [Rendering strategy](#rendering-strategy)), so consecutive pages come from consistent snapshots. A loading indicator appears while the next batch loads.
 
-The cursor resets automatically when filters or sort change. Each batch renders [product cards](/docs/anatomy/product-card) inline using the same card primitives as the initial grid.
+The cursor resets automatically when filters or sort change. Each batch renders [product cards](/docs/anatomy/product-card) inline using the same card primitives as the initial grid. As a final safeguard against a ranking shift mid-scroll, the grid tracks already-rendered product ids and skips any duplicate a live cursor page might surface.
 
 ## Toolbar
 

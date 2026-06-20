@@ -551,10 +551,13 @@ export async function getSearchFacets(params: {
   };
 }
 
-// Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
-// (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
-// silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
-export async function searchIndexProducts(params: {
+type SearchIndexProductsResult = {
+  pageInfo: PageInfo;
+  products: ProductCard[];
+  total: number;
+};
+
+type SearchIndexProductsParams = {
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -562,11 +565,14 @@ export async function searchIndexProducts(params: {
   locale?: string;
   query?: string;
   sortKey?: string;
-}): Promise<{ pageInfo: PageInfo; products: ProductCard[]; total: number }> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
+};
 
+// Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
+// (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
+// silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
+export async function fetchSearchIndexProducts(
+  params: SearchIndexProductsParams,
+): Promise<SearchIndexProductsResult> {
   const {
     collection,
     cursor,
@@ -612,13 +618,23 @@ export async function searchIndexProducts(params: {
     .map((edge) => edge.node)
     .filter((node): node is ShopifyProductCard => node !== null);
 
-  tagProducts(shopifyProducts);
-
   return {
     pageInfo: data.search.pageInfo,
     products: shopifyProducts.map(transformShopifyProductCard),
     total: data.search.totalCount,
   };
+}
+
+export async function searchIndexProducts(
+  params: SearchIndexProductsParams,
+): Promise<SearchIndexProductsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  const result = await fetchSearchIndexProducts(params);
+  tagProducts(result.products);
+  return result;
 }
 
 const COLLECTION_PRODUCTS_QUERY = `
@@ -672,7 +688,14 @@ const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolea
   COLLECTION_DEFAULT: { sortKey: "COLLECTION_DEFAULT", reverse: false },
 };
 
-export async function getCollectionProducts(params: {
+type CollectionProductsResult = {
+  filters: Filter[];
+  pageInfo: PageInfo;
+  priceRange?: PriceRange;
+  products: ProductCard[];
+};
+
+type CollectionProductsParams = {
   activeFilters?: ActiveFilters;
   collection: string;
   cursor?: string;
@@ -680,16 +703,11 @@ export async function getCollectionProducts(params: {
   limit?: number;
   locale?: string;
   sortKey?: string;
-}): Promise<{
-  filters: Filter[];
-  pageInfo: PageInfo;
-  priceRange?: PriceRange;
-  products: ProductCard[];
-}> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", "collections", `collection-${params.collection}`);
+};
 
+export async function fetchCollectionProducts(
+  params: CollectionProductsParams,
+): Promise<CollectionProductsResult> {
   const {
     activeFilters = {},
     collection,
@@ -742,8 +760,6 @@ export async function getCollectionProducts(params: {
 
   const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
 
-  tagProducts(shopifyProducts);
-
   const products = shopifyProducts.map(transformShopifyProductCard);
   const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
 
@@ -753,6 +769,18 @@ export async function getCollectionProducts(params: {
     priceRange: transformed.priceRange,
     products,
   };
+}
+
+export async function getCollectionProducts(
+  params: CollectionProductsParams,
+): Promise<CollectionProductsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", "collections", `collection-${params.collection}`);
+
+  const result = await fetchCollectionProducts(params);
+  tagProducts(result.products);
+  return result;
 }
 
 const PRODUCT_RECOMMENDATIONS_QUERY = `

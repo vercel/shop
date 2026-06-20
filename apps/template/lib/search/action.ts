@@ -1,6 +1,6 @@
 "use server";
 
-import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import { predictiveSearch } from "@/lib/shopify/operations/search";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, PredictiveSearchResult, ProductCard } from "@/lib/types";
@@ -26,7 +26,7 @@ export async function loadMoreSearchProducts(params: {
   locale: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
   // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
-  const result = await searchIndexProducts({
+  const result = await fetchSearchIndexProducts({
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,

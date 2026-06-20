@@ -3,9 +3,9 @@ import { getTranslations } from "next-intl/server";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
-  getCollectionProducts,
+  fetchCollectionProducts,
+  fetchSearchIndexProducts,
   getSearchFacets,
-  searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
@@ -27,7 +27,7 @@ export interface CollectionResultsData {
   collection: string;
   sort?: string;
   filters: ProductFilter[];
-  result: Awaited<ReturnType<typeof getCollectionProducts>>;
+  result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
   transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
 }
 
@@ -53,7 +53,7 @@ export async function getCollectionResultsData({
 }): Promise<CollectionResultsData> {
   const { activeFilters, sort } = await searchStatePromise;
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
-  const result = await getCollectionProducts({
+  const result = await fetchCollectionProducts({
     activeFilters,
     collection: handle,
     sortKey: sort,
@@ -75,7 +75,7 @@ export async function getCollectionResultsData({
 export function getExactCollectionResultCount({
   result,
 }: {
-  result: Awaited<ReturnType<typeof getCollectionProducts>>;
+  result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
 }): number | undefined {
   if (result.pageInfo.hasNextPage) {
     return undefined;
@@ -113,7 +113,7 @@ export async function getAllProductsResultsData({
   const { activeFilters, sort } = await searchStatePromise;
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const [products, facets] = await Promise.all([
-    searchIndexProducts({
+    fetchSearchIndexProducts({
       sortKey: sort,
       limit: RESULTS_PER_PAGE,
       filters: shopifyFilters,

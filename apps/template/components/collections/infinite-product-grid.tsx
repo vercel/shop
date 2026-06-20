@@ -41,6 +41,8 @@ export function InfiniteProductGrid<TParams>({
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
+  // Live cursor pages can re-emit a boundary product if the ranking shifts mid-scroll; skip ids already shown.
+  const seenIdsRef = useRef<Set<string>>(new Set(initialProducts.map((product) => product.id)));
 
   // Reset when initial data changes (filter/sort navigation)
   useEffect(() => {
@@ -48,6 +50,7 @@ export function InfiniteProductGrid<TParams>({
     setPageInfo(initialPageInfo);
     setIsLoading(false);
     loadingRef.current = false;
+    seenIdsRef.current = new Set(initialProducts.map((product) => product.id));
   }, [initialProducts, initialPageInfo]);
 
   const handleLoadMore = useCallback(async () => {
@@ -57,7 +60,9 @@ export function InfiniteProductGrid<TParams>({
 
     try {
       const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor });
-      setAdditionalProducts((prev) => [...prev, ...result.products]);
+      const fresh = result.products.filter((product) => !seenIdsRef.current.has(product.id));
+      for (const product of fresh) seenIdsRef.current.add(product.id);
+      setAdditionalProducts((prev) => [...prev, ...fresh]);
       setPageInfo(result.pageInfo);
     } finally {
       setIsLoading(false);
