@@ -70,8 +70,8 @@ A single `BuyButtons` component renders identically on both mobile and desktop. 
 
 `bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
 
-- **Bundle includes** — a fixed bundle's component products, from `components` (`BundleComponents`).
-- **Available in bundles** — bundles containing the current product, collapsed to one link per bundle, from `groupedBy` (`BundleParents`).
+- **Bundle Includes** — a fixed bundle's component products, from `components` (`BundleComponents`).
+- **Available in Bundles** — bundles containing the current product, collapsed to one link per bundle, from `groupedBy` (`BundleParents`).
 
 These are product-level facts (which products a bundle contains / which bundles a product belongs to), so they render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query — no layout shift on load.
 
@@ -79,7 +79,7 @@ A customized bundle parent (`requiresComponents` with no fixed `components`) dis
 
 ### Complementary products
 
-`complementary-products.tsx` renders the merchant-curated "Pairs well with" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
+`complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
 
 Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. Both recommendation surfaces — this set and the [related grid](#related-products) below the fold — come from a single cached (`use cache: remote`) `getProductRecommendationSets()` operation that fetches both intents in one aliased `productRecommendations` request and is tagged with both `complementary-{handle}` and `recommendations-{handle}`. Because both surfaces call it with the same arguments, they dedupe to **one** Shopify request; this section reads the `complementary` slice, baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to four products as thumbnail + title + price rows and renders nothing when none are configured.
 

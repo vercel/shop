@@ -65,7 +65,7 @@
     "adding": "Adding...",
     "addressPlaceholder": "Address will be added at checkout",
     "applyDiscount": "Apply",
-    "bundleIncludes": "Bundle includes",
+    "bundleIncludes": "Bundle Includes",
     "cartItemsLabel": "Cart items",
     "cartTotalIs": "Cart total is",
     "checkout": "Checkout",
@@ -116,7 +116,7 @@
     "updatingCart": "Updating cart...",
     "upsell": {
       "description": "Complete your order with these complementary products",
-      "title": "You might also like"
+      "title": "You Might Also Like"
     },
     "viewFullCart": "View full cart",
     "warningsTitle": "Your cart was updated"
@@ -229,14 +229,14 @@
     "addingQuantity": "Adding {quantity}...",
     "addingToCart": "Adding to Cart...",
     "addToCart": "Add to Cart",
-    "availableInBundles": "Available in bundles",
+    "availableInBundles": "Available in Bundles",
     "brand": "Brand",
     "breadcrumb": {
       "home": "Home",
       "toggleMenu": "Toggle menu"
     },
     "bundleConfigurationRequired": "Choose bundle items",
-    "bundleIncludes": "Bundle includes",
+    "bundleIncludes": "Bundle Includes",
     "buyNow": "Buy now",
     "buyWithShop": "Buy with",
     "color": "Color",
@@ -294,7 +294,7 @@
     "noImage": "No image",
     "officialStore": "Official Store",
     "outOfStock": "Out of Stock",
-    "pairsWith": "Pairs well with",
+    "pairsWith": "Pairs Well With",
     "quantity": "Quantity",
     "recommendations": "You May Also Like",
     "seeAllSpecs": "See all specs",
