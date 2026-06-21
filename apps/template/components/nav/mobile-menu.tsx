@@ -36,7 +36,7 @@ function MenuLink({ url, children, className, onClick }: MenuLinkProps) {
     );
   }
   return (
-    <Link href={url} className={className} onClick={onClick} prefetch={true}>
+    <Link href={url} className={className} onClick={onClick}>
       {children}
     </Link>
   );

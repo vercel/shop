@@ -124,7 +124,7 @@ function ClientProductCard({
     : `/products/${product.handle}`;
 
   return (
-    <Link href={href} prefetch={true}>
+    <Link href={href}>
       <ProductCardRoot>
         <ProductCardImageContainer>
           <ProductCardImage

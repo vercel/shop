@@ -39,7 +39,7 @@ export async function ProductCard({
   const t = isFeatured ? await getTranslations("product") : null;
 
   return (
-    <Link href={`/products/${product.handle}`} className={className} prefetch={true}>
+    <Link href={`/products/${product.handle}`} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>
