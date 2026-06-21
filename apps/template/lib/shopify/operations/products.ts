@@ -12,7 +12,7 @@ import type {
   SelectedOption,
 } from "@/lib/types";
 
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk } from "../errors";
 import {
   IMAGE_FRAGMENT,
   METAFIELD_FRAGMENT,
@@ -21,6 +21,7 @@ import {
   PRODUCT_WITH_VARIANTS_FRAGMENT,
   PURCHASABLE_PRODUCT_VARIANT_FRAGMENT,
 } from "../fragments";
+import { storefront } from "../storefront";
 import { transformShopifyFilters } from "../transforms/filters";
 import {
   type ShopifyProduct,
@@ -49,24 +50,30 @@ function tagProducts(products: Array<{ id: string }>): void {
   }
 }
 
-const productMetafieldsSelection = productMetafieldIdentifiers.length
-  ? `metafields(identifiers: [${productMetafieldIdentifiers
-      .map(({ key, namespace }) => `{ namespace: "${namespace}", key: "${key}" }`)
-      .join(", ")}]) {
-      ...MetafieldFields
-    }`
-  : "";
-
-const GET_PRODUCT_BY_HANDLE_QUERY = `
-  ${productMetafieldIdentifiers.length ? METAFIELD_FRAGMENT : ""}
+const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   ${PRODUCT_FRAGMENT}
   query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductFields
-      ${productMetafieldsSelection}
     }
   }
-`;
+` as const;
+
+// Opt-in metafields variant, selected when productMetafieldIdentifiers is non-empty.
+// Identifiers ride a $metafieldIdentifiers variable (not string interpolation) so the
+// document stays static and codegen-validatable.
+const GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY = `#graphql
+  ${METAFIELD_FRAGMENT}
+  ${PRODUCT_FRAGMENT}
+  query getProductByHandleWithMetafields($handle: String!, $metafieldIdentifiers: [HasMetafieldsIdentifier!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      ...ProductFields
+      metafields(identifiers: $metafieldIdentifiers) {
+        ...MetafieldFields
+      }
+    }
+  }
+` as const;
 
 export async function getProduct({
   handle,
@@ -81,13 +88,23 @@ export async function getProduct({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
-    productByHandle: ShopifyProduct;
-  }>({
-    operation: "getProductByHandle",
-    query: GET_PRODUCT_BY_HANDLE_QUERY,
-    variables: { handle, country, language },
-  });
+  const response = productMetafieldIdentifiers.length
+    ? await storefront.request<{ productByHandle: ShopifyProduct }>(
+        GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY,
+        {
+          variables: {
+            handle,
+            metafieldIdentifiers: productMetafieldIdentifiers,
+            country,
+            language,
+          },
+        },
+      )
+    : await storefront.request<{ productByHandle: ShopifyProduct }>(GET_PRODUCT_BY_HANDLE_QUERY, {
+        variables: { handle, country, language },
+      });
+  assertStorefrontOk(response, "getProductByHandle");
+  const { data } = response;
 
   if (!data.productByHandle) {
     return undefined;
@@ -98,7 +115,7 @@ export async function getProduct({
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-const GET_PRODUCT_VARIANT_QUERY = `
+const GET_PRODUCT_VARIANT_QUERY = `#graphql
   ${IMAGE_FRAGMENT}
   ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
   query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
@@ -108,7 +125,7 @@ const GET_PRODUCT_VARIANT_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 // Resolves the active variant from selected options (the suspended PDP query).
 // Empty selectedOptions returns the first available variant — matches the
@@ -128,26 +145,26 @@ export async function getProductVariant({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     productByHandle: { selectedOrFirstAvailableVariant: ShopifyVariant | null } | null;
-  }>({
-    operation: "getProductVariant",
-    query: GET_PRODUCT_VARIANT_QUERY,
+  }>(GET_PRODUCT_VARIANT_QUERY, {
     variables: { handle, selectedOptions, country, language },
   });
+  assertStorefrontOk(response, "getProductVariant");
+  const { data } = response;
 
   const variant = data.productByHandle?.selectedOrFirstAvailableVariant;
   return variant ? transformVariant(variant) : undefined;
 }
 
-const GET_PRODUCT_WITH_VARIANTS_QUERY = `
+const GET_PRODUCT_WITH_VARIANTS_QUERY = `#graphql
   ${PRODUCT_WITH_VARIANTS_FRAGMENT}
   query getProductWithVariants($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductWithVariantsFields
     }
   }
-`;
+` as const;
 
 // Slim shell + full variant matrix; for the AI agent and markdown routes that
 // enumerate variants. The PDP uses getProduct + getProductVariant instead.
@@ -164,13 +181,13 @@ export async function getProductWithVariants({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     productByHandle: ShopifyProduct;
-  }>({
-    operation: "getProductWithVariants",
-    query: GET_PRODUCT_WITH_VARIANTS_QUERY,
+  }>(GET_PRODUCT_WITH_VARIANTS_QUERY, {
     variables: { handle, country, language },
   });
+  assertStorefrontOk(response, "getProductWithVariants");
+  const { data } = response;
 
   if (!data.productByHandle) {
     return undefined;
@@ -181,7 +198,7 @@ export async function getProductWithVariants({
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-const CATALOG_PRODUCTS_QUERY = `
+const CATALOG_PRODUCTS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query catalogProducts($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     products(
@@ -205,9 +222,9 @@ const CATALOG_PRODUCTS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const SEARCH_FACETS_QUERY = `
+const SEARCH_FACETS_QUERY = `#graphql
   query searchFacets($query: String!, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
@@ -229,9 +246,9 @@ const SEARCH_FACETS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const PRODUCTS_SEARCH_QUERY = `
+const PRODUCTS_SEARCH_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query searchProducts($query: String!, $first: Int!, $after: String, $productFilters: [ProductFilter!], $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
@@ -260,7 +277,7 @@ const PRODUCTS_SEARCH_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 // QueryRoot.products(sortKey: ProductSortKeys) — used for the catalog browse path.
 const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
@@ -467,14 +484,12 @@ async function fetchCatalogProducts({
   const sortKey =
     sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "BEST_SELLING" : sortConfig.sortKey;
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     products: {
       edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
       pageInfo: PageInfo;
     };
-  }>({
-    operation: "catalogProducts",
-    query: CATALOG_PRODUCTS_QUERY,
+  }>(CATALOG_PRODUCTS_QUERY, {
     variables: {
       first: limit,
       after: cursor,
@@ -485,6 +500,8 @@ async function fetchCatalogProducts({
       language,
     },
   });
+  assertStorefrontOk(response, "catalogProducts");
+  const { data } = response;
 
   const shopifyProducts = data.products.edges
     .map((edge) => edge.node)
@@ -538,14 +555,12 @@ export async function getSearchFacets(params: {
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     search: {
       totalCount: number;
       productFilters: ShopifyFilter[];
     };
-  }>({
-    operation: "searchFacets",
-    query: SEARCH_FACETS_QUERY,
+  }>(SEARCH_FACETS_QUERY, {
     variables: {
       query: searchQuery,
       productFilters: filters.length > 0 ? filters : undefined,
@@ -553,6 +568,8 @@ export async function getSearchFacets(params: {
       language,
     },
   });
+  assertStorefrontOk(response, "searchFacets");
+  const { data } = response;
 
   const transformed = transformShopifyFilters(data.search.productFilters, { activeFilters });
 
@@ -605,15 +622,13 @@ export async function fetchSearchIndexProducts(
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     search: {
       totalCount: number;
       edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
       pageInfo: PageInfo;
     };
-  }>({
-    operation: "searchProducts",
-    query: PRODUCTS_SEARCH_QUERY,
+  }>(PRODUCTS_SEARCH_QUERY, {
     variables: {
       query: searchQuery,
       first: limit,
@@ -625,6 +640,8 @@ export async function fetchSearchIndexProducts(
       language,
     },
   });
+  assertStorefrontOk(response, "searchProducts");
+  const { data } = response;
 
   const shopifyProducts = data.search.edges
     .map((edge) => edge.node)
@@ -649,7 +666,7 @@ export async function searchIndexProducts(
   return result;
 }
 
-const COLLECTION_PRODUCTS_QUERY = `
+const COLLECTION_PRODUCTS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query collectionProducts($handle: String!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean, $filters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
@@ -680,7 +697,7 @@ const COLLECTION_PRODUCTS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
@@ -734,7 +751,7 @@ export async function fetchCollectionProducts(
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     collection: {
       products: {
         edges: Array<{ node: ShopifyProductCard }>;
@@ -742,9 +759,7 @@ export async function fetchCollectionProducts(
         filters: ShopifyFilter[];
       };
     } | null;
-  }>({
-    operation: "collectionProducts",
-    query: COLLECTION_PRODUCTS_QUERY,
+  }>(COLLECTION_PRODUCTS_QUERY, {
     variables: {
       handle: collection,
       first: limit,
@@ -756,6 +771,8 @@ export async function fetchCollectionProducts(
       language,
     },
   });
+  assertStorefrontOk(response, "collectionProducts");
+  const { data } = response;
 
   if (!data.collection) {
     return {
@@ -795,7 +812,7 @@ export async function getCollectionProducts(
   return result;
 }
 
-const PRODUCT_RECOMMENDATION_SETS_QUERY = `
+const PRODUCT_RECOMMENDATION_SETS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query productRecommendationSets($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     complementary: productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
@@ -805,7 +822,7 @@ const PRODUCT_RECOMMENDATION_SETS_QUERY = `
       ...ProductCardFields
     }
   }
-`;
+` as const;
 
 // COMPLEMENTARY is the merchant-curated "pair it with" set (Search & Discovery app);
 // RELATED is Shopify's auto-generated "you may also like" set.
@@ -831,14 +848,14 @@ export async function getProductRecommendationSets({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     complementary: ShopifyProductCard[] | null;
     related: ShopifyProductCard[] | null;
-  }>({
-    operation: "productRecommendationSets",
-    query: PRODUCT_RECOMMENDATION_SETS_QUERY,
+  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, {
     variables: { country, handle, language },
   });
+  assertStorefrontOk(response, "productRecommendationSets");
+  const { data } = response;
 
   const complementary = data.complementary ?? [];
   const related = data.related ?? [];
@@ -851,7 +868,7 @@ export async function getProductRecommendationSets({
   };
 }
 
-const GET_PRODUCTS_BY_HANDLES_QUERY = `
+const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query getProductsByHandles($query: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     products(first: $first, query: $query) {
@@ -862,9 +879,9 @@ const GET_PRODUCTS_BY_HANDLES_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const GET_PRODUCT_BY_ID_QUERY = `
+const GET_PRODUCT_BY_ID_QUERY = `#graphql
   ${PRODUCT_WITH_VARIANTS_FRAGMENT}
   query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     node(id: $id) {
@@ -873,9 +890,9 @@ const GET_PRODUCT_BY_ID_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const GET_PRODUCTS_BY_IDS_QUERY = `
+const GET_PRODUCTS_BY_IDS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
   query getProductsByIds($ids: [ID!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
@@ -884,7 +901,7 @@ const GET_PRODUCTS_BY_IDS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
 function decodeShopifyId(id: string): string {
   if (id.startsWith("gid://")) {
@@ -908,11 +925,14 @@ export async function getProductById({
   const language = getLanguageCode(locale);
   const gid = decodeShopifyId(id);
 
-  const data = await shopifyFetch<{ node: ShopifyProduct | null }>({
-    operation: "getProductById",
-    query: GET_PRODUCT_BY_ID_QUERY,
-    variables: { id: gid, country, language },
-  });
+  const response = await storefront.request<{ node: ShopifyProduct | null }>(
+    GET_PRODUCT_BY_ID_QUERY,
+    {
+      variables: { id: gid, country, language },
+    },
+  );
+  assertStorefrontOk(response, "getProductById");
+  const { data } = response;
 
   const product = data.node;
   if (!product) {
@@ -945,11 +965,14 @@ export async function getProductsByIds({
   const language = getLanguageCode(locale);
   const gids = ids.map(decodeShopifyId);
 
-  const data = await shopifyFetch<{ nodes: (ShopifyProductCard | null)[] }>({
-    operation: "getProductsByIds",
-    query: GET_PRODUCTS_BY_IDS_QUERY,
-    variables: { ids: gids, country, language },
-  });
+  const response = await storefront.request<{ nodes: (ShopifyProductCard | null)[] }>(
+    GET_PRODUCTS_BY_IDS_QUERY,
+    {
+      variables: { ids: gids, country, language },
+    },
+  );
+  assertStorefrontOk(response, "getProductsByIds");
+  const { data } = response;
 
   const shopifyProducts = data.nodes.filter((node): node is ShopifyProductCard => node !== null);
 
@@ -980,13 +1003,13 @@ export async function getProductsByHandles({
   // Build search query: "handle:foo OR handle:bar OR handle:baz"
   const searchQuery = handles.map((h) => `handle:${h}`).join(" OR ");
 
-  const data = await shopifyFetch<{
+  const response = await storefront.request<{
     products: { edges: Array<{ node: ShopifyProductCard }> };
-  }>({
-    operation: "getProductsByHandles",
-    query: GET_PRODUCTS_BY_HANDLES_QUERY,
+  }>(GET_PRODUCTS_BY_HANDLES_QUERY, {
     variables: { query: searchQuery, first: handles.length, country, language },
   });
+  assertStorefrontOk(response, "getProductsByHandles");
+  const { data } = response;
 
   const productMap = new Map<string, ShopifyProductCard>();
   for (const edge of data.products.edges) {

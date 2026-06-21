@@ -35,7 +35,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 - Add the operation to the closest existing file in `lib/shopify/operations/` when the concern already exists there.
 - Create a new operation file only when the concern is genuinely new.
-- Always call `shopifyFetch` with a stable `operation` name, a GraphQL document string, and `variables` passed as an object.
+- Tag the query/mutation with `#graphql` and end the declaration with `as const`, then call `storefront.request<ResponseType>(QUERY, { variables })` followed by `assertStorefrontOk(response, name)`.
 
 ### 3. Reuse fragments deliberately
 
@@ -66,7 +66,7 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 ### 7. Verify the change
 
 - Re-check the query against the live schema with `shopify-ai-toolkit`.
-- Check that the operation name passed to `shopifyFetch` matches the GraphQL operation name.
+- Run `pnpm --filter template codegen` — it validates every `#graphql` query against the schema and fails on unknown fields. Types regenerate at dev/build and are gitignored, so there's nothing to commit.
 - Run the smallest relevant validation command for the touched area.
 
 ## Guardrails
@@ -88,21 +88,22 @@ Use this skill as the reference source for Shopify GraphQL work in the template.
 
 ### Add a new read operation
 
-1. Define the GraphQL query using existing fragments where possible.
-2. Add `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
-3. Call `shopifyFetch` with the query and variables object.
-4. Transform the response before returning it.
+1. Define the `#graphql ... as const` query using existing fragments where possible.
+2. Run `pnpm --filter template codegen` to validate it against the live schema.
+3. Add `"use cache"`, `cacheLife(...)`, and `cacheTag(...)`; use `"use cache: remote"` for search/filter/sort/cursor reads.
+4. Call `storefront.request<ResponseType>(QUERY, { variables })`, then `assertStorefrontOk(response, name)`.
+5. Transform the response before returning it.
 
 ### Add a mutation
 
-1. Define the mutation and typed response shape.
-2. Call `shopifyFetch` without read-cache directives.
+1. Define the `#graphql ... as const` mutation and typed response shape; run codegen.
+2. Call `storefront.request` without read-cache directives, then `assertStorefrontOk`.
 3. If the mutation touches cart state, call `invalidateCartCache()`.
 4. Return transformed domain data.
 
 ### Debug GraphQL errors
 
-- Set `DEBUG_SHOPIFY=true` in `.env.local` to log Shopify requests with timing and variables.
+- Set `DEBUG_SHOPIFY=true` in `.env.local` to log Shopify requests with operation name and timing.
 - Compare every field and argument against the live schema with `shopify-ai-toolkit`.
 - Check whether the wrong fragment is being reused for the surface.
 

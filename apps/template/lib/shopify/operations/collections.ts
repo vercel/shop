@@ -3,8 +3,9 @@ import { cacheLife, cacheTag } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
-import { shopifyFetch } from "../fetch";
+import { assertStorefrontOk } from "../errors";
 import { COLLECTION_FIELDS_FRAGMENT } from "../fragments";
+import { storefront } from "../storefront";
 import {
   type ShopifyCollection,
   transformShopifyCollection,
@@ -19,7 +20,7 @@ type CollectionResponse = {
   collection: ShopifyCollection | null;
 };
 
-const GET_COLLECTIONS_QUERY = `
+const GET_COLLECTIONS_QUERY = `#graphql
   ${COLLECTION_FIELDS_FRAGMENT}
   query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collections(first: $first) {
@@ -30,16 +31,16 @@ const GET_COLLECTIONS_QUERY = `
       }
     }
   }
-`;
+` as const;
 
-const GET_COLLECTION_QUERY = `
+const GET_COLLECTION_QUERY = `#graphql
   ${COLLECTION_FIELDS_FRAGMENT}
   query getCollection($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       ...CollectionFields
     }
   }
-`;
+` as const;
 
 export async function getCollections({
   limit = 250,
@@ -52,11 +53,11 @@ export async function getCollections({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<CollectionsResponse>({
-    operation: "getCollections",
-    query: GET_COLLECTIONS_QUERY,
+  const response = await storefront.request<CollectionsResponse>(GET_COLLECTIONS_QUERY, {
     variables: { first: limit, country, language },
   });
+  assertStorefrontOk(response, "getCollections");
+  const { data } = response;
 
   const rawCollections = data.collections.edges.map((edge) => edge.node);
   return transformShopifyCollections(rawCollections);
@@ -78,11 +79,11 @@ export async function getCollection({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const data = await shopifyFetch<CollectionResponse>({
-    operation: "getCollection",
-    query: GET_COLLECTION_QUERY,
+  const response = await storefront.request<CollectionResponse>(GET_COLLECTION_QUERY, {
     variables: { handle, country, language },
   });
+  assertStorefrontOk(response, "getCollection");
+  const { data } = response;
 
   if (!data.collection) return undefined;
 

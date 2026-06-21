@@ -1,21 +1,21 @@
-export const MONEY_FRAGMENT = `
+export const MONEY_FRAGMENT = `#graphql
   fragment MoneyFields on MoneyV2 {
     amount
     currencyCode
   }
-`;
+` as const;
 
-export const IMAGE_FRAGMENT = `
+export const IMAGE_FRAGMENT = `#graphql
   fragment ImageFields on Image {
     url
     altText
     width
     height
   }
-`;
+` as const;
 
 // Note: Does not include IMAGE_FRAGMENT - expects parent to include it
-export const PRODUCT_VARIANT_FRAGMENT = `
+export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${MONEY_FRAGMENT}
   fragment ProductVariantFields on ProductVariant {
     id
@@ -35,11 +35,11 @@ export const PRODUCT_VARIANT_FRAGMENT = `
       ...ImageFields
     }
   }
-`;
+` as const;
 
 // Lightweight variant reference for bundle relationships. Relies on the parent
 // to include IMAGE_FRAGMENT (matches PRODUCT_VARIANT_FRAGMENT).
-export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `
+export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
   fragment BundleComponentVariantFields on ProductVariant {
     id
     title
@@ -55,12 +55,12 @@ export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
 // The selected/purchasable variant: base fields plus Shopify bundle relationships.
 // Used only where one variant is resolved (the shell default + the suspended query),
 // never for the full matrix or cards. Relies on the parent to include IMAGE_FRAGMENT.
-export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `
+export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
   ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
   fragment PurchasableProductVariantFields on ProductVariant {
@@ -81,9 +81,9 @@ export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
-export const TAXONOMY_CATEGORY_FRAGMENT = `
+export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
   fragment TaxonomyCategoryFields on TaxonomyCategory {
     id
     name
@@ -92,21 +92,21 @@ export const TAXONOMY_CATEGORY_FRAGMENT = `
       name
     }
   }
-`;
+` as const;
 
-export const METAFIELD_FRAGMENT = `
+export const METAFIELD_FRAGMENT = `#graphql
   fragment MetafieldFields on Metafield {
     key
     namespace
     value
     type
   }
-`;
+` as const;
 
 // A bundle's component lines carry Shopify edit instructions (e.g. canRemove:false
 // so a shopper can't pull one product out of a fixed bundle); the parent bundle line
 // is a ComponentizableCartLine whose lineComponents are ordinary CartLines.
-export const CART_FRAGMENT = `
+export const CART_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   fragment CartLineFields on CartLine {
@@ -271,9 +271,9 @@ export const CART_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
-export const COLLECTION_FIELDS_FRAGMENT = `
+export const COLLECTION_FIELDS_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   fragment CollectionFields on Collection {
     handle
@@ -288,9 +288,9 @@ export const COLLECTION_FIELDS_FRAGMENT = `
       description
     }
   }
-`;
+` as const;
 
-export const PRODUCT_FRAGMENT = `
+export const PRODUCT_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
@@ -391,12 +391,12 @@ export const PRODUCT_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
 // Extends the slim shell with the full variant matrix. Used by the AI agent and
 // markdown routes, which enumerate variants; the PDP uses the slim ProductFields
 // plus a per-selection variant query instead.
-export const PRODUCT_WITH_VARIANTS_FRAGMENT = `
+export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
   ${PRODUCT_FRAGMENT}
   fragment ProductWithVariantsFields on Product {
     ...ProductFields
@@ -408,9 +408,9 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = `
       }
     }
   }
-`;
+` as const;
 
-export const PRODUCT_CARD_FRAGMENT = `
+export const PRODUCT_CARD_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
   fragment ProductCardFields on Product {
@@ -444,4 +444,4 @@ export const PRODUCT_CARD_FRAGMENT = `
       }
     }
   }
-`;
+` as const;

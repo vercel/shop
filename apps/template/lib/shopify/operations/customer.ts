@@ -8,7 +8,7 @@ import type {
   CustomerProfile,
 } from "@/lib/types";
 
-import { customerAccountFetch } from "../fetch";
+import { customerAccountFetch } from "../customer-account";
 import {
   type ShopifyCustomerAddress,
   type ShopifyCustomerProfile,

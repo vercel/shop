@@ -10,7 +10,8 @@
     "build/**",
     ".claude/**",
     "app/.well-known/**",
-    "components/ai-elements/**"
+    "components/ai-elements/**",
+    "lib/shopify/types/generated/**"
   ],
   "plugins": ["typescript", "react", "nextjs"],
   "rules": {

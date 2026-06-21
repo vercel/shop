@@ -23,7 +23,7 @@
     "strict": true,
     "target": "ES2017"
   },
-  "exclude": ["node_modules", "scripts", "tmp"],
+  "exclude": ["node_modules", "scripts", "tmp", "lib/shopify/types/generated"],
   "include": [
     "next-env.d.ts",
     "**/*.ts",

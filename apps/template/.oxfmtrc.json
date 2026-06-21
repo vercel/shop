@@ -5,7 +5,8 @@
     "dist/**",
     "build/**",
     ".claude/**",
-    "app/.well-known/**"
+    "app/.well-known/**",
+    "lib/shopify/types/generated/**"
   ],
   "semi": true,
   "singleQuote": false,
