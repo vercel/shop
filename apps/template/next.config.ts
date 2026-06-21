@@ -1,28 +1,35 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+  PHASE_PRODUCTION_SERVER,
+} from "next/constants";
 
-const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
-  (key) => !process.env[key],
-);
-
-if (missingShopify.length > 0) {
-  throw new Error(
-    `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
+function assertRequiredEnv() {
+  const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
+    (key) => !process.env[key],
   );
-}
 
-if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
-  const missing = [
-    "BETTER_AUTH_SECRET",
-    "SHOPIFY_CUSTOMER_CLIENT_ID",
-    "SHOPIFY_CUSTOMER_CLIENT_SECRET",
-  ].filter((key) => !process.env[key]);
-
-  if (missing.length > 0) {
+  if (missingShopify.length > 0) {
     throw new Error(
-      `NEXT_PUBLIC_ENABLE_AUTH=1 requires: ${missing.join(", ")}. ` +
-        `Set the missing variables or unset NEXT_PUBLIC_ENABLE_AUTH.`,
+      `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
     );
+  }
+
+  if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
+    const missing = [
+      "BETTER_AUTH_SECRET",
+      "SHOPIFY_CUSTOMER_CLIENT_ID",
+      "SHOPIFY_CUSTOMER_CLIENT_SECRET",
+    ].filter((key) => !process.env[key]);
+
+    if (missing.length > 0) {
+      throw new Error(
+        `NEXT_PUBLIC_ENABLE_AUTH=1 requires: ${missing.join(", ")}. ` +
+          `Set the missing variables or unset NEXT_PUBLIC_ENABLE_AUTH.`,
+      );
+    }
   }
 }
 
@@ -77,4 +84,19 @@ const withNextIntl = createNextIntlPlugin({
   requestConfig: "./lib/i18n/request.ts",
 });
 
-export default withNextIntl(nextConfig);
+const config = withNextIntl(nextConfig);
+
+export default function getConfig(phase: string): NextConfig {
+  // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.
+  const isTypegen = process.argv.includes("typegen");
+  const isRuntime =
+    phase === PHASE_DEVELOPMENT_SERVER ||
+    phase === PHASE_PRODUCTION_BUILD ||
+    phase === PHASE_PRODUCTION_SERVER;
+
+  if (isRuntime && !isTypegen) {
+    assertRequiredEnv();
+  }
+
+  return config;
+}
