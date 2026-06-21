@@ -16,6 +16,7 @@ import {
   ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
+import { ProductSpecs } from "@/components/product-detail/product-specs";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -255,6 +256,8 @@ async function ProductInfoArea({
       <ComplementaryProducts handle={handle} locale={locale} title={t("pairsWith")} />
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
+
+      <ProductSpecs metafields={product.metafields ?? []} title={t("specifications")} />
     </div>
   );
 }

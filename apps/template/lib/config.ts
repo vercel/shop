@@ -37,6 +37,14 @@ export const agent = {
   enabled: process.env.NEXT_PUBLIC_ENABLE_AGENT === "1",
 } as const;
 
+// Product metafields to surface on the PDP, by namespace + key. Empty by default:
+// namespaces are shop-specific, so a storefront opts in to the ones it populates.
+// Friendly labels for each key live in METAFIELD_LABELS (lib/shopify/transforms/product.ts).
+export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
+  // { namespace: "custom", key: "material" },
+  // { namespace: "reviews", key: "rating" },
+];
+
 export const navItems: MenuItem[] = [
   {
     id: "default-nav-shop",

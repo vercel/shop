@@ -20,23 +20,20 @@ The PDP shell fetches the product's options and Shopify's encoded variant-availa
 
 ## Metafields
 
-The template ships with **no metafield identifiers** in `PRODUCT_FRAGMENT`. Metafield namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults.
+The template ships with **no metafields wired in** by default. Namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults: an empty config means the product query is unchanged and nothing renders.
 
-To wire metafields into the PDP for your store:
+To surface metafields on the PDP for your store, list the ones you populate in `productMetafieldIdentifiers` in `lib/config.ts`:
 
-1. Add a `metafields(identifiers: [...])` field to `PRODUCT_FRAGMENT` in `lib/shopify/fragments.ts`, importing `${METAFIELD_FRAGMENT}` and selecting `...MetafieldFields` inside.
-2. Extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for the keys you query.
-
-Example:
-
-```graphql
-metafields(identifiers: [
-  {namespace: "custom", key: "material"},
-  {namespace: "custom", key: "warranty"},
-]) {
-  ...MetafieldFields
-}
+```ts
+export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
+  { namespace: "custom", key: "material" },
+  { namespace: "custom", key: "warranty" },
+];
 ```
+
+The product-detail query (`getProductByHandle` in `lib/shopify/operations/products.ts`) appends a `metafields(identifiers: [...])` selection built from that list, and `ProductSpecs` (`components/product-detail/product-specs.tsx`) renders them as a label/value "Specifications" list below the description. Optionally extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for your keys — keys without an entry fall back to a humanized version of the key.
+
+Values are formatted by metafield type: text and number pass through, measurements (`dimension`/`weight`/`volume`) and `rating` are parsed from their JSON, `boolean` becomes Yes/No, and `list.*` types are joined. **Reference types** (product or metaobject references) are skipped — their value is a GID that needs a follow-up query to resolve.
 
 Define metafields in Shopify admin under **Settings → Custom data → Products → Add definition**.
 

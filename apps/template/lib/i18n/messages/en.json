@@ -301,6 +301,7 @@
     "selectVariant": "Please select a variant",
     "selectVariantLabel": "Select {name}: {value}",
     "sku": "SKU",
+    "specifications": "Specifications",
     "stockLeft": "({stock} left)",
     "swatchAlt": "{value} swatch",
     "unavailableVariantLabel": "{name}: {value} (unavailable)",

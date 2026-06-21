@@ -321,6 +321,61 @@ const METAFIELD_LABELS: Record<string, string> = {
   model_number: "Model Number",
 };
 
+// A single scalar metafield value, already parsed from its JSON envelope: an object
+// for measurement/money/rating types, a primitive otherwise.
+function formatScalarMetafield(type: string, value: unknown): string {
+  switch (type) {
+    case "boolean":
+      return value === true || value === "true" ? "Yes" : "No";
+    case "dimension":
+    case "volume":
+    case "weight": {
+      const v = value as { unit?: string; value?: number };
+      return v?.unit ? `${v.value} ${v.unit}` : String(v?.value ?? value);
+    }
+    case "money": {
+      const v = value as { amount?: string; currency_code?: string };
+      return v?.currency_code ? `${v.amount} ${v.currency_code}` : String(v?.amount ?? value);
+    }
+    case "rating": {
+      const v = value as { value?: number | string };
+      return String(v?.value ?? value);
+    }
+    default:
+      return String(value);
+  }
+}
+
+const STRUCTURED_METAFIELD_TYPES = new Set(["dimension", "money", "rating", "volume", "weight"]);
+
+// Shopify stores measurement/money/rating values as JSON, and list.* values as a JSON
+// array of those. Reference types resolve to GIDs we can't render without extra queries,
+// so they're skipped (null); every list element is formatted by its element type.
+function formatMetafieldValue(type: string, value: string): string | null {
+  if (type.includes("_reference")) return null;
+
+  if (type.startsWith("list.")) {
+    const itemType = type.slice("list.".length);
+    try {
+      const items = JSON.parse(value) as unknown[];
+      if (!Array.isArray(items)) return value;
+      return items.map((item) => formatScalarMetafield(itemType, item)).join(", ");
+    } catch {
+      return value;
+    }
+  }
+
+  if (STRUCTURED_METAFIELD_TYPES.has(type)) {
+    try {
+      return formatScalarMetafield(type, JSON.parse(value));
+    } catch {
+      return value;
+    }
+  }
+
+  return formatScalarMetafield(type, value);
+}
+
 function transformMetafields(
   metafields?: (ShopifyMetafield | null)[],
 ): Array<{ key: string; label: string; value: string }> {
@@ -328,11 +383,12 @@ function transformMetafields(
 
   return metafields
     .filter((mf): mf is ShopifyMetafield => mf !== null && mf.value !== "")
-    .map((mf) => ({
-      key: mf.key,
-      label: METAFIELD_LABELS[mf.key] || formatKey(mf.key),
-      value: mf.value,
-    }));
+    .map((mf) => {
+      const value = formatMetafieldValue(mf.type, mf.value);
+      if (value === null) return null;
+      return { key: mf.key, label: METAFIELD_LABELS[mf.key] || formatKey(mf.key), value };
+    })
+    .filter((mf): mf is { key: string; label: string; value: string } => mf !== null);
 }
 
 function formatKey(key: string): string {
