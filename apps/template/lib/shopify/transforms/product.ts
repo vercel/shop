@@ -321,39 +321,59 @@ const METAFIELD_LABELS: Record<string, string> = {
   model_number: "Model Number",
 };
 
-// Shopify stores some metafield values as JSON (measurements, ratings, lists). Reference
-// types resolve to GIDs we can't render without extra queries, so they're skipped (null).
+// A single scalar metafield value, already parsed from its JSON envelope: an object
+// for measurement/money/rating types, a primitive otherwise.
+function formatScalarMetafield(type: string, value: unknown): string {
+  switch (type) {
+    case "boolean":
+      return value === true || value === "true" ? "Yes" : "No";
+    case "dimension":
+    case "volume":
+    case "weight": {
+      const v = value as { unit?: string; value?: number };
+      return v?.unit ? `${v.value} ${v.unit}` : String(v?.value ?? value);
+    }
+    case "money": {
+      const v = value as { amount?: string; currency_code?: string };
+      return v?.currency_code ? `${v.amount} ${v.currency_code}` : String(v?.amount ?? value);
+    }
+    case "rating": {
+      const v = value as { value?: number | string };
+      return String(v?.value ?? value);
+    }
+    default:
+      return String(value);
+  }
+}
+
+const STRUCTURED_METAFIELD_TYPES = new Set(["dimension", "money", "rating", "volume", "weight"]);
+
+// Shopify stores measurement/money/rating values as JSON, and list.* values as a JSON
+// array of those. Reference types resolve to GIDs we can't render without extra queries,
+// so they're skipped (null); every list element is formatted by its element type.
 function formatMetafieldValue(type: string, value: string): string | null {
   if (type.includes("_reference")) return null;
-  if (type === "boolean") return value === "true" ? "Yes" : "No";
-
-  if (type === "dimension" || type === "weight" || type === "volume") {
-    try {
-      const parsed = JSON.parse(value) as { unit?: string; value: number };
-      return parsed.unit ? `${parsed.value} ${parsed.unit}` : String(parsed.value);
-    } catch {
-      return value;
-    }
-  }
-
-  if (type === "rating") {
-    try {
-      return String((JSON.parse(value) as { value: number }).value);
-    } catch {
-      return value;
-    }
-  }
 
   if (type.startsWith("list.")) {
+    const itemType = type.slice("list.".length);
     try {
       const items = JSON.parse(value) as unknown[];
-      return Array.isArray(items) ? items.join(", ") : value;
+      if (!Array.isArray(items)) return value;
+      return items.map((item) => formatScalarMetafield(itemType, item)).join(", ");
     } catch {
       return value;
     }
   }
 
-  return value;
+  if (STRUCTURED_METAFIELD_TYPES.has(type)) {
+    try {
+      return formatScalarMetafield(type, JSON.parse(value));
+    } catch {
+      return value;
+    }
+  }
+
+  return formatScalarMetafield(type, value);
 }
 
 function transformMetafields(
