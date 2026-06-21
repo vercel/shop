@@ -783,77 +783,60 @@ export async function getCollectionProducts(
   return result;
 }
 
-const PRODUCT_RECOMMENDATIONS_QUERY = `
+const PRODUCT_RECOMMENDATION_SETS_QUERY = `
   ${PRODUCT_CARD_FRAGMENT}
-  query productRecommendations($productId: ID!, $intent: ProductRecommendationIntent, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productRecommendations(productId: $productId, intent: $intent) {
+  query productRecommendationSets($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    complementary: productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
+      ...ProductCardFields
+    }
+    related: productRecommendations(productHandle: $handle, intent: RELATED) {
       ...ProductCardFields
     }
   }
 `;
 
-// RELATED is Shopify's auto-generated "you may also like" set; COMPLEMENTARY is the
-// merchant-curated "pair it with" set configured in the Search & Discovery app.
-type RecommendationIntent = "COMPLEMENTARY" | "RELATED";
+// COMPLEMENTARY is the merchant-curated "pair it with" set (Search & Discovery app);
+// RELATED is Shopify's auto-generated "you may also like" set.
+export interface ProductRecommendationSets {
+  complementary: ProductCard[];
+  related: ProductCard[];
+}
 
-async function fetchRecommendations({
+// Both intents ride one aliased request, so the PDP's two recommendation surfaces
+// dedupe to a single Shopify call. The entry carries both the complementary- and
+// recommendations- tags so either webhook invalidation still busts it.
+export async function getProductRecommendationSets({
   handle,
-  intent,
-  locale,
+  locale = defaultLocale,
 }: {
   handle: string;
-  intent: RecommendationIntent;
-  locale: string;
-}): Promise<ProductCard[]> {
+  locale?: string;
+}): Promise<ProductRecommendationSets> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `complementary-${handle}`, `recommendations-${handle}`);
+
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const product = await getProduct({ handle, locale });
-  if (!product) {
-    return [];
-  }
-
-  const data = await shopifyFetch<{ productRecommendations: ShopifyProductCard[] }>({
-    operation: "productRecommendations",
-    query: PRODUCT_RECOMMENDATIONS_QUERY,
-    variables: { productId: product.id, intent, country, language },
+  const data = await shopifyFetch<{
+    complementary: ShopifyProductCard[] | null;
+    related: ShopifyProductCard[] | null;
+  }>({
+    operation: "productRecommendationSets",
+    query: PRODUCT_RECOMMENDATION_SETS_QUERY,
+    variables: { country, handle, language },
   });
 
-  if (!data.productRecommendations) {
-    return [];
-  }
+  const complementary = data.complementary ?? [];
+  const related = data.related ?? [];
+  tagProducts(complementary);
+  tagProducts(related);
 
-  tagProducts(data.productRecommendations);
-
-  return data.productRecommendations.map(transformShopifyProductCard);
-}
-
-export async function getProductRecommendations({
-  handle,
-  locale = defaultLocale,
-}: {
-  handle: string;
-  locale?: string;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `recommendations-${handle}`);
-
-  return fetchRecommendations({ handle, intent: "RELATED", locale });
-}
-
-export async function getComplementaryProducts({
-  handle,
-  locale = defaultLocale,
-}: {
-  handle: string;
-  locale?: string;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `complementary-${handle}`);
-
-  return fetchRecommendations({ handle, intent: "COMPLEMENTARY", locale });
+  return {
+    complementary: complementary.map(transformShopifyProductCard),
+    related: related.map(transformShopifyProductCard),
+  };
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `

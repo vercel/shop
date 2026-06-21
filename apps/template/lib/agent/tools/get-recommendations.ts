@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
 
 import { getAgentContext } from "../server";
 
@@ -17,7 +17,16 @@ Returns AI-powered recommendations from Shopify.`,
       const { user } = getAgentContext();
 
       try {
-        const recommendations = await getProductRecommendations({ handle, locale: user.locale });
+        const { complementary, related } = await getProductRecommendationSets({
+          handle,
+          locale: user.locale,
+        });
+        const seen = new Set<string>();
+        const recommendations = [...complementary, ...related].filter((p) => {
+          if (seen.has(p.handle)) return false;
+          seen.add(p.handle);
+          return true;
+        });
 
         return {
           success: true,

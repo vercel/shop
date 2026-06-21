@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getProductRecommendations } from "@/lib/shopify/operations/products";
+import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
 
 const RECOMMENDATION_LIMIT = 4;
 
@@ -27,12 +27,12 @@ export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
 
 async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
   const resolvedHandle = await handle;
-  const [t, recommendations] = await Promise.all([
+  const [t, { related }] = await Promise.all([
     getTranslations("product"),
-    getProductRecommendations({ handle: resolvedHandle, locale }),
+    getProductRecommendationSets({ handle: resolvedHandle, locale }),
   ]);
 
-  if (recommendations.length === 0) return null;
+  if (related.length === 0) return null;
 
   return (
     <div className="grid gap-4">
@@ -40,7 +40,7 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
         {t("recommendations")}
       </h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        {recommendations.slice(0, RECOMMENDATION_LIMIT).map((product) => (
+        {related.slice(0, RECOMMENDATION_LIMIT).map((product) => (
           <ProductCard
             key={product.id}
             product={product}
