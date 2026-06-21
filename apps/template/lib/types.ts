@@ -50,6 +50,9 @@ export interface ProductCard {
   featuredImage: Image | null;
   handle: string;
   id: string;
+  /** Highest variant price; equals price for single-price products, else the top of the range. */
+  maxPrice: Money;
+  /** Lowest variant price; the card shows a "min – max" range when maxPrice differs. */
   price: Money;
   title: string;
   vendor?: string;

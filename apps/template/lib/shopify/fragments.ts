@@ -426,6 +426,9 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
       minVariantPrice {
         ...MoneyFields
       }
+      maxVariantPrice {
+        ...MoneyFields
+      }
     }
     compareAtPriceRange {
       minVariantPrice {

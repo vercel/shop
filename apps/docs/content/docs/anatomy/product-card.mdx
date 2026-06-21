@@ -19,6 +19,10 @@ Used in the home featured grid, collection (PLP) and search grids, the related-p
 
 The badge label comes from the `product.featuredBadge` translation key, so it stays localized.
 
+## Price
+
+`ProductCard` carries both `price` (the lowest variant price) and `maxPrice` (the highest). When they differ — the product's variants span a price range — the card renders both bounds as a `min – max` range (_$48.00 – $96.00_); otherwise it shows the single price. Because per-variant discounts differ across a range, the compare-at strike-through and discount badge are suppressed when a range is shown; single-price products keep the strike-through and percent-off badge. The PDP, which has variant selection, instead resolves the exact selected variant's price rather than the range.
+
 ## Aspect ratio
 
 `ProductCardImage` accepts `aspectRatio` of `square` (default), `portrait`, or `landscape`, applied via `data-[aspect-ratio=...]` selectors. The skeleton honors the same prop so the placeholder matches the loaded card.

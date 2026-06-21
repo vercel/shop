@@ -139,6 +139,7 @@ function ClientProductCard({
             <ProductCardPrice
               amount={product.price.amount}
               currencyCode={product.price.currencyCode}
+              maxAmount={product.maxPrice.amount}
               compareAtAmount={product.compareAtPrice?.amount}
               compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
               locale={locale}

@@ -156,6 +156,7 @@ export interface ShopifyProductCard {
   featuredImage: ShopifyImage | null;
   priceRange: {
     minVariantPrice: ShopifyMoney;
+    maxVariantPrice: ShopifyMoney;
   };
   compareAtPriceRange?: {
     minVariantPrice: ShopifyMoney;
@@ -403,6 +404,7 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     title: product.title,
     featuredImage: transformImage(product.featuredImage),
     price: product.priceRange.minVariantPrice,
+    maxPrice: product.priceRange.maxVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
@@ -437,6 +439,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     title: product.title,
     featuredImage: transformImage(product.featuredImage),
     price: product.priceRange.minVariantPrice,
+    maxPrice: product.priceRange.maxVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,

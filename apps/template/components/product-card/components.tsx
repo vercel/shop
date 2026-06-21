@@ -130,6 +130,8 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
 interface ProductCardPriceProps {
   amount: string;
   currencyCode: string;
+  /** Highest variant price; when it differs from amount the card renders a "min – max" range. */
+  maxAmount?: string;
   compareAtAmount?: string;
   compareAtCurrencyCode?: string;
   locale: string;
@@ -145,6 +147,7 @@ function getDiscountPercent(price: number, compareAtPrice: number | undefined): 
 function ProductCardPrice({
   amount,
   currencyCode,
+  maxAmount,
   compareAtAmount,
   compareAtCurrencyCode,
   locale,
@@ -153,17 +156,32 @@ function ProductCardPrice({
 }: ProductCardPriceProps) {
   const priceNum = parseFloat(amount);
   const compareAtNum = compareAtAmount ? parseFloat(compareAtAmount) : undefined;
-  const discountPercent = getDiscountPercent(priceNum, compareAtNum);
+  const isRange = maxAmount != null && maxAmount !== amount;
+  // A range's per-variant discounts differ, so a single compare-at would be misleading.
+  const discountPercent = isRange ? null : getDiscountPercent(priceNum, compareAtNum);
 
   return (
     <div data-slot="product-card-price" className={cn(className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <Price
-          amount={amount}
-          currencyCode={currencyCode}
-          locale={locale}
-          className="text-sm text-main-foreground"
-        />
+        <span className="inline-flex items-baseline gap-x-1 text-sm text-main-foreground">
+          <Price
+            amount={amount}
+            currencyCode={currencyCode}
+            locale={locale}
+            className="text-sm text-main-foreground"
+          />
+          {isRange && (
+            <>
+              <span>–</span>
+              <Price
+                amount={maxAmount}
+                currencyCode={currencyCode}
+                locale={locale}
+                className="text-sm text-main-foreground"
+              />
+            </>
+          )}
+        </span>
         {discountPercent && compareAtAmount && compareAtCurrencyCode && (
           <>
             <Price
