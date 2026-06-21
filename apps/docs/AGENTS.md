@@ -29,23 +29,23 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 
 ## Common edit targets
 
-| Task | Edit |
-| --- | --- |
-| Site title, logo, nav, GitHub links, AI prompt, suggestions, `siteId` | `geistdocs.tsx` |
-| Add or update documentation pages | `content/docs/**/*.mdx` |
-| Sidebar order, groups, and labels | `content/docs/**/meta.json` |
-| Override or register MDX components | `components/geistdocs/mdx-components.tsx` |
-| Provider, analytics, global client behavior | `components/geistdocs/provider.tsx` |
-| Docs layout shell | `components/geistdocs/docs-layout.tsx` |
-| Fumadocs source adapter | `lib/geistdocs/source.ts` |
-| Fumadocs collections / frontmatter schema | `source.config.ts` |
-| Docs page renderer | `app/[lang]/docs/[[...slug]]/page.tsx` |
-| AI-readable markdown output | `app/[lang]/{agents.md,llms.txt,sitemap.md}/route.ts`, `app/[lang]/llms.mdx/[[...slug]]/route.ts`, `app/[lang]/.well-known/mcp.json/route.ts` |
-| Chat or search APIs | `app/api/chat/route.ts`, `app/api/search/route.ts` |
-| Request handling before/after Geistdocs routing | `proxy.ts` (keep `export const config` static; exclude only `api(?:/|$)`) |
-| Marketing homepage | `app/[lang]/(home)/**` |
-| Shared styles | `app/global.css`, `app/styles/geistdocs.css` |
-| Homepage-only styles (scoped to `.shop-home`) | `app/styles/home.css` |
+| Task                                                                  | Edit                                                                                                                                          |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Site title, logo, nav, GitHub links, AI prompt, suggestions, `siteId` | `geistdocs.tsx`                                                                                                                               |
+| Add or update documentation pages                                     | `content/docs/**/*.mdx`                                                                                                                       |
+| Sidebar order, groups, and labels                                     | `content/docs/**/meta.json`                                                                                                                   |
+| Override or register MDX components                                   | `components/geistdocs/mdx-components.tsx`                                                                                                     |
+| Provider, analytics, global client behavior                           | `components/geistdocs/provider.tsx`                                                                                                           |
+| Docs layout shell                                                     | `components/geistdocs/docs-layout.tsx`                                                                                                        |
+| Fumadocs source adapter                                               | `lib/geistdocs/source.ts`                                                                                                                     |
+| Fumadocs collections / frontmatter schema                             | `source.config.ts`                                                                                                                            |
+| Docs page renderer                                                    | `app/[lang]/docs/[[...slug]]/page.tsx`                                                                                                        |
+| AI-readable markdown output                                           | `app/[lang]/{agents.md,llms.txt,sitemap.md}/route.ts`, `app/[lang]/llms.mdx/[[...slug]]/route.ts`, `app/[lang]/.well-known/mcp.json/route.ts` |
+| Chat or search APIs                                                   | `app/api/chat/route.ts`, `app/api/search/route.ts`                                                                                            |
+| Request handling before/after Geistdocs routing                       | `proxy.ts` (keep `export const config` static; exclude only `api(?:/\|$)`)                                                                    |
+| Marketing homepage                                                    | `app/[lang]/(home)/**`                                                                                                                        |
+| Shared styles                                                         | `app/global.css`, `app/styles/geistdocs.css`                                                                                                  |
+| Homepage-only styles (scoped to `.shop-home`)                         | `app/styles/home.css`                                                                                                                         |
 
 ## Shop-specific conventions
 

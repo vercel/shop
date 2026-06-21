@@ -27,13 +27,13 @@ The site serves markdown to agents via `/llms.txt`, `/agents.md`, `/sitemap.md`,
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `pnpm dev` | Start the dev server |
-| `pnpm build` | Production build |
-| `pnpm lint` | oxlint, oxfmt check, and doc path validation |
-| `pnpm typecheck` | TypeScript |
-| `npx tsx scripts/sync-skills.ts` | Sync skill content into docs |
-| `pnpm exec geistdocs update` | Update `@vercel/geistdocs` |
+| Command                          | Description                                  |
+| -------------------------------- | -------------------------------------------- |
+| `pnpm dev`                       | Start the dev server                         |
+| `pnpm build`                     | Production build                             |
+| `pnpm lint`                      | oxlint, oxfmt check, and doc path validation |
+| `pnpm typecheck`                 | TypeScript                                   |
+| `npx tsx scripts/sync-skills.ts` | Sync skill content into docs                 |
+| `pnpm exec geistdocs update`     | Update `@vercel/geistdocs`                   |
 
 See `AGENTS.md` for agent editing conventions.

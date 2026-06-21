@@ -31,7 +31,8 @@ function extractKeyFilesSection(src: string): string | null {
 const PATH_LIKE = /`([^`\n]+)`/g;
 
 function isPathLike(s: string): boolean {
-  return s.includes("/") && !s.startsWith("http") && !s.includes(" ");
+  // `@scope/pkg` and `@directive` are package names/directives, not repo paths.
+  return s.includes("/") && !s.startsWith("http") && !s.startsWith("@") && !s.includes(" ");
 }
 
 function resolvePath(p: string): { abs: string; existed: boolean } {
