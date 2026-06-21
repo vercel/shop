@@ -83,6 +83,10 @@ A customized bundle parent (`requiresComponents` with no fixed `components`) dis
 
 Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. Both recommendation surfaces — this set and the [related grid](#related-products) below the fold — come from a single cached (`use cache: remote`) `getProductRecommendationSets()` operation that fetches both intents in one aliased `productRecommendations` request and is tagged with both `complementary-{handle}` and `recommendations-{handle}`. Because both surfaces call it with the same arguments, they dedupe to **one** Shopify request; this section reads the `complementary` slice, baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to four products as thumbnail + title + price rows and renders nothing when none are configured.
 
+### Specifications
+
+`product-specs.tsx` renders configured product [metafields](/docs/shopify/pdp#metafields) as a label/value "Specifications" list below the description. The set is **opt-in**: `productMetafieldIdentifiers` in `lib/config.ts` is empty by default, so the product query is unchanged and the section renders nothing until a storefront lists the namespaces and keys it populates. Like bundle relationships, it renders eagerly from the cached product in the static shell. Values are formatted by metafield type (measurements, ratings, lists, booleans); reference (product/metaobject) types are skipped pending GID resolution.
+
 ## Related Products
 
 Below the product details, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set. It reads the `related` slice of the same cached `getProductRecommendationSets()` operation the [complementary set](#complementary-products) consumes — so the two surfaces share one Shopify request — and renders inside a `Suspense` boundary with a skeleton grid fallback.
@@ -113,6 +117,7 @@ The page emits two JSON-LD schemas:
 | `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                                  |
 | `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                                         |
 | `components/product-detail/bundle-components.tsx`      | Renders a bundle's contents and the bundles a product is part of                                                     |
+| `components/product-detail/product-specs.tsx`         | Renders configured product metafields as a "Specifications" label/value list                                         |
 | `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, color-image helpers                                     |
 | `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability                                        |
 

@@ -321,6 +321,41 @@ const METAFIELD_LABELS: Record<string, string> = {
   model_number: "Model Number",
 };
 
+// Shopify stores some metafield values as JSON (measurements, ratings, lists). Reference
+// types resolve to GIDs we can't render without extra queries, so they're skipped (null).
+function formatMetafieldValue(type: string, value: string): string | null {
+  if (type.includes("_reference")) return null;
+  if (type === "boolean") return value === "true" ? "Yes" : "No";
+
+  if (type === "dimension" || type === "weight" || type === "volume") {
+    try {
+      const parsed = JSON.parse(value) as { unit?: string; value: number };
+      return parsed.unit ? `${parsed.value} ${parsed.unit}` : String(parsed.value);
+    } catch {
+      return value;
+    }
+  }
+
+  if (type === "rating") {
+    try {
+      return String((JSON.parse(value) as { value: number }).value);
+    } catch {
+      return value;
+    }
+  }
+
+  if (type.startsWith("list.")) {
+    try {
+      const items = JSON.parse(value) as unknown[];
+      return Array.isArray(items) ? items.join(", ") : value;
+    } catch {
+      return value;
+    }
+  }
+
+  return value;
+}
+
 function transformMetafields(
   metafields?: (ShopifyMetafield | null)[],
 ): Array<{ key: string; label: string; value: string }> {
@@ -328,11 +363,12 @@ function transformMetafields(
 
   return metafields
     .filter((mf): mf is ShopifyMetafield => mf !== null && mf.value !== "")
-    .map((mf) => ({
-      key: mf.key,
-      label: METAFIELD_LABELS[mf.key] || formatKey(mf.key),
-      value: mf.value,
-    }));
+    .map((mf) => {
+      const value = formatMetafieldValue(mf.type, mf.value);
+      if (value === null) return null;
+      return { key: mf.key, label: METAFIELD_LABELS[mf.key] || formatKey(mf.key), value };
+    })
+    .filter((mf): mf is { key: string; label: string; value: string } => mf !== null);
 }
 
 function formatKey(key: string): string {

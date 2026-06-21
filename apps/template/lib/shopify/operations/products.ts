@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
+import { productMetafieldIdentifiers } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Filter,
@@ -14,6 +15,7 @@ import type {
 import { shopifyFetch } from "../fetch";
 import {
   IMAGE_FRAGMENT,
+  METAFIELD_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
@@ -47,11 +49,21 @@ function tagProducts(products: Array<{ id: string }>): void {
   }
 }
 
+const productMetafieldsSelection = productMetafieldIdentifiers.length
+  ? `metafields(identifiers: [${productMetafieldIdentifiers
+      .map(({ key, namespace }) => `{ namespace: "${namespace}", key: "${key}" }`)
+      .join(", ")}]) {
+      ...MetafieldFields
+    }`
+  : "";
+
 const GET_PRODUCT_BY_HANDLE_QUERY = `
+  ${productMetafieldIdentifiers.length ? METAFIELD_FRAGMENT : ""}
   ${PRODUCT_FRAGMENT}
   query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductFields
+      ${productMetafieldsSelection}
     }
   }
 `;
