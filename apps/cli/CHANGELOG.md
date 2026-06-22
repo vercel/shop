@@ -1,5 +1,11 @@
 # create-vercel-shop
 
+## 0.3.1
+
+### Patch Changes
+
+- [#355](https://github.com/vercel/shop/pull/355) [`9610736`](https://github.com/vercel/shop/commit/9610736a063d92f180af0495f04fe9c6f34442a2) Thanks [@blurrah](https://github.com/blurrah)! - Require coding agents and other non-interactive callers to provide an explicit target directory instead of silently creating `my-shop`.
+
 ## 0.3.0
 
 ### Minor Changes
