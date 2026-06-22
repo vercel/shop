@@ -284,7 +284,7 @@ function FilterPriceRange({
       {...props}
     >
       <div className="flex flex-1 items-center rounded-lg bg-input px-2.5 h-8">
-        <span className="text-sm text-muted-foreground">{currencySymbol}</span>
+        <span className="text-base text-muted-foreground md:text-sm">{currencySymbol}</span>
         <Input
           type="number"
           step="0.01"
@@ -292,12 +292,12 @@ function FilterPriceRange({
           placeholder={fromPlaceholder}
           value={minValue}
           onChange={(e) => onMinChange?.(e.target.value)}
-          className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-auto border-0 bg-transparent px-1 shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       </div>
       <span className="text-muted-foreground">–</span>
       <div className="flex flex-1 items-center rounded-lg bg-input px-2.5 h-8">
-        <span className="text-sm text-muted-foreground">{currencySymbol}</span>
+        <span className="text-base text-muted-foreground md:text-sm">{currencySymbol}</span>
         <Input
           type="number"
           step="0.01"
@@ -305,7 +305,7 @@ function FilterPriceRange({
           placeholder={toPlaceholder}
           value={maxValue}
           onChange={(e) => onMaxChange?.(e.target.value)}
-          className="h-auto border-0 bg-transparent px-1 text-sm shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="h-auto border-0 bg-transparent px-1 shadow-none outline-none focus-visible:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
       </div>
       <button
