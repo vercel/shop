@@ -1,8 +1,10 @@
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  - "@ai-sdk/react"
   - "@next/*"
   - "@types/react"
+  - ai
   - next
   - react
   - react-dom
