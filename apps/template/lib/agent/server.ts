@@ -182,9 +182,9 @@ function getSystemPrompt() {
   return createSystemPrompt(ctx);
 }
 
-const defaults: ToolLoopAgentSettings = {
+const defaults = {
   model: "anthropic/claude-sonnet-4.6",
-};
+} satisfies Partial<ToolLoopAgentSettings>;
 
 const tools = {
   searchProducts: searchProductsTool(),
