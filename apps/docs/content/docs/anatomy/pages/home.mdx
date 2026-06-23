@@ -22,7 +22,7 @@ On mobile, the subheadline and CTA text are hidden to keep the banner compact.
 
 ## Products grid
 
-A responsive grid showing the top 8 products fetched via `getCatalogProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a [product card](/docs/anatomy/product-card) with:
+A responsive grid showing the top 8 products fetched via `searchIndexProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a [product card](/docs/anatomy/product-card) with:
 
 - Featured image, with a muted image-icon placeholder when the product has no image
 - Out-of-stock overlay when unavailable
@@ -32,7 +32,7 @@ The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. A `Produ
 
 ## Data fetching
 
-Products are fetched server-side with `getCatalogProducts({ limit: 8, locale })`, which pulls the top products across the entire catalog (best-selling order) rather than a curated collection. The result is cached with `cacheLife("max")` and product-level cache tags for granular revalidation. The section heading and its "view all" link are set by the `title` and `collectionUrl` props on the `ProductsGrid` call in `app/page.tsx`, which point at `/collections/all` by default.
+Products are fetched server-side with `searchIndexProducts({ limit: 8, locale })` — the same relevance-ranked Storefront `search` path (wildcard `*` query) that backs `/collections/all`, so the home grid shows exactly the first 8 products a shopper sees on that page rather than a separate best-selling list or a curated collection. The result is cached with `cacheLife("max")` and product-level cache tags for granular revalidation. The section heading and its "view all" link are set by the `title` and `collectionUrl` props on the `ProductsGrid` call in `app/page.tsx`, which point at `/collections/all` by default.
 
 ## Key files
 

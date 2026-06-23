@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import { getCatalogProducts } from "@/lib/shopify/operations/products";
+import { searchIndexProducts } from "@/lib/shopify/operations/products";
 import { cn } from "@/lib/utils";
 
 interface ProductsGridSkeletonProps {
@@ -61,7 +61,8 @@ async function ProductsGridContent({
   locale: Locale;
   outOfStockText: string;
 }) {
-  const { products } = await getCatalogProducts({ limit, locale });
+  // Use the search index (not the products connection) so these match the first items on /collections/all.
+  const { products } = await searchIndexProducts({ limit, locale });
 
   if (products.length === 0) return null;
 
