@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState } from "react";
 
@@ -8,6 +9,7 @@ import {
   useFilterPending,
   useFilterTransition,
 } from "@/components/collections/filter-pending-context";
+import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
 
@@ -23,6 +25,7 @@ import {
   FilterSidebarActiveFilters,
   FilterSidebarHeader,
   FilterSidebarScrollFade,
+  FilterSwatchGrid,
 } from "./filter-primitives";
 
 interface CollectionFilterSidebarClientProps {
@@ -250,25 +253,54 @@ export function CollectionFilterSidebarClient({
             <FilterSection key={filter.id}>
               <FilterSectionHeader title={filter.label} />
               <FilterSectionContent>
-                <FilterOptionList>
-                  {filter.values.slice(0, 10).map((value) => (
-                    <FilterOption
-                      key={value.id}
-                      label={value.label}
-                      count={value.count}
-                      selected={currentValues.includes(value.value)}
-                      href={computeFilterHref(filter.paramKey, value.value)}
-                      pending={
-                        isPending &&
-                        pendingFilterRef.current === `${filter.paramKey}:${value.value}`
-                      }
-                      onClick={(e) => {
-                        e.preventDefault();
-                        toggleFilter(filter.paramKey, value.value);
-                      }}
-                    />
-                  ))}
-                </FilterOptionList>
+                {filter.presentation === "swatch" ? (
+                  <FilterSwatchGrid>
+                    {filter.values.map((value) => (
+                      <Link
+                        key={value.id}
+                        href={computeFilterHref(filter.paramKey, value.value)}
+                        scroll={false}
+                        aria-label={tSearch("selectFilterValue", {
+                          name: filter.label,
+                          value: value.label,
+                        })}
+                        aria-pressed={currentValues.includes(value.value)}
+                        className="block cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleFilter(filter.paramKey, value.value);
+                        }}
+                      >
+                        <Swatch
+                          color={value.swatch?.color}
+                          image={value.swatch?.image}
+                          label={value.label}
+                          selected={currentValues.includes(value.value)}
+                        />
+                      </Link>
+                    ))}
+                  </FilterSwatchGrid>
+                ) : (
+                  <FilterOptionList>
+                    {filter.values.map((value) => (
+                      <FilterOption
+                        key={value.id}
+                        label={value.label}
+                        count={value.count}
+                        selected={currentValues.includes(value.value)}
+                        href={computeFilterHref(filter.paramKey, value.value)}
+                        pending={
+                          isPending &&
+                          pendingFilterRef.current === `${filter.paramKey}:${value.value}`
+                        }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleFilter(filter.paramKey, value.value);
+                        }}
+                      />
+                    ))}
+                  </FilterOptionList>
+                )}
               </FilterSectionContent>
             </FilterSection>
           );

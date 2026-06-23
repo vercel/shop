@@ -1,6 +1,19 @@
-import type { Filter, FilterType, FilterValue, PriceRange } from "@/lib/types";
+import type {
+  Filter,
+  FilterPresentation,
+  FilterType,
+  FilterValue,
+  OptionValueSwatch,
+  PriceRange,
+} from "@/lib/types";
 
-import type { ProductFilter, ShopifyFilter, ShopifyFilterType } from "../types/filters";
+import type {
+  ProductFilter,
+  ShopifyFilter,
+  ShopifyFilterPresentation,
+  ShopifyFilterType,
+  ShopifyFilterValue,
+} from "../types/filters";
 
 export interface TransformFiltersOptions {
   hideZeroCount?: boolean;
@@ -36,6 +49,7 @@ function parseShopifyFilterValue(inputJson: string): string | null {
     }
     if (input.tag) return input.tag;
     if (input.productMetafield) return input.productMetafield.value;
+    if (input.taxonomyMetafield) return input.taxonomyMetafield.value;
     return null;
   } catch {
     return null;
@@ -53,20 +67,44 @@ function mapShopifyFilterType(type: ShopifyFilterType): FilterType {
   }
 }
 
-function transformFilterValue(value: {
-  id: string;
-  label: string;
-  count: number;
-  input: string;
-}): FilterValue | null {
+function mapShopifyFilterPresentation(
+  presentation: ShopifyFilterPresentation | null | undefined,
+): FilterPresentation | undefined {
+  switch (presentation) {
+    case "IMAGE":
+      return "image";
+    case "SWATCH":
+      return "swatch";
+    case "TEXT":
+      return "text";
+    default:
+      return undefined;
+  }
+}
+
+function transformFilterSwatch(
+  swatch: ShopifyFilterValue["swatch"],
+): OptionValueSwatch | undefined {
+  if (!swatch) return undefined;
+  const result: OptionValueSwatch = {};
+  if (swatch.color) result.color = swatch.color;
+  if (swatch.image?.previewImage?.url) result.image = swatch.image.previewImage.url;
+  if (!result.color && !result.image) return undefined;
+  return result;
+}
+
+function transformFilterValue(value: ShopifyFilterValue): FilterValue | null {
   const parsedValue = parseShopifyFilterValue(value.input);
   if (!parsedValue) return null;
 
+  const swatch = transformFilterSwatch(value.swatch);
+
   return {
+    count: value.count,
     id: value.id,
     label: value.label,
+    ...(swatch ? { swatch } : {}),
     value: parsedValue,
-    count: value.count,
   };
 }
 
@@ -75,11 +113,14 @@ function transformFilter(filter: ShopifyFilter): Filter {
     .map(transformFilterValue)
     .filter((v): v is FilterValue => v !== null);
 
+  const presentation = mapShopifyFilterPresentation(filter.presentation);
+
   return {
     id: filter.id,
     label: filter.label,
-    type: mapShopifyFilterType(filter.type),
     paramKey: getParamKeyFromShopifyId(filter.id),
+    ...(presentation ? { presentation } : {}),
+    type: mapShopifyFilterType(filter.type),
     values,
   };
 }

@@ -237,11 +237,20 @@ const SEARCH_FACETS_QUERY = `#graphql
         id
         label
         type
+        presentation
         values {
           id
           label
           count
           input
+          swatch {
+            color
+            image {
+              previewImage {
+                url
+              }
+            }
+          }
         }
       }
     }
@@ -433,6 +442,17 @@ export function buildProductFiltersFromParams(
       }
       continue;
     }
+
+    // filter.{v|p}.t.{namespace}.{key} → taxonomyMetafield (e.g. Color via shopify.color-pattern)
+    const taxonomyMatch = key.match(/^filter\.[vp]\.t\.([^.]+)\.(.+)$/i);
+    if (taxonomyMatch) {
+      for (const v of toArray(value)) {
+        filters.push({
+          taxonomyMetafield: { namespace: taxonomyMatch[1], key: taxonomyMatch[2], value: v },
+        });
+      }
+      continue;
+    }
   }
 
   // Combine price.gte and price.lte into a single price filter
@@ -535,17 +555,20 @@ export async function getFilteredCatalogProducts(
   return fetchCatalogProducts(params);
 }
 
-export async function getSearchFacets(params: {
+type SearchFacetsParams = {
   activeFilters?: ActiveFilters;
   collection?: string;
   filters?: ProductFilter[];
   locale?: string;
   query?: string;
-}): Promise<{ filters: Filter[]; priceRange?: PriceRange; total: number }> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
+};
 
+type SearchFacetsResult = { filters: Filter[]; priceRange?: PriceRange; total: number };
+
+// Uncached so browse/search facets reflect live Search & Discovery config (newly
+// enabled filters, swatch setup) rather than a long-lived snapshot; the cached
+// getSearchFacets wrapper below stays for non-paginated /md + agent reads.
+export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
   const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -578,6 +601,14 @@ export async function getSearchFacets(params: {
     priceRange: transformed.priceRange,
     total: data.search.totalCount,
   };
+}
+
+export async function getSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  return fetchSearchFacets(params);
 }
 
 type SearchIndexProductsResult = {
@@ -675,11 +706,20 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
           id
           label
           type
+          presentation
           values {
             id
             label
             count
             input
+            swatch {
+              color
+              image {
+                previewImage {
+                  url
+                }
+              }
+            }
           }
         }
         edges {

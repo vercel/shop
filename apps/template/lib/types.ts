@@ -248,12 +248,15 @@ export interface Collection {
   updatedAt: string;
 }
 
+export type FilterPresentation = "image" | "swatch" | "text";
+
 export type FilterType = "boolean" | "list" | "price";
 
 export interface FilterValue {
   count: number;
   id: string;
   label: string;
+  swatch?: OptionValueSwatch;
   value: string;
 }
 
@@ -261,6 +264,7 @@ export interface Filter {
   id: string;
   label: string;
   paramKey: string;
+  presentation?: FilterPresentation;
   type: FilterType;
   values: FilterValue[];
 }

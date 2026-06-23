@@ -4,8 +4,8 @@ import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   fetchCollectionProducts,
+  fetchSearchFacets,
   fetchSearchIndexProducts,
-  getSearchFacets,
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
@@ -119,7 +119,7 @@ export async function getAllProductsResultsData({
       filters: shopifyFilters,
       locale,
     }),
-    getSearchFacets({ activeFilters, filters: shopifyFilters, locale }),
+    fetchSearchFacets({ activeFilters, filters: shopifyFilters, locale }),
   ]);
 
   return {
