@@ -343,6 +343,7 @@
     "resultRange": "(showing {start}-{end})",
     "results": "Results",
     "selectCategory": "Select collection",
+    "selectFilterValue": "Filter by {name}: {value}",
     "selectSort": "Select sort order",
     "sort": {
       "bestMatches": "Best Matches",

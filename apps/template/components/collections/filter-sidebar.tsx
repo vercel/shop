@@ -260,6 +260,10 @@ export function CollectionFilterSidebarClient({
                         key={value.id}
                         href={computeFilterHref(filter.paramKey, value.value)}
                         scroll={false}
+                        aria-label={tSearch("selectFilterValue", {
+                          name: filter.label,
+                          value: value.label,
+                        })}
                         aria-pressed={currentValues.includes(value.value)}
                         className="block cursor-pointer"
                         onClick={(e) => {
