@@ -24,8 +24,8 @@ export function Swatch({
       data-selected={selected}
       title={label}
       className={cn(
-        "relative block aspect-square w-full overflow-hidden rounded-lg transition-all",
-        "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:inset-ring after:inset-ring-foreground/10",
+        "relative block size-9 shrink-0 overflow-hidden rounded-full transition-all",
+        "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:inset-ring after:inset-ring-foreground/10",
         "data-[selected=true]:ring-2 data-[selected=true]:ring-foreground data-[selected=true]:ring-offset-2 data-[selected=true]:ring-offset-background",
         className,
       )}

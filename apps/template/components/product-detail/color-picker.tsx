@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import Link from "next/link";
 import type * as React from "react";
 
+import { Swatch } from "@/components/ui/swatch";
 import { buildOptionUrl, type SelectedOptions } from "@/lib/product";
 import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -35,46 +35,27 @@ export function ColorPicker({
       <p className="text-sm font-medium text-foreground/70">
         {option.name}: <span className="text-foreground">{selectedValue}</span>
       </p>
-      <div className="grid grid-cols-4 lg:grid-cols-5 gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
-
           const isAvailable = !available || available.has(value.name);
-
           const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
-
           const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const swatch = (
-            <div
-              className={cn(
-                "relative aspect-square w-full rounded-lg transition-all overflow-hidden",
-                "after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:inset-ring after:inset-ring-foreground/10",
-                isSelected && "ring-2 ring-foreground ring-offset-2 ring-offset-background",
-              )}
-            >
-              {imageUrl ? (
-                <Image
-                  src={imageUrl}
-                  width={200}
-                  height={200}
-                  alt={t("swatchAlt", { value: value.name })}
-                  className="size-full object-cover"
-                />
-              ) : (
-                <div
-                  className="size-full bg-accent"
-                  style={value.swatch?.color ? { backgroundColor: value.swatch.color } : undefined}
-                />
-              )}
-            </div>
+            <Swatch
+              color={value.swatch?.color}
+              image={imageUrl}
+              label={value.name}
+              selected={isSelected}
+            />
           );
 
           if (!isAvailable) {
             return (
               <span
                 key={value.id}
-                className="block opacity-40 cursor-not-allowed"
+                className="block cursor-not-allowed opacity-40"
                 aria-label={t("unavailableVariantLabel", { name: option.name, value: value.name })}
               >
                 {swatch}
@@ -87,7 +68,7 @@ export function ColorPicker({
               key={value.id}
               href={href}
               scroll={false}
-              className="block"
+              className="block cursor-pointer"
               aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
             >
               {swatch}

@@ -187,7 +187,7 @@ function FilterSwatchGrid({ className, children, ...props }: React.ComponentProp
   return (
     <div
       data-slot="filter-swatch-grid"
-      className={cn("grid grid-cols-6 gap-2.5", className)}
+      className={cn("flex flex-wrap gap-2.5", className)}
       {...props}
     >
       {children}
