@@ -12,8 +12,8 @@ import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProducts } from "@/lib/search/action";
 import {
   buildProductFiltersFromParams,
+  fetchSearchFacets,
   fetchSearchIndexProducts,
-  getSearchFacets,
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
@@ -54,7 +54,7 @@ export async function getSearchResultsData({
       filters: shopifyFilters,
       locale,
     }),
-    getSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
+    fetchSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
   ]);
 
   return {

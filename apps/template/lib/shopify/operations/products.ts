@@ -555,17 +555,20 @@ export async function getFilteredCatalogProducts(
   return fetchCatalogProducts(params);
 }
 
-export async function getSearchFacets(params: {
+type SearchFacetsParams = {
   activeFilters?: ActiveFilters;
   collection?: string;
   filters?: ProductFilter[];
   locale?: string;
   query?: string;
-}): Promise<{ filters: Filter[]; priceRange?: PriceRange; total: number }> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
+};
 
+type SearchFacetsResult = { filters: Filter[]; priceRange?: PriceRange; total: number };
+
+// Uncached so browse/search facets reflect live Search & Discovery config (newly
+// enabled filters, swatch setup) rather than a long-lived snapshot; the cached
+// getSearchFacets wrapper below stays for non-paginated /md + agent reads.
+export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
   const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -598,6 +601,14 @@ export async function getSearchFacets(params: {
     priceRange: transformed.priceRange,
     total: data.search.totalCount,
   };
+}
+
+export async function getSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  return fetchSearchFacets(params);
 }
 
 type SearchIndexProductsResult = {
