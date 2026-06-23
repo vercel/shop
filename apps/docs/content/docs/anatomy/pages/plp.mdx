@@ -33,6 +33,8 @@ A filter sidebar provides multi-select faceted filters for:
 - **Size, Color, Vendor, Product Type, Tags** - checkbox-based multi-select
 - **Price range** - slider with presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
 
+Filters whose Shopify `presentation` is `SWATCH` (typically Color) render as a grid of color/image swatches via the `Swatch` primitive (`components/ui/swatch.tsx`) instead of the text list — `presentation` and each value's `swatch { color, image }` come straight from the Storefront API. All other filters use the text list.
+
 Active filters appear as badges with remove buttons. Filter state is encoded in URL search params using Shopify's standard format (`?filter.v.option.color=red&filter.v.price.gte=10&filter.v.price.lte=100`) so filtered views are shareable and compatible with Shopify themes.
 
 Filters use `useOptimistic` for instant UI feedback while the server request is in flight, coordinated through a `FilterTransitionProvider` context. On mobile, filters are accessible through a sheet overlay triggered from the toolbar.

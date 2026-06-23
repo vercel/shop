@@ -237,11 +237,20 @@ const SEARCH_FACETS_QUERY = `#graphql
         id
         label
         type
+        presentation
         values {
           id
           label
           count
           input
+          swatch {
+            color
+            image {
+              previewImage {
+                url
+              }
+            }
+          }
         }
       }
     }
@@ -675,11 +684,20 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
           id
           label
           type
+          presentation
           values {
             id
             label
             count
             input
+            swatch {
+              color
+              image {
+                previewImage {
+                  url
+                }
+              }
+            }
           }
         }
         edges {

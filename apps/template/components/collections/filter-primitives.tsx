@@ -183,6 +183,18 @@ function FilterOptionList({ className, children, ...props }: React.ComponentProp
   );
 }
 
+function FilterSwatchGrid({ className, children, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="filter-swatch-grid"
+      className={cn("grid grid-cols-6 gap-2.5", className)}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
 interface FilterOptionProps extends React.ComponentProps<"button"> {
   label: string;
   count?: number;
@@ -428,4 +440,5 @@ export {
   FilterSidebarHeader,
   FilterSidebarResultsCount,
   FilterSidebarScrollFade,
+  FilterSwatchGrid,
 };
