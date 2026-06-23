@@ -251,7 +251,7 @@ export function CollectionFilterSidebarClient({
               <FilterSectionHeader title={filter.label} />
               <FilterSectionContent>
                 <FilterOptionList>
-                  {filter.values.slice(0, 10).map((value) => (
+                  {filter.values.map((value) => (
                     <FilterOption
                       key={value.id}
                       label={value.label}
