@@ -37,6 +37,11 @@ export interface ProductFilter {
   productType?: string;
   productVendor?: string;
   tag?: string;
+  taxonomyMetafield?: {
+    namespace: string;
+    key: string;
+    value: string;
+  };
   variantOption?: {
     name: string;
     value: string;

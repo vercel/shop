@@ -49,6 +49,7 @@ function parseShopifyFilterValue(inputJson: string): string | null {
     }
     if (input.tag) return input.tag;
     if (input.productMetafield) return input.productMetafield.value;
+    if (input.taxonomyMetafield) return input.taxonomyMetafield.value;
     return null;
   } catch {
     return null;

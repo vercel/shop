@@ -442,6 +442,17 @@ export function buildProductFiltersFromParams(
       }
       continue;
     }
+
+    // filter.{v|p}.t.{namespace}.{key} → taxonomyMetafield (e.g. Color via shopify.color-pattern)
+    const taxonomyMatch = key.match(/^filter\.[vp]\.t\.([^.]+)\.(.+)$/i);
+    if (taxonomyMatch) {
+      for (const v of toArray(value)) {
+        filters.push({
+          taxonomyMetafield: { namespace: taxonomyMatch[1], key: taxonomyMatch[2], value: v },
+        });
+      }
+      continue;
+    }
   }
 
   // Combine price.gte and price.lte into a single price filter
