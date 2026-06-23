@@ -13,7 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/react": "4.0.0-beta.188",
     "@icons-pack/react-simple-icons": "13.13.0",
     "@orama/tokenizers": "3.1.18",
     "@streamdown/cjk": "1.0.3",
@@ -27,7 +26,6 @@
     "@vercel/analytics": "2.0.1",
     "@vercel/geistdocs": "1.7.3",
     "@vercel/speed-insights": "2.0.0",
-    "ai": "7.0.0-beta.183",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",

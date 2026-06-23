@@ -22,9 +22,6 @@ importers:
 
   apps/docs:
     dependencies:
-      '@ai-sdk/react':
-        specifier: 4.0.0-beta.188
-        version: 4.0.0-beta.188(react@19.2.7)(zod@4.4.3)
       '@icons-pack/react-simple-icons':
         specifier: 13.13.0
         version: 13.13.0(react@19.2.7)
@@ -64,9 +61,6 @@ importers:
       '@vercel/speed-insights':
         specifier: 2.0.0
         version: 2.0.0(next@16.2.6(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)(vue@3.5.30(typescript@6.0.3))
-      ai:
-        specifier: 7.0.0-beta.183
-        version: 7.0.0-beta.183(zod@4.4.3)
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
