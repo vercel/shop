@@ -20,6 +20,12 @@ type CollectionResponse = {
   collection: ShopifyCollection | null;
 };
 
+function tagCollections(collections: Array<{ handle: string }>): void {
+  for (const collection of collections) {
+    cacheTag(`collection-${collection.handle}`);
+  }
+}
+
 const GET_COLLECTIONS_QUERY = `#graphql
   ${COLLECTION_FIELDS_FRAGMENT}
   query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
@@ -60,6 +66,7 @@ export async function getCollections({
   const { data } = response;
 
   const rawCollections = data.collections.edges.map((edge) => edge.node);
+  tagCollections(rawCollections);
   return transformShopifyCollections(rawCollections);
 }
 

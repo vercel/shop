@@ -42,9 +42,11 @@ export async function POST(request: Request) {
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
-    const productTags = ["products", "collections"];
+    // Per-product tags only — never the broad "products" tag. tagProducts() stamps every
+    // list/search/collection/recommendation entry with the contained products' product-<id>
+    // tag, so busting one product cascades to every surface showing it without nuking the catalog.
+    const productTags: string[] = [];
 
-    // Pull handle/id from the payload for targeted invalidation.
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
@@ -60,7 +62,7 @@ export async function POST(request: Request) {
         productTags.push(`product-${payload.id}`);
       }
     } catch {
-      // Parse failure: fall through and invalidate the generic tags.
+      console.error("[Shopify Webhook] Could not parse products payload; no tags invalidated");
     }
 
     for (const tag of productTags) {
@@ -70,7 +72,9 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("collections/")) {
-    const collectionTags = ["collections", "products", "menus"];
+    // Per-collection tag only — busts the collection's PLP (getCollection + getCollectionProducts).
+    // The all-collections list (getCollections) feeds only llms.txt and the agent tool; it refreshes at expiry.
+    const collectionTags: string[] = [];
 
     try {
       const payload = JSON.parse(body);
@@ -78,19 +82,10 @@ export async function POST(request: Request) {
         collectionTags.push(`collection-${payload.handle}`);
       }
     } catch {
-      // Parse failure: fall through and invalidate the generic tags.
+      console.error("[Shopify Webhook] Could not parse collections payload; no tags invalidated");
     }
 
     for (const tag of collectionTags) {
-      revalidateTag(tag, "max");
-      tagsInvalidated.push(tag);
-    }
-  }
-
-  if (topic.startsWith("inventory_levels/")) {
-    const inventoryTags = ["products", "collections"];
-
-    for (const tag of inventoryTags) {
       revalidateTag(tag, "max");
       tagsInvalidated.push(tag);
     }
