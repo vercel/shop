@@ -10,8 +10,9 @@ type: reference
 | ----------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/`                     | `app/page.tsx`                      | Home page with hero, products grid, info section                                                   |
 | `/products/[handle]`    | `app/products/[handle]/page.tsx`    | Product detail page; `?color=…&size=…` option params select a variant                              |
+| `/collections`          | `app/collections/page.tsx`          | All-collections index; each card links to a collection, image falls back to its first product      |
 | `/collections/[handle]` | `app/collections/[handle]/page.tsx` | Collection listing with filters, sort, pagination                                                  |
-| `/collections/all`      | `app/collections/[handle]/page.tsx` | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
+| `/collections/all`      | `app/collections/all/page.tsx`      | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
 | `/search`               | `app/search/page.tsx`               | Search results (same grid as collections)                                                          |
 | `/cart`                 | `app/cart/page.tsx`                 | Full cart page with upsells                                                                        |
 | `/pages/[slug]`         | `app/pages/[slug]/page.tsx`         | CMS-driven marketing pages                                                                         |

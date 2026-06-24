@@ -162,6 +162,7 @@
       "home": "Home"
     },
     "description": "Browse products by collection.",
+    "empty": "No collections found.",
     "title": "Collections",
     "viewCollection": "View this collection"
   },

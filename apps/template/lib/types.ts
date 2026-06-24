@@ -248,6 +248,11 @@ export interface Collection {
   updatedAt: string;
 }
 
+export interface CollectionWithThumbnail extends Collection {
+  /** Collection's own image, falling back to the first product's featured image. */
+  thumbnail: Image | null;
+}
+
 export type FilterPresentation = "image" | "swatch" | "text";
 
 export type FilterType = "boolean" | "list" | "price";
