@@ -51,16 +51,16 @@ The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` envir
 ### Supported topics
 
 | Webhook topic        | Cache tags invalidated                                                |
-| -------------------- | -------------------------------------------------------------------- |
+| -------------------- | --------------------------------------------------------------------- |
 | `products/create`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
 | `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
 | `products/delete`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `collections/create` | `collections-index`, `collection-{handle}`                          |
-| `collections/update` | `collection-{handle}`                                                |
-| `collections/delete` | `collections-index`, `collection-{handle}`                          |
-| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                |
+| `collections/create` | `collections-index`, `collection-{handle}`                            |
+| `collections/update` | `collection-{handle}`                                                 |
+| `collections/delete` | `collections-index`, `collection-{handle}`                            |
+| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                 |
 
-The handler relies on fine-grained tags: per-product (`product-{numericId}`, stamped on every list and collection read via `tagProducts()`) and per-collection (`collection-{handle}`, stamped on every collection read including the all-collections listing). Because create and delete change the *set* of collections, they also fire `collections-index` — a tag carried only by the all-collections reads (`getCollections`, `getCollectionsListing`) and the collections sitemap — so the listing refreshes without touching other PLPs. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
+The handler relies on fine-grained tags: per-product (`product-{numericId}`, stamped on every list and collection read via `tagProducts()`) and per-collection (`collection-{handle}`, stamped on every collection read including the all-collections listing). Because create and delete change the _set_ of collections, they also fire `collections-index` — a tag carried only by the all-collections reads (`getCollections`, `getCollectionsListing`) and the collections sitemap — so the listing refreshes without touching other PLPs. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
 
 ### Setting up webhooks
 
