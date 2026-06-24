@@ -32,12 +32,13 @@ Adds the previously-missing all-collections index at `/collections` (`app/collec
 
 `getCollections` already existed but was only consumed by `llms.txt`, build-time `generateStaticParams`, and the agent tool — there was no browsable collections page. This gives storefronts a standard collections index out of the box, consistent with Horizon.
 
-The listing read is cached (`"use cache"` + `cacheLife("max")`) and tagged for the per-item webhook scheme introduced in `webhook-targeted-invalidation`: `collections`, plus `collection-{handle}` per collection (via `tagCollections`) and `product-{numericId}` per first product. So a collection edit (`collection-{handle}`) or a fallback product image change (`product-{numericId}`) busts the page.
+The listing read is cached (`"use cache"` + `cacheLife("max")`) and tagged `collection-{handle}` per collection (via `tagCollections`) and `product-{numericId}` per first product, so a collection edit or a fallback product image change busts the page.
 
-This change also finishes scoping the `collections` tag now that there's a read where it's meaningful:
+Now that there's a read where the *set* of collections is rendered, this change splits the collections tagging into three clear tiers:
 
-- The broad `collections` tag is **confined to the all-collections reads** — `getCollections`, the new `getCollectionsListing`, and the collections sitemap. It was removed from the per-collection reads `getCollection` (`lib/shopify/operations/collections.ts`) and `getCollectionProducts` (`lib/shopify/operations/products.ts`), which keep only `collection-{handle}`.
-- The webhook's `collections/*` branch now fires the broad `collections` tag on **`collections/create`** (in addition to `collection-{handle}`). This surfaces a brand-new collection in the listing/sitemap immediately — closing the create-lag caveat noted in `webhook-targeted-invalidation` — while leaving every other collection's PLP untouched (they no longer carry `collections`). Updates and deletes of existing collections are still covered by `collection-{handle}` (stamped on the listing via `tagCollections`), so they don't fire the broad tag.
+- **`collection-{handle}`** (per collection) — on `getCollection`, `getCollectionProducts`, and stamped on every all-collections read via `tagCollections`. Fired by the webhook on every `collections/*` topic with a handle.
+- **`collections-index`** (the set / listing) — on the all-collections reads only: `getCollections`, the new `getCollectionsListing`, and the collections sitemap (`lib/shopify/operations/sitemap.ts`). Fired by the webhook on **`collections/create` and `collections/delete`**, since those change membership. This surfaces a new collection (and drops a deleted one) immediately, closing the create-lag caveat from `webhook-targeted-invalidation`, without touching any individual PLP.
+- **`collections`** (break-glass) — re-added to *every* collection read (PLP metadata, PLP product lists, listing, sitemap) but **never fired by a webhook**. It's a manual purge lever: `revalidateTag("collections")` flushes all collection data at once (e.g. after a bulk import). `products` plays the same role for product reads.
 
 ## Apply when
 
@@ -57,4 +58,4 @@ This change also finishes scoping the `collections` tag now that there's a read 
 
 1. `pnpm --filter template lint`, `pnpm --filter template build`, `pnpm --filter docs build`.
 2. Load `/collections`: cards render, collections without their own image show the first product's image, each card routes to its PLP, grid is responsive.
-3. `curl -X POST .../api/webhooks/shopify -H "x-shopify-topic: collections/create" -d '{"handle":"new-arrivals"}'` → `tagsInvalidated` is `["collections","collection-new-arrivals"]`; `collections/update` for the same handle returns only `["collection-new-arrivals"]`.
+3. `curl -X POST .../api/webhooks/shopify -H "x-shopify-topic: collections/create" -d '{"handle":"new-arrivals"}'` → `tagsInvalidated` is `["collections-index","collection-new-arrivals"]`; `collections/delete` returns the same; `collections/update` returns only `["collection-new-arrivals"]`.

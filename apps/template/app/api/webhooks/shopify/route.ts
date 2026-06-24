@@ -73,13 +73,13 @@ export async function POST(request: Request) {
 
   if (topic.startsWith("collections/")) {
     // collection-{handle} busts the collection's PLP and — via tagCollections stamping — the
-    // all-collections listing for edits/deletes. A brand-new collection isn't stamped on the
-    // cached listing yet, so create also fires the broad "collections" tag (the only reads
-    // carrying it are the all-collections listing and sitemap) to surface the new collection.
+    // all-collections listing for edits. create/delete change the *set* of collections, so they
+    // also fire "collections-index" (the listing page + collections sitemap). The broad
+    // "collections" tag is a manual break-glass purge of all collection data and is never fired here.
     const collectionTags: string[] = [];
 
-    if (topic === "collections/create") {
-      collectionTags.push("collections");
+    if (topic === "collections/create" || topic === "collections/delete") {
+      collectionTags.push("collections-index");
     }
 
     try {

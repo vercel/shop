@@ -34,14 +34,16 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
   }
 ` as const;
 
-function cacheTagFor(type: ShopifySitemapType): string {
-  return type === "PRODUCT" ? "products" : "collections";
+function cacheTagsFor(type: ShopifySitemapType): string[] {
+  // Collection sitemap lists the full set, so it also carries "collections-index" —
+  // busted on collections/create and collections/delete alongside the listing page.
+  return type === "PRODUCT" ? ["products"] : ["collections", "collections-index"];
 }
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag(cacheTagFor(type));
+  cacheTag(...cacheTagsFor(type));
 
   const response = await storefront.request<{ sitemap: { pagesCount: { count: number } } }>(
     GET_SITEMAP_PAGES_COUNT_QUERY,
@@ -60,7 +62,7 @@ export async function getShopifySitemapPage(
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag(cacheTagFor(type));
+  cacheTag(...cacheTagsFor(type));
 
   const response = await storefront.request<{
     sitemap: { resources: { hasNextPage: boolean; items: SitemapResource[] } };

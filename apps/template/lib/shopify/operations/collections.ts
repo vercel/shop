@@ -90,7 +90,7 @@ export async function getCollections({
 }: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("collections");
+  cacheTag("collections", "collections-index");
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -117,7 +117,7 @@ export async function getCollection({
   // PLP static shell; "use cache: remote" defers to request time and won't inline.
   "use cache";
   cacheLife("max");
-  cacheTag(`collection-${handle}`);
+  cacheTag("collections", `collection-${handle}`);
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -139,7 +139,7 @@ export async function getCollectionsListing({
 }: { limit?: number; locale?: string } = {}): Promise<CollectionWithThumbnail[]> {
   "use cache";
   cacheLife("max");
-  cacheTag("collections");
+  cacheTag("collections", "collections-index");
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
