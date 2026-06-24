@@ -41,7 +41,7 @@ export function CollectionCard({
       </div>
       <h2
         data-slot="collection-card-title"
-        className="py-2.5 text-sm font-semibold text-main-foreground line-clamp-1"
+        className="py-2.5 text-sm font-medium text-foreground line-clamp-1"
       >
         {title}
       </h2>

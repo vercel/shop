@@ -13,6 +13,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --text-xxs: 0.625rem;
+  --tracking-display: -0.04em;
 
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -82,7 +83,7 @@
   --secondary: #e9e9e9;
   --secondary-foreground: #171717;
   --muted: #e9e9e9;
-  --muted-foreground: #2c2c2c;
+  --muted-foreground: #666666;
   --accent: #efefef;
   --accent-foreground: #171717;
   --destructive: #cc0001;
@@ -110,7 +111,7 @@
 @layer components {
   .prose :where(h1, h2, h3, h4):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
     letter-spacing: -0.025em; /* tracking-tight */
-    font-weight: 600; /* font-semibold */
+    font-weight: 500; /* font-medium */
   }
 }
 

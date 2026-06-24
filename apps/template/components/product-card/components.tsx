@@ -119,7 +119,7 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
   return (
     <h3
       data-slot="product-card-title"
-      className={cn("text-sm font-semibold text-main-foreground line-clamp-1", className)}
+      className={cn("text-sm font-medium text-foreground line-clamp-1", className)}
       {...props}
     >
       {children}
@@ -163,12 +163,12 @@ function ProductCardPrice({
   return (
     <div data-slot="product-card-price" className={cn(className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="inline-flex items-baseline gap-x-1 text-sm text-main-foreground">
+        <span className="inline-flex items-baseline gap-x-1 text-sm text-foreground">
           <Price
             amount={amount}
             currencyCode={currencyCode}
             locale={locale}
-            className="text-sm text-main-foreground"
+            className="text-sm text-foreground"
           />
           {isRange && (
             <>
@@ -177,7 +177,7 @@ function ProductCardPrice({
                 amount={maxAmount}
                 currencyCode={currencyCode}
                 locale={locale}
-                className="text-sm text-main-foreground"
+                className="text-sm text-foreground"
               />
             </>
           )}

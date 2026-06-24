@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <Page>
       <Container className="max-w-2xl">
-        <article className="prose prose-neutral prose-headings:font-semibold prose-headings:tracking-tight">
+        <article className="prose prose-neutral prose-headings:font-medium prose-headings:tracking-tight">
           <h1>About {siteConfig.name}</h1>
           <p>
             Welcome to {siteConfig.name}. Browse our products, explore our collections, and check

@@ -56,7 +56,7 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
         <SummaryRow label={t("tax")} money={order.totalTax} />
         <div className="flex items-center justify-between border-t pt-2 font-medium">
           <dt>{t("total")}</dt>
-          <dd className="tabular-nums">
+          <dd className="font-mono tabular-nums">
             {formatPrice(
               Number(order.totalPrice.amount),
               order.totalPrice.currencyCode,
@@ -112,7 +112,7 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
         <p className="text-xs text-muted-foreground">× {item.quantity}</p>
       </div>
       {item.totalPrice ? (
-        <span className="text-sm tabular-nums">
+        <span className="font-mono text-sm tabular-nums">
           {formatPrice(Number(item.totalPrice.amount), item.totalPrice.currencyCode, defaultLocale)}
         </span>
       ) : null}
@@ -125,7 +125,7 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="tabular-nums">
+      <dd className="font-mono tabular-nums">
         {formatPrice(Number(money.amount), money.currencyCode, defaultLocale)}
       </dd>
     </div>

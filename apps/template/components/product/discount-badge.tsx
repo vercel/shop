@@ -16,7 +16,7 @@ export function DiscountBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
+        "inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums",
         variant === "green" && "bg-positive/15 text-positive",
         variant === "blue" && "bg-blue-500/15 text-blue-600",
         className,
