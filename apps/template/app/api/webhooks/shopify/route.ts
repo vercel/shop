@@ -72,9 +72,15 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("collections/")) {
-    // Per-collection tag only — busts the collection's PLP (getCollection + getCollectionProducts).
-    // The all-collections list (getCollections) feeds only llms.txt and the agent tool; it refreshes at expiry.
+    // collection-{handle} busts the collection's PLP and — via tagCollections stamping — the
+    // all-collections listing for edits. create/delete change the *set* of collections, so they
+    // also fire "collections-index" (the listing page + collections sitemap). The broad
+    // "collections" tag is a manual break-glass purge of all collection data and is never fired here.
     const collectionTags: string[] = [];
+
+    if (topic === "collections/create" || topic === "collections/delete") {
+      collectionTags.push("collections-index");
+    }
 
     try {
       const payload = JSON.parse(body);
@@ -82,7 +88,7 @@ export async function POST(request: Request) {
         collectionTags.push(`collection-${payload.handle}`);
       }
     } catch {
-      console.error("[Shopify Webhook] Could not parse collections payload; no tags invalidated");
+      console.error("[Shopify Webhook] Could not parse collections payload");
     }
 
     for (const tag of collectionTags) {
