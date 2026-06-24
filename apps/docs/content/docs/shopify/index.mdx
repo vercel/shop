@@ -55,12 +55,12 @@ The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` envir
 | `products/create`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
 | `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
 | `products/delete`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `collections/create` | `collection-{handle}`                                                |
+| `collections/create` | `collections`, `collection-{handle}`                                 |
 | `collections/update` | `collection-{handle}`                                                |
 | `collections/delete` | `collection-{handle}`                                                |
 | `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                |
 
-The handler never invalidates the broad `products` or `collections` tags — fine-grained per-product (`product-{numericId}`, stamped on every list and collection read via `tagProducts()`) and per-collection (`collection-{handle}`, stamped on every collection read including the all-collections list) tags cover changes, so a single edit doesn't flush the whole catalog cache. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
+The handler never invalidates the broad `products` tag and fires the broad `collections` tag only on `collections/create`. Fine-grained per-product (`product-{numericId}`, stamped on every list and collection read via `tagProducts()`) and per-collection (`collection-{handle}`, stamped on every collection read including the all-collections listing) tags cover routine edits, so a single change doesn't flush the whole catalog cache. The `collections` tag is confined to the all-collections reads (`getCollections`, `getCollectionsListing`, sitemap), so create surfaces a new collection there without touching other PLPs. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
 
 ### Setting up webhooks
 

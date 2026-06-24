@@ -7,12 +7,16 @@ defaultAction: review
 appliesTo:
   - all
 paths:
+  - apps/template/app/api/webhooks/shopify/route.ts
   - apps/template/app/collections/page.tsx
   - apps/template/components/collections/collection-card.tsx
   - apps/template/lib/shopify/operations/collections.ts
+  - apps/template/lib/shopify/operations/products.ts
   - apps/template/lib/types.ts
   - apps/template/lib/i18n/messages/en.json
+  - apps/docs/content/docs/anatomy/webhooks.mdx
   - apps/docs/content/docs/reference/routes.mdx
+  - apps/docs/content/docs/shopify/index.mdx
 ---
 
 ## Summary
@@ -28,7 +32,12 @@ Adds the previously-missing all-collections index at `/collections` (`app/collec
 
 `getCollections` already existed but was only consumed by `llms.txt`, build-time `generateStaticParams`, and the agent tool — there was no browsable collections page. This gives storefronts a standard collections index out of the box, consistent with Horizon.
 
-The listing read is cached (`"use cache"` + `cacheLife("max")`) and tagged for the per-item webhook scheme introduced in `webhook-targeted-invalidation`: `collections`, plus `collection-{handle}` per collection (via `tagCollections`) and `product-{numericId}` per first product. So a collection edit (`collection-{handle}`) or a fallback product image change (`product-{numericId}`) busts the page. A brand-new collection still lags until cache expiry — its tag wasn't present when the list was cached (same inherent limitation as a new product in a cached catalog list).
+The listing read is cached (`"use cache"` + `cacheLife("max")`) and tagged for the per-item webhook scheme introduced in `webhook-targeted-invalidation`: `collections`, plus `collection-{handle}` per collection (via `tagCollections`) and `product-{numericId}` per first product. So a collection edit (`collection-{handle}`) or a fallback product image change (`product-{numericId}`) busts the page.
+
+This change also finishes scoping the `collections` tag now that there's a read where it's meaningful:
+
+- The broad `collections` tag is **confined to the all-collections reads** — `getCollections`, the new `getCollectionsListing`, and the collections sitemap. It was removed from the per-collection reads `getCollection` (`lib/shopify/operations/collections.ts`) and `getCollectionProducts` (`lib/shopify/operations/products.ts`), which keep only `collection-{handle}`.
+- The webhook's `collections/*` branch now fires the broad `collections` tag on **`collections/create`** (in addition to `collection-{handle}`). This surfaces a brand-new collection in the listing/sitemap immediately — closing the create-lag caveat noted in `webhook-targeted-invalidation` — while leaving every other collection's PLP untouched (they no longer carry `collections`). Updates and deletes of existing collections are still covered by `collection-{handle}` (stamped on the listing via `tagCollections`), so they don't fire the broad tag.
 
 ## Apply when
 
@@ -48,3 +57,4 @@ The listing read is cached (`"use cache"` + `cacheLife("max")`) and tagged for t
 
 1. `pnpm --filter template lint`, `pnpm --filter template build`, `pnpm --filter docs build`.
 2. Load `/collections`: cards render, collections without their own image show the first product's image, each card routes to its PLP, grid is responsive.
+3. `curl -X POST .../api/webhooks/shopify -H "x-shopify-topic: collections/create" -d '{"handle":"new-arrivals"}'` → `tagsInvalidated` is `["collections","collection-new-arrivals"]`; `collections/update` for the same handle returns only `["collection-new-arrivals"]`.

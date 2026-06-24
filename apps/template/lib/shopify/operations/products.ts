@@ -845,7 +845,7 @@ export async function getCollectionProducts(
 ): Promise<CollectionProductsResult> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", "collections", `collection-${params.collection}`);
+  cacheTag("products", `collection-${params.collection}`);
 
   const result = await fetchCollectionProducts(params);
   tagProducts(result.products);

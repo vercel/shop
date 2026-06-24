@@ -117,7 +117,7 @@ export async function getCollection({
   // PLP static shell; "use cache: remote" defers to request time and won't inline.
   "use cache";
   cacheLife("max");
-  cacheTag("collections", `collection-${handle}`);
+  cacheTag(`collection-${handle}`);
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
