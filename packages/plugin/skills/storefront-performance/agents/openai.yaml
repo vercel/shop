@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storefront Performance"
+  short_description: "Build and audit fast Vercel Shop routes"
+  default_prompt: "Use $storefront-performance to preserve rendering and loading performance while implementing this storefront route."
