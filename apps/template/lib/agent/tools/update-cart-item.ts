@@ -8,16 +8,15 @@ import { getAgentContext } from "../server";
 export function updateCartItemTool() {
   return tool({
     description: `Update the quantity of an item in the cart.
-IMPORTANT: You must call getCart first to get the lineId and merchandiseId of the item to update.
+IMPORTANT: You must call getCart first to get the lineId of the item to update.
 Use the lineId from getCart results, not the product or variant ID.`,
     inputSchema: z.object({
       lineId: z
         .string()
         .describe("The cart line item ID from getCart results (e.g. 'gid://shopify/CartLine/...')"),
-      merchandiseId: z.string().describe("The merchandise/variant ID from getCart results"),
       quantity: z.number().min(1).max(99).describe("New quantity for the item"),
     }),
-    execute: async ({ lineId, merchandiseId, quantity }) => {
+    execute: async ({ lineId, quantity }) => {
       const { cart: cartId } = getAgentContext();
 
       if (!cartId) {
@@ -28,10 +27,7 @@ Use the lineId from getCart results, not the product or variant ID.`,
       }
 
       try {
-        const { cart: updatedCart } = await updateCart(
-          [{ id: lineId, merchandiseId, quantity }],
-          cartId,
-        );
+        const { cart: updatedCart } = await updateCart([{ id: lineId, quantity }], cartId);
 
         return {
           success: true,

@@ -41,7 +41,7 @@ All cart mutations are defined in `lib/cart/action.ts` with `"use server"`:
 
 - `addToCartAction()` - adds line items and returns the updated cart
 - `updateCartQuantityAction()` - validates quantity (1–99) and updates the line
-- `removeFromCartAction()` - removes a line item and fetches the updated cart
+- `removeFromCartAction()` - removes a line item and returns the updated cart
 - `syncCartLocaleAction()` - updates buyer identity for locale and currency switching
 - `updateCartNoteAction()` - updates the cart note field
 - `buyNowAction()` - adds an item and returns the Shopify checkout URL
@@ -76,7 +76,7 @@ Below the items, a `RelatedProductsSection` shows product recommendations based 
 
 ## Shopify integration
 
-Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
+Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. Each mutation returns the full cart through `CartFields`; the operation normalizes that response and the server action uses it directly without a follow-up `getCart()` query. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
 
 The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
 

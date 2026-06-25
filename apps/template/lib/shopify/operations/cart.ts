@@ -335,7 +335,7 @@ export async function addToCart(
 }
 
 export async function updateCart(
-  lines: { id: string; merchandiseId: string; quantity: number }[],
+  lines: { id: string; quantity: number }[],
   cartIdOverride?: string,
 ): Promise<CartMutationResult> {
   const cartId = cartIdOverride || (await getCartIdFromCookie());
@@ -346,7 +346,7 @@ export async function updateCart(
   }>(CART_LINES_UPDATE_MUTATION, {
     variables: {
       cartId,
-      lines: lines.map((line) => ({ id: line.id, quantity: line.quantity })),
+      lines,
     },
   });
   assertStorefrontOk(response, "cartLinesUpdate");

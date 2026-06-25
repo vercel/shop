@@ -36,12 +36,11 @@ export async function removeFromCartAction(itemId: string): Promise<CartActionRe
   }
 
   try {
-    const { warnings } = await removeFromCart([itemId]);
-    const updatedCart = await getCart();
+    const { cart, warnings } = await removeFromCart([itemId]);
 
     return {
       success: true,
-      cart: updatedCart,
+      cart,
       warnings,
     };
   } catch (error) {
@@ -72,34 +71,11 @@ export async function updateCartQuantityAction(
   }
 
   try {
-    const currentCart = await getCart();
-    if (!currentCart) {
-      return {
-        success: false,
-        error: "Cart not found",
-      };
-    }
-
-    const item = currentCart.lines.find((line) => line.id === itemId);
-    if (!item) {
-      return {
-        success: false,
-        error: "Item not found in cart",
-      };
-    }
-
-    const { warnings } = await updateCart([
-      {
-        id: itemId,
-        merchandiseId: item.merchandise.id,
-        quantity,
-      },
-    ]);
-    const updatedCart = await getCart();
+    const { cart, warnings } = await updateCart([{ id: itemId, quantity }]);
 
     return {
       success: true,
-      cart: updatedCart,
+      cart,
       warnings,
     };
   } catch (error) {
@@ -130,12 +106,11 @@ export async function addToCartAction(
   }
 
   try {
-    const { warnings } = await addToCart([{ merchandiseId, quantity }]);
-    const updatedCart = await getCart();
+    const { cart, warnings } = await addToCart([{ merchandiseId, quantity }]);
 
     return {
       success: true,
-      cart: updatedCart,
+      cart,
       warnings,
     };
   } catch (error) {
