@@ -1,4 +1,4 @@
-# Home and Marketing Routes
+# Home and Marketing Route Architecture
 
 ## Rendering contract
 

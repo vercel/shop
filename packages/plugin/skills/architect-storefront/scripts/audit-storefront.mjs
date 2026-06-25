@@ -40,15 +40,25 @@ for (const file of files) {
   const normalized = relative(root, file);
 
   if (/<img\b/.test(source)) {
-    report("error", file, "Native <img> found; use next/image unless this is an intentional exception.");
+    report(
+      "error",
+      file,
+      "Native <img> found; use next/image unless this is an intentional exception.",
+    );
   }
 
   if (/^["']use client["'];?/m.test(source) && /(^|\/)(page|layout)\.[jt]sx$/.test(normalized)) {
-    report("review", file, "A page or layout is a client boundary; verify that it cannot be pushed down.");
+    report(
+      "review",
+      file,
+      "A page or layout is a client boundary; verify that it cannot be pushed down.",
+    );
   }
 
-  if (/export\s+const\s+prefetch\s*=\s*["']allow-runtime["']/.test(source) &&
-      !/export\s+const\s+instant\s*=\s*true/.test(source)) {
+  if (
+    /export\s+const\s+prefetch\s*=\s*["']allow-runtime["']/.test(source) &&
+    !/export\s+const\s+instant\s*=\s*true/.test(source)
+  ) {
     report("review", file, "Runtime prefetching is enabled without instant-navigation validation.");
   }
 
@@ -58,7 +68,11 @@ for (const file of files) {
       report("review", file, "An <Image fill> tag has no sizes prop.");
     }
     if (/\bpriority(?:\s|=|\/|>)/.test(value)) {
-      report("review", file, "Image priority is deprecated in Next.js 16; choose preload, eager loading, or fetchPriority intentionally.");
+      report(
+        "review",
+        file,
+        "Image priority is deprecated in Next.js 16; choose preload, eager loading, or fetchPriority intentionally.",
+      );
     }
   }
 }
@@ -69,6 +83,8 @@ for (const finding of findings) {
 
 const errors = findings.filter(({ level }) => level === "error").length;
 const reviews = findings.length - errors;
-console.log(`Scanned ${files.length} files: ${errors} error(s), ${reviews} review item(s).`);
+console.log(
+  `Scanned ${files.length} files for architecture hotspots: ${errors} error(s), ${reviews} review item(s).`,
+);
 
 process.exitCode = errors > 0 ? 1 : 0;

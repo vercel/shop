@@ -42,16 +42,18 @@ This version has breaking changes — APIs, conventions, and file structure may 
 4. **Always verify Shopify GraphQL fields against the live schema** before adding or changing fields. Use `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference` if available, otherwise consult the Shopify Storefront / Customer Account API docs. Never guess Shopify field names.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
-## Storefront Performance Contract
+## Storefront Architecture Contract
 
 - Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates while rebuilding presentation. Change them only when the task explicitly changes behavior.
+- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own fetching/cache/transforms, Server Components compose the shell, client leaves own interaction, and server actions own mutations/invalidation.
+- Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
 - Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits it. Push request-time inputs to the smallest Suspense boundary that needs them.
 - Make visible fallbacks match the resolved section's geometry. A loading state must not introduce avoidable layout shift.
 - Keep Server Components as the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
 - Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
 - Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
 
-Use `/vercel-shop:storefront-performance` when the project plugin is installed for the full route-specific workflow and audit guidance.
+Use `/vercel-shop:architect-storefront` when the project plugin is installed for the full route-specific workflow and audit guidance.
 
 ## Code Style
 
@@ -179,7 +181,7 @@ If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" abov
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
-- Storefront rendering and loading performance: `/vercel-shop:storefront-performance`
+- Storefront architecture and rendering performance: `/vercel-shop:architect-storefront`
 
 These are agent-side conveniences. The template runs and deploys without them.
 

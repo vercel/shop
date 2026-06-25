@@ -1,4 +1,4 @@
-# Product Detail Routes
+# Product Detail Route Architecture
 
 ## Preserve shell coherence
 

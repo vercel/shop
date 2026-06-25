@@ -1,4 +1,4 @@
-# Collection and Search Routes
+# Collection and Search Route Architecture
 
 ## Preserve the static header
 

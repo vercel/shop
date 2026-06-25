@@ -1,0 +1,4 @@
+interface:
+  display_name: "Storefront Architecture"
+  short_description: "Design non-blocking Vercel Shop routes"
+  default_prompt: "Use $architect-storefront to design this storefront route's data, rendering, cache, and interaction boundaries."
