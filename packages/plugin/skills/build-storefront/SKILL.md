@@ -18,6 +18,7 @@ Design the route dependency graph before designing its presentation. Performance
    - Collection and search routes: `references/plp-search.md`
    - Product routes: `references/pdp.md`
    - Cart and authenticated account routes: `references/cart-account.md`
+   - Cart provider, bootstrap, optimistic state, and mutations: `references/cart-provider.md`
 
 ## Model the route
 
@@ -58,12 +59,12 @@ node scripts/audit-storefront.mjs <storefront-root>
 
 Treat its output as review prompts, not measurements. Then:
 
-1. Run the storefront's lint, typecheck, and production build commands.
-2. Test cold direct visits and warm client navigations in a production build.
+1. Run targeted lint, typecheck, tests, and affected flows available in the current environment.
+2. Test direct visits and client navigations for the routes changed.
 3. Verify that non-critical Shopify work does not delay the shell or primary interaction.
 4. Run every affected flow in `references/commerce-flows.md`, including failure and empty states.
-5. Inspect failed requests, layout shifts, LCP discovery, hydration, and interaction behavior.
-6. Use the Next.js bundle analyzer when client dependencies or boundaries changed.
-7. Use Speed Insights field data after deployment. Do not claim improvement from code inspection alone.
+5. Inspect failed requests, layout shifts, LCP discovery, hydration, and interaction behavior when relevant.
+6. Require a production build only when build, prerendering, caching, bundling, deployment behavior, or release readiness is in scope.
+7. Use bundle analysis or deployed field data only for an explicit performance investigation when those tools and data are available. Do not request them as routine completion work or claim measured improvement from code inspection.
 
 Report the final layer boundaries, blocking dependencies, cache ownership, and remaining risks.

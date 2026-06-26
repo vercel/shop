@@ -21,7 +21,7 @@ Verify commerce outcomes without prescribing visual composition. Adapt the prese
 ## Cart and checkout handoff
 
 - Create a cart when none exists and persist its identifier using the existing server cookie path.
-- Apply optimistic quantity and removal changes, then reconcile warnings, errors, and the canonical Shopify cart.
+- Apply each optimistic intent exactly once, then reconcile warnings, errors, and the canonical Shopify cart without quantity flashes or reversions.
 - Preserve line identity, attributes, discounts, buyer identity, delivery state, totals, currency, and checkout URL.
 - Call `invalidateCartCache()` after every cart mutation.
 - Keep checkout handoff usable without requiring unrelated client state to finish hydrating.
@@ -44,7 +44,7 @@ Verify commerce outcomes without prescribing visual composition. Adapt the prese
 Run the flows affected by the change:
 
 1. Browse or search, filter or sort, open a product, and use back navigation.
-2. Select a variant, add it to cart, change quantity, remove it, and open checkout.
+2. Select a variant, add it to an empty cart, add the same variant again, change quantity, remove it, and open checkout. Counts must move monotonically to the confirmed result without double-application or reversion.
 3. Exercise sold-out, incomplete-selection, missing-media, empty-result, empty-cart, and API-failure states.
 4. Refresh after cart creation and confirm state persists and reconciles.
 5. When auth is enabled, sign in, visit each account surface, mutate profile/address data, and sign out.

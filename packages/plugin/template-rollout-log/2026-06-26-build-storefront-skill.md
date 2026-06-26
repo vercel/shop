@@ -16,7 +16,7 @@ relatedSkills:
 
 Add a short, always-on storefront contract to the template's agent guidance. It defines ownership across routes, Shopify operations, Server Components, client islands, and server actions, then protects the route's dependency graph, cache boundaries, shell, loading states, media, and prefetch behavior.
 
-The detailed route-specific workflow lives in the `build-storefront` plugin skill so coding agents can implement, redesign, extend, and review storefronts without prescribing their visual composition.
+The detailed route-specific workflow lives in the `build-storefront` plugin skill so coding agents can implement, redesign, extend, and review storefronts without prescribing their visual composition. Its cart-provider contract separates confirmed Shopify state from pending intent so bootstrap and concurrent mutations cannot double-apply or revert cart updates.
 
 Performance remains a verification outcome of the broader storefront architecture and commerce workflow.
 

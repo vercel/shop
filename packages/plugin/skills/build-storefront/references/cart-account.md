@@ -6,6 +6,8 @@ Cart and account data depend on cookies, sessions, or customer access tokens. Do
 
 Every cart mutation must call `invalidateCartCache()`. Preserve optimistic cart reconciliation so the interface responds immediately and converges on the server result.
 
+For cart provider, bootstrap, optimistic state, nav badge, overlay, or mutation work, read `cart-provider.md` and preserve its confirmed-cart plus pending-intents model.
+
 ## Shared shell
 
 - Keep navigation, page headings, and stable layout outside personalized boundaries.
@@ -22,7 +24,9 @@ Every cart mutation must call `invalidateCartCache()`. Preserve optimistic cart 
 
 ## Mutations and transitions
 
-- Use pending and optimistic states without removing the current cart contents.
+- Keep the confirmed Shopify cart separate from pending client intents. Derive the displayed cart from both instead of destructively editing the confirmed cart.
+- Reconcile a successful mutation response and its acknowledged intent exactly once. Never replay the same optimistic delta over the returned cart.
+- Ignore stale bootstrap data and out-of-order mutation responses.
 - Disable only the control affected by a mutation when concurrent actions remain safe.
 - Keep stable row keys and dimensions so quantity updates do not recreate the whole list.
 - Reconcile errors visibly and restore the last confirmed state.

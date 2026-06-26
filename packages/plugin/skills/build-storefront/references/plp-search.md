@@ -26,4 +26,4 @@ Search is different: its query and results are request inputs. The search route 
 
 ## Prefetch traffic
 
-Product grids are high fanout. Do not add `prefetch={true}` to every card by reflex. Compare navigation latency against the number and cost of prefetch requests in a production build. Shell-only prefetching is the safe default when dozens of product links are visible.
+Product grids are high fanout. Do not add `prefetch={true}` to every card by reflex. Shell-only prefetching is the safe default when dozens of product links are visible. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.

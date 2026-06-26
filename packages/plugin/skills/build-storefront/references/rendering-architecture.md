@@ -78,7 +78,7 @@ With partial prefetching, visible links receive a reusable App Shell by default.
 - Consider fuller prefetching for a small number of high-intent links.
 - Use runtime prefetching only when it resolves meaningful request-dependent UI before the click.
 - Pair runtime prefetching with instant-navigation validation where supported.
-- Verify request count and navigation behavior in a production build.
+- Verify request count and navigation behavior with the tools available in the current environment. Use a production build only when prefetch or deployment behavior is explicitly under investigation.
 
 Prefetch cannot compensate for a route whose primary content is unnecessarily request-bound.
 
@@ -94,4 +94,4 @@ Check cold direct visits, prefetched navigations, mutations, and back/forward na
 - no hydration, uncached-data, or blocking-route errors appear;
 - mutations invalidate and reconcile the intended data only.
 
-Use lab tools to diagnose architectural mistakes. Use field data to decide whether users improved.
+Use lab tools to diagnose architectural mistakes. Consult field data only when explicitly evaluating deployed user performance and the data is available.
