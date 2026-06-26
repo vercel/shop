@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build a Storefront"
+  short_description: "Build non-blocking Vercel Shop routes"
+  default_prompt: "Use $build-storefront to build this storefront route with coherent data, rendering, cache, mutation, and interaction boundaries."

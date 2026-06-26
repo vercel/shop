@@ -11,7 +11,7 @@ Vercel Shop is built for agentic development. Instead of copy-pasting snippets f
 This works because the template ships with structured context that agents read automatically:
 
 - **`AGENTS.md`** - architecture rules and conventions. Tells the agent things like "every cart mutation must call `invalidateCartCache()`" or "components in `ui/` must not import domain types."
-- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide skills, platform guidance, and live Shopify schema tooling.
+- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide template conventions, platform guidance, and authoritative Shopify documentation and validation.
 
 For best results, use an agent that reads `AGENTS.md` and supports skills and project-scoped plugins - for example [Claude Code](https://claude.ai/code), [Cursor](https://cursor.sh), or [Codex](https://openai.com/index/introducing-codex/). Claude Code has the deepest integration via the plugin install flow; Cursor and Codex lean more on the repo context and docs.
 
@@ -21,7 +21,7 @@ After [creating your project](/docs/getting-started), `create-vercel-shop` insta
 
 - `vercel-shop` for initialization and storefront skills plus drift and upgrade-planning commands
 - `vercel-plugin` for generic Vercel and Next.js guidance
-- `shopify-ai-toolkit` for Shopify-aware tooling and schema access
+- `shopify-ai-toolkit` for current Shopify documentation, schemas, operation validation, and store execution
 
 If you already have a project and only want the agent setup:
 

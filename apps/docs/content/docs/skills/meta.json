@@ -2,6 +2,8 @@
   "title": "Skills",
   "pages": [
     "index",
+    "build-storefront",
+    "shopify-graphql-reference",
     "enable-analytics",
     "enable-i18n",
     "enable-shopify-markets",
