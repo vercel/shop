@@ -71,9 +71,9 @@ export async function getHomepage({
 }: {
   locale?: string;
 } = {}): Promise<Homepage | null> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
-  cacheTag("cms-content");
+  cacheTag("cms:all", "cms:homepage");
   // Query cms_homepage metaobject, transform to Homepage type
 }
 
@@ -84,9 +84,9 @@ export async function getMarketingPage({
   slug: string;
   locale?: string;
 }): Promise<MarketingPage | null> {
-  "use cache: remote";
+  "use cache";
   cacheLife("max");
-  cacheTag("cms-content");
+  cacheTag("cms:all", "cms:pages", `cms:page:${slug}`);
   // Query cms_page metaobject by slug, transform to MarketingPage type
 }
 
@@ -95,14 +95,14 @@ export async function getAllMarketingPageSlugs(): Promise<
 > {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("cms-content");
+  cacheTag("cms:all", "cms:pages");
   // Query all cms_page metaobjects, return slugs
 }
 ```
 
 ### 2. Write GraphQL queries
 
-Validate field names with `shopify-ai-toolkit` or `vercel-shop:fetch-shopify-schema`. Use `metaobjects(type: "cms_homepage")` and `metaobjects(type: "cms_page")` queries with `@inContext` locale directives.
+Use Shopify AI Toolkit's custom-data skill first, then validate the final Storefront GraphQL documents with its Storefront skill. Use `metaobjects(type: "cms_homepage")` and `metaobjects(type: "cms_page")` queries with `@inContext` locale directives.
 
 ### 3. Transform metaobject responses
 
@@ -135,19 +135,11 @@ export default async function HomePage() {
 
 Update `app/pages/[slug]/page.tsx` to use `getMarketingPage` and `getAllMarketingPageSlugs`. To index CMS pages in the sitemap, add a `cms-pages-{n}` shard type to `app/sitemap/[shard]/route.ts` and include it in `app/sitemap.xml/route.ts`.
 
-### 5. Add cache invalidation webhook
+The homepage and marketing-page reads use plain `"use cache"` so their stable bodies can be included coherently in prerendered shells. The slug enumeration uses `"use cache: remote"` because sitemap and discovery reads can run at request time and share results.
 
-Create `app/api/webhooks/shopify-cms/route.ts`:
+### 5. Use the existing cache invalidation webhook
 
-```ts
-import { updateTag } from "next/cache";
-
-export async function POST(request: Request) {
-  // Verify Shopify webhook signature
-  updateTag("cms-content");
-  return new Response("OK");
-}
-```
+Keep metaobject invalidation in `app/api/webhooks/shopify/route.ts`, which already verifies Shopify's signature and maps `metaobjects/*` topics to `cms:all`, `cms:homepage`, `cms:pages`, and page-specific tags. Extend that mapping if the content model adds another CMS metaobject type; do not create a second unverified CMS webhook endpoint.
 
 ## Guardrails
 
@@ -155,5 +147,6 @@ export async function POST(request: Request) {
 - Resolve product references to `ProductCard[]` — components expect ready-to-render product data.
 - Handle locale fallback gracefully — return default locale content if requested locale is unavailable, never throw.
 - Support the `alternates` field on `MarketingPage` — this powers locale-aware URL switching.
+- Keep CMS cache tags aligned with `app/api/webhooks/shopify/route.ts`.
 
 {/* END SKILL CONTENT: enable-shopify-cms */}

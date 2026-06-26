@@ -24,7 +24,7 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 
 - `vercel-shop` provides storefront-specific skills and commands such as `/vercel-shop:enable-shopify-markets`.
 - `vercel-plugin` provides generic Vercel and Next.js skills.
-- `shopify-ai-toolkit` provides Shopify-aware tooling and schema access.
+- `shopify-ai-toolkit` is authoritative for current Shopify documentation, API schemas, operation validation, and store execution.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -39,7 +39,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 1. **Every cart mutation MUST call `invalidateCartCache()`** (from `@/lib/cart/server`) or cache goes stale.
 2. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
-4. **Always verify Shopify GraphQL fields against the live schema** before adding or changing fields. Use `shopify-ai-toolkit` or `/vercel-shop:shopify-graphql-reference` if available, otherwise consult the Shopify Storefront / Customer Account API docs. Never guess Shopify field names.
+4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
 ## Storefront Architecture Contract
@@ -175,7 +175,7 @@ Request → Page → Operation → shopifyFetch → Shopify API → Transform �
 
 If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" above), agents have access to slash commands that walk through common storefront extensions:
 
-- Shopify GraphQL work: `/vercel-shop:shopify-graphql-reference`
+- Integrating Shopify-validated GraphQL into the template: `/vercel-shop:shopify-graphql-reference`
 - Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
 - Locale-prefixed routing + i18n (no Markets): `/vercel-shop:enable-i18n`
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
@@ -203,8 +203,9 @@ The `(authenticated)` route group separates the auth-gated layout from the login
 
 ## Shopify GraphQL Workflow
 
-- Inspect the live Storefront or Customer Account schema before changing fields. The `Shopify/shopify-ai-toolkit` plugin streamlines this if installed; otherwise the official Shopify GraphQL docs are the source of truth.
-- Use `/vercel-shop:shopify-graphql-reference` (if the plugin is installed) for template-specific GraphQL conventions: fragments, locale context, caching, transforms, and operation placement.
+- Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog/cart/public storefront operations, Customer for authenticated customer data, and custom-data first for metafields or metaobjects.
+- Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
+- Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns

@@ -16,7 +16,7 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 
 - `vercel-shop` provides the canonical storefront skills that the docs site renders and references.
 - `vercel-plugin` provides generic Vercel and Next.js skills.
-- `shopify-ai-toolkit` provides Shopify-aware tooling and schema access.
+- `shopify-ai-toolkit` is authoritative for current Shopify documentation, API schemas, operation validation, and store execution.
 
 ## Geistdocs architecture rules
 

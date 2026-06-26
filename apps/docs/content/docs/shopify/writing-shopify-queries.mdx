@@ -8,11 +8,11 @@ prerequisites:
 
 This guide walks through adding a new Shopify Storefront API operation from scratch. We'll fetch a shop's privacy policy as a concrete example.
 
-If you're using a coding agent, run `/vercel-shop:shopify-graphql-reference` in Claude Code or ask the agent to use the `shopify-graphql-reference` skill first. The skill is the reference source for Shopify GraphQL work and uses `shopify-ai-toolkit` for live schema checks while keeping the agent anchored to the template guardrails.
+If you're using a coding agent, use Shopify AI Toolkit's Storefront GraphQL skill first so it searches current Shopify documentation and validates the operation. Then run `/vercel-shop:shopify-graphql-reference` to integrate that validated operation with the template's files, domain types, cache role, and invalidation.
 
 ## 1. Check the schema
 
-Use `shopify-ai-toolkit`, Shopify's GraphQL docs, or your preferred GraphQL explorer to confirm the field exists before writing the query. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:
+Use Shopify AI Toolkit to confirm the operation against the intended Storefront API version before writing template code. For this example, validate the `shop.privacyPolicy` selection and its return fields rather than relying on this guide as API reference:
 
 ```graphql
 type ShopPolicy {
@@ -69,14 +69,13 @@ This is a local type scoped to your operation file - it maps directly to the Gra
 Create a new file in `lib/shopify/operations/` or add to an existing one. The function calls `shopifyFetch`, applies caching, and returns the result:
 
 ```ts
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopifyFetch } from "../client";
+import { shopifyFetch } from "../fetch";
 
 export async function getPrivacyPolicy(locale: string = defaultLocale) {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("policies");
+  "use cache";
+  cacheLife("days");
 
   const data = await shopifyFetch<ShopifyPrivacyPolicyResponse>({
     operation: "getPrivacyPolicy",
@@ -93,10 +92,11 @@ export async function getPrivacyPolicy(locale: string = defaultLocale) {
 
 Key points:
 
-- **`"use cache: remote"`** stores the entry in Vercel's shared Runtime Cache, so it persists across serverless instances and between requests. Plain `"use cache"` is per-instance in-memory at runtime — it only survives for params prerendered at build, so most reads would refetch on every cold instance
-- **`cacheLife("max")`** caches until you manually invalidate
-- **`cacheTag("policies")`** lets you invalidate with `revalidateTag("policies")` later
+- **`"use cache"`** allows this stable policy body to become part of the page's prerendered shell
+- **`cacheLife("days")`** refreshes content that has no matching webhook invalidation path
 - Always pass `locale` and extract `country`/`language` from it
+
+Cache behavior follows the consuming route, not a universal default. Use plain `"use cache"` for public identity/body content that must be coherent in the static shell. Use `"use cache: remote"` for reusable public results resolved after request inputs such as filters, search, or cursors. Keep cart, session, and Customer Account data request-scoped or private. Use `cacheLife("max")` only when a webhook, mutation, or deliberate manual path invalidates every associated tag.
 
 ## 5. Add a transform (if needed)
 
@@ -170,10 +170,11 @@ Expose mutations to the client through server actions in `components/cart/action
 ## Checklist
 
 - [ ] Verified field names against the live Storefront API schema
+- [ ] Validated the final operation with Shopify AI Toolkit
 - [ ] Operation name in the query string matches the `operation` parameter
 - [ ] Variables passed as an object, never interpolated into the query
 - [ ] `@inContext` directive included if data is locale-sensitive
-- [ ] `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
+- [ ] Cache directive chosen from the route's render role, with `cacheLife` and `cacheTag` where applicable
 - [ ] Transform added if the Shopify response shape needs mapping
 - [ ] Components import domain types from `lib/types`, not Shopify response types
 - [ ] Cart mutations call `invalidateCartCache()`

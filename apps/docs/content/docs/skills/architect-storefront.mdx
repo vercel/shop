@@ -26,6 +26,7 @@ Design the route dependency graph before designing its presentation. Performance
 2. Read the local Next.js documentation under `node_modules/next/dist/docs/` for any API being changed. This template may use newer Cache Components and prefetch behavior than model knowledge.
 3. Preserve existing cache directives, promises, invalidation tags, auth gates, redirects, metadata, and `notFound()` behavior unless the task explicitly changes the domain behavior.
 4. Read `references/rendering-architecture.md` for every route. Then read only the route references that apply:
+   - Commerce behavior and end-to-end flows: `references/commerce-flows.md`
    - Home and marketing routes: `references/home.md`
    - Collection and search routes: `references/plp-search.md`
    - Product routes: `references/pdp.md`
@@ -42,6 +43,12 @@ Write down the route as five layers before editing:
 5. **Mutation path** — perform server mutations, invalidate the right domain cache, and reconcile optimistic state.
 
 For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
+
+## Keep the Shopify boundary explicit
+
+Use the installed Shopify AI Toolkit for Shopify API documentation, schema facts, operation design, and validation. Invoke its API-specific skill before adding or changing Storefront or Customer Account GraphQL. For metafields or metaobjects, use its custom-data skill first.
+
+Use `/vercel-shop:shopify-graphql-reference` only after Shopify validation to apply Vercel Shop conventions: operation placement, domain transforms, cache role, locale flow, invalidation, and route integration. Never treat this architecture skill as a substitute for authoritative Shopify validation.
 
 ## Prevent blocking
 
@@ -67,9 +74,10 @@ Treat its output as review prompts, not measurements. Then:
 1. Run the storefront's lint, typecheck, and production build commands.
 2. Test cold direct visits and warm client navigations in a production build.
 3. Verify that non-critical Shopify work does not delay the shell or primary interaction.
-4. Inspect failed requests, layout shifts, LCP discovery, hydration, and interaction behavior.
-5. Use the Next.js bundle analyzer when client dependencies or boundaries changed.
-6. Use Speed Insights field data after deployment. Do not claim improvement from code inspection alone.
+4. Run every affected flow in `references/commerce-flows.md`, including failure and empty states.
+5. Inspect failed requests, layout shifts, LCP discovery, hydration, and interaction behavior.
+6. Use the Next.js bundle analyzer when client dependencies or boundaries changed.
+7. Use Speed Insights field data after deployment. Do not claim improvement from code inspection alone.
 
 Report the final layer boundaries, blocking dependencies, cache ownership, and remaining risks.
 

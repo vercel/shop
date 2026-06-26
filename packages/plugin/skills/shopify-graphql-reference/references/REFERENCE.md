@@ -1,147 +1,76 @@
-# Shopify GraphQL Reference
+# Vercel Shop GraphQL Integration Reference
 
-Use this reference when the task needs detailed guidance beyond the workflow in `SKILL.md`.
+## Ownership boundary
 
-Schema validation for this skill comes from the installed `Shopify/shopify-ai-toolkit` plugin. Use it to confirm fields, arguments, enum values, and API boundaries before editing queries or mutations.
+| Concern | Owner |
+| --- | --- |
+| Shopify fields, types, arguments, enums, API versions, examples, and operation validation | Shopify AI Toolkit |
+| Operation file, shared fragments, locale helpers, response types, domain transforms, cache role, tags, and route composition | Vercel Shop |
 
-## Key files and tools
+Never duplicate Shopify API reference material here. Re-run Shopify validation whenever the final document changes.
+
+## Key Vercel Shop files
 
 | Resource | Role |
-|------|------|
-| `Shopify/shopify-ai-toolkit` | Live Storefront and Customer Account schema inspection |
-| `lib/shopify/fetch.ts` | `shopifyFetch()` GraphQL client |
-| `lib/shopify/fragments.ts` | Shared fragments (`PRODUCT_FRAGMENT`, `PRODUCT_CARD_FRAGMENT`, money, images, metafields) |
-| `lib/shopify/utils.ts` | `flattenEdges()` connection helper |
-| `lib/shopify/operations/*.ts` | Query and mutation entry points |
-| `lib/shopify/transforms/*.ts` | Shopify-to-domain mapping helpers |
-| `lib/types.ts` | Provider-agnostic domain types consumed by components |
+| --- | --- |
+| `lib/shopify/fetch.ts` | Storefront and Customer Account transport and error handling |
+| `lib/shopify/fragments.ts` | Shared Storefront selections |
+| `lib/shopify/operations/*.ts` | Domain-oriented query and mutation entry points |
+| `lib/shopify/transforms/*.ts` | Shopify response to domain mapping |
+| `lib/shopify/types/**` | Raw Shopify response shapes |
+| `lib/types.ts` | Provider-independent types consumed by presentation |
+| `lib/cart/server.ts` | Cart cookie helpers and `invalidateCartCache()` |
+| `app/api/webhooks/shopify/route.ts` | Public-content invalidation entry point |
 
-## Operation structure
-
-Every read operation should follow this pattern:
-
-```tsx
-import { cacheLife, cacheTag } from "next/cache";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopifyFetch } from "@/lib/shopify/fetch";
-import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
-import { transformShopifyProductDetails } from "@/lib/shopify/transforms/product";
-import type { ProductDetails } from "@/lib/types";
-
-export async function getProduct({
-  handle,
-  locale = defaultLocale,
-}: {
-  handle: string;
-  locale?: string;
-}): Promise<ProductDetails | undefined> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  const data = await shopifyFetch<{ product: ShopifyProduct }>({
-    operation: "GetProduct",
-    query: `
-      ${PRODUCT_FRAGMENT}
-      query GetProduct($handle: String!, $country: CountryCode, $language: LanguageCode)
-        @inContext(country: $country, language: $language) {
-        product(handle: $handle) {
-          ...ProductFields
-        }
-      }
-    `,
-    variables: {
-      handle,
-      country: getCountryCode(locale),
-      language: getLanguageCode(locale),
-    },
-  });
-
-  if (!data.product) return undefined;
-
-  return transformShopifyProductDetails(data.product);
-}
-```
-
-## Fragment hierarchy
-
-Fragments compose from small to large:
+## Data flow
 
 ```text
-MONEY_FRAGMENT
-  -> PRODUCT_VARIANT_FRAGMENT
-IMAGE_FRAGMENT
-TAXONOMY_CATEGORY_FRAGMENT
-METAFIELD_FRAGMENT
-
-PRODUCT_FRAGMENT
-  -> full PDP data
-
-PRODUCT_CARD_FRAGMENT
-  -> lighter listing/search data
+Route → domain operation → shopifyFetch → validated Shopify operation
+      ← domain type      ← transform    ← Shopify response
 ```
 
-`PRODUCT_VARIANT_FRAGMENT` includes `MONEY_FRAGMENT` but not `IMAGE_FRAGMENT`. Parent fragments pull in image fields separately.
+Do not add an internal HTTP hop between a Server Component and `lib/shopify/operations/`. Do not return raw Shopify response types to presentation.
 
-## Locale context
+## Choose cache behavior from the consumer
 
-Use `@inContext` for locale-sensitive reads:
+| Render role | Treatment |
+| --- | --- |
+| Public identity/body that must be included coherently in a prerendered shell | Plain `"use cache"` with the established lifetime and tags |
+| Public, reusable results resolved after request inputs such as filters, search, cursor, or runtime composition | `"use cache: remote"` when shared Runtime Cache is justified |
+| Cart, session, authorization, or Customer Account data | Uncached or private/request-scoped; never public remote cache |
+| Mutation | No read-cache directive; invalidate the affected domain after success |
 
-```graphql
-query GetProduct($handle: String!)
-  @inContext(country: US, language: EN) {
-  ...
-}
-```
+Follow the closest existing operation with the same render role. Do not choose a directive solely because the upstream data is public. Cache placement changes whether content becomes part of the static shell and can affect hydration coherence.
 
-Use locale helpers instead of hardcoding:
+Current examples of intent:
 
-- `getCountryCode("en-US")` -> `"US"`
-- `getLanguageCode("en-US")` -> `"EN"`
+- `getProduct()` and `getCollection()` use plain `"use cache"` because their stable bodies belong in the PDP and PLP shells.
+- Filtered collection/search/facet reads use `"use cache: remote"` because request inputs resolve outside those shells and results are reusable.
+- Customer Account operations and cart reads remain customer/request scoped.
 
-## Connections and edge flattening
+## Operation integration
 
-Shopify returns connections as `{ edges: [{ node: T }] }`. Flatten them with `flattenEdges()`:
+- Keep GraphQL operation names stable and pass the same name to `shopifyFetch`.
+- Pass dynamic values as variables, never string interpolation.
+- Reuse `PRODUCT_CARD_FRAGMENT` for listing payloads and `PRODUCT_FRAGMENT` for the stable PDP body only when their current selections fit the task.
+- Use `@inContext` and the existing locale helpers for locale-sensitive Storefront operations.
+- Add response fields to raw Shopify types, transforms, and domain types as one coherent change.
+- Preserve missing-resource contracts: use the existing `undefined`, `null`, or empty-collection convention for the domain.
 
-```tsx
-import { flattenEdges } from "@/lib/shopify/utils";
+## Invalidation
 
-const products = flattenEdges(data.collection.products);
-```
+- Reuse established product, collection, menu, recommendation, sitemap, CMS, and cart tags.
+- Add a new tag only when the webhook or mutation path can invalidate it correctly.
+- Keep public-content tags aligned with `app/api/webhooks/shopify/route.ts`.
+- Call `invalidateCartCache()` after every successful cart mutation.
+- Never rely on public cache invalidation for Customer Account privacy or authorization.
 
-## Guardrails
+## Completion checklist
 
-- Always verify fields against the live schema with `shopify-ai-toolkit`.
-- Reads need `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`. `"use cache: remote"` uses Vercel's shared Runtime Cache (durable across serverless instances); plain `"use cache"` is per-instance in-memory at runtime and only persists for build-prerendered params.
-- Use `PRODUCT_CARD_FRAGMENT` for listings and `PRODUCT_FRAGMENT` for PDP work unless you have a clear reason not to.
-- Transform Shopify responses to domain types before returning them from operations.
-- Cart mutations must call `invalidateCartCache()`.
-
-## Common modifications
-
-### Add a new field to product queries
-
-1. Check the live Storefront API schema with `shopify-ai-toolkit`.
-2. Add the field to the right fragment in `lib/shopify/fragments.ts`.
-3. Update the Shopify response type and transform in `lib/shopify/transforms/product.ts`.
-4. Add the mapped field to `lib/types.ts` if components need it.
-
-### Write a new read operation
-
-1. Define the GraphQL query using existing fragments where possible.
-2. Add `"use cache: remote"`, `cacheLife(...)`, and `cacheTag(...)`.
-3. Call `shopifyFetch` with the query and variables object.
-4. Transform the response before returning it.
-
-### Write a mutation
-
-1. Define the mutation and typed response shape.
-2. Call `shopifyFetch` without read-cache directives.
-3. Call `invalidateCartCache()` if cart state changed.
-4. Return transformed domain data.
-
-### Debug GraphQL errors
-
-- Set `DEBUG_SHOPIFY=true` in `.env.local`.
-- Compare every field and argument against the live schema with `shopify-ai-toolkit`.
-- Check whether the operation is using the wrong fragment for the surface.
+- Shopify AI Toolkit validated the final document against the intended API version.
+- The operation lives in the closest domain file and uses existing transport.
+- Cache behavior follows render role, not a blanket default.
+- Locale variables flow through existing helpers when applicable.
+- Raw and domain types remain separated by a transform.
+- Mutations invalidate the affected state.
+- Direct visits, client navigation, failure states, and affected commerce flows pass.
