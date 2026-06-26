@@ -72,7 +72,7 @@ Output lands in `lib/shopify/types/generated/`, which is **gitignored**. Nothing
 
 Because codegen resolves interpolations of other `#graphql` consts by name, every fragment in `lib/shopify/fragments.ts` is also tagged `#graphql ... as const`. A raw selection snippet that isn't a valid standalone document (it can't be `#graphql`-tagged) must be inlined into each operation rather than interpolated.
 
-Always verify fields against the live Storefront API schema with `shopify-ai-toolkit` or [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) when adding or modifying queries - don't guess field names.
+Always use Shopify AI Toolkit to search current Shopify documentation and validate the final operation. Then use [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) for Vercel Shop integration conventions. The Vercel Shop skill is not a schema source.
 
 ## Fragments
 
@@ -131,14 +131,23 @@ export async function getProduct({
 
 Key elements:
 
-1. **`"use cache"`** - uses the local Next.js cache for stable, low-cardinality reads
+1. **`"use cache"`** - includes the stable product body coherently in the PDP's prerendered shell
 2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
 3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
 4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
 
 ## Caching
 
-Read operations use `"use cache"` or `"use cache: remote"` with `cacheLife("max")` and one or more cache tags. Stable, low-cardinality reads (product detail, single collection) can use plain `"use cache"` so they inline into the static shell; high-cardinality operations that depend on search, filters, sort, or cursors use `"use cache: remote"`, which stores entries in Vercel's shared Runtime Cache so they persist across serverless instances and between requests. Tags follow a hierarchy:
+Read operations choose cache behavior from their render role:
+
+| Render role                                                                     | Treatment                                                        |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Public identity/body that belongs coherently in the prerendered shell           | Plain `"use cache"`                                              |
+| Public results resolved after request inputs such as filters, search, or cursor | `"use cache: remote"` when shared Runtime Cache is justified     |
+| Cart, session, authorization, or Customer Account data                          | Request-scoped or private; never public remote cache             |
+| Mutation                                                                        | No read-cache directive; invalidate affected state after success |
+
+Cached public operations use the established `cacheLife` and tags. Combined with webhook-driven invalidation, those tags refresh the intended shell or runtime entry when Shopify changes. Tags follow a hierarchy:
 
 | Tag pattern                | Scope                                |
 | -------------------------- | ------------------------------------ |
@@ -206,20 +215,19 @@ Domain types are defined in `lib/types.ts` and are provider-agnostic. Components
 
 ## Key files and tools
 
-| Resource                                | Purpose                                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------------------ |
-| `lib/shopify/storefront.ts`             | Shared `@shopify/storefront-api-client` instance + `customFetchApi`                  |
-| `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers                          |
-| `lib/shopify/customer-account.ts`       | `customerAccountFetch` for the separate Customer Account API                         |
-| `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)                                |
-| `lib/shopify/types/generated/`          | Generated (gitignored) Storefront types + schema snapshot; codegen validation output |
-| `lib/shopify/fragments.ts`              | Reusable `#graphql` fragment definitions                                             |
-| `lib/shopify/operations/products.ts`    | Product queries: single, batch, search, recommendations                              |
-| `lib/shopify/operations/cart.ts`        | Cart queries and mutations                                                           |
-| `lib/shopify/operations/collections.ts` | Collection queries                                                                   |
-| `lib/shopify/operations/search.ts`      | Predictive search                                                                    |
-| `lib/shopify/operations/menu.ts`        | Navigation menu queries                                                              |
-| `lib/shopify/transforms/product.ts`     | Shopify product → domain type                                                        |
-| `lib/shopify/transforms/cart.ts`        | Shopify cart → domain type                                                           |
-| `lib/cart/server.ts`                    | `invalidateCartCache()` for mutation cache busting                                   |
-| `shopify-ai-toolkit`                    | Live Storefront and Customer Account schema inspection                               |
+| Resource                                | Purpose                                                               |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| `lib/shopify/storefront.ts`             | Shared `@shopify/storefront-api-client` instance + `customFetchApi`   |
+| `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers           |
+| `lib/shopify/customer-account.ts`       | `customerAccountFetch` for the separate Customer Account API          |
+| `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)                 |
+| `lib/shopify/fragments.ts`              | Reusable `#graphql` fragment definitions                              |
+| `lib/shopify/operations/products.ts`    | Product queries: single, batch, search, recommendations               |
+| `lib/shopify/operations/cart.ts`        | Cart queries and mutations                                            |
+| `lib/shopify/operations/collections.ts` | Collection queries                                                    |
+| `lib/shopify/operations/search.ts`      | Predictive search                                                     |
+| `lib/shopify/operations/menu.ts`        | Navigation menu queries                                               |
+| `lib/shopify/transforms/product.ts`     | Shopify product → domain type                                         |
+| `lib/shopify/transforms/cart.ts`        | Shopify cart → domain type                                            |
+| `lib/cart/server.ts`                    | `invalidateCartCache()` for mutation cache busting                    |
+| `shopify-ai-toolkit`                    | Authoritative Shopify docs, schemas, operation design, and validation |

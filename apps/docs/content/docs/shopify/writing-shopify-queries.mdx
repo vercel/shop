@@ -8,11 +8,11 @@ prerequisites:
 
 This guide walks through adding a new Shopify Storefront API operation from scratch. We'll fetch a shop's privacy policy as a concrete example.
 
-If you're using a coding agent, run `/vercel-shop:shopify-graphql-reference` in Claude Code or ask the agent to use the `shopify-graphql-reference` skill first. The skill is the reference source for Shopify GraphQL work and uses `shopify-ai-toolkit` for live schema checks while keeping the agent anchored to the template guardrails.
+If you're using a coding agent, use Shopify AI Toolkit's Storefront GraphQL skill first so it searches current Shopify documentation and validates the operation. Then run `/vercel-shop:shopify-graphql-reference` to integrate that validated operation with the template's files, domain types, cache role, and invalidation.
 
 ## 1. Check the schema
 
-Use `shopify-ai-toolkit`, Shopify's GraphQL docs, or your preferred GraphQL explorer to confirm the field exists before writing the query. For our example, the `QueryRoot` type has a `shop` field with a `privacyPolicy` property that returns a `ShopPolicy`:
+Use Shopify AI Toolkit to confirm the operation against the intended Storefront API version before writing template code. For this example, validate the `shop.privacyPolicy` selection and its return fields rather than relying on this guide as API reference:
 
 ```graphql
 type ShopPolicy {
@@ -86,15 +86,14 @@ Codegen parses every `#graphql`-tagged query and **fails the command if a field,
 Create a new file in `lib/shopify/operations/` or add to an existing one. The function calls `storefront.request`, asserts the response is OK, applies caching, and returns the result:
 
 ```ts
-import { cacheLife, cacheTag } from "next/cache";
+import { cacheLife } from "next/cache";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { assertStorefrontOk } from "../errors";
 import { storefront } from "../storefront";
 
 export async function getPrivacyPolicy(locale: string = defaultLocale) {
   "use cache";
-  cacheLife("max");
-  cacheTag("policies");
+  cacheLife("days");
 
   const response = await storefront.request<ShopifyPrivacyPolicyResponse>(PRIVACY_POLICY_QUERY, {
     variables: {
@@ -113,11 +112,11 @@ Key points:
 
 - **`storefront`** is the shared `@shopify/storefront-api-client` instance from `lib/shopify/storefront.ts`. Pass your response type as the generic; the query is the first argument and variables go in the options object.
 - **`assertStorefrontOk(response, name)`** throws on a transport/GraphQL failure (no `data`), warns on partial errors, and narrows `response.data` to non-null.
-- **`"use cache"`** uses the local Next.js cache for stable, low-cardinality reads
-- **`cacheLife("max")`** caches until you manually invalidate
-- **`cacheTag("policies")`** lets you invalidate with `revalidateTag("policies")` later
-- Use `"use cache: remote"` instead for high-cardinality reads that depend on search, filters, sort, or cursors
+- **`"use cache"`** allows this stable policy body to become part of the page's prerendered shell.
+- **`cacheLife("days")`** refreshes content that has no matching webhook invalidation path.
 - Always pass `locale` and extract `country`/`language` from it
+
+Cache behavior follows the consuming route, not a universal default. Use plain `"use cache"` for public identity/body content that must be coherent in the static shell. Use `"use cache: remote"` for reusable public results resolved after request inputs such as filters, search, or cursors. Keep cart, session, and Customer Account data request-scoped or private. Use `cacheLife("max")` only when a webhook, mutation, or deliberate manual path invalidates every associated tag.
 
 ## 6. Add a transform (if needed)
 
@@ -195,10 +194,11 @@ Expose mutations to the client through server actions in `components/cart/action
 - [ ] Query string starts with `#graphql` and the declaration ends with `as const`
 - [ ] Query/mutation is **named** so codegen can parse it
 - [ ] Document is static — dynamic parts passed as variables, not interpolated into the query string
+- [ ] Validated the final operation with Shopify AI Toolkit
 - [ ] `pnpm --filter template codegen` passes (validates fields against the live schema); generated types are gitignored and regenerate at dev/build
 - [ ] `@inContext` directive included if data is locale-sensitive
 - [ ] `storefront.request<ResponseType>(QUERY, { variables })` followed by `assertStorefrontOk(response, name)`
-- [ ] `"use cache"` or `"use cache: remote"`, `cacheLife`, and `cacheTag` set for read operations
+- [ ] Cache directive chosen from the route's render role, with `cacheLife` and `cacheTag` where applicable
 - [ ] Transform added if the Shopify response shape needs mapping
 - [ ] Components import domain types from `lib/types`, not Shopify response types
 - [ ] Cart mutations call `invalidateCartCache()`
