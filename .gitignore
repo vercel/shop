@@ -20,6 +20,9 @@ out/
 # production
 build
 
+# generated archives
+/*.zip
+
 # misc
 .DS_Store
 *.pem
