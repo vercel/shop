@@ -146,6 +146,24 @@ Make the accordion closed by default on mobile
 
 The agent retains context from the previous exchange.
 
+### Use a browser feedback loop
+
+Storefront changes should be checked in a real browser, not only by reading diffs. v0 has this feedback loop built in. For agents without built-in browser control, install the standalone [`agent-browser`](https://github.com/vercel-labs/agent-browser) CLI:
+
+```bash
+npm install -g agent-browser
+agent-browser install
+```
+
+Then ask the agent to start the dev server, open the affected route, capture a snapshot and screenshot, interact through the changed commerce flow, and repeat until the browser result matches the intended behavior.
+
+```bash
+agent-browser open http://localhost:3000/products/example
+agent-browser wait --load networkidle
+agent-browser snapshot
+agent-browser screenshot --full
+```
+
 ### When something breaks, name the failure
 
 Specific error messages and likely files beat "fix it":

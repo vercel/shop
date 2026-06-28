@@ -340,7 +340,7 @@ params: { locale: "en-US", handle: "__placeholder__" }
 If any layout-level server component (e.g. a shipping/postal banner, geo-aware nav) reads `headers()`, also add a `headers` array to every sample:
 
 ```ts
-headers: [["x-vercel-ip-postal-code", null]]
+headers: [["x-vercel-ip-postal-code", null]];
 ```
 
 (See "Cache Components compatibility D/E" at the top.)

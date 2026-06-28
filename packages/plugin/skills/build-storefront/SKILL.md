@@ -5,7 +5,7 @@ description: Build Vercel Shop storefront routes so data loading, caching, strea
 
 # Build a Storefront
 
-Design the route dependency graph before designing its presentation. Performance is an architectural outcome of where data is owned, when work starts, what blocks the shell, and how little code must run in the browser.
+Build the shop around commerce truth first: what product or collection is being shown, what the customer has selected, what can be bought now, what price is authoritative, and what state belongs in the URL, Shopify, the server cache, or the browser. Presentation comes after that contract is clear.
 
 ## Start with the existing contract
 
@@ -22,15 +22,30 @@ Design the route dependency graph before designing its presentation. Performance
 
 ## Model the route
 
-Write down the route as five layers before editing:
+Write down the route as five layers before editing, using commerce nouns instead of generic component names:
 
-1. **Route orchestration** — resolve identity needed for redirects, metadata, auth, and real 404s.
-2. **Data operations** — fetch Shopify data, transform provider types, and own cache policy and tags.
-3. **Server composition** — render stable shell content and place independent async sections behind granular boundaries.
-4. **Client islands** — own only state, effects, browser APIs, and event handlers.
-5. **Mutation path** — perform server mutations, invalidate the right domain cache, and reconcile optimistic state.
+1. **Route orchestration** — resolve handles, locale, selected options, filters, pagination, redirects, metadata, auth, and real 404s.
+2. **Data operations** — fetch Shopify data, transform provider types into shop domain types, and own cache scope, tags, and invalidation names.
+3. **Server composition** — render the stable catalog shell first and place independent sections like recommendations, facets, reviews, and account/cart details behind granular boundaries.
+4. **Client islands** — own only selection, optimistic intent, browser APIs, effects, and event handlers: variant pickers, galleries, filter controls, carts, and forms.
+5. **Mutation path** — perform server mutations, return canonical Shopify state and warnings, invalidate the right domain cache, and reconcile optimistic state without double-applying it.
 
 For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
+
+## Default ownership
+
+- URLs own customer-visible browse and selection state: selected product options, filters, sort, cursors/pages, and search text.
+- Shopify owns canonical commerce state: products, variants, prices, availability, carts, checkout URLs, customer accounts, discounts, and warnings.
+- The data layer owns provider transforms, cache tags, invalidation, locale flow, and the boundary between shared and personalized data.
+- Server Components own the stable catalog shell and async composition. Client Components own only interaction, optimistic intent, browser APIs, and local affordances.
+
+## Storefront gotchas
+
+- Product selection must round-trip through direct visits, links, refreshes, and client navigation, then drive media, price, availability, add-to-cart payloads, and canonical links.
+- Collection/search URLs are the source of truth for browsing. Empty results, unavailable facets, and back/forward navigation are not optional states.
+- Cart UI must keep confirmed Shopify state separate from pending optimistic intent so concurrent mutations, bootstrap, errors, and warnings cannot double-apply or disappear.
+- Customer, account, cart identity, and authorization state must never leak into shared product, collection, menu, page, or recommendation caches.
+- Missing images, deleted products, sold-out variants, empty collections, partial Shopify failures, and disabled auth are normal storefront cases. Represent them deliberately.
 
 ## Keep the Shopify boundary explicit
 
@@ -40,7 +55,7 @@ Use `/vercel-shop:shopify-graphql-reference` only after Shopify validation to ap
 
 ## Prevent blocking
 
-1. Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits it.
+1. Keep route identity, stable headings, primary media, selected price/availability, and likely LCP content in the earliest shell the data contract permits.
 2. Resolve route identity early only when it is required for correctness or shell coherence.
 3. Pass request-dependent promises downward unawaited. Resolve them in the smallest component that needs them and place Suspense there.
 4. Use sibling boundaries for independent work. Do not put the whole page behind the slowest Shopify request.
@@ -48,6 +63,17 @@ Use `/vercel-shop:shopify-graphql-reference` only after Shopify validation to ap
 6. Keep components server-rendered by default. Do not move reads into client effects or internal HTTP endpoints.
 7. Keep cache policy in the data layer and personalized data out of shared caches.
 8. Treat prefetching as a traffic-versus-latency decision, not a default fix for blocking architecture.
+
+## Use a browser feedback loop
+
+For visible storefront changes, close the loop in a real browser before calling the work done. Use the agent's built-in browser when available; otherwise use the standalone `agent-browser` CLI.
+
+1. Start the local storefront and open each affected route: `agent-browser open http://localhost:3000/...`.
+2. Capture the current state: `agent-browser wait --load networkidle`, `agent-browser snapshot`, and `agent-browser screenshot --full`.
+3. Exercise the commerce interaction through the UI: variant selection, filtering, pagination, add/update/remove cart, auth redirects, or the changed control.
+4. Re-snapshot after every navigation or DOM change before reusing element refs.
+5. Repeat on mobile and desktop viewports when layout, media, overlays, filters, cart, or primary actions changed.
+6. Iterate on the implementation until the browser outcome matches the intended commerce behavior. If `agent-browser` is unavailable, say so and report the fallback checks used.
 
 ## Verify the architecture
 
@@ -60,9 +86,9 @@ node scripts/audit-storefront.mjs <storefront-root>
 Treat its output as review prompts, not measurements. Then:
 
 1. Run targeted lint, typecheck, tests, and affected flows available in the current environment.
-2. Test direct visits and client navigations for the routes changed.
-3. Verify that non-critical Shopify work does not delay the shell or primary interaction.
-4. Run every affected flow in `references/commerce-flows.md`, including failure and empty states.
+2. Test direct visits, client navigations, back/forward navigation, and URL round-trips for the routes changed.
+3. Verify that non-critical Shopify work does not delay the shell, primary media, selected price/availability, or primary interaction.
+4. Run every affected flow in `references/commerce-flows.md`, including failure, empty, sold-out, and missing-media states.
 5. Inspect failed requests, layout shifts, LCP discovery, hydration, and interaction behavior when relevant.
 6. Require a production build only when build, prerendering, caching, bundling, deployment behavior, or release readiness is in scope.
 7. Use bundle analysis or deployed field data only for an explicit performance investigation when those tools and data are available. Do not request them as routine completion work or claim measured improvement from code inspection.
