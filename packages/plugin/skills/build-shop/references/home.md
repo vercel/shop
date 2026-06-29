@@ -1,5 +1,13 @@
 # Home and Marketing Route Architecture
 
+## Reference implementation
+
+- Docs: [home page anatomy](https://vercel.shop/docs/anatomy/pages/home)
+- Source: `apps/template/app/page.tsx`
+- Product sections: `apps/template/components/product/products-grid.tsx`, `apps/template/components/product/products-slider.tsx`, `apps/template/components/product-card/product-card.tsx`
+- Catalog operations: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/products.ts`
+- Public source fallback: [home route source](https://github.com/vercel/shop/blob/main/apps/template/app/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+
 ## Rendering contract
 
 Keep brand copy and the primary heading available in the initial shell. The catalog promise may stream, but the visual design should not require the product request before any meaningful home content can paint.

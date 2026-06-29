@@ -1,37 +1,39 @@
 ---
-title: Build a Storefront
-description: Build storefront routes with non-blocking data, rendering, cache, mutation, and interaction boundaries.
-type: guide
+name: build-shop
+description: Build or adapt a Shopify storefront with Vercel Shop source-backed patterns. Use when creating, redesigning, refactoring, or reviewing storefront routes, commerce data, rendering, caching, streaming, navigation, cart, account, mutations, product cards, media, loading states, or when applying Vercel Shop outside the template.
 ---
 
-## How to use
+# Build with Vercel Shop
 
-```bash
-/vercel-shop:build-storefront
-```
+Build the shop around commerce truth first: what product or collection is being shown, what the customer has selected, what can be bought now, what price is authoritative, and what state belongs in the URL, Shopify, the server cache, or the browser. Use Vercel Shop's template as the reference implementation, but adapt the behavior to the current storefront instead of copying files blindly.
 
-The skill includes focused references for the shared rendering architecture, home pages, collection and search pages, product pages, cart-provider bootstrap and reconciliation, and account pages.
-
-<div className="pb-6" />
-
-{/* BEGIN SKILL CONTENT: build-storefront */}
-
-# Build a Storefront
-
-Build the shop around commerce truth first: what product or collection is being shown, what the customer has selected, what can be bought now, what price is authoritative, and what state belongs in the URL, Shopify, the server cache, or the browser. Presentation comes after that contract is clear.
-
-## Start with the existing contract
+## Ground the work in source
 
 1. Read the project's `AGENTS.md`, the target route, its view contract, and every operation it calls.
-2. Read the local Next.js documentation under `node_modules/next/dist/docs/` for any API being changed. This template may use newer Cache Components and prefetch behavior than model knowledge.
-3. Preserve existing cache directives, promises, invalidation tags, auth gates, redirects, metadata, and `notFound()` behavior unless the task explicitly changes the domain behavior.
-4. Read `references/rendering-architecture.md` for every route. Then read only the route references that apply:
-   - Commerce behavior and end-to-end flows: `references/commerce-flows.md`
-   - Home and marketing routes: `references/home.md`
-   - Collection and search routes: `references/plp-search.md`
-   - Product routes: `references/pdp.md`
-   - Cart and authenticated account routes: `references/cart-account.md`
-   - Cart provider, bootstrap, optimistic state, and mutations: `references/cart-provider.md`
+2. If the Vercel Shop template source is available, inspect it before relying on this prose:
+   - Template rules: `apps/template/AGENTS.md`
+   - Route/layout shell: `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
+   - Shopify boundary: `apps/template/lib/shopify/storefront.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
+   - Shared UI layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
+   - Public source fallback: [apps/template source](https://github.com/vercel/shop/tree/main/apps/template)
+3. Use the docs to orient before editing unfamiliar areas:
+   - [Architecture docs](https://vercel.shop/docs/anatomy)
+   - [Route reference](https://vercel.shop/docs/reference/routes)
+   - [Shopify integration docs](https://vercel.shop/docs/shopify)
+   - [API boundary docs](https://vercel.shop/docs/reference/storefront-api)
+4. Read the local Next.js documentation under `node_modules/next/dist/docs/` for any API being changed. This template may use newer Cache Components and prefetch behavior than model knowledge.
+5. Preserve existing cache directives, promises, invalidation tags, auth gates, redirects, metadata, and `notFound()` behavior unless the task explicitly changes the domain behavior.
+
+## Route the work
+
+Read `references/rendering-architecture.md` for every route. Then read only the route references that apply:
+
+- Commerce behavior and end-to-end flows: `references/commerce-flows.md`
+- Home and marketing routes: `references/home.md`
+- Collection and search routes: `references/plp-search.md`
+- Product routes: `references/pdp.md`
+- Cart and authenticated account routes: `references/cart-account.md`
+- Cart provider, bootstrap, optimistic state, and mutations: `references/cart-provider.md`
 
 ## Model the route
 
@@ -107,5 +109,3 @@ Treat its output as review prompts, not measurements. Then:
 7. Use bundle analysis or deployed field data only for an explicit performance investigation when those tools and data are available. Do not request them as routine completion work or claim measured improvement from code inspection.
 
 Report the final layer boundaries, blocking dependencies, cache ownership, and remaining risks.
-
-{/* END SKILL CONTENT: build-storefront */}

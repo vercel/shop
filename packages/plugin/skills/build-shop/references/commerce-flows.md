@@ -2,6 +2,14 @@
 
 Verify commerce outcomes without prescribing visual composition. Adapt the presentation freely while preserving the applicable behaviors below.
 
+## Reference implementation
+
+- Route docs: [route reference](https://vercel.shop/docs/reference/routes)
+- Cart docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
+- Product and PLP docs: [PDP anatomy](https://vercel.shop/docs/anatomy/pages/pdp), [PLP anatomy](https://vercel.shop/docs/anatomy/pages/plp)
+- Source paths to inspect by flow: `apps/template/app/`, `apps/template/components/product-detail/`, `apps/template/components/collections/`, `apps/template/components/cart/`, `apps/template/components/cart-page/`, `apps/template/app/account/`, `apps/template/lib/shopify/operations/`, `apps/template/lib/cart/`
+- Public source fallback: [template source](https://github.com/vercel/shop/tree/main/apps/template)
+
 ## Discovery
 
 - Show localized price and currency consistently across navigation, listings, search, PDP, and cart.

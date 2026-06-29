@@ -2,6 +2,15 @@
 
 Use this contract when creating or changing global cart context, server bootstrap, nav badges, cart overlays, cart pages, or optimistic mutations. Preserve the behavior, but adapt names and component composition to the storefront.
 
+## Reference implementation
+
+- Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
+- Provider and bootstrap bridge: `apps/template/components/cart/context.tsx`, `apps/template/components/cart/context-sync.tsx`
+- Nav badge and overlay: `apps/template/components/nav/cart.tsx`, `apps/template/components/nav/cart-client.tsx`, `apps/template/components/cart/overlay.tsx`, `apps/template/components/cart/overlay-content.tsx`
+- Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`
+- Server state and mutations: `apps/template/lib/cart/server.ts`, `apps/template/lib/cart/action.ts`, `apps/template/lib/cart/index.ts`, `apps/template/lib/shopify/operations/cart.ts`
+- Public source fallback: [cart provider source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [cart data source](https://github.com/vercel/shop/tree/main/apps/template/lib/cart), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+
 ## State ownership
 
 Keep one authoritative confirmed cart and model pending user intent separately:

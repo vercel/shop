@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build with Vercel Shop"
+  short_description: "Build Shopify storefronts with Vercel Shop patterns"
+  default_prompt: "Use $build-shop to build or adapt this storefront with source-backed Vercel Shop data, rendering, cache, mutation, and interaction boundaries."

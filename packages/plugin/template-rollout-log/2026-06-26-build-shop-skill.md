@@ -1,6 +1,6 @@
 ---
 title: Add storefront building standards to agent guidance
-changeKey: build-storefront-skill
+changeKey: build-shop-skill
 introducedOn: 2026-06-26
 changeType: meta
 defaultAction: adopt
@@ -9,14 +9,14 @@ appliesTo:
 paths:
   - apps/template/AGENTS.md
 relatedSkills:
-  - /vercel-shop:build-storefront
+  - /vercel-shop:build-shop
 ---
 
 ## Summary
 
 Add a short, always-on storefront contract to the template's agent guidance. It defines ownership across routes, Shopify operations, Server Components, client islands, and server actions, then protects the route's dependency graph, cache boundaries, shell, loading states, media, and prefetch behavior.
 
-The detailed route-specific workflow lives in the `build-storefront` plugin skill so coding agents can implement, redesign, extend, and review storefronts without prescribing their visual composition. Its cart-provider contract separates confirmed Shopify state from pending intent so bootstrap and concurrent mutations cannot double-apply or revert cart updates.
+The detailed route-specific workflow lives in the `build-shop` plugin skill so coding agents can implement, redesign, extend, and review storefronts without prescribing their visual composition. Its cart-provider contract separates confirmed Shopify state from pending intent so bootstrap and concurrent mutations cannot double-apply or revert cart updates.
 
 Performance remains a verification outcome of the broader storefront architecture and commerce workflow.
 
@@ -36,4 +36,4 @@ Without explicit architecture, an implementation can look correct while accident
 ## Validation
 
 1. Confirm the downstream `AGENTS.md` describes route orchestration, data ownership, blocking dependencies, Suspense, client islands, mutation invalidation, images, and prefetch expectations.
-2. If the Vercel Shop plugin is installed, invoke `/vercel-shop:build-storefront` and confirm it routes to the relevant page reference.
+2. If the Vercel Shop plugin is installed, invoke `/vercel-shop:build-shop` and confirm it routes to the relevant page reference.

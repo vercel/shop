@@ -1,5 +1,15 @@
 # Storefront Rendering and Data Architecture
 
+## Reference implementation
+
+Use these files as the concrete model before applying the rules below. Prefer local files when this repository or a generated Vercel Shop project is available; otherwise use the public source link as a reference.
+
+- Docs: [architecture](https://vercel.shop/docs/anatomy), [routes](https://vercel.shop/docs/reference/routes), [Storefront API](https://vercel.shop/docs/reference/storefront-api)
+- Source root: [apps/template](https://github.com/vercel/shop/tree/main/apps/template)
+- App shell and route contracts: `apps/template/AGENTS.md`, `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
+- Shopify data boundary: `apps/template/lib/shopify/storefront.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
+- Layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
+
 ## Keep responsibilities in layers
 
 Vercel Shop enables `cacheComponents`, `partialPrefetching`, and the React Compiler. Keep route responsibilities separated:

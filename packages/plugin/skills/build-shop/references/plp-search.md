@@ -1,5 +1,14 @@
 # Collection and Search Routes
 
+## Reference implementation
+
+- Docs: [PLP anatomy](https://vercel.shop/docs/anatomy/pages/plp), [route reference](https://vercel.shop/docs/reference/routes)
+- Collection routes: `apps/template/app/collections/page.tsx`, `apps/template/app/collections/all/page.tsx`, `apps/template/app/collections/[handle]/page.tsx`
+- Search route: `apps/template/app/search/page.tsx`
+- Components: `apps/template/components/collections/`, `apps/template/components/search/results.tsx`, `apps/template/components/product-card/product-card.tsx`
+- Operations and transforms: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/search.ts`, `apps/template/lib/shopify/transforms/collection.ts`, `apps/template/lib/shopify/transforms/search.ts`, `apps/template/lib/search/action.ts`
+- Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/apps/template/app/collections), [search route source](https://github.com/vercel/shop/blob/main/apps/template/app/search/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+
 ## Preserve the static header
 
 Collection identity, title, description, and other cacheable header content belong in the static shell. The route intentionally resolves the collection before rendering and keeps `searchParams` unawaited for filters, sort, pagination, and results.

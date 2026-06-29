@@ -9,7 +9,7 @@ appliesTo:
 paths:
   - apps/template/AGENTS.md
 relatedSkills:
-  - /vercel-shop:build-storefront
+  - /vercel-shop:build-shop
   - /vercel-shop:shopify-graphql-reference
 ---
 

@@ -43,7 +43,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
 - Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
 
-Use `/vercel-shop:build-storefront` when the project plugin is installed for the full route-specific workflow and audit guidance.
+Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
 
 <!-- BEGIN:vercel-shop-style -->
 
@@ -185,7 +185,7 @@ If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" abov
 - Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
-- Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-storefront`
+- Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-shop`
 
 These are agent-side conveniences. The template runs and deploys without them.
 
