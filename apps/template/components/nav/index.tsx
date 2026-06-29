@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { Container } from "@/components/ui/container";
 import { isAuthEnabled } from "@/lib/auth";
 import { navItems, siteConfig } from "@/lib/config";
 
@@ -18,7 +19,7 @@ export async function Nav({ locale }: { locale: string }) {
       className="sticky top-0 z-30 w-full bg-background pt-[env(safe-area-inset-top,0px)] transition-shadow duration-250"
       id="nav-outer"
     >
-      <div className="mx-auto flex h-16 items-center gap-2.5 md:gap-5 px-5 lg:px-10">
+      <Container className="flex h-16 items-center gap-2.5 md:gap-5">
         <MobileMenu items={items} />
 
         <Link className="flex items-center shrink-0" href="/">
@@ -38,7 +39,7 @@ export async function Nav({ locale }: { locale: string }) {
             <CartIcon />
           </Suspense>
         </div>
-      </div>
+      </Container>
     </nav>
   );
 }
