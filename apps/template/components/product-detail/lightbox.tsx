@@ -79,7 +79,11 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
 export function LightboxTrigger({ item, children }: { item: MediaItem; children: ReactNode }) {
   const open = useContext(LightboxContext);
   return (
-    <button type="button" onClick={() => open?.(item)} className="h-full w-full cursor-zoom-in">
+    <button
+      type="button"
+      onClick={() => open?.(item)}
+      className="relative h-full w-full cursor-zoom-in"
+    >
       {children}
     </button>
   );
