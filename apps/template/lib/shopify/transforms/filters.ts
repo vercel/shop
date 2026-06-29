@@ -143,6 +143,15 @@ function extractPriceRange(priceFilter: ShopifyFilter): PriceRange {
   return { min: 0, max: 1000 };
 }
 
+function isFilterValueSelected(
+  activeFilters: Record<string, string | string[] | undefined>,
+  paramKey: string,
+  value: string,
+): boolean {
+  const current = activeFilters[paramKey];
+  return Array.isArray(current) ? current.includes(value) : current === value;
+}
+
 export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
@@ -162,16 +171,23 @@ export function transformShopifyFilters(
     filters = filters
       .map((filter) => ({
         ...filter,
-        values: filter.values.filter((value) => {
-          const currentValue = activeFilters[filter.paramKey];
-          const isSelected = Array.isArray(currentValue)
-            ? currentValue.includes(value.value)
-            : currentValue === value.value;
-          return value.count > 0 || isSelected;
-        }),
+        values: filter.values.filter(
+          (value) =>
+            value.count > 0 || isFilterValueSelected(activeFilters, filter.paramKey, value.value),
+        ),
       }))
       .filter((filter) => filter.values.length > 0);
   }
+
+  // Drop facet groups that resolve to a single choice — unless that lone value is
+  // active, so a selected filter never silently vanishes from the UI.
+  filters = filters.filter(
+    (filter) =>
+      filter.values.length > 1 ||
+      filter.values.some((value) =>
+        isFilterValueSelected(activeFilters, filter.paramKey, value.value),
+      ),
+  );
 
   return {
     filters,
