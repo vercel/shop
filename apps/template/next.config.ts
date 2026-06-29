@@ -37,7 +37,6 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   experimental: {
     inlineCss: true,
-    turbopackFileSystemCacheForDev: true,
   },
   images: {
     deviceSizes: [1080, 1920],
@@ -51,7 +50,6 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
-  partialPrefetching: true,
   reactCompiler: true,
   async rewrites() {
     return {

@@ -4,6 +4,7 @@ minimumReleaseAgeExclude:
   - "@ai-sdk/*"
   - "@next/*"
   - "@types/react"
+  - "@vercel/*"
   - ai
   - next
   - react
