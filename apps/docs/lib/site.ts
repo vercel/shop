@@ -3,7 +3,7 @@ export const siteName = "Vercel Shop";
 export const homeTitle = "Production-ready Shopify storefront on Next.js";
 
 export const homeSubtitle =
-  "The agent-native commerce template for going from idea to shipped storefront.";
+  "The commerce template for the agent era. Fast by default and built to be customized.";
 
 export const homeDescription = `${homeTitle} ${homeSubtitle}`;
 
