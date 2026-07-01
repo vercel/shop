@@ -19,7 +19,7 @@ Keep these coupled decisions together:
 - keep the stable product body out of a request-time outer Suspense boundary;
 - do not add `prefetch = "allow-runtime"` to the PDP without proving that the body is not rendered again as a divergent request-time flight;
 - keep `searchParams` unawaited for selected-option state;
-- keep the selected-options promise separate from the slower exact-variant query.
+- keep the selected-options promise separate from the slower exact-variant query — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`.
 
 Inspect the existing PDP boundaries before changing them. Render stable product content immediately where the data contract permits, then suspend only variant-dependent media, price, availability, option state, and purchase controls. Keep a broader boundary only when those concerns genuinely share one blocking dependency.
 
