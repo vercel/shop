@@ -40,19 +40,12 @@ Read `references/rendering-architecture.md` for every route. Then read only the 
 Write down the route as five layers before editing, using commerce nouns instead of generic component names:
 
 1. **Route orchestration** — resolve handles, locale, selected options, filters, pagination, redirects, metadata, auth, and real 404s.
-2. **Data operations** — fetch Shopify data, transform provider types into shop domain types, and own cache scope, tags, and invalidation names.
+2. **Data operation** — fetch Shopify data, transform provider types into shop domain types, and own cache scope, tags, and invalidation names.
 3. **Server composition** — render the stable catalog shell first and place independent sections like recommendations, facets, reviews, and account/cart details behind granular boundaries.
-4. **Client islands** — own only selection, optimistic intent, browser APIs, effects, and event handlers: variant pickers, galleries, filter controls, carts, and forms.
-5. **Mutation path** — perform server mutations, return canonical Shopify state and warnings, invalidate the right domain cache, and reconcile optimistic state without double-applying it.
+4. **Client island** — own only selection, optimistic intent, browser APIs, effects, and event handlers: variant pickers, galleries, filter controls, carts, and forms.
+5. **Server action** — perform server mutations, return canonical Shopify state and warnings, invalidate the right domain cache, and reconcile optimistic state without double-applying it.
 
-For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
-
-## Default ownership
-
-- URLs own customer-visible browse and selection state: selected product options, filters, sort, cursors/pages, and search text.
-- Shopify owns canonical commerce state: products, variants, prices, availability, carts, checkout URLs, customer accounts, discounts, and warnings.
-- The data layer owns provider transforms, cache tags, invalidation, locale flow, and the boundary between shared and personalized data.
-- Server Components own the stable catalog shell and async composition. Client Components own only interaction, optimistic intent, browser APIs, and local affordances.
+For each layer's full ownership boundary, see the responsibility table in `references/rendering-architecture.md`. For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
 
 ## Storefront gotchas
 

@@ -2,13 +2,7 @@
 
 ## Reference implementation
 
-Use these files as the concrete model before applying the rules below. Prefer local files when this repository or a generated Vercel Shop project is available; otherwise use the public source link as a reference.
-
-- Docs: [architecture](https://vercel.shop/docs/anatomy), [routes](https://vercel.shop/docs/reference/routes), [Storefront API](https://vercel.shop/docs/reference/storefront-api)
-- Source root: [apps/template](https://github.com/vercel/shop/tree/main/apps/template)
-- App shell and route contracts: `apps/template/AGENTS.md`, `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
-- Shopify data boundary: `apps/template/lib/shopify/storefront.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
-- Layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
+Inspect the source files listed in the skill's "Ground the work in source" step before applying the rules below. Prefer local files when this repository or a generated Vercel Shop project is available; otherwise fall back to [apps/template](https://github.com/vercel/shop/tree/main/apps/template).
 
 ## Keep responsibilities in layers
 
@@ -16,8 +10,8 @@ Vercel Shop enables `cacheComponents`, `partialPrefetching`, and the React Compi
 
 | Layer | Owns | Must not own |
 | --- | --- | --- |
-| Route | URL identity, metadata, redirects, auth gates, real 404 decisions, promise orchestration | Interactive state or provider-specific presentation |
-| Shopify operation | GraphQL, cache policy, tags, transforms into domain types | React loading UI |
+| Route orchestration | URL identity, metadata, redirects, auth gates, real 404 decisions, promise orchestration | Interactive state or provider-specific presentation |
+| Data operation | GraphQL, cache policy, tags, locale flow, transforms into domain types | React loading UI |
 | Server composition | Static shell, section composition, Suspense placement | Browser effects or duplicated data fetching |
 | Client island | Local interaction, optimistic UI, browser APIs | Initial public reads, secrets, or broad page composition |
 | Server action | Mutation, authorization, invalidation, canonical result | Long-lived client state |
@@ -36,6 +30,58 @@ List each read and mark what it requires. A dependency should block another only
 - Avoid a client fetch that repeats data already available to a Server Component.
 
 A Suspense boundary exposes an async dependency; it does not remove it. If the primary heading or media is inside the slow boundary, the route remains architecturally blocked.
+
+## Pass request-time work down to a resolved leaf
+
+The request-time promise shape is the pattern most often written wrong. Verify it against `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx`; the distilled shape:
+
+```tsx
+// 1. Route: await the stable, cacheable read → static shell. Leave searchParams
+//    UNAWAITED; derive request-time promises from it, split by cost, pass DOWN.
+export default async function ProductPage({ params, searchParams }: PageProps<"/products/[handle]">) {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const product = await getProduct({ handle, locale }); // cacheable → lives in the shell
+  if (!product) notFound();
+
+  // Cheap URL parse and the network variant query ride SEPARATE promises, so the
+  // picker highlight never waits on the round-trip that only price + buy need.
+  const selectedOptionsPromise = searchParams.then((sp) => resolveOptions(product, sp));
+  const variantPromise = searchParams.then((sp) => getProductVariant({ handle, locale, sp }));
+
+  return (
+    <ProductDetailSection
+      product={product} // stable props render immediately
+      selectedOptionsPromise={selectedOptionsPromise}
+      variantPromise={variantPromise}
+    />
+  );
+}
+
+// 2. Composition is a SYNCHRONOUS component. It only places boundaries — never awaits.
+function ProductInfoArea({ product, variantPromise }: ProductInfoAreaProps) {
+  return (
+    <>
+      <ProductTitle title={product.title} /> {/* stable — no Suspense */}
+      <Suspense fallback={<div className="h-7" aria-hidden />}> {/* fallback matches resolved height */}
+        <ResolvedProductPrice variantPromise={variantPromise} />
+      </Suspense>
+    </>
+  );
+}
+
+// 3. The resolved leaf is ASYNC, awaits exactly ONE promise, and sits inside its own boundary.
+async function ResolvedProductPrice({ variantPromise }: { variantPromise: Promise<ProductVariant | undefined> }) {
+  const variant = await variantPromise;
+  return <ProductPrice amount={variant?.price} />;
+}
+```
+
+Invariants the shape enforces:
+
+- Await stable, cacheable reads at the route so they enter the shell; never `await searchParams` (or any request input) at the route.
+- Promises flow through synchronous composition untouched. Only a resolved leaf awaits, and it awaits one promise — so a slow read suspends only its own leaf, not its siblings.
+- Every resolved leaf has its own `Suspense` whose fallback matches the resolved geometry, so streaming does not shift the shell.
+- Split one request input into multiple promises when their costs differ, so cheap UI never waits on a network round-trip it does not need.
 
 ## Choose cache ownership deliberately
 
