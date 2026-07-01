@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { StorefrontHero } from "@/components/storefront-hero";
-import { Button } from "@/components/ui/button";
 import {
   CommandPromptContent,
   CommandPromptCopy,
@@ -58,45 +56,33 @@ export const metadata: Metadata = {
 
 const HomePage = () => (
   <div className="container mx-auto max-w-[1448px]">
-    <Hero badge="Vercel Shop is now in alpha" description={homeSubtitle} title={homeTitle}>
-      <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button asChild className="h-12 w-fit rounded-full px-5">
-          <Link href="https://template.vercel.shop/" target="_blank">
-            Go to Demo
-          </Link>
-        </Button>
-        <Button asChild className="h-12 w-fit rounded-full px-5" variant="secondary">
-          <Link href="/docs">View Documentation</Link>
-        </Button>
-      </div>
+    <Hero description={homeSubtitle} title={homeTitle}>
+      <CommandPromptRoot defaultValue="humans">
+        <CommandPromptList>
+          <CommandPromptTrigger className="min-w-[90px]" value="humans">
+            For humans
+          </CommandPromptTrigger>
+          <CommandPromptTriggerDivider />
+          <CommandPromptTrigger className="min-w-[84px]" value="agents">
+            For agents
+          </CommandPromptTrigger>
+        </CommandPromptList>
+        <CommandPromptSurface>
+          <CommandPromptPrefix>$</CommandPromptPrefix>
+          <CommandPromptViewport>
+            <CommandPromptContent value="humans">
+              npx create-vercel-shop@latest
+            </CommandPromptContent>
+            <CommandPromptContent value="agents">
+              npx plugins add vercel/shop
+            </CommandPromptContent>
+          </CommandPromptViewport>
+          <CommandPromptCopy />
+        </CommandPromptSurface>
+      </CommandPromptRoot>
     </Hero>
     <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
       <CenteredSection
-        aside={
-          <CommandPromptRoot defaultValue="humans">
-            <CommandPromptList>
-              <CommandPromptTrigger className="min-w-[90px]" value="humans">
-                For humans
-              </CommandPromptTrigger>
-              <CommandPromptTriggerDivider />
-              <CommandPromptTrigger className="min-w-[84px]" value="agents">
-                For agents
-              </CommandPromptTrigger>
-            </CommandPromptList>
-            <CommandPromptSurface>
-              <CommandPromptPrefix>$</CommandPromptPrefix>
-              <CommandPromptViewport>
-                <CommandPromptContent value="humans">
-                  npx create-vercel-shop@latest
-                </CommandPromptContent>
-                <CommandPromptContent value="agents">
-                  npx plugins add vercel/shop
-                </CommandPromptContent>
-              </CommandPromptViewport>
-              <CommandPromptCopy />
-            </CommandPromptSurface>
-          </CommandPromptRoot>
-        }
         description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"
       >
