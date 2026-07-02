@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 const HomePage = () => (
   <div className="container mx-auto max-w-[1448px]">
     <Hero description={homeSubtitle} title={homeTitle}>
-      <CommandPromptRoot defaultValue="humans">
+      <CommandPromptRoot className="mx-auto w-fit max-w-full items-start" defaultValue="humans">
         <CommandPromptList>
           <CommandPromptTrigger className="min-w-[90px]" value="humans">
             For humans
@@ -69,34 +69,29 @@ const HomePage = () => (
             For agents
           </CommandPromptTrigger>
         </CommandPromptList>
-        <CommandPromptSurface>
-          <CommandPromptPrefix>$</CommandPromptPrefix>
-          <CommandPromptViewport>
-            <CommandPromptContent value="humans">
-              npx create-vercel-shop@latest
-            </CommandPromptContent>
-            <CommandPromptContent value="agents">
-              npx plugins add vercel/shop
-            </CommandPromptContent>
-          </CommandPromptViewport>
-          <CommandPromptCopy />
-        </CommandPromptSurface>
+        <div className="flex max-w-full flex-wrap items-center gap-3">
+          <CommandPromptSurface>
+            <CommandPromptPrefix>$</CommandPromptPrefix>
+            <CommandPromptViewport>
+              <CommandPromptContent value="humans">
+                npx create-vercel-shop@latest
+              </CommandPromptContent>
+              <CommandPromptContent value="agents">
+                npx plugins add vercel/shop
+              </CommandPromptContent>
+            </CommandPromptViewport>
+            <CommandPromptCopy />
+          </CommandPromptSurface>
+          <Button asChild className="h-12 w-fit rounded-full px-5">
+            <Link href="https://template.vercel.shop/" target="_blank">
+              View demo
+            </Link>
+          </Button>
+        </div>
       </CommandPromptRoot>
     </Hero>
     <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
       <CenteredSection
-        aside={
-          <div className="flex flex-wrap items-center gap-3">
-            <Button asChild className="h-12 w-fit rounded-full px-5">
-              <Link href="https://template.vercel.shop/" target="_blank">
-                View the demo
-              </Link>
-            </Button>
-            <Button asChild className="h-12 w-fit rounded-full px-5" variant="secondary">
-              <Link href="/docs">View Documentation</Link>
-            </Button>
-          </div>
-        }
         description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"
       >
