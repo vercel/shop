@@ -35,9 +35,6 @@ function assertRequiredEnv() {
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  experimental: {
-    inlineCss: true,
-  },
   images: {
     deviceSizes: [1080, 1920],
     imageSizes: [],
