@@ -7,7 +7,7 @@
     "codegen": "graphql-codegen",
     "codegen:watch": "graphql-codegen --watch",
     "dev": "graphql-codegen || true && next dev",
-    "dev:https": "graphql-codegen || true && next dev --experimental-https",
+    "dev:portless": "graphql-codegen || true && portless shop next dev",
     "format": "oxfmt",
     "lint": "oxlint . && oxfmt --check",
     "start": "next start"

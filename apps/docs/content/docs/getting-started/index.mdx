@@ -75,6 +75,27 @@ bun dev
 
 Your store is now running at [localhost:3000](http://localhost:3000).
 
+### Run over HTTPS at a custom domain (optional)
+
+Some flows behave differently over plain `http://localhost` - Shopify customer-account and OAuth callbacks and `Secure` cookies expect a real HTTPS origin. The template ships a `dev:portless` script that runs the dev server behind [portless](https://portless.sh), a local reverse proxy that serves the app over trusted HTTPS at `https://shop.localhost` with no port in the URL.
+
+Install portless globally (requires Node 24+):
+
+```bash
+npm install -g portless
+```
+
+Then start the dev server through it, using the run command for your package manager:
+
+```bash
+pnpm dev:portless
+npm run dev:portless
+yarn dev:portless
+bun dev:portless
+```
+
+Your store is now running at [shop.localhost](https://shop.localhost). The first run asks for `sudo` once to bind port 443 and trusts a local certificate authority; later runs are silent. To serve a different subdomain, change the `shop` argument in the `dev:portless` script.
+
 ## Next steps
 
 <Cards>
