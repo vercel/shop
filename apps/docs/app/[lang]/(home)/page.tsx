@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 const HomePage = () => (
   <div className="container mx-auto max-w-[1448px]">
     <Hero description={homeSubtitle} title={homeTitle}>
-      <CommandPromptRoot className="mx-auto w-fit max-w-full items-start" defaultValue="humans">
+      <CommandPromptRoot defaultValue="humans">
         <CommandPromptList>
           <CommandPromptTrigger className="min-w-[90px]" value="humans">
             For humans
