@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { StorefrontHero } from "@/components/storefront-hero";
+import { Button } from "@/components/ui/button";
 import {
   CommandPromptContent,
   CommandPromptCopy,
@@ -83,6 +85,13 @@ const HomePage = () => (
     </Hero>
     <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
       <CenteredSection
+        aside={
+          <Button asChild className="h-12 w-fit rounded-full px-5">
+            <Link href="https://template.vercel.shop/" target="_blank">
+              View the demo
+            </Link>
+          </Button>
+        }
         description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"
       >
