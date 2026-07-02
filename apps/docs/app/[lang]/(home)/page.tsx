@@ -86,11 +86,16 @@ const HomePage = () => (
     <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
       <CenteredSection
         aside={
-          <Button asChild className="h-12 w-fit rounded-full px-5">
-            <Link href="https://template.vercel.shop/" target="_blank">
-              View the demo
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button asChild className="h-12 w-fit rounded-full px-5">
+              <Link href="https://template.vercel.shop/" target="_blank">
+                View the demo
+              </Link>
+            </Button>
+            <Button asChild className="h-12 w-fit rounded-full px-5" variant="secondary">
+              <Link href="/docs">View Documentation</Link>
+            </Button>
+          </div>
         }
         description="Cache Components serve product data instantly while streaming in personalized content."
         title="Dynamic at the speed of static"

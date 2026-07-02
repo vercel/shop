@@ -18,7 +18,7 @@ export const CenteredSection = ({ title, description, aside, children }: Centere
         </h2>
         <p className="text-balance text-lg text-muted-foreground">{description}</p>
       </div>
-      {aside ? <div className="sm:justify-self-center">{aside}</div> : null}
+      {aside ? <div className="sm:justify-self-end">{aside}</div> : null}
     </div>
     {children}
   </div>
