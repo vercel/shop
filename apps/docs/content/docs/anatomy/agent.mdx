@@ -33,7 +33,7 @@ Each turn attaches the user's current page path as ephemeral `clientContext` (`{
 
 The agent has 11 tools organized into three groups. Each is a file under `agent/tools/` (the filename is the tool name, so tools are snake_case). Tools read per-session context (cart ID, locale) from `ctx.session.auth.current.attributes` via the `agent/lib/session.ts` helpers.
 
-Tools import Next-free "fetch cores" (`lib/shopify/operations/*.fetch.ts`) rather than the `"use cache"` operation wrappers, because eve's runtime has no Next cache or `server-only` support. The wrappers and the tools share the same cores.
+Tools import Next-free fetch cores from `lib/shopify/fetch.ts` rather than the `"use cache"` operation wrappers, because eve's runtime has no Next cache or `server-only` support. The `operations/*.ts` wrappers import the same cores, so nothing is duplicated. (The Storefront client in `storefront.ts` carries no `server-only` guard — it uses the public Storefront token — so eve can import it.)
 
 ### Product discovery
 
@@ -107,8 +107,7 @@ If the routes sit behind an existing WAF (Cloudflare, etc.), prefer that.
 | `agent/channels/eve.ts`                     | HTTP channel auth; exposes cart ID + locale to tools             |
 | `agent/tools/`                              | One file per tool (`defineTool`), snake_case names               |
 | `agent/lib/session.ts`                      | Reads locale / cart ID from session context                     |
-| `lib/shopify/operations/*.fetch.ts`         | Next-free fetch cores shared by cache wrappers and agent tools   |
-| `lib/shopify/storefront.core.ts`            | Next-free Storefront client (the `server-only` entry re-exports it) |
+| `lib/shopify/fetch.ts`                      | Next-free fetch cores shared by cache wrappers and agent tools   |
 | `components/agent/agent-panel.tsx`          | Chat panel UI (`useEveAgent`)                                    |
 | `components/agent/eve-json-render.ts`       | Client bridge: reconstructs json-render specs from eve messages  |
 | `components/agent/registry.tsx`             | Generative UI component registry                                 |

@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { addToCartCore, createCartCore } from "@/lib/shopify/operations/cart.fetch";
+import { addToCartCore, createCartCore } from "@/lib/shopify/fetch";
 
 import { getCartId, getLocale } from "../lib/session";
 

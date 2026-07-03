@@ -4,18 +4,11 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { Collection, CollectionWithThumbnail } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
+import { fetchCollections } from "../fetch";
 import { COLLECTION_FIELDS_FRAGMENT } from "../fragments";
 import { storefront } from "../storefront";
-import {
-  type ShopifyCollection,
-  transformShopifyCollection,
-  transformShopifyCollections,
-} from "../transforms/collection";
+import { type ShopifyCollection, transformShopifyCollection } from "../transforms/collection";
 import { getNumericShopifyId } from "../utils";
-
-type CollectionsResponse = {
-  collections: { edges: Array<{ node: ShopifyCollection }> };
-};
 
 type CollectionResponse = {
   collection: ShopifyCollection | null;
@@ -26,19 +19,6 @@ function tagCollections(collections: Array<{ handle: string }>): void {
     cacheTag(`collection-${collection.handle}`);
   }
 }
-
-const GET_COLLECTIONS_QUERY = `#graphql
-  ${COLLECTION_FIELDS_FRAGMENT}
-  query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    collections(first: $first) {
-      edges {
-        node {
-          ...CollectionFields
-        }
-      }
-    }
-  }
-` as const;
 
 const GET_COLLECTION_QUERY = `#graphql
   ${COLLECTION_FIELDS_FRAGMENT}
@@ -84,26 +64,16 @@ const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = `#graphql
   }
 ` as const;
 
-export async function getCollections({
-  limit = 250,
-  locale = defaultLocale,
-}: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
+export async function getCollections(
+  params: { limit?: number; locale?: string } = {},
+): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("collections", "collections-index");
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<CollectionsResponse>(GET_COLLECTIONS_QUERY, {
-    variables: { first: limit, country, language },
-  });
-  assertStorefrontOk(response, "getCollections");
-  const { data } = response;
-
-  const rawCollections = data.collections.edges.map((edge) => edge.node);
-  tagCollections(rawCollections);
-  return transformShopifyCollections(rawCollections);
+  const collections = await fetchCollections(params);
+  tagCollections(collections);
+  return collections;
 }
 
 export async function getCollection({

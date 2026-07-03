@@ -1,125 +1,29 @@
 import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Cart, CartWarning } from "@/lib/types";
+import type { Cart } from "@/lib/types";
 
-import { assertStorefrontOk, type CartMutationPayload, unwrapCartMutation } from "../errors";
+import { assertStorefrontOk, type CartMutationPayload } from "../errors";
+import {
+  addToCartCore,
+  applyCartMutation,
+  type CartLineInput,
+  type CartMutationResult,
+  createCartCore,
+  fetchCart,
+  removeFromCartCore,
+  updateCartCore,
+  updateCartNoteCore,
+} from "../fetch";
 import { CART_FRAGMENT } from "../fragments";
 import { storefront } from "../storefront";
-import { type ShopifyCart, transformShopifyCart } from "../transforms/cart";
+import type { ShopifyCart } from "../transforms/cart";
 
-const GET_CART_QUERY = `#graphql
-  ${CART_FRAGMENT}
-  query getCart($cartId: ID!) {
-    cart(id: $cartId) {
-      ...CartFields
-    }
-  }
-` as const;
-
-const CART_CREATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    cartCreate(input: $input) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
-
-const CART_LINES_ADD_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
-    cartLinesAdd(cartId: $cartId, lines: $lines) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
-
-const CART_LINES_UPDATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
-    cartLinesUpdate(cartId: $cartId, lines: $lines) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
-
-const CART_LINES_REMOVE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
+export type { CartLineInput, CartMutationResult };
 
 const CART_BUYER_IDENTITY_UPDATE_MUTATION = `#graphql
   ${CART_FRAGMENT}
   mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
     cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
-
-const CART_NOTE_UPDATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartNoteUpdate($cartId: ID!, $note: String!) {
-    cartNoteUpdate(cartId: $cartId, note: $note) {
       cart {
         ...CartFields
       }
@@ -227,31 +131,10 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `#graphql
   }
 ` as const;
 
-export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
-
-function applyMutation(
-  payload: CartMutationPayload<ShopifyCart>,
-  operation: string,
-): CartMutationResult {
-  const { cart, warnings } = unwrapCartMutation(payload, operation);
-  return { cart: transformShopifyCart(cart), warnings };
-}
-
 export async function getCart(cartId?: string): Promise<Cart | undefined> {
-  if (!cartId) {
-    cartId = await getCartIdFromCookie();
-  }
-  if (!cartId) return undefined;
-
-  const response = await storefront.request<{ cart: ShopifyCart | null }>(GET_CART_QUERY, {
-    variables: { cartId },
-  });
-  assertStorefrontOk(response, "getCart");
-  const { data } = response;
-
-  if (!data.cart) return undefined;
-
-  return transformShopifyCart(data.cart);
+  const resolvedCartId = cartId ?? (await getCartIdFromCookie());
+  if (!resolvedCartId) return undefined;
+  return fetchCart(resolvedCartId);
 }
 
 /**
@@ -261,26 +144,7 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
 export async function createCartWithoutCookie(
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{ cartCreate: CartMutationPayload<ShopifyCart> }>(
-    CART_CREATE_MUTATION,
-    {
-      variables: {
-        input: {
-          buyerIdentity: {
-            countryCode: country,
-          },
-        },
-        country,
-        language,
-      },
-    },
-  );
-  assertStorefrontOk(response, "cartCreate");
-
-  const result = applyMutation(response.data.cartCreate, "cartCreate");
+  const result = await createCartCore(locale);
   invalidateCartCache();
   return result;
 }
@@ -295,41 +159,18 @@ export async function createCart(locale: string = defaultLocale): Promise<CartMu
   return result;
 }
 
-// Shopify's CartLineInput. `parent` links a line to a bundle/add-on parent —
-// the foundation for app-specific customized bundle flows; the default PDP only
-// adds ordinary products and fixed bundle parents directly (no parent).
-export interface CartLineInput {
-  merchandiseId: string;
-  parent?: {
-    lineId?: string;
-    merchandiseId?: string;
-  };
-  quantity: number;
-}
-
 export async function addToCart(
   lines: CartLineInput[],
   cartId?: string,
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {
-  if (!cartId) {
-    cartId = await getCartIdFromCookie();
+  let resolvedCartId = cartId ?? (await getCartIdFromCookie());
+  if (!resolvedCartId) {
+    resolvedCartId = (await createCart(locale)).cart.id;
   }
+  if (!resolvedCartId) throw new Error("Cart ID not found");
 
-  if (!cartId) {
-    const created = await createCart(locale);
-    cartId = created.cart.id;
-  }
-
-  const response = await storefront.request<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>(
-    CART_LINES_ADD_MUTATION,
-    {
-      variables: { cartId, lines },
-    },
-  );
-  assertStorefrontOk(response, "cartLinesAdd");
-
-  const result = applyMutation(response.data.cartLinesAdd, "cartLinesAdd");
+  const result = await addToCartCore(lines, resolvedCartId);
   invalidateCartCache();
   return result;
 }
@@ -341,17 +182,7 @@ export async function updateCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const response = await storefront.request<{
-    cartLinesUpdate: CartMutationPayload<ShopifyCart>;
-  }>(CART_LINES_UPDATE_MUTATION, {
-    variables: {
-      cartId,
-      lines,
-    },
-  });
-  assertStorefrontOk(response, "cartLinesUpdate");
-
-  const result = applyMutation(response.data.cartLinesUpdate, "cartLinesUpdate");
+  const result = await updateCartCore(lines, cartId);
   invalidateCartCache();
   return result;
 }
@@ -363,14 +194,7 @@ export async function removeFromCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const response = await storefront.request<{
-    cartLinesRemove: CartMutationPayload<ShopifyCart>;
-  }>(CART_LINES_REMOVE_MUTATION, {
-    variables: { cartId, lineIds },
-  });
-  assertStorefrontOk(response, "cartLinesRemove");
-
-  const result = applyMutation(response.data.cartLinesRemove, "cartLinesRemove");
+  const result = await removeFromCartCore(lineIds, cartId);
   invalidateCartCache();
   return result;
 }
@@ -396,7 +220,10 @@ export async function updateCartBuyerIdentity(
   });
   assertStorefrontOk(response, "cartBuyerIdentityUpdate");
 
-  const result = applyMutation(response.data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
+  const result = applyCartMutation(
+    response.data.cartBuyerIdentityUpdate,
+    "cartBuyerIdentityUpdate",
+  );
   invalidateCartCache();
   return result;
 }
@@ -420,7 +247,10 @@ export async function linkCartToCustomer(
   });
   assertStorefrontOk(response, "cartBuyerIdentityUpdate");
 
-  const result = applyMutation(response.data.cartBuyerIdentityUpdate, "cartBuyerIdentityUpdate");
+  const result = applyCartMutation(
+    response.data.cartBuyerIdentityUpdate,
+    "cartBuyerIdentityUpdate",
+  );
   invalidateCartCache();
   return result;
 }
@@ -432,17 +262,7 @@ export async function updateCartNote(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
-  const response = await storefront.request<{
-    cartNoteUpdate: CartMutationPayload<ShopifyCart>;
-  }>(CART_NOTE_UPDATE_MUTATION, {
-    variables: {
-      cartId,
-      note,
-    },
-  });
-  assertStorefrontOk(response, "cartNoteUpdate");
-
-  const result = applyMutation(response.data.cartNoteUpdate, "cartNoteUpdate");
+  const result = await updateCartNoteCore(note, cartId);
   invalidateCartCache();
   return result;
 }
@@ -461,7 +281,10 @@ export async function updateCartDiscountCodes(
   });
   assertStorefrontOk(response, "cartDiscountCodesUpdate");
 
-  const result = applyMutation(response.data.cartDiscountCodesUpdate, "cartDiscountCodesUpdate");
+  const result = applyCartMutation(
+    response.data.cartDiscountCodesUpdate,
+    "cartDiscountCodesUpdate",
+  );
   invalidateCartCache();
   return result;
 }
@@ -518,7 +341,10 @@ export async function addCartDeliveryAddress(address: {
   });
   assertStorefrontOk(response, "cartDeliveryAddressesAdd");
 
-  const result = applyMutation(response.data.cartDeliveryAddressesAdd, "cartDeliveryAddressesAdd");
+  const result = applyCartMutation(
+    response.data.cartDeliveryAddressesAdd,
+    "cartDeliveryAddressesAdd",
+  );
   invalidateCartCache();
   return result;
 }
@@ -608,7 +434,7 @@ export async function updateCartDeliveryAddress(
   });
   assertStorefrontOk(response, "cartDeliveryAddressesUpdate");
 
-  const result = applyMutation(
+  const result = applyCartMutation(
     response.data.cartDeliveryAddressesUpdate,
     "cartDeliveryAddressesUpdate",
   );

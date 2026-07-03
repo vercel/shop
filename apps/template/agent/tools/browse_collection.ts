@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { fetchCollectionProducts } from "@/lib/shopify/operations/products.fetch";
+import { fetchCollectionProducts } from "@/lib/shopify/fetch";
 
 import { getLocale } from "../lib/session";
 

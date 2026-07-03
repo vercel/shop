@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { updateCartCore } from "@/lib/shopify/operations/cart.fetch";
+import { updateCartCore } from "@/lib/shopify/fetch";
 
 import { getCartId } from "../lib/session";
 

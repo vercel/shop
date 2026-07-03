@@ -14,6 +14,19 @@ import type {
 
 import { assertStorefrontOk } from "../errors";
 import {
+  type ActiveFilters,
+  type CollectionProductsParams,
+  type CollectionProductsResult,
+  escapeProductQuery,
+  fetchCollectionProducts,
+  fetchProductRecommendationSets,
+  fetchProductWithVariants,
+  fetchSearchIndexProducts,
+  type ProductRecommendationSets,
+  type SearchIndexProductsParams,
+  type SearchIndexProductsResult,
+} from "../fetch";
+import {
   IMAGE_FRAGMENT,
   METAFIELD_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
@@ -34,7 +47,14 @@ import {
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
-type ActiveFilters = Record<string, string | string[] | undefined>;
+// Re-export the Next-free cores so existing importers of these from
+// "operations/products" keep working; the cached wrappers below add cacheTag.
+export {
+  fetchCollectionProducts,
+  fetchProductRecommendationSets,
+  fetchProductWithVariants,
+  fetchSearchIndexProducts,
+} from "../fetch";
 
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);
@@ -157,45 +177,19 @@ export async function getProductVariant({
   return variant ? transformVariant(variant) : undefined;
 }
 
-const GET_PRODUCT_WITH_VARIANTS_QUERY = `#graphql
-  ${PRODUCT_WITH_VARIANTS_FRAGMENT}
-  query getProductWithVariants($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
-      ...ProductWithVariantsFields
-    }
-  }
-` as const;
-
 // Slim shell + full variant matrix; for the AI agent and markdown routes that
 // enumerate variants. The PDP uses getProduct + getProductVariant instead.
-export async function getProductWithVariants({
-  handle,
-  locale = defaultLocale,
-}: {
+export async function getProductWithVariants(params: {
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
-  cacheTag("products", `product-${handle}`);
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
+  cacheTag("products", `product-${params.handle}`);
 
-  const response = await storefront.request<{
-    productByHandle: ShopifyProduct;
-  }>(GET_PRODUCT_WITH_VARIANTS_QUERY, {
-    variables: { handle, country, language },
-  });
-  assertStorefrontOk(response, "getProductWithVariants");
-  const { data } = response;
-
-  if (!data.productByHandle) {
-    return undefined;
-  }
-
-  tagProducts([data.productByHandle]);
-
-  return transformShopifyProductDetails(data.productByHandle);
+  const product = await fetchProductWithVariants(params);
+  if (product) tagProducts([product]);
+  return product;
 }
 
 const CATALOG_PRODUCTS_QUERY = `#graphql
@@ -257,37 +251,6 @@ const SEARCH_FACETS_QUERY = `#graphql
   }
 ` as const;
 
-const PRODUCTS_SEARCH_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
-  query searchProducts($query: String!, $first: Int!, $after: String, $productFilters: [ProductFilter!], $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    search(
-      query: $query
-      first: $first
-      after: $after
-      productFilters: $productFilters
-      sortKey: $sortKey
-      reverse: $reverse
-      types: PRODUCT
-    ) {
-      totalCount
-      edges {
-        cursor
-        node {
-          ... on Product {
-            ...ProductCardFields
-          }
-        }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-` as const;
-
 // QueryRoot.products(sortKey: ProductSortKeys) — used for the catalog browse path.
 const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
@@ -308,19 +271,6 @@ const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }
   UPDATED_AT: { sortKey: "UPDATED_AT", reverse: false },
   VENDOR: { sortKey: "VENDOR", reverse: false },
 };
-
-// SearchSortKeys only supports PRICE and RELEVANCE — used by the AI agent text-search path.
-const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
-  "best-matches": { sortKey: "RELEVANCE", reverse: false },
-  "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
-  PRICE: { sortKey: "PRICE", reverse: false },
-  RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
-};
-
-function escapeProductQuery(value: string): string {
-  return value.replace(/'/g, "\\'");
-}
 
 function joinOr(field: string, values: string[]): string {
   const expressions = values.map((v) => `${field}:'${escapeProductQuery(v)}'`);
@@ -611,80 +561,6 @@ export async function getSearchFacets(params: SearchFacetsParams): Promise<Searc
   return fetchSearchFacets(params);
 }
 
-type SearchIndexProductsResult = {
-  pageInfo: PageInfo;
-  products: ProductCard[];
-  total: number;
-};
-
-type SearchIndexProductsParams = {
-  collection?: string;
-  cursor?: string;
-  filters?: ProductFilter[];
-  limit?: number;
-  locale?: string;
-  query?: string;
-  sortKey?: string;
-};
-
-// Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
-// (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
-// silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
-export async function fetchSearchIndexProducts(
-  params: SearchIndexProductsParams,
-): Promise<SearchIndexProductsResult> {
-  const {
-    collection,
-    cursor,
-    filters = [],
-    limit = 50,
-    locale = defaultLocale,
-    query,
-    sortKey: rawSortKey = "best-matches",
-  } = params;
-
-  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const trimmedQuery = query?.trim() ?? "";
-  const queryParts: string[] = [];
-  if (trimmedQuery) queryParts.push(trimmedQuery);
-  if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
-  const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
-
-  const response = await storefront.request<{
-    search: {
-      totalCount: number;
-      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
-      pageInfo: PageInfo;
-    };
-  }>(PRODUCTS_SEARCH_QUERY, {
-    variables: {
-      query: searchQuery,
-      first: limit,
-      after: cursor,
-      productFilters: filters.length > 0 ? filters : undefined,
-      sortKey: sortConfig.sortKey,
-      reverse: sortConfig.reverse,
-      country,
-      language,
-    },
-  });
-  assertStorefrontOk(response, "searchProducts");
-  const { data } = response;
-
-  const shopifyProducts = data.search.edges
-    .map((edge) => edge.node)
-    .filter((node): node is ShopifyProductCard => node !== null);
-
-  return {
-    pageInfo: data.search.pageInfo,
-    products: shopifyProducts.map(transformShopifyProductCard),
-    total: data.search.totalCount,
-  };
-}
-
 export async function searchIndexProducts(
   params: SearchIndexProductsParams,
 ): Promise<SearchIndexProductsResult> {
@@ -695,149 +571,6 @@ export async function searchIndexProducts(
   const result = await fetchSearchIndexProducts(params);
   tagProducts(result.products);
   return result;
-}
-
-const COLLECTION_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
-  query collectionProducts($handle: String!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean, $filters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    collection(handle: $handle) {
-      products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, filters: $filters) {
-        filters {
-          id
-          label
-          type
-          presentation
-          values {
-            id
-            label
-            count
-            input
-            swatch {
-              color
-              image {
-                previewImage {
-                  url
-                }
-              }
-            }
-          }
-        }
-        edges {
-          cursor
-          node {
-            ...ProductCardFields
-          }
-        }
-        pageInfo {
-          hasNextPage
-          hasPreviousPage
-          startCursor
-          endCursor
-        }
-      }
-    }
-  }
-` as const;
-
-const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
-  "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
-  "best-selling": { sortKey: "BEST_SELLING", reverse: false },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
-  "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "product-name-ascending": { sortKey: "TITLE", reverse: false },
-  "product-name-descending": { sortKey: "TITLE", reverse: true },
-  "date-old-to-new": { sortKey: "CREATED", reverse: false },
-  "date-new-to-old": { sortKey: "CREATED", reverse: true },
-  TITLE: { sortKey: "TITLE", reverse: false },
-  PRICE: { sortKey: "PRICE", reverse: false },
-  BEST_SELLING: { sortKey: "BEST_SELLING", reverse: false },
-  CREATED: { sortKey: "CREATED", reverse: false },
-  ID: { sortKey: "ID", reverse: false },
-  MANUAL: { sortKey: "MANUAL", reverse: false },
-  COLLECTION_DEFAULT: { sortKey: "COLLECTION_DEFAULT", reverse: false },
-};
-
-type CollectionProductsResult = {
-  filters: Filter[];
-  pageInfo: PageInfo;
-  priceRange?: PriceRange;
-  products: ProductCard[];
-};
-
-type CollectionProductsParams = {
-  activeFilters?: ActiveFilters;
-  collection: string;
-  cursor?: string;
-  filters?: ProductFilter[];
-  limit?: number;
-  locale?: string;
-  sortKey?: string;
-};
-
-export async function fetchCollectionProducts(
-  params: CollectionProductsParams,
-): Promise<CollectionProductsResult> {
-  const {
-    activeFilters = {},
-    collection,
-    cursor,
-    filters = [],
-    limit = 50,
-    locale = defaultLocale,
-    sortKey: rawSortKey = "best-matches",
-  } = params;
-
-  const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{
-    collection: {
-      products: {
-        edges: Array<{ node: ShopifyProductCard }>;
-        pageInfo: PageInfo;
-        filters: ShopifyFilter[];
-      };
-    } | null;
-  }>(COLLECTION_PRODUCTS_QUERY, {
-    variables: {
-      handle: collection,
-      first: limit,
-      after: cursor,
-      sortKey: sortConfig.sortKey,
-      reverse: sortConfig.reverse,
-      filters: filters.length > 0 ? filters : undefined,
-      country,
-      language,
-    },
-  });
-  assertStorefrontOk(response, "collectionProducts");
-  const { data } = response;
-
-  if (!data.collection) {
-    return {
-      filters: [],
-      pageInfo: {
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startCursor: null,
-        endCursor: null,
-      },
-      products: [],
-    };
-  }
-
-  const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
-
-  const products = shopifyProducts.map(transformShopifyProductCard);
-  const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
-
-  return {
-    filters: transformed.filters,
-    pageInfo: data.collection.products.pageInfo,
-    priceRange: transformed.priceRange,
-    products,
-  };
 }
 
 export async function getCollectionProducts(
@@ -852,60 +585,20 @@ export async function getCollectionProducts(
   return result;
 }
 
-const PRODUCT_RECOMMENDATION_SETS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
-  query productRecommendationSets($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    complementary: productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
-      ...ProductCardFields
-    }
-    related: productRecommendations(productHandle: $handle, intent: RELATED) {
-      ...ProductCardFields
-    }
-  }
-` as const;
-
-// COMPLEMENTARY is the merchant-curated "pair it with" set (Search & Discovery app);
-// RELATED is Shopify's auto-generated "you may also like" set.
-export interface ProductRecommendationSets {
-  complementary: ProductCard[];
-  related: ProductCard[];
-}
-
 // Both intents ride one aliased request, so the PDP's two recommendation surfaces
 // dedupe to a single Shopify call. The entry carries both the complementary- and
 // recommendations- tags so either webhook invalidation still busts it.
-export async function getProductRecommendationSets({
-  handle,
-  locale = defaultLocale,
-}: {
+export async function getProductRecommendationSets(params: {
   handle: string;
   locale?: string;
 }): Promise<ProductRecommendationSets> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", `complementary-${handle}`, `recommendations-${handle}`);
+  cacheTag("products", `complementary-${params.handle}`, `recommendations-${params.handle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{
-    complementary: ShopifyProductCard[] | null;
-    related: ShopifyProductCard[] | null;
-  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, {
-    variables: { country, handle, language },
-  });
-  assertStorefrontOk(response, "productRecommendationSets");
-  const { data } = response;
-
-  const complementary = data.complementary ?? [];
-  const related = data.related ?? [];
-  tagProducts(complementary);
-  tagProducts(related);
-
-  return {
-    complementary: complementary.map(transformShopifyProductCard),
-    related: related.map(transformShopifyProductCard),
-  };
+  const sets = await fetchProductRecommendationSets(params);
+  tagProducts([...sets.complementary, ...sets.related]);
+  return sets;
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql

@@ -9,10 +9,10 @@ appliesTo:
 paths:
   - apps/template/agent/
   - apps/template/next.config.ts
-  - apps/template/lib/shopify/operations/products.fetch.ts
-  - apps/template/lib/shopify/operations/collections.fetch.ts
-  - apps/template/lib/shopify/operations/cart.fetch.ts
-  - apps/template/lib/shopify/storefront.core.ts
+  - apps/template/lib/shopify/fetch.ts
+  - apps/template/lib/shopify/storefront.ts
+  - apps/template/lib/shopify/operations/products.ts
+  - apps/template/lib/shopify/operations/cart.ts
   - apps/template/components/agent/agent-panel.tsx
   - apps/template/components/agent/eve-json-render.ts
   - apps/template/components/agent/cart-reconciler.tsx
@@ -27,7 +27,7 @@ The shopping assistant moved off the hand-rolled Vercel AI SDK stack (`app/api/c
 - **Agent lives in `agent/`**: `agent.ts` (`defineAgent({ model })`), `instructions.md` (system prompt + json-render rules), `channels/eve.ts` (guest auth that exposes `cartId` + `locale` from the cart cookie), 11 tools under `agent/tools/*.ts` (filenames are the model-facing tool names, hence **snake_case**), and `agent/lib/session.ts` (reads context from `ctx.session.auth.current.attributes`).
 - **Client**: `agent-panel.tsx` swaps `useChat` → `useEveAgent()`; page path rides each turn as ephemeral `clientContext`; the eve session cursor + events persist to `localStorage` (`template-agent-chat:v2`).
 - **json-render bridge**: eve owns the model loop, so the former server-side `pipeJsonRender` is replaced by a client-side `components/agent/eve-json-render.ts` that reconstructs the spec from the model's ` ```spec ` fence and feeds the unchanged `<Renderer>` + registry.
-- **Next-free fetch cores**: eve's runtime can't import `next/cache` or `server-only`, so tools call new `lib/shopify/operations/{products,collections,cart}.fetch.ts` cores (also imported by the existing `"use cache"` wrappers — shared, not duplicated). The Storefront client was split into `storefront.core.ts` (Next-free) + `storefront.ts` (keeps `import "server-only"` and re-exports the core).
+- **Next-free fetch cores**: eve's runtime can't import `next/cache` or `server-only`, so tools call a new Next-free `lib/shopify/fetch.ts` module. The `"use cache"` operations wrappers (`operations/{products,collections,cart}.ts`) import the same cores — shared, not duplicated. The Storefront client (`storefront.ts`) dropped its `import "server-only"` guard (it uses the public Storefront access token; the operations layer stays server-only via next/cache), so eve tools can import it.
 - **Deps/config**: added `eve` (in `minimumReleaseAgeExclude`), removed `@ai-sdk/react`, added `engines.node >=24`, gitignored `.eve/` + `.workflow-data/`, documented `AI_GATEWAY_API_KEY` in `.env.example`.
 
 ## Why it matters

@@ -1,20 +1,37 @@
-// Next-free product fetch cores: storefront.request + transform, no "next/cache".
-// The cached wrappers in ./products.ts add "use cache" + cacheTag around these;
-// eve agent tools import these directly (eve's runtime has no Next cache APIs).
+// Next-free Shopify fetch cores: storefront.request + transform, with no
+// "next/cache" (cacheLife/cacheTag) or "use cache". The cached operations in
+// ./operations/* wrap these with "use cache" + cacheTag; eve agent tools import
+// them directly, because eve's standalone runtime has no Next cache.
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { Filter, PageInfo, PriceRange, ProductCard, ProductDetails } from "@/lib/types";
+import type {
+  Cart,
+  CartWarning,
+  Collection,
+  Filter,
+  PageInfo,
+  PriceRange,
+  ProductCard,
+  ProductDetails,
+} from "@/lib/types";
 
-import { assertStorefrontOk } from "../errors";
-import { PRODUCT_CARD_FRAGMENT, PRODUCT_WITH_VARIANTS_FRAGMENT } from "../fragments";
-import { storefront } from "../storefront.core";
-import { transformShopifyFilters } from "../transforms/filters";
+import { assertStorefrontOk, type CartMutationPayload, unwrapCartMutation } from "./errors";
+import {
+  CART_FRAGMENT,
+  COLLECTION_FIELDS_FRAGMENT,
+  PRODUCT_CARD_FRAGMENT,
+  PRODUCT_WITH_VARIANTS_FRAGMENT,
+} from "./fragments";
+import { storefront } from "./storefront";
+import { type ShopifyCart, transformShopifyCart } from "./transforms/cart";
+import { type ShopifyCollection, transformShopifyCollections } from "./transforms/collection";
+import { transformShopifyFilters } from "./transforms/filters";
 import {
   type ShopifyProduct,
   type ShopifyProductCard,
   transformShopifyProductCard,
   transformShopifyProductDetails,
-} from "../transforms/product";
-import type { ProductFilter, ShopifyFilter } from "../types/filters";
+} from "./transforms/product";
+import type { ProductFilter, ShopifyFilter } from "./types/filters";
 
 export type ActiveFilters = Record<string, string | string[] | undefined>;
 
@@ -143,6 +160,83 @@ const PRODUCT_RECOMMENDATION_SETS_QUERY = `#graphql
   }
 ` as const;
 
+const GET_COLLECTIONS_QUERY = `#graphql
+  ${COLLECTION_FIELDS_FRAGMENT}
+  query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    collections(first: $first) {
+      edges {
+        node {
+          ...CollectionFields
+        }
+      }
+    }
+  }
+` as const;
+
+const GET_CART_QUERY = `#graphql
+  ${CART_FRAGMENT}
+  query getCart($cartId: ID!) {
+    cart(id: $cartId) {
+      ...CartFields
+    }
+  }
+` as const;
+
+const CART_CREATE_MUTATION = `#graphql
+  ${CART_FRAGMENT}
+  mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    cartCreate(input: $input) {
+      cart { ...CartFields }
+      userErrors { field message }
+      warnings { code message target }
+    }
+  }
+` as const;
+
+const CART_LINES_ADD_MUTATION = `#graphql
+  ${CART_FRAGMENT}
+  mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+    cartLinesAdd(cartId: $cartId, lines: $lines) {
+      cart { ...CartFields }
+      userErrors { field message }
+      warnings { code message target }
+    }
+  }
+` as const;
+
+const CART_LINES_UPDATE_MUTATION = `#graphql
+  ${CART_FRAGMENT}
+  mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
+    cartLinesUpdate(cartId: $cartId, lines: $lines) {
+      cart { ...CartFields }
+      userErrors { field message }
+      warnings { code message target }
+    }
+  }
+` as const;
+
+const CART_LINES_REMOVE_MUTATION = `#graphql
+  ${CART_FRAGMENT}
+  mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
+    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
+      cart { ...CartFields }
+      userErrors { field message }
+      warnings { code message target }
+    }
+  }
+` as const;
+
+const CART_NOTE_UPDATE_MUTATION = `#graphql
+  ${CART_FRAGMENT}
+  mutation cartNoteUpdate($cartId: ID!, $note: String!) {
+    cartNoteUpdate(cartId: $cartId, note: $note) {
+      cart { ...CartFields }
+      userErrors { field message }
+      warnings { code message target }
+    }
+  }
+` as const;
+
 export type SearchIndexProductsParams = {
   collection?: string;
   cursor?: string;
@@ -181,6 +275,23 @@ export type CollectionProductsResult = {
 export interface ProductRecommendationSets {
   complementary: ProductCard[];
   related: ProductCard[];
+}
+
+export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
+
+// Shopify's CartLineInput. `parent` links a line to a bundle/add-on parent.
+export interface CartLineInput {
+  merchandiseId: string;
+  parent?: { lineId?: string; merchandiseId?: string };
+  quantity: number;
+}
+
+export function applyCartMutation(
+  payload: CartMutationPayload<ShopifyCart>,
+  operation: string,
+): CartMutationResult {
+  const { cart, warnings } = unwrapCartMutation(payload, operation);
+  return { cart: transformShopifyCart(cart), warnings };
 }
 
 // Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
@@ -284,18 +395,12 @@ export async function fetchCollectionProducts(
   if (!data.collection) {
     return {
       filters: [],
-      pageInfo: {
-        hasNextPage: false,
-        hasPreviousPage: false,
-        startCursor: null,
-        endCursor: null,
-      },
+      pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
       products: [],
     };
   }
 
   const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
-
   const products = shopifyProducts.map(transformShopifyProductCard);
   const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
 
@@ -319,18 +424,14 @@ export async function fetchProductWithVariants({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const response = await storefront.request<{
-    productByHandle: ShopifyProduct;
-  }>(GET_PRODUCT_WITH_VARIANTS_QUERY, {
-    variables: { handle, country, language },
-  });
+  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
+    GET_PRODUCT_WITH_VARIANTS_QUERY,
+    { variables: { handle, country, language } },
+  );
   assertStorefrontOk(response, "getProductWithVariants");
   const { data } = response;
 
-  if (!data.productByHandle) {
-    return undefined;
-  }
-
+  if (!data.productByHandle) return undefined;
   return transformShopifyProductDetails(data.productByHandle);
 }
 
@@ -349,9 +450,7 @@ export async function fetchProductRecommendationSets({
   const response = await storefront.request<{
     complementary: ShopifyProductCard[] | null;
     related: ShopifyProductCard[] | null;
-  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, {
-    variables: { country, handle, language },
-  });
+  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, { variables: { country, handle, language } });
   assertStorefrontOk(response, "productRecommendationSets");
   const { data } = response;
 
@@ -359,4 +458,87 @@ export async function fetchProductRecommendationSets({
     complementary: (data.complementary ?? []).map(transformShopifyProductCard),
     related: (data.related ?? []).map(transformShopifyProductCard),
   };
+}
+
+export async function fetchCollections({
+  limit = 250,
+  locale = defaultLocale,
+}: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const response = await storefront.request<{
+    collections: { edges: Array<{ node: ShopifyCollection }> };
+  }>(GET_COLLECTIONS_QUERY, { variables: { first: limit, country, language } });
+  assertStorefrontOk(response, "getCollections");
+
+  return transformShopifyCollections(response.data.collections.edges.map((edge) => edge.node));
+}
+
+export async function fetchCart(cartId: string): Promise<Cart | undefined> {
+  const response = await storefront.request<{ cart: ShopifyCart | null }>(GET_CART_QUERY, {
+    variables: { cartId },
+  });
+  assertStorefrontOk(response, "getCart");
+  return response.data.cart ? transformShopifyCart(response.data.cart) : undefined;
+}
+
+export async function createCartCore(locale: string = defaultLocale): Promise<CartMutationResult> {
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const response = await storefront.request<{ cartCreate: CartMutationPayload<ShopifyCart> }>(
+    CART_CREATE_MUTATION,
+    { variables: { input: { buyerIdentity: { countryCode: country } }, country, language } },
+  );
+  assertStorefrontOk(response, "cartCreate");
+  return applyCartMutation(response.data.cartCreate, "cartCreate");
+}
+
+export async function addToCartCore(
+  lines: CartLineInput[],
+  cartId: string,
+): Promise<CartMutationResult> {
+  const response = await storefront.request<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>(
+    CART_LINES_ADD_MUTATION,
+    { variables: { cartId, lines } },
+  );
+  assertStorefrontOk(response, "cartLinesAdd");
+  return applyCartMutation(response.data.cartLinesAdd, "cartLinesAdd");
+}
+
+export async function updateCartCore(
+  lines: { id: string; quantity: number }[],
+  cartId: string,
+): Promise<CartMutationResult> {
+  const response = await storefront.request<{ cartLinesUpdate: CartMutationPayload<ShopifyCart> }>(
+    CART_LINES_UPDATE_MUTATION,
+    { variables: { cartId, lines } },
+  );
+  assertStorefrontOk(response, "cartLinesUpdate");
+  return applyCartMutation(response.data.cartLinesUpdate, "cartLinesUpdate");
+}
+
+export async function removeFromCartCore(
+  lineIds: string[],
+  cartId: string,
+): Promise<CartMutationResult> {
+  const response = await storefront.request<{ cartLinesRemove: CartMutationPayload<ShopifyCart> }>(
+    CART_LINES_REMOVE_MUTATION,
+    { variables: { cartId, lineIds } },
+  );
+  assertStorefrontOk(response, "cartLinesRemove");
+  return applyCartMutation(response.data.cartLinesRemove, "cartLinesRemove");
+}
+
+export async function updateCartNoteCore(
+  note: string,
+  cartId: string,
+): Promise<CartMutationResult> {
+  const response = await storefront.request<{ cartNoteUpdate: CartMutationPayload<ShopifyCart> }>(
+    CART_NOTE_UPDATE_MUTATION,
+    { variables: { cartId, note } },
+  );
+  assertStorefrontOk(response, "cartNoteUpdate");
+  return applyCartMutation(response.data.cartNoteUpdate, "cartNoteUpdate");
 }
