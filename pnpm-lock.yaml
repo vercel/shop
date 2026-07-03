@@ -218,7 +218,7 @@ importers:
         specifier: 1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       eve:
-        specifier: ^0.18.2
+        specifier: 0.18.2
         version: 0.18.2(@opentelemetry/api@1.9.0)(ai@7.0.9(zod@4.4.3))(chokidar@5.0.0)(dotenv@8.6.0)(jiti@2.7.0)(lru-cache@11.5.1)
       lucide-react:
         specifier: 1.21.0
