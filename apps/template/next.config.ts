@@ -100,4 +100,9 @@ function getConfig(phase: string): NextConfig {
   return config;
 }
 
-export default withEve(getConfig, { eveRoot: "." });
+// eve types `withEve` against its own (older) copy of `next`, while the template
+// runs a newer canary. The two `NextConfig` types differ nominally (webpack
+// context) though the runtime shape is identical, so cast to withEve's param type.
+export default withEve(getConfig as unknown as Parameters<typeof withEve>[0], {
+  eveRoot: ".",
+});
