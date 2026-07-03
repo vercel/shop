@@ -40,9 +40,7 @@ const customFetchApi = async (url: string, init?: CustomRequestInit): Promise<Re
   return response;
 };
 
-// The Storefront API uses a public access token (safe for client exposure), so
-// this client carries no `import "server-only"` — the eve agent runtime imports
-// it too. The cached operations in ./operations/* remain server-only via next/cache.
+// No `server-only` guard: the Storefront token is public, so the eve agent runtime can import this client directly.
 export const storefront = createStorefrontApiClient({
   apiVersion: SHOPIFY_API_VERSION,
   customFetchApi,

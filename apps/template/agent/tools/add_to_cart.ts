@@ -22,9 +22,7 @@ Do not add customized bundle parents that require components but have no fixed c
   }),
   async execute({ quantity, variant_id }, ctx) {
     try {
-      // The cart cookie rides same-origin requests into the channel AuthFn; when
-      // absent (first cart action) we create a cart and return its id so the
-      // client can persist the cookie (see CartReconciler).
+      // No cart yet (first cart action): create one and return its id so the client can persist the cookie.
       let cartId = getCartId(ctx);
       let createdCartId: string | undefined;
       if (!cartId) {

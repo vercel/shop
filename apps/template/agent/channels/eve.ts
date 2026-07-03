@@ -3,9 +3,7 @@ import { eveChannel } from "eve/channels/eve";
 
 import { defaultLocale } from "@/lib/i18n";
 
-// The storefront cart cookie (httpOnly). It rides same-origin requests into the
-// channel, so the eve runtime can read the caller's cart id here and expose it
-// (plus the deployment locale) to tools via ctx.session.auth.current.attributes.
+// httpOnly cart cookie; rides same-origin requests so the channel can read it here.
 const CART_ID_COOKIE = "shopify_cartId";
 
 function readCookie(header: string | null, name: string): string | undefined {
@@ -17,8 +15,7 @@ function readCookie(header: string | null, name: string): string | undefined {
   return undefined;
 }
 
-// Public shopping assistant: every caller is an anonymous guest (parity with the
-// former public /api/chat route). The cart cookie scopes cart tools per browser.
+// Public assistant: every caller is an anonymous guest (parity with the old public /api/chat).
 function guestSession(): AuthFn<Request> {
   return (request) => {
     const cartId = readCookie(request.headers.get("cookie"), CART_ID_COOKIE);

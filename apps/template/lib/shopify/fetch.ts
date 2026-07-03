@@ -1,7 +1,4 @@
-// Next-free Shopify fetch cores: storefront.request + transform, with no
-// "next/cache" (cacheLife/cacheTag) or "use cache". The cached operations in
-// ./operations/* wrap these with "use cache" + cacheTag; eve agent tools import
-// them directly, because eve's standalone runtime has no Next cache.
+// Next-free fetch cores (no next/cache / server-only), shared by the cached operations/* wrappers and the eve agent tools.
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Cart,

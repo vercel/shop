@@ -1,14 +1,6 @@
 import { compileSpecStream, type Spec } from "@json-render/core";
 
-/**
- * Client-side reconstruction of a json-render spec from eve assistant text.
- *
- * eve owns the model loop, so the server-side `pipeJsonRender` transform never
- * runs. The model still emits its mixed stream (prose + a ```spec fence of
- * RFC-6902 JSON-Patch JSONL) into eve `text` parts; we extract the fence and
- * compile it with json-render's own `compileSpecStream`, then hand the result
- * to the existing `<Renderer registry>`.
- */
+// Client-side stand-in for the server-side pipeJsonRender (eve owns the model loop).
 const SPEC_FENCE = /```spec\s*\n([\s\S]*?)(?:\n```|$)/;
 
 export interface EveJsonRenderResult {

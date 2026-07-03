@@ -258,11 +258,7 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
   }
 }
 
-/**
- * Persists a cart the agent created (in eve's runtime, which can't set cookies)
- * into the httpOnly cart cookie, so later agent turns and the storefront share
- * it. No-op when a cart cookie already exists, to avoid orphaning the current cart.
- */
+/** Writes an agent-created cart id to the httpOnly cookie (eve can't set cookies); no-op if one already exists. */
 export async function persistAgentCartAction(cartId: string): Promise<void> {
   if (!cartId) return;
   const existing = await getCartIdFromCookie();

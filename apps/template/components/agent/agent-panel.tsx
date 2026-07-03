@@ -318,8 +318,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   const agent = useEveAgent({
     initialEvents: persistedChat.events,
     initialSession: persistedChat.session,
-    // Attach the current page path to every turn (ephemeral, never persisted
-    // server-side) so the model can resolve "this product"/"this collection".
+    // Ephemeral per-turn page path so the model can resolve "this product"/"this collection".
     prepareSend: (turn) => ({ ...turn, clientContext: { path: pathnameRef.current } }),
   });
 
