@@ -19,7 +19,7 @@ Both optional features are opt-in via explicit `NEXT_PUBLIC_ENABLE_*` flags. The
 | Variable                   | Description                                                                                                                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` to enable the auth UI and the `/account/*` routes. Requires the three Customer Authentication secrets below — `next.config.ts` throws at build time if any are missing. |
-| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` to enable the AI shopping assistant button and the `/api/chat` route.                                                                                                   |
+| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` to show the AI shopping assistant (eve). Its model routes through the Vercel AI Gateway — uses the project OIDC token on Vercel, or set `AI_GATEWAY_API_KEY` elsewhere.   |
 
 ## Customer Authentication
 

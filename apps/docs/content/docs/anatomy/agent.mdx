@@ -6,71 +6,64 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an AI shopping assistant powered by Claude via the Vercel AI SDK. It can search products, browse collections, manage the cart, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
+The storefront includes an AI shopping assistant powered by Claude, built on [eve](https://eve.dev) — a filesystem-first framework for durable agents that mounts into the Next.js app. It can search products, browse collections, manage the cart, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
 
 ## Configuration
 
-The agent is opt-in via `NEXT_PUBLIC_ENABLE_AGENT="1"`. When unset, the agent button is hidden from the storefront and the `/api/chat` route returns 404.
+The agent is opt-in via `NEXT_PUBLIC_ENABLE_AGENT="1"`. When unset, the agent button is hidden from the storefront. The agent's model routes through the Vercel AI Gateway: on Vercel the project's OIDC token is used automatically; elsewhere set `AI_GATEWAY_API_KEY` (or run `vercel link` to mint a `VERCEL_OIDC_TOKEN` for local dev).
 
 ## Architecture
 
-The agent runs as a `ToolLoopAgent` that streams responses back to a floating chat panel:
+The agent lives in the `agent/` directory — an eve project mounted into Next.js by `withEve()` in `next.config.ts`. eve runs the model loop on the Workflow SDK, so sessions are durable and resumable (on Vercel this is Vercel Workflow; locally it persists to a `.workflow-data` file — no database required).
 
 ```
-AgentPanel (client) → POST /api/chat → ToolLoopAgent (Claude) → Shopify tools → streaming response
+AgentPanel (useEveAgent) → /eve/v1 (durable session) → Shopify tools → live Shopify → streamed response
 ```
 
-1. The client sends conversation history and a `chatId` to `/api/chat`
-2. The server resolves page context from the `Referer` header (home, product, collection, search, or cart page)
-3. A Shopify cart is created or retrieved from a cookie before the agent runs
-4. The agent calls tools to search products, manage the cart, or generate navigation links
-5. Tool results include json-render specs that the client renders as product cards, cart summaries, and variant pickers
+1. The client (`useEveAgent()`) talks to same-origin eve routes under `/eve/v1` — no CORS or URL config
+2. The channel's auth resolver (`agent/channels/eve.ts`) reads the cart cookie from the request and exposes `cartId` + `locale` to tools
+3. The agent calls tools to search products, manage the cart, or generate navigation links
+4. The model emits json-render specs inline; a client-side bridge reconstructs them and renders product cards, cart summaries, and variant pickers
 
 ## Page context
 
-The agent adapts its instructions based on where the user is browsing. Page context is resolved server-side from the `Referer` header:
-
-- **Product page** - the full product is injected into the prompt with all variants, prices, availability, and variant IDs ready for "add to cart"
-- **Collection page** - the collection handle and title are included
-- **Search page** - the active search query is passed through
-- **Cart page** - the agent knows the user is viewing their cart
-- **Home page** - the agent knows the user is landing on the storefront and can help them start browsing
-
-The system prompt also includes the user's locale so the agent responds in the correct language.
+Each turn attaches the user's current page path as ephemeral `clientContext` (`{ path }`), which never persists to durable session history. The instructions tell the model to resolve the handle from that path and call `get_product_details` or `browse_collection` when the user says "this product" or "this collection". This replaces the former server-side `Referer` resolution.
 
 ## Tools
 
-The agent has 11 tools organized into three groups. All tools access the agent context (chat ID, cart ID, locale, page) via AsyncLocalStorage.
+The agent has 11 tools organized into three groups. Each is a file under `agent/tools/` (the filename is the tool name, so tools are snake_case). Tools read per-session context (cart ID, locale) from `ctx.session.auth.current.attributes` via the `agent/lib/session.ts` helpers.
+
+Tools import Next-free "fetch cores" (`lib/shopify/operations/*.fetch.ts`) rather than the `"use cache"` operation wrappers, because eve's runtime has no Next cache or `server-only` support. The wrappers and the tools share the same cores.
 
 ### Product discovery
 
-| Tool                        | Purpose                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------- |
-| `searchProducts`            | Keyword search with sorting (best matches, price low/high) - returns up to 10 results |
-| `getProductDetails`         | Full product info: title, description, price, variants, availability, images          |
-| `getProductRecommendations` | AI-powered similar products (up to 5)                                                 |
-| `listCollections`           | All store categories                                                                  |
-| `browseCollection`          | Products within a collection with sorting                                             |
+| Tool                          | Purpose                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| `search_products`             | Keyword search with sorting (best matches, price low/high) - returns up to 10 results |
+| `get_product_details`         | Full product info: title, description, price, variants, availability, images          |
+| `get_product_recommendations` | AI-powered similar products (up to 5)                                                 |
+| `list_collections`            | All store categories                                                                  |
+| `browse_collection`           | Products within a collection with sorting                                             |
 
 ### Cart management
 
-| Tool                     | Purpose                                             |
-| ------------------------ | --------------------------------------------------- |
-| `addToCart`              | Add a variant to cart (requires Shopify variant ID) |
-| `getCart`                | View cart contents, line items, and costs           |
-| `updateCartItemQuantity` | Change quantity of a line item                      |
-| `removeFromCart`         | Remove items by line ID                             |
-| `addCartNote`            | Delivery notes, gift messages, special instructions |
+| Tool                          | Purpose                                             |
+| ----------------------------- | --------------------------------------------------- |
+| `add_to_cart`                 | Add a variant to cart (requires Shopify variant ID) |
+| `get_cart`                    | View cart contents, line items, and costs           |
+| `update_cart_item_quantity`   | Change quantity of a line item                      |
+| `remove_from_cart`            | Remove items by line ID                             |
+| `add_cart_note`               | Delivery notes, gift messages, special instructions |
 
 ### Navigation
 
-| Tool           | Purpose                                                                               |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `navigateUser` | Generate links to product pages, collections, search, cart, checkout, account, orders |
+| Tool            | Purpose                                                                               |
+| --------------- | ------------------------------------------------------------------------------------- |
+| `navigate_user` | Generate links to product pages, collections, search, cart, checkout, account, orders |
 
 ## Generative UI
 
-The agent doesn't just return text - it renders rich UI components via json-render. The system prompt includes a catalog of components the model can invoke:
+The agent doesn't just return text - it renders rich UI components via json-render. The instructions include a catalog of components the model can invoke:
 
 - **AgentProductCard** - clickable card with image, title, price, compare-at price, and availability
 - **AgentProductGrid** - 2-column responsive grid wrapping multiple product cards
@@ -78,11 +71,11 @@ The agent doesn't just return text - it renders rich UI components via json-rend
 - **AgentCartConfirmation** - success card shown after adding an item to cart
 - **AgentVariantPicker** - display-only variant selector with option groups and availability status
 
-These components are registered in a json-render registry and rendered client-side from specs embedded in the assistant's streamed messages.
+The model writes json-render specs into its response (a ` ```spec ` fenced block of JSON-Patch lines). Because eve owns the model loop, a client-side bridge (`components/agent/eve-json-render.ts`) reconstructs the spec from the streamed assistant text and hands it to the json-render `<Renderer>` and component registry.
 
 ## Cart reconciliation
 
-A `CartReconciler` component watches the agent's tool results for cart mutations. When `addToCart`, `updateCartItemQuantity`, `removeFromCart`, or `addCartNote` succeed, it extracts the updated cart object and syncs it to the global cart context - updating the cart UI without a page reload and opening the cart overlay for visual feedback.
+A `CartReconciler` component watches the agent's tool results for cart mutations. When `add_to_cart`, `update_cart_item_quantity`, `remove_from_cart`, or `add_cart_note` succeed, it extracts the updated cart object and syncs it to the global cart context - updating the cart UI without a page reload and opening the cart overlay for visual feedback. When `add_to_cart` creates a new cart (eve's runtime can't set cookies), the reconciler persists its id to the httpOnly cart cookie via a server action so later turns and the storefront share it.
 
 ## Chat UI
 
@@ -90,29 +83,34 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 
 - Header controls to clear the conversation or minimize the panel
 - Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
-- Generative UI rendering via `useJsonRenderMessage()` and a component registry
-- Regenerate and copy message actions
-- Chat history and draft input persisted to localStorage (`template-agent-chat:v1`) until cleared
+- Generative UI rendering via `useEveJsonRenderMessage()` and a component registry
+- Copy message action
+- The eve session cursor and event stream persisted to localStorage (`template-agent-chat:v2`), so the durable conversation resumes on reload until cleared
 - Click-outside and Escape to minimize
 
 ## Abuse protection
 
-`/api/chat` ships without bot, rate-limit, or token-cap protection by default — it's reachable anonymously. Before exposing the agent to real traffic, harden it. A reasonable baseline on Vercel:
+The eve routes under `/eve/v1` ship with a permissive guest auth policy (`agent/channels/eve.ts`) — they're reachable anonymously. Before exposing the agent to real traffic, harden it. A reasonable baseline on Vercel:
 
-- **[Vercel BotID](https://vercel.com/docs/botid)** — wrap `next.config.ts` with `withBotId()`, call `initBotId({ protect: [{ path: "/api/chat", method: "POST" }] })` from `instrumentation-client.ts`, and call `checkBotId()` at the top of the POST handler. Returns 403 when a bot is detected and works locally without a Vercel deployment.
-- **Per-IP rate limit** — a sliding-window log keyed by the client IP, backed by [Vercel Runtime Cache](https://vercel.com/docs/runtime-cache) (`getCache` from `@vercel/functions`) so it shares state across regions. Run it before `request.json()` and before any Shopify cart is created so bot floods don't poison cart records or burn gateway spend.
-- **Token cap** — set `maxOutputTokens` on the `ToolLoopAgent` defaults to bound worst-case gateway spend per call.
+- **[Vercel BotID](https://vercel.com/docs/botid)** — protect the eve route namespace and reject bot traffic.
+- **Per-IP rate limit** — a sliding-window log keyed by client IP, backed by [Vercel Runtime Cache](https://vercel.com/docs/runtime-cache), applied in the channel's `onMessage` hook before dispatch.
+- **Stricter channel auth** — replace the `guestSession()` resolver with a real policy (e.g. `vercelOidc()` / signed session) from `eve/channels/auth`.
 
-If `/api/chat` sits behind an existing WAF (Cloudflare, etc.), prefer that and keep the token cap.
+If the routes sit behind an existing WAF (Cloudflare, etc.), prefer that.
 
 ## Key files
 
-| File                               | Purpose                                                  |
-| ---------------------------------- | -------------------------------------------------------- |
-| `app/api/chat/route.ts`            | Chat endpoint — page context, cart init, streaming       |
-| `lib/agent/server.ts`              | Agent creation, system prompt, AsyncLocalStorage context |
-| `lib/agent/tools/`                 | Tool implementations using Shopify operations            |
-| `components/agent/agent-panel.tsx` | Chat panel UI                                            |
-| `components/agent/registry.tsx`    | Generative UI component registry                         |
+| File                                        | Purpose                                                          |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| `agent/agent.ts`                            | Model + runtime config (`defineAgent`)                           |
+| `agent/instructions.md`                     | System prompt + json-render rendering rules                      |
+| `agent/channels/eve.ts`                     | HTTP channel auth; exposes cart ID + locale to tools             |
+| `agent/tools/`                              | One file per tool (`defineTool`), snake_case names               |
+| `agent/lib/session.ts`                      | Reads locale / cart ID from session context                     |
+| `lib/shopify/operations/*.fetch.ts`         | Next-free fetch cores shared by cache wrappers and agent tools   |
+| `lib/shopify/storefront.core.ts`            | Next-free Storefront client (the `server-only` entry re-exports it) |
+| `components/agent/agent-panel.tsx`          | Chat panel UI (`useEveAgent`)                                    |
+| `components/agent/eve-json-render.ts`       | Client bridge: reconstructs json-render specs from eve messages  |
+| `components/agent/registry.tsx`             | Generative UI component registry                                 |
 
-Auxiliary components (`client.tsx`, `agent-button.tsx`, `cart-reconciler.tsx`) and the json-render schemas in `lib/agent/index.ts` live next to these.
+Auxiliary components (`client.tsx`, `agent-button.tsx`, `cart-reconciler.tsx`) and the json-render schemas in `lib/agent/index.ts` live next to these. Mounting is configured by `withEve()` in `next.config.ts`.

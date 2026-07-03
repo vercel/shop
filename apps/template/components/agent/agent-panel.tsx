@@ -1,8 +1,7 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { JSONUIProvider, Renderer } from "@json-render/react";
+import { type EveMessage, useEveAgent } from "eve/react";
 import {
   BotMessageSquareIcon,
   BrainIcon,
@@ -18,7 +17,6 @@ import {
   NavigationIcon,
   PackageIcon,
   PlusIcon,
-  RefreshCcwIcon,
   SearchIcon,
   SettingsIcon,
   ShoppingCartIcon,
@@ -26,7 +24,6 @@ import {
   StickyNoteIcon,
   Trash2Icon,
 } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -56,29 +53,23 @@ import {
 } from "../ai-elements/prompt-input";
 import { Shimmer } from "../ai-elements/shimmer";
 import { CartReconciler } from "./cart-reconciler";
+import { useEveJsonRenderMessage } from "./eve-json-render";
 import { registry } from "./registry";
 
 const AUTO_CLOSE_DELAY = 1000;
-const AGENT_CHAT_STORAGE_KEY = "template-agent-chat:v1";
+const AGENT_CHAT_STORAGE_KEY = "template-agent-chat:v2";
+
+type AgentSnapshot = ReturnType<typeof useEveAgent>;
 
 type PersistedAgentChat = {
-  version: 1;
-  chatId: string;
+  version: 2;
   input: string;
-  messages: UIMessage[];
+  session?: AgentSnapshot["session"];
+  events?: AgentSnapshot["events"];
 };
 
-function createEmptyPersistedAgentChat(): PersistedAgentChat {
-  return {
-    version: 1,
-    chatId: nanoid(),
-    input: "",
-    messages: [],
-  };
-}
-
 function readPersistedAgentChat(): PersistedAgentChat {
-  const fallback = createEmptyPersistedAgentChat();
+  const fallback: PersistedAgentChat = { version: 2, input: "" };
 
   if (typeof window === "undefined") {
     return fallback;
@@ -86,23 +77,16 @@ function readPersistedAgentChat(): PersistedAgentChat {
 
   try {
     const raw = window.localStorage.getItem(AGENT_CHAT_STORAGE_KEY);
-    if (!raw) {
-      return fallback;
-    }
+    if (!raw) return fallback;
 
     const parsed = JSON.parse(raw) as Partial<PersistedAgentChat>;
-    if (parsed.version !== 1) {
-      return fallback;
-    }
+    if (parsed.version !== 2) return fallback;
 
     return {
-      version: 1,
-      chatId:
-        typeof parsed.chatId === "string" && parsed.chatId.length > 0
-          ? parsed.chatId
-          : fallback.chatId,
+      version: 2,
       input: typeof parsed.input === "string" ? parsed.input : "",
-      messages: Array.isArray(parsed.messages) ? (parsed.messages as UIMessage[]) : [],
+      session: parsed.session,
+      events: parsed.events,
     };
   } catch {
     return fallback;
@@ -110,10 +94,7 @@ function readPersistedAgentChat(): PersistedAgentChat {
 }
 
 function writePersistedAgentChat(chat: PersistedAgentChat): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
+  if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(AGENT_CHAT_STORAGE_KEY, JSON.stringify(chat));
   } catch {
@@ -121,12 +102,9 @@ function writePersistedAgentChat(chat: PersistedAgentChat): void {
   }
 }
 
-function getToolNameFromPart(part: UIMessage["parts"][number]): string | null {
+function getToolNameFromPart(part: EveMessage["parts"][number]): string | null {
   if (part.type === "dynamic-tool" && "toolName" in part) {
     return part.toolName as string;
-  }
-  if (part.type.startsWith("tool-")) {
-    return part.type.slice(5);
   }
   return null;
 }
@@ -143,43 +121,38 @@ function getToolStepStatus(state: string): "complete" | "active" | "pending" {
 }
 
 const TOOL_METADATA: Record<string, { label: string; icon: LucideIcon }> = {
-  searchProducts: { label: "Searching products", icon: SearchIcon },
-  getProductDetails: { label: "Looking up product details", icon: PackageIcon },
-  getProductRecommendations: {
-    label: "Finding recommendations",
-    icon: SparklesIcon,
-  },
-  listCollections: { label: "Listing collections", icon: LayoutGridIcon },
-  browseCollection: { label: "Browsing collection", icon: FolderOpenIcon },
-  addToCart: { label: "Adding to cart", icon: PlusIcon },
-  getCart: { label: "Checking cart", icon: ShoppingCartIcon },
-  updateCartItemQuantity: { label: "Updating cart", icon: SettingsIcon },
-  removeFromCart: { label: "Removing from cart", icon: Trash2Icon },
-  addCartNote: { label: "Adding cart note", icon: StickyNoteIcon },
-  navigateUser: { label: "Navigating", icon: NavigationIcon },
-  getOrderHistory: { label: "Looking up orders", icon: ClipboardListIcon },
-  getOrderDetails: { label: "Fetching order details", icon: FileTextIcon },
-  getAddresses: { label: "Loading addresses", icon: MapPinIcon },
-  manageAddress: { label: "Managing address", icon: MapPinIcon },
+  search_products: { label: "Searching products", icon: SearchIcon },
+  get_product_details: { label: "Looking up product details", icon: PackageIcon },
+  get_product_recommendations: { label: "Finding recommendations", icon: SparklesIcon },
+  list_collections: { label: "Listing collections", icon: LayoutGridIcon },
+  browse_collection: { label: "Browsing collection", icon: FolderOpenIcon },
+  add_to_cart: { label: "Adding to cart", icon: PlusIcon },
+  get_cart: { label: "Checking cart", icon: ShoppingCartIcon },
+  update_cart_item_quantity: { label: "Updating cart", icon: SettingsIcon },
+  remove_from_cart: { label: "Removing from cart", icon: Trash2Icon },
+  add_cart_note: { label: "Adding cart note", icon: StickyNoteIcon },
+  navigate_user: { label: "Navigating", icon: NavigationIcon },
+  get_order_history: { label: "Looking up orders", icon: ClipboardListIcon },
+  get_order_details: { label: "Fetching order details", icon: FileTextIcon },
+  get_addresses: { label: "Loading addresses", icon: MapPinIcon },
+  manage_address: { label: "Managing address", icon: MapPinIcon },
 };
 
 function getToolMeta(toolName: string) {
   return TOOL_METADATA[toolName] ?? { label: toolName, icon: DotIcon };
 }
 
-function getMessagePartKey(part: UIMessage["parts"][number]): string {
+function getMessagePartKey(part: EveMessage["parts"][number], index: number): string {
   if ("toolCallId" in part && typeof part.toolCallId === "string") {
     return `${part.type}-${part.toolCallId}`;
   }
-
   if (part.type === "text") {
-    return `${part.type}-${part.text}`;
+    return `${part.type}-${index}-${part.text.slice(0, 24)}`;
   }
-
-  return `${part.type}-${JSON.stringify(part)}`;
+  return `${part.type}-${index}`;
 }
 
-// Safelist relative paths so navigateTool links (e.g. "/en-US/cart") skip the external-link modal
+// Safelist relative paths so navigate_user links (e.g. "/cart") skip the external-link modal
 const linkSafety = {
   enabled: true,
   onLinkCheck: (url: string) => url.startsWith("/"),
@@ -188,21 +161,14 @@ const linkSafety = {
 function ChatMessage({
   message,
   isLastAssistant,
-  status,
-  messages,
-  regenerate,
+  isStreaming,
 }: {
-  message: UIMessage;
+  message: EveMessage;
   isLastAssistant: boolean;
-  status: string;
-  messages: UIMessage[];
-  regenerate: () => void;
+  isStreaming: boolean;
 }) {
   const t = useTranslations("agent");
-  const { spec, text, hasSpec } = useJsonRenderMessage(message.parts);
-
-  // Chain of thought state — hooks must be before early return
-  const isStreamingThisMessage = status === "streaming" && message.id === messages.at(-1)?.id;
+  const { hasSpec, spec, text } = useEveJsonRenderMessage(message.parts);
 
   const chainParts = message.parts.filter(
     (part) => part.type === "reasoning" || getToolNameFromPart(part) !== null,
@@ -210,7 +176,7 @@ function ChatMessage({
   const hasChain = chainParts.length > 0;
 
   const hasActiveWork = chainParts.some((part) => {
-    if (part.type === "reasoning") return isStreamingThisMessage;
+    if (part.type === "reasoning") return isStreaming;
     if ("state" in part) {
       const state = part.state as string;
       return !["output-available", "output-error", "output-denied"].includes(state);
@@ -236,10 +202,10 @@ function ChatMessage({
   if (message.role === "user") {
     return (
       <div>
-        {message.parts.map((part) => {
+        {message.parts.map((part, index) => {
           if (part.type === "text") {
             return (
-              <Message key={getMessagePartKey(part)} from="user">
+              <Message key={getMessagePartKey(part, index)} from="user">
                 <MessageContent>
                   <MessageResponse linkSafety={linkSafety}>{part.text}</MessageResponse>
                 </MessageContent>
@@ -264,15 +230,15 @@ function ChatMessage({
             )}
           </ChainOfThoughtHeader>
           <ChainOfThoughtContent>
-            {chainParts.map((part) => {
+            {chainParts.map((part, index) => {
               if (part.type === "reasoning") {
                 return (
                   <ChainOfThoughtStep
-                    key={getMessagePartKey(part)}
+                    key={getMessagePartKey(part, index)}
                     icon={BrainIcon}
                     label="Thinking"
                     status={
-                      isStreamingThisMessage && part === chainParts[chainParts.length - 1]
+                      isStreaming && part === chainParts[chainParts.length - 1]
                         ? "active"
                         : "complete"
                     }
@@ -281,16 +247,14 @@ function ChatMessage({
               }
 
               const toolName = getToolNameFromPart(part);
-              if (!toolName) {
-                return null;
-              }
+              if (!toolName) return null;
 
               const meta = getToolMeta(toolName);
               const state = (part as { state: string }).state;
 
               return (
                 <ChainOfThoughtStep
-                  key={getMessagePartKey(part)}
+                  key={getMessagePartKey(part, index)}
                   icon={meta.icon}
                   label={meta.label}
                   status={getToolStepStatus(state)}
@@ -314,9 +278,6 @@ function ChatMessage({
           </MessageContent>
           {isLastAssistant && (
             <MessageActions>
-              <MessageAction onClick={() => regenerate()} label={t("retry")}>
-                <RefreshCcwIcon className="size-3" />
-              </MessageAction>
               <MessageAction
                 onClick={() => navigator.clipboard.writeText(text || "")}
                 label={t("copy")}
@@ -344,33 +305,31 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   const panelRef = useRef<HTMLDivElement>(null);
 
   const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
   const prevPathnameRef = useRef(pathname);
+
   useEffect(() => {
-    if (pathname === prevPathnameRef.current) {
-      return;
-    }
+    pathnameRef.current = pathname;
+    if (pathname === prevPathnameRef.current) return;
     prevPathnameRef.current = pathname;
     onOpenChange(false);
   }, [pathname, onOpenChange]);
 
-  const { messages, sendMessage, setMessages, status, regenerate, stop } = useChat({
-    id: persistedChat.chatId,
-    generateId: () => nanoid(),
-    messages: persistedChat.messages,
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: { chatId: persistedChat.chatId },
-    }),
+  const agent = useEveAgent({
+    initialEvents: persistedChat.events,
+    initialSession: persistedChat.session,
+    // Attach the current page path to every turn (ephemeral, never persisted
+    // server-side) so the model can resolve "this product"/"this collection".
+    prepareSend: (turn) => ({ ...turn, clientContext: { path: pathnameRef.current } }),
   });
 
+  const { data, error, reset, send, session, status, stop } = agent;
+  const messages = data.messages;
+  const isBusy = status === "submitted" || status === "streaming";
+
   useEffect(() => {
-    writePersistedAgentChat({
-      version: 1,
-      chatId: persistedChat.chatId,
-      input,
-      messages,
-    });
-  }, [persistedChat.chatId, input, messages]);
+    writePersistedAgentChat({ version: 2, input, session, events: agent.events });
+  }, [input, session, agent.events]);
 
   useEffect(() => {
     if (!open) return;
@@ -387,9 +346,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     }
 
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        onOpenChange(false);
-      }
+      if (e.key === "Escape") onOpenChange(false);
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -409,30 +366,19 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
 
   const handleSubmit = useCallback(
     (message: PromptInputMessage) => {
-      if (!message.text) {
-        return;
-      }
-
-      sendMessage({ text: message.text });
+      if (!message.text) return;
+      void send({ message: message.text });
       setInput("");
     },
-    [sendMessage],
+    [send],
   );
 
   const handleClear = useCallback(() => {
-    if (status === "streaming" || status === "submitted") {
-      stop();
-    }
-
+    if (isBusy) stop();
     setInput("");
-    setMessages([]);
-    writePersistedAgentChat({
-      version: 1,
-      chatId: persistedChat.chatId,
-      input: "",
-      messages: [],
-    });
-  }, [persistedChat.chatId, setMessages, status, stop]);
+    reset();
+    writePersistedAgentChat({ version: 2, input: "" });
+  }, [isBusy, reset, stop]);
 
   const canClear = messages.length > 0 || input.trim().length > 0;
   const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant");
@@ -494,9 +440,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                   key={message.id}
                   message={message}
                   isLastAssistant={messageIndex === lastAssistantIndex}
-                  status={status}
-                  messages={messages}
-                  regenerate={regenerate}
+                  isStreaming={status === "streaming" && messageIndex === messages.length - 1}
                 />
               ))}
             </ConversationContent>
@@ -517,9 +461,14 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 value={input}
               />
             </PromptInputBody>
-            <PromptInputSubmit className="mr-1.5" disabled={!input && !status} status={status} />
+            <PromptInputSubmit className="mr-1.5" disabled={!input && !isBusy} status={status} />
           </div>
         </PromptInput>
+        {error && (
+          <p className="px-5 pb-2 text-red-500 text-xs">
+            {error.message ?? "Something went wrong."}
+          </p>
+        )}
       </div>
     </>
   );

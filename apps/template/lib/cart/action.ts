@@ -1,5 +1,6 @@
 "use server";
 
+import { getCartIdFromCookie, setCartIdCookie } from "@/lib/cart/server";
 import { isEnabledLocale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import {
@@ -255,6 +256,18 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
       error: error instanceof Error ? error.message : "Failed to remove discount code",
     };
   }
+}
+
+/**
+ * Persists a cart the agent created (in eve's runtime, which can't set cookies)
+ * into the httpOnly cart cookie, so later agent turns and the storefront share
+ * it. No-op when a cart cookie already exists, to avoid orphaning the current cart.
+ */
+export async function persistAgentCartAction(cartId: string): Promise<void> {
+  if (!cartId) return;
+  const existing = await getCartIdFromCookie();
+  if (existing) return;
+  await setCartIdCookie(cartId);
 }
 
 /** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */

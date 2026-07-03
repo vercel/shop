@@ -1,3 +1,4 @@
+import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -84,7 +85,7 @@ const withNextIntl = createNextIntlPlugin({
 
 const config = withNextIntl(nextConfig);
 
-export default function getConfig(phase: string): NextConfig {
+function getConfig(phase: string): NextConfig {
   // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.
   const isTypegen = process.argv.includes("typegen");
   const isRuntime =
@@ -98,3 +99,5 @@ export default function getConfig(phase: string): NextConfig {
 
   return config;
 }
+
+export default withEve(getConfig, { eveRoot: "." });
