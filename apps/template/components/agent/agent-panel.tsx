@@ -6,7 +6,6 @@ import {
   BotMessageSquareIcon,
   BrainIcon,
   ClipboardListIcon,
-  CopyIcon,
   DotIcon,
   FileTextIcon,
   FolderOpenIcon,
@@ -37,13 +36,7 @@ import {
   ChainOfThoughtStep,
 } from "../ai-elements/chain-of-thought";
 import { Conversation, ConversationContent } from "../ai-elements/conversation";
-import {
-  Message,
-  MessageAction,
-  MessageActions,
-  MessageContent,
-  MessageResponse,
-} from "../ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "../ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -158,16 +151,7 @@ const linkSafety = {
   onLinkCheck: (url: string) => url.startsWith("/"),
 };
 
-function ChatMessage({
-  message,
-  isLastAssistant,
-  isStreaming,
-}: {
-  message: EveMessage;
-  isLastAssistant: boolean;
-  isStreaming: boolean;
-}) {
-  const t = useTranslations("agent");
+function ChatMessage({ message, isStreaming }: { message: EveMessage; isStreaming: boolean }) {
   const { hasSpec, spec, text } = useEveJsonRenderMessage(message.parts);
 
   const chainParts = message.parts.filter(
@@ -267,7 +251,6 @@ function ChatMessage({
 
       {(text || hasSpec) && (
         <Message from="assistant">
-          {isLastAssistant && <BotMessageSquareIcon className="size-5 shrink-0 text-primary" />}
           <MessageContent>
             {text && <MessageResponse linkSafety={linkSafety}>{text}</MessageResponse>}
             {hasSpec && spec && (
@@ -276,16 +259,6 @@ function ChatMessage({
               </JSONUIProvider>
             )}
           </MessageContent>
-          {isLastAssistant && (
-            <MessageActions>
-              <MessageAction
-                onClick={() => navigator.clipboard.writeText(text || "")}
-                label={t("copy")}
-              >
-                <CopyIcon className="size-3" />
-              </MessageAction>
-            </MessageActions>
-          )}
         </Message>
       )}
     </div>
@@ -380,7 +353,6 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
   }, [isBusy, reset, stop]);
 
   const canClear = messages.length > 0 || input.trim().length > 0;
-  const lastAssistantIndex = messages.findLastIndex((m) => m.role === "assistant");
 
   return (
     <>
@@ -438,7 +410,6 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
                 <ChatMessage
                   key={message.id}
                   message={message}
-                  isLastAssistant={messageIndex === lastAssistantIndex}
                   isStreaming={status === "streaming" && messageIndex === messages.length - 1}
                 />
               ))}
