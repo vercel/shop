@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from its own `i18n` config on every request, so the template caches one client per country/language pair and picks the right one from the request variables. Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
+All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from its own `i18n` config on every request, so the wrapper creates the client with the country/language pair taken from the request variables (client creation is plain config allocation — there's nothing stateful worth caching). Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
@@ -217,7 +217,7 @@ Domain types are defined in `lib/types.ts` and are provider-agnostic. Components
 
 | Resource                                | Purpose                                                               |
 | --------------------------------------- | --------------------------------------------------------------------- |
-| `lib/shopify/storefront.ts`             | Hydrogen `createStorefrontClient` per-locale cache + `customFetchApi` |
+| `lib/shopify/storefront.ts`             | Hydrogen `createStorefrontClient` wrapper + `customFetchApi`          |
 | `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers           |
 | `lib/shopify/customer-account.ts`       | `customerAccountFetch` for the separate Customer Account API          |
 | `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)                 |
