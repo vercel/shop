@@ -24,6 +24,10 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
+## The AI assistant runs on eve — read its bundled docs
+
+The opt-in shopping assistant is built on **eve**, a filesystem-first, pre-1.0 framework that changes often. Do not trust training-data recall of its APIs. Before writing or changing anything under `agent/`, read the relevant guide in `node_modules/eve/docs/` (the same docs as eve.dev, shipped in the package). Start at `node_modules/eve/docs/README.md` — it lists a "Read this first" order; the load-bearing pages for this template are `reference/project-layout.md`, `agent-config.md`, `reference/typescript-api.md`, `tools/overview.mdx`, `channels/overview.mdx`, and `concepts/execution-model-and-durability.md`. eve is pinned to an exact version and excluded from the workspace release-age gate, so confirm the installed API from `node_modules/eve`, not memory. See "AI Shopping Assistant" below for how it's wired into this template.
+
 ## Critical Rules (Always Apply)
 
 1. **Every cart mutation MUST call `invalidateCartCache()`** (from `@/lib/cart/server`) or cache goes stale.
@@ -31,6 +35,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
+6. **Agent tool code (anything under `agent/`) must not import `next/cache`, `server-only`, or `next/headers`**, even transitively — it runs in eve's standalone runtime, not Next. Route Shopify access through the Next-free `lib/shopify/fetch.ts` cores (shared with the `"use cache"` `operations/*` wrappers), never the operations directly.
 
 ## Storefront Architecture Contract
 
@@ -146,7 +151,7 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built on eve (see "AI Shopping Assistant").
 
 The default deployment story is single-locale with clean, unprefixed URLs (`/products/...`). The repo keeps locale catalogs and helpers in place so adding multi-locale routing later is straightforward, but that routing is not enabled by default.
 
@@ -163,10 +168,13 @@ pnpm format
 ## Directory Structure
 
 - `app/` for routes
+- `agent/` for the eve AI assistant (mounted by `withEve()` in `next.config.ts`)
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
+- `lib/shopify/fetch.ts` for the Next-free fetch cores the agent tools and cached operations share
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
+- `components/agent/` for the assistant panel, json-render bridge, registry, and cart reconciler
 - `next.config.ts` rewrites for variant URL resolution
 
 ## Data Flow
@@ -205,6 +213,33 @@ Key files:
 - `components/account/` — sidebar, tabs, page header, sign-out button
 
 The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
+
+## AI Shopping Assistant (eve)
+
+The assistant is an [eve](https://eve.dev) project in `agent/`, mounted into Next by `withEve()` in `next.config.ts`. eve runs the model loop on the Workflow SDK, so sessions are durable (Vercel Workflow in production; a local `.workflow-data` file in dev — gitignored, no database). **Read `node_modules/eve/docs/` before touching `agent/`** (see the rule near the top of this file).
+
+It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AGENT="1"` to show the panel button (`lib/config.ts` reads it). The model routes through the Vercel AI Gateway — the project OIDC token on Vercel, or `AI_GATEWAY_API_KEY` elsewhere.
+
+**Runtime boundary (the load-bearing constraint):** everything under `agent/` is bundled and run by eve, not Next, so it cannot import `next/cache`, `server-only`, or `next/headers` (see Critical Rule 6). Tools call the Next-free `lib/shopify/fetch.ts` cores — the single source shared with the `"use cache"` `operations/*.ts` wrappers (which add `cacheTag`). The Storefront client (`lib/shopify/storefront.ts`) intentionally carries no `server-only` guard for the same reason.
+
+Conventions:
+
+- **Tools** — one file per tool under `agent/tools/`; the filename _is_ the model-facing name (snake_case, e.g. `add_to_cart.ts`, no `name` override exists). `export default defineTool({ description, inputSchema, execute(input, ctx) })`. Read per-session context (cart id, locale) via `agent/lib/session.ts`, which pulls from `ctx.session.auth.current.attributes` — filled by `agent/channels/eve.ts` from the request's cart cookie (decode it; Next percent-encodes cookie values). Keep the `{ success, ... }` return shape so the client's `CartReconciler` and the json-render rules keep working. Adding a tool also means updating the capabilities list in `agent/instructions.md` and, for cart/UI tools, `TOOL_METADATA` / `CART_TOOL_NAMES` in `components/agent/agent-panel.tsx` / `cart-reconciler.tsx`.
+- **Generative UI** — the model emits ` ```spec ` fences (json-render). Because eve owns the loop there is no server-side `pipeJsonRender`; `components/agent/eve-json-render.ts` reconstructs the spec client-side and hands it to `<Renderer>` + the registry. Component catalog: `lib/agent/index.ts`; registry: `components/agent/registry.tsx`.
+- **System prompt** — `agent/instructions.md`; its json-render rules are the `catalog.prompt()` output baked in.
+- **Client session** — the panel persists eve's session cursor + events to `localStorage`; "clear" remounts a keyed `AgentConversation` for a fresh session (eve's `reset()` re-binds the constructed `initialSession`, so remounting is what truly resets).
+- **Auth/channel** — `agent/channels/eve.ts` ships a permissive guest policy (parity with a public assistant). Harden it before real traffic — see `node_modules/eve/docs/guides/auth-and-route-protection.md`.
+
+Key files:
+
+- `agent/agent.ts` — `defineAgent({ model })`
+- `agent/instructions.md` — system prompt + json-render rules
+- `agent/channels/eve.ts` — HTTP channel auth; exposes cart id + locale to tools
+- `agent/tools/*.ts` — one `defineTool` per file (snake_case)
+- `agent/lib/session.ts` — reads locale / cart id from session context
+- `lib/shopify/fetch.ts` — Next-free fetch cores shared by cached operations and agent tools
+- `components/agent/{agent-panel,eve-json-render,cart-reconciler,registry}.tsx`
+- `next.config.ts` — `withEve()` mounts the agent
 
 ## Shopify GraphQL Workflow
 
