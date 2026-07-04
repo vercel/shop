@@ -110,7 +110,7 @@ export async function getPrivacyPolicy(locale: string = defaultLocale) {
 
 Key points:
 
-- **`storefront`** is the shared `@shopify/storefront-api-client` instance from `lib/shopify/storefront.ts`. Pass your response type as the generic; the query is the first argument and variables go in the options object.
+- **`storefront`** is the shared wrapper around `@shopify/hydrogen`'s `createStorefrontClient` from `lib/shopify/storefront.ts`. Pass your response type as the generic; the query is the first argument and variables go in the options object.
 - **`assertStorefrontOk(response, name)`** throws on a transport/GraphQL failure (no `data`), warns on partial errors, and narrows `response.data` to non-null.
 - **`"use cache"`** allows this stable policy body to become part of the page's prerendered shell.
 - **`cacheLife("days")`** refreshes content that has no matching webhook invalidation path.

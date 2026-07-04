@@ -1,20 +1,22 @@
+import type { GraphQLFormattedError } from "@shopify/hydrogen";
+
 import type { CartWarning } from "@/lib/types";
 
 interface StorefrontResponse<T> {
-  data?: T;
-  errors?: { graphQLErrors?: unknown[]; message?: string };
+  data?: T | null;
+  errors?: GraphQLFormattedError[];
 }
 
 export function assertStorefrontOk<T>(
   response: StorefrontResponse<T>,
   operation: string,
-): asserts response is { data: T; errors?: StorefrontResponse<T>["errors"] } {
-  if (response.errors && !response.data) {
-    const detail = response.errors.message ?? JSON.stringify(response.errors.graphQLErrors);
+): asserts response is { data: T; errors?: GraphQLFormattedError[] } {
+  if (response.errors?.length && !response.data) {
+    const detail = response.errors.map((error) => error.message).join("; ");
     throw new Error(`Shopify ${operation} failed: ${detail}`);
   }
-  if (response.errors) {
-    const detail = JSON.stringify(response.errors.graphQLErrors ?? response.errors.message);
+  if (response.errors?.length) {
+    const detail = JSON.stringify(response.errors);
     console.warn(`[shopify] ${operation} returned partial errors: ${detail}`);
   }
   if (!response.data) {

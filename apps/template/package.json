@@ -18,7 +18,7 @@
     "@json-render/core": "0.19.0",
     "@json-render/react": "0.19.0",
     "@shopify/api-codegen-preset": "2.0.1",
-    "@shopify/storefront-api-client": "1.0.10",
+    "@shopify/hydrogen": "0.0.0-preview-0c3bff8-20260618001533",
     "@tailwindcss/postcss": "4.3.2",
     "@tailwindcss/typography": "0.5.20",
     "@types/node": "26.0.1",
