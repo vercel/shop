@@ -10,7 +10,15 @@ function readCookie(header: string | null, name: string): string | undefined {
   if (!header) return undefined;
   for (const part of header.split(";")) {
     const [key, ...rest] = part.trim().split("=");
-    if (key === name) return rest.join("=") || undefined;
+    if (key !== name) continue;
+    const value = rest.join("=");
+    if (!value) return undefined;
+    // Next percent-encodes cookie values on set; the cart id contains "/:?=".
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
   }
   return undefined;
 }

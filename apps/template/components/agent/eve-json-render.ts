@@ -39,10 +39,13 @@ export function extractSpecFromText(fullText: string): EveJsonRenderResult {
 export function useEveJsonRenderMessage(
   parts: readonly { readonly type: string; readonly text?: string }[],
 ): EveJsonRenderResult {
+  // Separate narration segments (e.g. before vs after a tool call) are distinct
+  // text parts; join with a blank line so they don't run together ("variant.It").
   const text = parts
     .filter((part) => part.type === "text")
     .map((part) => part.text ?? "")
-    .join("");
+    .filter((value) => value.length > 0)
+    .join("\n\n");
 
   return extractSpecFromText(text);
 }
