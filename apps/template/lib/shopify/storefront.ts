@@ -43,27 +43,20 @@ const customFetchApi: typeof fetch = async (input, init) => {
 };
 
 // The Hydrogen client injects its own i18n config into `$country`/`$language`,
-// overriding per-request variables — so each country/language pair needs its
-// own client. Single-locale deploys only ever populate the default entry.
-const clients = new Map<string, StorefrontClient>();
-
+// overriding per-request variables — so the client must be created with the
+// call's locale pair. Creation is just config/closure allocation, so a fresh
+// client per call is fine.
 function getClient(country: string, language: string): StorefrontClient {
-  const key = `${country}/${language}`;
-  let client = clients.get(key);
-  if (!client) {
-    client = createStorefrontClient({
-      type: "public",
-      config: {
-        apiVersion: SHOPIFY_API_VERSION,
-        fetch: customFetchApi,
-        i18n: { country, language } as I18nConfig,
-        publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,
-        storeDomain: SHOPIFY_STORE_DOMAIN,
-      },
-    });
-    clients.set(key, client);
-  }
-  return client;
+  return createStorefrontClient({
+    type: "public",
+    config: {
+      apiVersion: SHOPIFY_API_VERSION,
+      fetch: customFetchApi,
+      i18n: { country, language } as I18nConfig,
+      publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,
+      storeDomain: SHOPIFY_STORE_DOMAIN,
+    },
+  });
 }
 
 interface StorefrontRequestOptions {

@@ -13,7 +13,7 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 
 | Resource | Role |
 | --- | --- |
-| `lib/shopify/storefront.ts` | Shared `@shopify/hydrogen` storefront client (per-locale cache) and custom request behavior |
+| `lib/shopify/storefront.ts` | Shared `@shopify/hydrogen` storefront client wrapper and custom request behavior |
 | `lib/shopify/errors.ts` | `assertStorefrontOk()` response contract |
 | `.graphqlrc.ts` + `pnpm codegen` | Validates static `#graphql` documents against the live schema |
 | `lib/shopify/customer-account.ts` | Separate Customer Account API transport |
