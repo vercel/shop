@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import type * as React from "react";
 
 import { defaultLocale } from "@/lib/i18n";
@@ -10,11 +11,10 @@ interface PriceProps extends React.ComponentProps<"span"> {
 }
 
 export function Price({ amount, currencyCode, locale, className, ...props }: PriceProps) {
-  const price = new Intl.NumberFormat(locale || defaultLocale, {
-    style: "currency",
-    currency: currencyCode,
-    currencyDisplay: "narrowSymbol",
-  }).format(Number(amount));
+  const price = formatMoney(
+    { amount, currencyCode },
+    { currencyDisplay: "narrowSymbol", locale: locale || defaultLocale },
+  ).localizedString;
 
   return (
     <span

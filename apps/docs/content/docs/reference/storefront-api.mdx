@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Storefront API data flows through a shared client built with [`@shopify/storefront-api-client`](https://www.npmjs.com/package/@shopify/storefront-api-client), exported as `storefront` from `lib/shopify/storefront.ts`. Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
+All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from its own `i18n` config on every request, so the template caches one client per country/language pair and picks the right one from the request variables. Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
@@ -183,9 +183,9 @@ Shopify returns the full updated cart in every mutation response, so there's no 
 
 ## Error handling
 
-`@shopify/storefront-api-client` never throws on its own — `request()` resolves to `{ data?, errors? }`. The template applies its contract through `assertStorefrontOk(response, operation)` in `lib/shopify/errors.ts`:
+The Hydrogen client resolves to `{ data, errors? }` for GraphQL-level errors, but **throws** on transport failures — `StorefrontApiError` for non-OK HTTP responses and malformed payloads, `StorefrontTimeoutError` when the default 30s timeout elapses. The template applies its contract through `assertStorefrontOk(response, operation)` in `lib/shopify/errors.ts`:
 
-**Transport / GraphQL failure** - if `errors` is present and there's no `data`, it throws with the operation name and error detail.
+**GraphQL failure** - if `errors` is present and there's no `data`, it throws with the operation name and error detail.
 
 **Partial success** - if there are `errors` but `data` is also present, it logs a warning and lets the operation use the partial data.
 
@@ -217,7 +217,7 @@ Domain types are defined in `lib/types.ts` and are provider-agnostic. Components
 
 | Resource                                | Purpose                                                               |
 | --------------------------------------- | --------------------------------------------------------------------- |
-| `lib/shopify/storefront.ts`             | Shared `@shopify/storefront-api-client` instance + `customFetchApi`   |
+| `lib/shopify/storefront.ts`             | Hydrogen `createStorefrontClient` per-locale cache + `customFetchApi` |
 | `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers           |
 | `lib/shopify/customer-account.ts`       | `customerAccountFetch` for the separate Customer Account API          |
 | `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)                 |
