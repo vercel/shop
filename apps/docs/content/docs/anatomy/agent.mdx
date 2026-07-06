@@ -84,7 +84,7 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 - Header controls to clear the conversation or minimize the panel
 - Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
 - Generative UI rendering via `useEveJsonRenderMessage()` and a component registry (cards render once the turn settles, so a mid-stream partial spec never flashes a wrong card)
-- A fixed-height panel with a bottom-anchored message column: short chats hug the composer, long chats scroll, and the view stays pinned to the latest content as it streams unless the reader scrolls up
+- A panel that sizes to its content up to a max height: it's compact when empty, grows with the conversation, then caps and scrolls — the view stays pinned to the latest content as it streams unless the reader scrolls up
 - The eve session cursor and event stream persisted to localStorage (`template-agent-chat:v2`), so the durable conversation resumes on reload until cleared
 - Click-outside and Escape to minimize
 
