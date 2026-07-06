@@ -50,7 +50,7 @@ function SheetContent({
         data-slot="sheet-content"
         data-side={side}
         className={cn(
-          "bg-card data-open:animate-in data-closed:animate-out fixed z-60 flex flex-col gap-5 shadow-lg transition ease-in-out data-closed:duration-300 data-open:duration-500",
+          "bg-card data-open:animate-in data-closed:animate-out fixed z-60 flex flex-col gap-5 shadow-lg ease-in-out data-closed:duration-300 data-open:duration-500",
           side === "right" &&
             "data-closed:slide-out-to-right data-open:slide-in-from-right inset-y-0 right-0 h-full w-[calc(100%-2.5rem)] max-w-md border-l",
           side === "left" &&
