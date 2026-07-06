@@ -1,7 +1,7 @@
 "use client";
 
 import { useEveAgent } from "eve/react";
-import { BotMessageSquareIcon, MinusIcon, Trash2Icon } from "lucide-react";
+import { MinusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -115,35 +115,28 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
     <>
       <CartReconciler messages={messages} />
 
-      <div className="min-h-0 flex-1">
-        <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-          <MessageScroller>
-            <MessageScrollerViewport>
-              <MessageScrollerContent className="p-5">
-                {messages.length === 0 && (
-                  <div className="flex items-start gap-2.5">
-                    <BotMessageSquareIcon className="mt-0.5 size-5 shrink-0 text-primary" />
-                    <p className="pt-2 text-sm text-foreground">{t("greeting")}</p>
-                  </div>
-                )}
-                {messages.map((message, index) => (
-                  <MessageScrollerItem
-                    key={message.id}
-                    messageId={message.id}
-                    scrollAnchor={message.role === "user"}
-                  >
-                    <ChatMessage
-                      message={message}
-                      isStreaming={status === "streaming" && index === messages.length - 1}
-                    />
-                  </MessageScrollerItem>
-                ))}
-              </MessageScrollerContent>
-            </MessageScrollerViewport>
-            <MessageScrollerButton />
-          </MessageScroller>
-        </MessageScrollerProvider>
-      </div>
+      <MessageScrollerProvider autoScroll defaultScrollPosition="end">
+        <MessageScroller>
+          <MessageScrollerViewport>
+            <MessageScrollerContent className="p-5">
+              {messages.length === 0 && <p className="text-sm text-foreground">{t("greeting")}</p>}
+              {messages.map((message, index) => (
+                <MessageScrollerItem
+                  key={message.id}
+                  messageId={message.id}
+                  scrollAnchor={message.role === "user"}
+                >
+                  <ChatMessage
+                    message={message}
+                    isStreaming={status === "streaming" && index === messages.length - 1}
+                  />
+                </MessageScrollerItem>
+              ))}
+            </MessageScrollerContent>
+          </MessageScrollerViewport>
+          <MessageScrollerButton />
+        </MessageScroller>
+      </MessageScrollerProvider>
 
       <AgentComposer
         value={input}
