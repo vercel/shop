@@ -45,7 +45,7 @@ export function ChatMessage({
     return (
       <Message align="end">
         <MessageContent>
-          <Bubble variant="secondary">
+          <Bubble variant="default">
             <BubbleContent>
               <Markdown>{text}</Markdown>
             </BubbleContent>
@@ -57,7 +57,7 @@ export function ChatMessage({
 
   return (
     <Message align="start">
-      <MessageContent>
+      <MessageContent className="[&>*]:shrink-0">
         <AgentReasoning parts={message.parts} isStreaming={isStreaming} />
         {text && <Markdown>{text}</Markdown>}
         {hasSpec && spec && (

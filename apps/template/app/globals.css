@@ -148,55 +148,6 @@
   }
 }
 
-/* Scroll-aware bottom edge fade for the agent MessageScroller viewport (shadcn scroll-fade). */
-@property --scroll-fade-b {
-  syntax: "<length-percentage>";
-  inherits: false;
-  initial-value: 0px;
-}
-@property --scroll-fade-mask {
-  syntax: "*";
-  inherits: false;
-}
-
-@theme inline {
-  @keyframes scroll-fade-reveal-b {
-    from {
-      --scroll-fade-b: var(--scroll-fade-b-size, min(12%, calc(var(--spacing) * 10)));
-    }
-    to {
-      --scroll-fade-b: 0px;
-    }
-  }
-}
-
-@utility scroll-fade-b {
-  --_scroll-fade-size-b: var(--scroll-fade-b-size, min(12%, calc(var(--spacing) * 10)));
-  --scroll-fade-mask: linear-gradient(
-    to bottom,
-    #000 0,
-    #000 calc(100% - var(--scroll-fade-b, 0px)),
-    transparent 100%
-  );
-  -webkit-mask-image: var(--scroll-fade-mask);
-  mask-image: var(--scroll-fade-mask);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-
-  @supports (animation-timeline: scroll()) {
-    animation: scroll-fade-reveal-b 1ms ease-in-out;
-    animation-timeline: scroll(self y);
-    animation-range: calc(100% - var(--scroll-fade-reveal, calc(var(--spacing) * 24))) 100%;
-    animation-fill-mode: both;
-  }
-
-  @supports not (animation-timeline: scroll()) {
-    --scroll-fade-b: var(--_scroll-fade-size-b);
-  }
-}
-
 /* Text shimmer for live agent status (shadcn shimmer utility). */
 @property --shimmer-angle {
   syntax: "<angle>";

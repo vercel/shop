@@ -175,9 +175,6 @@ importers:
       '@json-render/react':
         specifier: 0.19.0
         version: 0.19.0(react@19.2.7)(zod@4.4.3)
-      '@shadcn/react':
-        specifier: ^0.2.0
-        version: 0.2.0(@types/react@19.2.17)(react@19.2.7)
       '@shopify/api-codegen-preset':
         specifier: 2.0.1
         version: 2.0.1(@types/node@26.0.1)(crossws@0.4.6(srvx@0.11.18))(typescript@6.0.3)
@@ -4191,17 +4188,6 @@ packages:
 
   '@schummar/icu-type-parser@1.21.5':
     resolution: {integrity: sha512-bXHSaW5jRTmke9Vd0h5P7BtWZG9Znqb8gSDxZnxaGSJnGwPLDPfS+3g0BKzeWqzgZPsIVZkM7m2tbo18cm5HBw==}
-
-  '@shadcn/react@0.2.0':
-    resolution: {integrity: sha512-g/LMtyL0eiHCHkOCelhYf32RC5nTMdtUNag1ZQRhSDCW+jnHxDY1Dajk7P6zJosOg8z2N4wzfKOY5sh54QTDYA==}
-    peerDependencies:
-      '@types/react': '>=19'
-      react: '>=19'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react:
-        optional: true
 
   '@shikijs/core@3.19.0':
     resolution: {integrity: sha512-L7SrRibU7ZoYi1/TrZsJOFAnnHyLTE1SwHG1yNWjZIVCqjOEmCSuK2ZO9thnRbJG6TOkPp+Z963JmpCNw5nzvA==}
@@ -11856,11 +11842,6 @@ snapshots:
   '@rolldown/pluginutils@1.0.1': {}
 
   '@schummar/icu-type-parser@1.21.5': {}
-
-  '@shadcn/react@0.2.0(@types/react@19.2.17)(react@19.2.7)':
-    optionalDependencies:
-      '@types/react': 19.2.17
-      react: 19.2.7
 
   '@shikijs/core@3.19.0':
     dependencies:

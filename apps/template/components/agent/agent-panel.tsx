@@ -4,16 +4,8 @@ import { useEveAgent } from "eve/react";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-import {
-  MessageScroller,
-  MessageScrollerButton,
-  MessageScrollerContent,
-  MessageScrollerItem,
-  MessageScrollerProvider,
-  MessageScrollerViewport,
-} from "@/components/ui/message-scroller";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
 
 import { CartReconciler } from "./cart-reconciler";
@@ -95,6 +87,24 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
   const { data, error, send, session, status } = agent;
   const messages = data.messages;
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef(true);
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Consider "pinned" when within a small threshold of the bottom.
+    pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+  }, []);
+
+  // Keep the latest content in view while streaming, unless the reader scrolled up.
+  const lastMessage = messages[messages.length - 1];
+  const streamSignal = lastMessage ? JSON.stringify(lastMessage.parts).length : 0;
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (el && pinnedRef.current) el.scrollTop = el.scrollHeight;
+  }, [messages.length, streamSignal]);
+
   useEffect(() => {
     writePersistedAgentChat({ version: 2, input, session, events: agent.events });
   }, [input, session, agent.events]);
@@ -105,6 +115,7 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
 
   const handleSend = useCallback(
     (text: string) => {
+      pinnedRef.current = true;
       void send({ message: text });
       setInput("");
     },
@@ -115,28 +126,21 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
     <>
       <CartReconciler messages={messages} />
 
-      <MessageScrollerProvider autoScroll defaultScrollPosition="end">
-        <MessageScroller>
-          <MessageScrollerViewport>
-            <MessageScrollerContent className="p-5">
-              {messages.length === 0 && <p className="text-sm text-foreground">{t("greeting")}</p>}
-              {messages.map((message, index) => (
-                <MessageScrollerItem
-                  key={message.id}
-                  messageId={message.id}
-                  scrollAnchor={message.role === "user"}
-                >
-                  <ChatMessage
-                    message={message}
-                    isStreaming={status === "streaming" && index === messages.length - 1}
-                  />
-                </MessageScrollerItem>
-              ))}
-            </MessageScrollerContent>
-          </MessageScrollerViewport>
-          <MessageScrollerButton />
-        </MessageScroller>
-      </MessageScrollerProvider>
+      <div
+        ref={scrollRef}
+        data-slot="agent-messages"
+        onScroll={handleScroll}
+        className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-5"
+      >
+        {messages.length === 0 && <p className="text-sm text-foreground">{t("greeting")}</p>}
+        {messages.map((message, index) => (
+          <ChatMessage
+            key={message.id}
+            message={message}
+            isStreaming={status === "streaming" && index === messages.length - 1}
+          />
+        ))}
+      </div>
 
       <AgentComposer
         value={input}
@@ -192,12 +196,10 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     };
   }, [open, onOpenChange, triggerRef]);
 
-  useScrollContain(panelRef, open, "[data-slot=message-scroller-viewport]");
+  useScrollContain(panelRef, open, "[data-slot=agent-messages]");
 
   const scrollMessagesToBottom = useCallback(() => {
-    const el = panelRef.current?.querySelector<HTMLElement>(
-      "[data-slot=message-scroller-viewport]",
-    );
+    const el = panelRef.current?.querySelector<HTMLElement>("[data-slot=agent-messages]");
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
 
