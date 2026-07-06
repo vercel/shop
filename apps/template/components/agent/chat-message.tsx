@@ -8,8 +8,8 @@ import { Streamdown } from "streamdown";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 
 import { useEveJsonRenderMessage } from "./eve-json-render";
-import { AgentReasoning } from "./reasoning";
 import { registry } from "./registry";
+import { AgentThinking } from "./thinking";
 
 // Safelist relative paths so navigate_user links (e.g. "/cart") skip the external-link modal.
 const linkSafety = {
@@ -51,7 +51,7 @@ export function ChatMessage({
 
   return (
     <div className="space-y-2.5 text-sm text-foreground">
-      <AgentReasoning parts={message.parts} isStreaming={isStreaming} />
+      <AgentThinking active={isStreaming && !text} />
       {text && <Markdown>{text}</Markdown>}
       {/* Render generative cards only once the turn settles — mid-stream the spec
           fence is partial and compiles to a wrong/half card (the "card flash"). */}
