@@ -192,7 +192,7 @@ export function AgentPanel({ open, onOpenChange, triggerRef }: AgentPanelProps) 
     };
   }, [open, onOpenChange, triggerRef]);
 
-  useScrollContain(panelRef, open);
+  useScrollContain(panelRef, open, "[data-slot=message-scroller-viewport]");
 
   const scrollMessagesToBottom = useCallback(() => {
     const el = panelRef.current?.querySelector<HTMLElement>(
