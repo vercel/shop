@@ -192,6 +192,7 @@ If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" abov
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
 - Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-shop`
+- Keeping the storefront current with template changes: `/vercel-shop:update-shop`
 
 These are agent-side conveniences. The template runs and deploys without them.
 

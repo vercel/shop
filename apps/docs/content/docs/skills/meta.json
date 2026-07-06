@@ -3,6 +3,7 @@
   "pages": [
     "index",
     "build-shop",
+    "update-shop",
     "shopify-graphql-reference",
     "enable-analytics",
     "enable-i18n",
