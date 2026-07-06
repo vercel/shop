@@ -1,4 +1,3 @@
-import "server-only";
 import {
   createStorefrontClient,
   type GraphQLFormattedError,
@@ -68,6 +67,7 @@ interface StorefrontResponse<T> {
   errors?: GraphQLFormattedError[];
 }
 
+// No `server-only` guard: the Storefront token is public, so the eve agent runtime can import this client directly.
 export const storefront = {
   async request<T>(
     query: string,

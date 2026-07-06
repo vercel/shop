@@ -49,11 +49,13 @@ export function MobileMenu({ items }: { items: MenuItem[] }) {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <button type="button" className="md:hidden -ml-2 p-2" aria-label={t("menu")}>
-          <Menu className="size-5" />
-        </button>
-      </SheetTrigger>
+      <SheetTrigger
+        render={
+          <button type="button" className="md:hidden -ml-2 p-2" aria-label={t("menu")}>
+            <Menu className="size-5" />
+          </button>
+        }
+      />
       <SheetContent side="left" className="gap-0">
         <div className="flex h-16 items-center px-5">
           <SheetTitle className="text-lg font-semibold">{t("menu")}</SheetTitle>
@@ -100,7 +102,7 @@ function MobileMenuList({
   }
 
   return (
-    <Accordion type="multiple" className="w-full">
+    <Accordion multiple className="w-full">
       {items.map((item) =>
         item.items.length > 0 ? (
           <AccordionItem key={item.id} value={item.id}>

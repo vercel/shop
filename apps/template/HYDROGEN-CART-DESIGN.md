@@ -57,23 +57,23 @@ revalidation: updateTag("cart") → new promise ───▶ store.receive (guar
 ### Reads: suspend at the leaves, never at the provider
 
 The server layout starts `getCart()` without awaiting and passes the promise to
-the provider. The store ingests it. Leaves that render cart *data* gate on a
+the provider. The store ingests it. Leaves that render cart _data_ gate on a
 thenable that settles when the store has hydrated:
 
 ```tsx
 function useCartData<S>(selector: (s: CartState) => S): S {
   const store = useCartStore(); // context; stable per provider instance
-  use(getReady(store));         // suspends this leaf only; no-op once settled
-  return useCart(selector);     // uSES; selector runs post-gate only
+  use(getReady(store)); // suspends this leaf only; no-op once settled
+  return useCart(selector); // uSES; selector runs post-gate only
 }
 ```
 
 - `use()` before the selector is deliberate: selectors never execute against
   the unhydrated store, so `s.data` is non-nullable by convention. A selector
   above the gate would run on pre-hydration renders and a non-null-safe one
-  (`s.data.lines`) throws a TypeError that *beats* the suspension — error
+  (`s.data.lines`) throws a TypeError that _beats_ the suspension — error
   boundary instead of fallback.
-- Components that render cart *status* (mutation spinner, disabled checkout
+- Components that render cart _status_ (mutation spinner, disabled checkout
   button) use the plain ungated `useCart` and read `loading`/`pending`/`error`
   — those fields exist in every state shape, and these components must render
   before/during resolution by definition.
@@ -90,15 +90,15 @@ It cannot deliver the initial data well in streaming SSR:
    never re-render an in-progress server render, so the HTML always contains
    the loading state regardless of fetch timing.
 2. Hydration must replay that same snapshot (mismatch avoidance), so the first
-   client commit is the skeleton *even if the data already arrived*.
+   client commit is the skeleton _even if the data already arrived_.
 3. The flip to data is a synchronous, non-interruptible external-store flush of
    every subscriber (badge, drawer, lines, summary, checkout) — uSES updates
    can't be time-sliced or downgraded to transitions.
 
 Net: two commits minimum, badge pop-in, CLS, fetch off the streaming path. With
-the gate, the leaf suspends *during SSR*, the promise resolves server-side, the
+the gate, the leaf suspends _during SSR_, the promise resolves server-side, the
 resolved badge streams into first paint, and the client hydrates once directly
-into final state. (uSES is still fine *through* a suspension retry — the retry
+into final state. (uSES is still fine _through_ a suspension retry — the retry
 re-executes the component and re-reads the snapshot. The limitation is
 narrowly: a subscription event can't re-render an in-progress SSR pass.)
 
@@ -107,7 +107,7 @@ narrowly: a subscription event can't re-render an in-progress SSR pass.)
 Whether Shopify ships `store.ready` or we polyfill it, the contract is:
 
 1. **Stable identity** — `use()` keys on the object; a fresh thenable per
-   render/snapshot re-suspends forever. Belongs on the *store* (structurally
+   render/snapshot re-suspends forever. Belongs on the _store_ (structurally
    stable), not in state (must be threaded by reference through every immutable
    state copy — one refactor away from breakage).
 2. **Settles only after the internal state write** — the first unsuspended
@@ -125,7 +125,7 @@ Whether Shopify ships `store.ready` or we polyfill it, the contract is:
 
 Userland polyfill (works today against `subscribe` — makes `ready` an
 ergonomics ask, not a blocker; settle-after-write is guaranteed by construction
-because it resolves *from* the state-change notification):
+because it resolves _from_ the state-change notification):
 
 ```ts
 const readyCache = new WeakMap<CartStore, Promise<void>>();
@@ -228,7 +228,7 @@ Hard requirements (cannot be polyfilled):
 3. **Expose the internal "adopt authoritative cart data" path** as a public
    method (`store.receive(cart)`). It already exists internally for their own
    `/api/cart` responses; the ask is an escape hatch with zero policy —
-   frameworks own *when* to call it. This carries our whole mutation
+   frameworks own _when_ to call it. This carries our whole mutation
    reconciliation story.
 
 Ergonomics (polyfillable, but ships subtly-different bugs in every framework

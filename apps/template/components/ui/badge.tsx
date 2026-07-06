@@ -1,6 +1,7 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
-import type * as React from "react";
+import { isValidElement, type ReactElement } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -23,17 +24,28 @@ const badgeVariants = cva(
   },
 );
 
-function Badge({
-  className,
-  variant,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? SlotPrimitive.Slot : "span";
+interface BadgeProps extends useRender.ComponentProps<"span">, VariantProps<typeof badgeVariants> {
+  /** @deprecated Pass `render={<El />}` instead. Kept for back-compat with Radix-era call sites. */
+  asChild?: boolean;
+}
 
-  return (
-    <Comp data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />
-  );
+function Badge({ asChild = false, className, render, variant, ...props }: BadgeProps) {
+  const asChildRender =
+    !render && asChild && isValidElement(props.children)
+      ? (props.children as ReactElement)
+      : undefined;
+
+  return useRender({
+    defaultTagName: "span",
+    render: render ?? asChildRender,
+    state: { slot: "badge" },
+    props: mergeProps<"span">(
+      {
+        className: cn(badgeVariants({ variant }), className),
+      },
+      asChildRender ? { ...props, children: undefined } : props,
+    ),
+  });
 }
 
 export { Badge, badgeVariants };

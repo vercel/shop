@@ -51,12 +51,12 @@
   "agent": {
     "assistantLabel": "Shopping assistant",
     "clearChat": "Clear chat",
-    "copy": "Copy",
     "greeting": "Hi, how can I help?",
+    "inputPlaceholder": "Ask anything…",
     "minimizeAssistant": "Minimize assistant",
-    "name": "Agent",
+    "name": "Shop Assistant",
     "openAssistant": "Open shopping assistant",
-    "retry": "Retry",
+    "thinking": "Thinking…",
     "title": ""
   },
   "cart": {

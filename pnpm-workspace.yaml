@@ -6,6 +6,7 @@ minimumReleaseAgeExclude:
   - "@types/react"
   - "@vercel/*"
   - ai
+  - eve
   - next
   - react
   - react-dom
