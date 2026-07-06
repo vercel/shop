@@ -42,7 +42,11 @@ export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) 
   };
 
   return (
-    <Select value={currentSort} onValueChange={handleSortChange} disabled={isPending}>
+    <Select
+      value={currentSort}
+      onValueChange={(value) => handleSortChange(value ?? "best-matches")}
+      disabled={isPending}
+    >
       <SelectTrigger className="border-0 shadow-none bg-transparent px-0">
         <span>{tSearch("sortBy")}</span>
       </SelectTrigger>

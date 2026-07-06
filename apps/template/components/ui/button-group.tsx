@@ -1,5 +1,8 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
+import { isValidElement, type ReactElement } from "react";
+import type * as React from "react";
 
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -36,24 +39,30 @@ function ButtonGroup({
   );
 }
 
-function ButtonGroupText({
-  className,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"div"> & {
+interface ButtonGroupTextProps extends useRender.ComponentProps<"div"> {
+  /** @deprecated Pass `render={<El />}` instead. Kept for back-compat with Radix-era call sites. */
   asChild?: boolean;
-}) {
-  const Comp = asChild ? SlotPrimitive.Slot : "div";
+}
 
-  return (
-    <Comp
-      className={cn(
-        "bg-muted flex items-center gap-2 rounded-md border px-5 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
-        className,
-      )}
-      {...props}
-    />
-  );
+function ButtonGroupText({ asChild = false, className, render, ...props }: ButtonGroupTextProps) {
+  const asChildRender =
+    !render && asChild && isValidElement(props.children)
+      ? (props.children as ReactElement)
+      : undefined;
+
+  return useRender({
+    defaultTagName: "div",
+    render: render ?? asChildRender,
+    props: mergeProps<"div">(
+      {
+        className: cn(
+          "bg-muted flex items-center gap-2 rounded-md border px-5 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+          className,
+        ),
+      },
+      asChildRender ? { ...props, children: undefined } : props,
+    ),
+  });
 }
 
 function ButtonGroupSeparator({

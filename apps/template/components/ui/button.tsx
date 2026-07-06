@@ -1,6 +1,7 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
-import type * as React from "react";
+import { isValidElement, type ReactElement } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -33,25 +34,29 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? SlotPrimitive.Slot : "button";
+interface ButtonProps
+  extends useRender.ComponentProps<"button">, VariantProps<typeof buttonVariants> {
+  /** @deprecated Pass `render={<El />}` instead. Kept for back-compat with Radix-era call sites. */
+  asChild?: boolean;
+}
 
-  return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+function Button({ asChild = false, className, render, size, variant, ...props }: ButtonProps) {
+  const asChildRender =
+    !render && asChild && isValidElement(props.children)
+      ? (props.children as ReactElement)
+      : undefined;
+
+  return useRender({
+    defaultTagName: "button",
+    render: render ?? asChildRender,
+    state: { slot: "button" },
+    props: mergeProps<"button">(
+      {
+        className: cn(buttonVariants({ variant, size, className })),
+      },
+      asChildRender ? { ...props, children: undefined } : props,
+    ),
+  });
 }
 
 export { Button, buttonVariants };

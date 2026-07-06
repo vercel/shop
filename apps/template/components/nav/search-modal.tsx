@@ -1,10 +1,10 @@
 "use client";
 
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Dialog as DialogPrimitive } from "radix-ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Price } from "@/components/product/price";
@@ -28,15 +28,17 @@ function SearchTrigger() {
   const t = useTranslations("nav");
 
   return (
-    <DialogTrigger asChild>
-      <button
-        type="button"
-        className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
-      >
-        <Search className="size-5" />
-        <span className="sr-only">{t("search")}</span>
-      </button>
-    </DialogTrigger>
+    <DialogTrigger
+      render={
+        <button
+          type="button"
+          className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
+        >
+          <Search className="size-5" />
+          <span className="sr-only">{t("search")}</span>
+        </button>
+      }
+    />
   );
 }
 
@@ -110,21 +112,18 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
 
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-60 bg-black/30 backdrop-blur-sm" />
-      <DialogPrimitive.Content
+      <DialogPrimitive.Backdrop className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 z-60 bg-black/30 backdrop-blur-sm" />
+      <DialogPrimitive.Popup
         aria-describedby={undefined}
         className="fixed inset-0 z-60 flex justify-center pt-[15vh] px-4 outline-none"
+        initialFocus={inputRef}
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
-        }}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-          requestAnimationFrame(() => inputRef.current?.focus());
         }}
       >
         <div className="w-full max-w-xl h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
-          <div className="bg-background rounded-xl shadow-lg overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200">
+          <div className="bg-background rounded-xl shadow-lg overflow-hidden duration-200">
             {/* Search input */}
             <form onSubmit={handleSubmit} className="flex items-center gap-3 px-4 py-3">
               <Search className="size-4 shrink-0 text-foreground/40" />
@@ -237,7 +236,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
             )}
           </div>
         </div>
-      </DialogPrimitive.Content>
+      </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>
   );
 }

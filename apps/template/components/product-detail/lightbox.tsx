@@ -1,8 +1,8 @@
 "use client";
 
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
-import { Dialog as DialogPrimitive } from "radix-ui";
 import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
@@ -23,9 +23,9 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
 
       <DialogPrimitive.Root open={activeItem !== null} onOpenChange={(open) => !open && close()}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-60 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-          <DialogPrimitive.Content
-            className="fixed inset-0 z-60 flex items-center justify-center p-10 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
+          <DialogPrimitive.Backdrop className="fixed inset-0 z-60 bg-black/30 backdrop-blur-sm data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0" />
+          <DialogPrimitive.Popup
+            className="fixed inset-0 z-60 flex items-center justify-center p-10 outline-none data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0"
             aria-describedby={undefined}
             onClick={(e) => {
               if (e.target === e.currentTarget) close();
@@ -69,7 +69,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
                 />
               </div>
             )}
-          </DialogPrimitive.Content>
+          </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
     </LightboxContext.Provider>

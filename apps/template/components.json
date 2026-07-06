@@ -10,7 +10,7 @@
   "iconLibrary": "lucide",
   "registries": {},
   "rsc": true,
-  "style": "new-york",
+  "style": "base-nova",
   "tailwind": {
     "baseColor": "neutral",
     "config": "",

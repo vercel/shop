@@ -22,23 +22,25 @@ export function FilterSidebarSheet({
   return (
     <Sheet>
       {trigger ? (
-        <SheetTrigger asChild>{trigger}</SheetTrigger>
+        <SheetTrigger render={trigger as React.ReactElement} />
       ) : (
-        <SheetTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 gap-2 border border-input bg-transparent shadow-xs hover:bg-accent"
-          >
-            <SlidersHorizontalIcon className="size-4" />
-            <span>{label}</span>
-            {activeCount !== undefined && activeCount > 0 && (
-              <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-                {activeCount}
-              </span>
-            )}
-          </Button>
-        </SheetTrigger>
+        <SheetTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 gap-2 border border-input bg-transparent shadow-xs hover:bg-accent"
+            >
+              <SlidersHorizontalIcon className="size-4" />
+              <span>{label}</span>
+              {activeCount !== undefined && activeCount > 0 && (
+                <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
+                  {activeCount}
+                </span>
+              )}
+            </Button>
+          }
+        />
       )}
       <SheetContent
         side="left"
