@@ -6,7 +6,6 @@ import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import { Message, MessageContent } from "@/components/ui/message";
 
 import { useEveJsonRenderMessage } from "./eve-json-render";
 import { AgentReasoning } from "./reasoning";
@@ -20,10 +19,7 @@ const linkSafety = {
 
 const Markdown = memo(
   ({ children }: { children: string }) => (
-    <Streamdown
-      linkSafety={linkSafety}
-      className="size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
-    >
+    <Streamdown linkSafety={linkSafety} className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
       {children}
     </Streamdown>
   ),
@@ -43,29 +39,27 @@ export function ChatMessage({
   if (message.role === "user") {
     if (!text) return null;
     return (
-      <Message align="end">
-        <MessageContent>
-          <Bubble variant="default">
-            <BubbleContent>
-              <Markdown>{text}</Markdown>
-            </BubbleContent>
-          </Bubble>
-        </MessageContent>
-      </Message>
+      <div className="flex justify-end">
+        <Bubble variant="default" className="max-w-[85%]">
+          <BubbleContent className="rounded-2xl px-3.5">
+            <Markdown>{text}</Markdown>
+          </BubbleContent>
+        </Bubble>
+      </div>
     );
   }
 
   return (
-    <Message align="start">
-      <MessageContent className="[&>*]:shrink-0">
-        <AgentReasoning parts={message.parts} isStreaming={isStreaming} />
-        {text && <Markdown>{text}</Markdown>}
-        {hasSpec && spec && (
-          <JSONUIProvider registry={registry}>
-            <Renderer spec={spec} registry={registry} />
-          </JSONUIProvider>
-        )}
-      </MessageContent>
-    </Message>
+    <div className="space-y-2.5 text-sm text-foreground">
+      <AgentReasoning parts={message.parts} isStreaming={isStreaming} />
+      {text && <Markdown>{text}</Markdown>}
+      {/* Render generative cards only once the turn settles — mid-stream the spec
+          fence is partial and compiles to a wrong/half card (the "card flash"). */}
+      {!isStreaming && hasSpec && spec && (
+        <JSONUIProvider registry={registry}>
+          <Renderer spec={spec} registry={registry} />
+        </JSONUIProvider>
+      )}
+    </div>
   );
 }

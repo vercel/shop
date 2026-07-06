@@ -4,7 +4,7 @@ import { useEveAgent } from "eve/react";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
 
@@ -88,6 +88,7 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
   const messages = data.messages;
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
 
   const handleScroll = useCallback(() => {
@@ -97,13 +98,19 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
     pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48;
   }, []);
 
-  // Keep the latest content in view while streaming, unless the reader scrolled up.
-  const lastMessage = messages[messages.length - 1];
-  const streamSignal = lastMessage ? JSON.stringify(lastMessage.parts).length : 0;
-  useLayoutEffect(() => {
-    const el = scrollRef.current;
-    if (el && pinnedRef.current) el.scrollTop = el.scrollHeight;
-  }, [messages.length, streamSignal]);
+  // Keep the latest content in view as it grows — streaming text, a late-rendered
+  // card, an image loading in — unless the reader scrolled up. A ResizeObserver on
+  // the content is the one signal that covers all three; React deps miss the last two.
+  useEffect(() => {
+    const scroller = scrollRef.current;
+    const content = contentRef.current;
+    if (!scroller || !content) return;
+    const observer = new ResizeObserver(() => {
+      if (pinnedRef.current) scroller.scrollTop = scroller.scrollHeight;
+    });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     writePersistedAgentChat({ version: 2, input, session, events: agent.events });
@@ -130,16 +137,26 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
         ref={scrollRef}
         data-slot="agent-messages"
         onScroll={handleScroll}
-        className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-5"
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
       >
-        {messages.length === 0 && <p className="text-sm text-foreground">{t("greeting")}</p>}
-        {messages.map((message, index) => (
-          <ChatMessage
-            key={message.id}
-            message={message}
-            isStreaming={status === "streaming" && index === messages.length - 1}
-          />
-        ))}
+        {/* justify-end bottom-anchors short chats to the composer; shrink-0 keeps
+            cards from being squeezed when the column overflows. */}
+        <div
+          ref={contentRef}
+          className="flex min-h-full flex-col justify-end gap-6 p-5 [&>*]:shrink-0"
+        >
+          {messages.length === 0 ? (
+            <p className="text-sm text-foreground">{t("greeting")}</p>
+          ) : (
+            messages.map((message, index) => (
+              <ChatMessage
+                key={message.id}
+                message={message}
+                isStreaming={status === "streaming" && index === messages.length - 1}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       <AgentComposer

@@ -47,13 +47,13 @@ Tools import Next-free fetch cores from `lib/shopify/fetch.ts` rather than the `
 
 ### Cart management
 
-| Tool                          | Purpose                                             |
-| ----------------------------- | --------------------------------------------------- |
-| `add_to_cart`                 | Add a variant to cart (requires Shopify variant ID) |
-| `get_cart`                    | View cart contents, line items, and costs           |
-| `update_cart_item_quantity`   | Change quantity of a line item                      |
-| `remove_from_cart`            | Remove items by line ID                             |
-| `add_cart_note`               | Delivery notes, gift messages, special instructions |
+| Tool                        | Purpose                                             |
+| --------------------------- | --------------------------------------------------- |
+| `add_to_cart`               | Add a variant to cart (requires Shopify variant ID) |
+| `get_cart`                  | View cart contents, line items, and costs           |
+| `update_cart_item_quantity` | Change quantity of a line item                      |
+| `remove_from_cart`          | Remove items by line ID                             |
+| `add_cart_note`             | Delivery notes, gift messages, special instructions |
 
 ### Navigation
 
@@ -83,8 +83,8 @@ The agent panel is toggled from a button in the bottom bar. The panel includes:
 
 - Header controls to clear the conversation or minimize the panel
 - Message display with collapsible chain-of-thought (tool calls auto-collapse after completion)
-- Generative UI rendering via `useEveJsonRenderMessage()` and a component registry
-- Copy message action
+- Generative UI rendering via `useEveJsonRenderMessage()` and a component registry (cards render once the turn settles, so a mid-stream partial spec never flashes a wrong card)
+- A fixed-height panel with a bottom-anchored message column: short chats hug the composer, long chats scroll, and the view stays pinned to the latest content as it streams unless the reader scrolls up
 - The eve session cursor and event stream persisted to localStorage (`template-agent-chat:v2`), so the durable conversation resumes on reload until cleared
 - Click-outside and Escape to minimize
 
@@ -100,16 +100,16 @@ If the routes sit behind an existing WAF (Cloudflare, etc.), prefer that.
 
 ## Key files
 
-| File                                        | Purpose                                                          |
-| ------------------------------------------- | ---------------------------------------------------------------- |
-| `agent/agent.ts`                            | Model + runtime config (`defineAgent`)                           |
-| `agent/instructions.md`                     | System prompt + json-render rendering rules                      |
-| `agent/channels/eve.ts`                     | HTTP channel auth; exposes cart ID + locale to tools             |
-| `agent/tools/`                              | One file per tool (`defineTool`), snake_case names               |
-| `agent/lib/session.ts`                      | Reads locale / cart ID from session context                     |
-| `lib/shopify/fetch.ts`                      | Next-free fetch cores shared by cache wrappers and agent tools   |
-| `components/agent/agent-panel.tsx`          | Chat panel UI (`useEveAgent`)                                    |
-| `components/agent/eve-json-render.ts`       | Client bridge: reconstructs json-render specs from eve messages  |
-| `components/agent/registry.tsx`             | Generative UI component registry                                 |
+| File                                  | Purpose                                                         |
+| ------------------------------------- | --------------------------------------------------------------- |
+| `agent/agent.ts`                      | Model + runtime config (`defineAgent`)                          |
+| `agent/instructions.md`               | System prompt + json-render rendering rules                     |
+| `agent/channels/eve.ts`               | HTTP channel auth; exposes cart ID + locale to tools            |
+| `agent/tools/`                        | One file per tool (`defineTool`), snake_case names              |
+| `agent/lib/session.ts`                | Reads locale / cart ID from session context                     |
+| `lib/shopify/fetch.ts`                | Next-free fetch cores shared by cache wrappers and agent tools  |
+| `components/agent/agent-panel.tsx`    | Chat panel UI (`useEveAgent`)                                   |
+| `components/agent/eve-json-render.ts` | Client bridge: reconstructs json-render specs from eve messages |
+| `components/agent/registry.tsx`       | Generative UI component registry                                |
 
 Auxiliary components (`client.tsx`, `agent-button.tsx`, `cart-reconciler.tsx`) and the json-render schemas in `lib/agent/index.ts` live next to these. Mounting is configured by `withEve()` in `next.config.ts`.

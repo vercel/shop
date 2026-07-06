@@ -1,7 +1,7 @@
 "use client";
 
 import type { EveMessage } from "eve/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Marker, MarkerContent } from "@/components/ui/marker";
@@ -70,19 +70,22 @@ export function AgentReasoning({
   );
 
   const [isOpen, setIsOpen] = useState(hasActiveWork);
-  const [hasAutoClosed, setHasAutoClosed] = useState(false);
+  const wasActiveRef = useRef(hasActiveWork);
 
   useEffect(() => {
     if (hasActiveWork) {
+      wasActiveRef.current = true;
       setIsOpen(true);
-    } else if (chainParts.length > 0 && isOpen && !hasAutoClosed) {
-      const timer = setTimeout(() => {
-        setIsOpen(false);
-        setHasAutoClosed(true);
-      }, AUTO_CLOSE_DELAY);
+      return;
+    }
+    // Auto-collapse once, only for a chain we watched finish this session — never a
+    // restored/complete block, and never fighting a manual expand.
+    if (wasActiveRef.current) {
+      wasActiveRef.current = false;
+      const timer = setTimeout(() => setIsOpen(false), AUTO_CLOSE_DELAY);
       return () => clearTimeout(timer);
     }
-  }, [hasActiveWork, chainParts.length, isOpen, hasAutoClosed]);
+  }, [hasActiveWork]);
 
   if (chainParts.length === 0) return null;
 
