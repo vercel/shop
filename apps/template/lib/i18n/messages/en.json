@@ -52,8 +52,9 @@
     "assistantLabel": "Shopping assistant",
     "clearChat": "Clear chat",
     "greeting": "Hi, how can I help?",
+    "inputPlaceholder": "Ask anything…",
     "minimizeAssistant": "Minimize assistant",
-    "name": "Agent",
+    "name": "Shop Assistant",
     "openAssistant": "Open shopping assistant",
     "title": ""
   },

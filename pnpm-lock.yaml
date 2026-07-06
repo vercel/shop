@@ -265,9 +265,6 @@ importers:
       typescript:
         specifier: 6.0.3
         version: 6.0.3
-      use-stick-to-bottom:
-        specifier: 1.1.6
-        version: 1.1.6(react@19.2.7)
       zod:
         specifier: 4.4.3
         version: 4.4.3
