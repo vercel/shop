@@ -106,7 +106,7 @@ function OrdersSkeleton() {
   return (
     <div className="grid gap-3">
       {Array.from({ length: 4 }).map((_, index) => (
-        <Skeleton key={index} className="h-[4.5rem] w-full rounded-lg" />
+        <Skeleton key={index} className="h-18 w-full rounded-lg" />
       ))}
     </div>
   );
