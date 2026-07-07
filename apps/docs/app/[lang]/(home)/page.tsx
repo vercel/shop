@@ -75,9 +75,7 @@ const HomePage = () => (
             <CommandPromptContent value="humans">
               npx create-vercel-shop@latest
             </CommandPromptContent>
-            <CommandPromptContent value="agents">
-              npx plugins add vercel/shop
-            </CommandPromptContent>
+            <CommandPromptContent value="agents">npx plugins add vercel/shop</CommandPromptContent>
           </CommandPromptViewport>
           <CommandPromptCopy />
         </CommandPromptSurface>

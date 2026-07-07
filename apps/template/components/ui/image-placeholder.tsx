@@ -17,7 +17,7 @@ function ImagePlaceholder({ className, iconClassName, ...props }: ImagePlacehold
       <ImageIcon
         aria-hidden
         strokeWidth={1.5}
-        className={cn("h-auto w-1/3 max-w-[10rem] text-accent", iconClassName)}
+        className={cn("h-auto w-1/3 max-w-40 text-accent", iconClassName)}
       />
     </div>
   );

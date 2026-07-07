@@ -64,10 +64,6 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
-export const instant = true;
-
-export const prefetch = "allow-runtime";
-
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 

@@ -118,7 +118,7 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
               >
                 <span className={cn(!d.applicable && "line-through")}>{d.code}</span>
                 {!d.applicable ? (
-                  <span className="text-[10px] uppercase tracking-wide">
+                  <span className="text-xs uppercase tracking-wide">
                     {t("discountNotApplicable")}
                   </span>
                 ) : null}

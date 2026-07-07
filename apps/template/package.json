@@ -21,24 +21,24 @@
     "@shopify/hydrogen": "0.0.0-preview-0c3bff8-20260618001533",
     "@tailwindcss/postcss": "4.3.2",
     "@tailwindcss/typography": "0.5.20",
-    "@types/node": "26.0.1",
+    "@types/node": "26.1.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
-    "ai": "7.0.9",
+    "ai": "7.0.16",
     "babel-plugin-react-compiler": "1.0.0",
-    "better-auth": "1.6.22",
+    "better-auth": "1.6.23",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "eve": "0.18.2",
-    "lucide-react": "1.21.0",
+    "eve": "0.20.0",
+    "lucide-react": "1.23.0",
     "nanoid": "5.1.16",
-    "next": "16.3.0-canary.72",
-    "next-intl": "4.13.0",
+    "next": "16.3.0-canary.79",
+    "next-intl": "4.13.1",
     "oxfmt": "0.56.0",
     "oxlint": "1.71.0",
-    "postcss": "8.5.15",
+    "postcss": "8.5.16",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "server-only": "0.0.1",
@@ -50,6 +50,6 @@
     "zod": "4.4.3"
   },
   "engines": {
-    "node": ">=24"
+    "node": "24"
   }
 }
