@@ -1,6 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
+import { fetchProductHandlesByIds } from "@/lib/shopify/fetch";
 import { type McpMoney, searchCatalog } from "@/lib/shopify/storefront-mcp";
 
 import { getLocale } from "../lib/session";
@@ -15,9 +16,9 @@ export default defineTool({
   description: `Search the catalog using Shopify's native Storefront MCP semantic search.
 Experimental alternative to search_products: it calls Shopify's hosted agentic search, which
 honors merchant-configured relevance and accepts a natural-language buyer "intent" hint.
-Returns matching products with titles, prices, availability, and images.
-Note: results carry a Shopify product GID (productId), not a storefront handle — use search_products
-when you need a handle for navigate_user or get_product_details.`,
+Returns matching products with titles, prices, availability, images, a Shopify product GID
+(productId), and the storefront handle — so results feed navigate_user, get_product_details,
+and add_to_cart directly.`,
   inputSchema: z.object({
     query: z.string().describe("Search query (e.g. 'blue jacket', 'wireless speaker')"),
     intent: z
@@ -35,12 +36,16 @@ when you need a handle for navigate_user or get_product_details.`,
         query,
       });
 
+      // Resolve GID -> storefront handle so results feed the handle-based tools.
+      const handles = await fetchProductHandlesByIds(products.map((p) => p.id));
+
       return {
         success: true,
         total: products.length,
         hasMore: pagination?.has_next_page ?? false,
         products: products.map((p) => ({
           available: (p.variants ?? []).some((v) => v.availability?.available),
+          handle: handles.get(p.id) ?? null,
           image: p.media?.[0]?.url ?? p.variants?.[0]?.media?.[0]?.url ?? null,
           price: formatMoney(p.price_range?.min),
           productId: p.id,

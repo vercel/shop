@@ -106,3 +106,58 @@ export async function searchCatalog(params: {
     catalog: { context, pagination: { limit }, query },
   });
 }
+
+// Note: get_product_details encodes money differently from search_catalog — major-unit
+// strings with a sibling `currency`, rather than minor-unit `McpMoney` objects.
+export interface McpProductDetails {
+  description?: string;
+  image_url?: string | null;
+  images?: Array<{ alt_text?: string; url?: string }>;
+  options?: Array<{ name?: string; values?: string[] }>;
+  price_range?: { currency?: string; max?: string; min?: string };
+  product_id: string;
+  selectedOrFirstAvailableVariant?: {
+    available?: boolean;
+    currency?: string;
+    price?: string;
+    title?: string;
+    variant_id?: string;
+  };
+  title: string;
+  total_variants?: number;
+}
+
+export async function getCatalogProduct(params: {
+  locale?: string;
+  options?: Record<string, string>;
+  productId: string;
+}): Promise<McpProductDetails | undefined> {
+  const { locale = defaultLocale, options, productId } = params;
+
+  const result = await callStorefrontMcp<{ product?: McpProductDetails }>("get_product_details", {
+    country: getCountryCode(locale),
+    language: getLanguageCode(locale),
+    product_id: productId,
+    ...(options ? { options } : {}),
+  });
+  return result.product;
+}
+
+export interface McpPolicyAnswer {
+  answer?: string;
+  question?: string;
+  sources?: Array<{ title?: string; url?: string }>;
+}
+
+export async function searchShopPoliciesAndFaqs(params: {
+  context?: string;
+  query: string;
+}): Promise<McpPolicyAnswer[]> {
+  const { context, query } = params;
+
+  const result = await callStorefrontMcp<McpPolicyAnswer | McpPolicyAnswer[]>(
+    "search_shop_policies_and_faqs",
+    { query, ...(context ? { context } : {}) },
+  );
+  return Array.isArray(result) ? result : [result];
+}
