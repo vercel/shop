@@ -143,14 +143,18 @@ export async function getCart(cartId?: string): Promise<Cart | undefined> {
  */
 export async function createCartWithoutCookie(
   locale: string = defaultLocale,
+  lines?: CartLineInput[],
 ): Promise<CartMutationResult> {
-  const result = await createCartCore(locale);
+  const result = await createCartCore(locale, lines);
   invalidateCartCache();
   return result;
 }
 
-export async function createCart(locale: string = defaultLocale): Promise<CartMutationResult> {
-  const result = await createCartWithoutCookie(locale);
+export async function createCart(
+  locale: string = defaultLocale,
+  lines?: CartLineInput[],
+): Promise<CartMutationResult> {
+  const result = await createCartWithoutCookie(locale, lines);
 
   if (result.cart.id) {
     await setCartIdCookie(result.cart.id);
@@ -164,11 +168,15 @@ export async function addToCart(
   cartId?: string,
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {
-  let resolvedCartId = cartId ?? (await getCartIdFromCookie());
+  const resolvedCartId = cartId ?? (await getCartIdFromCookie());
+
+  // First add (no cart yet): create the cart *with* the lines in a single
+  // round-trip. Creating an empty cart and adding lines separately means the
+  // httpOnly cart-id cookie only commits after the second request, widening the
+  // window where a reload drops the cart.
   if (!resolvedCartId) {
-    resolvedCartId = (await createCart(locale)).cart.id;
+    return createCart(locale, lines);
   }
-  if (!resolvedCartId) throw new Error("Cart ID not found");
 
   const result = await addToCartCore(lines, resolvedCartId);
   invalidateCartCache();

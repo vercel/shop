@@ -281,7 +281,61 @@ export function CartProvider({
 
   const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(new Map());
 
-  /** Debounced — accumulates rapid clicks into a single request per variant. */
+  // Flushes buffered adds: one `addToCartAction` per variant, resolving each
+  // caller's promise. Clears the timer so the next click starts a fresh burst.
+  const flushPendingAddToCart = () => {
+    const debounce = addToCartDebounceRef.current;
+    debounce.timer = null;
+
+    const items = new Map(debounce.pending);
+    debounce.pending.clear();
+    pendingProductInfoRef.current.clear();
+
+    if (items.size === 0) return;
+
+    const flushedResolvers = new Map<string, Array<(success: boolean) => void>>();
+    for (const [vid] of items) {
+      flushedResolvers.set(vid, addToCartResolversRef.current.get(vid) ?? []);
+      addToCartResolversRef.current.delete(vid);
+    }
+
+    for (const [vid, qty] of items) {
+      startTransition(async () => {
+        let success = false;
+
+        try {
+          const result = await addToCartAction(vid, qty);
+          success = result.success;
+
+          if (result.success && result.cart) {
+            setCartInternal(result.cart);
+            setLastWarnings(result.warnings ?? []);
+          }
+        } catch (error) {
+          console.error("Failed to add item to cart:", error);
+        } finally {
+          const resolvers = flushedResolvers.get(vid) ?? [];
+          for (const resolve of resolvers) {
+            resolve(success);
+          }
+        }
+
+        // Only clear pending state if nothing was queued while in-flight.
+        if (debounce.pending.size === 0) {
+          setIsAddingToCart(false);
+          setPendingQuantity(0);
+          setPendingLines([]);
+        }
+      });
+    }
+  };
+
+  /**
+   * Leading edge: the first add fires immediately so the cart and its httpOnly id
+   * cookie are created without waiting out the debounce — a reload inside that
+   * window would otherwise drop the item. Rapid follow-up clicks coalesce into a
+   * single trailing flush.
+   */
   const addToCartOptimistic = (
     variantId: string,
     quantity: number,
@@ -318,55 +372,12 @@ export function CartProvider({
       setOverlayOpen(true);
     }
 
-    if (debounce.timer !== null) {
-      clearTimeout(debounce.timer);
+    if (debounce.timer === null) {
+      // No burst in flight — fire now, then hold a window open to coalesce follow-ups.
+      flushPendingAddToCart();
+      debounce.timer = setTimeout(flushPendingAddToCart, DEBOUNCE_MS);
     }
-
-    debounce.timer = setTimeout(() => {
-      debounce.timer = null;
-
-      const items = new Map(debounce.pending);
-      debounce.pending.clear();
-      pendingProductInfoRef.current.clear();
-
-      if (items.size === 0) return;
-
-      const flushedResolvers = new Map<string, Array<(success: boolean) => void>>();
-      for (const [vid] of items) {
-        flushedResolvers.set(vid, addToCartResolversRef.current.get(vid) ?? []);
-        addToCartResolversRef.current.delete(vid);
-      }
-
-      for (const [vid, qty] of items) {
-        startTransition(async () => {
-          let success = false;
-
-          try {
-            const result = await addToCartAction(vid, qty);
-            success = result.success;
-
-            if (result.success && result.cart) {
-              setCartInternal(result.cart);
-              setLastWarnings(result.warnings ?? []);
-            }
-          } catch (error) {
-            console.error("Failed to add item to cart:", error);
-          } finally {
-            const resolvers = flushedResolvers.get(vid) ?? [];
-            for (const resolve of resolvers) {
-              resolve(success);
-            }
-          }
-
-          // Only clear pending state if nothing was queued while in-flight.
-          if (debounce.pending.size === 0) {
-            setIsAddingToCart(false);
-            setPendingQuantity(0);
-            setPendingLines([]);
-          }
-        });
-      }
-    }, DEBOUNCE_MS);
+    // Within an open window the click is buffered above; the trailing timer flushes it.
 
     return requestPromise;
   };

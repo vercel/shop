@@ -480,13 +480,21 @@ export async function fetchCart(cartId: string): Promise<Cart | undefined> {
   return response.data.cart ? transformShopifyCart(response.data.cart) : undefined;
 }
 
-export async function createCartCore(locale: string = defaultLocale): Promise<CartMutationResult> {
+export async function createCartCore(
+  locale: string = defaultLocale,
+  lines?: CartLineInput[],
+): Promise<CartMutationResult> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
+  const input = {
+    buyerIdentity: { countryCode: country },
+    ...(lines?.length ? { lines } : {}),
+  };
+
   const response = await storefront.request<{ cartCreate: CartMutationPayload<ShopifyCart> }>(
     CART_CREATE_MUTATION,
-    { variables: { input: { buyerIdentity: { countryCode: country } }, country, language } },
+    { variables: { input, country, language } },
   );
   assertStorefrontOk(response, "cartCreate");
   return applyCartMutation(response.data.cartCreate, "cartCreate");
