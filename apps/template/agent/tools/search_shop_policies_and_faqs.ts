@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { searchShopPoliciesAndFaqs } from "@/lib/shopify/storefront-mcp";
+import { searchShopPoliciesAndFaqs } from "@/lib/shopify/storefront";
 
 export default defineTool({
   description: `Answer questions about the store's policies, shipping, returns, warranties, and FAQs using

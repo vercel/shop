@@ -2,11 +2,10 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { fetchProductHandlesByIds } from "@/lib/shopify/fetch";
-import { getCatalogProduct } from "@/lib/shopify/storefront-mcp";
+import { getCatalogProduct } from "@/lib/shopify/storefront";
 
 import { getLocale } from "../lib/session";
 
-// get_product_details returns major-unit amount strings with a sibling currency.
 function formatPrice(amount?: string, currency?: string): string | null {
   if (amount === undefined || currency === undefined) return null;
   const value = Number(amount);

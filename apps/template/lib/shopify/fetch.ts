@@ -491,8 +491,7 @@ const NODE_HANDLES_QUERY = `#graphql
   }
 ` as const;
 
-// Resolves Shopify product GIDs to storefront handles. Bridges the Storefront MCP
-// catalog (GID-only) back to the template's handle-based routes and tools.
+// Resolves product GIDs to storefront handles (e.g. to route MCP catalog results on-site).
 export async function fetchProductHandlesByIds(ids: string[]): Promise<Map<string, string>> {
   const handles = new Map<string, string>();
   if (ids.length === 0) return handles;

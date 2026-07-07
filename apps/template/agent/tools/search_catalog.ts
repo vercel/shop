@@ -2,11 +2,10 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { fetchProductHandlesByIds } from "@/lib/shopify/fetch";
-import { type McpMoney, searchCatalog } from "@/lib/shopify/storefront-mcp";
+import { type McpMoney, searchCatalog } from "@/lib/shopify/storefront";
 
 import { getLocale } from "../lib/session";
 
-// MCP returns minor currency units (e.g. 38900 = 389.00). Prototype assumes 2 decimals.
 function formatMoney(money?: McpMoney): string | null {
   if (!money) return null;
   return `${(money.amount / 100).toFixed(2)} ${money.currency}`;
@@ -36,7 +35,6 @@ and add_to_cart directly.`,
         query,
       });
 
-      // Resolve GID -> storefront handle so results feed the handle-based tools.
       const handles = await fetchProductHandlesByIds(products.map((p) => p.id));
 
       return {
