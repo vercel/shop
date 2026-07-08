@@ -59,6 +59,11 @@
     "thinking": "Thinking…",
     "title": ""
   },
+  "announcement": {
+    "freeShipping": "Free shipping on all orders over $100",
+    "newArrivals": "New arrivals just landed — shop the latest drop",
+    "returns": "Easy 30-day returns, no questions asked"
+  },
   "cart": {
     "addedToCart": "Added to cart",
     "addToCart": "Add to Cart",

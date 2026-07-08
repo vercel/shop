@@ -1,4 +1,4 @@
-import "./globals.css";
+import "../globals.css";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -8,12 +8,14 @@ import { Suspense } from "react";
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
+import { AnnouncementBar } from "@/components/announcement-bar";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { agent, siteConfig } from "@/lib/config";
+import { enabledLocales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
@@ -27,7 +29,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export const generateStaticParams = async () => enabledLocales.map((locale) => ({ locale }));
+
+export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
   const [locale, messages, t] = await Promise.all([
     getLocale(),
     getMessages(),
@@ -49,6 +53,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
+            <AnnouncementBar />
             <Nav />
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}

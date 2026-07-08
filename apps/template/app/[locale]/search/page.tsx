@@ -27,7 +27,9 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { parseFiltersFromSearchParams } from "@/lib/utils";
 
-export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/[locale]/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations("seo");
   const q = Array.isArray(resolvedSearchParams.q)
@@ -64,7 +66,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
-export default async function SearchPage({ searchParams }: PageProps<"/search">) {
+export default async function SearchPage({ searchParams }: PageProps<"/[locale]/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   // Don't await searchParams here — it would force the route fully dynamic.

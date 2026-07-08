@@ -51,20 +51,23 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   async rewrites() {
     return {
+      // proxy.ts prepends the hidden /:locale segment before beforeFiles runs,
+      // so these sources match the prefixed path and forward the locale as the
+      // query the /md handlers already read.
       beforeFiles: [
         {
-          source: "/collections/:handle",
-          destination: "/md/collections/:handle",
+          source: "/:locale/collections/:handle",
+          destination: "/md/collections/:handle?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/products/:handle",
-          destination: "/md/products/:handle",
+          source: "/:locale/products/:handle",
+          destination: "/md/products/:handle?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
         {
-          source: "/search",
-          destination: "/md/search",
+          source: "/:locale/search",
+          destination: "/md/search?locale=:locale",
           has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
         },
       ],

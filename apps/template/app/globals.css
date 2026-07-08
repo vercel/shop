@@ -8,6 +8,7 @@
   --breakpoint-4xl: 140rem; /* 2240px */
 
   --color-background: var(--background);
+  --color-cta: #E11261;
   --color-foreground: var(--foreground);
   --color-shop: #5A31F4;
   --font-sans: var(--font-geist-sans);
