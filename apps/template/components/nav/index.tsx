@@ -23,7 +23,7 @@ export async function Nav({ locale }: { locale: string }) {
         <MobileMenu items={items} />
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl font-semibold leading-4 tracking-tight">{siteConfig.name}</span>
+          <span className="text-xl leading-4">{siteConfig.name}</span>
         </Link>
 
         <QuickLinks items={items} />
