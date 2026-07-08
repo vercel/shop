@@ -20,6 +20,7 @@ import { ProductSpecs } from "@/components/product-detail/product-specs";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { RatingStars } from "@/components/ui/rating-stars";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
@@ -183,21 +184,32 @@ async function ProductInfoArea({
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      <div data-slot="product-info-header">
-        <h1 className="text-foreground text-3xl">{title}</h1>
-        {uniformPrice ? (
-          <ProductPrice
-            amount={product.priceRange.minVariantPrice.amount}
-            currencyCode={product.priceRange.minVariantPrice.currencyCode}
-            compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
-            locale={locale}
+      <div data-slot="product-info-header" className="grid gap-2.5">
+        {product.rating ? (
+          <RatingStars
+            value={product.rating.value}
+            label={t("ratingLabel", { max: 5, rating: product.rating.value })}
+            countLabel={
+              product.rating.count > 0 ? t("reviews", { count: product.rating.count }) : undefined
+            }
           />
-        ) : (
-          // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
-          <Suspense fallback={<div className="h-7" aria-hidden />}>
-            <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
-          </Suspense>
-        )}
+        ) : null}
+        <div>
+          <h1 className="text-foreground text-3xl">{title}</h1>
+          {uniformPrice ? (
+            <ProductPrice
+              amount={product.priceRange.minVariantPrice.amount}
+              currencyCode={product.priceRange.minVariantPrice.currencyCode}
+              compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
+              locale={locale}
+            />
+          ) : (
+            // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
+            <Suspense fallback={<div className="h-7" aria-hidden />}>
+              <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
+            </Suspense>
+          )}
+        </div>
       </div>
 
       {eagerSelection ? (

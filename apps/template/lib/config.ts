@@ -49,8 +49,10 @@ export const agent = {
 // namespaces are shop-specific, so a storefront opts in to the ones it populates.
 // Friendly labels for each key live in METAFIELD_LABELS (lib/shopify/transforms/product.ts).
 export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
-  // { namespace: "custom", key: "material" },
-  // { namespace: "reviews", key: "rating" },
+  // { key: "material", namespace: "custom" },
+  // Shopify standard review metafields — surfaced as the PDP rating stars, not as specs.
+  { key: "rating", namespace: "reviews" },
+  { key: "rating_count", namespace: "reviews" },
 ];
 
 // Placeholder mega-menu navigation. Each top-level item opens a multi-column

@@ -87,6 +87,8 @@ export interface ProductDetails extends ProductCard {
     maxVariantPrice: Money;
     minVariantPrice: Money;
   };
+  /** Aggregate review rating from Shopify's standard `reviews` metafields; absent when unrated. */
+  rating?: ProductRating;
   seo: SEO;
   tags: string[];
   updatedAt: string;
@@ -95,6 +97,13 @@ export interface ProductDetails extends ProductCard {
   /** Exact variant count from Shopify; authoritative single-variant signal (=== 1). */
   variantsCount: number;
   videos: Video[];
+}
+
+export interface ProductRating {
+  /** Total number of reviews (reviews.rating_count); 0 when unknown. */
+  count: number;
+  /** Average rating value on a 0–5 scale (reviews.rating). */
+  value: number;
 }
 
 export interface ProductVariant {

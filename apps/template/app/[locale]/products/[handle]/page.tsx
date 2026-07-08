@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
+import { ProductReviewsSection } from "@/components/product-detail/product-reviews-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -121,6 +122,7 @@ export default async function ProductPage({
             variantPromise={variantPromise}
             locale={locale}
           />
+          <ProductReviewsSection />
           <RelatedProductsSection handle={handle} locale={locale} />
         </Sections>
       </Container>

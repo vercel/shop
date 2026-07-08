@@ -8,6 +8,7 @@ import type {
   ProductCard,
   ProductDetails,
   ProductOption,
+  ProductRating,
   ProductVariant,
   ProductVariantComponent,
   ProductVariantReference,
@@ -377,13 +378,21 @@ function formatMetafieldValue(type: string, value: string): string | null {
   return formatScalarMetafield(type, value);
 }
 
+// reviews.rating / reviews.rating_count surface as the dedicated rating stars (see
+// extractRating), so they're kept out of the generic spec list.
+function isRatingMetafield(mf: ShopifyMetafield): boolean {
+  return mf.namespace === "reviews" && (mf.key === "rating" || mf.key === "rating_count");
+}
+
 function transformMetafields(
   metafields?: (ShopifyMetafield | null)[],
 ): Array<{ key: string; label: string; value: string }> {
   if (!metafields) return [];
 
   return metafields
-    .filter((mf): mf is ShopifyMetafield => mf !== null && mf.value !== "")
+    .filter(
+      (mf): mf is ShopifyMetafield => mf !== null && mf.value !== "" && !isRatingMetafield(mf),
+    )
     .map((mf) => {
       const value = formatMetafieldValue(mf.type, mf.value);
       if (value === null) return null;
@@ -475,7 +484,35 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     categoryId: product.category?.id,
     collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
     metafields: transformMetafields(product.metafields),
+    rating: extractRating(product.metafields),
   };
+}
+
+// reviews.rating is a JSON envelope ({ value, scale_min, scale_max }); reviews.rating_count
+// is a plain integer string. Returns undefined when the product carries no rating value.
+function extractRating(metafields?: (ShopifyMetafield | null)[]): ProductRating | undefined {
+  if (!metafields) return undefined;
+
+  let value: number | undefined;
+  let count = 0;
+
+  for (const mf of metafields) {
+    if (!mf || mf.namespace !== "reviews" || mf.value === "") continue;
+    if (mf.key === "rating") {
+      try {
+        const parsed = JSON.parse(mf.value) as { value?: number | string };
+        const n = Number(parsed?.value);
+        if (!Number.isNaN(n)) value = n;
+      } catch {
+        // ignore malformed rating payloads
+      }
+    } else if (mf.key === "rating_count") {
+      const n = Number.parseInt(mf.value, 10);
+      if (!Number.isNaN(n)) count = n;
+    }
+  }
+
+  return value === undefined ? undefined : { count, value };
 }
 
 export function transformShopifyProductCards(products: ShopifyProductCard[]): ProductCard[] {
