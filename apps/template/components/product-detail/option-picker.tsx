@@ -34,12 +34,12 @@ export function OptionPicker({
           const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const classes = cn(
-            "grid px-5 py-2 text-center text-sm rounded-lg transition-all inset-ring",
+            "grid px-5 py-2 text-center text-sm rounded-lg transition-all border",
             !isAvailable
-              ? "font-normal inset-ring-border text-muted-foreground/50 line-through cursor-not-allowed"
+              ? "font-normal border-dashed border-border text-muted-foreground/50 line-through cursor-not-allowed"
               : isSelected
-                ? "font-medium inset-ring-foreground text-foreground"
-                : "font-normal inset-ring-muted-foreground text-muted-foreground hover:inset-ring-foreground hover:text-foreground",
+                ? "font-medium border-foreground text-foreground"
+                : "font-normal border-border text-muted-foreground hover:border-foreground hover:text-foreground",
           );
 
           // Invisible medium-weight twin reserves the bold width so pills don't shift on selection.

@@ -15,7 +15,7 @@ paths:
 
 Two related changes to the text option picker on the PDP:
 
-1. **Restyled the pills as an outline three-tier ramp** (`option-picker.tsx`). Selected went from a solid `bg-primary`/`text-primary-foreground` fill to a `foreground` (near-black) border + text. In-stock but unselected values use a `muted-foreground` (dark gray) border + text that darkens toward the selected treatment on hover. Unavailable values use a lighter `border`-toned, struck-through, `cursor-not-allowed` state. The border is an `inset-ring` (as before) so there is no box-model layout shift between tiers, and the invisible medium-weight twin still reserves the selected width.
+1. **Restyled the pills as an outline three-tier ramp** (`option-picker.tsx`). Selected went from a solid `bg-primary`/`text-primary-foreground` fill to a solid `foreground` (near-black) border + text. In-stock but unselected values use a solid, light `border`-toned pill with `muted-foreground` text that darkens toward the selected treatment on hover. Unavailable values use a **dashed** `border` with lighter, struck-through text and `cursor-not-allowed`. The pills moved from `inset-ring` (a box-shadow, which can't render dashed) to a real 1px `border`; all three tiers share the same border width so pill geometry never shifts between states, and the invisible medium-weight twin still reserves the selected width.
 2. **Seeded the streamed picker's Suspense fallback with the default selection** (`product-detail-section.tsx`). The multi-variant fallback previously rendered `selectedOptions={{}}` (nothing highlighted); it now renders `defaultSelectedOptions(product)`.
 
 ## Why it matters
@@ -37,4 +37,4 @@ The picker highlight resolves off a fast `searchParams`-only promise, but the fa
 1. `pnpm --filter template lint` and `pnpm --filter template exec tsc --noEmit`.
 2. On a multi-option PDP with no query params, the default option is highlighted immediately and does not change as the page settles.
 3. Deep-linking `?size=…` to a non-default value moves the highlight to that pill without a flash of nothing-selected.
-4. An out-of-stock value renders lighter, struck-through, non-clickable, with `cursor-not-allowed`.
+4. An out-of-stock value renders with a dashed border, lighter struck-through text, non-clickable, with `cursor-not-allowed`.
