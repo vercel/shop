@@ -15,13 +15,13 @@ export async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations("footer");
 
   return (
-    <footer>
+    <footer className="bg-primary text-primary-foreground">
       {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
       <Container className={cn("pt-20 pb-10", agent.enabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
-            <p className="text-sm text-muted-foreground leading-5">
+            <p className="text-sm text-primary-foreground/70 leading-5">
               {t("copyright", { name: siteConfig.name })}
             </p>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
@@ -76,7 +76,7 @@ function FooterMenu({ items }: { items: MenuItem[] }) {
                 <li key={leaf.id}>
                   <MenuLink
                     url={leaf.url}
-                    className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
                   >
                     {leaf.title}
                   </MenuLink>

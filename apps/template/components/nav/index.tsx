@@ -11,7 +11,7 @@ import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
-export async function Nav({ locale }: { locale: string }) {
+export async function Nav() {
   const items = navItems;
 
   return (
@@ -20,15 +20,16 @@ export async function Nav({ locale }: { locale: string }) {
       id="nav-outer"
     >
       <Container className="flex h-16 items-center gap-2.5 md:gap-5">
-        <MobileMenu items={items} />
+        <div className="flex flex-1 min-w-0 items-center gap-5">
+          <MobileMenu items={items} />
+          <QuickLinks items={items} />
+        </div>
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl leading-4">{siteConfig.name}</span>
+          <span className="text-xl font-semibold leading-4 tracking-tight">{siteConfig.name}</span>
         </Link>
 
-        <QuickLinks items={items} />
-
-        <div className="flex items-center gap-5 ml-auto">
+        <div className="flex flex-1 items-center justify-end gap-5">
           <SearchModal />
           {isAuthEnabled && (
             <Suspense fallback={<NavAccountFallback />}>
