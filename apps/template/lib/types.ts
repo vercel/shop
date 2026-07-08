@@ -349,7 +349,7 @@ export interface BannerSection {
   ctaText: string | null;
   headline: string;
   id: string;
-  subheadline: string | null;
+  subheadline?: string | null;
 }
 
 // Customer account — populated from the Shopify Customer Account API (a separate
