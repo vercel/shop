@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an AI shopping assistant powered by Claude, built on [eve](https://eve.dev) — a filesystem-first framework for durable agents that mounts into the Next.js app. It can search products, browse collections, manage the cart, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
+The storefront includes an AI shopping assistant powered by Claude, built on [eve](https://eve.dev) — a filesystem-first framework for durable agents that mounts into the Next.js app. It can search products, browse collections, manage the cart, answer store-policy questions, and render rich product cards - all through natural conversation. The assistant is context-aware, adapting its behavior based on what page the user is viewing.
 
 ## Configuration
 
@@ -31,9 +31,9 @@ Each turn attaches the user's current page path as ephemeral `clientContext` (`{
 
 ## Tools
 
-The agent has 11 tools organized into three groups. Each is a file under `agent/tools/` (the filename is the tool name, so tools are snake_case). Tools read per-session context (cart ID, locale) from `ctx.session.auth.current.attributes` via the `agent/lib/session.ts` helpers.
+The agent has 14 tools organized into four groups. Each is a file under `agent/tools/` (the filename is the tool name, so tools are snake_case). Tools read per-session context (cart ID, locale) from `ctx.session.auth.current.attributes` via the `agent/lib/session.ts` helpers.
 
-Tools import Next-free fetch cores from `lib/shopify/fetch.ts` rather than the `"use cache"` operation wrappers, because eve's runtime has no Next cache or `server-only` support. The `operations/*.ts` wrappers import the same cores, so nothing is duplicated. (The Storefront client in `storefront.ts` carries no `server-only` guard — it uses the public Storefront token — so eve can import it.)
+Tools import Next-free fetch cores from `lib/shopify/fetch.ts` rather than the `"use cache"` operation wrappers, because eve's runtime has no Next cache or `server-only` support. The `operations/*.ts` wrappers import the same cores, so nothing is duplicated. (The Storefront client in `storefront.ts` carries no `server-only` guard — it uses the public Storefront token — so eve can import it; the Storefront MCP helpers `searchCatalog`, `getCatalogProduct`, and `searchShopPoliciesAndFaqs` live there too.)
 
 ### Product discovery
 
@@ -60,6 +60,16 @@ Tools import Next-free fetch cores from `lib/shopify/fetch.ts` rather than the `
 | Tool            | Purpose                                                                               |
 | --------------- | ------------------------------------------------------------------------------------- |
 | `navigate_user` | Generate links to product pages, collections, search, cart, checkout, account, orders |
+
+### Native Shopify (Storefront MCP)
+
+An experimental group backed by Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) server (`/api/mcp`) instead of the GraphQL cores — an alternative to compare against the discovery tools above. `search_catalog` uses Shopify's merchant-tuned semantic search and accepts a natural-language `intent`; its results are enriched with the storefront handle (resolved via the Storefront `nodes` query) so they still feed the handle-based tools. Requires the store's MCP endpoint to be enabled; set `UCP_AGENT_PROFILE_URL` if your store requires an agent profile.
+
+| Tool                             | Purpose                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `search_catalog`                 | Native semantic catalog search (accepts `intent`); returns handle + product GID |
+| `get_catalog_product`            | Product details by product GID via MCP; returns handle + variant ID            |
+| `search_shop_policies_and_faqs`  | Answers store policy, shipping, returns, and FAQ questions                      |
 
 ## Generative UI
 
