@@ -26,7 +26,7 @@ export async function Nav() {
         </div>
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl font-semibold leading-4 tracking-tight">{siteConfig.name}</span>
+          <span className="text-xl leading-4">{siteConfig.name}</span>
         </Link>
 
         <div className="flex flex-1 items-center justify-end gap-5">
