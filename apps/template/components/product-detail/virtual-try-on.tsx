@@ -1,12 +1,10 @@
 "use client";
 
-import { Loader2Icon, SparklesIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type * as React from "react";
 import { useRef, useState } from "react";
 
 import { useLightbox } from "@/components/product-detail/lightbox";
-import { Button } from "@/components/ui/button";
 import { virtualTryOnAction } from "@/lib/try-on/action";
 
 const MAX_DIMENSION = 1024;
@@ -79,21 +77,15 @@ export function VirtualTryOn({ productImageUrl }: { productImageUrl: string }) {
         onChange={handleFile}
         aria-label={t("virtualTryOnUploadLabel")}
       />
-      <Button
+      <button
         type="button"
-        size="sm"
         onClick={() => inputRef.current?.click()}
         disabled={loading}
         data-error={error || undefined}
-        className="absolute bottom-4 right-4 z-10 bg-background/90 text-foreground shadow-md backdrop-blur-sm hover:bg-background data-[error]:text-destructive"
+        className="absolute bottom-4 right-4 z-10 cursor-pointer rounded-lg border border-border bg-white px-5 py-2 text-sm font-medium text-foreground transition-all hover:border-foreground disabled:cursor-not-allowed disabled:opacity-50 data-[error]:text-destructive"
       >
-        {loading ? (
-          <Loader2Icon className="size-4 animate-spin" />
-        ) : (
-          <SparklesIcon className="size-4" />
-        )}
         {label}
-      </Button>
+      </button>
     </>
   );
 }
