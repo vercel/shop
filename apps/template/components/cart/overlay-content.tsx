@@ -91,7 +91,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto px-5 space-y-5">
+      <div className="flex-1 overflow-y-auto p-5 space-y-5">
         <CartWarnings />
         <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
           {displayCart.lines.map((item) => (
