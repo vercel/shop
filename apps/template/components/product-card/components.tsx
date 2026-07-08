@@ -15,7 +15,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full overflow-hidden", className)}
+      className={cn("group flex flex-col h-full overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -64,6 +64,7 @@ const aspectRatioClasses =
 
 interface ProductCardImageProps {
   src?: string | null;
+  hoverSrc?: string | null;
   alt: string;
   sizes?: string;
   outOfStock?: boolean;
@@ -74,6 +75,7 @@ interface ProductCardImageProps {
 
 function ProductCardImage({
   src,
+  hoverSrc,
   alt,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
@@ -91,6 +93,16 @@ function ProductCardImage({
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
       ) : (
         <ImagePlaceholder className="size-full" />
+      )}
+      {hoverSrc && (
+        <Image
+          src={hoverSrc}
+          alt=""
+          aria-hidden
+          fill
+          sizes={sizes}
+          className="object-cover opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
+        />
       )}
       {outOfStock && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

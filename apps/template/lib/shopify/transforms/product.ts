@@ -155,6 +155,7 @@ export interface ShopifyProductCard {
   vendor: string;
   availableForSale: boolean;
   featuredImage: ShopifyImage | null;
+  images?: ShopifyEdges<ShopifyImage>;
   priceRange: {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;
@@ -407,11 +408,16 @@ function formatKey(key: string): string {
 
 export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
+  // First image that isn't the featured one — used for the hover-reveal on the card.
+  const altImage = (product.images ? flattenEdges(product.images) : []).find(
+    (img) => img.url !== product.featuredImage?.url,
+  );
   return {
     id: product.id,
     handle: product.handle,
     title: product.title,
     featuredImage: transformImage(product.featuredImage),
+    secondaryImage: altImage ? transformImage(altImage) : undefined,
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,

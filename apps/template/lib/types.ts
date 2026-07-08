@@ -54,6 +54,8 @@ export interface ProductCard {
   maxPrice: Money;
   /** Lowest variant price; the card shows a "min – max" range when maxPrice differs. */
   price: Money;
+  /** First non-featured image, revealed on card hover; absent when the product has only one image. */
+  secondaryImage?: Image | null;
   title: string;
   vendor?: string;
 }

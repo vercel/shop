@@ -51,6 +51,7 @@ export async function ProductCard({
         <ProductCardImageContainer variant={variant}>
           <ProductCardImage
             src={product.featuredImage?.url}
+            hoverSrc={product.secondaryImage?.url}
             alt={product.featuredImage?.altText || product.title}
             sizes={sizes}
             outOfStock={!product.availableForSale}
