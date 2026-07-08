@@ -18,7 +18,7 @@ Restyled the PDP text option picker (`option-picker.tsx`) from a solid selected 
 - **Available** (unselected) — solid, light `border`-toned pill with `muted-foreground` text that darkens toward the selected treatment on hover.
 - **Unavailable** — **dashed** `border` with lighter, struck-through text and `cursor-not-allowed`, rendered as an inert `<span>`.
 
-The pills moved from `inset-ring` (a box-shadow, which can't render dashed) to a real 1px `border`. All three tiers share the same border width so pill geometry never shifts between states, and the invisible medium-weight twin still reserves the selected width.
+The pills moved from `inset-ring` (a box-shadow, which can't render dashed) to a real 1px `border`. All three tiers share the same border width so pill geometry never shifts between states, and the invisible medium-weight twin still reserves the selected width. Each pill also gained a `starting:opacity-0` so it eases in on first render (CSS `@starting-style`) on the same `transition-all` the hover uses — no separate keyframes or duration.
 
 ## Why it matters
 
