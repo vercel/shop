@@ -4,17 +4,31 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import {
+  getCollectionProducts,
+  getFilteredCatalogProducts,
+  searchIndexProducts,
+} from "@/lib/shopify/operations/products";
+import type { SearchParamsPromise } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-interface ProductsGridSkeletonProps {
-  count: number;
-  className?: string;
+export type ProductsGridColumns = 4 | 5;
+
+export function productsGridColumnsClass(columns: ProductsGridColumns = 4): string {
+  return columns === 5
+    ? "grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+    : "grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4";
 }
 
-export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonProps) {
+interface ProductsGridSkeletonProps {
+  className?: string;
+  columns?: ProductsGridColumns;
+  count: number;
+}
+
+export function ProductsGridSkeleton({ className, columns, count }: ProductsGridSkeletonProps) {
   return (
-    <div className={cn("grid grid-cols-2 gap-5 lg:grid-cols-4", className)}>
+    <div className={cn(productsGridColumnsClass(columns), className)}>
       {Array.from({ length: count }, (_, index) => (
         <ProductCardSkeleton key={index} />
       ))}
@@ -22,14 +36,57 @@ export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonP
   );
 }
 
-interface ProductsGridProps {
-  collectionUrl?: string;
+// A ?utm_campaign= value selects a collection only when it's in the caller's allowlist;
+// anything else (missing, unknown, multi-valued) falls through to the regular resolution.
+function resolveCampaignCollection(
+  params: Record<string, string | string[] | undefined> | undefined,
+  allowed: readonly string[] | undefined,
+): string | undefined {
+  if (!params || !allowed?.length) return undefined;
+  const value = params.utm_campaign;
+  const campaign = Array.isArray(value) ? value[0] : value;
+  return campaign && allowed.includes(campaign) ? campaign : undefined;
+}
+
+// No campaign or collection: pull the fallback vector. A catalog sort key (e.g. best-selling)
+// gives this grid a distinct ordering from new arrivals; without one, match /collections/all.
+function fetchFallbackProducts({
+  fallbackSortKey,
+  limit,
+  locale,
+}: {
+  fallbackSortKey?: string;
   limit: number;
   locale: Locale;
+}) {
+  return fallbackSortKey
+    ? getFilteredCatalogProducts({ limit, locale, sortKey: fallbackSortKey })
+    : searchIndexProducts({ limit, locale });
+}
+
+interface ProductsGridProps {
+  campaignCollections?: readonly string[];
+  collection?: string;
+  collectionUrl?: string;
+  columns?: ProductsGridColumns;
+  fallbackSortKey?: string;
+  limit: number;
+  locale: Locale;
+  searchParams?: SearchParamsPromise;
   title: string;
 }
 
-export async function ProductsGrid({ collectionUrl, limit, locale, title }: ProductsGridProps) {
+export async function ProductsGrid({
+  campaignCollections,
+  collection,
+  collectionUrl,
+  columns,
+  fallbackSortKey,
+  limit,
+  locale,
+  searchParams,
+  title,
+}: ProductsGridProps) {
   const t = await getTranslations("product");
 
   return (
@@ -45,29 +102,57 @@ export async function ProductsGrid({ collectionUrl, limit, locale, title }: Prod
           </Link>
         )}
       </div>
-      <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
-        <ProductsGridContent limit={limit} locale={locale} outOfStockText={t("outOfStock")} />
+      <Suspense fallback={<ProductsGridSkeleton columns={columns} count={limit} />}>
+        <ProductsGridContent
+          campaignCollections={campaignCollections}
+          collection={collection}
+          columns={columns}
+          fallbackSortKey={fallbackSortKey}
+          limit={limit}
+          locale={locale}
+          outOfStockText={t("outOfStock")}
+          searchParams={searchParams}
+        />
       </Suspense>
     </div>
   );
 }
 
 async function ProductsGridContent({
+  campaignCollections,
+  collection,
+  columns,
+  fallbackSortKey,
   limit,
   locale,
   outOfStockText,
+  searchParams,
 }: {
+  campaignCollections?: readonly string[];
+  collection?: string;
+  columns?: ProductsGridColumns;
+  fallbackSortKey?: string;
   limit: number;
   locale: Locale;
   outOfStockText: string;
+  searchParams?: SearchParamsPromise;
 }) {
-  // Use the search index (not the products connection) so these match the first items on /collections/all.
-  const { products } = await searchIndexProducts({ limit, locale });
+  // Reading searchParams (when passed) opts this grid into PPR's dynamic hole so it
+  // streams in behind the skeleton.
+  const params = searchParams ? await searchParams : undefined;
+
+  // A ?utm_campaign= match swaps in that collection; otherwise use the configured
+  // collection, or the fallback vector (catalog sort key, else the relevance search index).
+  const collectionHandle = resolveCampaignCollection(params, campaignCollections) ?? collection;
+
+  const { products } = collectionHandle
+    ? await getCollectionProducts({ collection: collectionHandle, limit, locale })
+    : await fetchFallbackProducts({ fallbackSortKey, limit, locale });
 
   if (products.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+    <div className={productsGridColumnsClass(columns)}>
       {products.map((product) => (
         <ProductCard
           key={product.id}

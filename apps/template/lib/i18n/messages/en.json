@@ -182,10 +182,28 @@
     "copyright": "© {name}. All rights reserved."
   },
   "home": {
+    "allTimeFavorites": "All-time Favorites",
+    "categories": {
+      "mens": "Mens",
+      "unisex": "Unisex",
+      "womens": "Womens",
+      "youth": "Youth"
+    },
     "ctaText": "Shop Now",
-    "headline": "Agentic Infrastructure for Commerce",
-    "productsTitle": "Products",
-    "subheadline": "A production-ready, agent-friendly Shopify storefront built on Next.js."
+    "headline": "You Can Just Shop Things",
+    "marketing": {
+      "secondary": {
+        "body": "From the studio to the street, we make considered essentials built to move with you. Get to know the people and the principles behind the label.",
+        "cta": "About Us",
+        "title": "Our Story"
+      }
+    },
+    "newArrivalsTitle": "New Arrivals",
+    "pickedForYou": "Picked for You",
+    "secondaryHero": {
+      "ctaText": "Shop Clearance",
+      "headline": "Once-in-a-lifetime deals are yours"
+    }
   },
   "nav": {
     "account": "Account",
