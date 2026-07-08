@@ -15,7 +15,7 @@ export async function Footer({ locale }: { locale: string }) {
   const t = await getTranslations("footer");
 
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="mt-10 bg-primary text-primary-foreground">
       {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
       <Container className={cn("pt-20 pb-10", agent.enabled && "pb-22")}>
         <Sections className="gap-10">

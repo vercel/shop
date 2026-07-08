@@ -20,7 +20,7 @@ export function SocialLinks({ links }: { links: readonly SocialLink[] }) {
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          className="text-primary-foreground/70 hover:text-primary-foreground transition-colors"
           aria-label={PLATFORM_LABELS[link.platform] ?? link.platform}
         >
           <SocialIcon platform={link.platform} />
