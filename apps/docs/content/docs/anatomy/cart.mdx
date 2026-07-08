@@ -78,6 +78,8 @@ Below the items, a `RelatedProductsSection` shows product recommendations based 
 
 Cart operations in `lib/shopify/operations/cart.ts` use GraphQL mutations: `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove`. Each mutation returns the full cart through `CartFields`; the operation normalizes that response and the server action uses it directly without a follow-up `getCart()` query. The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Every mutation calls `invalidateCartCache()` to ensure subsequent reads reflect the latest state.
 
+The cookie's `SameSite` attribute is derived from `VERCEL_ENV`: `Strict` on the production deployment, `Lax` on preview and every other environment. Preview deployments sit behind Vercel Authentication, whose SSO flow bounces the browser cross-site and redirects back to the deployment — a `Strict` cookie is withheld on that return navigation, so the cart id is dropped and the cart reads empty. `Lax` still rides top-level GET navigations back into the site (the SSO return, and the return from Shopify's checkout domain) while staying off cross-site subrequests, which is the right level for a cart identifier. The production custom domain is public, so it keeps `Strict`.
+
 The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
 
 ## Key files
