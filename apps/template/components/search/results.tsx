@@ -112,7 +112,7 @@ async function SearchResultsGridRender({
   if (products.length === 0) {
     return (
       <div className="text-center py-10">
-        <h2 className="text-2xl font-medium tracking-tight mb-2">{t("noResults")}</h2>
+        <h2 className="text-2xl mb-2">{t("noResults")}</h2>
         <p className="text-muted-foreground">
           {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}
         </p>

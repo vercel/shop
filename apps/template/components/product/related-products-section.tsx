@@ -12,7 +12,7 @@ export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
   return (
     <div className="grid gap-4">
       {title ? (
-        <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">{title}</h2>
+        <h2 className="text-2xl sm:text-3xl">{title}</h2>
       ) : (
         <Skeleton className="h-9 w-48" />
       )}
@@ -36,7 +36,7 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
 
   return (
     <div className="grid gap-4">
-      <h2 className="text-2xl sm:text-3xl font-medium tracking-tight">{t("recommendations")}</h2>
+      <h2 className="text-2xl sm:text-3xl">{t("recommendations")}</h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {related.slice(0, RECOMMENDATION_LIMIT).map((product) => (
           <ProductCard

@@ -184,7 +184,7 @@ async function ProductInfoArea({
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
       <div data-slot="product-info-header">
-        <h1 className="font-medium text-foreground tracking-display text-3xl">{title}</h1>
+        <h1 className="text-foreground text-3xl">{title}</h1>
         {uniformPrice ? (
           <ProductPrice
             amount={product.priceRange.minVariantPrice.amount}

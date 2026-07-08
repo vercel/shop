@@ -45,9 +45,7 @@ export default async function CollectionsPage() {
     <Page className="pt-2.5 md:pt-10">
       <Container>
         <Sections className="gap-5">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-display">
-            {t("title")}
-          </h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl">{t("title")}</h1>
 
           {collections.length > 0 ? (
             <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">

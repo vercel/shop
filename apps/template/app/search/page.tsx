@@ -87,7 +87,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         <FilterTransitionProvider>
           <Sections className="gap-5">
             <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-display">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl">
                 <Link href="/search">{t("title")}</Link>
                 <Suspense fallback={null}>
                   <SearchQueryLabel searchParamsPromise={searchParams} />

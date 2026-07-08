@@ -73,7 +73,7 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
           <div className="flex flex-col items-center text-center gap-2.5">
             <Heading
               className={cn(
-                "text-3xl md:text-5xl font-semibold tracking-tight max-w-3xl",
+                "text-3xl md:text-5xl max-w-3xl",
                 hasMedia ? "text-white" : "text-foreground",
               )}
             >
