@@ -48,7 +48,7 @@ export function LocalePicker({ locale }: LocalePickerProps) {
         {enabledLocales.map((code) => (
           <DropdownMenuItem
             key={code}
-            onSelect={() => select(code)}
+            onClick={() => select(code)}
             data-active={code === locale}
             className="cursor-pointer gap-2.5 data-[active=true]:font-medium"
           >

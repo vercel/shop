@@ -12,7 +12,7 @@ export async function AnnouncementBar() {
   const [t, locale] = await Promise.all([getTranslations("announcement"), getLocale()]);
 
   return (
-    <div className="flex h-8 w-full shrink-0 items-center overflow-hidden bg-cta text-primary-foreground">
+    <div className="flex h-8 w-full shrink-0 items-center overflow-hidden bg-primary text-primary-foreground">
       <div className="mx-auto flex h-full w-full max-w-[96rem] items-center gap-4 px-5 lg:px-10">
         <AnnouncementBarClient messages={[t("freeShipping"), t("newArrivals"), t("returns")]} />
         <div className="flex shrink-0 items-center gap-5">
