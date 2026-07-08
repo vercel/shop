@@ -334,6 +334,11 @@
     "unavailableVariantLabel": "{name}: {value} (unavailable)",
     "viewAll": "View All",
     "viewImage": "View image {current} of {total}",
+    "virtualTryOn": "Virtual Try On",
+    "virtualTryOnError": "Try-on failed",
+    "virtualTryOnGenerating": "Generating…",
+    "virtualTryOnResultAlt": "Virtual try-on result",
+    "virtualTryOnUploadLabel": "Upload a photo for virtual try-on",
     "visitStore": "Visit the store"
   },
   "search": {

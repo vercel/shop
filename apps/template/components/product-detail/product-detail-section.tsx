@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
@@ -19,6 +19,7 @@ import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSpecs } from "@/components/product-detail/product-specs";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
+import { VirtualTryOn } from "@/components/product-detail/virtual-try-on";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,6 +93,11 @@ function ProductMediaArea({
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
 }) {
+  const productImageUrl = product.featuredImage?.url ?? product.images[0]?.url;
+  const tryOnOverlay = productImageUrl ? (
+    <VirtualTryOn productImageUrl={productImageUrl} />
+  ) : undefined;
+
   if (!hasColorImagePartitioning(product.options)) {
     return (
       <ProductMedia
@@ -99,6 +105,7 @@ function ProductMediaArea({
         videos={product.videos}
         title={product.title}
         className="lg:col-span-6"
+        overlay={tryOnOverlay}
       />
     );
   }
@@ -109,11 +116,13 @@ function ProductMediaArea({
       videos={product.videos}
       title={product.title}
       className="lg:col-span-6"
+      overlay={tryOnOverlay}
       desktopSlot={
         <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
           <ResolvedColorImageGrid
             product={product}
             selectedOptionsPromise={selectedOptionsPromise}
+            overlay={tryOnOverlay}
           />
         </Suspense>
       }
@@ -128,6 +137,7 @@ function ProductMediaArea({
           <ResolvedColorImageCarousel
             product={product}
             selectedOptionsPromise={selectedOptionsPromise}
+            overlay={tryOnOverlay}
           />
         </Suspense>
       }
@@ -138,25 +148,29 @@ function ProductMediaArea({
 async function ResolvedColorImageGrid({
   product,
   selectedOptionsPromise,
+  overlay,
 }: {
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
+  overlay?: ReactNode;
 }) {
   const image = getSelectedColorImage(product, await selectedOptionsPromise);
   if (!image) return null;
-  return <ColorImageGrid images={[image]} title={product.title} />;
+  return <ColorImageGrid images={[image]} title={product.title} overlay={overlay} />;
 }
 
 async function ResolvedColorImageCarousel({
   product,
   selectedOptionsPromise,
+  overlay,
 }: {
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
+  overlay?: ReactNode;
 }) {
   const image = getSelectedColorImage(product, await selectedOptionsPromise);
   if (!image) return null;
-  return <ColorImageCarouselItems images={[image]} title={product.title} />;
+  return <ColorImageCarouselItems images={[image]} title={product.title} overlay={overlay} />;
 }
 
 async function ProductInfoArea({

@@ -334,6 +334,11 @@
     "unavailableVariantLabel": "{name} : {value} (indisponible)",
     "viewAll": "Tout voir",
     "viewImage": "Voir l'image {current} sur {total}",
+    "virtualTryOn": "Essayage virtuel",
+    "virtualTryOnError": "Échec de l'essayage",
+    "virtualTryOnGenerating": "Génération…",
+    "virtualTryOnResultAlt": "Résultat de l'essayage virtuel",
+    "virtualTryOnUploadLabel": "Téléverser une photo pour l'essayage virtuel",
     "visitStore": "Visiter la boutique"
   },
   "search": {

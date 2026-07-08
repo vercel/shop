@@ -87,11 +87,13 @@ function Carousel({
   mediaItems,
   title,
   hasColorSlot,
+  overlay,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
+  overlay?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -177,6 +179,7 @@ function Carousel({
                   eager={eager}
                 />
               )}
+              {priority && item.type === "image" ? overlay : null}
             </div>
           );
         })}
@@ -209,12 +212,14 @@ function GridItem({
   idx,
   priority,
   eager,
+  overlay,
 }: {
   item: MediaItem;
   title: string;
   idx: number;
   priority: boolean;
   eager: boolean;
+  overlay?: React.ReactNode;
 }) {
   return (
     <div className="relative w-full overflow-hidden aspect-square">
@@ -238,6 +243,7 @@ function GridItem({
           />
         </LightboxTrigger>
       )}
+      {priority && item.type === "image" ? overlay : null}
     </div>
   );
 }
@@ -247,16 +253,16 @@ function Grid({
   mediaItems,
   title,
   hasColorSlot,
-  interactive = true,
+  overlay,
   children,
 }: {
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
-  interactive?: boolean;
+  overlay?: React.ReactNode;
   children?: React.ReactNode;
 }) {
-  const grid = (
+  return (
     <div className="grid grid-cols-2 gap-2.5">
       {children}
       {mediaItems.map((item, idx) => {
@@ -269,20 +275,27 @@ function Grid({
             idx={idx}
             priority={priority}
             eager
+            overlay={overlay}
           />
         );
       })}
     </div>
   );
-
-  return interactive ? <Lightbox label={title}>{grid}</Lightbox> : grid;
 }
 
 /**
  * Renders color-specific images as grid items (desktop).
  * Designed to be used inside a Suspense boundary as children of ProductMedia.
  */
-export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
+export function ColorImageGrid({
+  images,
+  title,
+  overlay,
+}: {
+  images: ImageType[];
+  title: string;
+  overlay?: React.ReactNode;
+}) {
   return images.map((image, idx) => (
     <GridItem
       key={image.url}
@@ -291,6 +304,7 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
       idx={idx}
       priority={idx === 0}
       eager
+      overlay={overlay}
     />
   ));
 }
@@ -299,7 +313,15 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
  * Renders color-specific images as carousel items (mobile).
  * Matches the Carousel item structure for consistent snap-scroll behavior.
  */
-export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
+export function ColorImageCarouselItems({
+  images,
+  title,
+  overlay,
+}: {
+  images: ImageType[];
+  title: string;
+  overlay?: React.ReactNode;
+}) {
   return images.map((image, idx) => {
     const priority = idx === 0;
     const eager = idx === 1;
@@ -318,6 +340,7 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
           loading={priority || eager ? "eager" : "lazy"}
           draggable={false}
         />
+        {priority ? overlay : null}
       </div>
     );
   });
@@ -348,6 +371,7 @@ export function ProductMedia({
   className,
   desktopSlot,
   mobileSlot,
+  overlay,
 }: {
   otherImages: ImageType[];
   videos: Video[];
@@ -357,6 +381,8 @@ export function ProductMedia({
   desktopSlot?: React.ReactNode;
   /** Color images rendered as carousel items (mobile). */
   mobileSlot?: React.ReactNode;
+  /** Rendered over the first/primary image cell (e.g. the virtual try-on button). */
+  overlay?: React.ReactNode;
 }) {
   const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),
@@ -367,23 +393,25 @@ export function ProductMedia({
   const isEmpty = sharedMediaItems.length === 0 && !hasColorSlot;
   const mediaItems: MediaItem[] = isEmpty ? [{ type: "placeholder" }] : sharedMediaItems;
 
-  return (
+  const content = (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot}>
+        <Carousel
+          mediaItems={mediaItems}
+          title={title}
+          hasColorSlot={hasColorSlot}
+          overlay={overlay}
+        >
           {mobileSlot}
         </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid
-          mediaItems={mediaItems}
-          title={title}
-          hasColorSlot={hasColorSlot}
-          interactive={!isEmpty}
-        >
+        <Grid mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot} overlay={overlay}>
           {desktopSlot}
         </Grid>
       </div>
     </div>
   );
+
+  return isEmpty ? content : <Lightbox label={title}>{content}</Lightbox>;
 }

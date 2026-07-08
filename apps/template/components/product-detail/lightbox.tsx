@@ -13,6 +13,11 @@ type MediaItem = { type: "video"; video: Video } | { type: "image"; image: Image
 
 const LightboxContext = createContext<((item: MediaItem) => void) | null>(null);
 
+/** Opens the nearest Lightbox programmatically. Returns null outside a provider. */
+export function useLightbox() {
+  return useContext(LightboxContext);
+}
+
 export function Lightbox({ label, children }: { label: string; children: ReactNode }) {
   const [activeItem, setActiveItem] = useState<MediaItem | null>(null);
   const close = useCallback(() => setActiveItem(null), []);
