@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CollectionHero } from "@/components/collections/collection-hero";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilters } from "@/components/collections/filters";
 import { CollectionResultsGrid } from "@/components/collections/results-grid";
@@ -44,51 +45,53 @@ export async function CollectionDetailPage({
 
   return (
     <FilterTransitionProvider>
-      <Page className="pt-2.5 md:pt-10">
-        <Container>
-          <Sections className="gap-5">
-            <CollectionHeader
-              collection={collection}
-              handle={handle}
-              homeLabel={tBreadcrumb("home")}
-            />
+      <Page className={collection.image ? "pt-0" : "pt-2.5 md:pt-10"}>
+        <Sections className="gap-5">
+          <CollectionHeader
+            collection={collection}
+            handle={handle}
+            homeLabel={tBreadcrumb("home")}
+          />
 
-            <CollectionToolbar
-              filterSheet={
-                <FilterSidebarSheet
-                  label={filtersLabel}
-                  trigger={
-                    <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                      <SlidersHorizontalIcon className="size-4" />
-                      <span>{filtersLabel}</span>
-                      <Suspense fallback={null}>
-                        <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
-                      </Suspense>
-                    </button>
-                  }
-                >
-                  <FilterPendingScope>
-                    <CollectionFilters
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </FilterSidebarSheet>
-              }
-              sortSelect={
-                <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
-                  <CollectionsSortSelect exclude={sortExclude} />
-                </Suspense>
-              }
-            />
-
-            <FilterPendingScope>
-              <CollectionResultsGrid
-                locale={locale}
-                collectionResultsDataPromise={collectionResultsDataPromise}
+          <Container>
+            <Sections className="gap-5">
+              <CollectionToolbar
+                filterSheet={
+                  <FilterSidebarSheet
+                    label={filtersLabel}
+                    trigger={
+                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                        <SlidersHorizontalIcon className="size-4" />
+                        <span>{filtersLabel}</span>
+                        <Suspense fallback={null}>
+                          <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
+                        </Suspense>
+                      </button>
+                    }
+                  >
+                    <FilterPendingScope>
+                      <CollectionFilters
+                        collectionResultsDataPromise={collectionResultsDataPromise}
+                      />
+                    </FilterPendingScope>
+                  </FilterSidebarSheet>
+                }
+                sortSelect={
+                  <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
+                    <CollectionsSortSelect exclude={sortExclude} />
+                  </Suspense>
+                }
               />
-            </FilterPendingScope>
-          </Sections>
-        </Container>
+
+              <FilterPendingScope>
+                <CollectionResultsGrid
+                  locale={locale}
+                  collectionResultsDataPromise={collectionResultsDataPromise}
+                />
+              </FilterPendingScope>
+            </Sections>
+          </Container>
+        </Sections>
       </Page>
     </FilterTransitionProvider>
   );
@@ -103,7 +106,7 @@ function CollectionHeader({
   handle: string;
   homeLabel: string;
 }) {
-  const { title, description, updatedAt } = collection;
+  const { description, image, title, updatedAt } = collection;
 
   const breadcrumbItems = [
     { name: homeLabel, path: "/" },
@@ -114,12 +117,18 @@ function CollectionHeader({
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
       <CollectionSchema collection={{ handle, title, description, updatedAt }} />
-      <div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl">
-          <Link href={`/collections/${handle}`}>{title}</Link>
-        </h1>
-        {description && <p className="mt-1 leading-6 text-muted-foreground">{description}</p>}
-      </div>
+      {image ? (
+        <CollectionHero image={image} title={title} />
+      ) : (
+        <Container>
+          <div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl">
+              <Link href={`/collections/${handle}`}>{title}</Link>
+            </h1>
+            {description && <p className="mt-1 leading-6 text-muted-foreground">{description}</p>}
+          </div>
+        </Container>
+      )}
     </>
   );
 }
