@@ -214,7 +214,7 @@ async function ProductInfoArea({
             <ProductInfoOptions
               availableValues={availableValues}
               options={options}
-              selectedOptions={{}}
+              selectedOptions={defaultSelectedOptions(product)}
               handle={handle}
               t={t}
               hideImages

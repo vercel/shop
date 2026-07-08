@@ -33,7 +33,9 @@ The page receives `searchParams` as a promise and derives two things from it. `p
 
 The `buildOptionUrl()` helper in `lib/product.ts` computes the target URL for each option — a pure merge of the current selection with the changed option, no variant lookup required. When no option params are present, the page skips the variant query and renders the cached default variant.
 
-Swatch availability comes from Shopify's `encodedVariantAvailability` field, decoded in `lib/shopify/encoded-variants.ts` into the set of in-stock values per option. Unavailable options render as inert `<span>` elements instead of links.
+While the fast options promise resolves, the picker streams behind a Suspense fallback that renders with the **default selection** already highlighted (`defaultSelectedOptions(product)`), not an empty selection. For the common no-params load the resolved highlight matches the fallback, so nothing moves; a deep link to a non-default variant shifts the highlight by one pill rather than popping a selection in from nothing.
+
+Swatch availability comes from Shopify's `encodedVariantAvailability` field, decoded in `lib/shopify/encoded-variants.ts` into the set of in-stock values per option. Text option pills render in three tiers — the selected value gets a `foreground` (near-black) border and text, other in-stock values a `muted-foreground` (dark gray) border and text that darkens toward the selected treatment on hover, and unavailable values a lighter `border`-toned, struck-through, `cursor-not-allowed` state. Unavailable options render as inert `<span>` elements instead of links.
 
 Options with a single value render as a plain `Name: Value` label without a picker — there is no choice to surface, but the attribute is still useful information to the shopper (e.g. `Finish: Natural White Oak` on a one-variant product). Shopify's synthetic `Title: Default Title` option (emitted for products with no variant axes) is the only single-value option that is hidden entirely.
 
