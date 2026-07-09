@@ -2,7 +2,7 @@
 
 import type { ShopAnalytics } from "@shopify/hydrogen";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 
 import { useCart } from "@/components/cart/context";
 import {
@@ -32,9 +32,12 @@ export function ShopifyAnalyticsClient({
   const searchParams = useSearchParams();
   const search = searchParams.toString();
 
+  const init = useEffectEvent(() =>
+    initAnalytics({ consentDomain, publicStorefrontAccessToken, shop }),
+  );
+
   useEffect(() => {
-    initAnalytics({ consentDomain, publicStorefrontAccessToken, shop });
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- the bus is a create-once singleton
+    init();
   }, []);
 
   useEffect(() => {
@@ -49,9 +52,10 @@ export function ShopifyAnalyticsClient({
 }
 
 export function ProductViewTracker({ product }: { product: ProductViewPayload }) {
+  const fireProductView = useEffectEvent(() => trackProductView(product));
+
   useEffect(() => {
-    trackProductView(product);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- one view per product navigation
+    fireProductView();
   }, [product.id, product.variantId]);
 
   return null;
@@ -62,9 +66,10 @@ export function CollectionViewTracker({
 }: {
   collection: { handle: string; id: string };
 }) {
+  const fireCollectionView = useEffectEvent(() => trackCollectionView(collection));
+
   useEffect(() => {
-    trackCollectionView(collection);
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- one view per collection navigation
+    fireCollectionView();
   }, [collection.id]);
 
   return null;
