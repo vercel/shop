@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -72,6 +73,7 @@ interface ProductsGridProps {
   fallbackSortKey?: string;
   limit: number;
   locale: Locale;
+  rememberedCollectionCookie?: string;
   searchParams?: SearchParamsPromise;
   title: string;
 }
@@ -84,6 +86,7 @@ export async function ProductsGrid({
   fallbackSortKey,
   limit,
   locale,
+  rememberedCollectionCookie,
   searchParams,
   title,
 }: ProductsGridProps) {
@@ -111,6 +114,7 @@ export async function ProductsGrid({
           limit={limit}
           locale={locale}
           outOfStockText={t("outOfStock")}
+          rememberedCollectionCookie={rememberedCollectionCookie}
           searchParams={searchParams}
         />
       </Suspense>
@@ -126,6 +130,7 @@ async function ProductsGridContent({
   limit,
   locale,
   outOfStockText,
+  rememberedCollectionCookie,
   searchParams,
 }: {
   campaignCollections?: readonly string[];
@@ -135,15 +140,24 @@ async function ProductsGridContent({
   limit: number;
   locale: Locale;
   outOfStockText: string;
+  rememberedCollectionCookie?: string;
   searchParams?: SearchParamsPromise;
 }) {
   // Reading searchParams (when passed) opts this grid into PPR's dynamic hole so it
   // streams in behind the skeleton.
   const params = searchParams ? await searchParams : undefined;
 
-  // A ?utm_campaign= match swaps in that collection; otherwise use the configured
-  // collection, or the fallback vector (catalog sort key, else the relevance search index).
-  const collectionHandle = resolveCampaignCollection(params, campaignCollections) ?? collection;
+  // A remembered collection (from a cookie set on a prior collection page) follows the
+  // campaign override but takes precedence over the configured collection/fallback.
+  const rememberedCollection = rememberedCollectionCookie
+    ? (await cookies()).get(rememberedCollectionCookie)?.value
+    : undefined;
+
+  // A ?utm_campaign= match swaps in that collection; otherwise the remembered
+  // collection, the configured collection, or the fallback vector (catalog sort key,
+  // else the relevance search index).
+  const collectionHandle =
+    resolveCampaignCollection(params, campaignCollections) ?? rememberedCollection ?? collection;
 
   const { products } = collectionHandle
     ? await getCollectionProducts({ collection: collectionHandle, limit, locale })

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { RememberCollection } from "@/components/collections/remember-collection";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -103,12 +104,15 @@ export default async function CollectionPage({
   });
 
   return (
-    <CollectionDetailPage
-      collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
-      handle={handle}
-      locale={locale}
-      searchStatePromise={searchStatePromise}
-    />
+    <>
+      <RememberCollection handle={handle} />
+      <CollectionDetailPage
+        collection={collection}
+        collectionResultsDataPromise={collectionResultsDataPromise}
+        handle={handle}
+        locale={locale}
+        searchStatePromise={searchStatePromise}
+      />
+    </>
   );
 }

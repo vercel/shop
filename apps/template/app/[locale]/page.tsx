@@ -65,6 +65,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
             fallbackSortKey="price-high-to-low"
             limit={5}
             locale={locale}
+            rememberedCollectionCookie="state_v0"
             searchParams={searchParams}
             title={t("pickedForYou")}
           />
