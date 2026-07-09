@@ -30,14 +30,17 @@ export async function getProductReviews(params: {
   cacheLife("max");
   cacheTag("products", `reviews-${params.handle}`);
 
-  // Vary the prompt per cache fill so the model doesn't reuse the same names across products.
-  const seed = Math.floor(Math.random() * 1_000_000);
+  // The model gravitates toward a few default names; pin each review to a random
+  // initial so the AI picks a different author per cache fill.
+  const initials = Array.from({ length: 3 }, () =>
+    String.fromCharCode(65 + Math.floor(Math.random() * 26)),
+  );
 
   const { object } = await generateObject({
     model: REVIEWS_MODEL,
     prompt:
       `Write three realistic customer reviews for the product "${params.title}". ` +
-      `Use distinct, varied author names (seed ${seed}). ` +
+      `The three authors' first names must start with the letters ${initials.join(", ")}. ` +
       "Each review must have a short body praising a specific detail, " +
       "a month-and-year date, and a star rating between 3 and 5. Keep them varied and authentic.",
     schema: reviewSchema,
