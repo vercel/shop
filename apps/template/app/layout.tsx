@@ -7,7 +7,7 @@ import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
-import { AnalyticsComponents } from "@/components/analytics";
+import { AnalyticsComponents, ShopifyAnalytics } from "@/components/analytics";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
@@ -60,6 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Suspense>
               <ActionBar>{agent.enabled && <AgentButton />}</ActionBar>
             </Suspense>
+            <ShopifyAnalytics locale={locale} />
           </CartProvider>
         </NextIntlClientProvider>
         <AnalyticsComponents />

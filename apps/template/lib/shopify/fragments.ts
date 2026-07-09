@@ -140,6 +140,7 @@ export const CART_FRAGMENT = `#graphql
       ... on ProductVariant {
         id
         title
+        sku
         selectedOptions {
           name
           value
@@ -154,6 +155,7 @@ export const CART_FRAGMENT = `#graphql
           id
           title
           handle
+          vendor
           featuredImage {
             ...ImageFields
           }
@@ -188,6 +190,7 @@ export const CART_FRAGMENT = `#graphql
       ... on ProductVariant {
         id
         title
+        sku
         selectedOptions {
           name
           value
@@ -202,6 +205,7 @@ export const CART_FRAGMENT = `#graphql
           id
           title
           handle
+          vendor
           featuredImage {
             ...ImageFields
           }
@@ -214,6 +218,7 @@ export const CART_FRAGMENT = `#graphql
   }
   fragment CartFields on Cart {
     id
+    updatedAt
     checkoutUrl
     totalQuantity
     note
@@ -276,6 +281,7 @@ export const CART_FRAGMENT = `#graphql
 export const COLLECTION_FIELDS_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   fragment CollectionFields on Collection {
+    id
     handle
     title
     description

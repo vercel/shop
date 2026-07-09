@@ -182,6 +182,7 @@ export interface Cart {
   note: string | null;
   shippingCost: Money | null;
   totalQuantity: number;
+  updatedAt?: string;
 }
 
 export interface CartLine {
@@ -228,6 +229,7 @@ export interface CartMerchandise {
   price?: Money;
   product: CartProduct;
   selectedOptions: SelectedOption[];
+  sku?: string | null;
   title: string;
 }
 
@@ -236,11 +238,13 @@ export interface CartProduct {
   handle: string;
   id: string;
   title: string;
+  vendor?: string;
 }
 
 export interface Collection {
   description: string;
   handle: string;
+  id?: string;
   image?: Image | null;
   path: string;
   seo: SEO;

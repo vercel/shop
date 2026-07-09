@@ -1,6 +1,7 @@
 import type { Collection } from "@/lib/types";
 
 interface ShopifyCollection {
+  id: string;
   handle: string;
   title: string;
   description: string;
@@ -19,6 +20,7 @@ interface ShopifyCollection {
 
 export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {
+    id: collection.id,
     handle: collection.handle,
     title: collection.title,
     description: collection.description,
