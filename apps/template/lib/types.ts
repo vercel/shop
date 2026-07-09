@@ -108,6 +108,14 @@ export interface ProductRating {
   value: number;
 }
 
+export interface ProductReview {
+  author: string;
+  body: string;
+  date: string;
+  id: string;
+  rating: number;
+}
+
 export interface ProductVariant {
   availableForSale: boolean;
   /** Bundle variants this variant is a component of (Shopify `groupedBy`); empty for non-components. */

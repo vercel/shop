@@ -122,7 +122,7 @@ export default async function ProductPage({
             variantPromise={variantPromise}
             locale={locale}
           />
-          <ProductReviewsSection />
+          <ProductReviewsSection handle={handle} locale={locale} />
           <RelatedProductsSection handle={handle} locale={locale} />
         </Sections>
       </Container>
