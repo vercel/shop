@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { io } from "next/cache";
 import { Suspense } from "react";
 
 import { RatingStars } from "@/components/ui/rating-stars";
@@ -22,6 +23,10 @@ function ProductReviewsSkeleton({ title }: { title: string }) {
 }
 
 async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
+  // io() suspends the prerender at this boundary so the skeleton ships in the static
+  // shell and the reviews stream in at request time. It's a no-op inside a use cache
+  // scope, so it must live here (outside getProductReviews), not in the cached fetch.
+  await io();
   const resolvedHandle = await handle;
   const [t, reviews] = await Promise.all([
     getTranslations("product"),
