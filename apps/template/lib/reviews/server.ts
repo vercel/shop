@@ -21,10 +21,6 @@ const reviewSchema = z.object({
     .length(3),
 });
 
-// EXPERIMENT: artificial delay to confirm the reviews section streams in behind its
-// Suspense boundary instead of blocking the PDP shell. Only fires on a cache miss.
-const EXPERIMENT_DELAY_MS = 10_000;
-
 export async function getProductReviews(params: {
   handle: string;
   locale?: string;
@@ -34,16 +30,18 @@ export async function getProductReviews(params: {
   cacheLife("max");
   cacheTag("products", `reviews-${params.handle}`);
 
-  await new Promise((resolve) => setTimeout(resolve, EXPERIMENT_DELAY_MS));
+  // Vary the prompt per cache fill so the model doesn't reuse the same names across products.
+  const seed = Math.floor(Math.random() * 1_000_000);
 
   const { object } = await generateObject({
     model: REVIEWS_MODEL,
     prompt:
       `Write three realistic customer reviews for the product "${params.title}". ` +
-      "Each review must have a distinct author, a short body praising a specific detail, " +
+      `Use distinct, varied author names (seed ${seed}). ` +
+      "Each review must have a short body praising a specific detail, " +
       "a month-and-year date, and a star rating between 3 and 5. Keep them varied and authentic.",
     schema: reviewSchema,
   });
 
-  return object.reviews;
+  return object.reviews.toSorted((a, b) => Date.parse(b.date) - Date.parse(a.date));
 }
