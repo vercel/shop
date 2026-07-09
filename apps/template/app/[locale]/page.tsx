@@ -60,11 +60,13 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
 
         <Container>
           <ProductsGrid
-            collectionUrl="/collections/all"
+            campaignCollections={CAMPAIGN_COLLECTIONS}
             columns={5}
+            fallbackSortKey="price-high-to-low"
             limit={5}
             locale={locale}
-            title={t("newArrivalsTitle")}
+            searchParams={searchParams}
+            title={t("pickedForYou")}
           />
         </Container>
 
@@ -101,13 +103,11 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
 
         <Container>
           <ProductsGrid
-            campaignCollections={CAMPAIGN_COLLECTIONS}
+            collectionUrl="/collections/all"
             columns={5}
-            fallbackSortKey="price-high-to-low"
             limit={5}
             locale={locale}
-            searchParams={searchParams}
-            title={t("pickedForYou")}
+            title={t("newArrivalsTitle")}
           />
         </Container>
 
