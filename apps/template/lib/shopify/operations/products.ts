@@ -8,7 +8,6 @@ import type {
   PriceRange,
   ProductCard,
   ProductDetails,
-  ProductReview,
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
@@ -600,48 +599,6 @@ export async function getProductRecommendationSets(params: {
   const sets = await fetchProductRecommendationSets(params);
   tagProducts([...sets.complementary, ...sets.related]);
   return sets;
-}
-
-// Stand-in reviews source. Mirrors the recommendation sets cache contract: a single
-// cached entry per product handle, invalidated by the product tag. Placeholder copy
-// lives here until the storefront wires a real reviews provider (metafields, app, etc.).
-const PLACEHOLDER_REVIEWS: ProductReview[] = [
-  {
-    author: "Alex Morgan",
-    body: "Exceeded my expectations. The quality is outstanding and it arrived earlier than promised. Would absolutely buy again.",
-    date: "March 2026",
-    id: "1",
-    rating: 5,
-  },
-  {
-    author: "Jordan Lee",
-    body: "Really happy with this purchase overall. Fit and finish are great — took off one star only because shipping took a little longer than expected.",
-    date: "February 2026",
-    id: "2",
-    rating: 4,
-  },
-  {
-    author: "Sam Rivera",
-    body: "Exactly as described and worth every penny. I've already recommended it to a couple of friends.",
-    date: "January 2026",
-    id: "3",
-    rating: 5,
-  },
-];
-
-export async function getProductReviews(params: {
-  handle: string;
-  locale?: string;
-}): Promise<ProductReview[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `reviews-${params.handle}`);
-
-  // EXPERIMENT: artificial delay to confirm the reviews section streams in behind its
-  // Suspense boundary instead of blocking the PDP shell. Only fires on a cache miss.
-  await new Promise((resolve) => setTimeout(resolve, 10000));
-
-  return PLACEHOLDER_REVIEWS.filter((review) => review.rating >= 3);
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql

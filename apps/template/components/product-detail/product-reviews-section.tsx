@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getProductReviews } from "@/lib/shopify/operations/products";
+import { getProductReviews } from "@/lib/reviews/server";
 
 const REVIEW_COUNT = 3;
 
@@ -22,7 +22,15 @@ function ProductReviewsSkeleton({ title }: { title: string }) {
   );
 }
 
-async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
+async function Render({
+  handle,
+  locale,
+  title,
+}: {
+  handle: string | Promise<string>;
+  locale: Locale;
+  title: string;
+}) {
   // io() suspends the prerender at this boundary so the skeleton ships in the static
   // shell and the reviews stream in at request time. It's a no-op inside a use cache
   // scope, so it must live here (outside getProductReviews), not in the cached fetch.
@@ -30,7 +38,7 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
   const resolvedHandle = await handle;
   const [t, reviews] = await Promise.all([
     getTranslations("product"),
-    getProductReviews({ handle: resolvedHandle, locale }),
+    getProductReviews({ handle: resolvedHandle, locale, title }),
   ]);
 
   if (reviews.length === 0) return null;
@@ -65,15 +73,17 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
 export async function ProductReviewsSection({
   handle,
   locale,
+  title,
 }: {
   handle: string | Promise<string>;
   locale: Locale;
+  title: string;
 }) {
   const t = await getTranslations("product");
 
   return (
     <Suspense fallback={<ProductReviewsSkeleton title={t("reviewsTitle")} />}>
-      <Render handle={handle} locale={locale} />
+      <Render handle={handle} locale={locale} title={title} />
     </Suspense>
   );
 }
