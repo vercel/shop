@@ -596,6 +596,9 @@ export async function getProductRecommendationSets(params: {
   cacheLife("max");
   cacheTag("products", `complementary-${params.handle}`, `recommendations-${params.handle}`);
 
+  // EXPERIMENT: artificial delay to observe PDP streaming behavior on cache miss.
+  await new Promise((resolve) => setTimeout(resolve, 10000));
+
   const sets = await fetchProductRecommendationSets(params);
   tagProducts([...sets.complementary, ...sets.related]);
   return sets;

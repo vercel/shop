@@ -27,8 +27,6 @@ export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
 
 async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
   const resolvedHandle = await handle;
-  // EXPERIMENT: artificial delay to observe PDP streaming behavior.
-  await new Promise((resolve) => setTimeout(resolve, 10000));
   const [t, { related }] = await Promise.all([
     getTranslations("product"),
     getProductRecommendationSets({ handle: resolvedHandle, locale }),
