@@ -30,7 +30,10 @@ let bus: StorefrontAnalytics | null = null;
 let shopConfig: ShopAnalytics | null = null;
 let lastCart: AnalyticsCart | null = null;
 // Trackers are leaf components whose effects run before the initializer's, so
-// pre-init publishes queue until the bus exists.
+// pre-init publishes queue until the bus exists. The bus may never initialize
+// (e.g. the analytics loader bails out for the session), so the queue is capped
+// to drop the oldest entries and avoid unbounded growth / a memory leak.
+const MAX_QUEUE_LENGTH = 100;
 let queue: Array<(bus: StorefrontAnalytics) => void> = [];
 
 export function initAnalytics({
@@ -56,6 +59,9 @@ function withBus(publish: (bus: StorefrontAnalytics) => void): void {
   if (bus) {
     publish(bus);
   } else {
+    // Cap the pre-init queue: if the bus never initializes, drop the oldest
+    // pending publishes so the queue cannot grow without bound.
+    if (queue.length >= MAX_QUEUE_LENGTH) queue.shift();
     queue.push(publish);
   }
 }
