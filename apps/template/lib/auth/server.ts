@@ -19,7 +19,7 @@ function trimTrailingSlash(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
-function getAuthBaseUrl(): string {
+export function getAuthBaseUrl(): string {
   const explicitUrl = process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
   if (explicitUrl) return trimTrailingSlash(explicitUrl);
 
