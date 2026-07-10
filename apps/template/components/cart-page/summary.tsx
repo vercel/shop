@@ -97,7 +97,7 @@ export function Summary({ locale }: SummaryProps) {
       <div className="grid gap-2.5">
         <ShopPayButton
           checkoutUrl={cart.checkoutUrl}
-          channel="hydrogen"
+          channel="headless"
           disabled={isUpdatingCart}
           width="100%"
           borderRadius="8px"

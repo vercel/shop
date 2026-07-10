@@ -388,8 +388,8 @@ function BuyButtonsFallback({
   }
   return (
     <div className="grid grid-cols-2 gap-2.5">
-      <div className={cn("h-12 rounded-lg bg-shop", !allInStock && "invisible")} />
-      <div className="flex items-center justify-center rounded-lg h-12 bg-primary text-primary-foreground text-sm font-medium">
+      <div className={cn("h-[43px] rounded-lg bg-shop", !allInStock && "invisible")} />
+      <div className="flex items-center justify-center rounded-lg h-[43px] bg-primary text-primary-foreground text-sm font-medium">
         {allInStock ? t("addToCart") : t("outOfStock")}
       </div>
     </div>

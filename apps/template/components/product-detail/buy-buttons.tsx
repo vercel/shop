@@ -78,7 +78,7 @@ export function BuyButtons({
           <ShopPayButton
             checkoutUrl={checkoutOrigin}
             variants={[{ id: selectedVariantId, quantity: 1 }]}
-            channel="hydrogen"
+            channel="headless"
             disabled={isOutOfStock || requiresBundleConfiguration}
             width="100%"
             borderRadius="8px"
@@ -89,7 +89,7 @@ export function BuyButtons({
         type="button"
         disabled={isOutOfStock || requiresBundleConfiguration}
         onClick={handleAddToCart}
-        className="flex-1 justify-center h-12"
+        className="flex-1 justify-center h-[43px]"
       >
         {getButtonText()}
       </Button>

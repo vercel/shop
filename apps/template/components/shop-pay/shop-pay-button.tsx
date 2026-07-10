@@ -12,7 +12,8 @@ import { createElement, type CSSProperties, type ReactElement, useEffect } from 
 // Hydrogen's own `@shopify/hydrogen/react` ShopPayButton hardcodes the checkout
 // origin to `window.location.origin`, which is this storefront's domain — wrong
 // for a headless store. This wrapper takes the same core helpers but keeps
-// `checkoutUrl` explicit so it resolves to the Shopify checkout origin.
+// `checkoutUrl` explicit so it resolves to the Shopify checkout origin, and
+// defaults `channel` to "headless" since this template is not a Hydrogen app.
 export interface ShopPayButtonProps extends ShopPayButtonOptions {
   className?: string;
   loadScript?: boolean;
@@ -20,6 +21,7 @@ export interface ShopPayButtonProps extends ShopPayButtonOptions {
 }
 
 export function ShopPayButton({
+  channel = "headless",
   checkoutUrl,
   className,
   loadScript = true,
@@ -37,7 +39,7 @@ export function ShopPayButton({
 
   const style = getShopPayButtonStyleProperties(options);
   const element = createElement(SHOP_PAY_BUTTON_TAG_NAME, {
-    ...getShopPayButtonAttributes({ ...options, checkoutUrl }),
+    ...getShopPayButtonAttributes({ ...options, channel, checkoutUrl }),
     ...(className ? { className } : {}),
     ...(Object.keys(style).length > 0 ? { style } : {}),
   });
