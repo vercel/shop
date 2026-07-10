@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { SearchViewTracker } from "@/components/analytics-client";
 import {
   FilterPendingScope,
   FilterTransitionProvider,
@@ -83,6 +84,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <Page className="pt-2.5 md:pt-10">
+      <Suspense>
+        <SearchViewTracker />
+      </Suspense>
       <Container>
         <FilterTransitionProvider>
           <Sections className="gap-5">

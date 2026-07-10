@@ -62,8 +62,10 @@ interface ShopifyCartLine {
       handle: string;
       id: string;
       title: string;
+      vendor: string;
     };
     selectedOptions: Array<{ name: string; value: string }>;
+    sku?: string | null;
     title: string;
   };
   quantity: number;
@@ -90,6 +92,7 @@ export interface ShopifyCart {
   lines: { nodes: ShopifyCartLine[] };
   note: string | null;
   totalQuantity: number;
+  updatedAt: string;
 }
 
 function transformImage(image: ShopifyImage | null): Image {
@@ -106,6 +109,7 @@ function transformCartProduct(product: ShopifyCartLine["merchandise"]["product"]
     id: product.id,
     handle: product.handle,
     title: product.title,
+    vendor: product.vendor,
     featuredImage: transformImage(product.featuredImage),
   };
 }
@@ -165,6 +169,7 @@ function transformCartLine(line: ShopifyCartLine): CartLine {
     merchandise: {
       id: line.merchandise.id,
       title: line.merchandise.title,
+      sku: line.merchandise.sku,
       image: line.merchandise.image ? transformImage(line.merchandise.image) : undefined,
       price: line.merchandise.price,
       selectedOptions: line.merchandise.selectedOptions,
@@ -193,6 +198,7 @@ function transformShippingCost(cart: ShopifyCart): Money | null {
 export function transformShopifyCart(cart: ShopifyCart): Cart {
   return {
     id: cart.id,
+    updatedAt: cart.updatedAt,
     checkoutUrl: cart.checkoutUrl,
     totalQuantity: cart.totalQuantity,
     note: cart.note,

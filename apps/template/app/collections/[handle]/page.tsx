@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { CollectionViewTracker } from "@/components/analytics-client";
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
@@ -103,12 +104,17 @@ export default async function CollectionPage({
   });
 
   return (
-    <CollectionDetailPage
-      collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
-      handle={handle}
-      locale={locale}
-      searchStatePromise={searchStatePromise}
-    />
+    <>
+      {collection.id && (
+        <CollectionViewTracker collection={{ handle: collection.handle, id: collection.id }} />
+      )}
+      <CollectionDetailPage
+        collection={collection}
+        collectionResultsDataPromise={collectionResultsDataPromise}
+        handle={handle}
+        locale={locale}
+        searchStatePromise={searchStatePromise}
+      />
+    </>
   );
 }

@@ -5,7 +5,9 @@ description: Add Vercel Analytics, Vercel Speed Insights, and Google Tag Manager
 
 # Enable Analytics
 
-The current storefront includes Vercel Analytics and Vercel Speed Insights by default. This skill adds the same default wiring to older storefronts and can also add Google Tag Manager using the recommended integration.
+The current storefront includes Vercel Analytics, Vercel Speed Insights, and first-party Shopify analytics (`ShopifyAnalytics` in `components/analytics.tsx`, backed by `@shopify/hydrogen`'s `createStorefrontAnalytics`) by default. This skill adds the Vercel wiring to older storefronts and can also add Google Tag Manager using the recommended integration. To adopt the Shopify first-party events on an older storefront, use `/vercel-shop:update-shop` with the `shopify-first-party-analytics` rollout-log entry instead.
+
+When editing `components/analytics.tsx` in a current storefront, preserve the `ShopifyAnalytics` export — this skill's snippets only cover the Vercel `AnalyticsComponents` portion of that file.
 
 ## Before you start
 

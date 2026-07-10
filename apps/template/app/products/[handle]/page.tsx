@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { ProductViewTracker } from "@/components/analytics-client";
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
@@ -113,6 +114,16 @@ export default async function ProductPage({
 
   return (
     <Page className="pt-0">
+      <ProductViewTracker
+        product={{
+          id: product.id,
+          price: (product.defaultVariant?.price ?? product.price).amount,
+          title: product.title,
+          variantId: product.defaultVariant?.id ?? product.defaultVariantId ?? product.id,
+          variantTitle: product.defaultVariant?.title ?? product.title,
+          vendor: product.vendor ?? "",
+        }}
+      />
       <Container className="bg-background">
         <Sections>
           <ProductDetailSection
