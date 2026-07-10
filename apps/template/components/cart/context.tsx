@@ -543,3 +543,13 @@ export function useCart() {
   }
   return context;
 }
+
+/** Seeds the root provider once from a server-fetched cart. Safe to call from every boundary. */
+export function useSeedCart(initialCart: Cart | null) {
+  const { cart, setCart } = useCart();
+  useEffect(() => {
+    if (cart === null && initialCart !== null) {
+      setCart(initialCart);
+    }
+  }, [cart, initialCart, setCart]);
+}
