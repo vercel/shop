@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart/context";
 import { useCartRender } from "@/components/cart/context-sync";
 import { DiscountForm } from "@/components/cart/discount-form";
+import { ShopPayButton } from "@/components/shop-pay/shop-pay-button";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 import { cn, formatPrice } from "@/lib/utils";
@@ -93,12 +94,21 @@ export function Summary({ locale }: SummaryProps) {
         <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
       </div>
 
-      <CheckoutLink
-        checkoutUrl={cart.checkoutUrl}
-        isUpdatingCart={isUpdatingCart}
-        updatingText={t("updatingCart")}
-        checkoutText={t("completeCheckout")}
-      />
+      <div className="grid gap-2.5">
+        <ShopPayButton
+          checkoutUrl={cart.checkoutUrl}
+          channel="hydrogen"
+          disabled={isUpdatingCart}
+          width="100%"
+          borderRadius="8px"
+        />
+        <CheckoutLink
+          checkoutUrl={cart.checkoutUrl}
+          isUpdatingCart={isUpdatingCart}
+          updatingText={t("updatingCart")}
+          checkoutText={t("completeCheckout")}
+        />
+      </div>
     </div>
   );
 }

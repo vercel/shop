@@ -18,7 +18,6 @@ import {
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSpecs } from "@/components/product-detail/product-specs";
 import { ProductSchema } from "@/components/product-detail/schema";
-import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import { siteConfig } from "@/lib/config";
@@ -180,6 +179,7 @@ async function ProductInfoArea({
   const t = await getTranslations("product");
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
+  const checkoutOrigin = `https://${process.env.SHOPIFY_STORE_DOMAIN}`;
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
@@ -238,6 +238,7 @@ async function ProductInfoArea({
           handle={handle}
           featuredImage={featuredImage}
           availableForSale={availableForSale}
+          checkoutOrigin={checkoutOrigin}
         />
       ) : (
         <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
@@ -247,6 +248,7 @@ async function ProductInfoArea({
             featuredImage={featuredImage}
             availableForSale={availableForSale}
             variantPromise={variantPromise}
+            checkoutOrigin={checkoutOrigin}
           />
         </Suspense>
       )}
@@ -347,12 +349,14 @@ async function ResolvedBuyButtons({
   featuredImage,
   availableForSale,
   variantPromise,
+  checkoutOrigin,
 }: {
   title: string;
   handle: string;
   featuredImage: ProductDetails["featuredImage"];
   availableForSale: boolean;
   variantPromise: Promise<ProductVariant | undefined>;
+  checkoutOrigin: string;
 }) {
   const selectedVariant = await variantPromise;
   return (
@@ -362,6 +366,7 @@ async function ResolvedBuyButtons({
       handle={handle}
       featuredImage={featuredImage}
       availableForSale={availableForSale}
+      checkoutOrigin={checkoutOrigin}
     />
   );
 }
@@ -383,15 +388,7 @@ function BuyButtonsFallback({
   }
   return (
     <div className="grid grid-cols-2 gap-2.5">
-      <div
-        className={cn(
-          "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
-          !allInStock && "invisible",
-        )}
-      >
-        <span className="text-sm font-medium">{t("buyWithShop")}</span>
-        <ShopLogo className="h-4 w-auto" />
-      </div>
+      <div className={cn("h-12 rounded-lg bg-shop", !allInStock && "invisible")} />
       <div className="flex items-center justify-center rounded-lg h-12 bg-primary text-primary-foreground text-sm font-medium">
         {allInStock ? t("addToCart") : t("outOfStock")}
       </div>

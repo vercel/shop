@@ -1,17 +1,13 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/context";
+import { ShopPayButton } from "@/components/shop-pay/shop-pay-button";
 import { Button } from "@/components/ui/button";
-import { buyNowAction } from "@/lib/cart/action";
 import { variantToOptimisticInfo } from "@/lib/product";
 import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-import { ShopLogo } from "./shop-logo";
 
 // Client-facing projection of the selected variant — only the fields the buy
 // controls need. Bundle relationship arrays stay on the server; the gating they
@@ -32,28 +28,19 @@ export function BuyButtons({
   handle,
   featuredImage,
   availableForSale = true,
+  checkoutOrigin,
 }: {
   selectedVariant: BuyButtonVariant | undefined;
   title: string;
   handle: string;
   featuredImage: Image | null;
   availableForSale?: boolean;
+  checkoutOrigin: string;
 }) {
   const selectedVariantId = selectedVariant?.id;
 
   const t = useTranslations("product");
-  const [, startBuyNowTransition] = useTransition();
-  const [isBuyingNow, setIsBuyingNow] = useState(false);
   const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
-
-  // Reset pending state when returning from checkout (bfcache / back navigation)
-  useEffect(() => {
-    const handlePageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) setIsBuyingNow(false);
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
 
   const handleAddToCart = () => {
     if (selectedVariantId && selectedVariant) {
@@ -67,23 +54,6 @@ export function BuyButtons({
         }),
       );
     }
-  };
-
-  const handleBuyNow = () => {
-    if (!selectedVariantId) return;
-    setIsBuyingNow(true);
-    startBuyNowTransition(async () => {
-      try {
-        const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
-        if (checkoutUrl) {
-          window.location.href = checkoutUrl;
-        } else {
-          setIsBuyingNow(false);
-        }
-      } catch {
-        setIsBuyingNow(false);
-      }
-    });
   };
 
   if (!selectedVariant) {
@@ -103,24 +73,18 @@ export function BuyButtons({
 
   return (
     <div className="grid grid-cols-2 gap-2.5">
-      <button
-        type="button"
-        className={cn(
-          "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
-          !availableForSale && "invisible",
-        )}
-        disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
-        onClick={handleBuyNow}
-      >
-        {isBuyingNow ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <>
-            <span className="text-sm font-medium">{t("buyWithShop")}</span>
-            <ShopLogo className="h-4 w-auto" />
-          </>
-        )}
-      </button>
+      <div className={cn(!availableForSale && "invisible")}>
+        {selectedVariantId ? (
+          <ShopPayButton
+            checkoutUrl={checkoutOrigin}
+            variants={[{ id: selectedVariantId, quantity: 1 }]}
+            channel="hydrogen"
+            disabled={isOutOfStock || requiresBundleConfiguration}
+            width="100%"
+            borderRadius="8px"
+          />
+        ) : null}
+      </div>
       <Button
         type="button"
         disabled={isOutOfStock || requiresBundleConfiguration}

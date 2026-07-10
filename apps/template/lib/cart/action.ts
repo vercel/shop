@@ -266,43 +266,6 @@ export async function persistAgentCartAction(cartId: string): Promise<void> {
   await setCartIdCookie(cartId);
 }
 
-/** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */
-export async function buyNowAction(
-  merchandiseId: string,
-  quantity: number = 1,
-): Promise<{ checkoutUrl: string | null; error?: string }> {
-  if (!merchandiseId) {
-    return { checkoutUrl: null, error: "Invalid product ID" };
-  }
-
-  const domain = process.env.SHOPIFY_STORE_DOMAIN;
-  if (!domain) {
-    return { checkoutUrl: null, error: "Store domain not configured" };
-  }
-
-  // Extract numeric ID from GID (e.g. "gid://shopify/ProductVariant/123" → "123")
-  let numericId: string | null = merchandiseId;
-  if (merchandiseId.startsWith("gid://") || !merchandiseId.match(/^\d+$/)) {
-    let decoded = merchandiseId;
-    if (!decoded.startsWith("gid://")) {
-      try {
-        decoded = atob(decoded);
-      } catch {
-        return { checkoutUrl: null, error: "Invalid variant ID" };
-      }
-    }
-    const match = decoded.match(/gid:\/\/shopify\/\w+\/(\d+)/);
-    numericId = match?.[1] ?? null;
-  }
-
-  if (!numericId) {
-    return { checkoutUrl: null, error: "Could not resolve variant ID" };
-  }
-
-  const checkoutUrl = `https://${domain}/cart/${numericId}:${quantity}?payment=shop_pay`;
-  return { checkoutUrl };
-}
-
 export async function prepareCheckoutAction(): Promise<{
   checkoutUrl: string | null;
 }> {
