@@ -1,4 +1,5 @@
 import {
+  createShopifyRequestContext,
   createStorefrontClient,
   type GraphQLFormattedError,
   type I18nConfig,
@@ -48,10 +49,13 @@ const customFetchApi: typeof fetch = async (input, init) => {
 function getClient(country: string, language: string): StorefrontClient {
   return createStorefrontClient({
     type: "public",
+    requestContext: createShopifyRequestContext({
+      i18n: { country, language } as I18nConfig,
+      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`),
+    }),
     config: {
       apiVersion: SHOPIFY_API_VERSION,
       fetch: customFetchApi,
-      i18n: { country, language } as I18nConfig,
       publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,
       storeDomain: SHOPIFY_STORE_DOMAIN,
     },
