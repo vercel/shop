@@ -103,6 +103,15 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
   }, [input, messages, persistedChat.chatId]);
 
   useEffect(() => {
+    if (status !== "ready" || !pinnedRef.current) return;
+    const frame = requestAnimationFrame(() => {
+      const scroller = scrollRef.current;
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [status]);
+
+  useEffect(() => {
     onContentChange(messages.length > 0 || input.trim().length > 0);
   }, [input, messages.length, onContentChange]);
 
