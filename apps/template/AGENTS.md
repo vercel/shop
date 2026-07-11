@@ -24,9 +24,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## The AI assistant runs on eve — read its bundled docs
+## The AI assistant uses AI SDK — read its bundled docs
 
-The opt-in assistant under `agent/` is built on **eve**, a fast-moving pre-1.0 framework — don't rely on training-data recall of its APIs. Before writing or changing anything under `agent/`, read the relevant guide in `node_modules/eve/docs/` (start at its `README.md`).
+The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK. Before changing the route, agent, tools, or `useChat` client, read the relevant guide in `node_modules/ai/docs/`.
 
 ## Critical Rules (Always Apply)
 
@@ -35,7 +35,6 @@ The opt-in assistant under `agent/` is built on **eve**, a fast-moving pre-1.0 f
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
-6. **Agent tool code (`agent/`) must not import `next/cache`, `server-only`, or `next/headers`** (even transitively) — it runs in eve's runtime, not Next. Get Shopify data via `lib/shopify/fetch.ts`, not the `next/cache`-wrapped `operations/*`.
 
 ## Storefront Architecture Contract
 
@@ -152,7 +151,7 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built on eve.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
 
 The default deployment story is single-locale with clean, unprefixed URLs (`/products/...`). The repo keeps locale catalogs and helpers in place so adding multi-locale routing later is straightforward, but that routing is not enabled by default.
 
@@ -168,8 +167,8 @@ pnpm format
 
 ## Directory Structure
 
-- `app/` for routes
-- `agent/` for the eve AI assistant (mounted by `withEve()` in `next.config.ts`)
+- `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
+- `lib/agent/` for the AI SDK agent, tools, and json-render catalog
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
