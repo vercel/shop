@@ -137,8 +137,12 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `#graphql
 export const getCart = cache(async (): Promise<Cart | undefined> => {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
-  return fetchCart(cartId);
+  return getCartById(cartId);
 });
+
+export async function getCartById(cartId: string): Promise<Cart | undefined> {
+  return fetchCart(cartId);
+}
 
 /**
  * Use in streaming contexts (e.g., the AI agent) where `cookies().set()` won't work.

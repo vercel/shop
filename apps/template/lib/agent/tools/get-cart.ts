@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getCart } from "@/lib/shopify/operations/cart";
+import { getCartById } from "@/lib/shopify/operations/cart";
 
 import { getAgentContext } from "../server";
 
@@ -14,7 +14,7 @@ export function getCartTool() {
       if (!cartId) return { empty: true, items: [], message: "Cart is empty", success: true };
 
       try {
-        const cart = await getCart(cartId);
+        const cart = await getCartById(cartId);
         if (!cart || cart.lines.length === 0) {
           return { empty: true, items: [], message: "Cart is empty", success: true };
         }

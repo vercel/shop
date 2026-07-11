@@ -8,6 +8,7 @@ appliesTo:
   - all
 paths:
   - apps/template/lib/shopify/operations/cart.ts
+  - apps/template/lib/agent/tools/get-cart.ts
   - apps/template/components/nav/cart.tsx
   - apps/template/components/nav/cart-client.tsx
   - apps/template/components/cart/context.tsx
@@ -16,7 +17,7 @@ paths:
 
 ## Summary
 
-`getCart()` is now wrapped in `React.cache` and takes no arguments — it resolves the cart-id cookie internally, so every server boundary in a single render (the nav cart icon and the cart page) shares one Shopify fetch instead of issuing duplicate queries. On the client, the two duplicated effect-based seeders (in `cart-client.tsx` and `context-sync.tsx`) collapse into one shared `useSeedCart(initialCart)` hook exported from the cart provider.
+`getCart()` is now wrapped in `React.cache` and takes no arguments — it resolves the cart-id cookie internally, so every server boundary in a single render (the nav cart icon and the cart page) shares one Shopify fetch instead of issuing duplicate queries. `getCartById()` remains available for the streaming agent, which may create a cart before its response sets the cart-id cookie. On the client, the two duplicated effect-based seeders (in `cart-client.tsx` and `context-sync.tsx`) collapse into one shared `useSeedCart(initialCart)` hook exported from the cart provider.
 
 ## Why it matters
 
@@ -31,7 +32,7 @@ paths:
 
 ## Safe to skip when
 
-- A caller genuinely needs to fetch an arbitrary cart by id that is not the cookie's cart. (No such caller exists in the template; the id param was only ever passed the cookie value.)
+- A caller genuinely needs to fetch an arbitrary cart by id that is not yet available from the request cookie. Keep that path explicit with `getCartById()` rather than adding an optional id back to the request-deduped `getCart()` API.
 
 ## Validation
 
