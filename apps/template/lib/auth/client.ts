@@ -3,6 +3,8 @@
 import { genericOAuthClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
+import { auth } from "@/lib/config";
+
 import type { CustomerSession } from "./server";
 
 export const authClient = createAuthClient({
@@ -41,7 +43,7 @@ export function useSession(): SessionState {
 }
 
 export function signIn(callbackURL = "/account"): void {
-  authClient.signIn.oauth2({ providerId: "shopify", callbackURL });
+  authClient.signIn.oauth2({ providerId: auth.providerId, callbackURL });
 }
 
 export async function signOut(): Promise<void> {

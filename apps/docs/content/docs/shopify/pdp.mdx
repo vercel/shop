@@ -22,13 +22,17 @@ The PDP shell fetches the product's options and Shopify's encoded variant-availa
 
 The template ships with **no metafields wired in** by default. Namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults: an empty config means the product query is unchanged and nothing renders.
 
-To surface metafields on the PDP for your store, list the ones you populate in `productMetafieldIdentifiers` in `lib/config.ts`:
+To surface metafields on the PDP for your store, list the ones you populate in `pdp.specifications.metafields` in `shop.config.ts`:
 
 ```ts
-export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
-  { namespace: "custom", key: "material" },
-  { namespace: "custom", key: "warranty" },
-];
+pdp: {
+  specifications: {
+    metafields: [
+      { key: "material", namespace: "custom" },
+      { key: "warranty", namespace: "custom" },
+    ],
+  },
+}
 ```
 
 The product-detail query (`getProductByHandle` in `lib/shopify/operations/products.ts`) appends a `metafields(identifiers: [...])` selection built from that list, and `ProductSpecs` (`components/product-detail/product-specs.tsx`) renders them as a label/value "Specifications" list below the description. Optionally extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for your keys — keys without an entry fall back to a humanized version of the key.

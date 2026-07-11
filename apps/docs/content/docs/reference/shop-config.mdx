@@ -1,0 +1,88 @@
+---
+title: Shop Configuration
+description: Configure canonical storefront behavior for the agent, authentication, and product merchandising.
+type: reference
+---
+
+`shop.config.ts` is the template's canonical, secret-free configuration file. Use it for behavior that should be consistent across deployments and easy for a coding agent to discover, such as the shopping assistant model, authentication defaults, and PDP merchandising surfaces.
+
+Environment variables still own credentials and deployment-specific overrides. Shopify remains the source of product, recommendation, bundle, and metafield data.
+
+## Default configuration
+
+```ts
+export const shopConfig = {
+  agent: {
+    enabledByDefault: false,
+    maxSteps: 10,
+    model: "google/gemini-3.5-flash",
+    tools: [
+      "addCartNote",
+      "addToCart",
+      "browseCollection",
+      "getCart",
+      "getCatalogProduct",
+      "getProductDetails",
+      "getProductRecommendations",
+      "listCollections",
+      "navigateUser",
+      "removeFromCart",
+      "searchCatalog",
+      "searchProducts",
+      "searchShopPoliciesAndFaqs",
+      "updateCartItemQuantity",
+    ],
+  },
+  auth: {
+    enabledByDefault: false,
+    providerId: "shopify",
+  },
+  pdp: {
+    bundles: { enabled: true },
+    relatedProducts: { enabled: true, limit: 4 },
+    specifications: { metafields: [] },
+    upsells: { enabled: true, limit: 4 },
+  },
+} satisfies ShopConfig;
+```
+
+`lib/config.ts` resolves this static configuration with deployment environment variables and exports the values consumed by the app.
+
+## Agent
+
+- `enabledByDefault` controls whether the assistant is available when `NEXT_PUBLIC_ENABLE_AGENT` is unset.
+- `model` is the AI Gateway model passed to `ToolLoopAgent`.
+- `maxSteps` bounds the agent loop with AI SDK's `isStepCount()`.
+- `tools` is the allowlist exposed to the model. Remove a tool name to keep its implementation in the codebase without making it available to the agent.
+
+Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override `enabledByDefault` for a deployment.
+
+## Authentication
+
+- `enabledByDefault` controls whether customer authentication is active when `NEXT_PUBLIC_ENABLE_AUTH` is unset.
+- `providerId` is the better-auth OAuth provider identifier used by the Shopify Customer Account integration.
+
+Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the server-only better-auth and Shopify Customer Account credentials documented in [Environment Variables](/docs/reference/env-vars). The build validates those credentials whether auth is enabled by the file or by the environment override.
+
+## PDP merchandising
+
+- `bundles.enabled` shows or hides Shopify bundle relationships beside the buy section.
+- `upsells.enabled` shows or hides merchant-curated complementary products. `upsells.limit` controls the number of rows.
+- `relatedProducts.enabled` shows or hides Shopify's algorithmic related-product grid on PDP and cart pages. `relatedProducts.limit` controls its product and skeleton counts.
+- `specifications.metafields` lists Shopify product metafield namespace/key pairs to request and render as specifications.
+
+Disabling a surface prevents its component from rendering. The recommendation operation and existing cache strategy remain unchanged for enabled surfaces, so complementary and related products continue sharing one cached Shopify request when both are shown.
+
+## What does not belong here
+
+Do not put secrets, access tokens, store-specific product handles, or fetched Shopify data in `shop.config.ts`. Keep credentials in environment variables and merchandising data in Shopify.
+
+## Key files
+
+| File                                                   | Purpose                                                                |
+| ------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `shop.config.ts`                                       | Canonical static defaults and feature policy                           |
+| `lib/config.ts`                                        | Environment resolution plus site, navigation, and footer configuration |
+| `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist                   |
+| `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility                   |
+| `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                          |

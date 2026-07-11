@@ -5,7 +5,7 @@ description: Built-in customer authentication with better-auth and Shopify Custo
 
 The template includes built-in customer authentication using [better-auth](https://www.better-auth.com/) with the Shopify Customer Account API. When configured, customers can sign in via Shopify OIDC, view their profile, order history, and address book.
 
-Authentication is **opt-in via environment variables**. Without them, the storefront works as a guest-only experience and no auth UI is rendered.
+Authentication is opt-in by default. The canonical default lives in `shop.config.ts`, and a deployment can override it with `NEXT_PUBLIC_ENABLE_AUTH`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
 
 ## Configuration
 
@@ -18,7 +18,7 @@ SHOPIFY_CUSTOMER_CLIENT_ID="your-customer-client-id"
 SHOPIFY_CUSTOMER_CLIENT_SECRET="your-customer-client-secret"
 ```
 
-`next.config.ts` throws at build time if `NEXT_PUBLIC_ENABLE_AUTH="1"` is set without the three secrets. The flag must be `NEXT_PUBLIC_` so its value is available identically on server and client — probing the server-only secrets directly inside a component causes hydration mismatches under cache components.
+`auth.enabledByDefault` in `shop.config.ts` is `false`. Set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable auth for a deployment, or `"0"` to override an enabled file default. `next.config.ts` throws at build time whenever the resolved auth setting is enabled without the three secrets. The override must be `NEXT_PUBLIC_` so its value is available identically on server and client — probing the server-only secrets directly inside a component causes hydration mismatches under cache components. See [Shop Configuration](/docs/reference/shop-config) for the static config schema.
 
 Generate the auth secret with `openssl rand -base64 32`. The client ID and secret come from Shopify's Customer Account API.
 
@@ -48,7 +48,7 @@ The API route at `/api/auth/[...all]` handles all OAuth callbacks, session manag
 
 ### Feature gating
 
-The `isAuthEnabled` flag (from `lib/auth`) reads `auth.enabled` from `lib/config`, which is `process.env.NEXT_PUBLIC_ENABLE_AUTH === "1"`. When `false`:
+The `isAuthEnabled` flag (from `lib/auth`) reads the resolved `auth.enabled` value from `lib/config`. That value uses `NEXT_PUBLIC_ENABLE_AUTH` when set and otherwise falls back to `shopConfig.auth.enabledByDefault`. When `false`:
 
 - The account icon does not appear in the nav
 - `/account/login` and `/account/*` return 404
@@ -124,12 +124,12 @@ function AccountMenu() {
 
 The account pages read and write customer data through the Shopify Customer Account API — a separate GraphQL endpoint and schema from the Storefront API.
 
-| Module                               | Purpose                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/shopify/customer-account.ts`    | `customerAccountFetch()` — wraps `@shopify/hydrogen/customer-account`'s `createCustomerAccountClient`, which POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` with the customer's access token. The `shopId` is derived from the OIDC discovery document's `issuer` and cached. The endpoint is **not** on the storefront domain.                       |
-| `lib/shopify/operations/customer.ts` | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`.                                                                                                                                                                 |
-| `lib/shopify/transforms/customer.ts` | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                                                                                                                                                                                                          |
-| `lib/customer/action.ts`             | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.                                                                                                                                                                                         |
+| Module                               | Purpose                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `lib/shopify/customer-account.ts`    | `customerAccountFetch()` — wraps `@shopify/hydrogen/customer-account`'s `createCustomerAccountClient`, which POSTs to `https://shopify.com/{shopId}/account/customer/api/{version}/graphql` with the customer's access token. The `shopId` is derived from the OIDC discovery document's `issuer` and cached. The endpoint is **not** on the storefront domain. |
+| `lib/shopify/operations/customer.ts` | Queries (profile, orders, order detail, addresses) and mutations (address create/update/delete, profile update). Each call resolves the token via `requireSession()`.                                                                                                                                                                                           |
+| `lib/shopify/transforms/customer.ts` | Maps Customer Account API responses to the provider-agnostic domain types in `lib/types.ts`.                                                                                                                                                                                                                                                                    |
+| `lib/customer/action.ts`             | `"use server"` actions for the address and profile forms. They validate input, surface Shopify `userErrors`, and `revalidatePath` on success.                                                                                                                                                                                                                   |
 
 Order and profile pages are read-only server components wrapped in Suspense. Addresses and profile editing use client forms that call the server actions. Order requests are per-customer `POST`s, so responses are never shared across customers.
 

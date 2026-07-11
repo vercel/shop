@@ -21,7 +21,7 @@ import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
-import { siteConfig } from "@/lib/config";
+import { pdp, siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -251,9 +251,11 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      <BundleRelationships variant={product.defaultVariant} t={t} />
+      {pdp.bundles.enabled ? <BundleRelationships variant={product.defaultVariant} t={t} /> : null}
 
-      <ComplementaryProducts handle={handle} locale={locale} title={t("pairsWith")} />
+      {pdp.upsells.enabled ? (
+        <ComplementaryProducts handle={handle} locale={locale} title={t("pairsWith")} />
+      ) : null}
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
 

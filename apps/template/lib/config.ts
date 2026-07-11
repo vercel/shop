@@ -1,4 +1,5 @@
 import type { MenuItem } from "@/lib/shopify/types/menu";
+import { shopConfig } from "@/shop.config";
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
@@ -29,21 +30,21 @@ export const siteConfig = {
   url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
 } as const;
 
-export const auth = {
-  enabled: process.env.NEXT_PUBLIC_ENABLE_AUTH === "1",
-} as const;
-
 export const agent = {
-  enabled: process.env.NEXT_PUBLIC_ENABLE_AGENT === "1",
+  ...shopConfig.agent,
+  enabled: process.env.NEXT_PUBLIC_ENABLE_AGENT
+    ? process.env.NEXT_PUBLIC_ENABLE_AGENT === "1"
+    : shopConfig.agent.enabledByDefault,
 } as const;
 
-// Product metafields to surface on the PDP, by namespace + key. Empty by default:
-// namespaces are shop-specific, so a storefront opts in to the ones it populates.
-// Friendly labels for each key live in METAFIELD_LABELS (lib/shopify/transforms/product.ts).
-export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
-  // { namespace: "custom", key: "material" },
-  // { namespace: "reviews", key: "rating" },
-];
+export const auth = {
+  ...shopConfig.auth,
+  enabled: process.env.NEXT_PUBLIC_ENABLE_AUTH
+    ? process.env.NEXT_PUBLIC_ENABLE_AUTH === "1"
+    : shopConfig.auth.enabledByDefault,
+} as const;
+
+export const pdp = shopConfig.pdp;
 
 export const navItems: MenuItem[] = [
   {

@@ -1,7 +1,7 @@
 import { isStepCount, ToolLoopAgent } from "ai";
 
 import { catalog } from ".";
-import { siteConfig } from "../config";
+import { agent as agentConfig, siteConfig } from "../config";
 import type { Locale } from "../i18n";
 import type { ProductDetails } from "../types";
 import { addCartNoteTool } from "./tools/add-cart-note";
@@ -86,7 +86,7 @@ function createSystemPrompt(context: AgentContext): string {
   })}`;
 }
 
-const tools = {
+const availableTools = {
   addCartNote: addCartNoteTool(),
   addToCart: addToCartTool(),
   browseCollection: browseCollectionTool(),
@@ -103,11 +103,15 @@ const tools = {
   updateCartItemQuantity: updateCartItemTool(),
 };
 
+const tools = Object.fromEntries(
+  agentConfig.tools.map((name) => [name, availableTools[name]]),
+) as Pick<typeof availableTools, (typeof agentConfig.tools)[number]>;
+
 export function createAgent() {
   return new ToolLoopAgent({
     instructions: createSystemPrompt(getAgentContext()),
-    model: "google/gemini-3.5-flash",
-    stopWhen: isStepCount(10),
+    model: agentConfig.model,
+    stopWhen: isStepCount(agentConfig.maxSteps),
     tools,
   });
 }

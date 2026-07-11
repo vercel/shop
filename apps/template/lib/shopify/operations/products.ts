@@ -1,6 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { productMetafieldIdentifiers } from "@/lib/config";
+import { pdp } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Filter,
@@ -79,7 +79,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   }
 ` as const;
 
-// Opt-in metafields variant, selected when productMetafieldIdentifiers is non-empty.
+// Opt-in metafields variant, selected when pdp.specifications.metafields is non-empty.
 // Identifiers ride a $metafieldIdentifiers variable (not string interpolation) so the
 // document stays static and codegen-validatable.
 const GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY = `#graphql
@@ -108,13 +108,13 @@ export async function getProduct({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const response = productMetafieldIdentifiers.length
+  const response = pdp.specifications.metafields.length
     ? await storefront.request<{ productByHandle: ShopifyProduct }>(
         GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY,
         {
           variables: {
             handle,
-            metafieldIdentifiers: productMetafieldIdentifiers,
+            metafieldIdentifiers: pdp.specifications.metafields,
             country,
             language,
           },

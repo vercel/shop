@@ -6,9 +6,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
 
-const RECOMMENDATION_LIMIT = 4;
-
-export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
+export function RelatedProductsSectionSkeleton({
+  limit,
+  title,
+}: {
+  limit: number;
+  title?: string;
+}) {
   return (
     <div className="grid gap-4">
       {title ? (
@@ -17,7 +21,7 @@ export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
         <Skeleton className="h-9 w-48" />
       )}
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        {Array.from({ length: RECOMMENDATION_LIMIT }, (_, index) => (
+        {Array.from({ length: limit }, (_, index) => (
           <ProductCardSkeleton key={index} />
         ))}
       </div>
@@ -25,7 +29,15 @@ export function RelatedProductsSectionSkeleton({ title }: { title?: string }) {
   );
 }
 
-async function Render({ handle, locale }: { handle: string | Promise<string>; locale: Locale }) {
+async function Render({
+  handle,
+  limit,
+  locale,
+}: {
+  handle: string | Promise<string>;
+  limit: number;
+  locale: Locale;
+}) {
   const resolvedHandle = await handle;
   const [t, { related }] = await Promise.all([
     getTranslations("product"),
@@ -38,7 +50,7 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
     <div className="grid gap-4">
       <h2 className="text-2xl sm:text-3xl">{t("recommendations")}</h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-        {related.slice(0, RECOMMENDATION_LIMIT).map((product) => (
+        {related.slice(0, limit).map((product) => (
           <ProductCard
             key={product.id}
             product={product}
@@ -53,15 +65,19 @@ async function Render({ handle, locale }: { handle: string | Promise<string>; lo
 
 export async function RelatedProductsSection({
   handle,
+  limit,
   locale,
 }: {
   handle: string | Promise<string>;
+  limit: number;
   locale: Locale;
 }) {
   const t = await getTranslations("product");
   return (
-    <Suspense fallback={<RelatedProductsSectionSkeleton title={t("recommendations")} />}>
-      <Render handle={handle} locale={locale} />
+    <Suspense
+      fallback={<RelatedProductsSectionSkeleton limit={limit} title={t("recommendations")} />}
+    >
+      <Render handle={handle} limit={limit} locale={locale} />
     </Suspense>
   );
 }

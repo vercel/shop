@@ -6,6 +6,12 @@ import {
   PHASE_PRODUCTION_SERVER,
 } from "next/constants";
 
+import { shopConfig } from "./shop.config";
+
+function isFeatureEnabled(envValue: string | undefined, enabledByDefault: boolean): boolean {
+  return envValue ? envValue === "1" : enabledByDefault;
+}
+
 function assertRequiredEnv() {
   const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
     (key) => !process.env[key],
@@ -17,7 +23,7 @@ function assertRequiredEnv() {
     );
   }
 
-  if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
+  if (isFeatureEnabled(process.env.NEXT_PUBLIC_ENABLE_AUTH, shopConfig.auth.enabledByDefault)) {
     const missing = [
       "BETTER_AUTH_SECRET",
       "SHOPIFY_CUSTOMER_CLIENT_ID",
@@ -26,8 +32,8 @@ function assertRequiredEnv() {
 
     if (missing.length > 0) {
       throw new Error(
-        `NEXT_PUBLIC_ENABLE_AUTH=1 requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or unset NEXT_PUBLIC_ENABLE_AUTH.`,
+        `Enabled auth requires: ${missing.join(", ")}. ` +
+          `Set the missing variables or disable auth in shop.config.ts or NEXT_PUBLIC_ENABLE_AUTH.`,
       );
     }
   }

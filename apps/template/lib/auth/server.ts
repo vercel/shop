@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { isAuthEnabled } from "@/lib/auth";
+import { auth as authConfig } from "@/lib/config";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
 
@@ -100,7 +101,7 @@ export const auth = isAuthEnabled
         genericOAuth({
           config: [
             {
-              providerId: "shopify",
+              providerId: authConfig.providerId,
               clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
               clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
               discoveryUrl: SHOPIFY_STORE_DOMAIN
@@ -195,7 +196,7 @@ const getAccessToken = cache(async (): Promise<string> => {
   try {
     const tokenResponse = await auth.api.getAccessToken({
       headers: reqHeaders,
-      body: { providerId: "shopify" },
+      body: { providerId: authConfig.providerId },
     });
     accessToken = tokenResponse?.accessToken || "";
   } catch (error) {
