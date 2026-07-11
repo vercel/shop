@@ -44,13 +44,11 @@ interface ShopifyCartLine {
   };
   discountAllocations: ShopifyDiscountAllocation[];
   id: string;
-  // Present on CartLine (and a bundle's nested component lines), absent on the
-  // ComponentizableCartLine parent — defaults to editable in the transform.
+  // ComponentizableCartLine parents omit instructions and default to editable.
   instructions?: {
     canRemove: boolean;
     canUpdateQuantity: boolean;
   };
-  // Present only on a ComponentizableCartLine (the bundle parent's contents).
   lineComponents?: ShopifyCartLine[];
   merchandise: {
     id: string;

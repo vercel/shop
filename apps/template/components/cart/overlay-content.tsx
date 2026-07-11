@@ -69,7 +69,6 @@ export function OverlayContent({ locale }: OverlayContentProps) {
     window.location.href = checkoutUrl || cart?.checkoutUrl || displayCart?.checkoutUrl || "";
   };
 
-  // Use cartWithPending for display - it includes optimistic lines
   const displayCart = cartWithPending;
 
   if (!displayCart || displayCart.lines.length === 0) {
@@ -100,11 +99,9 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         </ul>
       </div>
 
-      {/* Summary Section */}
       <footer className="px-5 py-5 space-y-5">
         <OverlaySummary cart={displayCart} locale={locale} />
 
-        {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
           className="w-full h-12 justify-center"

@@ -264,9 +264,7 @@ async function ProductInfoArea({
   );
 }
 
-// Bundle relationships are product-level (which products a bundle contains / which
-// bundles a product belongs to), so they render eagerly from the cached default
-// variant in the static shell rather than streaming in behind the variant query.
+// Bundle relationships are product-level, so keep them in the static shell.
 function BundleRelationships({
   variant,
   t,
@@ -328,8 +326,7 @@ async function ResolvedProductInfoOptions({
   );
 }
 
-// Bundle relationship arrays stay server-side; the client buy controls only need
-// the gating boolean (a customized bundle parent has no fixed components to ship).
+// Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
 function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVariant | undefined {
   if (!variant) return undefined;
   return {

@@ -35,8 +35,7 @@ const ADDRESS_FIELDS = [
 
 const UPPERCASE_FIELDS = new Set<keyof CustomerAddressInput>(["territoryCode", "zoneCode"]);
 
-// Customer Account API userErrors carry a `field` path like ["address", "zip"];
-// the last segment is the input field a form can highlight.
+// Customer Account API field paths end with the form field to highlight.
 function mapUserErrors(errors: CustomerUserError[]): AccountActionResult {
   if (errors.length === 0) return { success: true };
 

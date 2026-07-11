@@ -133,7 +133,6 @@ const CART_DELIVERY_ADDRESSES_UPDATE_MUTATION = `#graphql
   }
 ` as const;
 
-/** Request-deduped via React.cache so every server boundary in a render shares one fetch. */
 export const getCart = cache(async (): Promise<Cart | undefined> => {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
@@ -144,10 +143,7 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   return fetchCart(cartId);
 }
 
-/**
- * Use in streaming contexts (e.g., the AI agent) where `cookies().set()` won't work.
- * The caller is responsible for setting the cookie via response headers.
- */
+// Streaming callers must emit the cart cookie through response headers.
 export async function createCartWithoutCookie(
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {

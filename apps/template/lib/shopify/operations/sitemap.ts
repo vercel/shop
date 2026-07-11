@@ -35,8 +35,7 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
 ` as const;
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
-  // Collection sitemap lists the full set, so it also carries "collections-index" —
-  // busted on collections/create and collections/delete alongside the listing page.
+  // Collection sitemap membership changes with the collection index.
   return type === "PRODUCT" ? ["products"] : ["collections", "collections-index"];
 }
 

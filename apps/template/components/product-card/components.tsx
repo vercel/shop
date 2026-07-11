@@ -130,7 +130,6 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
 interface ProductCardPriceProps {
   amount: string;
   currencyCode: string;
-  /** Highest variant price; when it differs from amount the card renders a "min – max" range. */
   maxAmount?: string;
   compareAtAmount?: string;
   compareAtCurrencyCode?: string;

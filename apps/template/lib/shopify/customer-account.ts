@@ -14,11 +14,7 @@ const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "2026-04";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 
-// The Customer Account API lives at a per-shop endpoint keyed by the numeric
-// {shopId} embedded in the store's OIDC issuer. Derive it from the discovery
-// document — cached for the process lifetime — so the template needs no config
-// beyond SHOPIFY_STORE_DOMAIN. Hydrogen's client builds the endpoint from
-// shopId, so cache the id rather than the full URL.
+// Hydrogen needs the numeric shop ID embedded in Shopify's OIDC issuer.
 let shopIdPromise: Promise<string> | undefined;
 
 function resolveShopId(): Promise<string> {
@@ -45,12 +41,7 @@ function resolveShopId(): Promise<string> {
   return shopIdPromise;
 }
 
-// Customer Account API is a separate GraphQL endpoint and schema from the
-// Storefront API. It authenticates with the customer's OAuth access token and
-// is always per-request (POST), so responses are never shared across customers.
-// Hydrogen's client requires a request context carrying the resolved i18n and
-// an HTTPS origin (used for the mandatory `Origin` header); reuse the app's
-// configured base URL so it matches the OAuth-registered origin.
+// Hydrogen requires an HTTPS Origin matching the OAuth-registered auth base URL.
 export async function customerAccountFetch<T>({
   accessToken,
   operation,
@@ -76,8 +67,7 @@ export async function customerAccountFetch<T>({
   });
 
   const start = DEBUG ? performance.now() : 0;
-  // Operations pass plain-string queries; brand the runtime document so the
-  // client accepts our variables instead of inferring `never` from the string.
+  // Brand runtime strings so Hydrogen does not infer `never` variables.
   const doc = gql(query) as CustomerAccountDocument<T, Record<string, unknown>>;
   const { data, errors } = await client.graphql(doc, { accessToken, variables });
 

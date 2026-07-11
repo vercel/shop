@@ -13,9 +13,7 @@ import { cn } from "@/lib/utils";
 
 import { ShopLogo } from "./shop-logo";
 
-// Client-facing projection of the selected variant — only the fields the buy
-// controls need. Bundle relationship arrays stay on the server; the gating they
-// imply is collapsed to the requiresBundleConfiguration boolean.
+// Keep bundle relationship arrays server-side; the client only needs their gating boolean.
 export interface BuyButtonVariant {
   availableForSale: boolean;
   id: string;

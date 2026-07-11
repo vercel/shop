@@ -46,7 +46,6 @@ export interface ShopifyVariant {
   compareAtPrice: ShopifyMoney | null;
   selectedOptions: Array<{ name: string; value: string }>;
   image: ShopifyImage | null;
-  // Bundle relationships — present only on variants fetched via PurchasableProductVariantFields.
   requiresComponents?: boolean;
   groupedBy?: { nodes: ShopifyBundleComponentVariant[] };
   components?: {
@@ -205,7 +204,6 @@ function extractMediaFromProduct(product: ShopifyProduct): {
       const img = transformImage(node.image);
       if (img) images.push(img);
     } else if (node.mediaContentType === "VIDEO") {
-      // Pick the best mp4 source (largest width)
       const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));
       const bestSource = mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
       if (bestSource) {
@@ -224,7 +222,6 @@ function extractMediaFromProduct(product: ShopifyProduct): {
 
 function transformCategory(category: ShopifyCategory | null | undefined): Category | null {
   if (!category) return null;
-  // Cap to 3 levels (Shopify menu limit): keep only the last 2 ancestors
   const cappedAncestors = category.ancestors.slice(-2);
   return {
     id: category.id,
@@ -322,8 +319,6 @@ const METAFIELD_LABELS: Record<string, string> = {
   model_number: "Model Number",
 };
 
-// A single scalar metafield value, already parsed from its JSON envelope: an object
-// for measurement/money/rating types, a primitive otherwise.
 function formatScalarMetafield(type: string, value: unknown): string {
   switch (type) {
     case "boolean":
@@ -349,9 +344,7 @@ function formatScalarMetafield(type: string, value: unknown): string {
 
 const STRUCTURED_METAFIELD_TYPES = new Set(["dimension", "money", "rating", "volume", "weight"]);
 
-// Shopify stores measurement/money/rating values as JSON, and list.* values as a JSON
-// array of those. Reference types resolve to GIDs we can't render without extra queries,
-// so they're skipped (null); every list element is formatted by its element type.
+// Reference metafields require follow-up queries, so this formatter skips them.
 function formatMetafieldValue(type: string, value: string): string | null {
   if (type.includes("_reference")) return null;
 

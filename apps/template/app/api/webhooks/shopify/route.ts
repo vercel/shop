@@ -19,7 +19,6 @@ async function verifyWebhook(body: string, hmacHeader: string | null): Promise<b
   return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
 }
 
-// Configure webhook topics in Shopify Admin → Settings → Notifications → Webhooks.
 export async function POST(request: Request) {
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
@@ -42,9 +41,7 @@ export async function POST(request: Request) {
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
-    // Per-product tags only — never the broad "products" tag. tagProducts() stamps every
-    // list/search/collection/recommendation entry with the contained products' product-<id>
-    // tag, so busting one product cascades to every surface showing it without nuking the catalog.
+    // Product tags cascade through every surface without purging the full catalog.
     const productTags: string[] = [];
 
     try {
@@ -72,10 +69,7 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("collections/")) {
-    // collection-{handle} busts the collection's PLP and — via tagCollections stamping — the
-    // all-collections listing for edits. create/delete change the *set* of collections, so they
-    // also fire "collections-index" (the listing page + collections sitemap). The broad
-    // "collections" tag is a manual break-glass purge of all collection data and is never fired here.
+    // Create/delete also invalidate the collection index; the broad tag is break-glass only.
     const collectionTags: string[] = [];
 
     if (topic === "collections/create" || topic === "collections/delete") {

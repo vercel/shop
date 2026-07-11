@@ -13,8 +13,7 @@ export function formatPrice(amount: number, currencyCode: string, locale: string
   ).localizedString;
 }
 
-// Price keys are scalar (gte/lte) — buildProductFiltersFromParams' parsePrice
-// bails on arrays, so don't comma-split them.
+// Price filters are scalar; comma-splitting would make parsePrice reject them.
 const PRICE_FILTER_KEYS = new Set(["filter.v.price.gte", "filter.v.price.lte"]);
 
 export function parseFiltersFromSearchParams(

@@ -93,8 +93,7 @@ export default async function CollectionPage({
   const collection = await getCollection({ handle, locale });
   if (!collection) notFound();
 
-  // Keep searchParams unawaited so only the results/filters/sort stream; the
-  // collection header resolves here and renders into the static shell.
+  // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getCollectionResultsData({
     handle,

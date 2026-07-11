@@ -1,6 +1,5 @@
 import type { SVGProps } from "react";
 
-// https://help.shopify.com/en/manual/payments/shop-pay/assets
 export function ShopLogo(props: SVGProps<SVGSVGElement>) {
   return (
     <svg

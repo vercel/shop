@@ -2,8 +2,6 @@ export const locales = ["en-US"] as const;
 
 export type Locale = (typeof locales)[number];
 
-// Deployment-level locale mode. By default the storefront runs in single-locale
-// mode, but additional locales can be enabled here when the app is ready.
 export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = [defaultLocale];
 export const localeSwitchingEnabled = enabledLocales.length > 1;
@@ -20,7 +18,6 @@ export function asLocale(value: string): Locale {
   return isLocale(value) ? value : defaultLocale;
 }
 
-/** Unsupported or disabled values fall back to `defaultLocale`. */
 export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
@@ -42,7 +39,6 @@ export function getLocaleData(locale: string): LocaleData {
   const [lang, country] = locale.split("-");
   const currencyData = localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
 
-  // Native language name (e.g., "Deutsch" for de-DE).
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
   const languageName = languageNames.of(lang) ?? lang;
 

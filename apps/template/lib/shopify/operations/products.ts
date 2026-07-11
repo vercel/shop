@@ -47,8 +47,6 @@ import {
 import type { ProductFilter, ShopifyFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
-// Re-export the Next-free cores so existing importers of these from
-// "operations/products" keep working; the cached wrappers below add cacheTag.
 export {
   fetchCollectionProducts,
   fetchProductRecommendationSets,
@@ -79,9 +77,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   }
 ` as const;
 
-// Opt-in metafields variant, selected when pdp.specifications.metafields is non-empty.
-// Identifiers ride a $metafieldIdentifiers variable (not string interpolation) so the
-// document stays static and codegen-validatable.
+// Metafield identifiers stay variables so the document remains codegen-validatable.
 const GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY = `#graphql
   ${METAFIELD_FRAGMENT}
   ${PRODUCT_FRAGMENT}
@@ -147,9 +143,7 @@ const GET_PRODUCT_VARIANT_QUERY = `#graphql
   }
 ` as const;
 
-// Resolves the active variant from selected options (the suspended PDP query).
-// Empty selectedOptions returns the first available variant — matches the
-// no-params / partial-selection fallback the PDP relies on.
+// Empty selections intentionally resolve Shopify's first available variant.
 export async function getProductVariant({
   handle,
   locale = defaultLocale,
@@ -177,8 +171,6 @@ export async function getProductVariant({
   return variant ? transformVariant(variant) : undefined;
 }
 
-// Slim shell + full variant matrix; for the AI agent and markdown routes that
-// enumerate variants. The PDP uses getProduct + getProductVariant instead.
 export async function getProductWithVariants(params: {
   handle: string;
   locale?: string;
@@ -251,7 +243,6 @@ const SEARCH_FACETS_QUERY = `#graphql
   }
 ` as const;
 
-// QueryRoot.products(sortKey: ProductSortKeys) — used for the catalog browse path.
 const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
   "best-selling": { sortKey: "BEST_SELLING", reverse: false },
@@ -338,7 +329,6 @@ export function buildProductFiltersFromParams(
   for (const [key, value] of Object.entries(searchParams)) {
     if (!key.startsWith("filter.") || !value) continue;
 
-    // filter.v.option.{name} → variantOption
     const optionMatch = key.match(/^filter\.v\.option\.(.+)$/i);
     if (optionMatch) {
       const name = optionMatch[1];
@@ -348,17 +338,14 @@ export function buildProductFiltersFromParams(
       continue;
     }
 
-    // filter.v.availability → available
     if (key === "filter.v.availability") {
       const v = Array.isArray(value) ? value[0] : value;
       filters.push({ available: v === "1" });
       continue;
     }
 
-    // filter.v.price.gte / filter.v.price.lte → handled after loop
     if (key.startsWith("filter.v.price.")) continue;
 
-    // filter.p.vendor → productVendor
     if (key === "filter.p.vendor") {
       for (const v of toArray(value)) {
         filters.push({ productVendor: v });
@@ -366,7 +353,6 @@ export function buildProductFiltersFromParams(
       continue;
     }
 
-    // filter.p.product_type → productType
     if (key === "filter.p.product_type") {
       for (const v of toArray(value)) {
         filters.push({ productType: v });
@@ -374,7 +360,6 @@ export function buildProductFiltersFromParams(
       continue;
     }
 
-    // filter.p.tag → tag
     if (key === "filter.p.tag") {
       for (const v of toArray(value)) {
         filters.push({ tag: v });
@@ -382,7 +367,6 @@ export function buildProductFiltersFromParams(
       continue;
     }
 
-    // filter.p.m.{namespace}.{key} → productMetafield
     const metaMatch = key.match(/^filter\.p\.m\.([^.]+)\.(.+)$/i);
     if (metaMatch) {
       for (const v of toArray(value)) {
@@ -393,7 +377,6 @@ export function buildProductFiltersFromParams(
       continue;
     }
 
-    // filter.{v|p}.t.{namespace}.{key} → taxonomyMetafield (e.g. Color via shopify.color-pattern)
     const taxonomyMatch = key.match(/^filter\.[vp]\.t\.([^.]+)\.(.+)$/i);
     if (taxonomyMatch) {
       for (const v of toArray(value)) {
@@ -405,7 +388,6 @@ export function buildProductFiltersFromParams(
     }
   }
 
-  // Combine price.gte and price.lte into a single price filter
   const min = parsePrice(searchParams["filter.v.price.gte"]);
   const max = parsePrice(searchParams["filter.v.price.lte"]);
   if (min !== undefined || max !== undefined) {
@@ -515,9 +497,7 @@ type SearchFacetsParams = {
 
 type SearchFacetsResult = { filters: Filter[]; priceRange?: PriceRange; total: number };
 
-// Uncached so browse/search facets reflect live Search & Discovery config (newly
-// enabled filters, swatch setup) rather than a long-lived snapshot; the cached
-// getSearchFacets wrapper below stays for non-paginated /md + agent reads.
+// Browse facets stay uncached so Search & Discovery changes appear immediately.
 export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
   const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
   const country = getCountryCode(locale);
@@ -585,9 +565,7 @@ export async function getCollectionProducts(
   return result;
 }
 
-// Both intents ride one aliased request, so the PDP's two recommendation surfaces
-// dedupe to a single Shopify call. The entry carries both the complementary- and
-// recommendations- tags so either webhook invalidation still busts it.
+// Both intents share one request and both invalidation tags.
 export async function getProductRecommendationSets(params: {
   handle: string;
   locale?: string;
@@ -678,7 +656,6 @@ export async function getProductById({
   return transformShopifyProductDetails(product);
 }
 
-/** Results are returned in the same order as the input IDs. */
 export async function getProductsByIds({
   ids,
   locale = defaultLocale,
@@ -714,7 +691,6 @@ export async function getProductsByIds({
   return shopifyProducts.map(transformShopifyProductCard);
 }
 
-/** Results are reordered to match the input handle order. */
 export async function getProductsByHandles({
   handles,
   locale = defaultLocale,
@@ -733,7 +709,6 @@ export async function getProductsByHandles({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  // Build search query: "handle:foo OR handle:bar OR handle:baz"
   const searchQuery = handles.map((h) => `handle:${h}`).join(" OR ");
 
   const response = await storefront.request<{

@@ -44,7 +44,6 @@ export function InfiniteProductGrid<TParams>({
   // Live cursor pages can re-emit a boundary product if the ranking shifts mid-scroll; skip ids already shown.
   const seenIdsRef = useRef<Set<string>>(new Set(initialProducts.map((product) => product.id)));
 
-  // Reset when initial data changes (filter/sort navigation)
   useEffect(() => {
     setAdditionalProducts([]);
     setPageInfo(initialPageInfo);

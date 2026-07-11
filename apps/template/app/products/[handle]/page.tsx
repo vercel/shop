@@ -93,11 +93,7 @@ export default async function ProductPage({
   const product = await getProduct({ handle, locale });
   if (!product) notFound();
 
-  // Keep searchParams unawaited so only the variant-dependent UI streams. The
-  // picker highlight and color image depend only on searchParams (fast), so they
-  // ride a separate promise from the per-selection variant query (the network
-  // round-trip that price + add-to-cart need) — otherwise the picker would wait
-  // on the network and the selected option would visibly snap in after load.
+  // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
   const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then((sp) => ({
     ...defaultSelectedOptions(product),
     ...parseSelectedOptions(product.options, sp ?? {}),

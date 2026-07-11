@@ -24,9 +24,7 @@ function operationName(body: RequestInit["body"]): string {
   }
 }
 
-// Preserve the prior shopifyFetch behavior the SDK doesn't replicate: the
-// ?operation= URL annotation for network-tab/debug visibility, brotli, and the
-// DEBUG_SHOPIFY timing log. Caching stays at the operation-function level.
+// Hydrogen lacks operation URL annotations and debug timing, so custom fetch preserves them.
 const customFetchApi: typeof fetch = async (input, init) => {
   const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   const operation = operationName(init?.body);
@@ -42,10 +40,7 @@ const customFetchApi: typeof fetch = async (input, init) => {
   return response;
 };
 
-// The Hydrogen client injects its own i18n config into `$country`/`$language`,
-// overriding per-request variables — so the client must be created with the
-// call's locale pair. Creation is just config/closure allocation, so a fresh
-// client per call is fine.
+// Hydrogen overrides locale variables from client config, requiring a client per locale pair.
 function getClient(country: string, language: string): StorefrontClient {
   return createStorefrontClient({
     type: "public",
@@ -71,7 +66,6 @@ interface StorefrontResponse<T> {
   errors?: GraphQLFormattedError[];
 }
 
-// The Storefront token is public; server-only consumers are enforced at their call sites.
 export const storefront = {
   async request<T>(
     query: string,
@@ -83,15 +77,13 @@ export const storefront = {
     const language =
       typeof variables?.language === "string" ? variables.language : getLanguageCode(defaultLocale);
 
-    // Operations pass codegen-typed queries as plain strings; brand them so the
-    // client accepts our variables instead of inferring `never` from `string`.
+    // Brand runtime strings so Hydrogen does not infer `never` variables.
     const doc = query as StorefrontQueryString<T, Record<string, unknown>>;
     const { data, errors } = await getClient(country, language).graphql(doc, { variables });
     return { data, errors };
   },
 };
 
-// Storefront MCP — the store's hosted agentic-commerce tools over JSON-RPC 2.0 (/api/mcp).
 const MCP_ENDPOINT = `https://${SHOPIFY_STORE_DOMAIN}/api/mcp`;
 const UCP_AGENT_PROFILE_URL = process.env.UCP_AGENT_PROFILE_URL;
 
@@ -148,7 +140,7 @@ export async function callStorefrontMcp<T>(
 }
 
 export interface McpMoney {
-  amount: number; // minor units (52800 = 528.00)
+  amount: number;
   currency: string;
 }
 
@@ -194,8 +186,7 @@ export async function searchCatalog(params: {
   });
 }
 
-// get_product_details encodes money as major-unit strings with a sibling currency,
-// unlike search_catalog's minor-unit McpMoney objects.
+// MCP details use major-unit strings while search uses minor-unit numbers.
 export interface McpProductDetails {
   description?: string;
   image_url?: string | null;

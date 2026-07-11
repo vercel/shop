@@ -14,7 +14,7 @@ export const IMAGE_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Note: Does not include IMAGE_FRAGMENT - expects parent to include it
+// Parent documents must include IMAGE_FRAGMENT.
 export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${MONEY_FRAGMENT}
   fragment ProductVariantFields on ProductVariant {
@@ -37,8 +37,6 @@ export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Lightweight variant reference for bundle relationships. Relies on the parent
-// to include IMAGE_FRAGMENT (matches PRODUCT_VARIANT_FRAGMENT).
 export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
   fragment BundleComponentVariantFields on ProductVariant {
     id
@@ -57,9 +55,7 @@ export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// The selected/purchasable variant: base fields plus Shopify bundle relationships.
-// Used only where one variant is resolved (the shell default + the suspended query),
-// never for the full matrix or cards. Relies on the parent to include IMAGE_FRAGMENT.
+// Parent documents must include IMAGE_FRAGMENT.
 export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${PRODUCT_VARIANT_FRAGMENT}
   ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
@@ -103,9 +99,7 @@ export const METAFIELD_FRAGMENT = `#graphql
   }
 ` as const;
 
-// A bundle's component lines carry Shopify edit instructions (e.g. canRemove:false
-// so a shopper can't pull one product out of a fixed bundle); the parent bundle line
-// is a ComponentizableCartLine whose lineComponents are ordinary CartLines.
+// Fixed bundle components carry Shopify edit restrictions on nested CartLines.
 export const CART_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
@@ -393,9 +387,6 @@ export const PRODUCT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Extends the slim shell with the full variant matrix. Used by the AI agent and
-// markdown routes, which enumerate variants; the PDP uses the slim ProductFields
-// plus a per-selection variant query instead.
 export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
   ${PRODUCT_FRAGMENT}
   fragment ProductWithVariantsFields on Product {

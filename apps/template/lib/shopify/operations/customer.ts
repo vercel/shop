@@ -299,7 +299,6 @@ export async function getCustomerAddresses(): Promise<CustomerAddress[]> {
     transformCustomerAddress(address, defaultId),
   );
 
-  // Surface the default address first; it's the one customers act on most.
   return addresses.sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
 }
 

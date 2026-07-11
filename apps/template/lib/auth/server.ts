@@ -76,8 +76,7 @@ function decodeIdTokenPayload(idToken: string): {
   return JSON.parse(decoded);
 }
 
-// Skip betterAuth construction when auth is disabled — calling it without a real
-// BETTER_AUTH_SECRET logs a default-secret warning at module load during build.
+// Disabled auth must not construct betterAuth; it warns about the absent secret at module load.
 export const auth = isAuthEnabled
   ? betterAuth({
       baseURL: authBaseUrl,

@@ -2,7 +2,6 @@ import type { Image, Money, ProductDetails, ProductOption, SelectedOption } from
 
 export type SelectedOptions = Record<string, string>;
 
-/** Selected options from `?color=Blue&size=XS` params, keyed by canonical option name. */
 export function parseSelectedOptions(
   options: ProductOption[],
   searchParams: Record<string, string | string[] | undefined>,
@@ -18,7 +17,6 @@ export function parseSelectedOptions(
   return selected;
 }
 
-/** The default variant's options — the selection shown when no params are present. */
 export function defaultSelectedOptions(product: ProductDetails): SelectedOptions {
   const selected: SelectedOptions = {};
   for (const option of product.defaultVariant?.selectedOptions ??
@@ -33,7 +31,6 @@ export function toSelectedOptionList(selectedOptions: SelectedOptions): Selected
   return Object.entries(selectedOptions).map(([name, value]) => ({ name, value }));
 }
 
-/** Option-based PDP URL, e.g. `/products/handle?color=Blue&size=XS`. */
 export function buildOptionUrl(
   handle: string,
   currentOptions: SelectedOptions,
@@ -47,7 +44,6 @@ export function buildOptionUrl(
   return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
 }
 
-/** The color option, detected by swatch data or name — the only axis that partitions the gallery. */
 function findColorOption(options: ProductOption[]): ProductOption | undefined {
   return options.find(
     (option) =>
@@ -56,18 +52,13 @@ function findColorOption(options: ProductOption[]): ProductOption | undefined {
   );
 }
 
-/**
- * True only when the color axis has multiple values with distinct representative
- * images — so the gallery should lead with the selected color's image. Other
- * multi-value axes (size, etc.) share imagery and must not trigger a streamed slot.
- */
+// Only color partitions the gallery; other option axes share imagery.
 export function hasColorImagePartitioning(options: ProductOption[]): boolean {
   const color = findColorOption(options);
   if (!color || color.values.length <= 1) return false;
   return color.values.filter((value) => value.image).length > 1;
 }
 
-/** Product images that aren't a specific color's representative image. */
 export function getSharedImages(images: Image[], options: ProductOption[]): Image[] {
   const color = findColorOption(options);
   if (!color) return images;
@@ -79,7 +70,6 @@ export function getSharedImages(images: Image[], options: ProductOption[]): Imag
   return shared.length > 0 ? shared : images;
 }
 
-/** The selected color's representative image, resolved from options alone (no variant query). */
 export function getSelectedColorImage(
   product: ProductDetails,
   selectedOptions: SelectedOptions,

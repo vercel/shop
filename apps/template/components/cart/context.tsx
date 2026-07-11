@@ -233,7 +233,6 @@ export function CartProvider({
   const isOverlayOpenRef = useRef(isOverlayOpen);
   isOverlayOpenRef.current = isOverlayOpen;
 
-  // Pending line item ops use leading-edge debounce.
   const lineOpsRef = useRef<Map<string, LineOperation>>(new Map());
   // Per-line request versioning ignores stale responses that return out of order.
   const latestLineRequestIdRef = useRef<Map<string, number>>(new Map());
@@ -281,7 +280,6 @@ export function CartProvider({
 
   const pendingProductInfoRef = useRef<Map<string, OptimisticProductInfo>>(new Map());
 
-  /** Debounced — accumulates rapid clicks into a single request per variant. */
   const addToCartOptimistic = (
     variantId: string,
     quantity: number,
@@ -389,7 +387,6 @@ export function CartProvider({
 
     startTransition(async () => {
       const result = await updateCartQuantityAction(lineId, quantity);
-      // Ignore stale responses from older requests for this line.
       if (latestLineRequestIdRef.current.get(lineId) !== requestId) {
         endTracking();
         return;
@@ -398,8 +395,7 @@ export function CartProvider({
       const pending = lineOpsRef.current.get(lineId);
 
       if (result.success && result.cart) {
-        // If the user changed quantity during the request, keep the optimistic
-        // state — the debounce timer will fire the final request.
+        // Preserve newer optimistic input; its debounce will issue the final request.
         if (!pending || pending.targetQuantity === quantity) {
           setCartInternal(result.cart);
           setLastWarnings(result.warnings ?? []);
@@ -407,8 +403,7 @@ export function CartProvider({
         }
       } else if (originalCart) {
         setCartInternal(originalCart);
-        // If quantity changed again during the request, leave the pending
-        // entry so the debounce timer will retry.
+        // Preserve newer pending input so the debounce can retry it.
         if (!pending || pending.targetQuantity === quantity) {
           lineOpsRef.current.delete(lineId);
         }
@@ -465,7 +460,6 @@ export function CartProvider({
 
     if (pending.timer) clearTimeout(pending.timer);
 
-    // Leading edge — first update fires immediately, the rest are debounced.
     if (!pending.hasFiredInitial) {
       pending.hasFiredInitial = true;
       fireUpdateRequest(lineId, quantity, pending.originalCart);
@@ -497,7 +491,6 @@ export function CartProvider({
     };
   }, []);
 
-  // Drop pending ops for lines the revalidated cart no longer contains.
   useEffect(() => {
     const lineIds = new Set(cart?.lines.map((l) => l.id) ?? []);
     for (const [lineId, pending] of lineOpsRef.current) {
@@ -544,7 +537,7 @@ export function useCart() {
   return context;
 }
 
-/** Seeds the root provider once from a server-fetched cart. Safe to call from every boundary. */
+// Idempotent so every server boundary may seed the root provider.
 export function useSeedCart(initialCart: Cart | null) {
   const { cart, setCart } = useCart();
   useEffect(() => {

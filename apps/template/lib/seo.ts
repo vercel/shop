@@ -85,8 +85,7 @@ export function buildOpenGraph({
       }
   >;
 }): Metadata["openGraph"] {
-  // Omitting `type` emits no og:type, letting product pages own og:type=product
-  // via a dedicated meta block (Next only emits og:type when the key is present).
+  // Omit type so product pages can emit og:type=product through raw meta tags.
   return {
     ...(type ? { type } : {}),
     title,
