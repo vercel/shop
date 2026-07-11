@@ -1,6 +1,6 @@
 "use client";
 
-import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
+import { buildSpecFromParts, getTextFromParts, JSONUIProvider, Renderer } from "@json-render/react";
 import type { UIMessage } from "ai";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
@@ -32,7 +32,10 @@ export function ChatMessage({
   isStreaming: boolean;
   message: UIMessage;
 }) {
-  const { hasSpec, spec, text } = useJsonRenderMessage(message.parts);
+  // AI SDK mutates parts in place, so reference-based memoization misses later spec patches.
+  const spec = buildSpecFromParts(message.parts);
+  const text = getTextFromParts(message.parts);
+  const hasSpec = spec !== null && Object.keys(spec.elements ?? {}).length > 0;
 
   if (message.role === "user") {
     if (!text) return null;
