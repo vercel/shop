@@ -1,6 +1,6 @@
 "use client";
 
-import { buildSpecFromParts, getTextFromParts, JSONUIProvider, Renderer } from "@json-render/react";
+import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
 import type { UIMessage } from "ai";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
@@ -27,20 +27,12 @@ Markdown.displayName = "Markdown";
 
 export function ChatMessage({
   isStreaming,
-  messageId,
-  messages,
+  message,
 }: {
   isStreaming: boolean;
-  messageId: string;
-  messages: readonly UIMessage[];
+  message: UIMessage;
 }) {
-  const message = messages.find((item) => item.id === messageId);
-  if (!message) return null;
-
-  // AI SDK mutates parts in place; the messages array is the reactive stream snapshot.
-  const spec = buildSpecFromParts(message.parts);
-  const text = getTextFromParts(message.parts);
-  const hasSpec = spec !== null && Object.keys(spec.elements ?? {}).length > 0;
+  const { hasSpec, spec, text } = useJsonRenderMessage(message.parts);
 
   if (message.role === "user") {
     if (!text) return null;
@@ -59,7 +51,7 @@ export function ChatMessage({
     <div className="space-y-2.5 text-sm text-foreground">
       <AgentThinking active={isStreaming && !text} />
       {text && <Markdown>{text}</Markdown>}
-      {!isStreaming && hasSpec && spec && (
+      {hasSpec && spec && (
         <JSONUIProvider registry={registry}>
           <Renderer registry={registry} spec={spec} />
         </JSONUIProvider>
