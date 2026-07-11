@@ -1,6 +1,4 @@
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -9,12 +7,13 @@ import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
+import { AnalyticsComponents } from "@/components/analytics";
 import { CartProvider } from "@/components/cart/context";
 import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { agent, analytics, siteConfig } from "@/lib/config";
+import { agent, siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
@@ -63,8 +62,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
-        {analytics.vercel.enabled ? <Analytics /> : null}
-        {analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+        <AnalyticsComponents />
       </body>
     </html>
   );

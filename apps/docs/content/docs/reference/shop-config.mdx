@@ -66,7 +66,7 @@ Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override `enabledByDefault` for a
 - `vercel.enabled` controls Vercel Web Analytics.
 - `speedInsights.enabled` controls Vercel Speed Insights.
 
-Each integration is disabled by default. Set an individual integration to `true` to render it. The root layout owns these gates and does not mount disabled integration components.
+Each integration is disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components.
 
 ## Authentication
 
@@ -94,7 +94,8 @@ Do not put secrets, access tokens, store-specific product handles, or fetched Sh
 | ------------------------------------------------------ | ---------------------------------------------------------------------- |
 | `shop.config.ts`                                       | Canonical static defaults and feature policy                           |
 | `lib/config.ts`                                        | Environment resolution plus site, navigation, and footer configuration |
-| `app/layout.tsx`                                       | Applies analytics and integration feature gates                        |
+| `app/layout.tsx`                                       | Mounts the root analytics component                                    |
+| `components/analytics.tsx`                             | Composes analytics providers and applies integration gates             |
 | `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist                   |
 | `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility                   |
 | `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                          |

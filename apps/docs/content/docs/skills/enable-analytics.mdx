@@ -63,7 +63,7 @@ pnpm add @vercel/analytics
 pnpm add @vercel/speed-insights
 ```
 
-Import the selected provider components directly in the root layout. Each library handles its own client-side behavior internally.
+For older storefronts, create or update the root analytics component described below. Each library handles its own client-side behavior internally.
 
 ---
 
@@ -88,17 +88,17 @@ NEXT_PUBLIC_GTM_ID="GTM-XXXXXX"
 
 Set the actual value in `.env.local` or in the Vercel dashboard under Environment Variables.
 
-### B3. Add GTM to the root layout
+### B3. Add GTM to `components/analytics.tsx`
 
-Import `GoogleTagManager` directly from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the root layout and render `<GoogleTagManager gtmId={gtmId} />` there only when the value exists. If the storefront extends `shop.config.ts` with a GTM integration gate, apply that gate at the same parent level.
+Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `shop.config.ts` with a GTM integration gate, apply that gate inside the same component.
 
 ---
 
-## Part C: Root layout integration
+## Part C: Root analytics integration
 
-### C1. Update `app/layout.tsx`
+### C1. Create or update `components/analytics.tsx`
 
-Import the selected provider components and analytics configuration, then gate each provider inside `<body>` after the `</NextIntlClientProvider>` closing tag:
+Compose the selected providers in the root analytics component and apply each integration gate there:
 
 ```tsx
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -106,30 +106,48 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { analytics } from "@/lib/config";
+
+export function AnalyticsComponents() {
+  const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+
+  return (
+    <>
+      {analytics.vercel.enabled ? <Analytics /> : null}
+      {analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+      {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
+    </>
+  );
+}
+```
+
+Remove imports for integrations the storefront does not support.
+
+### C2. Update `app/layout.tsx`
+
+Always render the root analytics component inside `<body>` after the `</NextIntlClientProvider>` closing tag:
+
+```tsx
+import { AnalyticsComponents } from "@/components/analytics";
 ```
 
 ```tsx
-const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
-
 <body ...>
   <a href="#main-content" ...>...</a>
   <SiteSchema locale={locale} />
   <NextIntlClientProvider locale={locale} messages={messages}>
     {/* ... existing layout content ... */}
   </NextIntlClientProvider>
-  {analytics.vercel.enabled ? <Analytics /> : null}
-  {analytics.speedInsights.enabled ? <SpeedInsights /> : null}
-  {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
+  <AnalyticsComponents />
 </body>
 ```
 
-Keep the gates in the root layout so disabled provider components are not mounted. The providers remain siblings after `NextIntlClientProvider` because analytics components do not need i18n context.
+The root component remains mounted as the extension point for current and future analytics providers. Provider gates stay inside it so disabled integrations are not mounted.
 
 ## Guardrails
 
-- Import provider components directly in the root layout; do not add pass-through wrappers.
-- Keep each integration gate in the root layout so disabled provider components are not mounted.
-- The GTM container ID must come from `NEXT_PUBLIC_GTM_ID`, never hardcoded. The component renders nothing if the env var is missing.
+- Keep root analytics providers and their gates in `components/analytics.tsx`.
+- Always mount `<AnalyticsComponents />` from the root layout, even when every provider is disabled.
+- The GTM container ID must come from `NEXT_PUBLIC_GTM_ID`, never hardcoded. The provider renders nothing if the env var is missing.
 - Use `@next/third-parties/google` for GTM, not a manual `<script>` tag. The Next.js component handles script loading and performance optimization.
 - Import paths: use `@vercel/analytics/next` and `@vercel/speed-insights/next` (the `/next` subpath), not the root package exports.
 - Add `NEXT_PUBLIC_GTM_ID` to `.env.example` with a placeholder value so other developers know the variable exists.
