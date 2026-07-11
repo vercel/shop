@@ -94,19 +94,29 @@ export default async function ProductPage({
   if (!product) notFound();
 
   // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
-  const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then((sp) => ({
-    ...defaultSelectedOptions(product),
-    ...parseSelectedOptions(product.options, sp ?? {}),
-  }));
-  const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(async (sp) => {
-    const fromUrl = parseSelectedOptions(product.options, sp ?? {});
-    if (Object.keys(fromUrl).length === 0) return product.defaultVariant;
-    return getProductVariant({
-      handle,
-      locale,
-      selectedOptions: toSelectedOptionList({ ...defaultSelectedOptions(product), ...fromUrl }),
-    });
-  });
+  const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then(
+    (resolvedSearchParams) => ({
+      ...defaultSelectedOptions(product),
+      ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
+    }),
+  );
+  const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
+    async (resolvedSearchParams) => {
+      if (
+        Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
+      ) {
+        return product.defaultVariant;
+      }
+      return getProductVariant({
+        handle,
+        locale,
+        selectedOptions: toSelectedOptionList({
+          ...defaultSelectedOptions(product),
+          ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
+        }),
+      });
+    },
+  );
 
   return (
     <Page className="pt-0">

@@ -19,10 +19,10 @@ import {
   type CollectionProductsResult,
   escapeProductQuery,
   fetchCollectionProducts,
-  fetchProductRecommendationSets,
+  fetchComplementaryProducts,
   fetchProductWithVariants,
+  fetchRelatedProducts,
   fetchSearchIndexProducts,
-  type ProductRecommendationSets,
   type SearchIndexProductsParams,
   type SearchIndexProductsResult,
 } from "../fetch";
@@ -49,8 +49,9 @@ import { getNumericShopifyId } from "../utils";
 
 export {
   fetchCollectionProducts,
-  fetchProductRecommendationSets,
+  fetchComplementaryProducts,
   fetchProductWithVariants,
+  fetchRelatedProducts,
   fetchSearchIndexProducts,
 } from "../fetch";
 
@@ -565,18 +566,30 @@ export async function getCollectionProducts(
   return result;
 }
 
-// Both intents share one request and both invalidation tags.
-export async function getProductRecommendationSets(params: {
+export async function getComplementaryProducts(params: {
   handle: string;
   locale?: string;
-}): Promise<ProductRecommendationSets> {
+}): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", `complementary-${params.handle}`, `recommendations-${params.handle}`);
+  cacheTag("products", `recommendations-${params.handle}`);
 
-  const sets = await fetchProductRecommendationSets(params);
-  tagProducts([...sets.complementary, ...sets.related]);
-  return sets;
+  const products = await fetchComplementaryProducts(params);
+  tagProducts(products);
+  return products;
+}
+
+export async function getRelatedProducts(params: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", `recommendations-${params.handle}`);
+
+  const products = await fetchRelatedProducts(params);
+  tagProducts(products);
+  return products;
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql

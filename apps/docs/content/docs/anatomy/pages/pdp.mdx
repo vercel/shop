@@ -81,9 +81,9 @@ A customized bundle parent (`requiresComponents` with no fixed `components`) dis
 
 ### Complementary products
 
-When `pdp.upsells.enabled` is `true` in `shop.config.ts`, `complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
+When `pdp.complementaryProducts.enabled` is `true` in `shop.config.ts`, `complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
 
-Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. Both recommendation surfaces — this set and the [related grid](#related-products) below the fold — come from a single cached (`use cache: remote`) `getProductRecommendationSets()` operation that fetches both intents in one aliased `productRecommendations` request and is tagged with both `complementary-{handle}` and `recommendations-{handle}`. Because both surfaces call it with the same arguments, they dedupe to **one** Shopify request; this section reads the `complementary` slice, baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to `pdp.upsells.limit` products as thumbnail + title + price rows and renders nothing when none are configured.
+Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. Its parent in `product-detail-section.tsx` owns the `pdp.complementaryProducts.enabled` gate and does not render the component when disabled, so the cached (`use cache: remote`) `getComplementaryProducts()` operation does not run. The operation fetches only the `COMPLEMENTARY` intent and uses the existing `recommendations-{handle}` invalidation tag. When enabled, the result is baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to `pdp.complementaryProducts.limit` products as thumbnail + title + price rows and renders nothing when none are configured.
 
 ### Specifications
 
@@ -91,7 +91,7 @@ Like bundle relationships, the section renders **eagerly into the prerendered sh
 
 ## Related Products
 
-When `pdp.relatedProducts.enabled` is `true` in `shop.config.ts`, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set below the product details and on non-empty cart pages. It reads the `related` slice of the same cached `getProductRecommendationSets()` operation the [complementary set](#complementary-products) consumes — so the two surfaces share one Shopify request — and renders inside a `Suspense` boundary with a skeleton grid fallback.
+When `pdp.relatedProducts.enabled` is `true` in `shop.config.ts`, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set below the product details and on non-empty cart pages. The PDP and cart parents own the gate and do not render the component when disabled, so translations and data fetching do not run. When enabled, the component calls the cached (`use cache: remote`) `getRelatedProducts()` operation, which fetches only the `RELATED` intent under the `recommendations-{handle}` tag, and renders inside a `Suspense` boundary with a skeleton grid fallback.
 
 Related products display as a fixed grid of up to `pdp.relatedProducts.limit` product cards — two columns on mobile, four on `lg:` and up — matching the homepage's featured-products grid. The configured limit also determines the skeleton count. Shopify typically returns more recommendations, but the section intentionally remains a small footer rather than a second browse surface.
 
@@ -114,7 +114,7 @@ The page emits two JSON-LD schemas:
 
 | File                                                   | Purpose                                                                                                              |
 | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `shop.config.ts`                                       | PDP bundle, upsell, related-product, and specification policy                                                        |
+| `shop.config.ts`                                       | PDP bundle, complementary-product, related-product, and specification policy                                         |
 | `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams the per-selection variant query |
 | `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD                       |
 | `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                                  |

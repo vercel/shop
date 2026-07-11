@@ -34,16 +34,16 @@ export interface ShopConfig {
     bundles: {
       enabled: boolean;
     };
+    complementaryProducts: {
+      enabled: boolean;
+      limit: number;
+    };
     relatedProducts: {
       enabled: boolean;
       limit: number;
     };
     specifications: {
       metafields: MetafieldIdentifier[];
-    };
-    upsells: {
-      enabled: boolean;
-      limit: number;
     };
   };
 }
@@ -78,16 +78,16 @@ export const shopConfig = {
     bundles: {
       enabled: true,
     },
+    complementaryProducts: {
+      enabled: true,
+      limit: 4,
+    },
     relatedProducts: {
       enabled: true,
       limit: 4,
     },
     specifications: {
       metafields: [],
-    },
-    upsells: {
-      enabled: true,
-      limit: 4,
     },
   },
 } satisfies ShopConfig;

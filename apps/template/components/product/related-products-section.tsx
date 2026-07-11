@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
+import { getRelatedProducts } from "@/lib/shopify/operations/products";
 
 export function RelatedProductsSectionSkeleton({
   limit,
@@ -39,9 +39,9 @@ async function Render({
   locale: Locale;
 }) {
   const resolvedHandle = await handle;
-  const [t, { related }] = await Promise.all([
+  const [t, related] = await Promise.all([
     getTranslations("product"),
-    getProductRecommendationSets({ handle: resolvedHandle, locale }),
+    getRelatedProducts({ handle: resolvedHandle, locale }),
   ]);
 
   if (related.length === 0) return null;

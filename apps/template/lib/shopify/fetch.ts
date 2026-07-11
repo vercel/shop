@@ -144,13 +144,19 @@ const GET_PRODUCT_WITH_VARIANTS_QUERY = `#graphql
   }
 ` as const;
 
-const PRODUCT_RECOMMENDATION_SETS_QUERY = `#graphql
+const COMPLEMENTARY_PRODUCTS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
-  query productRecommendationSets($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    complementary: productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
+  query complementaryProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
       ...ProductCardFields
     }
-    related: productRecommendations(productHandle: $handle, intent: RELATED) {
+  }
+` as const;
+
+const RELATED_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query relatedProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productHandle: $handle, intent: RELATED) {
       ...ProductCardFields
     }
   }
@@ -265,11 +271,6 @@ export type CollectionProductsResult = {
   priceRange?: PriceRange;
   products: ProductCard[];
 };
-
-export interface ProductRecommendationSets {
-  complementary: ProductCard[];
-  related: ProductCard[];
-}
 
 export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
 
@@ -424,27 +425,40 @@ export async function fetchProductWithVariants({
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-export async function fetchProductRecommendationSets({
+export async function fetchComplementaryProducts({
   handle,
   locale = defaultLocale,
 }: {
   handle: string;
   locale?: string;
-}): Promise<ProductRecommendationSets> {
+}): Promise<ProductCard[]> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
   const response = await storefront.request<{
-    complementary: ShopifyProductCard[] | null;
-    related: ShopifyProductCard[] | null;
-  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, { variables: { country, handle, language } });
-  assertStorefrontOk(response, "productRecommendationSets");
-  const { data } = response;
+    productRecommendations: ShopifyProductCard[] | null;
+  }>(COMPLEMENTARY_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  assertStorefrontOk(response, "complementaryProducts");
 
-  return {
-    complementary: (data.complementary ?? []).map(transformShopifyProductCard),
-    related: (data.related ?? []).map(transformShopifyProductCard),
-  };
+  return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
+}
+
+export async function fetchRelatedProducts({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const response = await storefront.request<{
+    productRecommendations: ShopifyProductCard[] | null;
+  }>(RELATED_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  assertStorefrontOk(response, "relatedProducts");
+
+  return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
 }
 
 export async function fetchCollections({
