@@ -1,4 +1,4 @@
-// Next-free fetch cores (no next/cache / server-only), shared by the cached operations/* wrappers and the eve agent tools.
+// Shared Storefront fetch cores used by cached operations and MCP result enrichment.
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Cart,

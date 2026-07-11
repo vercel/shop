@@ -1,6 +1,5 @@
 "use server";
 
-import { getCartIdFromCookie, setCartIdCookie } from "@/lib/cart/server";
 import { isEnabledLocale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import {
@@ -256,14 +255,6 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
       error: error instanceof Error ? error.message : "Failed to remove discount code",
     };
   }
-}
-
-/** Writes an agent-created cart id to the httpOnly cookie (eve can't set cookies); no-op if one already exists. */
-export async function persistAgentCartAction(cartId: string): Promise<void> {
-  if (!cartId) return;
-  const existing = await getCartIdFromCookie();
-  if (existing) return;
-  await setCartIdCookie(cartId);
 }
 
 /** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */

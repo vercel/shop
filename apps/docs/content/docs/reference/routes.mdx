@@ -24,7 +24,7 @@ type: reference
 | ---------------------------- | ----------------------------------- | ---------------------------------------------- |
 | `POST /api/webhooks/shopify` | `app/api/webhooks/shopify/route.ts` | Shopify webhook handler for cache invalidation |
 | `GET /api/draft`             | `app/api/draft/route.ts`            | Draft mode toggle for content preview          |
-| `/eve/v1/*`                  | `agent/` (mounted by `withEve`)     | AI shopping assistant (eve) — session + stream |
+| `POST /api/chat`             | `app/api/chat/route.ts`             | Guarded AI SDK shopping-assistant stream       |
 
 ## Variant URLs
 

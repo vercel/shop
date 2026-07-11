@@ -71,7 +71,7 @@ interface StorefrontResponse<T> {
   errors?: GraphQLFormattedError[];
 }
 
-// No `server-only` guard: the Storefront token is public, so the eve agent runtime can import this client directly.
+// The Storefront token is public; server-only consumers are enforced at their call sites.
 export const storefront = {
   async request<T>(
     query: string,

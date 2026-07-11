@@ -1,4 +1,3 @@
-import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -97,7 +96,4 @@ function getConfig(phase: string): NextConfig {
   return config;
 }
 
-// Cast around eve's `withEve` typing against a different `next` version than the template runs.
-export default withEve(getConfig as unknown as Parameters<typeof withEve>[0], {
-  eveRoot: ".",
-});
+export default getConfig;
