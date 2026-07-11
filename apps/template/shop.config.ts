@@ -26,6 +26,14 @@ export interface ShopConfig {
     model: string;
     tools: AgentToolName[];
   };
+  analytics: {
+    speedInsights: {
+      enabled: boolean;
+    };
+    vercel: {
+      enabled: boolean;
+    };
+  };
   auth: {
     enabledByDefault: boolean;
     providerId: "shopify";
@@ -69,6 +77,14 @@ export const shopConfig = {
       "searchShopPoliciesAndFaqs",
       "updateCartItemQuantity",
     ],
+  },
+  analytics: {
+    speedInsights: {
+      enabled: false,
+    },
+    vercel: {
+      enabled: false,
+    },
   },
   auth: {
     enabledByDefault: false,

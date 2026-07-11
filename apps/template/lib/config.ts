@@ -37,6 +37,8 @@ export const agent = {
     : shopConfig.agent.enabledByDefault,
 } as const;
 
+export const analytics = shopConfig.analytics;
+
 export const auth = {
   ...shopConfig.auth,
   enabled: process.env.NEXT_PUBLIC_ENABLE_AUTH

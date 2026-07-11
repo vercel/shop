@@ -1,10 +1,10 @@
 ---
 title: Shop Configuration
-description: Configure canonical storefront behavior for the agent, authentication, and product merchandising.
+description: Configure canonical storefront behavior for analytics, the agent, authentication, and product merchandising.
 type: reference
 ---
 
-`shop.config.ts` is the template's canonical, secret-free configuration file. Use it for behavior that should be consistent across deployments and easy for a coding agent to discover, such as the shopping assistant model, authentication defaults, and PDP merchandising surfaces.
+`shop.config.ts` is the template's canonical, secret-free configuration file. Use it for behavior that should be consistent across deployments and easy for a coding agent to discover, such as analytics integrations, the shopping assistant model, authentication defaults, and PDP merchandising surfaces.
 
 Environment variables still own credentials and deployment-specific overrides. Shopify remains the source of product, recommendation, bundle, and metafield data.
 
@@ -33,6 +33,10 @@ export const shopConfig = {
       "updateCartItemQuantity",
     ],
   },
+  analytics: {
+    speedInsights: { enabled: false },
+    vercel: { enabled: false },
+  },
   auth: {
     enabledByDefault: false,
     providerId: "shopify",
@@ -56,6 +60,13 @@ export const shopConfig = {
 - `tools` is the allowlist exposed to the model. Remove a tool name to keep its implementation in the codebase without making it available to the agent.
 
 Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override `enabledByDefault` for a deployment.
+
+## Analytics
+
+- `vercel.enabled` controls Vercel Web Analytics.
+- `speedInsights.enabled` controls Vercel Speed Insights.
+
+Each integration is disabled by default. Set an individual integration to `true` to render it. The root layout owns these gates and does not mount disabled integration components.
 
 ## Authentication
 
@@ -83,6 +94,7 @@ Do not put secrets, access tokens, store-specific product handles, or fetched Sh
 | ------------------------------------------------------ | ---------------------------------------------------------------------- |
 | `shop.config.ts`                                       | Canonical static defaults and feature policy                           |
 | `lib/config.ts`                                        | Environment resolution plus site, navigation, and footer configuration |
+| `app/layout.tsx`                                       | Applies analytics and integration feature gates                        |
 | `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist                   |
 | `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility                   |
 | `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                          |
