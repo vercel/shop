@@ -6,8 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "format": "oxfmt",
-    "lint": "oxlint . && oxfmt --check && npx tsx scripts/lint-doc-paths.ts",
-    "lint:doc-paths": "npx tsx scripts/lint-doc-paths.ts",
+    "lint": "oxlint . && oxfmt --check",
     "postinstall": "fumadocs-mdx",
     "start": "next start",
     "typecheck": "tsc --noEmit"

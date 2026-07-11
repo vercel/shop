@@ -84,13 +84,3 @@ Wiring:
 Verify: hover a multi-image card on desktop - the carousel fades in with working
 chevrons; single-image and no-image cards are unchanged; mobile shows no carousel.
 ```
-
-## Key files
-
-| File                                       | Purpose                                      |
-| ------------------------------------------ | -------------------------------------------- |
-| `components/product-card/product-card.tsx` | High-level server component and link wrapper |
-| `components/product-card/components.tsx`   | Compound parts, image/fallback, skeleton     |
-| `lib/shopify/fragments.ts`                 | `PRODUCT_CARD_FRAGMENT` (card data shape)    |
-| `lib/shopify/transforms/product.ts`        | `transformShopifyProductCard`                |
-| `lib/types.ts`                             | `ProductCard` domain type                    |

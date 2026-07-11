@@ -30,12 +30,3 @@ The template scopes sitemaps to products and collections. Shopify's `SitemapType
 1. **`lib/shopify/operations/sitemap.ts`** — extend the `ShopifySitemapType` union.
 2. **`app/sitemap.xml/route.ts`** — fetch the new type's `getShopifySitemapPagesCount(...)` and spread its `{type}-{n}` ids into the index alongside the product and collection shards. The index lists only what you add here — it does not discover new types on its own.
 3. **`app/sitemap/[shard]/route.ts`** — widen the shard regex and the type mapping so the new `{type}-{n}` segments resolve, then map each item to its URL path.
-
-## Key files
-
-| File                                | Purpose                                                      |
-| ----------------------------------- | ------------------------------------------------------------ |
-| `app/sitemap.xml/route.ts`          | Sitemap index — lists every shard                            |
-| `app/sitemap/[shard]/route.ts`      | Child sitemaps — `static`, `products-{n}`, `collections-{n}` |
-| `lib/shopify/operations/sitemap.ts` | `getShopifySitemapPagesCount`, `getShopifySitemapPage`       |
-| `app/robots.ts`                     | Declares the sitemap index as the crawler entry point        |

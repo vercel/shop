@@ -87,15 +87,3 @@ Each recommendation surface is gated by its rendering parent, which does not mou
 ## What does not belong here
 
 Do not put secrets, access tokens, store-specific product handles, or fetched Shopify data in `shop.config.ts`. Keep credentials in environment variables and merchandising data in Shopify.
-
-## Key files
-
-| File                                                   | Purpose                                                                |
-| ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `shop.config.ts`                                       | Canonical static defaults and feature policy                           |
-| `lib/config.ts`                                        | Environment resolution plus site, navigation, and footer configuration |
-| `app/layout.tsx`                                       | Mounts the root analytics component                                    |
-| `components/analytics.tsx`                             | Composes analytics providers and applies integration gates             |
-| `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist                   |
-| `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility                   |
-| `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                          |

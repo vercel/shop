@@ -84,15 +84,4 @@ Products within a collection are fetched via `getCollectionProducts()`, which ac
 
 The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. The search page displays a heading with the query and shows a "no results" message with i18n support when the query returns empty. Predictive search is available from the navbar search modal, which shows suggestion chips and product results as the user types.
 
-## Key files
-
-| File                                               | Purpose                                                         |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| `app/collections/[handle]/page.tsx`                | Collection route                                                |
-| `app/search/page.tsx`                              | Search route                                                    |
-| `components/collections/collection-page.tsx`       | Orchestrates toolbar, filter sidebar, results grid, and JSON-LD |
-| `components/collections/infinite-product-grid.tsx` | Infinite scroll via `IntersectionObserver` + server action      |
-| `components/collections/filter-sidebar.tsx`        | Faceted filter sidebar driven by Shopify filter data            |
-| `lib/shopify/operations/products.ts`               | Product search with caching and filter mapping                  |
-
 The toolbar, sort select, mobile filter sheet, filter primitives, transition context, search results layout, and product card live alongside these in `components/collections/`, `components/search/`, and `components/product-card/`.

@@ -12,14 +12,14 @@ The template ships with several built-in surfaces that contribute to AEO/GEO. Th
 
 ## Surfaces in the template
 
-| Surface                          | What it does                                                                                           | Key files                                                                                |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`                                        | `next.config.ts`, `app/md/**`, `lib/markdown/**`                                         |
-| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data                                 | `components/product-detail/schema.tsx`, `components/schema/**`                           |
-| **Sitemap**                      | [Sitemap index + paged children](/docs/anatomy/sitemap) for products and collections                   | `app/sitemap.xml/route.ts`, `app/sitemap/[shard]/route.ts`                               |
-| **Robots**                       | Declares crawl policy and blocks faceted (sort/filter) collection URLs                                 | `app/robots.ts`                                                                          |
-| **`llms.txt`**                   | Curated `/llms.txt` index of collections and discovery links for AI agents                             | `app/llms.txt/route.ts`, `lib/markdown/llms.ts`                                          |
-| **OpenGraph & Twitter metadata** | Per-route title/description/image previews, plus `product` OG tags (type, price, availability) on PDPs | `lib/seo.ts`, `components/product-detail/open-graph.tsx`, route-level `generateMetadata` |
+| Surface                          | What it does                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Content negotiation**          | Serves clean markdown to AI clients via `Accept: text/markdown`                                        |
+| **Schema.org JSON-LD**           | Embeds structured `Product`, `BreadcrumbList`, and `Organization` data                                 |
+| **Sitemap**                      | [Sitemap index + paged children](/docs/anatomy/sitemap) for products and collections                   |
+| **Robots**                       | Declares crawl policy and blocks faceted (sort/filter) collection URLs                                 |
+| **`llms.txt`**                   | Curated `/llms.txt` index of collections and discovery links for AI agents                             |
+| **OpenGraph & Twitter metadata** | Per-route title/description/image previews, plus `product` OG tags (type, price, availability) on PDPs |
 
 The rest of this page goes deep on content negotiation. The other surfaces are documented inline in the linked files.
 
@@ -71,20 +71,6 @@ The `Vary: Accept` header ensures CDNs cache markdown and HTML responses separat
 - **Collection pages** — collection metadata, description, applied filters, available filters, products, pagination, image, and SEO metadata
 - **Search pages** — query metadata, active collection filter, applied filters, available filters, products, and pagination state
 
-### Key files
-
-| File                                   | Purpose                                             |
-| -------------------------------------- | --------------------------------------------------- |
-| `next.config.ts`                       | Rewrite rules matching `Accept: text/markdown`      |
-| `app/md/products/[handle]/route.ts`    | Product markdown route handler                      |
-| `app/md/collections/[handle]/route.ts` | Collection markdown route handler                   |
-| `app/md/search/route.ts`               | Search markdown route handler                       |
-| `lib/markdown/product.ts`              | `productToMarkdown()` converter                     |
-| `lib/markdown/collection.ts`           | `collectionToMarkdown()` converter                  |
-| `lib/markdown/search.ts`               | `searchResultsToMarkdown()` converter               |
-| `lib/markdown/catalog.ts`              | Shared product/filter/pagination formatting helpers |
-| `lib/markdown/utils.ts`                | Formatting helpers (prices, tables, escaping)       |
-
 ### Multi-locale
 
 If you have enabled Shopify Markets, the rewrite fires before locale routing — no additional configuration is needed. Pass a `?locale=` query parameter to the markdown endpoint for locale-specific pricing and collection/search context.
@@ -94,10 +80,3 @@ If you have enabled Shopify Markets, the rewrite fires before locale routing —
 `/llms.txt` is a curated, machine-readable index of the storefront — an [emerging convention](https://llmstxt.org) that is to AI agents what `robots.txt` is to crawlers. It links to the search entry point, the collection catalog, and the sitemap/robots discovery surfaces, and tells agents that those pages also serve clean Markdown under `Accept: text/markdown` (the content negotiation above).
 
 The route is dynamic: collections are pulled live from Shopify and capped so the file stays a concise index rather than an exhaustive dump — the full URL set lives in the [sitemap](/docs/anatomy/sitemap). Because the links honor content negotiation, the virtual `/collections/all` catalog page is served as Markdown too, not just HTML.
-
-### Key files
-
-| File                    | Purpose                                                      |
-| ----------------------- | ------------------------------------------------------------ |
-| `app/llms.txt/route.ts` | Route handler; fetches collections and serves `text/plain`   |
-| `lib/markdown/llms.ts`  | `llmsTxt()` generator that builds the index from the catalog |

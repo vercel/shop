@@ -112,11 +112,3 @@ To handle a new Shopify topic:
 3. Confirm the tags you're invalidating actually wrap the reads you care about — `cacheTag("...")` calls inside `lib/shopify/operations/` and `lib/cms/`
 
 If the new topic touches data not currently cached by tag, add a `cacheTag()` to the operation that reads it before the webhook will have any effect.
-
-## Key files
-
-| File                                | Purpose                                                       |
-| ----------------------------------- | ------------------------------------------------------------- |
-| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification and tag dispatch       |
-| `lib/shopify/utils.ts`              | `getNumericShopifyId()` — extracts numeric ID from GraphQL ID |
-| `.env.example`                      | Documents `SHOPIFY_WEBHOOK_SECRET`                            |

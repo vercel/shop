@@ -19,7 +19,6 @@ Open http://localhost:3000.
 - `components/geistdocs/` — provider, docs layout, and MDX component registration.
 - `components/fake-browser/`, `components/storefront-hero/` — custom components used in docs content and on the homepage.
 - `scripts/sync-skills.ts` — syncs `packages/plugin/skills/*/SKILL.md` into the skills docs pages.
-- `scripts/lint-doc-paths.ts` — validates `## Key files` paths against the template app.
 
 ## AI-readable surfaces
 
@@ -27,13 +26,13 @@ The site serves markdown to agents via `/llms.txt`, `/agents.md`, `/sitemap.md`,
 
 ## Commands
 
-| Command                          | Description                                  |
-| -------------------------------- | -------------------------------------------- |
-| `pnpm dev`                       | Start the dev server                         |
-| `pnpm build`                     | Production build                             |
-| `pnpm lint`                      | oxlint, oxfmt check, and doc path validation |
-| `pnpm typecheck`                 | TypeScript                                   |
-| `npx tsx scripts/sync-skills.ts` | Sync skill content into docs                 |
-| `pnpm exec geistdocs update`     | Update `@vercel/geistdocs`                   |
+| Command                          | Description                  |
+| -------------------------------- | ---------------------------- |
+| `pnpm dev`                       | Start the dev server         |
+| `pnpm build`                     | Production build             |
+| `pnpm lint`                      | oxlint and oxfmt check       |
+| `pnpm typecheck`                 | TypeScript                   |
+| `npx tsx scripts/sync-skills.ts` | Sync skill content into docs |
+| `pnpm exec geistdocs update`     | Update `@vercel/geistdocs`   |
 
 See `AGENTS.md` for agent editing conventions.

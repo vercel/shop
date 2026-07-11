@@ -103,18 +103,3 @@ The panel keeps the current compact-to-capped layout, streaming "Thinking…" st
 - **A model output/token cap** to bound worst-case gateway spend
 
 Run bot and rate-limit checks before `request.json()` and before cart creation. If the route is already behind a WAF, prefer that policy and keep the model cap.
-
-## Key files
-
-| File                                   | Purpose                                                       |
-| -------------------------------------- | ------------------------------------------------------------- |
-| `shop.config.ts`                       | Default enablement, model, step limit, and tool allowlist     |
-| `app/api/chat/route.ts`                | Feature guard, validation, page context, cart cookie, stream  |
-| `lib/agent/server.ts`                  | ToolLoopAgent, prompt, request-scoped context, tool registry  |
-| `lib/agent/tools/`                     | One AI SDK tool per file                                      |
-| `lib/agent/index.ts`                   | json-render catalog schemas                                   |
-| `components/agent/agent-panel.tsx`     | `useChat`, local persistence, panel and streaming behavior    |
-| `components/agent/chat-message.tsx`    | Text and generative UI rendering                              |
-| `components/agent/cart-reconciler.tsx` | Synchronizes cart tool results with the storefront cart state |
-| `components/agent/registry.tsx`        | Generative UI component implementations                       |
-| `lib/shopify/storefront.ts`            | Storefront client and native Storefront MCP helpers           |

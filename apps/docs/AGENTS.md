@@ -50,7 +50,6 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ## Shop-specific conventions
 
 - **Skill sync**: the `skills/enable-*.mdx` pages embed `packages/plugin/skills/<name>/SKILL.md` between `{/* BEGIN SKILL CONTENT */}` / `{/* END SKILL CONTENT */}` markers. Never hand-edit between the markers; run `npx tsx scripts/sync-skills.ts` instead. The script escapes MDX-unsafe characters (`{`, `}`, bare `<`) in skill prose.
-- **Key files lint**: `## Key files` sections in docs list backtick paths that must resolve against `apps/template/` or the repo root. Validated by `npx tsx scripts/lint-doc-paths.ts` (part of `pnpm lint`).
 - **Custom MDX components**: `HomeBrowser`, `PDPBrowser`, `PLPBrowser`, `CartBrowser`, `ContentBrowser` (from `components/fake-browser/`) plus `Card`/`Cards` are registered in `components/geistdocs/mdx-components.tsx`.
 - **Homepage styling**: the homepage and its components use shadcn-style tokens defined in `app/styles/home.css`, scoped to the `.shop-home` wrapper set in `app/[lang]/(home)/layout.tsx`. Do not use those tokens outside the homepage; docs UI uses Geist tokens from `app/styles/geistdocs.css`.
 - **Local UI primitives** in `components/ui/` (badge, button, command-prompt, input, input-group, tabs, textarea) exist only for the homepage. Docs UI components come from `@vercel/geistdocs/components/*`.
@@ -61,12 +60,13 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 - Use MDX frontmatter with at least `title` and `description`; the schema (from `@vercel/geistdocs/source-config`) also supports `type`, `prerequisites`, `related`, `summary`, `tags`, and `excludeFrom`.
 - Add each new page to the relevant `meta.json` so it appears in the sidebar.
 - Plain markdown copied into MDX must have `{`, `}`, and bare `<` escaped outside code blocks.
+- Do not add `Key files`, file inventory, or file-to-purpose table sections. Mention a path inline only when it directly supports the surrounding instruction or explanation.
 - Keep slugs stable unless the task explicitly includes redirects or link updates.
 
 ## Commands
 
 - Dev: `pnpm dev` · Build: `pnpm build` · Start: `pnpm start`
-- Lint (oxlint + oxfmt + doc paths): `pnpm lint` · Format: `pnpm format` · Types: `pnpm typecheck`
+- Lint (oxlint + oxfmt): `pnpm lint` · Format: `pnpm format` · Types: `pnpm typecheck`
 - Sync skills into docs: `npx tsx scripts/sync-skills.ts`
 - Update Geistdocs: `pnpm exec geistdocs update`
 

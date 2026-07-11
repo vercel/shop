@@ -88,11 +88,3 @@ When Shopify sends a webhook, the handler:
 5. Returns the list of invalidated tags for logging
 
 This means a product update in Shopify invalidates only that product's cache and its recommendations - not every page on the site.
-
-## Key files
-
-| File                                | Purpose                                                           |
-| ----------------------------------- | ----------------------------------------------------------------- |
-| `app/api/webhooks/shopify/route.ts` | Webhook handler with HMAC verification                            |
-| `lib/shopify/operations/menu.ts`    | Menu fetching by handle (used after `enable-shopify-menus` skill) |
-| `lib/shopify/storefront.ts`         | Core Storefront API client                                        |

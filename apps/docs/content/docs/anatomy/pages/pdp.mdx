@@ -110,18 +110,4 @@ The page emits two JSON-LD schemas:
 - **Product schema** - name, description, images, brand, price range, availability, and variant count
 - **Breadcrumb schema** - Home → Product Title (JSON-LD only, no visible breadcrumb UI)
 
-## Key files
-
-| File                                                   | Purpose                                                                                                              |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `shop.config.ts`                                       | PDP bundle, complementary-product, related-product, and specification policy                                         |
-| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams the per-selection variant query |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD                       |
-| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                                  |
-| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                                         |
-| `components/product-detail/bundle-components.tsx`      | Renders a bundle's contents and the bundles a product is part of                                                     |
-| `components/product-detail/product-specs.tsx`          | Renders configured product metafields as a "Specifications" label/value list                                         |
-| `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, color-image helpers                                     |
-| `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability                                        |
-
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.

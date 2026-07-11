@@ -82,15 +82,4 @@ The cookie's `SameSite` attribute is derived from `VERCEL_ENV`: `Strict` on the 
 
 The transform layer in `lib/shopify/transforms/cart.ts` converts Shopify's GraphQL response shape into a domain `Cart` type used throughout the application. This isolates the rest of the codebase from Shopify's API structure.
 
-## Key files
-
-| File                             | Purpose                                                         |
-| -------------------------------- | --------------------------------------------------------------- |
-| `components/cart/context.tsx`    | Cart state, optimistic updates, debouncing                      |
-| `components/cart/overlay.tsx`    | Cart slideover composition                                      |
-| `app/cart/page.tsx`              | Full cart page route                                            |
-| `lib/cart/action.ts`             | Server actions for cart mutations                               |
-| `lib/cart/server.ts`             | `invalidateCartCache()` — must be called by every cart mutation |
-| `lib/shopify/operations/cart.ts` | Shopify cart GraphQL operations                                 |
-
 Sub-components (`overlay-content`, `overlay-item`, `overlay-summary`, `context-sync`, and the pieces under `components/cart-page/`) live alongside these and are discoverable by directory.
