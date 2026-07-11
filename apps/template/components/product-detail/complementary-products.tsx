@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { pdp } from "@/lib/config";
-import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
+import { getComplementaryProducts } from "@/lib/shopify/operations/products";
 import type { ProductCard } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -18,7 +18,7 @@ export async function ComplementaryProducts({
 }) {
   if (!pdp.upsells.enabled) return null;
 
-  const { complementary } = await getProductRecommendationSets({ handle, locale });
+  const complementary = await getComplementaryProducts({ handle, locale });
   if (complementary.length === 0) return null;
 
   return (

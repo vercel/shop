@@ -71,7 +71,7 @@ Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling aut
 - `relatedProducts.enabled` shows or hides Shopify's algorithmic related-product grid on PDP and cart pages. `relatedProducts.limit` controls its product and skeleton counts.
 - `specifications.metafields` lists Shopify product metafield namespace/key pairs to request and render as specifications.
 
-Disabling a surface prevents its component from rendering. The recommendation operation and existing cache strategy remain unchanged for enabled surfaces, so complementary and related products continue sharing one cached Shopify request when both are shown.
+Each recommendation component owns its gate and returns before fetching when disabled. Complementary and related products use separate cached Shopify operations and invalidation tags, so enabling one surface does not request data for the other.
 
 ## What does not belong here
 

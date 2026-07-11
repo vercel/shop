@@ -1,7 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import { getProductRecommendationSets } from "@/lib/shopify/operations/products";
+import { getComplementaryProducts, getRelatedProducts } from "@/lib/shopify/operations/products";
 
 import { getAgentContext } from "../server";
 
@@ -12,10 +12,10 @@ export function getRecommendationsTool() {
     execute: async ({ handle }) => {
       try {
         const { user } = getAgentContext();
-        const { complementary, related } = await getProductRecommendationSets({
-          handle,
-          locale: user.locale,
-        });
+        const [complementary, related] = await Promise.all([
+          getComplementaryProducts({ handle, locale: user.locale }),
+          getRelatedProducts({ handle, locale: user.locale }),
+        ]);
         const seen = new Set<string>();
         const products = [...complementary, ...related].filter((product) => {
           if (seen.has(product.handle)) return false;

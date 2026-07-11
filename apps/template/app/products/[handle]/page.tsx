@@ -6,7 +6,6 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import { pdp } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import {
   defaultSelectedOptions,
@@ -118,13 +117,7 @@ export default async function ProductPage({
             variantPromise={variantPromise}
             locale={locale}
           />
-          {pdp.relatedProducts.enabled ? (
-            <RelatedProductsSection
-              handle={handle}
-              limit={pdp.relatedProducts.limit}
-              locale={locale}
-            />
-          ) : null}
+          <RelatedProductsSection handle={handle} locale={locale} />
         </Sections>
       </Container>
     </Page>

@@ -47,6 +47,7 @@ export async function POST(request: Request) {
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
+        productTags.push(`complementary-${payload.handle}`);
         productTags.push(`product-${payload.handle}`);
         productTags.push(`recommendations-${payload.handle}`);
       }
