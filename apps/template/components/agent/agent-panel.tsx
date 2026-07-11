@@ -135,7 +135,8 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
               <ChatMessage
                 key={message.id}
                 isStreaming={status === "streaming" && index === messages.length - 1}
-                message={message}
+                messageId={message.id}
+                messages={messages}
               />
             ))
           )}

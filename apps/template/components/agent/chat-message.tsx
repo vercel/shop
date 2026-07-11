@@ -27,12 +27,17 @@ Markdown.displayName = "Markdown";
 
 export function ChatMessage({
   isStreaming,
-  message,
+  messageId,
+  messages,
 }: {
   isStreaming: boolean;
-  message: UIMessage;
+  messageId: string;
+  messages: readonly UIMessage[];
 }) {
-  // AI SDK mutates parts in place, so reference-based memoization misses later spec patches.
+  const message = messages.find((item) => item.id === messageId);
+  if (!message) return null;
+
+  // AI SDK mutates parts in place; the messages array is the reactive stream snapshot.
   const spec = buildSpecFromParts(message.parts);
   const text = getTextFromParts(message.parts);
   const hasSpec = spec !== null && Object.keys(spec.elements ?? {}).length > 0;
