@@ -3,7 +3,6 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { pdp } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import { getRelatedProducts } from "@/lib/shopify/operations/products";
 
@@ -66,15 +65,14 @@ async function Render({
 
 export async function RelatedProductsSection({
   handle,
+  limit,
   locale,
 }: {
   handle: string | Promise<string>;
+  limit: number;
   locale: Locale;
 }) {
-  if (!pdp.relatedProducts.enabled) return null;
-
   const t = await getTranslations("product");
-  const { limit } = pdp.relatedProducts;
   return (
     <Suspense
       fallback={<RelatedProductsSectionSkeleton limit={limit} title={t("recommendations")} />}

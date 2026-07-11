@@ -17,7 +17,7 @@ paths:
 
 ## Summary
 
-Complementary and related products now use separate cached Shopify operations. `ComplementaryProducts` owns the `pdp.upsells.enabled` gate, and `RelatedProductsSection` owns the `pdp.relatedProducts.enabled` gate. Each component returns before fetching when disabled.
+Complementary and related products now use separate cached Shopify operations. Their rendering parents own the `pdp.upsells.enabled` and `pdp.relatedProducts.enabled` gates and do not mount the components when disabled, preventing their fetches from running.
 
 The shopping agent still returns both recommendation types by starting the independent operations together. Product webhooks invalidate the separate `complementary-{handle}` and `recommendations-{handle}` cache entries.
 

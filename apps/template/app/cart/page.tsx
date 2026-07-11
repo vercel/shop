@@ -14,6 +14,7 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { pdp } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
@@ -66,9 +67,10 @@ async function CartContent({ locale }: { locale: Locale }) {
                     </div>
                   </aside>
                 </div>
-                {cart.lines[0]?.merchandise.product.handle ? (
+                {pdp.relatedProducts.enabled && cart.lines[0]?.merchandise.product.handle ? (
                   <RelatedProductsSection
                     handle={cart.lines[0].merchandise.product.handle}
+                    limit={pdp.relatedProducts.limit}
                     locale={locale}
                   />
                 ) : null}
