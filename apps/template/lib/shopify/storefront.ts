@@ -11,7 +11,7 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_ACCESS_TOKEN = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
-const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "2026-04";
+const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 
 function operationName(body: RequestInit["body"]): string {

@@ -1,6 +1,6 @@
 import { ApiType, shopifyApiProject } from "@shopify/api-codegen-preset";
 
-const apiVersion = process.env.SHOPIFY_API_VERSION ?? "2026-04";
+const apiVersion = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const documents = ["lib/shopify/**/*.ts", "!lib/shopify/types/generated/**"];
 
 export default {
