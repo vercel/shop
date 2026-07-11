@@ -572,7 +572,7 @@ export async function getComplementaryProducts(params: {
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", `complementary-${params.handle}`);
+  cacheTag("products", `recommendations-${params.handle}`);
 
   const products = await fetchComplementaryProducts(params);
   tagProducts(products);

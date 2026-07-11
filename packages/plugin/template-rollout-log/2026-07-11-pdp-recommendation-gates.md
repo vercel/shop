@@ -17,18 +17,18 @@ paths:
 
 ## Summary
 
-Complementary and related products now use separate cached Shopify operations. Their rendering parents own the `pdp.upsells.enabled` and `pdp.relatedProducts.enabled` gates and do not mount the components when disabled, preventing their fetches from running.
+Complementary and related products now use separate cached Shopify operations. Their rendering parents own the `pdp.complementaryProducts.enabled` and `pdp.relatedProducts.enabled` gates and do not mount the components when disabled, preventing their fetches from running.
 
-The shopping agent still returns both recommendation types by starting the independent operations together. Product webhooks invalidate the separate `complementary-{handle}` and `recommendations-{handle}` cache entries.
+The shopping agent still returns both recommendation types by starting the independent operations together. Both cache entries use the existing `recommendations-{handle}` tag invalidated by product webhooks.
 
 ## Why it matters
 
-The previous combined operation fetched both recommendation intents whenever either surface rendered. A storefront could hide upsells or related products, but the enabled surface still requested the disabled surface's data. Separating the operations makes the feature gates control both rendering and Shopify requests.
+The previous combined operation fetched both recommendation intents whenever either surface rendered. A storefront could hide complementary or related products, but the enabled surface still requested the disabled surface's data. Separating the operations makes the feature gates control both rendering and Shopify requests.
 
 ## Apply when
 
 - The storefront uses the PDP recommendation gates from `shop.config.ts`.
-- Complementary and related recommendation data should be fetched and invalidated independently.
+- Complementary and related recommendation data should be fetched independently.
 - The storefront adopted `pdp-recommendations-single-request` and now prefers complete feature isolation over one combined request.
 
 ## Safe to skip when
@@ -42,7 +42,7 @@ This change supersedes the combined-operation guidance in `2026-06-20-pdp-recomm
 
 ## Validation
 
-1. Set `pdp.upsells.enabled` to `false`; confirm the complementary component renders nothing and no complementary-products operation runs.
+1. Set `pdp.complementaryProducts.enabled` to `false`; confirm the complementary component renders nothing and no complementary-products operation runs.
 2. Set `pdp.relatedProducts.enabled` to `false`; confirm PDP and cart related sections render nothing and no related-products operation runs.
 3. Enable both surfaces; confirm both sections render from their respective Shopify recommendation intents.
 4. Run template GraphQL codegen, type checking, and linting, then run the docs path linter.

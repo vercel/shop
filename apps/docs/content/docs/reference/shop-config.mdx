@@ -39,9 +39,9 @@ export const shopConfig = {
   },
   pdp: {
     bundles: { enabled: true },
+    complementaryProducts: { enabled: true, limit: 4 },
     relatedProducts: { enabled: true, limit: 4 },
     specifications: { metafields: [] },
-    upsells: { enabled: true, limit: 4 },
   },
 } satisfies ShopConfig;
 ```
@@ -67,11 +67,11 @@ Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling aut
 ## PDP merchandising
 
 - `bundles.enabled` shows or hides Shopify bundle relationships beside the buy section.
-- `upsells.enabled` shows or hides merchant-curated complementary products. `upsells.limit` controls the number of rows.
+- `complementaryProducts.enabled` shows or hides merchant-curated complementary products. `complementaryProducts.limit` controls the number of rows.
 - `relatedProducts.enabled` shows or hides Shopify's algorithmic related-product grid on PDP and cart pages. `relatedProducts.limit` controls its product and skeleton counts.
 - `specifications.metafields` lists Shopify product metafield namespace/key pairs to request and render as specifications.
 
-Each recommendation surface is gated by its rendering parent, which does not mount the component when disabled. Complementary and related products use separate cached Shopify operations and invalidation tags, so enabling one surface does not request data for the other.
+Each recommendation surface is gated by its rendering parent, which does not mount the component when disabled. Complementary and related products use separate cached Shopify operations, so enabling one surface does not request data for the other. Both operations use the existing `recommendations-{handle}` invalidation tag.
 
 ## What does not belong here
 

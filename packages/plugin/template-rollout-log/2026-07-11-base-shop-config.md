@@ -31,7 +31,7 @@ Storefront policy was previously split across hardcoded component constants, age
 
 - The storefront wants a central typed configuration surface.
 - Agent model, step count, or tool availability should be customizable without editing agent internals.
-- PDP bundles, upsells, related products, limits, or specifications should be configurable.
+- PDP bundles, complementary products, related products, limits, or specifications should be configurable.
 - Auth or agent defaults should live in source while remaining overridable per deployment.
 
 ## Safe to skip when

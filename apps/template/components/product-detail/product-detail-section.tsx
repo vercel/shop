@@ -253,10 +253,10 @@ async function ProductInfoArea({
 
       {pdp.bundles.enabled ? <BundleRelationships variant={product.defaultVariant} t={t} /> : null}
 
-      {pdp.upsells.enabled ? (
+      {pdp.complementaryProducts.enabled ? (
         <ComplementaryProducts
           handle={handle}
-          limit={pdp.upsells.limit}
+          limit={pdp.complementaryProducts.limit}
           locale={locale}
           title={t("pairsWith")}
         />
