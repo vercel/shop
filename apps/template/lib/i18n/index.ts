@@ -1,8 +1,8 @@
-export const locales = ["en-CA"] as const;
+export const locales = ["en-US"] as const;
 
 export type Locale = (typeof locales)[number];
 
-export const defaultLocale: Locale = "en-CA";
+export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = [defaultLocale];
 export const localeSwitchingEnabled = enabledLocales.length > 1;
 
