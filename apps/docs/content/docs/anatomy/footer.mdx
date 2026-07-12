@@ -1,14 +1,16 @@
 ---
 title: Footer
-description: The storefront footer - copyright, social links, and optional Shopify menu columns.
+description: The storefront footer - copyright, Shopify policy links, social links, and optional menu columns.
 type: guide
 ---
 
-The footer renders at the bottom of every page. By default it displays a copyright notice and optional social media links.
+The footer renders at the bottom of every page. By default it displays a copyright notice, every configured Shopify store policy, and optional social media links.
 
 ## Default behavior
 
-The footer always renders. By default it shows a copyright line ("© \{shopConfig.site.name\}. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
+The footer always renders. By default it shows a copyright line ("© \{shopConfig.site.name\}. All rights reserved."), links to every policy configured in Shopify Admin, and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
+
+Policy links use the active locale and disappear individually when a policy is not configured. They render at `/policies/[handle]` and share the `policies` cache tag with the policy pages and static sitemap shard.
 
 ## Social links
 

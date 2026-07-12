@@ -1,10 +1,10 @@
 ---
 title: Webhooks
-description: Shopify webhook handler that invalidates Next.js cache tags so storefront content updates near-instantly when products, collections, or CMS metaobjects change.
+description: Shopify webhook handler that invalidates Next.js cache tags when products, collections, or CMS metaobjects change.
 type: guide
 ---
 
-Read paths in the template are cached aggressively with `"use cache: remote"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
+Read paths in the template are cached aggressively with `"use cache"` or `"use cache: remote"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
 
 The handler ships in the template and runs with zero configuration in development. For production, set `SHOPIFY_WEBHOOK_SECRET` and register webhooks in Shopify Admin so a real signal flows in.
 
@@ -56,7 +56,7 @@ When a request arrives, the handler runs in this order:
 1. Reads the raw body as text — required for stable HMAC verification
 2. If `SHOPIFY_WEBHOOK_SECRET` is set, computes the HMAC-SHA256 of the body and compares it to `x-shopify-hmac-sha256` using `crypto.timingSafeEqual`. Mismatch returns `401`.
 3. Reads `x-shopify-topic`. Missing topic returns `400`.
-4. Dispatches on the topic prefix (`products/`, `collections/`, `metaobjects/`) and builds a tag list from the payload
+4. Dispatches on the topic prefix (`products/`, `collections/`, or `metaobjects/`) and builds a tag list from the payload
 5. Calls `revalidateTag()` for each affected tag
 6. Returns `{ success, topic, tagsInvalidated }` for log inspection
 

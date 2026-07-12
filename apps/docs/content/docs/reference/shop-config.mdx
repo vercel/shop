@@ -44,7 +44,6 @@ export const shopConfig = {
     footer: [],
     nav: [
       { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
-      { id: "default-nav-about", title: "About", url: "/about", type: "HTTP", items: [] },
     ],
   },
   pdp: {
@@ -87,7 +86,7 @@ Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling aut
 
 ## Navigation
 
-- `nav` is the hardcoded nav menu consumed by the desktop quick links and mobile sheet. It defaults to Shop and About links.
+- `nav` is the hardcoded nav menu consumed by the desktop quick links and mobile sheet. It defaults to a Shop link.
 - `footer` is the hardcoded footer menu columns. It defaults to an empty array, so no columns render.
 
 Both are `MenuItem[]` in Shopify menu shape (supporting up to three levels of nesting), so the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill can swap in a live Shopify menu while keeping these as the fallback.
