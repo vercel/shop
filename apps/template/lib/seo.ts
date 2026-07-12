@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { siteConfig } from "./config";
+import { shopConfig } from "@/shop.config";
 
 type SearchParamsInput =
   | URLSearchParams
@@ -91,7 +91,7 @@ export function buildOpenGraph({
     title,
     description,
     url,
-    siteName: siteConfig.name,
+    siteName: shopConfig.site.name,
     images,
   };
 }

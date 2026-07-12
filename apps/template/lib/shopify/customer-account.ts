@@ -7,8 +7,8 @@ import {
   gql,
 } from "@shopify/hydrogen/customer-account";
 
-import { siteConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { shopConfig } from "@/shop.config";
 
 import { resolveShopId } from "./discovery";
 
@@ -34,7 +34,7 @@ export async function customerAccountFetch<T>({
         country: getCountryCode(defaultLocale) as never,
         language: getLanguageCode(defaultLocale) as never,
       },
-      request: new Request(siteConfig.url),
+      request: new Request(shopConfig.site.url),
     }),
   });
 

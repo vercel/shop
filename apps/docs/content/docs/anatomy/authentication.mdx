@@ -56,7 +56,7 @@ There is no client-side auth SDK. Sign-in is a normal GET navigation to `/accoun
 
 ### Feature gating
 
-The `isAuthEnabled` flag reads the resolved `auth.enabled` value from `lib/config`. That value uses `NEXT_PUBLIC_ENABLE_AUTH` when set and otherwise falls back to `shopConfig.auth.enabledByDefault`. When false:
+The `isAuthEnabled` flag re-exports the resolved `shopConfig.auth.enabled` value from `shop.config.ts`. That value uses `NEXT_PUBLIC_ENABLE_AUTH` when set and otherwise falls back to `false`. When false:
 
 - The account icon does not appear in the nav
 - The Hydrogen account auth routes return 404

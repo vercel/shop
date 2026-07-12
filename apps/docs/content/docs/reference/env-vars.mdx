@@ -16,10 +16,10 @@ type: reference
 
 The canonical feature defaults live in [`shop.config.ts`](/docs/reference/shop-config) and are disabled initially. The `NEXT_PUBLIC_ENABLE_*` variables override those defaults per deployment; set them to `"1"` or `"0"`. The `NEXT_PUBLIC_` prefix is required so conditional rendering matches between server and client under cache components.
 
-| Variable                   | Description                                                                                                                                                                                    |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` or `"0"` to override `auth.enabledByDefault`. Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing. |
-| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` or `"0"` to override `agent.enabledByDefault`, showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                   |
+| Variable                   | Description                                                                                                                                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` or `"0"` to control `auth.enabled` (default `false`). Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing. |
+| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` or `"0"` to control `agent.enabled` (default `false`), showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                   |
 
 ## Customer Authentication
 

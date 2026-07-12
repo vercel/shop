@@ -13,7 +13,7 @@ Environment variables still own credentials and deployment-specific overrides. S
 ```ts
 export const shopConfig = {
   agent: {
-    enabledByDefault: false,
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false),
     maxSteps: 10,
     model: "google/gemini-3.5-flash",
     tools: [
@@ -38,8 +38,14 @@ export const shopConfig = {
     vercel: { enabled: false },
   },
   auth: {
-    enabledByDefault: false,
-    providerId: "shopify",
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+  },
+  navigation: {
+    footer: [],
+    nav: [
+      { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
+      { id: "default-nav-about", title: "About", url: "/about", type: "HTTP", items: [] },
+    ],
   },
   pdp: {
     bundles: { enabled: true },
@@ -47,19 +53,24 @@ export const shopConfig = {
     relatedProducts: { enabled: true, limit: 4 },
     specifications: { metafields: [] },
   },
+  site: {
+    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
+    socialLinks: [],
+    url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
+  },
 } satisfies ShopConfig;
 ```
 
-`lib/config.ts` resolves this static configuration with deployment environment variables and exports the values consumed by the app.
+`shop.config.ts` is the single source of configuration. It exports one `shopConfig` object that resolves everything inline: `envFlag` reads the `NEXT_PUBLIC_ENABLE_*` toggles for `agent.enabled` and `auth.enabled`, and the `site` block resolves the storefront's identity from deployment environment variables. Consumers import `shopConfig` directly from `@/shop.config`; there is no separate resolution module.
 
 ## Agent
 
-- `enabledByDefault` controls whether the assistant is available when `NEXT_PUBLIC_ENABLE_AGENT` is unset.
+- `enabled` controls whether the assistant is available. It reads `NEXT_PUBLIC_ENABLE_AGENT` and defaults to `false` when unset.
 - `model` is the AI Gateway model passed to `ToolLoopAgent`.
 - `maxSteps` bounds the agent loop with AI SDK's `isStepCount()`.
 - `tools` is the allowlist exposed to the model. Remove a tool name to keep its implementation in the codebase without making it available to the agent.
 
-Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override `enabledByDefault` for a deployment.
+Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override the default for a deployment.
 
 ## Analytics
 
@@ -70,9 +81,16 @@ Each integration is disabled by default. Set an individual integration to `true`
 
 ## Authentication
 
-- `enabledByDefault` controls whether customer authentication is active when `NEXT_PUBLIC_ENABLE_AUTH` is unset.
+- `enabled` controls whether customer authentication is active. It reads `NEXT_PUBLIC_ENABLE_AUTH` and defaults to `false` when unset.
 
 Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables whether auth is enabled by the file or by the environment override.
+
+## Navigation
+
+- `nav` is the hardcoded nav menu consumed by the desktop quick links and mobile sheet. It defaults to Shop and About links.
+- `footer` is the hardcoded footer menu columns. It defaults to an empty array, so no columns render.
+
+Both are `MenuItem[]` in Shopify menu shape (supporting up to three levels of nesting), so the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill can swap in a live Shopify menu while keeping these as the fallback.
 
 ## PDP merchandising
 
@@ -83,18 +101,25 @@ Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling aut
 
 Each recommendation surface is gated by its rendering parent, which does not mount the component when disabled. Complementary and related products use separate cached Shopify operations, so enabling one surface does not request data for the other. Both operations use the existing `recommendations-{handle}` invalidation tag.
 
+## Site
+
+`site` carries the storefront's identity. Consumers read it directly as `shopConfig.site` from `@/shop.config`.
+
+- `name` is the storefront's display name, used in metadata, the nav, the footer copyright, and schema. `NEXT_PUBLIC_SITE_NAME` overrides the `"Vercel Shop"` default per deployment.
+- `socialLinks` lists footer social icons. Each entry has a `platform` (one of `facebook`, `github`, `instagram`, `linkedin`, `pinterest`, `tiktok`, `x`, `youtube`) and a `url`. The default empty array hides the social links section.
+- `url` is the canonical base URL, resolved from `NEXT_PUBLIC_BASE_URL` or the Vercel production URL, used for sitemaps, schema, and absolute links.
+
 ## What does not belong here
 
 Do not put secrets, access tokens, store-specific product handles, or fetched Shopify data in `shop.config.ts`. Keep credentials in environment variables and merchandising data in Shopify.
 
 ## Key files
 
-| File                                                   | Purpose                                                                |
-| ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| `shop.config.ts`                                       | Canonical static defaults and feature policy                           |
-| `lib/config.ts`                                        | Environment resolution plus site, navigation, and footer configuration |
-| `app/layout.tsx`                                       | Mounts the root analytics component                                    |
-| `components/analytics.tsx`                             | Composes analytics providers and applies integration gates             |
-| `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist                   |
-| `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility                   |
-| `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                          |
+| File                                                   | Purpose                                                          |
+| ------------------------------------------------------ | ---------------------------------------------------------------- |
+| `shop.config.ts`                                       | Canonical `shopConfig`: feature policy, `site`, and `navigation` |
+| `app/layout.tsx`                                       | Mounts the root analytics component                              |
+| `components/analytics.tsx`                             | Composes analytics providers and applies integration gates       |
+| `lib/agent/server.ts`                                  | Consumes agent model, step limit, and tool allowlist             |
+| `components/product-detail/product-detail-section.tsx` | Consumes bundle and complementary-product visibility             |
+| `components/product/related-products-section.tsx`      | Consumes the configured related-product limit                    |

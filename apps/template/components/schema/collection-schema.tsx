@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 interface CollectionSchemaData {
   handle: string;
@@ -13,7 +13,7 @@ export function CollectionSchema({ collection }: { collection: CollectionSchemaD
     "@type": "CollectionPage",
     name: collection.title,
     description: collection.description || undefined,
-    url: `${siteConfig.url}/collections/${collection.handle}`,
+    url: `${shopConfig.site.url}/collections/${collection.handle}`,
     dateModified: collection.updatedAt,
   };
 

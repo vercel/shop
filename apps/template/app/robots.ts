@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -24,6 +24,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${siteConfig.url}/sitemap.xml`,
+    sitemap: `${shopConfig.site.url}/sitemap.xml`,
   };
 }

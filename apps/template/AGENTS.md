@@ -84,7 +84,7 @@ Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collectio
 Two exceptions that don't fit cleanly:
 
 - A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route) or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
-- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/config.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
+- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
 
 Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — that collides with the runtime meaning. Use a verb (`fetch.ts`) or product noun (`shopify.ts`) instead.
 
@@ -200,7 +200,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client feature gates aligned under cache components.
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. The flag is resolved in `shop.config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client feature gates aligned under cache components.
 
 Key files:
 

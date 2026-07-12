@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 
-import { siteConfig } from "@/lib/config";
 import { getShopifySitemapPage, type ShopifySitemapType } from "@/lib/shopify/operations/sitemap";
+import { shopConfig } from "@/shop.config";
 
 function escapeXml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function toAbsoluteUrl(pathname: string): string {
-  return `${siteConfig.url}${pathname}`;
+  return `${shopConfig.site.url}${pathname}`;
 }
 
 function urlsetWrap(body: string): string {

@@ -12,9 +12,9 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { siteConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { resolveShopId } from "@/lib/shopify/discovery";
+import { shopConfig } from "@/shop.config";
 
 const COOKIE_CHUNK_SIZE = 3_800;
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
@@ -184,7 +184,7 @@ export function getHydrogenCustomerSession(): Promise<HydrogenCustomerSession> {
 function getAllowedOrigins(): Set<string> {
   return new Set(
     [
-      siteConfig.url,
+      shopConfig.site.url,
       process.env.VERCEL_PROJECT_PRODUCTION_URL
         ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
         : undefined,
@@ -221,13 +221,13 @@ export function createCustomerRequestContext(request: Request): ShopifyRequestCo
 
 const getReadonlySessionManager = cache(async (): Promise<ReadonlyCustomerSessionManager> => {
   const requestHeaders = await headers();
-  return createSessionManager(requestHeaders.get("cookie"), siteConfig.url, false);
+  return createSessionManager(requestHeaders.get("cookie"), shopConfig.site.url, false);
 });
 
 const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext> => {
   const requestHeaders = await headers();
   return createCustomerRequestContext(
-    new Request(siteConfig.url, {
+    new Request(shopConfig.site.url, {
       headers: requestHeaders,
     }),
   );

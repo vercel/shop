@@ -5,7 +5,7 @@ description: Replace the hardcoded nav and footer menus with Shopify-powered men
 
 # Enable Shopify Menus
 
-By default, the storefront's nav and footer render hardcoded items from `lib/config.ts`. The components themselves (`QuickLinks`, `MobileMenu`, `Footer`'s `FooterMenu`) already consume `MenuItem[]` in Shopify shape and render up to three levels of nesting. This skill swaps the data source from `navItems` / `footerItems` to a live Shopify menu fetched by handle, with a fallback to the hardcoded items if the menu is missing or empty.
+By default, the storefront's nav and footer render hardcoded items from `shopConfig.navigation` in `shop.config.ts`. The components themselves (`QuickLinks`, `MobileMenu`, `Footer`'s `FooterMenu`) already consume `MenuItem[]` in Shopify shape and render up to three levels of nesting. This skill swaps the data source from `shopConfig.navigation.nav` / `shopConfig.navigation.footer` to a live Shopify menu fetched by handle, with a fallback to the hardcoded items if the menu is missing or empty.
 
 ## Before you start
 
@@ -35,14 +35,14 @@ Edit `components/nav/index.tsx`. Add the `getMenu` import and swap the data sour
 import { getMenu } from "@/lib/shopify/operations/menu";
 ```
 
-Inside `Nav`, replace `const items = navItems;` with:
+Inside `Nav`, replace `const items = shopConfig.navigation.nav;` with:
 
 ```tsx
 const menu = await getMenu({ handle: "NAV_HANDLE" });
-const items = menu?.items ?? navItems;
+const items = menu?.items ?? shopConfig.navigation.nav;
 ```
 
-Replace `"NAV_HANDLE"` with the handle the user provided. `QuickLinks` and `MobileMenu` already accept `MenuItem[]`, so no other component changes are needed. Keep the `navItems` import as the fallback.
+Replace `"NAV_HANDLE"` with the handle the user provided. `QuickLinks` and `MobileMenu` already accept `MenuItem[]`, so no other component changes are needed. Keep `shopConfig.navigation.nav` as the fallback.
 
 ---
 
@@ -56,14 +56,14 @@ Edit `components/footer/index.tsx`. Make the component async, add the `getMenu` 
 import { getMenu } from "@/lib/shopify/operations/menu";
 ```
 
-Change the signature to `async` and replace `const items = footerItems;` with:
+Change the signature to `async` and replace `const items = shopConfig.navigation.footer;` with:
 
 ```tsx
 const menu = await getMenu({ handle: "FOOTER_HANDLE" });
-const items = menu?.items ?? footerItems;
+const items = menu?.items ?? shopConfig.navigation.footer;
 ```
 
-Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` already accepts `MenuItem[]`. Keep the `footerItems` import as the fallback.
+Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` already accepts `MenuItem[]`. Keep `shopConfig.navigation.footer` as the fallback.
 
 The `Footer` callsite in `app/layout.tsx` (or wherever it is rendered) already passes `locale`; if it is not wrapped in `<Suspense>`, the menu fetch will block layout render — that is acceptable since `getMenu` is cached with `"use cache: remote"` and `cacheLife("max")`. Wrap in `<Suspense>` only if you specifically want the rest of the page to stream ahead of the footer.
 
@@ -72,5 +72,5 @@ The `Footer` callsite in `app/layout.tsx` (or wherever it is rendered) already p
 ## Guardrails
 
 - The `getMenu()` operation in `lib/shopify/operations/menu.ts` already handles caching (`"use cache: remote"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
-- Always preserve the `navItems` / `footerItems` fallback so a missing or empty Shopify menu doesn't leave the user with a blank nav or footer.
+- Always preserve the `shopConfig.navigation.nav` / `shopConfig.navigation.footer` fallback so a missing or empty Shopify menu doesn't leave the user with a blank nav or footer.
 - External links (URLs starting with `http`) are handled by the existing `MenuLink` helpers in each component — no change needed.

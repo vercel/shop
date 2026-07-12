@@ -1,7 +1,8 @@
 import { isStepCount, ToolLoopAgent } from "ai";
 
+import { shopConfig } from "@/shop.config";
+
 import { catalog } from ".";
-import { agent as agentConfig, siteConfig } from "../config";
 import type { Locale } from "../i18n";
 import type { ProductDetails } from "../types";
 import { addCartNoteTool } from "./tools/add-cart-note";
@@ -50,7 +51,7 @@ export function withAgentContext<T>(context: AgentContext, callback: () => T): T
 
 function createSystemPrompt(context: AgentContext): string {
   const { page, user } = context;
-  let prompt = `You're a helpful shopping assistant for ${siteConfig.name}. Never use emojis. Always respond in the same language as the user, preferring the user's language when unclear.\n\nThe active locale is ${user.locale}.\n\nYou can search products, browse collections, get recommendations and product details, answer store policy questions, manage the cart, and generate on-site navigation links. Prefer searchCatalog for vague, descriptive, or preference-driven requests; use searchProducts for exact keyword lookups or price sorting. If searchCatalog fails or returns nothing, retry with searchProducts. Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.\n`;
+  let prompt = `You're a helpful shopping assistant for ${shopConfig.site.name}. Never use emojis. Always respond in the same language as the user, preferring the user's language when unclear.\n\nThe active locale is ${user.locale}.\n\nYou can search products, browse collections, get recommendations and product details, answer store policy questions, manage the cart, and generate on-site navigation links. Prefer searchCatalog for vague, descriptive, or preference-driven requests; use searchProducts for exact keyword lookups or price sorting. If searchCatalog fails or returns nothing, retry with searchProducts. Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.\n`;
 
   if (page?.type === "home") {
     prompt += "\nThe user is on the home page. Help them discover products or collections.\n";
@@ -104,14 +105,14 @@ const availableTools = {
 };
 
 const tools = Object.fromEntries(
-  agentConfig.tools.map((name) => [name, availableTools[name]]),
-) as Pick<typeof availableTools, (typeof agentConfig.tools)[number]>;
+  shopConfig.agent.tools.map((name) => [name, availableTools[name]]),
+) as Pick<typeof availableTools, (typeof shopConfig.agent.tools)[number]>;
 
 export function createAgent() {
   return new ToolLoopAgent({
     instructions: createSystemPrompt(getAgentContext()),
-    model: agentConfig.model,
-    stopWhen: isStepCount(agentConfig.maxSteps),
+    model: shopConfig.agent.model,
+    stopWhen: isStepCount(shopConfig.agent.maxSteps),
     tools,
   });
 }

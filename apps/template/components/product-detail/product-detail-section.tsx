@@ -21,7 +21,6 @@ import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
-import { pdp, siteConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -33,6 +32,7 @@ import {
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { shopConfig } from "@/shop.config";
 
 export function ProductDetailSection({
   product,
@@ -67,7 +67,7 @@ export function ProductDetailSection({
       />
       <BreadcrumbSchema
         items={[
-          { name: siteConfig.name, path: "/" },
+          { name: shopConfig.site.name, path: "/" },
           { name: product.title, path: `/products/${product.handle}` },
         ]}
       />
@@ -251,12 +251,14 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {pdp.bundles.enabled ? <BundleRelationships variant={product.defaultVariant} t={t} /> : null}
+      {shopConfig.pdp.bundles.enabled ? (
+        <BundleRelationships variant={product.defaultVariant} t={t} />
+      ) : null}
 
-      {pdp.complementaryProducts.enabled ? (
+      {shopConfig.pdp.complementaryProducts.enabled ? (
         <ComplementaryProducts
           handle={handle}
-          limit={pdp.complementaryProducts.limit}
+          limit={shopConfig.pdp.complementaryProducts.limit}
           locale={locale}
           title={t("pairsWith")}
         />

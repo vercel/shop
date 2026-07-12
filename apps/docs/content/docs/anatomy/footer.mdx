@@ -8,30 +8,34 @@ The footer renders at the bottom of every page. By default it displays a copyrig
 
 ## Default behavior
 
-The footer always renders. By default it shows a copyright line ("© \{siteConfig.name\}. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
+The footer always renders. By default it shows a copyright line ("© \{shopConfig.site.name\}. All rights reserved.") and social media icons when configured. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
 
 ## Social links
 
-Social media icons are driven by the `socialLinks` array in `lib/config.ts`. Each entry has a `platform` (one of `facebook`, `instagram`, `x`, `youtube`, `tiktok`, `pinterest`, `linkedin`, `github`) and a `url`. When the array is non-empty, icons render on the right side of the footer opposite the copyright.
+Social media icons are driven by the `site.socialLinks` array in `shopConfig` (`shop.config.ts`). Each entry has a `platform` (one of `facebook`, `instagram`, `x`, `youtube`, `tiktok`, `pinterest`, `linkedin`, `github`) and a `url`. When the array is non-empty, icons render on the right side of the footer opposite the copyright.
 
 ```ts
-// lib/config.ts
-socialLinks: [
-  { platform: "x", url: "https://x.com/mystore" },
-  { platform: "instagram", url: "https://instagram.com/mystore" },
-],
+// shop.config.ts
+site: {
+  name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
+  socialLinks: [
+    { platform: "x", url: "https://x.com/mystore" },
+    { platform: "instagram", url: "https://instagram.com/mystore" },
+  ],
+  url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
+},
 ```
 
 The default is an empty array, which hides the social links section entirely.
 
 ## Copyright
 
-The copyright line uses the `footer.copyright` i18n key with `siteConfig.name` interpolated in. `siteConfig.name` reads from `NEXT_PUBLIC_SITE_NAME` and falls back to `"Vercel Shop"` — set that env var to brand your storefront. To change the wording (not just the name), edit the `footer.copyright` entry in `lib/i18n/messages/en.json`. The footer intentionally has no year — reading `new Date()` would force every page dynamic under Next.js 16 Cache Components; add a year only if you wrap it in a Suspense boundary.
+The copyright line uses the `footer.copyright` i18n key with `shopConfig.site.name` interpolated in. `shopConfig.site.name` reads from `NEXT_PUBLIC_SITE_NAME` and falls back to `"Vercel Shop"` — set that env var or edit `shop.config.ts` to brand your storefront. To change the wording (not just the name), edit the `footer.copyright` entry in `lib/i18n/messages/en.json`. The footer intentionally has no year — reading `new Date()` would force every page dynamic under Next.js 16 Cache Components; add a year only if you wrap it in a Suspense boundary.
 
 ## Key files
 
-| File                                 | Purpose                                             |
-| ------------------------------------ | --------------------------------------------------- |
-| `components/footer/index.tsx`        | Footer composition, copyright, social links slot    |
-| `components/footer/social-links.tsx` | Social media icon links                             |
-| `lib/config.ts`                      | `siteConfig.socialLinks`, `navItems`, `footerItems` |
+| File                                 | Purpose                                          |
+| ------------------------------------ | ------------------------------------------------ |
+| `components/footer/index.tsx`        | Footer composition, copyright, social links slot |
+| `components/footer/social-links.tsx` | Social media icon links                          |
+| `shop.config.ts`                     | `site.*`, `navigation.nav`, `navigation.footer`  |
