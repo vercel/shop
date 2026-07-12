@@ -10,7 +10,7 @@ The docs app is in apps/docs using the package-based Geistdocs architecture ([`@
 
 * The main app in this monorepo is apps/template, which is a template/reference architecture for using Shopify and Next.js. Learn more by reading the AGENTS.md in the directory.
 * You MUST check if a feature being updated in the template is documented in the docs application. If so, also update the documentation.
-* When a template change is something downstream storefronts may want to adopt later, add an entry to `packages/plugin/template-rollout-log/` so agents can reason about change-level rollout instead of only template versions.
+* Template rollout changelog entries are paused. Do not require or add an entry to `packages/plugin/template-rollout-log/` for pull requests.
 
 ## Skills
 
