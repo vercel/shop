@@ -25,9 +25,8 @@ function assertRequiredEnv() {
 
   if (isFeatureEnabled(process.env.NEXT_PUBLIC_ENABLE_AUTH, shopConfig.auth.enabledByDefault)) {
     const missing = [
-      "BETTER_AUTH_SECRET",
-      "SHOPIFY_CUSTOMER_CLIENT_ID",
-      "SHOPIFY_CUSTOMER_CLIENT_SECRET",
+      "CUSTOMER_ACCOUNT_SESSION_SECRET",
+      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
     ].filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
@@ -77,7 +76,6 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  serverExternalPackages: ["better-auth"],
 };
 
 const withNextIntl = createNextIntlPlugin({

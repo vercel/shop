@@ -7,39 +7,12 @@ import {
   gql,
 } from "@shopify/hydrogen/customer-account";
 
-import { getAuthBaseUrl } from "@/lib/auth/server";
+import { siteConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
+import { resolveShopId } from "./discovery";
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
-
-// Hydrogen needs the numeric shop ID embedded in Shopify's OIDC issuer.
-let shopIdPromise: Promise<string> | undefined;
-
-function resolveShopId(): Promise<string> {
-  if (!shopIdPromise) {
-    shopIdPromise = (async () => {
-      const response = await fetch(
-        `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`,
-        { next: { revalidate: 86400 } },
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to load Shopify OIDC discovery: ${response.status}`);
-      }
-      const config: { issuer?: string } = await response.json();
-      const shopId = config.issuer?.split("/").pop();
-      if (!shopId) {
-        throw new Error("Could not derive Shopify shop ID from OIDC issuer");
-      }
-      return shopId;
-    })().catch((error) => {
-      shopIdPromise = undefined;
-      throw error;
-    });
-  }
-  return shopIdPromise;
-}
 
 // Hydrogen requires an HTTPS Origin matching the OAuth-registered auth base URL.
 export async function customerAccountFetch<T>({
@@ -62,7 +35,7 @@ export async function customerAccountFetch<T>({
         country: getCountryCode(defaultLocale) as never,
         language: getLanguageCode(defaultLocale) as never,
       },
-      request: new Request(getAuthBaseUrl()),
+      request: new Request(siteConfig.url),
     }),
   });
 

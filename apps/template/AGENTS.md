@@ -200,20 +200,20 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When the flag is set, `next.config.ts` validates that the three required server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are present and throws a build error if any are missing. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client in agreement at hydration (safe for cache components).
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client feature gates aligned under cache components.
 
 Key files:
 
-- `lib/auth/index.ts` — universal `isAuthEnabled` flag (safe to import from server and client code)
-- `lib/auth/server.ts` — better-auth config with Shopify OIDC, plus `getCustomerSession()`, `requireSession()`, etc.
-- `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
-- `app/api/auth/[...all]/route.ts` — OAuth callback handler
+- `lib/auth/index.ts` — universal `isAuthEnabled` flag
+- `lib/auth/server.ts` — encrypted HttpOnly cookie adapter plus read-only login/token helpers
+- `app/account/[action]/route.ts` — Hydrogen login, authorize, refresh, and logout handlers
 - `app/account/(authenticated)/` — auth-gated account pages
-- `app/account/login/` — login redirect (outside auth gate)
-- `components/nav/account.tsx` — nav icon (async, inside Suspense)
-- `components/account/` — sidebar, tabs, page header, sign-out button
+- `components/nav/account.tsx` — read-only nav session state inside Suspense
+- `components/account/sign-out-button.tsx` — same-origin POST logout form
 
-The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
+Server Components must not refresh tokens because they cannot commit cookies. Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API operations. The latter redirects refreshable sessions through `/account/refresh`, where Hydrogen can rotate tokens and commit the encrypted cookie.
+
+The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(authenticated)` route group owns protected account UI, while the sibling `[action]` route owns OAuth response boundaries. Logout must remain a same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
 
 ## Shopify GraphQL Workflow
 

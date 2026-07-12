@@ -11,7 +11,8 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAuthEnabled } from "@/lib/auth";
-import { requireCustomerSession } from "@/lib/auth/server";
+import { getCustomerAccessToken, requireCustomerSession } from "@/lib/auth/server";
+import { getCustomerProfile } from "@/lib/shopify/operations/customer";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
@@ -27,8 +28,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
       <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
         <aside className="hidden w-52 shrink-0 md:block">
           <div className="sticky top-24 flex flex-col gap-6">
-            <Suspense fallback={<UserInfoSkeleton />}>
-              <UserInfo />
+            <Suspense fallback={<AccountLabelSkeleton />}>
+              <AccountLabel />
             </Suspense>
             <Suspense fallback={<SidebarSkeleton />}>
               <AccountSidebar />
@@ -39,8 +40,8 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
         <div className="flex flex-1 flex-col min-w-0">
           <div className="mb-4 flex items-center justify-between md:hidden">
-            <Suspense fallback={<UserInfoSkeleton />}>
-              <UserInfo />
+            <Suspense fallback={<AccountLabelSkeleton />}>
+              <AccountLabel />
             </Suspense>
             <SignOutButton />
           </div>
@@ -64,21 +65,32 @@ async function AccountGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-async function UserInfo() {
+async function AccountLabel() {
   if (!isAuthEnabled) notFound();
-  const session = await requireCustomerSession();
+  await requireCustomerSession();
+
+  const accessToken = await getCustomerAccessToken();
+  if (!accessToken) {
+    const t = await getTranslations("nav");
+    return <p className="text-sm font-medium">{t("account")}</p>;
+  }
+
+  const profile = await getCustomerProfile();
+  if (!profile) return null;
+
+  const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
 
   return (
     <div>
-      <p className="text-sm font-medium">{session.firstName || session.email}</p>
-      <p className="text-xs text-muted-foreground">{session.email}</p>
+      <p className="text-sm font-medium">{name || profile.email}</p>
+      <p className="text-xs text-muted-foreground">{profile.email}</p>
     </div>
   );
 }
 
-function UserInfoSkeleton() {
+function AccountLabelSkeleton() {
   return (
-    <div className="space-y-1.5">
+    <div className="grid gap-1.5">
       <Skeleton className="h-4 w-24" />
       <Skeleton className="h-3 w-32" />
     </div>

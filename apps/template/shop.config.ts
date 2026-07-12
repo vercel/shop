@@ -36,7 +36,6 @@ export interface ShopConfig {
   };
   auth: {
     enabledByDefault: boolean;
-    providerId: "shopify";
   };
   pdp: {
     bundles: {
@@ -88,7 +87,6 @@ export const shopConfig = {
   },
   auth: {
     enabledByDefault: false,
-    providerId: "shopify",
   },
   pdp: {
     bundles: {

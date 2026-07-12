@@ -71,9 +71,8 @@ Each integration is disabled by default. Set an individual integration to `true`
 ## Authentication
 
 - `enabledByDefault` controls whether customer authentication is active when `NEXT_PUBLIC_ENABLE_AUTH` is unset.
-- `providerId` is the better-auth OAuth provider identifier used by the Shopify Customer Account integration.
 
-Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the server-only better-auth and Shopify Customer Account credentials documented in [Environment Variables](/docs/reference/env-vars). The build validates those credentials whether auth is enabled by the file or by the environment override.
+Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables whether auth is enabled by the file or by the environment override.
 
 ## PDP merchandising
 
