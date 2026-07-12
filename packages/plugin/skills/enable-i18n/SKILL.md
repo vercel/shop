@@ -17,7 +17,7 @@ Wire next-intl into the template so the storefront serves locale-prefixed URLs (
 
 ## Source of truth: `lib/i18n/index.ts`
 
-The locale list lives in `lib/i18n/index.ts` as `locales` and `enabledLocales`. **Always read those at the start of the skill** — don't hardcode a list. Adding new locales means editing that file plus the `localeCurrency` map; everything downstream (`routing`, sitemap, alternates, switcher) reads from it.
+The locale list lives in `lib/i18n/index.ts` as `locales` and `enabledLocales`. **Always read those at the start of the skill** — don't hardcode a list. Adding new locales means editing that file plus the message loaders/catalogs; everything downstream (`routing`, sitemap, alternates, switcher) reads from it. Do not add a locale-to-currency map; commerce currency comes from Shopify responses when Markets is enabled.
 
 ```ts
 // lib/i18n/index.ts

@@ -220,6 +220,15 @@ const SEARCH_FACETS_QUERY = `#graphql
       first: 1
     ) {
       totalCount
+      nodes {
+        ... on Product {
+          priceRange {
+            minVariantPrice {
+              currencyCode
+            }
+          }
+        }
+      }
       productFilters {
         id
         label
@@ -511,8 +520,11 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
 
   const response = await storefront.request<{
     search: {
-      totalCount: number;
+      nodes: Array<{
+        priceRange: { minVariantPrice: { currencyCode: string } };
+      } | null>;
       productFilters: ShopifyFilter[];
+      totalCount: number;
     };
   }>(SEARCH_FACETS_QUERY, {
     variables: {
@@ -525,7 +537,12 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   assertStorefrontOk(response, "searchFacets");
   const { data } = response;
 
-  const transformed = transformShopifyFilters(data.search.productFilters, { activeFilters });
+  const currencyCode = data.search.nodes.find((node) => node !== null)?.priceRange.minVariantPrice
+    .currencyCode;
+  const transformed = transformShopifyFilters(data.search.productFilters, {
+    activeFilters,
+    currencyCode,
+  });
 
   return {
     filters: transformed.filters,

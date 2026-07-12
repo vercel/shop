@@ -22,36 +22,21 @@ export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
 
-const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
-  "en-US": { currency: "USD", symbol: "$" },
-};
-
 export type LocaleData = {
-  label: string;
   code: string;
   countryCode: string;
-  currency: string;
-  currencySymbol: string;
-  currencyName: string;
+  label: string;
 };
 
-export function getLocaleData(locale: string): LocaleData {
-  const [lang, country] = locale.split("-");
-  const currencyData = localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
-
+export function getLocaleData(locale: Locale): LocaleData {
+  const [language, country] = locale.split("-");
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
-  const languageName = languageNames.of(lang) ?? lang;
-
-  const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
-  const currencyName = currencyNames.of(currencyData.currency) ?? currencyData.currency;
+  const languageName = languageNames.of(language) ?? language;
 
   return {
-    label: `${languageName} - ${country}`,
     code: country,
     countryCode: country,
-    currency: currencyData.currency,
-    currencySymbol: currencyData.symbol,
-    currencyName,
+    label: `${languageName} - ${country}`,
   };
 }
 
@@ -61,10 +46,6 @@ export function getCountryCode(locale: string): string {
 
 export function getLanguageCode(locale: string): string {
   return (locale.split("-")[0] ?? "en").toUpperCase();
-}
-
-export function getCurrencyCode(locale: string): string {
-  return (localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale]).currency;
 }
 
 export type LocaleOption = {
@@ -85,35 +66,7 @@ export function getEnabledLocaleOptions(): LocaleOption[] {
   });
 }
 
-export type EnabledCurrencyOption = {
-  code: string;
-  symbol: string;
-  name: string;
-};
-
-export function getEnabledCurrencies(): EnabledCurrencyOption[] {
-  const currencies = new Map<string, EnabledCurrencyOption>();
-
-  for (const locale of enabledLocales) {
-    const data = getLocaleData(locale);
-
-    if (!currencies.has(data.currency)) {
-      currencies.set(data.currency, {
-        code: data.currency,
-        symbol: data.currencySymbol,
-        name: data.currencyName,
-      });
-    }
-  }
-
-  return Array.from(currencies.values());
-}
-
-export function getPrimaryLocaleForCurrency(currency: string): Locale | null {
-  return enabledLocales.find((locale) => getCurrencyCode(locale) === currency) ?? null;
-}
-
-export function getLocaleFlag(locale: string): string {
+export function getLocaleFlag(locale: Locale): string {
   const codePoints = getCountryCode(locale)
     .toUpperCase()
     .split("")

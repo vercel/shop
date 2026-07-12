@@ -394,7 +394,10 @@ export async function fetchCollectionProducts(
 
   const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
   const products = shopifyProducts.map(transformShopifyProductCard);
-  const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
+  const transformed = transformShopifyFilters(data.collection.products.filters, {
+    activeFilters,
+    currencyCode: products[0]?.price.currencyCode,
+  });
 
   return {
     filters: transformed.filters,

@@ -254,6 +254,7 @@ export interface Filter {
 }
 
 export interface PriceRange {
+  currencyCode?: string;
   max: number;
   min: number;
 }
