@@ -1,0 +1,40 @@
+---
+title: Content Pages
+description: Shopify-managed Pages and store policies rendered as localized storefront routes.
+type: guide
+---
+
+The template renders Shopify's built-in editorial content without requiring a separate CMS model:
+
+- Shopify Pages render at `/pages/[handle]`.
+- Configured store policies render at `/policies/[handle]`.
+
+Both route types use the active locale as Storefront API context, render Shopify's sanitized rich-text HTML in the shared prose layout, and return `404` for unknown handles.
+
+## Shopify Pages
+
+Create and edit Pages under **Shopify Admin → Online Store → Pages**. The route reads the page title, HTML body, update timestamp, and SEO fields. When an SEO title or description is absent, it falls back to the page title and body summary.
+
+The page read uses plain `"use cache"` with `cacheLife("hours")`, tagged with both `pages` and `page-{handle}`. This keeps stable page content in the prerendered shell while allowing Shopify Admin edits to propagate on a bounded schedule. Shopify does not expose Page webhook topics.
+
+Page handles come from Shopify. A page with handle `about-us`, for example, is available at `/pages/about-us`.
+
+## Store policies
+
+Configure policies under **Shopify Admin → Settings → Policies**. Shopify exposes configured contact information, legal notice, privacy, refund, shipping, terms of sale, and terms of service policies through the Storefront API. Only policies with content are returned, so unconfigured policy URLs return `404` rather than rendering empty pages.
+
+The footer automatically links every configured policy. Policies are also included in `/sitemap/static.xml` alongside the home page.
+
+Policy reads use plain `"use cache"` with `cacheLife("hours")` and the `policies` tag. Shopify does not expose a policy-specific webhook topic, so policy pages, footer links, and sitemap entries refresh on that bounded schedule.
+
+## Localization
+
+Both operations pass the locale's country and language through Shopify's `@inContext` directive. The default single-locale storefront therefore reads `en-US`; the Markets and i18n skills can move the routes under locale-aware routing without changing their data contract.
+
+Translations must also be published in Shopify. If Shopify has no translation for the active language, its normal Storefront API fallback behavior applies.
+
+## SEO and discovery
+
+Page metadata uses Shopify's page SEO fields and emits canonical and Open Graph metadata. Policies use their Shopify title and canonical policy URL.
+
+The sitemap index includes paginated `pages-{n}` shards from Shopify's native sitemap query. Policies have no equivalent sitemap resource type, so the template adds configured policy URLs to the static shard.

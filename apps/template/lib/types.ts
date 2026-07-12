@@ -232,6 +232,14 @@ export interface CollectionWithThumbnail extends Collection {
   thumbnail: Image | null;
 }
 
+export interface ContentPage {
+  body: string;
+  handle: string;
+  seo: SEO;
+  title: string;
+  updatedAt: string;
+}
+
 export type FilterPresentation = "image" | "swatch" | "text";
 
 export type FilterType = "boolean" | "list" | "price";
@@ -297,6 +305,12 @@ export interface PredictiveSearchProduct {
 export interface SearchSuggestion {
   styledText: string;
   text: string;
+}
+
+export interface ShopPolicy {
+  body: string;
+  handle: string;
+  title: string;
 }
 
 export interface PredictiveSearchCollection {

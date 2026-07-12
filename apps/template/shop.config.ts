@@ -136,13 +136,6 @@ export const shopConfig = {
         type: "HTTP",
         items: [],
       },
-      {
-        id: "default-nav-about",
-        title: "About",
-        url: "/about",
-        type: "HTTP",
-        items: [],
-      },
     ],
   },
   pdp: {

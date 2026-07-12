@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import { getShopifySitemapPage, type ShopifySitemapType } from "@/lib/shopify/operations/sitemap";
 import { shopConfig } from "@/shop.config";
 
@@ -25,9 +26,12 @@ function xmlResponse(body: string): Response {
   });
 }
 
-function renderStatic(): Response {
-  const entry = `  <url><loc>${escapeXml(toAbsoluteUrl("/"))}</loc></url>`;
-  return xmlResponse(urlsetWrap(entry));
+async function renderStatic(): Promise<Response> {
+  const policies = await getShopPolicies().catch(() => []);
+  const entries = ["/", ...policies.map(({ handle }) => `/policies/${handle}`)]
+    .map((pathname) => `  <url><loc>${escapeXml(toAbsoluteUrl(pathname))}</loc></url>`)
+    .join("\n");
+  return xmlResponse(urlsetWrap(entries));
 }
 
 async function renderShard(
@@ -57,11 +61,17 @@ export async function GET(
 
   if (id === "static") return renderStatic();
 
-  const match = id.match(/^(products|collections)-(\d+)$/);
+  const match = id.match(/^(collections|pages|products)-(\d+)$/);
   if (!match) notFound();
 
-  const type: ShopifySitemapType = match[1] === "products" ? "PRODUCT" : "COLLECTION";
-  const page = Number(match[2]);
+  const segment = match[1];
+  const types: Record<string, ShopifySitemapType> = {
+    collections: "COLLECTION",
+    pages: "PAGE",
+    products: "PRODUCT",
+  };
+  const type = types[segment];
+  if (!type) notFound();
 
-  return renderShard(type, page, match[1]);
+  return renderShard(type, Number(match[2]), segment);
 }

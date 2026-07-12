@@ -3,7 +3,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { assertStorefrontOk } from "../errors";
 import { storefront } from "../storefront";
 
-export type ShopifySitemapType = "COLLECTION" | "PRODUCT";
+export type ShopifySitemapType = "COLLECTION" | "PAGE" | "PRODUCT";
 
 export interface SitemapResource {
   handle: string;
@@ -35,13 +35,17 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
 ` as const;
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
-  // Collection sitemap membership changes with the collection index.
-  return type === "PRODUCT" ? ["products"] : ["collections", "collections-index"];
+  if (type === "COLLECTION") return ["collections", "collections-index"];
+  return type === "PAGE" ? ["pages"] : ["products"];
 }
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache: remote";
-  cacheLife("max");
+  if (type === "PAGE") {
+    cacheLife("hours");
+  } else {
+    cacheLife("max");
+  }
   cacheTag(...cacheTagsFor(type));
 
   const response = await storefront.request<{ sitemap: { pagesCount: { count: number } } }>(
@@ -60,7 +64,11 @@ export async function getShopifySitemapPage(
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache: remote";
-  cacheLife("max");
+  if (type === "PAGE") {
+    cacheLife("hours");
+  } else {
+    cacheLife("max");
+  }
   cacheTag(...cacheTagsFor(type));
 
   const response = await storefront.request<{

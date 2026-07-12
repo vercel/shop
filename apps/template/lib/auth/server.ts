@@ -9,9 +9,10 @@ import {
   type WritableCustomerSessionManager,
 } from "@shopify/hydrogen/customer-account";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
+import { isAuthEnabled } from "@/lib/auth";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { resolveShopId } from "@/lib/shopify/discovery";
 import { shopConfig } from "@/shop.config";
@@ -169,6 +170,8 @@ function createSessionManager(
 let customerSessionPromise: Promise<HydrogenCustomerSession> | undefined;
 
 export function getHydrogenCustomerSession(): Promise<HydrogenCustomerSession> {
+  if (!isAuthEnabled) notFound();
+
   if (!customerSessionPromise) {
     customerSessionPromise = resolveShopId().then((shopId) =>
       createCustomerSession({
@@ -234,6 +237,8 @@ const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext>
 });
 
 export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
+  if (!isAuthEnabled) return false;
+
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
     getReadonlySessionManager(),
@@ -243,6 +248,8 @@ export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
 });
 
 export const getCustomerAccessToken = cache(async (): Promise<string | undefined> => {
+  if (!isAuthEnabled) return undefined;
+
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
     getReadonlySessionManager(),
@@ -252,10 +259,13 @@ export const getCustomerAccessToken = cache(async (): Promise<string | undefined
 });
 
 export async function requireCustomerSession(): Promise<void> {
+  if (!isAuthEnabled) notFound();
   if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
 }
 
 export async function requireCustomerAccessToken(returnTo = "/account"): Promise<string> {
+  if (!isAuthEnabled) notFound();
+
   const accessToken = await getCustomerAccessToken();
   if (accessToken) return accessToken;
 

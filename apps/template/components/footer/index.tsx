@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
+import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
 import { shopConfig } from "@/shop.config";
@@ -12,7 +13,10 @@ import { SocialLinks } from "./social-links";
 export async function Footer({ locale }: { locale: string }) {
   const { socialLinks } = shopConfig.site;
   const items = shopConfig.navigation.footer;
-  const t = await getTranslations("footer");
+  const [policies, t] = await Promise.all([
+    getShopPolicies({ locale }).catch(() => []),
+    getTranslations("footer"),
+  ]);
 
   return (
     <footer>
@@ -21,9 +25,20 @@ export async function Footer({ locale }: { locale: string }) {
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
-            <p className="text-sm text-muted-foreground leading-5">
-              {t("copyright", { name: shopConfig.site.name })}
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
+              <p className="text-sm text-muted-foreground leading-5">
+                {t("copyright", { name: shopConfig.site.name })}
+              </p>
+              {policies.map((policy) => (
+                <Link
+                  key={policy.handle}
+                  href={`/policies/${policy.handle}`}
+                  className="cursor-pointer text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {policy.title}
+                </Link>
+              ))}
+            </div>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>
         </Sections>
@@ -33,9 +48,9 @@ export async function Footer({ locale }: { locale: string }) {
 }
 
 interface MenuLinkProps {
-  url: string;
   children: React.ReactNode;
   className?: string;
+  url: string;
 }
 
 function MenuLink({ url, children, className }: MenuLinkProps) {

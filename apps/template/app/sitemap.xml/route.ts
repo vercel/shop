@@ -6,15 +6,17 @@ function escapeXml(value: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  const [productPages, collectionPages] = await Promise.all([
-    getShopifySitemapPagesCount("PRODUCT"),
+  const [collectionPages, pagePages, productPages] = await Promise.all([
     getShopifySitemapPagesCount("COLLECTION"),
+    getShopifySitemapPagesCount("PAGE"),
+    getShopifySitemapPagesCount("PRODUCT"),
   ]);
 
   const childIds = [
     "static",
     ...Array.from({ length: productPages }, (_, i) => `products-${i + 1}`),
     ...Array.from({ length: collectionPages }, (_, i) => `collections-${i + 1}`),
+    ...Array.from({ length: pagePages }, (_, i) => `pages-${i + 1}`),
   ];
 
   const entries = childIds
