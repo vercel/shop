@@ -36,7 +36,16 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
   if (type === "COLLECTION") return ["collections", "collections-index"];
-  return type === "PAGE" ? ["pages"] : ["products"];
+  return type === "PAGE" ? ["pages"] : ["products", "products-index"];
+}
+
+function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResource[]): void {
+  if (type === "PAGE") return;
+
+  const prefix = type === "COLLECTION" ? "collection" : "product";
+  for (const resource of resources) {
+    cacheTag(`${prefix}-${resource.handle}`);
+  }
 }
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
@@ -78,5 +87,7 @@ export async function getShopifySitemapPage(
   });
   assertStorefrontOk(response, "getSitemapPage");
 
-  return response.data.sitemap.resources;
+  const resources = response.data.sitemap.resources;
+  tagSitemapResources(type, resources.items);
+  return resources;
 }

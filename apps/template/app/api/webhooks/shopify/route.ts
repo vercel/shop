@@ -44,6 +44,10 @@ export async function POST(request: Request) {
     // Product tags cascade through every surface without purging the full catalog.
     const productTags: string[] = [];
 
+    if (topic === "products/create" || topic === "products/delete") {
+      productTags.push("products-index");
+    }
+
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {

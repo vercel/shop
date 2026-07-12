@@ -22,7 +22,7 @@ The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `
 
 ## Cache behavior
 
-Product and collection page counts and resources use `cacheLife("max")`; their existing tags preserve the template's current invalidation behavior. Page sitemap data uses `cacheLife("hours")` and the `pages` tag because Shopify does not expose Page webhook topics. The static shard reads configured policies through the same hourly `policies` cache used by policy pages and the footer.
+Product and collection page counts and resources use `cacheLife("max")`. Each resource shard carries the same `product-{handle}` or `collection-{handle}` tags as its storefront page, so update webhooks refresh the affected shard and its `lastmod` value. Create and delete webhooks also invalidate `products-index` or `collections-index`, refreshing page counts and every shard whose membership may have shifted. Page sitemap data uses `cacheLife("hours")` and the `pages` tag because Shopify does not expose Page webhook topics. The static shard reads configured policies through the same hourly `policies` cache used by policy pages and the footer.
 
 ## Adding more resource types
 
