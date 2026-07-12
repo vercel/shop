@@ -71,7 +71,6 @@ export interface ProductDetails extends ProductCard {
   hasUniformPricing: boolean;
   images: Image[];
   manufacturerName: string;
-  metafields?: Metafield[];
   options: ProductOption[];
   priceRange: {
     maxVariantPrice: Money;
@@ -136,12 +135,6 @@ export interface OptionValue {
 
 export interface SelectedOption {
   name: string;
-  value: string;
-}
-
-export interface Metafield {
-  key: string;
-  label: string;
   value: string;
 }
 

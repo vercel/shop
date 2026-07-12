@@ -10,7 +10,6 @@ import type {
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
 
 import { assertStorefrontOk } from "../errors";
 import {
@@ -28,7 +27,6 @@ import {
 } from "../fetch";
 import {
   IMAGE_FRAGMENT,
-  METAFIELD_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
@@ -78,20 +76,6 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   }
 ` as const;
 
-// Metafield identifiers stay variables so the document remains codegen-validatable.
-const GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY = `#graphql
-  ${METAFIELD_FRAGMENT}
-  ${PRODUCT_FRAGMENT}
-  query getProductByHandleWithMetafields($handle: String!, $metafieldIdentifiers: [HasMetafieldsIdentifier!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
-      ...ProductFields
-      metafields(identifiers: $metafieldIdentifiers) {
-        ...MetafieldFields
-      }
-    }
-  }
-` as const;
-
 export async function getProduct({
   handle,
   locale = defaultLocale,
@@ -105,21 +89,12 @@ export async function getProduct({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const response = shopConfig.pdp.specifications.metafields.length
-    ? await storefront.request<{ productByHandle: ShopifyProduct }>(
-        GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY,
-        {
-          variables: {
-            handle,
-            metafieldIdentifiers: shopConfig.pdp.specifications.metafields,
-            country,
-            language,
-          },
-        },
-      )
-    : await storefront.request<{ productByHandle: ShopifyProduct }>(GET_PRODUCT_BY_HANDLE_QUERY, {
-        variables: { handle, country, language },
-      });
+  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
+    GET_PRODUCT_BY_HANDLE_QUERY,
+    {
+      variables: { handle, country, language },
+    },
+  );
   assertStorefrontOk(response, "getProductByHandle");
   const { data } = response;
 

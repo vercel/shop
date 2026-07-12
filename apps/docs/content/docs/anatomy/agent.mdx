@@ -12,7 +12,7 @@ The storefront includes an opt-in AI shopping assistant built with [AI SDK](http
 
 The assistant defaults to disabled through `agent.enabled` in `shop.config.ts`, which reads `NEXT_PUBLIC_ENABLE_AGENT` and falls back to `false`. Set `NEXT_PUBLIC_ENABLE_AGENT="1"` to enable it for a deployment, or `"0"` to disable it. When disabled, the button is hidden and `POST /api/chat` returns `404` before reading the request body or creating a cart.
 
-The same config block owns the AI Gateway `model`, maximum loop `maxSteps`, and the `tools` allowlist exposed to the model. On Vercel, the model uses the project's OIDC token automatically; elsewhere set `AI_GATEWAY_API_KEY` or run `vercel link` to mint a local `VERCEL_OIDC_TOKEN`. See [Shop Configuration](/docs/reference/shop-config) for the complete schema.
+The AI Gateway model, loop limit, prompts, and tool registry live together in `lib/agent/server.ts` because they form one runtime implementation rather than a storefront configuration API. On Vercel, the model uses the project's OIDC token automatically; elsewhere set `AI_GATEWAY_API_KEY` or run `vercel link` to mint a local `VERCEL_OIDC_TOKEN`.
 
 ## Architecture
 

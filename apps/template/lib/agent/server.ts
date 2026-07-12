@@ -87,7 +87,7 @@ function createSystemPrompt(context: AgentContext): string {
   })}`;
 }
 
-const availableTools = {
+const tools = {
   addCartNote: addCartNoteTool(),
   addToCart: addToCartTool(),
   browseCollection: browseCollectionTool(),
@@ -104,15 +104,11 @@ const availableTools = {
   updateCartItemQuantity: updateCartItemTool(),
 };
 
-const tools = Object.fromEntries(
-  shopConfig.agent.tools.map((name) => [name, availableTools[name]]),
-) as Pick<typeof availableTools, (typeof shopConfig.agent.tools)[number]>;
-
 export function createAgent() {
   return new ToolLoopAgent({
     instructions: createSystemPrompt(getAgentContext()),
-    model: shopConfig.agent.model,
-    stopWhen: isStepCount(shopConfig.agent.maxSteps),
+    model: "google/gemini-3.5-flash",
+    stopWhen: isStepCount(10),
     tools,
   });
 }

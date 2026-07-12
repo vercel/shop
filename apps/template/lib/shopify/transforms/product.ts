@@ -78,13 +78,6 @@ interface ShopifyCategory {
   ancestors: Array<{ id: string; name: string }>;
 }
 
-interface ShopifyMetafield {
-  key: string;
-  namespace: string;
-  value: string;
-  type: string;
-}
-
 interface ShopifyVideoSource {
   url: string;
   mimeType: string;
@@ -143,7 +136,6 @@ export interface ShopifyProduct {
   };
   category?: ShopifyCategory | null;
   collections?: ShopifyEdges<{ handle: string }>;
-  metafields?: (ShopifyMetafield | null)[];
 }
 
 export interface ShopifyProductCard {
@@ -308,87 +300,6 @@ function transformOption(option: ShopifyOption): ProductOption {
   };
 }
 
-const METAFIELD_LABELS: Record<string, string> = {
-  material: "Material",
-  dimensions: "Dimensions",
-  weight: "Weight",
-  connectivity: "Connectivity",
-  battery_life: "Battery Life",
-  warranty: "Warranty",
-  country_of_origin: "Country of Origin",
-  model_number: "Model Number",
-};
-
-function formatScalarMetafield(type: string, value: unknown): string {
-  switch (type) {
-    case "boolean":
-      return value === true || value === "true" ? "Yes" : "No";
-    case "dimension":
-    case "volume":
-    case "weight": {
-      const v = value as { unit?: string; value?: number };
-      return v?.unit ? `${v.value} ${v.unit}` : String(v?.value ?? value);
-    }
-    case "money": {
-      const v = value as { amount?: string; currency_code?: string };
-      return v?.currency_code ? `${v.amount} ${v.currency_code}` : String(v?.amount ?? value);
-    }
-    case "rating": {
-      const v = value as { value?: number | string };
-      return String(v?.value ?? value);
-    }
-    default:
-      return String(value);
-  }
-}
-
-const STRUCTURED_METAFIELD_TYPES = new Set(["dimension", "money", "rating", "volume", "weight"]);
-
-// Reference metafields require follow-up queries, so this formatter skips them.
-function formatMetafieldValue(type: string, value: string): string | null {
-  if (type.includes("_reference")) return null;
-
-  if (type.startsWith("list.")) {
-    const itemType = type.slice("list.".length);
-    try {
-      const items = JSON.parse(value) as unknown[];
-      if (!Array.isArray(items)) return value;
-      return items.map((item) => formatScalarMetafield(itemType, item)).join(", ");
-    } catch {
-      return value;
-    }
-  }
-
-  if (STRUCTURED_METAFIELD_TYPES.has(type)) {
-    try {
-      return formatScalarMetafield(type, JSON.parse(value));
-    } catch {
-      return value;
-    }
-  }
-
-  return formatScalarMetafield(type, value);
-}
-
-function transformMetafields(
-  metafields?: (ShopifyMetafield | null)[],
-): Array<{ key: string; label: string; value: string }> {
-  if (!metafields) return [];
-
-  return metafields
-    .filter((mf): mf is ShopifyMetafield => mf !== null && mf.value !== "")
-    .map((mf) => {
-      const value = formatMetafieldValue(mf.type, mf.value);
-      if (value === null) return null;
-      return { key: mf.key, label: METAFIELD_LABELS[mf.key] || formatKey(mf.key), value };
-    })
-    .filter((mf): mf is { key: string; label: string; value: string } => mf !== null);
-}
-
-function formatKey(key: string): string {
-  return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
   return {
@@ -467,7 +378,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     manufacturerName: product.vendor,
     categoryId: product.category?.id,
     collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
-    metafields: transformMetafields(product.metafields),
   };
 }
 

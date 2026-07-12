@@ -16,7 +16,6 @@ import {
   ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
-import { ProductSpecs } from "@/components/product-detail/product-specs";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { ShopLogo } from "@/components/product-detail/shop-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -251,22 +250,11 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {shopConfig.pdp.bundles.enabled ? (
-        <BundleRelationships variant={product.defaultVariant} t={t} />
-      ) : null}
+      <BundleRelationships variant={product.defaultVariant} t={t} />
 
-      {shopConfig.pdp.complementaryProducts.enabled ? (
-        <ComplementaryProducts
-          handle={handle}
-          limit={shopConfig.pdp.complementaryProducts.limit}
-          locale={locale}
-          title={t("pairsWith")}
-        />
-      ) : null}
+      <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
-
-      <ProductSpecs metafields={product.metafields ?? []} title={t("specifications")} />
     </div>
   );
 }

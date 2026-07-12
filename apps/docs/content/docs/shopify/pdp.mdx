@@ -1,6 +1,6 @@
 ---
 title: Product Setup
-description: Shopify product configuration for the Product Detail Page - variants, metafields, swatches, and SEO.
+description: Shopify product configuration for the Product Detail Page - variants, swatches, recommendations, bundles, and SEO.
 type: reference
 prerequisites:
   - /docs/anatomy/pages/pdp
@@ -17,29 +17,6 @@ The PDP renders any product that has a handle (URL slug) in Shopify. At minimum,
 - A **featured image** and optionally up to 10 media items (images or videos)
 
 The PDP shell fetches the product's options and Shopify's encoded variant-availability data (not the full variant list) plus up to 10 media items; the selected variant is resolved per request from its options. The AI agent and markdown routes still fetch the full variant list (up to 250) via `getProductWithVariants`.
-
-## Metafields
-
-The template ships with **no metafields wired in** by default. Namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults: an empty config means the product query is unchanged and nothing renders.
-
-To surface metafields on the PDP for your store, list the ones you populate in `pdp.specifications.metafields` in `shop.config.ts`:
-
-```ts
-pdp: {
-  specifications: {
-    metafields: [
-      { key: "material", namespace: "custom" },
-      { key: "warranty", namespace: "custom" },
-    ],
-  },
-}
-```
-
-The product-detail query (`getProductByHandle` in `lib/shopify/operations/products.ts`) appends a `metafields(identifiers: [...])` selection built from that list, and `ProductSpecs` (`components/product-detail/product-specs.tsx`) renders them as a label/value "Specifications" list below the description. Optionally extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for your keys — keys without an entry fall back to a humanized version of the key.
-
-Values are formatted by metafield type: text and number pass through, measurements (`dimension`/`weight`/`volume`) and `rating` are parsed from their JSON, `boolean` becomes Yes/No, and `list.*` types are joined. **Reference types** (product or metaobject references) are skipped — their value is a GID that needs a follow-up query to resolve.
-
-Define metafields in Shopify admin under **Settings → Custom data → Products → Add definition**.
 
 ## Color swatches
 

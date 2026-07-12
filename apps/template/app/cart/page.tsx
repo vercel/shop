@@ -18,7 +18,6 @@ import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
-import { shopConfig } from "@/shop.config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");
@@ -67,11 +66,10 @@ async function CartContent({ locale }: { locale: Locale }) {
                     </div>
                   </aside>
                 </div>
-                {shopConfig.pdp.relatedProducts.enabled &&
-                cart.lines[0]?.merchandise.product.handle ? (
+                {cart.lines[0]?.merchandise.product.handle ? (
                   <RelatedProductsSection
                     handle={cart.lines[0].merchandise.product.handle}
-                    limit={shopConfig.pdp.relatedProducts.limit}
+                    limit={4}
                     locale={locale}
                   />
                 ) : null}

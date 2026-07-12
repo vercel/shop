@@ -90,15 +90,6 @@ export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
   }
 ` as const;
 
-export const METAFIELD_FRAGMENT = `#graphql
-  fragment MetafieldFields on Metafield {
-    key
-    namespace
-    value
-    type
-  }
-` as const;
-
 // Fixed bundle components carry Shopify edit restrictions on nested CartLines.
 export const CART_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
