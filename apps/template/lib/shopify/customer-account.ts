@@ -11,7 +11,7 @@ import { siteConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 import { resolveShopId } from "./discovery";
-const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
+
 const DEBUG = process.env.DEBUG_SHOPIFY === "true";
 
 // Hydrogen requires an HTTPS Origin matching the OAuth-registered auth base URL.
@@ -29,7 +29,6 @@ export async function customerAccountFetch<T>({
   const shopId = await resolveShopId();
   const client: CustomerAccountClient = createCustomerAccountClient({
     shopId,
-    customerApiVersion: SHOPIFY_API_VERSION,
     requestContext: createShopifyRequestContext({
       i18n: {
         country: getCountryCode(defaultLocale) as never,
