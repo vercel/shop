@@ -128,7 +128,9 @@ export default async function ProductPage({
             variantPromise={variantPromise}
             locale={locale}
           />
-          <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+          {shopConfig.pdp.relatedProducts.enabled ? (
+            <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+          ) : null}
         </Sections>
       </Container>
     </Page>

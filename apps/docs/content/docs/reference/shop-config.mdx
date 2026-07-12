@@ -28,6 +28,11 @@ export const shopConfig = {
       { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
     ],
   },
+  pdp: {
+    bundles: { enabled: false },
+    complementaryProducts: { enabled: false },
+    relatedProducts: { enabled: false },
+  },
   site: {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
     socialLinks: [],
@@ -64,6 +69,16 @@ Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling aut
 
 Both are `MenuItem[]` in Shopify menu shape and support up to three levels of nesting. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill replaces these static defaults with menus managed in Shopify.
 
+## PDP capabilities
+
+The PDP capability flags are disabled by default so a basic storefront does not query Shopify features it does not use:
+
+- `bundles.enabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
+- `complementaryProducts.enabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
+- `relatedProducts.enabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
+
+These flags describe optional Shopify capabilities with a data-fetching cost. Display counts and component composition remain implementation details rather than configuration.
+
 ## Site
 
 `site` carries storefront identity and merchant-authored chrome shared by metadata, structured data, navigation, and the footer.
@@ -74,4 +89,4 @@ Both are `MenuItem[]` in Shopify menu shape and support up to three levels of ne
 
 ## What does not belong here
 
-Do not put secrets, access tokens, store-specific product data, Shopify query fields, display counts, component-level feature switches, or AI runtime wiring in `shop.config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.
+Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `shop.config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.

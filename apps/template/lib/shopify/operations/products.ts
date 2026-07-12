@@ -10,6 +10,7 @@ import type {
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
+import { shopConfig } from "@/shop.config";
 
 import { assertStorefrontOk } from "../errors";
 import {
@@ -26,9 +27,11 @@ import {
   type SearchIndexProductsResult,
 } from "../fetch";
 import {
+  BUNDLE_RELATIONSHIPS_FRAGMENT,
   IMAGE_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_FRAGMENT,
+  PRODUCT_VARIANT_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
   PURCHASABLE_PRODUCT_VARIANT_FRAGMENT,
 } from "../fragments";
@@ -76,6 +79,19 @@ const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
   }
 ` as const;
 
+const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = `#graphql
+  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
+  ${PRODUCT_FRAGMENT}
+  query getProductByHandleWithBundles($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      ...ProductFields
+      selectedOrFirstAvailableVariant {
+        ...BundleRelationshipFields
+      }
+    }
+  }
+` as const;
+
 export async function getProduct({
   handle,
   locale = defaultLocale,
@@ -90,7 +106,9 @@ export async function getProduct({
   const language = getLanguageCode(locale);
 
   const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-    GET_PRODUCT_BY_HANDLE_QUERY,
+    shopConfig.pdp.bundles.enabled
+      ? GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY
+      : GET_PRODUCT_BY_HANDLE_QUERY,
     {
       variables: { handle, country, language },
     },
@@ -109,8 +127,20 @@ export async function getProduct({
 
 const GET_PRODUCT_VARIANT_QUERY = `#graphql
   ${IMAGE_FRAGMENT}
-  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
   query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productByHandle(handle: $handle) {
+      selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
+        ...ProductVariantFields
+      }
+    }
+  }
+` as const;
+
+const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = `#graphql
+  ${IMAGE_FRAGMENT}
+  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+  query getProductVariantWithBundles($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
         ...PurchasableProductVariantFields
@@ -137,9 +167,14 @@ export async function getProductVariant({
 
   const response = await storefront.request<{
     productByHandle: { selectedOrFirstAvailableVariant: ShopifyVariant | null } | null;
-  }>(GET_PRODUCT_VARIANT_QUERY, {
-    variables: { handle, selectedOptions, country, language },
-  });
+  }>(
+    shopConfig.pdp.bundles.enabled
+      ? GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY
+      : GET_PRODUCT_VARIANT_QUERY,
+    {
+      variables: { handle, selectedOptions, country, language },
+    },
+  );
   assertStorefrontOk(response, "getProductVariant");
   const { data } = response;
 

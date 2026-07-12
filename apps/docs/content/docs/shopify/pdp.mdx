@@ -48,17 +48,17 @@ Products must be assigned to at least one collection to appear on collection lis
 
 ## Recommendations
 
-Product recommendations on the PDP are powered by Shopify's recommendation API. No configuration is needed - Shopify generates recommendations automatically based on purchase history and product similarity.
+Product recommendations on the PDP are powered by Shopify's recommendation API. Shopify generates recommendations automatically based on purchase history and product similarity. Set `pdp.relatedProducts.enabled` to `true` in `shop.config.ts` to request and render them.
 
 ## Complementary products
 
-Beyond the automatic recommendations above, the PDP shows a merchant-curated **"Pairs Well With"** list near the buy section, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`.
+Set `pdp.complementaryProducts.enabled` to `true` to show a merchant-curated **"Pairs Well With"** list near the buy section, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`.
 
 Unlike the `RELATED` recommendations Shopify generates automatically, complementary products are **configured by hand** in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app — open a product's **Product recommendations** settings and add its complementary items. With none configured for a product, the section renders nothing.
 
 ## Bundles
 
-The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships, fetched for the selected variant in `PurchasableProductVariantFields`:
+Set `pdp.bundles.enabled` to `true` to render Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships:
 
 - `components` — the items in a **fixed bundle** (each component variant and its quantity).
 - `groupedBy` — up to 10 bundles that contain the current product (the reverse relationship).

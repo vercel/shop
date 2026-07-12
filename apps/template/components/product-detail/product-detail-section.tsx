@@ -250,9 +250,13 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      <BundleRelationships variant={product.defaultVariant} t={t} />
+      {shopConfig.pdp.bundles.enabled ? (
+        <BundleRelationships variant={product.defaultVariant} t={t} />
+      ) : null}
 
-      <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
+      {shopConfig.pdp.complementaryProducts.enabled ? (
+        <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
+      ) : null}
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
     </div>

@@ -34,6 +34,17 @@ export interface ShopConfig {
     footer: MenuItem[];
     nav: MenuItem[];
   };
+  pdp: {
+    bundles: {
+      enabled: boolean;
+    };
+    complementaryProducts: {
+      enabled: boolean;
+    };
+    relatedProducts: {
+      enabled: boolean;
+    };
+  };
   site: {
     name: string;
     socialLinks: SocialLink[];
@@ -79,6 +90,17 @@ export const shopConfig = {
         items: [],
       },
     ],
+  },
+  pdp: {
+    bundles: {
+      enabled: false,
+    },
+    complementaryProducts: {
+      enabled: false,
+    },
+    relatedProducts: {
+      enabled: false,
+    },
   },
   site: {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",

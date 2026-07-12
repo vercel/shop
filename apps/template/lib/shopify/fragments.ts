@@ -56,11 +56,9 @@ export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
 ` as const;
 
 // Parent documents must include IMAGE_FRAGMENT.
-export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
-  ${PRODUCT_VARIANT_FRAGMENT}
+export const BUNDLE_RELATIONSHIPS_FRAGMENT = `#graphql
   ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
-  fragment PurchasableProductVariantFields on ProductVariant {
-    ...ProductVariantFields
+  fragment BundleRelationshipFields on ProductVariant {
     requiresComponents
     groupedBy(first: 10) {
       nodes {
@@ -76,6 +74,16 @@ export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
         }
       }
     }
+  }
+` as const;
+
+// Parent documents must include IMAGE_FRAGMENT.
+export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
+  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
+  fragment PurchasableProductVariantFields on ProductVariant {
+    ...BundleRelationshipFields
+    ...ProductVariantFields
   }
 ` as const;
 
@@ -277,7 +285,7 @@ export const COLLECTION_FIELDS_FRAGMENT = `#graphql
 
 export const PRODUCT_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
-  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
   fragment ProductFields on Product {
     id
@@ -337,7 +345,7 @@ export const PRODUCT_FRAGMENT = `#graphql
       count
     }
     selectedOrFirstAvailableVariant {
-      ...PurchasableProductVariantFields
+      ...ProductVariantFields
     }
     options {
       id
