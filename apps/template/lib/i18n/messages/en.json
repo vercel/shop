@@ -171,9 +171,6 @@
     "error": "Something went wrong",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "goHome": "Go back to the home page",
-    "loginClickHere": "Click here",
-    "loginNotRedirected": "Not redirected?",
-    "loginRedirecting": "Redirecting to sign in...",
     "notFound": "Page Not Found",
     "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "tryAgain": "Try again"

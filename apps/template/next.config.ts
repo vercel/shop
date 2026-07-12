@@ -8,10 +8,6 @@ import {
 
 import { shopConfig } from "./shop.config";
 
-function isFeatureEnabled(envValue: string | undefined, enabledByDefault: boolean): boolean {
-  return envValue ? envValue === "1" : enabledByDefault;
-}
-
 function assertRequiredEnv() {
   const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
     (key) => !process.env[key],
@@ -23,11 +19,10 @@ function assertRequiredEnv() {
     );
   }
 
-  if (isFeatureEnabled(process.env.NEXT_PUBLIC_ENABLE_AUTH, shopConfig.auth.enabledByDefault)) {
+  if (shopConfig.auth.enabled) {
     const missing = [
-      "BETTER_AUTH_SECRET",
-      "SHOPIFY_CUSTOMER_CLIENT_ID",
-      "SHOPIFY_CUSTOMER_CLIENT_SECRET",
+      "CUSTOMER_ACCOUNT_SESSION_SECRET",
+      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
     ].filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
@@ -77,7 +72,6 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  serverExternalPackages: ["better-auth"],
 };
 
 const withNextIntl = createNextIntlPlugin({

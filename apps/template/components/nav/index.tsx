@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { isAuthEnabled } from "@/lib/auth";
-import { navItems, siteConfig } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
@@ -12,7 +12,7 @@ import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
 export async function Nav({ locale }: { locale: string }) {
-  const items = navItems;
+  const items = shopConfig.navigation.nav;
 
   return (
     <nav
@@ -23,7 +23,7 @@ export async function Nav({ locale }: { locale: string }) {
         <MobileMenu items={items} />
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl leading-4">{siteConfig.name}</span>
+          <span className="text-xl leading-4">{shopConfig.site.name}</span>
         </Link>
 
         <QuickLinks items={items} />

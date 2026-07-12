@@ -1,234 +1,267 @@
 import "server-only";
-import { betterAuth } from "better-auth/minimal";
-import { genericOAuth } from "better-auth/plugins";
+import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
+
+import { createShopifyRequestContext, type ShopifyRequestContext } from "@shopify/hydrogen";
+import {
+  createCustomerSession,
+  type CustomerSession as HydrogenCustomerSession,
+  type ReadonlyCustomerSessionManager,
+  type WritableCustomerSessionManager,
+} from "@shopify/hydrogen/customer-account";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
-import { isAuthEnabled } from "@/lib/auth";
-import { auth as authConfig } from "@/lib/config";
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { resolveShopId } from "@/lib/shopify/discovery";
+import { shopConfig } from "@/shop.config";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN;
+const COOKIE_CHUNK_SIZE = 3_800;
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
+const COOKIE_MAX_CHUNKS = 4;
+const COOKIE_NAME = "shop_customer_session";
 
-const SHOPIFY_OIDC_SCOPES = ["openid", "email", "customer-account-api:full"];
+type SessionData = Record<string, unknown>;
 
-function formatVercelUrl(host?: string): string | undefined {
-  return host ? `https://${host}` : undefined;
-}
+function parseCookies(cookieHeader: string | null): Map<string, string> {
+  const cookies = new Map<string, string>();
 
-function trimTrailingSlash(url: string): string {
-  return url.replace(/\/+$/, "");
-}
-
-export function getAuthBaseUrl(): string {
-  const explicitUrl = process.env.BETTER_AUTH_BASE_URL || process.env.NEXT_PUBLIC_BASE_URL;
-  if (explicitUrl) return trimTrailingSlash(explicitUrl);
-
-  if (process.env.VERCEL_ENV === "production") {
-    const productionUrl = formatVercelUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL);
-    if (productionUrl) return productionUrl;
+  for (const entry of cookieHeader?.split(";") ?? []) {
+    const separator = entry.indexOf("=");
+    if (separator === -1) continue;
+    cookies.set(entry.slice(0, separator).trim(), entry.slice(separator + 1).trim());
   }
 
-  return (
-    formatVercelUrl(process.env.VERCEL_BRANCH_URL) ||
-    formatVercelUrl(process.env.VERCEL_URL) ||
-    "http://localhost:3000"
+  return cookies;
+}
+
+function getSessionKey(): Buffer {
+  const secret = process.env.CUSTOMER_ACCOUNT_SESSION_SECRET;
+  if (!secret) {
+    throw new Error("CUSTOMER_ACCOUNT_SESSION_SECRET is required when auth is enabled");
+  }
+  return createHash("sha256").update(secret).digest();
+}
+
+function encryptSession(data: SessionData): string {
+  const initializationVector = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", getSessionKey(), initializationVector);
+  const encrypted = Buffer.concat([cipher.update(JSON.stringify(data), "utf8"), cipher.final()]);
+  const authenticationTag = cipher.getAuthTag();
+
+  return [initializationVector, authenticationTag, encrypted]
+    .map((value) => value.toString("base64url"))
+    .join(".");
+}
+
+function decryptSession(value: string): SessionData {
+  try {
+    const [initializationVector, authenticationTag, encrypted] = value
+      .split(".")
+      .map((part) => Buffer.from(part, "base64url"));
+    if (!initializationVector || !authenticationTag || !encrypted) return {};
+
+    const decipher = createDecipheriv("aes-256-gcm", getSessionKey(), initializationVector);
+    decipher.setAuthTag(authenticationTag);
+    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    const data: unknown = JSON.parse(decrypted.toString("utf8"));
+
+    return data && typeof data === "object" && !Array.isArray(data) ? (data as SessionData) : {};
+  } catch {
+    return {};
+  }
+}
+
+function readSession(cookieHeader: string | null): {
+  chunkCount: number;
+  data: SessionData;
+} {
+  const cookies = parseCookies(cookieHeader);
+  const chunks: string[] = [];
+
+  for (let index = 0; index < COOKIE_MAX_CHUNKS; index++) {
+    const chunk = cookies.get(`${COOKIE_NAME}.${index}`);
+    if (!chunk) break;
+    chunks.push(chunk);
+  }
+
+  return {
+    chunkCount: chunks.length,
+    data: chunks.length > 0 ? decryptSession(chunks.join("")) : {},
+  };
+}
+
+function serializeCookie(name: string, value: string, origin: string, maxAge: number): string {
+  const secure = new URL(origin).protocol === "https:" ? "; Secure" : "";
+  return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
+}
+
+function createSessionManager(
+  cookieHeader: string | null,
+  origin: string,
+  writable: false,
+): ReadonlyCustomerSessionManager;
+function createSessionManager(
+  cookieHeader: string | null,
+  origin: string,
+  writable: true,
+): WritableCustomerSessionManager;
+function createSessionManager(
+  cookieHeader: string | null,
+  origin: string,
+  writable: boolean,
+): ReadonlyCustomerSessionManager | WritableCustomerSessionManager {
+  const initialSession = readSession(cookieHeader);
+  const data = { ...initialSession.data };
+  let dirty = false;
+
+  const readonlyManager: ReadonlyCustomerSessionManager = {
+    getSessionItem(key) {
+      return data[key];
+    },
+  };
+
+  if (!writable) return readonlyManager;
+
+  return {
+    ...readonlyManager,
+    getSessionOrigin() {
+      return origin;
+    },
+    removeSessionItem(key) {
+      delete data[key];
+      dirty = true;
+    },
+    setSessionItem(key, value) {
+      data[key] = value;
+      dirty = true;
+    },
+    commit() {
+      if (!dirty) return;
+
+      const responseHeaders = new Headers();
+      const encrypted = Object.keys(data).length > 0 ? encryptSession(data) : "";
+      const chunks = encrypted.match(new RegExp(`.{1,${COOKIE_CHUNK_SIZE}}`, "g")) ?? [];
+
+      if (chunks.length > COOKIE_MAX_CHUNKS) {
+        throw new Error("Customer Account session exceeds the supported cookie size");
+      }
+
+      chunks.forEach((chunk, index) => {
+        responseHeaders.append(
+          "Set-Cookie",
+          serializeCookie(`${COOKIE_NAME}.${index}`, chunk, origin, COOKIE_MAX_AGE),
+        );
+      });
+
+      for (let index = chunks.length; index < COOKIE_MAX_CHUNKS; index++) {
+        responseHeaders.append(
+          "Set-Cookie",
+          serializeCookie(`${COOKIE_NAME}.${index}`, "", origin, 0),
+        );
+      }
+
+      return responseHeaders;
+    },
+  };
+}
+
+let customerSessionPromise: Promise<HydrogenCustomerSession> | undefined;
+
+export function getHydrogenCustomerSession(): Promise<HydrogenCustomerSession> {
+  if (!customerSessionPromise) {
+    customerSessionPromise = resolveShopId().then((shopId) =>
+      createCustomerSession({
+        customerAccountApiClientId: process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string,
+        shopId,
+      }),
+    );
+  }
+
+  return customerSessionPromise;
+}
+
+function getAllowedOrigins(): Set<string> {
+  return new Set(
+    [
+      shopConfig.site.url,
+      process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : undefined,
+      process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : undefined,
+      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    ].filter((origin): origin is string => Boolean(origin)),
   );
 }
 
-function getTrustedOrigins(authBaseUrl: string): string[] {
-  return [
-    authBaseUrl,
-    formatVercelUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL),
-    formatVercelUrl(process.env.VERCEL_BRANCH_URL),
-    formatVercelUrl(process.env.VERCEL_URL),
-    ...(process.env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",") ?? []),
-  ].reduce<string[]>((origins, origin) => {
-    if (!origin) return origins;
-
-    const normalizedOrigin = trimTrailingSlash(origin.trim());
-    if (normalizedOrigin && !origins.includes(normalizedOrigin)) {
-      origins.push(normalizedOrigin);
-    }
-
-    return origins;
-  }, []);
+export function getCustomerRequestOrigin(request: Request): string {
+  const origin = new URL(request.url).origin;
+  if (!getAllowedOrigins().has(origin))
+    throw new Error("Untrusted Customer Account request origin");
+  return origin;
 }
 
-const authBaseUrl = getAuthBaseUrl();
+export function createCustomerSessionManager(request: Request): WritableCustomerSessionManager {
+  return createSessionManager(
+    request.headers.get("cookie"),
+    getCustomerRequestOrigin(request),
+    true,
+  );
+}
 
-function decodeIdTokenPayload(idToken: string): {
-  sub: string;
-  email: string;
-  email_verified?: boolean;
-  given_name?: string;
-  family_name?: string;
-} {
-  const parts = idToken.split(".");
-  if (parts.length !== 3) {
-    throw new Error("Invalid ID token format");
+export function createCustomerRequestContext(request: Request): ShopifyRequestContext {
+  return createShopifyRequestContext({
+    i18n: {
+      country: getCountryCode(defaultLocale) as never,
+      language: getLanguageCode(defaultLocale) as never,
+    },
+    request,
+  });
+}
+
+const getReadonlySessionManager = cache(async (): Promise<ReadonlyCustomerSessionManager> => {
+  const requestHeaders = await headers();
+  return createSessionManager(requestHeaders.get("cookie"), shopConfig.site.url, false);
+});
+
+const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext> => {
+  const requestHeaders = await headers();
+  return createCustomerRequestContext(
+    new Request(shopConfig.site.url, {
+      headers: requestHeaders,
+    }),
+  );
+});
+
+export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
+  const [customerSession, sessionManager, requestContext] = await Promise.all([
+    getHydrogenCustomerSession(),
+    getReadonlySessionManager(),
+    getReadonlyRequestContext(),
+  ]);
+  return customerSession.isLoggedIn(sessionManager, requestContext);
+});
+
+export const getCustomerAccessToken = cache(async (): Promise<string | undefined> => {
+  const [customerSession, sessionManager, requestContext] = await Promise.all([
+    getHydrogenCustomerSession(),
+    getReadonlySessionManager(),
+    getReadonlyRequestContext(),
+  ]);
+  return customerSession.getAccessToken(sessionManager, requestContext);
+});
+
+export async function requireCustomerSession(): Promise<void> {
+  if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
+}
+
+export async function requireCustomerAccessToken(returnTo = "/account"): Promise<string> {
+  const accessToken = await getCustomerAccessToken();
+  if (accessToken) return accessToken;
+
+  if (await isCustomerLoggedIn()) {
+    redirect(`/account/refresh?return_to=${encodeURIComponent(returnTo)}`);
   }
 
-  const payload = parts[1];
-  const padded = payload + "=".repeat((4 - (payload.length % 4)) % 4);
-  const decoded = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
-
-  return JSON.parse(decoded);
-}
-
-// Disabled auth must not construct betterAuth; it warns about the absent secret at module load.
-export const auth = isAuthEnabled
-  ? betterAuth({
-      baseURL: authBaseUrl,
-      secret: process.env.BETTER_AUTH_SECRET,
-
-      session: {
-        expiresIn: 7 * 24 * 60 * 60,
-        updateAge: 24 * 60 * 60,
-        cookieCache: {
-          enabled: true,
-          maxAge: 7 * 24 * 60 * 60,
-        },
-      },
-
-      account: {
-        storeStateStrategy: "cookie",
-        storeAccountCookie: true,
-      },
-
-      plugins: [
-        genericOAuth({
-          config: [
-            {
-              providerId: authConfig.providerId,
-              clientId: process.env.SHOPIFY_CUSTOMER_CLIENT_ID ?? "",
-              clientSecret: process.env.SHOPIFY_CUSTOMER_CLIENT_SECRET ?? "",
-              discoveryUrl: SHOPIFY_STORE_DOMAIN
-                ? `https://${SHOPIFY_STORE_DOMAIN}/.well-known/openid-configuration`
-                : undefined,
-              scopes: SHOPIFY_OIDC_SCOPES,
-              pkce: true,
-              accessType: "offline",
-              getUserInfo: async (tokens) => {
-                const idToken = tokens.idToken;
-                if (!idToken) {
-                  throw new Error("No ID token received from Shopify");
-                }
-
-                const decoded = decodeIdTokenPayload(idToken);
-
-                const nameParts = [decoded.given_name, decoded.family_name].filter(Boolean);
-                let name = nameParts.join(" ");
-                if (!name) {
-                  name = decoded.email?.split("@")[0] || "Customer";
-                }
-
-                return {
-                  id: decoded.sub,
-                  email: decoded.email,
-                  emailVerified: decoded.email_verified ?? false,
-                  name,
-                  image: undefined,
-                };
-              },
-              mapProfileToUser: (profile) => {
-                return {
-                  id: profile.id,
-                  email: profile.email,
-                  name: profile.name,
-                  image: profile.image,
-                  emailVerified: profile.emailVerified,
-                };
-              },
-            },
-          ],
-        }),
-      ],
-
-      basePath: "/api/auth",
-      trustedOrigins: getTrustedOrigins(authBaseUrl),
-    })
-  : null;
-
-export type Auth = typeof auth;
-
-export interface CustomerSession {
-  customerId: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-}
-
-export interface FullSession extends CustomerSession {
-  accessToken: string;
-}
-
-const getAuthSession = cache(async () => {
-  if (!auth) return null;
-  const reqHeaders = await headers();
-  return auth.api.getSession({ headers: reqHeaders });
-});
-
-function mapCustomerSession(
-  session: Awaited<ReturnType<typeof getAuthSession>>,
-): CustomerSession | null {
-  if (!session?.user) return null;
-
-  const [firstName, ...lastParts] = (session.user.name || "").split(" ");
-
-  return {
-    customerId: session.user.id,
-    email: session.user.email,
-    firstName: firstName || undefined,
-    lastName: lastParts.join(" ") || undefined,
-  };
-}
-
-const getAccessToken = cache(async (): Promise<string> => {
-  if (!auth) return "";
-  const session = await getAuthSession();
-  if (!session?.user) return "";
-
-  const reqHeaders = await headers();
-
-  let accessToken = "";
-  try {
-    const tokenResponse = await auth.api.getAccessToken({
-      headers: reqHeaders,
-      body: { providerId: authConfig.providerId },
-    });
-    accessToken = tokenResponse?.accessToken || "";
-  } catch (error) {
-    console.error("Failed to get access token:", error);
-  }
-
-  return accessToken;
-});
-
-export const getCustomerSession = cache(async (): Promise<CustomerSession | null> => {
-  const session = await getAuthSession();
-  return mapCustomerSession(session);
-});
-
-export const getSession = cache(async (): Promise<FullSession | null> => {
-  const session = await getCustomerSession();
-  if (!session) return null;
-
-  return {
-    ...session,
-    accessToken: await getAccessToken(),
-  };
-});
-
-export async function requireCustomerSession(): Promise<CustomerSession> {
-  const session = await getCustomerSession();
-  if (!session) redirect("/account/login");
-
-  return session;
-}
-
-export async function requireSession(): Promise<FullSession> {
-  const session = await getSession();
-  if (!session) redirect("/account/login");
-  return session;
+  redirect(`/account/login?return_to=${encodeURIComponent(returnTo)}`);
 }

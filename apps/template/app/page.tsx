@@ -6,9 +6,9 @@ import { BannerSection } from "@/components/sections/banner-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { shopConfig } from "@/shop.config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");
@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = t("homeDescription");
 
   return {
-    title: `${title} | ${siteConfig.name}`,
+    title: `${title} | ${shopConfig.site.name}`,
     description,
     alternates: buildAlternates({ pathname: "/" }),
     openGraph: buildOpenGraph({

@@ -41,20 +41,28 @@ const customFetchApi: typeof fetch = async (input, init) => {
 };
 
 // Hydrogen overrides locale variables from client config, requiring a client per locale pair.
-function getClient(country: string, language: string): StorefrontClient {
+export function createRequestStorefrontClient(
+  requestContext: ReturnType<typeof createShopifyRequestContext>,
+): StorefrontClient {
   return createStorefrontClient({
-    type: "public",
-    requestContext: createShopifyRequestContext({
-      i18n: { country, language } as I18nConfig,
-      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`),
-    }),
     config: {
       apiVersion: SHOPIFY_API_VERSION,
       fetch: customFetchApi,
       publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,
       storeDomain: SHOPIFY_STORE_DOMAIN,
     },
+    requestContext,
+    type: "public",
   });
+}
+
+function getClient(country: string, language: string): StorefrontClient {
+  return createRequestStorefrontClient(
+    createShopifyRequestContext({
+      i18n: { country, language } as I18nConfig,
+      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`),
+    }),
+  );
 }
 
 interface StorefrontRequestOptions {

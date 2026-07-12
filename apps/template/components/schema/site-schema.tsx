@@ -1,23 +1,23 @@
-import { siteConfig } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 function buildSiteSchema(locale: string) {
   return [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: siteConfig.name,
-      url: siteConfig.url,
-      logo: `${siteConfig.url}/og-default.png`,
+      name: shopConfig.site.name,
+      url: shopConfig.site.url,
+      logo: `${shopConfig.site.url}/og-default.png`,
     },
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: siteConfig.name,
-      url: siteConfig.url,
+      name: shopConfig.site.name,
+      url: shopConfig.site.url,
       inLanguage: locale,
       potentialAction: {
         "@type": "SearchAction",
-        target: `${siteConfig.url}/search?q={search_term_string}`,
+        target: `${shopConfig.site.url}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string",
       },
     },

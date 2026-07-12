@@ -94,15 +94,15 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { analytics } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 export function AnalyticsComponents() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
     <>
-      {analytics.vercel.enabled ? <Analytics /> : null}
-      {analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+      {shopConfig.analytics.vercel.enabled ? <Analytics /> : null}
+      {shopConfig.analytics.speedInsights.enabled ? <SpeedInsights /> : null}
       {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
     </>
   );

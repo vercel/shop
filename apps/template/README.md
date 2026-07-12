@@ -53,7 +53,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 - **Next.js 16 App Router** with React 19 and React Compiler
 - **Shopify Storefront API** via GraphQL with type-safe operations
-- **Customer authentication** with better-auth and Shopify Customer Account API OIDC — opt-in via env vars
+- **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via env vars
 - **Tailwind CSS 4** and shadcn/ui components
 - **Internationalization-ready** with next-intl
 - **AI-ready** with Vercel AI SDK integration

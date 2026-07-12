@@ -9,12 +9,12 @@ import {
 
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
 import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
-import { agent as agentConfig } from "@/lib/config";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProductWithVariants } from "@/lib/shopify/operations/products";
+import { shopConfig } from "@/shop.config";
 
 function parseReferer(referer: string | null): { locale: Locale; segments: string[] } {
   if (!referer) return { locale: defaultLocale, segments: [] };
@@ -54,7 +54,7 @@ async function resolvePageContext(
 }
 
 export async function POST(request: Request) {
-  if (!agentConfig.enabled) return new Response(null, { status: 404 });
+  if (!shopConfig.agent.enabled) return new Response(null, { status: 404 });
 
   let body: { id?: unknown; messages?: unknown };
   try {

@@ -1,4 +1,4 @@
-import type { SocialLink } from "@/lib/config";
+import type { SocialLink } from "@/shop.config";
 
 const PLATFORM_LABELS: Record<string, string> = {
   facebook: "Facebook",

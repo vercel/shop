@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 import {
   createCustomerAddress,
@@ -84,6 +85,7 @@ export async function createAddressAction(
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Create address failed:", error);
     return {
       success: false,
@@ -108,6 +110,7 @@ export async function updateAddressAction(
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Update address failed:", error);
     return {
       success: false,
@@ -124,6 +127,7 @@ export async function deleteAddressAction(addressId: string): Promise<AccountAct
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Delete address failed:", error);
     return {
       success: false,
@@ -146,6 +150,7 @@ export async function updateProfileAction(raw: {
     if (result.success) revalidatePath("/account/profile");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Update profile failed:", error);
     return {
       success: false,

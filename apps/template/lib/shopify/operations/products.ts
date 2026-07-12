@@ -1,6 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
 
-import { pdp } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Filter,
@@ -11,6 +10,7 @@ import type {
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
+import { shopConfig } from "@/shop.config";
 
 import { assertStorefrontOk } from "../errors";
 import {
@@ -105,13 +105,13 @@ export async function getProduct({
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
-  const response = pdp.specifications.metafields.length
+  const response = shopConfig.pdp.specifications.metafields.length
     ? await storefront.request<{ productByHandle: ShopifyProduct }>(
         GET_PRODUCT_BY_HANDLE_WITH_METAFIELDS_QUERY,
         {
           variables: {
             handle,
-            metafieldIdentifiers: pdp.specifications.metafields,
+            metafieldIdentifiers: shopConfig.pdp.specifications.metafields,
             country,
             language,
           },
