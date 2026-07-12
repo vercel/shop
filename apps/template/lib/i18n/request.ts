@@ -4,7 +4,7 @@ import { defaultLocale, resolveLocale } from ".";
 import type enMessages from "./messages/en.json";
 
 const messageLoaders = {
-  "en-US": () => import("./messages/en.json"),
+  "en-CA": () => import("./messages/en.json"),
 } as const;
 
 export default getRequestConfig(async () => {
