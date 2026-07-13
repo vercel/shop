@@ -146,8 +146,8 @@ export async function getBlog({
   locale?: string;
 }): Promise<Blog | undefined> {
   "use cache";
-  cacheLife("hours");
-  cacheTag("blogs", `blog-${handle}`);
+  cacheLife("max");
+  cacheTag("articles", "blogs", `blog-${handle}`);
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
@@ -180,8 +180,8 @@ export async function getBlogArticle({
   locale?: string;
 }): Promise<BlogArticle | undefined> {
   "use cache";
-  cacheLife("hours");
-  cacheTag("blogs", `blog-${blogHandle}`, `article-${blogHandle}-${articleHandle}`);
+  cacheLife("max");
+  cacheTag("articles", "blogs", `article-${blogHandle}-${articleHandle}`, `blog-${blogHandle}`);
 
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);

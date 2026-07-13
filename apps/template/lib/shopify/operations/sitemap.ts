@@ -74,15 +74,16 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
 ` as const;
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
-  if (type === "ARTICLE" || type === "BLOG") return ["blogs"];
+  if (type === "ARTICLE") return ["articles", "articles-index"];
+  if (type === "BLOG") return ["blogs", "blogs-index"];
   if (type === "COLLECTION") return ["collections", "collections-index"];
   return type === "PAGE" ? ["pages"] : ["products", "products-index"];
 }
 
 function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResource[]): void {
-  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") return;
+  if (type === "ARTICLE" || type === "PAGE") return;
 
-  const prefix = type === "COLLECTION" ? "collection" : "product";
+  const prefix = type === "BLOG" ? "blog" : type === "COLLECTION" ? "collection" : "product";
   for (const resource of resources) {
     cacheTag(`${prefix}-${resource.handle}`);
   }
@@ -90,7 +91,7 @@ function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResourc
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache: remote";
-  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") {
+  if (type === "PAGE") {
     cacheLife("hours");
   } else {
     cacheLife("max");
@@ -113,7 +114,7 @@ export async function getShopifySitemapPage(
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache: remote";
-  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") {
+  if (type === "PAGE") {
     cacheLife("hours");
   } else {
     cacheLife("max");
@@ -141,11 +142,14 @@ export async function getShopifySitemapPage(
     return {
       hasNextPage: articlePage?.pageInfo.hasNextPage ?? false,
       items:
-        articlePage?.nodes.map((article) => ({
-          handle: article.handle,
-          pathname: `/blogs/${article.blog.handle}/${article.handle}`,
-          updatedAt: article.publishedAt,
-        })) ?? [],
+        articlePage?.nodes.map((article) => {
+          cacheTag(`article-${article.blog.handle}-${article.handle}`);
+          return {
+            handle: article.handle,
+            pathname: `/blogs/${article.blog.handle}/${article.handle}`,
+            updatedAt: article.publishedAt,
+          };
+        }) ?? [],
     };
   }
 

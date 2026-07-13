@@ -33,7 +33,7 @@ Policy reads use plain `"use cache"` with `cacheLife("hours")` and the `policies
 
 Create blogs and articles under **Shopify Admin → Content → Blog posts**. Each blog route lists its latest articles with publication date, excerpt, and optional image. Article routes render the title, author, publication date, image, and HTML body. For example, the `news` blog and its `hello-world` article resolve to `/blogs/news` and `/blogs/news/hello-world`.
 
-Blog and article reads use plain `"use cache"` with `cacheLife("hours")`, the shared `blogs` tag, and handle-specific `blog-{handle}` or `article-{blogHandle}-{postHandle}` tags. Shopify does not expose blog or article webhook topics, so edits refresh on that bounded schedule.
+Blog and article reads use plain `"use cache"` with `cacheLife("max")`, broad `blogs` and `articles` tags, and handle-specific `blog-{handle}` or `article-{blogHandle}-{postHandle}` tags. This matches product caching: content stays long-lived, ready for Shopify webhooks to invalidate the affected resource tags. The webhook integration should invalidate an article's parent blog tag so listings refresh, while create and delete events should invalidate the relevant index tag for sitemap membership changes.
 
 ## Localization
 
