@@ -41,7 +41,7 @@ export function ColorPicker({
           const isAvailable = !available || available.has(value.name);
           const imageUrl = hideImages
             ? undefined
-            : value.swatch?.image || (!value.swatch?.color && value.image);
+            : value.swatch?.image || (value.swatch?.color ? undefined : value.image);
           const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const swatch = (
