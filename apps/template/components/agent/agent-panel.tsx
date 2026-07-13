@@ -4,7 +4,6 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { MinusIcon, Trash2Icon } from "lucide-react";
-import { nanoid } from "nanoid";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -25,7 +24,7 @@ interface PersistedAgentChat {
 }
 
 function createEmptyPersistedAgentChat(): PersistedAgentChat {
-  return { chatId: nanoid(), input: "", messages: [], version: 3 };
+  return { chatId: crypto.randomUUID(), input: "", messages: [], version: 3 };
 }
 
 function readPersistedAgentChat(): PersistedAgentChat {
