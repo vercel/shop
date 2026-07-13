@@ -259,6 +259,10 @@ export async function buyNowAction(
     return { checkoutUrl: null, error: "Invalid product ID" };
   }
 
+  if (quantity < 1 || quantity > 99 || !Number.isInteger(quantity)) {
+    return { checkoutUrl: null, error: "Quantity must be between 1 and 99" };
+  }
+
   const domain = process.env.SHOPIFY_STORE_DOMAIN;
   if (!domain) {
     return { checkoutUrl: null, error: "Store domain not configured" };
