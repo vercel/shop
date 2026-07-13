@@ -238,6 +238,7 @@ async function ProductInfoArea({
           featuredImage={featuredImage}
           availableForSale={availableForSale}
           buyWithShop={shopConfig.pdp.buyWithShop.enabled}
+          quantityPicker={shopConfig.pdp.quantityPicker.enabled}
         />
       ) : (
         <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
@@ -247,6 +248,7 @@ async function ProductInfoArea({
             featuredImage={featuredImage}
             availableForSale={availableForSale}
             buyWithShop={shopConfig.pdp.buyWithShop.enabled}
+            quantityPicker={shopConfig.pdp.quantityPicker.enabled}
             variantPromise={variantPromise}
           />
         </Suspense>
@@ -346,6 +348,7 @@ async function ResolvedBuyButtons({
   buyWithShop,
   featuredImage,
   handle,
+  quantityPicker,
   title,
   variantPromise,
 }: {
@@ -353,6 +356,7 @@ async function ResolvedBuyButtons({
   buyWithShop: boolean;
   featuredImage: ProductDetails["featuredImage"];
   handle: string;
+  quantityPicker: boolean;
   title: string;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
@@ -365,6 +369,7 @@ async function ResolvedBuyButtons({
       featuredImage={featuredImage}
       availableForSale={availableForSale}
       buyWithShop={buyWithShop}
+      quantityPicker={quantityPicker}
     />
   );
 }
@@ -379,15 +384,29 @@ function BuyButtonsFallback({
   if (!t) {
     return (
       <div className="grid gap-2.5">
-        <div className="h-12 rounded-lg bg-primary" />
+        <div className="flex gap-2.5">
+          {shopConfig.pdp.quantityPicker.enabled ? (
+            <div className="h-12 w-32 rounded-lg border bg-background" />
+          ) : null}
+          <div className="h-12 flex-1 rounded-lg bg-primary" />
+        </div>
         {shopConfig.pdp.buyWithShop.enabled ? <div className="h-12 rounded-lg bg-shop" /> : null}
       </div>
     );
   }
   return (
     <div className="grid gap-2.5">
-      <div className="flex h-12 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
-        {allInStock ? t("addToCart") : t("outOfStock")}
+      <div className="flex gap-2.5">
+        {shopConfig.pdp.quantityPicker.enabled ? (
+          <div className="flex h-12 w-32 items-center justify-between rounded-lg border bg-background px-4 text-sm font-medium">
+            <span aria-hidden>−</span>
+            <span>1</span>
+            <span aria-hidden>+</span>
+          </div>
+        ) : null}
+        <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
+          {allInStock ? t("addToCart") : t("outOfStock")}
+        </div>
       </div>
       {shopConfig.pdp.buyWithShop.enabled ? (
         <div

@@ -44,6 +44,9 @@ export interface ShopConfig {
     complementaryProducts: {
       enabled: boolean;
     };
+    quantityPicker: {
+      enabled: boolean;
+    };
     relatedProducts: {
       enabled: boolean;
     };
@@ -102,6 +105,9 @@ export const shopConfig = {
       enabled: true,
     },
     complementaryProducts: {
+      enabled: true,
+    },
+    quantityPicker: {
       enabled: true,
     },
     relatedProducts: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
@@ -29,6 +29,7 @@ export function BuyButtons({
   buyWithShop = true,
   featuredImage,
   handle,
+  quantityPicker = true,
   selectedVariant,
   title,
 }: {
@@ -36,14 +37,17 @@ export function BuyButtons({
   buyWithShop?: boolean;
   featuredImage: Image | null;
   handle: string;
+  quantityPicker?: boolean;
   selectedVariant: BuyButtonVariant | undefined;
   title: string;
 }) {
   const selectedVariantId = selectedVariant?.id;
 
   const t = useTranslations("product");
+  const tCart = useTranslations("cart");
   const [, startBuyNowTransition] = useTransition();
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
 
   // Reset pending state when returning from checkout (bfcache / back navigation)
@@ -59,7 +63,7 @@ export function BuyButtons({
     if (selectedVariantId && selectedVariant) {
       addToCartOptimistic(
         selectedVariantId,
-        1,
+        quantity,
         variantToOptimisticInfo(selectedVariant, {
           title,
           handle,
@@ -74,7 +78,7 @@ export function BuyButtons({
     setIsBuyingNow(true);
     startBuyNowTransition(async () => {
       try {
-        const { checkoutUrl } = await buyNowAction(selectedVariantId, 1);
+        const { checkoutUrl } = await buyNowAction(selectedVariantId, quantity);
         if (checkoutUrl) {
           window.location.href = checkoutUrl;
         } else {
@@ -103,14 +107,49 @@ export function BuyButtons({
 
   return (
     <div className="grid gap-2.5">
-      <Button
-        type="button"
-        disabled={isOutOfStock || requiresBundleConfiguration}
-        onClick={handleAddToCart}
-        className="h-12 w-full justify-center"
-      >
-        {getButtonText()}
-      </Button>
+      <div className="flex gap-2.5">
+        {quantityPicker ? (
+          <div
+            aria-label={tCart("itemQuantity")}
+            className="flex h-12 shrink-0 items-center rounded-lg border bg-background"
+            role="group"
+          >
+            <button
+              type="button"
+              aria-label={tCart("decreaseQuantity")}
+              className="flex size-12 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={quantity === 1}
+              onClick={() => setQuantity((currentQuantity) => Math.max(1, currentQuantity - 1))}
+            >
+              <MinusIcon className="size-4" />
+            </button>
+            <span
+              aria-live="polite"
+              className="flex min-w-8 items-center justify-center text-sm font-medium tabular-nums"
+              role="status"
+            >
+              {quantity}
+            </span>
+            <button
+              type="button"
+              aria-label={tCart("increaseQuantity")}
+              className="flex size-12 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={quantity === 99}
+              onClick={() => setQuantity((currentQuantity) => Math.min(99, currentQuantity + 1))}
+            >
+              <PlusIcon className="size-4" />
+            </button>
+          </div>
+        ) : null}
+        <Button
+          type="button"
+          disabled={isOutOfStock || requiresBundleConfiguration}
+          onClick={handleAddToCart}
+          className="h-12 min-w-0 flex-1 justify-center"
+        >
+          {getButtonText()}
+        </Button>
+      </div>
       {buyWithShop ? (
         <button
           type="button"
