@@ -17,7 +17,7 @@ import {
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
-import { ShopLogo } from "@/components/product-detail/shop-logo";
+import { ShopPayLogo } from "@/components/product-detail/shop-pay-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
@@ -374,8 +374,8 @@ function BuyButtonsFallback({
   if (!t) {
     return (
       <div className="grid grid-cols-2 gap-2.5">
-        <div className="h-12 rounded-lg bg-shop" />
-        <div className="h-12 rounded-lg bg-primary" />
+        <div className="h-10.75 rounded-lg bg-shop" />
+        <div className="h-10.75 rounded-lg bg-primary" />
       </div>
     );
   }
@@ -383,14 +383,13 @@ function BuyButtonsFallback({
     <div className="grid grid-cols-2 gap-2.5">
       <div
         className={cn(
-          "flex items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white",
+          "flex h-10.75 items-center justify-center rounded-lg bg-shop px-4 py-2.5 text-white",
           !allInStock && "invisible",
         )}
       >
-        <span className="text-sm font-medium">{t("buyWithShop")}</span>
-        <ShopLogo className="h-4 w-auto" />
+        <ShopPayLogo aria-hidden="true" className="h-auto w-22" />
       </div>
-      <div className="flex items-center justify-center rounded-lg h-12 bg-primary text-primary-foreground text-sm font-medium">
+      <div className="flex h-10.75 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
         {allInStock ? t("addToCart") : t("outOfStock")}
       </div>
     </div>

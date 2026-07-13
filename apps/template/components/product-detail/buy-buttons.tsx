@@ -11,7 +11,7 @@ import { variantToOptimisticInfo } from "@/lib/product";
 import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { ShopLogo } from "./shop-logo";
+import { ShopPayLogo } from "./shop-pay-logo";
 
 // Keep bundle relationship arrays server-side; the client only needs their gating boolean.
 export interface BuyButtonVariant {
@@ -104,7 +104,7 @@ export function BuyButtons({
       <button
         type="button"
         className={cn(
-          "flex flex-1 items-center justify-center gap-1.5 rounded-lg h-12 bg-shop text-white transition-all hover:bg-shop/85 disabled:pointer-events-none disabled:opacity-50",
+          "flex h-10.75 flex-1 cursor-pointer items-center justify-center rounded-lg bg-shop px-4 py-2.5 text-white transition-all hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
           !availableForSale && "invisible",
         )}
         disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
@@ -114,8 +114,8 @@ export function BuyButtons({
           <Loader2 className="size-4 animate-spin" />
         ) : (
           <>
-            <span className="text-sm font-medium">{t("buyWithShop")}</span>
-            <ShopLogo className="h-4 w-auto" />
+            <span className="sr-only">{t("buyWithShop")} Shop Pay</span>
+            <ShopPayLogo aria-hidden="true" className="h-auto w-22" />
           </>
         )}
       </button>
@@ -123,7 +123,7 @@ export function BuyButtons({
         type="button"
         disabled={isOutOfStock || requiresBundleConfiguration}
         onClick={handleAddToCart}
-        className="flex-1 justify-center h-12"
+        className="h-10.75 flex-1 justify-center"
       >
         {getButtonText()}
       </Button>
