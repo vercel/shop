@@ -19,9 +19,10 @@ The `CartProvider` in `context.tsx` exposes a `useCart()` hook with the followin
 - **isOverlayOpen** - controls the cart slideover visibility
 - **isAddingToCart** - true while an add-to-cart request is in flight
 - **isUpdatingCart** - true while a quantity update or removal is in flight
+- **lastError** - the most recent failed add, quantity update, or removal
 - **pendingQuantity** - accumulated quantity from rapid add-to-cart clicks before the debounce fires
 
-The provider tracks an `originalCart` snapshot for rollback if a mutation fails.
+The provider tracks an `originalCart` snapshot for rollback if a mutation fails. Failed mutations also set `lastError`, and the shared cart message banner announces a localized retry message in both the overlay and full cart page. Starting another mutation clears the previous error.
 
 ## Optimistic updates
 

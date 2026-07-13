@@ -154,18 +154,22 @@ function applyPendingLineOperations(
   return changed ? nextCart : cart;
 }
 
+export type CartMutationError = "add" | "remove" | "update";
+
 type CartContextType = {
   addToCartOptimistic: (
     variantId: string,
     quantity: number,
     productInfo?: OptimisticProductInfo,
-  ) => Promise<boolean>;
+  ) => void;
   cart: Cart | null;
   cartWithPending: Cart | null;
+  clearError: () => void;
   clearWarnings: () => void;
   isAddingToCart: boolean;
   isOverlayOpen: boolean;
   isUpdatingCart: boolean;
+  lastError: CartMutationError | null;
   lastWarnings: CartWarning[];
   openOverlay: () => void;
   pendingQuantity: number;
@@ -186,13 +190,15 @@ type LineOperation = {
 const CartContext = createContext<CartContextType | null>(null);
 
 const serverFallbackCartContext: CartContextType = {
-  addToCartOptimistic: async () => false,
+  addToCartOptimistic: () => {},
   cart: null,
   cartWithPending: null,
+  clearError: () => {},
   clearWarnings: () => {},
   isAddingToCart: false,
   isOverlayOpen: false,
   isUpdatingCart: false,
+  lastError: null,
   lastWarnings: [],
   openOverlay: () => {},
   pendingQuantity: 0,
@@ -216,7 +222,9 @@ export function CartProvider({
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [pendingQuantity, setPendingQuantity] = useState(0);
   const [pendingLines, setPendingLines] = useState<CartLine[]>([]);
+  const [lastError, setLastError] = useState<CartMutationError | null>(null);
   const [lastWarnings, setLastWarnings] = useState<CartWarning[]>([]);
+  const clearError = useCallback(() => setLastError(null), []);
   const clearWarnings = useCallback(() => setLastWarnings([]), []);
 
   const [isUpdatingCart, setIsUpdatingCart] = useState(false);
@@ -228,8 +236,6 @@ export function CartProvider({
     pending: new Map<string, number>(),
     timer: null as ReturnType<typeof setTimeout> | null,
   });
-  const addToCartResolversRef = useRef<Map<string, Array<(success: boolean) => void>>>(new Map());
-
   const isOverlayOpenRef = useRef(isOverlayOpen);
   isOverlayOpenRef.current = isOverlayOpen;
 
@@ -285,12 +291,8 @@ export function CartProvider({
     quantity: number,
     productInfo?: OptimisticProductInfo,
   ) => {
+    setLastError(null);
     const debounce = addToCartDebounceRef.current;
-    const requestPromise = new Promise<boolean>((resolve) => {
-      const resolvers = addToCartResolversRef.current.get(variantId) ?? [];
-      resolvers.push(resolve);
-      addToCartResolversRef.current.set(variantId, resolvers);
-    });
 
     if (productInfo) {
       pendingProductInfoRef.current.set(variantId, productInfo);
@@ -329,31 +331,20 @@ export function CartProvider({
 
       if (items.size === 0) return;
 
-      const flushedResolvers = new Map<string, Array<(success: boolean) => void>>();
-      for (const [vid] of items) {
-        flushedResolvers.set(vid, addToCartResolversRef.current.get(vid) ?? []);
-        addToCartResolversRef.current.delete(vid);
-      }
-
       for (const [vid, qty] of items) {
         startTransition(async () => {
-          let success = false;
-
           try {
             const result = await addToCartAction(vid, qty);
-            success = result.success;
 
             if (result.success && result.cart) {
               setCartInternal(result.cart);
               setLastWarnings(result.warnings ?? []);
+            } else {
+              setLastError("add");
             }
           } catch (error) {
             console.error("Failed to add item to cart:", error);
-          } finally {
-            const resolvers = flushedResolvers.get(vid) ?? [];
-            for (const resolve of resolvers) {
-              resolve(success);
-            }
+            setLastError("add");
           }
 
           // Only clear pending state if nothing was queued while in-flight.
@@ -365,8 +356,6 @@ export function CartProvider({
         });
       }
     }, DEBOUNCE_MS);
-
-    return requestPromise;
   };
 
   const trackInFlight = () => {
@@ -386,36 +375,48 @@ export function CartProvider({
     const endTracking = trackInFlight();
 
     startTransition(async () => {
-      const result = await updateCartQuantityAction(lineId, quantity);
-      if (latestLineRequestIdRef.current.get(lineId) !== requestId) {
+      try {
+        const result = await updateCartQuantityAction(lineId, quantity);
+        if (latestLineRequestIdRef.current.get(lineId) !== requestId) return;
+
+        const pending = lineOpsRef.current.get(lineId);
+
+        if (result.success && result.cart) {
+          // Preserve newer optimistic input; its debounce will issue the final request.
+          if (!pending || pending.targetQuantity === quantity) {
+            setCartInternal(result.cart);
+            setLastWarnings(result.warnings ?? []);
+            lineOpsRef.current.delete(lineId);
+          }
+        } else {
+          if (originalCart) setCartInternal(originalCart);
+          setLastError("update");
+          // Preserve newer pending input so the debounce can retry it.
+          if (!pending || pending.targetQuantity === quantity) {
+            lineOpsRef.current.delete(lineId);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to update cart quantity:", error);
+        if (latestLineRequestIdRef.current.get(lineId) === requestId) {
+          const pending = lineOpsRef.current.get(lineId);
+          if (originalCart) setCartInternal(originalCart);
+          setLastError("update");
+          if (!pending || pending.targetQuantity === quantity) {
+            lineOpsRef.current.delete(lineId);
+          }
+        }
+      } finally {
         endTracking();
-        return;
       }
-
-      const pending = lineOpsRef.current.get(lineId);
-
-      if (result.success && result.cart) {
-        // Preserve newer optimistic input; its debounce will issue the final request.
-        if (!pending || pending.targetQuantity === quantity) {
-          setCartInternal(result.cart);
-          setLastWarnings(result.warnings ?? []);
-          lineOpsRef.current.delete(lineId);
-        }
-      } else if (originalCart) {
-        setCartInternal(originalCart);
-        // Preserve newer pending input so the debounce can retry it.
-        if (!pending || pending.targetQuantity === quantity) {
-          lineOpsRef.current.delete(lineId);
-        }
-      }
-
-      endTracking();
     });
   };
 
   // quantity > 0: leading-edge debounce. quantity === 0: remove immediately.
   const updateItemOptimistic = (lineId: string, quantity: number) => {
     if (quantity < 0 || quantity > 99 || !cart) return;
+
+    setLastError(null);
 
     if (quantity === 0) {
       const pending = lineOpsRef.current.get(lineId);
@@ -430,14 +431,22 @@ export function CartProvider({
 
       const endTracking = trackInFlight();
       startTransition(async () => {
-        const result = await removeFromCartAction(lineId);
-        if (result.success && result.cart) {
-          setCartInternal(result.cart);
-          setLastWarnings(result.warnings ?? []);
-        } else {
+        try {
+          const result = await removeFromCartAction(lineId);
+          if (result.success && result.cart) {
+            setCartInternal(result.cart);
+            setLastWarnings(result.warnings ?? []);
+          } else {
+            setCartInternal(originalCart);
+            setLastError("remove");
+          }
+        } catch (error) {
+          console.error("Failed to remove cart item:", error);
           setCartInternal(originalCart);
+          setLastError("remove");
+        } finally {
+          endTracking();
         }
-        endTracking();
       });
       return;
     }
@@ -508,10 +517,12 @@ export function CartProvider({
         addToCartOptimistic,
         cart: displayCart,
         cartWithPending,
+        clearError,
         clearWarnings,
         isAddingToCart,
         isOverlayOpen,
         isUpdatingCart,
+        lastError,
         lastWarnings,
         openOverlay,
         pendingQuantity,

@@ -81,8 +81,14 @@
     "discountCode": "Discount code",
     "discountInvalidCode": "Enter a valid discount code",
     "discountNotApplicable": "Not applicable",
+    "dismissError": "Dismiss error",
     "dismissWarnings": "Dismiss",
     "empty": "Your cart is empty",
+    "errors": {
+      "add": "We couldn't add that item. Please try again.",
+      "remove": "We couldn't remove that item. Please try again.",
+      "update": "We couldn't update that quantity. Please try again."
+    },
     "emptyDescription": "Looks like you haven't added anything yet. Let's explore our products and find something great!",
     "estimatedTax": "Estimated Tax",
     "estimatedTotal": "Estimated total",
