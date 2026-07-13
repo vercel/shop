@@ -43,7 +43,7 @@ async function renderShard(
 
   const entries = items
     .map((item) => {
-      const loc = escapeXml(toAbsoluteUrl(`/${segment}/${item.handle}`));
+      const loc = escapeXml(toAbsoluteUrl(item.pathname ?? `/${segment}/${item.handle}`));
       const lastmod = escapeXml(item.updatedAt);
       return `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${lastmod}</lastmod>\n  </url>`;
     })
@@ -61,11 +61,13 @@ export async function GET(
 
   if (id === "static") return renderStatic();
 
-  const match = id.match(/^(collections|pages|products)-(\d+)$/);
+  const match = id.match(/^(articles|blogs|collections|pages|products)-(\d+)$/);
   if (!match) notFound();
 
   const segment = match[1];
   const types: Record<string, ShopifySitemapType> = {
+    articles: "ARTICLE",
+    blogs: "BLOG",
     collections: "COLLECTION",
     pages: "PAGE",
     products: "PRODUCT",

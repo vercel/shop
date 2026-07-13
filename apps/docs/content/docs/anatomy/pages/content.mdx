@@ -1,6 +1,6 @@
 ---
 title: Content Pages
-description: Shopify-managed Pages and store policies rendered as localized storefront routes.
+description: Shopify-managed Pages, policies, blogs, and articles rendered as localized storefront routes.
 type: guide
 ---
 
@@ -8,8 +8,10 @@ The template renders Shopify's built-in editorial content without requiring a se
 
 - Shopify Pages render at `/pages/[handle]`.
 - Configured store policies render at `/policies/[handle]`.
+- Shopify blogs render at `/blogs/[blogHandle]`.
+- Blog articles render at `/blogs/[blogHandle]/[postHandle]`.
 
-Both route types use the active locale as Storefront API context, render Shopify's sanitized rich-text HTML in the shared prose layout, and return `404` for unknown handles.
+All route types use the active locale as Storefront API context and return `404` for unknown handles. Pages, policies, and articles render Shopify's sanitized rich-text HTML in the shared prose layout. There is intentionally no `/blogs` index route; storefront navigation links to individual blogs such as `/blogs/news`.
 
 ## Shopify Pages
 
@@ -27,14 +29,20 @@ The footer automatically links every configured policy. Policies are also includ
 
 Policy reads use plain `"use cache"` with `cacheLife("hours")` and the `policies` tag. Shopify does not expose a policy-specific webhook topic, so policy pages, footer links, and sitemap entries refresh on that bounded schedule.
 
+## Blogs and articles
+
+Create blogs and articles under **Shopify Admin → Content → Blog posts**. Each blog route lists its latest articles with publication date, excerpt, and optional image. Article routes render the title, author, publication date, image, and HTML body. For example, the `news` blog and its `hello-world` article resolve to `/blogs/news` and `/blogs/news/hello-world`.
+
+Blog and article reads use plain `"use cache"` with `cacheLife("hours")`, the shared `blogs` tag, and handle-specific `blog-{handle}` or `article-{blogHandle}-{postHandle}` tags. Shopify does not expose blog or article webhook topics, so edits refresh on that bounded schedule.
+
 ## Localization
 
-Both operations pass the locale's country and language through Shopify's `@inContext` directive. The default single-locale storefront therefore reads `en-US`; the Markets and i18n skills can move the routes under locale-aware routing without changing their data contract.
+All content operations pass the locale's country and language through Shopify's `@inContext` directive. The default single-locale storefront therefore reads `en-US`; the Markets and i18n skills can move the routes under locale-aware routing without changing their data contract.
 
 Translations must also be published in Shopify. If Shopify has no translation for the active language, its normal Storefront API fallback behavior applies.
 
 ## SEO and discovery
 
-Page metadata uses Shopify's page SEO fields and emits canonical and Open Graph metadata. Policies use their Shopify title and canonical policy URL.
+Page metadata uses Shopify's page SEO fields and emits canonical and Open Graph metadata. Policies use their Shopify title and canonical policy URL. Blogs use their Shopify SEO title and description, while articles add article Open Graph metadata and use the article image when one is available.
 
-The sitemap index includes paginated `pages-{n}` shards from Shopify's native sitemap query. Policies have no equivalent sitemap resource type, so the template adds configured policy URLs to the static shard.
+The sitemap index includes paginated `pages-{n}`, `blogs-{n}`, and `articles-{n}` shards from Shopify's native sitemap query. Policies have no equivalent sitemap resource type, so the template adds configured policy URLs to the static shard.

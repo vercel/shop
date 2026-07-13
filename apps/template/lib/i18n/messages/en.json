@@ -59,6 +59,9 @@
     "thinking": "Thinking…",
     "title": ""
   },
+  "blog": {
+    "empty": "No articles found."
+  },
   "cart": {
     "addedToCart": "Added to cart",
     "addToCart": "Add to Cart",

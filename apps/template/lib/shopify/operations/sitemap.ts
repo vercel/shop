@@ -1,14 +1,53 @@
+import type { GraphQLFormattedError } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { assertStorefrontOk } from "../errors";
 import { storefront } from "../storefront";
 
-export type ShopifySitemapType = "COLLECTION" | "PAGE" | "PRODUCT";
+export type ShopifySitemapType = "ARTICLE" | "BLOG" | "COLLECTION" | "PAGE" | "PRODUCT";
 
 export interface SitemapResource {
   handle: string;
+  pathname?: string;
   updatedAt: string;
 }
+
+interface StorefrontResponse<T> {
+  data?: T | null;
+  errors?: GraphQLFormattedError[];
+}
+
+interface ArticleSitemapPageResponse {
+  articles: {
+    nodes: Array<{
+      blog: { handle: string };
+      handle: string;
+      publishedAt: string;
+    }>;
+    pageInfo: {
+      endCursor: string | null;
+      hasNextPage: boolean;
+    };
+  };
+}
+
+const GET_ARTICLE_SITEMAP_PAGE_QUERY = `#graphql
+  query getArticleSitemapPage($first: Int!, $after: String) {
+    articles(first: $first, after: $after, sortKey: UPDATED_AT) {
+      nodes {
+        blog {
+          handle
+        }
+        handle
+        publishedAt
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+  }
+` as const;
 
 const GET_SITEMAP_PAGES_COUNT_QUERY = `#graphql
   query getSitemapPagesCount($type: SitemapType!) {
@@ -35,12 +74,13 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
 ` as const;
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
+  if (type === "ARTICLE" || type === "BLOG") return ["blogs"];
   if (type === "COLLECTION") return ["collections", "collections-index"];
   return type === "PAGE" ? ["pages"] : ["products", "products-index"];
 }
 
 function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResource[]): void {
-  if (type === "PAGE") return;
+  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") return;
 
   const prefix = type === "COLLECTION" ? "collection" : "product";
   for (const resource of resources) {
@@ -50,7 +90,7 @@ function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResourc
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache: remote";
-  if (type === "PAGE") {
+  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") {
     cacheLife("hours");
   } else {
     cacheLife("max");
@@ -73,12 +113,41 @@ export async function getShopifySitemapPage(
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache: remote";
-  if (type === "PAGE") {
+  if (type === "ARTICLE" || type === "BLOG" || type === "PAGE") {
     cacheLife("hours");
   } else {
     cacheLife("max");
   }
   cacheTag(...cacheTagsFor(type));
+
+  if (type === "ARTICLE") {
+    let after: string | null = null;
+    let articlePage: ArticleSitemapPageResponse["articles"] | undefined;
+
+    for (let currentPage = 1; currentPage <= page; currentPage += 1) {
+      const response: StorefrontResponse<ArticleSitemapPageResponse> =
+        await storefront.request<ArticleSitemapPageResponse>(GET_ARTICLE_SITEMAP_PAGE_QUERY, {
+          variables: { after, first: 250 },
+        });
+      assertStorefrontOk(response, "getArticleSitemapPage");
+      articlePage = response.data.articles;
+      after = articlePage.pageInfo.endCursor;
+
+      if (!articlePage.pageInfo.hasNextPage && currentPage < page) {
+        return { hasNextPage: false, items: [] };
+      }
+    }
+
+    return {
+      hasNextPage: articlePage?.pageInfo.hasNextPage ?? false,
+      items:
+        articlePage?.nodes.map((article) => ({
+          handle: article.handle,
+          pathname: `/blogs/${article.blog.handle}/${article.handle}`,
+          updatedAt: article.publishedAt,
+        })) ?? [],
+    };
+  }
 
   const response = await storefront.request<{
     sitemap: { resources: { hasNextPage: boolean; items: SitemapResource[] } };

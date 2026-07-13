@@ -225,6 +225,27 @@ export interface CollectionWithThumbnail extends Collection {
   thumbnail: Image | null;
 }
 
+export interface Blog {
+  articles: BlogArticle[];
+  handle: string;
+  seo: SEO;
+  title: string;
+}
+
+export interface BlogArticle {
+  author?: string;
+  blogHandle: string;
+  blogTitle: string;
+  body?: string;
+  excerpt: string;
+  handle: string;
+  image: Image | null;
+  publishedAt: string;
+  seo: SEO;
+  tags: string[];
+  title: string;
+}
+
 export interface ContentPage {
   body: string;
   handle: string;
