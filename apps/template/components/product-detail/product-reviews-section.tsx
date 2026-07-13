@@ -38,6 +38,13 @@ const PLACEHOLDER_REVIEWS: PlaceholderReview[] = [
   },
 ];
 
+export const PLACEHOLDER_REVIEW_SUMMARY = {
+  count: PLACEHOLDER_REVIEWS.length,
+  value:
+    PLACEHOLDER_REVIEWS.reduce((total, review) => total + review.rating, 0) /
+    PLACEHOLDER_REVIEWS.length,
+};
+
 function ProductReviewsSkeleton({ title }: { title: string }) {
   return (
     <div className="grid gap-5" data-slot="product-reviews">
