@@ -7,13 +7,10 @@ import type { ProductCard as ProductCardType } from "@/lib/types";
 import {
   type ProductCardAspectRatio,
   ProductCardBadge,
-  ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
-  ProductCardPrice,
   ProductCard as ProductCardRoot,
   ProductCardSkeleton,
-  ProductCardTitle,
 } from "./components";
 
 export interface ProductCardProps {
@@ -28,7 +25,6 @@ export interface ProductCardProps {
 
 export async function ProductCard({
   product,
-  locale,
   aspectRatio = "square",
   variant = "default",
   outOfStockText,
@@ -57,18 +53,6 @@ export async function ProductCard({
             outOfStockText={outOfStockText}
             aspectRatio={aspectRatio}
           />
-          <ProductCardContent>
-            <ProductCardTitle>{product.title}</ProductCardTitle>
-            <ProductCardPrice
-              amount={product.price.amount}
-              currencyCode={product.price.currencyCode}
-              maxAmount={product.maxPrice.amount}
-              compareAtAmount={product.compareAtPrice?.amount}
-              compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-              locale={locale}
-              discountVariant={isFeatured ? "blue" : "green"}
-            />
-          </ProductCardContent>
         </ProductCardImageContainer>
       </ProductCardRoot>
     </Link>

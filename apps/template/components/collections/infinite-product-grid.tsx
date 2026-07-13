@@ -5,11 +5,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
-  ProductCardPrice,
-  ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
 import type { PageInfo, ProductCard } from "@/lib/types";
@@ -30,7 +27,6 @@ interface InfiniteProductGridProps<TParams> {
 export function InfiniteProductGrid<TParams>({
   initialProducts,
   initialPageInfo,
-  locale,
   outOfStockText,
   loadMore,
   loadMoreParams,
@@ -91,12 +87,7 @@ export function InfiniteProductGrid<TParams>({
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {children}
         {additionalProducts.map((product) => (
-          <ClientProductCard
-            key={product.id}
-            product={product}
-            locale={locale}
-            outOfStockText={outOfStockText}
-          />
+          <ClientProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
         ))}
       </div>
 
@@ -111,11 +102,9 @@ export function InfiniteProductGrid<TParams>({
 
 function ClientProductCard({
   product,
-  locale,
   outOfStockText,
 }: {
   product: ProductCard;
-  locale: string;
   outOfStockText: string;
 }) {
   const href = product.defaultVariantNumericId
@@ -133,17 +122,6 @@ function ClientProductCard({
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
           />
-          <ProductCardContent>
-            <ProductCardTitle>{product.title}</ProductCardTitle>
-            <ProductCardPrice
-              amount={product.price.amount}
-              currencyCode={product.price.currencyCode}
-              maxAmount={product.maxPrice.amount}
-              compareAtAmount={product.compareAtPrice?.amount}
-              compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-              locale={locale}
-            />
-          </ProductCardContent>
         </ProductCardImageContainer>
       </ProductCardRoot>
     </Link>

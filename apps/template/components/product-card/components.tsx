@@ -15,7 +15,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
     <article
       data-slot="product-card"
       data-variant={variant}
-      className={cn("flex flex-col h-full overflow-hidden", className)}
+      className={cn("group flex flex-col h-full overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -88,7 +88,13 @@ function ProductCardImage({
       className={cn("relative overflow-hidden", aspectRatioClasses, className)}
     >
       {src ? (
-        <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.03] motion-safe:group-hover:rotate-[1.5deg]"
+          sizes={sizes}
+        />
       ) : (
         <ImagePlaceholder className="size-full" />
       )}
@@ -213,10 +219,6 @@ function ProductCardSkeleton({
         data-aspect-ratio={aspectRatio}
         className={cn("animate-pulse", aspectRatioClasses)}
       />
-      <div className="py-2.5 h-12 box-content grid gap-2">
-        <div className="h-4 w-full bg-accent animate-pulse" />
-        <div className="h-4 w-12 bg-accent animate-pulse" />
-      </div>
     </div>
   );
 }
