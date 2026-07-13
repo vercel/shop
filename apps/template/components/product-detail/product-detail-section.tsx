@@ -1,3 +1,4 @@
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
@@ -374,6 +375,25 @@ async function ResolvedBuyButtons({
   );
 }
 
+function QuantityPickerFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="grid h-12 w-36 shrink-0 grid-cols-3 rounded-lg bg-background ring-1 ring-border ring-inset"
+    >
+      <span className="flex size-12 items-center justify-center opacity-50">
+        <MinusIcon className="size-4 shrink-0" />
+      </span>
+      <span className="flex size-12 items-center justify-center text-sm font-medium tabular-nums">
+        1
+      </span>
+      <span className="flex size-12 items-center justify-center">
+        <PlusIcon className="size-4 shrink-0" />
+      </span>
+    </div>
+  );
+}
+
 function BuyButtonsFallback({
   allInStock,
   t,
@@ -381,31 +401,12 @@ function BuyButtonsFallback({
   allInStock: boolean;
   t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
 }) {
-  if (!t) {
-    return (
-      <div className="grid gap-2.5">
-        <div className="flex gap-2.5">
-          {shopConfig.pdp.quantityPicker.enabled ? (
-            <div className="h-12 w-32 rounded-lg border bg-background" />
-          ) : null}
-          <div className="h-12 flex-1 rounded-lg bg-primary" />
-        </div>
-        {shopConfig.pdp.buyWithShop.enabled ? <div className="h-12 rounded-lg bg-shop" /> : null}
-      </div>
-    );
-  }
   return (
     <div className="grid gap-2.5">
       <div className="flex gap-2.5">
-        {shopConfig.pdp.quantityPicker.enabled ? (
-          <div className="flex h-12 w-32 items-center justify-between rounded-lg border bg-background px-4 text-sm font-medium">
-            <span aria-hidden>−</span>
-            <span>1</span>
-            <span aria-hidden>+</span>
-          </div>
-        ) : null}
+        {shopConfig.pdp.quantityPicker.enabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
-          {allInStock ? t("addToCart") : t("outOfStock")}
+          {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
         </div>
       </div>
       {shopConfig.pdp.buyWithShop.enabled ? (
