@@ -13,6 +13,8 @@ export function Toaster(props: ToasterProps) {
   return (
     <Sonner
       className="toaster group"
+      duration={5000}
+      expand
       icons={{
         error: <OctagonXIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
@@ -22,6 +24,7 @@ export function Toaster(props: ToasterProps) {
       }}
       position="bottom-right"
       richColors
+      visibleToasts={4}
       toastOptions={{
         classNames: {
           actionButton: "cursor-pointer",
