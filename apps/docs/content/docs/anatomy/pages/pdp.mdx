@@ -64,7 +64,7 @@ Because selection is option-driven, the gallery no longer filters out _every_ im
 The buy section stacks two full-width, 48 px action buttons with a 10 px gap:
 
 - **Add to Cart** - adds the item optimistically to the cart drawer
-- **Buy with Shop** - creates a Shopify checkout and redirects to it, using Shopify's official full-color [Buy with Shop lock-up](https://help.shopify.com/en/manual/payments/shop-pay/assets)
+- **Buy with Shop** - creates a Shopify checkout and redirects to it, using Shopify's official [Buy with Shop lock-up](https://help.shopify.com/en/manual/payments/shop-pay/assets) in its approved all-white treatment on Shop purple
 
 A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity. `pdp.buyWithShop.enabled` defaults to `true`; set it to `false` in `shop.config.ts` to hide the accelerated checkout action.
 

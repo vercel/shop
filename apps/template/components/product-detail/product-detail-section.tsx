@@ -380,9 +380,7 @@ function BuyButtonsFallback({
     return (
       <div className="grid gap-2.5">
         <div className="h-12 rounded-lg bg-primary" />
-        {shopConfig.pdp.buyWithShop.enabled ? (
-          <div className="h-12 rounded-lg border bg-white" />
-        ) : null}
+        {shopConfig.pdp.buyWithShop.enabled ? <div className="h-12 rounded-lg bg-shop" /> : null}
       </div>
     );
   }
@@ -394,7 +392,7 @@ function BuyButtonsFallback({
       {shopConfig.pdp.buyWithShop.enabled ? (
         <div
           className={cn(
-            "flex h-12 items-center justify-center rounded-lg border bg-white px-4",
+            "flex h-12 items-center justify-center rounded-lg bg-shop px-4 text-white",
             !allInStock && "invisible",
           )}
         >

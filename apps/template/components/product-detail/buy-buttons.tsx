@@ -115,14 +115,14 @@ export function BuyButtons({
         <button
           type="button"
           className={cn(
-            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg border bg-white px-4 transition-colors hover:border-foreground disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
             !availableForSale && "invisible",
           )}
           disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
           onClick={handleBuyNow}
         >
           {isBuyingNow ? (
-            <Loader2 className="size-4 animate-spin text-shop" />
+            <Loader2 className="size-4 animate-spin" />
           ) : (
             <>
               <span className="sr-only">{t("buyWithShop")}</span>
