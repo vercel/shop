@@ -5,12 +5,7 @@ interface ProductOpenGraphProps {
   price: Money;
 }
 
-// Renders the OpenGraph "product" object tags as raw <meta property> elements
-// (React 19 hoists them to <head>). Next's Metadata API has no product OG variant,
-// and its `other` field emits name= rather than the property= that OG parsers need.
-// Both the product:* (Facebook) and og:price/availability (Pinterest, older parsers)
-// namespaces are emitted for broad compatibility. Priced off the "from" (min) price
-// to match the displayed price and the JSON-LD AggregateOffer lowPrice.
+// Next Metadata cannot emit product `property=` tags, so React hoists these raw meta elements.
 export function ProductOpenGraph({ availableForSale, price }: ProductOpenGraphProps) {
   return (
     <>

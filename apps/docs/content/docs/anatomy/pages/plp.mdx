@@ -33,6 +33,8 @@ A filter sidebar provides multi-select faceted filters for:
 - **Size, Color, Vendor, Product Type, Tags** - checkbox-based multi-select
 - **Price range** - slider with presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
 
+> **Shopify limitation:** Price filtering works only when the **Price** filter is enabled in Shopify's Search & Discovery app. The Storefront API advertises and applies only filters enabled for the store; adding `filter.v.price.gte` or `filter.v.price.lte` to a URL does not enable price filtering, and Shopify can ignore those inputs otherwise. See Shopify's [product filtering requirements](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/products-collections/filter-products#requirements).
+
 Filters whose Shopify `presentation` is `SWATCH` (typically Color) render as a grid of color/image swatches via the `Swatch` primitive (`components/ui/swatch.tsx`) instead of the text list — `presentation` and each value's `swatch { color, image }` come straight from the Storefront API. All other filters use the text list.
 
 Active filters appear as badges with remove buttons. Filter state is encoded in URL search params using Shopify's standard format (`?filter.v.option.color=red&filter.v.price.gte=10&filter.v.price.lte=100`) so filtered views are shareable and compatible with Shopify themes.
@@ -78,21 +80,10 @@ The `/collections/[handle]` route resolves collection metadata (title, descripti
 
 Products within a collection are fetched via `getCollectionProducts()`, which accepts Shopify `ProductFilter[]` for server-side filtering by variant options, price, vendor, type, tags, and metafields.
 
-> **Note:** Filters are driven entirely by Shopify's `ProductFilter` type. Adding custom filter logic (e.g., filtering by a metafield) requires modifying the GraphQL query in `lib/shopify/operations/products.ts`.
+> **Note:** Filters are driven by Shopify's `ProductFilter` type and the filters enabled in Search & Discovery. Adding a supported metafield filter requires configuring it in Shopify as well as mapping its URL input to `ProductFilter` in `lib/shopify/operations/products.ts`; changing the query alone does not enable the filter.
 
 ## Search page
 
 The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. The search page displays a heading with the query and shows a "no results" message with i18n support when the query returns empty. Predictive search is available from the navbar search modal, which shows suggestion chips and product results as the user types.
-
-## Key files
-
-| File                                               | Purpose                                                         |
-| -------------------------------------------------- | --------------------------------------------------------------- |
-| `app/collections/[handle]/page.tsx`                | Collection route                                                |
-| `app/search/page.tsx`                              | Search route                                                    |
-| `components/collections/collection-page.tsx`       | Orchestrates toolbar, filter sidebar, results grid, and JSON-LD |
-| `components/collections/infinite-product-grid.tsx` | Infinite scroll via `IntersectionObserver` + server action      |
-| `components/collections/filter-sidebar.tsx`        | Faceted filter sidebar driven by Shopify filter data            |
-| `lib/shopify/operations/products.ts`               | Product search with caching and filter mapping                  |
 
 The toolbar, sort select, mobile filter sheet, filter primitives, transition context, search results layout, and product card live alongside these in `components/collections/`, `components/search/`, and `components/product-card/`.

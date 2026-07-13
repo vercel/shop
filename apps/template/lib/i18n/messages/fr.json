@@ -64,6 +64,9 @@
     "newArrivals": "Les nouveautés viennent d'arriver — découvrez la dernière collection",
     "returns": "Retours faciles sous 30 jours, sans condition"
   },
+  "blog": {
+    "empty": "Aucun article trouvé."
+  },
   "cart": {
     "addedToCart": "Ajouté au panier",
     "addToCart": "Ajouter au panier",

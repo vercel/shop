@@ -1,5 +1,5 @@
-import { siteConfig } from "@/lib/config";
 import type { Image, Money } from "@/lib/types";
+import { shopConfig } from "@/shop.config";
 
 interface ProductSchemaData {
   id: string;
@@ -18,7 +18,7 @@ interface ProductSchemaData {
 }
 
 function generateProductSchema(product: ProductSchemaData) {
-  const url = `${siteConfig.url}/products/${product.handle}`;
+  const url = `${shopConfig.site.url}/products/${product.handle}`;
 
   return {
     "@context": "https://schema.org",

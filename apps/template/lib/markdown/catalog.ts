@@ -1,4 +1,3 @@
-import { getCurrencyCode } from "@/lib/i18n";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
@@ -25,10 +24,16 @@ function getSingleValue(value: string | string[] | undefined): string | undefine
 }
 
 function formatPriceRange(priceRange: PriceRange, locale: string): string {
-  const currencyCode = getCurrencyCode(locale);
+  if (!priceRange.currencyCode) {
+    const formatter = new Intl.NumberFormat(locale);
+    return `${formatter.format(priceRange.min)} - ${formatter.format(priceRange.max)}`;
+  }
 
-  return `${formatPrice({ amount: priceRange.min.toString(), currencyCode }, locale)} - ${formatPrice(
-    { amount: priceRange.max.toString(), currencyCode },
+  return `${formatPrice(
+    { amount: priceRange.min.toString(), currencyCode: priceRange.currencyCode },
+    locale,
+  )} - ${formatPrice(
+    { amount: priceRange.max.toString(), currencyCode: priceRange.currencyCode },
     locale,
   )}`;
 }

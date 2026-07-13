@@ -20,5 +20,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|md|_next|_vercel|sitemap|robots.txt|llms.txt|.*\\..*).*)"],
+  matcher: [
+    "/((?!account/(?:authorize|login|logout|refresh)$|api|md|_next|_vercel|sitemap|robots.txt|llms.txt|.*\\..*).*)",
+  ],
 };

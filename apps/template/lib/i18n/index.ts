@@ -2,8 +2,6 @@ export const locales = ["en-CA", "en-US", "fr-CA"] as const;
 
 export type Locale = (typeof locales)[number];
 
-// Deployment-level locale mode: the lang (en/fr) × market (US/CA) space. Only
-// enabledLocales are live; localeSwitchingEnabled shows the picker when >1.
 export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = ["en-US", "en-CA", "fr-CA"];
 export const localeSwitchingEnabled = enabledLocales.length > 1;
@@ -20,44 +18,25 @@ export function asLocale(value: string): Locale {
   return isLocale(value) ? value : defaultLocale;
 }
 
-/** Unsupported or disabled values fall back to `defaultLocale`. */
 export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
 
-const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
-  "en-CA": { currency: "CAD", symbol: "$" },
-  "en-US": { currency: "USD", symbol: "$" },
-  "fr-CA": { currency: "CAD", symbol: "$" },
-};
-
-export type LocaleData = {
-  label: string;
+export interface LocaleData {
   code: string;
   countryCode: string;
-  currency: string;
-  currencySymbol: string;
-  currencyName: string;
-};
+  label: string;
+}
 
-export function getLocaleData(locale: string): LocaleData {
-  const [lang, country] = locale.split("-");
-  const currencyData = localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale];
-
-  // Native language name (e.g., "Deutsch" for de-DE).
+export function getLocaleData(locale: Locale): LocaleData {
+  const [language, country] = locale.split("-");
   const languageNames = new Intl.DisplayNames([locale], { type: "language" });
-  const languageName = languageNames.of(lang) ?? lang;
-
-  const currencyNames = new Intl.DisplayNames([locale], { type: "currency" });
-  const currencyName = currencyNames.of(currencyData.currency) ?? currencyData.currency;
+  const languageName = languageNames.of(language) ?? language;
 
   return {
-    label: `${languageName} - ${country}`,
     code: country,
     countryCode: country,
-    currency: currencyData.currency,
-    currencySymbol: currencyData.symbol,
-    currencyName,
+    label: `${languageName} - ${country}`,
   };
 }
 
@@ -69,57 +48,25 @@ export function getLanguageCode(locale: string): string {
   return (locale.split("-")[0] ?? "en").toUpperCase();
 }
 
-export function getCurrencyCode(locale: string): string {
-  return (localeCurrency[locale as Locale] ?? localeCurrency[defaultLocale]).currency;
-}
-
-export type LocaleOption = {
-  locale: Locale;
-  label: string;
+export interface LocaleOption {
   countryCode: string;
-};
+  label: string;
+  locale: Locale;
+}
 
 export function getEnabledLocaleOptions(): LocaleOption[] {
   return enabledLocales.map((locale) => {
     const data = getLocaleData(locale);
 
     return {
-      locale,
-      label: data.label,
       countryCode: data.countryCode,
+      label: data.label,
+      locale,
     };
   });
 }
 
-export type EnabledCurrencyOption = {
-  code: string;
-  symbol: string;
-  name: string;
-};
-
-export function getEnabledCurrencies(): EnabledCurrencyOption[] {
-  const currencies = new Map<string, EnabledCurrencyOption>();
-
-  for (const locale of enabledLocales) {
-    const data = getLocaleData(locale);
-
-    if (!currencies.has(data.currency)) {
-      currencies.set(data.currency, {
-        code: data.currency,
-        symbol: data.currencySymbol,
-        name: data.currencyName,
-      });
-    }
-  }
-
-  return Array.from(currencies.values());
-}
-
-export function getPrimaryLocaleForCurrency(currency: string): Locale | null {
-  return enabledLocales.find((locale) => getCurrencyCode(locale) === currency) ?? null;
-}
-
-export function getLocaleFlag(locale: string): string {
+export function getLocaleFlag(locale: Locale): string {
   const codePoints = getCountryCode(locale)
     .toUpperCase()
     .split("")

@@ -15,7 +15,7 @@ export function useMediaQuery(query: string): boolean {
   }, [query]);
 
   const getServerSnapshot = useCallback(() => {
-    // Default to false (mobile-first) on server
+    // SSR uses the mobile-first snapshot because matchMedia is unavailable.
     return false;
   }, []);
 

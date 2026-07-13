@@ -1,5 +1,7 @@
 import "server-only";
-import { requireSession } from "@/lib/auth/server";
+import { cache } from "react";
+
+import { requireCustomerAccessToken } from "@/lib/auth/server";
 import type {
   CustomerAddress,
   CustomerAddressInput,
@@ -211,28 +213,34 @@ const CUSTOMER_UPDATE_MUTATION = `
 async function customerFetch<T>(
   operation: string,
   query: string,
+  returnTo: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const { accessToken } = await requireSession();
+  const accessToken = await requireCustomerAccessToken(returnTo);
   return customerAccountFetch<T>({ accessToken, operation, query, variables });
 }
 
-export async function getCustomerProfile(): Promise<CustomerProfile | null> {
+export const getCustomerProfile = cache(async (): Promise<CustomerProfile | null> => {
   const data = await customerFetch<{ customer: ShopifyCustomerProfile | null }>(
     "getCustomerProfile",
     GET_CUSTOMER_PROFILE_QUERY,
+    "/account/profile",
   );
 
   if (!data.customer) return null;
 
   return transformCustomerProfile(data.customer);
-}
+});
 
 export async function getCustomerOrders(cursor?: {
   after?: string;
   before?: string;
 }): Promise<CustomerOrdersPage> {
   const paginateBackward = Boolean(cursor?.before);
+  const orderParams = new URLSearchParams();
+  if (cursor?.after) orderParams.set("after", cursor.after);
+  if (cursor?.before) orderParams.set("before", cursor.before);
+  const returnTo = `/account/orders${orderParams.size > 0 ? `?${orderParams}` : ""}`;
 
   const data = await customerFetch<{
     customer: {
@@ -246,7 +254,7 @@ export async function getCustomerOrders(cursor?: {
         };
       };
     } | null;
-  }>("getCustomerOrders", GET_CUSTOMER_ORDERS_QUERY, {
+  }>("getCustomerOrders", GET_CUSTOMER_ORDERS_QUERY, returnTo, {
     after: cursor?.after,
     before: cursor?.before,
     first: paginateBackward ? undefined : ORDERS_PER_PAGE,
@@ -276,6 +284,7 @@ export async function getCustomerOrder(id: string): Promise<CustomerOrder | null
   const data = await customerFetch<{ order: ShopifyOrder | null }>(
     "getCustomerOrder",
     GET_CUSTOMER_ORDER_QUERY,
+    `/account/orders/${encodeURIComponent(id)}`,
     { id },
   );
 
@@ -290,7 +299,7 @@ export async function getCustomerAddresses(): Promise<CustomerAddress[]> {
       addresses: { nodes: ShopifyCustomerAddress[] };
       defaultAddress: { id: string } | null;
     } | null;
-  }>("getCustomerAddresses", GET_CUSTOMER_ADDRESSES_QUERY);
+  }>("getCustomerAddresses", GET_CUSTOMER_ADDRESSES_QUERY, "/account/addresses");
 
   if (!data.customer) return [];
 
@@ -299,7 +308,6 @@ export async function getCustomerAddresses(): Promise<CustomerAddress[]> {
     transformCustomerAddress(address, defaultId),
   );
 
-  // Surface the default address first; it's the one customers act on most.
   return addresses.sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
 }
 
@@ -309,7 +317,7 @@ export async function createCustomerAddress(
 ): Promise<CustomerUserError[]> {
   const data = await customerFetch<{
     customerAddressCreate: { userErrors: CustomerUserError[] };
-  }>("customerAddressCreate", CUSTOMER_ADDRESS_CREATE_MUTATION, {
+  }>("customerAddressCreate", CUSTOMER_ADDRESS_CREATE_MUTATION, "/account/addresses", {
     address,
     defaultAddress,
   });
@@ -324,7 +332,7 @@ export async function updateCustomerAddress(
 ): Promise<CustomerUserError[]> {
   const data = await customerFetch<{
     customerAddressUpdate: { userErrors: CustomerUserError[] };
-  }>("customerAddressUpdate", CUSTOMER_ADDRESS_UPDATE_MUTATION, {
+  }>("customerAddressUpdate", CUSTOMER_ADDRESS_UPDATE_MUTATION, "/account/addresses", {
     address,
     addressId,
     defaultAddress,
@@ -336,7 +344,9 @@ export async function updateCustomerAddress(
 export async function deleteCustomerAddress(addressId: string): Promise<CustomerUserError[]> {
   const data = await customerFetch<{
     customerAddressDelete: { userErrors: CustomerUserError[] };
-  }>("customerAddressDelete", CUSTOMER_ADDRESS_DELETE_MUTATION, { addressId });
+  }>("customerAddressDelete", CUSTOMER_ADDRESS_DELETE_MUTATION, "/account/addresses", {
+    addressId,
+  });
 
   return data.customerAddressDelete.userErrors;
 }
@@ -347,7 +357,7 @@ export async function updateCustomerProfile(input: {
 }): Promise<CustomerUserError[]> {
   const data = await customerFetch<{
     customerUpdate: { userErrors: CustomerUserError[] };
-  }>("customerUpdate", CUSTOMER_UPDATE_MUTATION, { input });
+  }>("customerUpdate", CUSTOMER_UPDATE_MUTATION, "/account/profile", { input });
 
   return data.customerUpdate.userErrors;
 }

@@ -1,16 +1,15 @@
-"use client";
-
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
-import { signOut } from "@/lib/auth/client";
 
-export function SignOutButton() {
-  const t = useTranslations("account");
+export async function SignOutButton() {
+  const t = await getTranslations("account");
 
   return (
-    <Button variant="outline" size="sm" onClick={() => signOut()}>
-      {t("signOut")}
-    </Button>
+    <form action="/account/logout?return_to=/" method="post">
+      <Button className="w-full" size="sm" type="submit" variant="outline">
+        {t("signOut")}
+      </Button>
+    </form>
   );
 }

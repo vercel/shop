@@ -3,7 +3,7 @@ import { revalidateTag, updateTag } from "next/cache";
 import { cookies } from "next/headers";
 
 const CART_ID_COOKIE = "shopify_cartId";
-const CART_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+const CART_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 // Preview sits behind Vercel Authentication; its cross-site SSO return hop drops a SameSite=Strict cookie, so only prod gets Strict.
 const CART_ID_COOKIE_SAME_SITE = process.env.VERCEL_ENV === "production" ? "strict" : "lax";
 

@@ -3,10 +3,10 @@ minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
   - "@ai-sdk/*"
   - "@next/*"
+  - "@shopify/hydrogen"
   - "@types/react"
   - "@vercel/*"
   - ai
-  - eve
   - next
   - react
   - react-dom

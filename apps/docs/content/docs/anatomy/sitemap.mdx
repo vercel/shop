@@ -6,36 +6,30 @@ type: guide
 
 The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `/sitemap/{shard}.xml`. Each child holds up to 250 entries — Shopify's Storefront `sitemap(type:)` query computes the pagination, so the storefront just iterates.
 
-`robots.ts` points crawlers at `/sitemap.xml`; that URL alone is enough to discover every product and collection.
+`robots.ts` points crawlers at `/sitemap.xml`; that URL alone is enough to discover every product, collection, Shopify Page, blog, article, and configured policy.
 
 ## URLs
 
-| URL                            | Contents                                |
-| ------------------------------ | --------------------------------------- |
-| `/sitemap.xml`                 | Sitemap index listing every child shard |
-| `/sitemap/static.xml`          | Home page                               |
-| `/sitemap/products-{n}.xml`    | Up to 250 products per shard            |
-| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard         |
+| URL                            | Contents                                  |
+| ------------------------------ | ----------------------------------------- |
+| `/sitemap.xml`                 | Sitemap index listing every child shard   |
+| `/sitemap/static.xml`          | Home page and configured Shopify policies |
+| `/sitemap/products-{n}.xml`    | Up to 250 products per shard              |
+| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard           |
+| `/sitemap/pages-{n}.xml`       | Up to 250 Shopify Pages per shard         |
+| `/sitemap/blogs-{n}.xml`       | Up to 250 Shopify blogs per shard         |
+| `/sitemap/articles-{n}.xml`    | Up to 250 Shopify articles per shard      |
 
 `{n}` is 1-indexed and runs to the `pagesCount` Shopify returns for each type.
 
 ## Cache behavior
 
-Both the page count and each page of resources are cached with `cacheLife("max")` and tagged `products` or `collections`. The webhook handler at [`/api/webhooks/shopify`](/docs/anatomy/webhooks) invalidates those tags on product/collection mutation, so the sitemap stays fresh without scheduled regeneration.
+Product, collection, blog, and article page counts and resources use `cacheLife("max")`. Each resource shard carries the same handle-specific tag as its storefront page, so the corresponding webhook can refresh the affected shard and its `lastmod` value. Product and collection create/delete webhooks invalidate `products-index` or `collections-index`; the blog webhook integration should likewise invalidate `blogs-index` or `articles-index` when membership may have shifted. Page sitemap data uses `cacheLife("hours")` and the `pages` tag because Shopify does not expose Page webhook topics. The static shard reads configured policies through the same hourly `policies` cache used by policy pages and the footer.
 
 ## Adding more resource types
 
-The template scopes sitemaps to products and collections. Shopify's `SitemapType` enum also covers `PAGE`, `BLOG`, `ARTICLE`, and `METAOBJECT`. Both routes name those two types explicitly, so adding one touches three places:
+The template scopes paginated Shopify sitemaps to products, collections, Pages, blogs, and articles. Shopify's `SitemapType` enum also covers `METAOBJECT`. Both routes name the supported types explicitly, so adding one touches three places:
 
 1. **`lib/shopify/operations/sitemap.ts`** — extend the `ShopifySitemapType` union.
 2. **`app/sitemap.xml/route.ts`** — fetch the new type's `getShopifySitemapPagesCount(...)` and spread its `{type}-{n}` ids into the index alongside the product and collection shards. The index lists only what you add here — it does not discover new types on its own.
 3. **`app/sitemap/[shard]/route.ts`** — widen the shard regex and the type mapping so the new `{type}-{n}` segments resolve, then map each item to its URL path.
-
-## Key files
-
-| File                                | Purpose                                                      |
-| ----------------------------------- | ------------------------------------------------------------ |
-| `app/sitemap.xml/route.ts`          | Sitemap index — lists every shard                            |
-| `app/sitemap/[shard]/route.ts`      | Child sitemaps — `static`, `products-{n}`, `collections-{n}` |
-| `lib/shopify/operations/sitemap.ts` | `getShopifySitemapPagesCount`, `getShopifySitemapPage`       |
-| `app/robots.ts`                     | Declares the sitemap index as the crawler entry point        |

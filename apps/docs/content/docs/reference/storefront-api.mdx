@@ -6,11 +6,11 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from its own `i18n` config on every request, so the wrapper creates the client with the country/language pair taken from the request variables (client creation is plain config allocation — there's nothing stateful worth caching). Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
+All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from the `i18n` on its request context on every request, so the wrapper creates the client with the country/language pair taken from the request variables (client creation is plain config allocation — there's nothing stateful worth caching). Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
 
 For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-> The Customer Account API is a separate endpoint and schema. It still uses the hand-rolled `customerAccountFetch` in `lib/shopify/customer-account.ts` and is not covered by the Storefront client or codegen — the first-party client can't talk to it.
+> The Customer Account API is a separate endpoint and schema. `customerAccountFetch` in `lib/shopify/customer-account.ts` wraps `@shopify/hydrogen/customer-account`'s `createCustomerAccountClient` — a distinct client from the Storefront one, with its own schema and not covered by the storefront codegen.
 
 ## storefront.request
 
@@ -212,22 +212,3 @@ Every operation converts the Shopify response to a domain type before returning.
 | `transformShopifyCart`           | `ShopifyCart` → `Cart`              |
 
 Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
-
-## Key files and tools
-
-| Resource                                | Purpose                                                               |
-| --------------------------------------- | --------------------------------------------------------------------- |
-| `lib/shopify/storefront.ts`             | Hydrogen `createStorefrontClient` wrapper + `customFetchApi`          |
-| `lib/shopify/errors.ts`                 | `assertStorefrontOk` response contract + cart error helpers           |
-| `lib/shopify/customer-account.ts`       | `customerAccountFetch` for the separate Customer Account API          |
-| `.graphqlrc.ts`                         | Codegen config (schema source, documents, output dir)                 |
-| `lib/shopify/fragments.ts`              | Reusable `#graphql` fragment definitions                              |
-| `lib/shopify/operations/products.ts`    | Product queries: single, batch, search, recommendations               |
-| `lib/shopify/operations/cart.ts`        | Cart queries and mutations                                            |
-| `lib/shopify/operations/collections.ts` | Collection queries                                                    |
-| `lib/shopify/operations/search.ts`      | Predictive search                                                     |
-| `lib/shopify/operations/menu.ts`        | Navigation menu queries                                               |
-| `lib/shopify/transforms/product.ts`     | Shopify product → domain type                                         |
-| `lib/shopify/transforms/cart.ts`        | Shopify cart → domain type                                            |
-| `lib/cart/server.ts`                    | `invalidateCartCache()` for mutation cache busting                    |
-| `shopify-ai-toolkit`                    | Authoritative Shopify docs, schemas, operation design, and validation |

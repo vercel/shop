@@ -1,4 +1,3 @@
-// Next-free fetch cores (no next/cache / server-only), shared by the cached operations/* wrappers and the eve agent tools.
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Cart,
@@ -145,13 +144,19 @@ const GET_PRODUCT_WITH_VARIANTS_QUERY = `#graphql
   }
 ` as const;
 
-const PRODUCT_RECOMMENDATION_SETS_QUERY = `#graphql
+const COMPLEMENTARY_PRODUCTS_QUERY = `#graphql
   ${PRODUCT_CARD_FRAGMENT}
-  query productRecommendationSets($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    complementary: productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
+  query complementaryProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
       ...ProductCardFields
     }
-    related: productRecommendations(productHandle: $handle, intent: RELATED) {
+  }
+` as const;
+
+const RELATED_PRODUCTS_QUERY = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  query relatedProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productHandle: $handle, intent: RELATED) {
       ...ProductCardFields
     }
   }
@@ -267,16 +272,8 @@ export type CollectionProductsResult = {
   products: ProductCard[];
 };
 
-// COMPLEMENTARY is the merchant-curated "pair it with" set (Search & Discovery app);
-// RELATED is Shopify's auto-generated "you may also like" set.
-export interface ProductRecommendationSets {
-  complementary: ProductCard[];
-  related: ProductCard[];
-}
-
 export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
 
-// Shopify's CartLineInput. `parent` links a line to a bundle/add-on parent.
 export interface CartLineInput {
   merchandiseId: string;
   parent?: { lineId?: string; merchandiseId?: string };
@@ -291,9 +288,7 @@ export function applyCartMutation(
   return { cart: transformShopifyCart(cart), warnings };
 }
 
-// Relevance-ranked search via the Storefront `search` field. Accepts the full ProductFilter set
-// (variant options, metafields, etc.) — the products(...) query string in getCatalogProducts
-// silently drops variantOption/productMetafield, so /search uses this path even for no-query browse.
+// `products` drops variant/metafield filters, so /search must use the `search` field.
 export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
 ): Promise<SearchIndexProductsResult> {
@@ -399,7 +394,10 @@ export async function fetchCollectionProducts(
 
   const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
   const products = shopifyProducts.map(transformShopifyProductCard);
-  const transformed = transformShopifyFilters(data.collection.products.filters, { activeFilters });
+  const transformed = transformShopifyFilters(data.collection.products.filters, {
+    activeFilters,
+    currencyCode: products[0]?.price.currencyCode,
+  });
 
   return {
     filters: transformed.filters,
@@ -409,8 +407,6 @@ export async function fetchCollectionProducts(
   };
 }
 
-// Slim shell + full variant matrix; for the AI agent and markdown routes that
-// enumerate variants. The PDP uses getProduct + getProductVariant instead.
 export async function fetchProductWithVariants({
   handle,
   locale = defaultLocale,
@@ -432,29 +428,40 @@ export async function fetchProductWithVariants({
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-// Both intents ride one aliased request, so the PDP's two recommendation surfaces
-// dedupe to a single Shopify call.
-export async function fetchProductRecommendationSets({
+export async function fetchComplementaryProducts({
   handle,
   locale = defaultLocale,
 }: {
   handle: string;
   locale?: string;
-}): Promise<ProductRecommendationSets> {
+}): Promise<ProductCard[]> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
   const response = await storefront.request<{
-    complementary: ShopifyProductCard[] | null;
-    related: ShopifyProductCard[] | null;
-  }>(PRODUCT_RECOMMENDATION_SETS_QUERY, { variables: { country, handle, language } });
-  assertStorefrontOk(response, "productRecommendationSets");
-  const { data } = response;
+    productRecommendations: ShopifyProductCard[] | null;
+  }>(COMPLEMENTARY_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  assertStorefrontOk(response, "complementaryProducts");
 
-  return {
-    complementary: (data.complementary ?? []).map(transformShopifyProductCard),
-    related: (data.related ?? []).map(transformShopifyProductCard),
-  };
+  return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
+}
+
+export async function fetchRelatedProducts({
+  handle,
+  locale = defaultLocale,
+}: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
+  const country = getCountryCode(locale);
+  const language = getLanguageCode(locale);
+
+  const response = await storefront.request<{
+    productRecommendations: ShopifyProductCard[] | null;
+  }>(RELATED_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  assertStorefrontOk(response, "relatedProducts");
+
+  return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
 }
 
 export async function fetchCollections({
@@ -491,7 +498,6 @@ const NODE_HANDLES_QUERY = `#graphql
   }
 ` as const;
 
-// Resolves product GIDs to storefront handles (e.g. to route MCP catalog results on-site).
 export async function fetchProductHandlesByIds(ids: string[]): Promise<Map<string, string>> {
   const handles = new Map<string, string>();
   if (ids.length === 0) return handles;

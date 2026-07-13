@@ -1,6 +1,6 @@
 ---
 title: Product Setup
-description: Shopify product configuration for the Product Detail Page - variants, metafields, swatches, and SEO.
+description: Shopify product configuration for the Product Detail Page - variants, swatches, recommendations, bundles, and SEO.
 type: reference
 prerequisites:
   - /docs/anatomy/pages/pdp
@@ -17,25 +17,6 @@ The PDP renders any product that has a handle (URL slug) in Shopify. At minimum,
 - A **featured image** and optionally up to 10 media items (images or videos)
 
 The PDP shell fetches the product's options and Shopify's encoded variant-availability data (not the full variant list) plus up to 10 media items; the selected variant is resolved per request from its options. The AI agent and markdown routes still fetch the full variant list (up to 250) via `getProductWithVariants`.
-
-## Metafields
-
-The template ships with **no metafields wired in** by default. Namespaces and keys are shop-specific (Shopify's only standard product metafield namespaces are `descriptors`, `facts`, `reviews`, `shopify`, etc. — not generic spec namespaces like `custom` or `specs`), so the template doesn't presume any defaults: an empty config means the product query is unchanged and nothing renders.
-
-To surface metafields on the PDP for your store, list the ones you populate in `productMetafieldIdentifiers` in `lib/config.ts`:
-
-```ts
-export const productMetafieldIdentifiers: Array<{ key: string; namespace: string }> = [
-  { namespace: "custom", key: "material" },
-  { namespace: "custom", key: "warranty" },
-];
-```
-
-The product-detail query (`getProductByHandle` in `lib/shopify/operations/products.ts`) appends a `metafields(identifiers: [...])` selection built from that list, and `ProductSpecs` (`components/product-detail/product-specs.tsx`) renders them as a label/value "Specifications" list below the description. Optionally extend the `METAFIELD_LABELS` map in `lib/shopify/transforms/product.ts` with friendly labels for your keys — keys without an entry fall back to a humanized version of the key.
-
-Values are formatted by metafield type: text and number pass through, measurements (`dimension`/`weight`/`volume`) and `rating` are parsed from their JSON, `boolean` becomes Yes/No, and `list.*` types are joined. **Reference types** (product or metaobject references) are skipped — their value is a GID that needs a follow-up query to resolve.
-
-Define metafields in Shopify admin under **Settings → Custom data → Products → Add definition**.
 
 ## Color swatches
 
@@ -67,17 +48,17 @@ Products must be assigned to at least one collection to appear on collection lis
 
 ## Recommendations
 
-Product recommendations on the PDP are powered by Shopify's recommendation API. No configuration is needed - Shopify generates recommendations automatically based on purchase history and product similarity.
+Product recommendations on the PDP are powered by Shopify's recommendation API. Shopify generates recommendations automatically based on purchase history and product similarity. The template requests and renders them by default; set `pdp.relatedProducts.enabled` to `false` in `shop.config.ts` to disable them.
 
 ## Complementary products
 
-Beyond the automatic recommendations above, the PDP shows a merchant-curated **"Pairs Well With"** list near the buy section, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`.
+The template shows a merchant-curated **"Pairs Well With"** list near the buy section by default, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`. Set `pdp.complementaryProducts.enabled` to `false` to disable it.
 
 Unlike the `RELATED` recommendations Shopify generates automatically, complementary products are **configured by hand** in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app — open a product's **Product recommendations** settings and add its complementary items. With none configured for a product, the section renders nothing.
 
 ## Bundles
 
-The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships, fetched for the selected variant in `PurchasableProductVariantFields`:
+The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) by default from the Storefront API's variant-level relationships. Set `pdp.bundles.enabled` to `false` to disable this support:
 
 - `components` — the items in a **fixed bundle** (each component variant and its quantity).
 - `groupedBy` — up to 10 bundles that contain the current product (the reverse relationship).
@@ -86,12 +67,3 @@ The template renders Shopify [product bundles](https://help.shopify.com/en/manua
 Fixed bundles (such as those created with the free **Shopify Bundles** app) render their contents and add to cart normally. A customized bundle whose parent sets `requiresComponents` but has no fixed `components` is disabled by the buy buttons until you build an app-specific component picker and send the component lines through `CartLineInput.parent`.
 
 > **Publish bundles to your Headless channel.** The Shopify Bundles app publishes a new bundle to the **Online Store** channel only, but the template reads from your **Headless** channel. A bundle that 404s on the storefront while showing fine in admin is almost always missing from Headless — add it under the product's **Publishing** section. See [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
-
-## Key files
-
-| File                                 | Purpose                                                      |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `lib/shopify/fragments.ts`           | `PRODUCT_FRAGMENT` and `METAFIELD_FRAGMENT`                  |
-| `lib/shopify/transforms/product.ts`  | Metafield label mapping and product transform                |
-| `lib/shopify/operations/products.ts` | Product fetch operations with caching                        |
-| `lib/product.ts`                     | Option parsing, default selection, and option URL generation |

@@ -1,5 +1,5 @@
-import { siteConfig } from "@/lib/config";
 import type { Collection } from "@/lib/types";
+import { shopConfig } from "@/shop.config";
 
 import { escapeMarkdown } from "./utils";
 
@@ -15,7 +15,7 @@ export function llmsTxt({
   collections: Collection[];
   locale: string;
 }): string {
-  const { name, url } = siteConfig;
+  const { name, url } = shopConfig.site;
   const sections: string[] = [];
 
   sections.push(`# ${escapeMarkdown(name)}`);

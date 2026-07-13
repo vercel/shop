@@ -14,19 +14,19 @@ import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { agent, siteConfig } from "@/lib/config";
 import { enabledLocales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
+import { shopConfig } from "@/shop.config";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  variable: "--font-geist-sans",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export const generateStaticParams = async () => enabledLocales.map((locale) => ({ locale }));
@@ -63,7 +63,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
               <CartOverlay locale={locale} />
             </Suspense>
             <Suspense>
-              <ActionBar>{agent.enabled && <AgentButton />}</ActionBar>
+              <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
         </NextIntlClientProvider>
@@ -78,15 +78,15 @@ export const generateMetadata = async (): Promise<Metadata> => {
 
   return {
     alternates: buildAlternates({ pathname: "/" }),
-    description: t("defaultDescription", { name: siteConfig.name }),
-    generator: siteConfig.name,
-    metadataBase: new URL(siteConfig.url),
+    description: t("defaultDescription", { name: shopConfig.site.name }),
+    generator: shopConfig.site.name,
+    metadataBase: new URL(shopConfig.site.url),
     openGraph: {
-      images: [{ url: "/og-default.png", width: 1200, height: 630 }],
+      images: [{ height: 630, url: "/og-default.png", width: 1200 }],
     },
     title: {
-      default: siteConfig.name,
-      template: `%s | ${siteConfig.name}`,
+      default: shopConfig.site.name,
+      template: `%s | ${shopConfig.site.name}`,
     },
   };
 };

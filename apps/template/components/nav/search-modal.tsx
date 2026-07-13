@@ -124,7 +124,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
         <div className="w-full max-w-xl h-fit">
           <DialogTitle className="sr-only">{t("search")}</DialogTitle>
           <div className="bg-background rounded-xl shadow-lg overflow-hidden duration-200">
-            {/* Search input */}
             <form onSubmit={handleSubmit} className="flex items-center gap-3 px-4 py-3">
               <Search className="size-4 shrink-0 text-foreground/40" />
               <input
@@ -165,7 +164,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
               </DialogPrimitive.Close>
             </form>
 
-            {/* Results */}
             {show && (
               <div
                 id="search-modal-results"

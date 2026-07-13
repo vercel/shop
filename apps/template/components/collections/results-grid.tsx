@@ -52,8 +52,7 @@ async function Render({
     />
   ));
 
-  // /collections/all is backed by the catalog-browse search() field, not the collection
-  // field — load-more has to call the same backend the initial page used.
+  // /collections/all pagination must use the same search backend as its initial page.
   if (collection === ALL_PRODUCTS_HANDLE) {
     return (
       <InfiniteProductGrid

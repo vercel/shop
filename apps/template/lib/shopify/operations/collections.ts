@@ -83,8 +83,7 @@ export async function getCollection({
   handle: string;
   locale?: string;
 }): Promise<Collection | undefined> {
-  // Plain "use cache" (not remote) so the resolved collection bakes into the
-  // PLP static shell; "use cache: remote" defers to request time and won't inline.
+  // Plain cache is required to bake the collection into the PLP shell.
   "use cache";
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);
@@ -125,8 +124,7 @@ export async function getCollectionsListing({
 
   const nodes = data.collections.edges.map((edge) => edge.node);
 
-  // Per-collection and per-first-product tags so the listing busts on a collection edit
-  // (collection-{handle}) or a fallback image change (product-{numericId}).
+  // The first product tag covers collection thumbnails that fall back to product imagery.
   tagCollections(nodes);
   for (const node of nodes) {
     const firstProductId = node.products.edges[0]?.node.id;

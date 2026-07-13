@@ -6,31 +6,25 @@ import { getNumericShopifyId } from "@/lib/shopify/utils";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 
-async function verifyWebhook(body: string, hmacHeader: string | null): Promise<boolean> {
-  if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
-    return false;
-  }
+function verifyWebhook(body: string, hmacHeader: string | null, secret: string): boolean {
+  if (!hmacHeader) return false;
 
-  const hash = crypto
-    .createHmac("sha256", SHOPIFY_WEBHOOK_SECRET)
-    .update(body, "utf8")
-    .digest("base64");
+  const expected = crypto.createHmac("sha256", secret).update(body, "utf8").digest();
+  const received = Buffer.from(hmacHeader, "base64");
 
-  return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
 }
 
-// Configure webhook topics in Shopify Admin → Settings → Notifications → Webhooks.
 export async function POST(request: Request) {
+  if (!SHOPIFY_WEBHOOK_SECRET) return new Response(null, { status: 404 });
+
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const topic = request.headers.get("x-shopify-topic");
 
-  if (SHOPIFY_WEBHOOK_SECRET) {
-    const isValid = await verifyWebhook(body, hmacHeader);
-    if (!isValid) {
-      console.error("Invalid Shopify webhook signature");
-      return Response.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (!verifyWebhook(body, hmacHeader, SHOPIFY_WEBHOOK_SECRET)) {
+    console.error("Invalid Shopify webhook signature");
+    return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   if (!topic) {
@@ -42,10 +36,12 @@ export async function POST(request: Request) {
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
-    // Per-product tags only — never the broad "products" tag. tagProducts() stamps every
-    // list/search/collection/recommendation entry with the contained products' product-<id>
-    // tag, so busting one product cascades to every surface showing it without nuking the catalog.
+    // Product tags cascade through every surface without purging the full catalog.
     const productTags: string[] = [];
+
+    if (topic === "products/create" || topic === "products/delete") {
+      productTags.push("products-index");
+    }
 
     try {
       const payload = JSON.parse(body);
@@ -72,10 +68,7 @@ export async function POST(request: Request) {
   }
 
   if (topic.startsWith("collections/")) {
-    // collection-{handle} busts the collection's PLP and — via tagCollections stamping — the
-    // all-collections listing for edits. create/delete change the *set* of collections, so they
-    // also fire "collections-index" (the listing page + collections sitemap). The broad
-    // "collections" tag is a manual break-glass purge of all collection data and is never fired here.
+    // Create/delete also invalidate the collection index; the broad tag is break-glass only.
     const collectionTags: string[] = [];
 
     if (topic === "collections/create" || topic === "collections/delete") {

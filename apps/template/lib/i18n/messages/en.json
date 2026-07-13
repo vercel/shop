@@ -64,6 +64,9 @@
     "newArrivals": "New arrivals just landed — shop the latest drop",
     "returns": "Easy 30-day returns, no questions asked"
   },
+  "blog": {
+    "empty": "No articles found."
+  },
   "cart": {
     "addedToCart": "Added to cart",
     "addToCart": "Add to Cart",
@@ -86,8 +89,14 @@
     "discountCode": "Discount code",
     "discountInvalidCode": "Enter a valid discount code",
     "discountNotApplicable": "Not applicable",
+    "dismissError": "Dismiss error",
     "dismissWarnings": "Dismiss",
     "empty": "Your cart is empty",
+    "errors": {
+      "add": "We couldn't add that item. Please try again.",
+      "remove": "We couldn't remove that item. Please try again.",
+      "update": "We couldn't update that quantity. Please try again."
+    },
     "emptyDescription": "Looks like you haven't added anything yet. Let's explore our products and find something great!",
     "estimatedTax": "Estimated Tax",
     "estimatedTotal": "Estimated total",
@@ -176,9 +185,6 @@
     "error": "Something went wrong",
     "errorDesc": "An unexpected error occurred. Please try again.",
     "goHome": "Go back to the home page",
-    "loginClickHere": "Click here",
-    "loginNotRedirected": "Not redirected?",
-    "loginRedirecting": "Redirecting to sign in...",
     "notFound": "Page Not Found",
     "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "tryAgain": "Try again"

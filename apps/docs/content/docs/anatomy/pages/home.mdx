@@ -33,14 +33,3 @@ The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. A `Produ
 ## Data fetching
 
 Products are fetched server-side with `searchIndexProducts({ limit: 8, locale })` — the same relevance-ranked Storefront `search` path (wildcard `*` query) that backs `/collections/all`, so the home grid shows exactly the first 8 products a shopper sees on that page rather than a separate best-selling list or a curated collection. The result is cached with `cacheLife("max")` and product-level cache tags for granular revalidation. The section heading and its "view all" link are set by the `title` and `collectionUrl` props on the `ProductsGrid` call in `app/page.tsx`, which point at `/collections/all` by default.
-
-## Key files
-
-| File                                       | Purpose                                                         |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| `app/page.tsx`                             | Root page, metadata generation, product fetch                   |
-| `components/sections/banner-section.tsx`   | Full-width hero banner with image, headline, CTA                |
-| `components/product/products-grid.tsx`     | Responsive product grid with section title                      |
-| `components/product/products-slider.tsx`   | Horizontally scrollable product slider (reference, unused)      |
-| `components/product-card/product-card.tsx` | [Product card](/docs/anatomy/product-card) with image and price |
-| `lib/shopify/operations/products.ts`       | Shopify product fetching with caching                           |

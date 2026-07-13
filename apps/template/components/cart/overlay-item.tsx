@@ -20,7 +20,6 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const { cartWithPending, updateItemOptimistic } = useCart();
   const t = useTranslations("cart");
 
-  // Read quantity from cartWithPending (includes optimistic updates)
   const currentLine = cartWithPending?.lines.find((l) => l.id === item.id);
   const quantity = currentLine?.quantity ?? item.quantity;
 

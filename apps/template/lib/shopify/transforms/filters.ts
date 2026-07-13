@@ -16,8 +16,9 @@ import type {
 } from "../types/filters";
 
 export interface TransformFiltersOptions {
-  hideZeroCount?: boolean;
   activeFilters?: Record<string, string | string[] | undefined>;
+  currencyCode?: string;
+  hideZeroCount?: boolean;
 }
 
 export interface TransformedFilters {
@@ -33,8 +34,6 @@ export interface ActiveFilterBadge {
 }
 
 export function getParamKeyFromShopifyId(filterId: string): string {
-  // Shopify filter IDs already use the standard format (e.g. "filter.v.option.color",
-  // "filter.p.vendor", "filter.v.availability"). Return them as-is for URL params.
   return filterId.toLowerCase();
 }
 
@@ -125,22 +124,21 @@ function transformFilter(filter: ShopifyFilter): Filter {
   };
 }
 
-function extractPriceRange(priceFilter: ShopifyFilter): PriceRange {
+function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): PriceRange {
   for (const value of priceFilter.values) {
     try {
       const input = JSON.parse(value.input) as ProductFilter;
       if (input.price) {
         return {
-          min: input.price.min ?? 0,
+          ...(currencyCode ? { currencyCode } : {}),
           max: input.price.max ?? 1000,
+          min: input.price.min ?? 0,
         };
       }
-    } catch {
-      // Ignore malformed filter input.
-    }
+    } catch {}
   }
 
-  return { min: 0, max: 1000 };
+  return { ...(currencyCode ? { currencyCode } : {}), max: 1000, min: 0 };
 }
 
 function isFilterValueSelected(
@@ -156,7 +154,7 @@ export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
 ): TransformedFilters {
-  const { hideZeroCount = true, activeFilters = {} } = options;
+  const { activeFilters = {}, currencyCode, hideZeroCount = true } = options;
 
   const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");
   const listFilters = shopifyFilters.filter((f) => f.type === "LIST");
@@ -179,8 +177,7 @@ export function transformShopifyFilters(
       .filter((filter) => filter.values.length > 0);
   }
 
-  // Drop facet groups that resolve to a single choice — unless that lone value is
-  // active, so a selected filter never silently vanishes from the UI.
+  // Keep an active singleton facet so the shopper can still clear it.
   filters = filters.filter(
     (filter) =>
       filter.values.length > 1 ||
@@ -191,7 +188,7 @@ export function transformShopifyFilters(
 
   return {
     filters,
-    priceRange: priceFilter ? extractPriceRange(priceFilter) : undefined,
+    priceRange: priceFilter ? extractPriceRange(priceFilter, currencyCode) : undefined,
   };
 }
 

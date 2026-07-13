@@ -1,4 +1,3 @@
-import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -6,6 +5,8 @@ import {
   PHASE_PRODUCTION_BUILD,
   PHASE_PRODUCTION_SERVER,
 } from "next/constants";
+
+import { shopConfig } from "./shop.config";
 
 function assertRequiredEnv() {
   const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
@@ -18,17 +19,16 @@ function assertRequiredEnv() {
     );
   }
 
-  if (process.env.NEXT_PUBLIC_ENABLE_AUTH === "1") {
+  if (shopConfig.auth.enabled) {
     const missing = [
-      "BETTER_AUTH_SECRET",
-      "SHOPIFY_CUSTOMER_CLIENT_ID",
-      "SHOPIFY_CUSTOMER_CLIENT_SECRET",
+      "CUSTOMER_ACCOUNT_SESSION_SECRET",
+      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
     ].filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
       throw new Error(
-        `NEXT_PUBLIC_ENABLE_AUTH=1 requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or unset NEXT_PUBLIC_ENABLE_AUTH.`,
+        `Enabled auth requires: ${missing.join(", ")}. ` +
+          `Set the missing variables or disable auth in shop.config.ts or NEXT_PUBLIC_ENABLE_AUTH.`,
       );
     }
   }
@@ -75,7 +75,6 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
-  serverExternalPackages: ["better-auth"],
 };
 
 const withNextIntl = createNextIntlPlugin({
@@ -100,7 +99,4 @@ function getConfig(phase: string): NextConfig {
   return config;
 }
 
-// Cast around eve's `withEve` typing against a different `next` version than the template runs.
-export default withEve(getConfig as unknown as Parameters<typeof withEve>[0], {
-  eveRoot: ".",
-});
+export default getConfig;

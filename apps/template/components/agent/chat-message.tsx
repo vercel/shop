@@ -1,17 +1,15 @@
 "use client";
 
-import { JSONUIProvider, Renderer } from "@json-render/react";
-import type { EveMessage } from "eve/react";
+import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
+import type { UIMessage } from "ai";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 
-import { useEveJsonRenderMessage } from "./eve-json-render";
 import { registry } from "./registry";
 import { AgentThinking } from "./thinking";
 
-// Safelist relative paths so navigate_user links (e.g. "/cart") skip the external-link modal.
 const linkSafety = {
   enabled: true,
   onLinkCheck: (url: string) => url.startsWith("/"),
@@ -23,24 +21,24 @@ const Markdown = memo(
       {children}
     </Streamdown>
   ),
-  (prev, next) => prev.children === next.children,
+  (previous, next) => previous.children === next.children,
 );
 Markdown.displayName = "Markdown";
 
 export function ChatMessage({
-  message,
   isStreaming,
+  message,
 }: {
-  message: EveMessage;
   isStreaming: boolean;
+  message: UIMessage;
 }) {
-  const { hasSpec, spec, text } = useEveJsonRenderMessage(message.parts);
+  const { hasSpec, spec, text } = useJsonRenderMessage(message.parts);
 
   if (message.role === "user") {
     if (!text) return null;
     return (
       <div className="flex justify-end">
-        <Bubble variant="default" className="max-w-[85%]">
+        <Bubble className="max-w-[85%]" variant="default">
           <BubbleContent className="rounded-2xl px-3.5">
             <Markdown>{text}</Markdown>
           </BubbleContent>
@@ -53,11 +51,9 @@ export function ChatMessage({
     <div className="space-y-2.5 text-sm text-foreground">
       <AgentThinking active={isStreaming && !text} />
       {text && <Markdown>{text}</Markdown>}
-      {/* Render generative cards only once the turn settles — mid-stream the spec
-          fence is partial and compiles to a wrong/half card (the "card flash"). */}
-      {!isStreaming && hasSpec && spec && (
+      {hasSpec && spec && (
         <JSONUIProvider registry={registry}>
-          <Renderer spec={spec} registry={registry} />
+          <Renderer registry={registry} spec={spec} />
         </JSONUIProvider>
       )}
     </div>

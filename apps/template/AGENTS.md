@@ -24,9 +24,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## The AI assistant runs on eve — read its bundled docs
+## The AI assistant uses AI SDK — read its bundled docs
 
-The opt-in assistant under `agent/` is built on **eve**, a fast-moving pre-1.0 framework — don't rely on training-data recall of its APIs. Before writing or changing anything under `agent/`, read the relevant guide in `node_modules/eve/docs/` (start at its `README.md`).
+The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK. Before changing the route, agent, tools, or `useChat` client, read the relevant guide in `node_modules/ai/docs/`.
 
 ## Critical Rules (Always Apply)
 
@@ -35,7 +35,6 @@ The opt-in assistant under `agent/` is built on **eve**, a fast-moving pre-1.0 f
 3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
 4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
-6. **Agent tool code (`agent/`) must not import `next/cache`, `server-only`, or `next/headers`** (even transitively) — it runs in eve's runtime, not Next. Get Shopify data via `lib/shopify/fetch.ts`, not the `next/cache`-wrapped `operations/*`.
 
 ## Storefront Architecture Contract
 
@@ -85,7 +84,7 @@ Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collectio
 Two exceptions that don't fit cleanly:
 
 - A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route) or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
-- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/config.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
+- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
 
 Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — that collides with the runtime meaning. Use a verb (`fetch.ts`) or product noun (`shopify.ts`) instead.
 
@@ -128,6 +127,8 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 
 Default to writing none. Well-named identifiers, types, and tests already document WHAT the code does. Add a comment only when removing it would leave a future reader genuinely confused — and the reason is something they couldn't recover by reading the surrounding code.
 
+**Comments are terse guardrails for agents, not documentation.** Use one sentence on one physical line and state only the irreducible hidden WHY. Omit background, examples, history, setup, and consequences that are recoverable from the code. If the comment needs more than one line, improve the names or move the explanation to docs or the PR.
+
 A comment earns its place when it captures one of:
 
 - A hidden constraint (e.g. "cookies can't be set during stream").
@@ -135,7 +136,7 @@ A comment earns its place when it captures one of:
 - A non-obvious algorithmic choice or invariant.
 - A cross-system quirk (e.g. "Shopify's `productFilters` only affects facet counts, not results").
 
-**One line max.** If you can't say it in a single line, the code probably needs renaming, splitting, or extracting a constant — not more prose. Long-form context belongs in the PR description, not the source file.
+Before keeping a comment, ask: would an agent reasonably break behavior without this warning? If not, delete it.
 
 Don't write:
 
@@ -144,7 +145,7 @@ Don't write:
 - References to current work (`// added for cart refactor`, `// part of issue #123`, `// new`). That belongs in the PR description.
 - File-top banner comments and `// ── Section ──`-style dividers. If a file is large enough that you reach for one, split the file instead.
 - Bare `// TODO` without an owner or actionable reason. Either write `// TODO(handle): explain blocker` or fix the thing now.
-- Multi-paragraph docstrings on simple functions. If the JSDoc fits on one line, inline it; if you reach for multiple paragraphs, that's a signal to split or rename, not to write more prose.
+- Multi-line prose comments or docstrings. Preserve generated headers, licenses, and tooling-required blocks only.
 
 Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other tooling directives — those are not prose comments.
 
@@ -152,7 +153,7 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built on eve.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
 
 The default deployment story is single-locale with clean, unprefixed URLs (`/products/...`). The repo keeps locale catalogs and helpers in place so adding multi-locale routing later is straightforward, but that routing is not enabled by default.
 
@@ -168,8 +169,8 @@ pnpm format
 
 ## Directory Structure
 
-- `app/` for routes
-- `agent/` for the eve AI assistant (mounted by `withEve()` in `next.config.ts`)
+- `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
+- `lib/agent/` for the AI SDK agent, tools, and json-render catalog
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
@@ -199,20 +200,20 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication is built in using better-auth with Shopify Customer Account API OIDC. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When the flag is set, `next.config.ts` validates that the three required server-only secrets — `BETTER_AUTH_SECRET`, `SHOPIFY_CUSTOMER_CLIENT_ID`, `SHOPIFY_CUSTOMER_CLIENT_SECRET` — are present and throws a build error if any are missing. The flag is read in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client in agreement at hydration (safe for cache components).
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `NEXT_PUBLIC_ENABLE_AUTH="1"` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. The flag is resolved in `shop.config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client feature gates aligned under cache components.
 
 Key files:
 
-- `lib/auth/index.ts` — universal `isAuthEnabled` flag (safe to import from server and client code)
-- `lib/auth/server.ts` — better-auth config with Shopify OIDC, plus `getCustomerSession()`, `requireSession()`, etc.
-- `lib/auth/client.ts` — `useSession()`, `signIn()`, `signOut()`
-- `app/api/auth/[...all]/route.ts` — OAuth callback handler
+- `lib/auth/index.ts` — universal `isAuthEnabled` flag
+- `lib/auth/server.ts` — encrypted HttpOnly cookie adapter plus read-only login/token helpers
+- `app/account/[action]/route.ts` — Hydrogen login, authorize, refresh, and logout handlers
 - `app/account/(authenticated)/` — auth-gated account pages
-- `app/account/login/` — login redirect (outside auth gate)
-- `components/nav/account.tsx` — nav icon (async, inside Suspense)
-- `components/account/` — sidebar, tabs, page header, sign-out button
+- `components/nav/account.tsx` — read-only nav session state inside Suspense
+- `components/account/sign-out-button.tsx` — same-origin POST logout form
 
-The nav uses a fixed `size-5` container with the fallback icon rendered inline and NavAccount positioned absolutely on top via Suspense — this eliminates layout shift. All account pages use Suspense boundaries for cache components compatibility. The `(authenticated)` route group separates the auth-gated layout from the login page to avoid redirect loops.
+Server Components must not refresh tokens because they cannot commit cookies. Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API operations. The latter redirects refreshable sessions through `/account/refresh`, where Hydrogen can rotate tokens and commit the encrypted cookie.
+
+The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(authenticated)` route group owns protected account UI, while the sibling `[action]` route owns OAuth response boundaries. Logout must remain a same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
 
 ## Shopify GraphQL Workflow
 
