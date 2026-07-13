@@ -241,6 +241,9 @@ importers:
       server-only:
         specifier: 0.0.1
         version: 0.0.1
+      sonner:
+        specifier: 2.0.7
+        version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       streamdown:
         specifier: 2.5.0
         version: 2.5.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -6052,11 +6055,6 @@ packages:
   nanoid@3.3.12:
     resolution: {integrity: sha512-ZB9RH/39qpq5Vu6Y+NmUaFhQR6pp+M2Xt76XBnEwDaGcVAqhlvxrl3B2bKS5D3NH3QR76v3aSrKaF/Kiy7lEtQ==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
-  nanoid@5.1.16:
-    resolution: {integrity: sha512-kVrnsrJqMR8+oLJnGEmSWw9BivK5mt7H3FZatVRjrc5wGqFYuBxX1yG7+A7Gi5AefkX6t/oCkizcQgpu0cY1dQ==}
-    engines: {node: ^18 || >=20}
     hasBin: true
 
   native-promise-only@0.8.1:
@@ -13563,8 +13561,6 @@ snapshots:
   mux-embed@5.18.1: {}
 
   nanoid@3.3.12: {}
-
-  nanoid@5.1.16: {}
 
   native-promise-only@0.8.1: {}
 

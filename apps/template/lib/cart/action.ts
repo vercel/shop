@@ -105,6 +105,13 @@ export async function addToCartAction(
     };
   }
 
+  if (process.env.VERCEL_ENV === "preview") {
+    return {
+      success: false,
+      error: "Forced add-to-cart failure for toast preview",
+    };
+  }
+
   try {
     const { cart, warnings } = await addToCart([{ merchandiseId, quantity }]);
 
