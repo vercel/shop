@@ -4,7 +4,9 @@ A Next.js storefront template and reference architecture for Shopify, built with
 
 See [vercel.shop](https://vercel.shop) for full documentation.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps/template&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps%2Ftemplate&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app&env=SHOPIFY_STORE_DOMAIN%2CSHOPIFY_STOREFRONT_ACCESS_TOKEN&envDescription=Required%20Shopify%20Storefront%20API%20credentials&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Freference%2Fenv-vars)
+
+Vercel prompts for the two required Shopify credentials before the first deployment.
 
 ## Getting Started
 
