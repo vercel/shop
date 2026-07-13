@@ -6,30 +6,25 @@ import { getNumericShopifyId } from "@/lib/shopify/utils";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 
-async function verifyWebhook(body: string, hmacHeader: string | null): Promise<boolean> {
-  if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
-    return false;
-  }
+function verifyWebhook(body: string, hmacHeader: string | null, secret: string): boolean {
+  if (!hmacHeader) return false;
 
-  const hash = crypto
-    .createHmac("sha256", SHOPIFY_WEBHOOK_SECRET)
-    .update(body, "utf8")
-    .digest("base64");
+  const expected = crypto.createHmac("sha256", secret).update(body, "utf8").digest();
+  const received = Buffer.from(hmacHeader, "base64");
 
-  return crypto.timingSafeEqual(Buffer.from(hash, "base64"), Buffer.from(hmacHeader, "base64"));
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
 }
 
 export async function POST(request: Request) {
+  if (!SHOPIFY_WEBHOOK_SECRET) return new Response(null, { status: 404 });
+
   const body = await request.text();
   const hmacHeader = request.headers.get("x-shopify-hmac-sha256");
   const topic = request.headers.get("x-shopify-topic");
 
-  if (SHOPIFY_WEBHOOK_SECRET) {
-    const isValid = await verifyWebhook(body, hmacHeader);
-    if (!isValid) {
-      console.error("Invalid Shopify webhook signature");
-      return Response.json({ error: "Invalid signature" }, { status: 401 });
-    }
+  if (!verifyWebhook(body, hmacHeader, SHOPIFY_WEBHOOK_SECRET)) {
+    console.error("Invalid Shopify webhook signature");
+    return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
   if (!topic) {

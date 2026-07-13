@@ -47,21 +47,21 @@ Public reads use either plain `"use cache"` for content that belongs coherently 
 POST /api/webhooks/shopify
 ```
 
-The handler verifies the HMAC signature using the `SHOPIFY_WEBHOOK_SECRET` environment variable, then calls `revalidateTag()` for the affected cache tags.
+The handler is enabled by the `SHOPIFY_WEBHOOK_SECRET` environment variable, verifies the HMAC signature, then calls `revalidateTag()` for the affected cache tags. Without the secret, it returns `404` before reading the request body.
 
 ### Supported topics
 
-| Webhook topic        | Cache tags invalidated                                                |
-| -------------------- | --------------------------------------------------------------------- |
-| `products/create`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `products/delete`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `collections/create` | `collections-index`, `collection-{handle}`                            |
-| `collections/update` | `collection-{handle}`                                                 |
-| `collections/delete` | `collections-index`, `collection-{handle}`                            |
-| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                 |
+| Webhook topic        | Cache tags invalidated                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `products/create`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
+| `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}`                   |
+| `products/delete`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
+| `collections/create` | `collections-index`, `collection-{handle}`                                              |
+| `collections/update` | `collection-{handle}`                                                                   |
+| `collections/delete` | `collections-index`, `collection-{handle}`                                              |
+| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                                   |
 
-The handler relies on fine-grained tags: per-product (`product-{numericId}`, stamped on every list and collection read via `tagProducts()`) and per-collection (`collection-{handle}`, stamped on every collection read including the all-collections listing). Because create and delete change the _set_ of collections, they also fire `collections-index` — a tag carried only by the all-collections reads (`getCollections`, `getCollectionsListing`) and the collections sitemap — so the listing refreshes without touching other PLPs. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
+The handler relies on fine-grained tags: per-product tags stamped on product aggregates and sitemap shards, and per-collection tags stamped on collection reads, the all-collections listing, and sitemap shards. Create and delete also fire `products-index` or `collections-index` because those events change sitemap membership and page counts; `collections-index` additionally refreshes the all-collections listing. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
 
 ### Setting up webhooks
 
@@ -76,7 +76,7 @@ In your Shopify admin, go to **Settings → Notifications → Webhooks**:
 SHOPIFY_WEBHOOK_SECRET="your-webhook-signing-secret"
 ```
 
-> **Important:** Without `SHOPIFY_WEBHOOK_SECRET`, the handler skips signature verification. Always set this in production.
+> **Important:** `SHOPIFY_WEBHOOK_SECRET` enables the endpoint. Without it, the handler returns `404`; once enabled, unsigned or invalid requests return `401`.
 
 ### How it works
 

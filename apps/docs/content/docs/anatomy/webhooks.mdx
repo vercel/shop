@@ -6,7 +6,7 @@ type: guide
 
 Read paths in the template are cached aggressively with `"use cache"` or `"use cache: remote"` and `cacheLife("max")`. Without an invalidation signal, edits in Shopify Admin won't surface until the cache expires. The webhook handler at `/api/webhooks/shopify` closes that loop: Shopify posts a topic, the handler verifies the signature, and `revalidateTag()` invalidates the affected cache tags.
 
-The handler ships in the template and runs with zero configuration in development. For production, set `SHOPIFY_WEBHOOK_SECRET` and register webhooks in Shopify Admin so a real signal flows in.
+The handler is opt-in through `SHOPIFY_WEBHOOK_SECRET`. When the secret is unset, `POST /api/webhooks/shopify` returns `404` before reading the request body. Set the secret and register webhooks in Shopify Admin to enable the endpoint in any environment.
 
 ## The endpoint
 
@@ -53,16 +53,17 @@ All metaobject topics also invalidate the broad `cms:all` tag as a safety net fo
 
 When a request arrives, the handler runs in this order:
 
-1. Reads the raw body as text — required for stable HMAC verification
-2. If `SHOPIFY_WEBHOOK_SECRET` is set, computes the HMAC-SHA256 of the body and compares it to `x-shopify-hmac-sha256` using `crypto.timingSafeEqual`. Mismatch returns `401`.
-3. Reads `x-shopify-topic`. Missing topic returns `400`.
-4. Dispatches on the topic prefix (`products/`, `collections/`, or `metaobjects/`) and builds a tag list from the payload
-5. Calls `revalidateTag()` for each affected tag
-6. Returns `{ success, topic, tagsInvalidated }` for log inspection
+1. Returns `404` immediately if `SHOPIFY_WEBHOOK_SECRET` is unset
+2. Reads the raw body as text — required for stable HMAC verification
+3. Computes the HMAC-SHA256 of the body and compares it to `x-shopify-hmac-sha256` using `crypto.timingSafeEqual`. A missing, malformed, or mismatched signature returns `401`.
+4. Reads `x-shopify-topic`. Missing topic returns `400`.
+5. Dispatches on the topic prefix (`products/`, `collections/`, or `metaobjects/`) and builds a tag list from the payload
+6. Calls `revalidateTag()` for each affected tag
+7. Returns `{ success, topic, tagsInvalidated }` for log inspection
 
 Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the generic `cms:all` tag before parsing, so it still fires on a parse failure. Product and collection create/delete topics likewise seed their narrow index tag before parsing, ensuring sitemap membership is refreshed even if the resource identifiers cannot be read. Update topics need a parseable `handle` or product ID to scope invalidation; malformed update payloads log and invalidate nothing rather than busting the whole catalog. Real Shopify webhooks carry parseable payloads, so this distinction mainly matters for malformed test posts.
 
-> **Security note:** When `SHOPIFY_WEBHOOK_SECRET` is unset the handler skips signature verification. That's convenient in development but unsafe in production — always set the secret in deployed environments.
+> **Security note:** The secret is the enablement gate, not only a verification option. An unconfigured deployment exposes no active webhook processor; a configured deployment accepts only valid Shopify-signed requests.
 
 ## Setting up webhooks in Shopify
 
@@ -76,32 +77,21 @@ You can register only the topics you care about. Skipping `collections/*`, for e
 
 ## Environment variables
 
-| Variable                 | When to set                                                                                                                                                                |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SHOPIFY_WEBHOOK_SECRET` | Required in any environment where Shopify posts to `/api/webhooks/shopify`. Without it, signature verification is skipped — fine for local testing, unsafe for production. |
+| Variable                 | When to set                                                                                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SHOPIFY_WEBHOOK_SECRET` | Set in every environment where Shopify posts to `/api/webhooks/shopify`. Without it, the endpoint is disabled and returns `404` before reading the body. |
 
 See [Environment Variables](/docs/reference/env-vars) for the full reference.
 
 ## Verifying it works
 
-Send a request with no signature to confirm the route is mounted:
+With `SHOPIFY_WEBHOOK_SECRET` unset, confirm the endpoint is disabled without sending a body:
 
 ```bash
-curl -X POST http://localhost:3000/api/webhooks/shopify \
-  -H "x-shopify-topic: products/update" \
-  -d '{"handle":"speaker"}'
+curl -i -X POST http://localhost:3000/api/webhooks/shopify
 ```
 
-In development (no secret set) you should see a JSON response listing the invalidated tags and a server log line:
-
-```
-[Shopify Webhook] Received: products/update
-[Shopify Webhook] Invalidated tags: product-speaker, recommendations-speaker
-```
-
-(A real Shopify payload also carries `admin_graphql_api_id`, adding a `product-{numericId}` tag; the handcrafted `curl` body above only has a `handle`.)
-
-For a real Shopify-signed request, use the **Send test notification** button on each webhook in Shopify Admin and watch your function logs.
+The response should be `404`. After setting the secret, an unsigned request should return `401`. To verify successful processing with a valid signature, use the **Send test notification** button on each webhook in Shopify Admin and watch your function logs for the received topic and invalidated tags.
 
 ## Adding a new topic
 
