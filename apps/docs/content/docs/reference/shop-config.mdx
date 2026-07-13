@@ -29,9 +29,9 @@ export const shopConfig = {
     ],
   },
   pdp: {
-    bundles: { enabled: false },
-    complementaryProducts: { enabled: false },
-    relatedProducts: { enabled: false },
+    bundles: { enabled: true },
+    complementaryProducts: { enabled: true },
+    relatedProducts: { enabled: true },
   },
   site: {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
@@ -71,13 +71,13 @@ Both are `MenuItem[]` in Shopify menu shape and support up to three levels of ne
 
 ## PDP capabilities
 
-The PDP capability flags are disabled by default so a basic storefront does not query Shopify features it does not use:
+The PDP capability flags are enabled by default so storefronts render Shopify's merchandising features whenever the catalog provides data:
 
 - `bundles.enabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
 - `complementaryProducts.enabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
 - `relatedProducts.enabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
 
-These flags describe optional Shopify capabilities with a data-fetching cost. Display counts and component composition remain implementation details rather than configuration.
+Sections with no applicable Shopify data render nothing. Set an individual flag to `false` to skip its fields or recommendation request. Display counts and component composition remain implementation details rather than configuration.
 
 ## Site
 

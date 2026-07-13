@@ -48,17 +48,17 @@ Products must be assigned to at least one collection to appear on collection lis
 
 ## Recommendations
 
-Product recommendations on the PDP are powered by Shopify's recommendation API. Shopify generates recommendations automatically based on purchase history and product similarity. Set `pdp.relatedProducts.enabled` to `true` in `shop.config.ts` to request and render them.
+Product recommendations on the PDP are powered by Shopify's recommendation API. Shopify generates recommendations automatically based on purchase history and product similarity. The template requests and renders them by default; set `pdp.relatedProducts.enabled` to `false` in `shop.config.ts` to disable them.
 
 ## Complementary products
 
-Set `pdp.complementaryProducts.enabled` to `true` to show a merchant-curated **"Pairs Well With"** list near the buy section, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`.
+The template shows a merchant-curated **"Pairs Well With"** list near the buy section by default, powered by the Storefront API's `productRecommendations(intent: COMPLEMENTARY)`. Set `pdp.complementaryProducts.enabled` to `false` to disable it.
 
 Unlike the `RELATED` recommendations Shopify generates automatically, complementary products are **configured by hand** in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app — open a product's **Product recommendations** settings and add its complementary items. With none configured for a product, the section renders nothing.
 
 ## Bundles
 
-Set `pdp.bundles.enabled` to `true` to render Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships:
+The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) by default from the Storefront API's variant-level relationships. Set `pdp.bundles.enabled` to `false` to disable this support:
 
 - `components` — the items in a **fixed bundle** (each component variant and its quantity).
 - `groupedBy` — up to 10 bundles that contain the current product (the reverse relationship).

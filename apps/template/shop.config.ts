@@ -93,13 +93,13 @@ export const shopConfig = {
   },
   pdp: {
     bundles: {
-      enabled: false,
+      enabled: true,
     },
     complementaryProducts: {
-      enabled: false,
+      enabled: true,
     },
     relatedProducts: {
-      enabled: false,
+      enabled: true,
     },
   },
   site: {
