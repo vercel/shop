@@ -87,15 +87,7 @@ export const shopConfig = {
   },
   navigation: {
     footer: [],
-    nav: [
-      {
-        id: "default-nav-shop",
-        title: "Shop",
-        url: "/collections/all",
-        type: "HTTP",
-        items: [],
-      },
-    ],
+    nav: [],
   },
   pdp: {
     bundles: {
@@ -115,7 +107,7 @@ export const shopConfig = {
     },
   },
   site: {
-    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
+    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "▲",
     socialLinks: [],
     url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
   },

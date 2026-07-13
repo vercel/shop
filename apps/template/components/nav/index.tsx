@@ -2,14 +2,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
-import { isAuthEnabled } from "@/lib/auth";
 import { shopConfig } from "@/shop.config";
 
-import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
 import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
-import { SearchModal } from "./search-modal";
 
 export async function Nav({ locale }: { locale: string }) {
   const items = shopConfig.navigation.nav;
@@ -29,12 +26,6 @@ export async function Nav({ locale }: { locale: string }) {
         <QuickLinks items={items} />
 
         <div className="flex items-center gap-5 ml-auto">
-          <SearchModal />
-          {isAuthEnabled && (
-            <Suspense fallback={<NavAccountFallback />}>
-              <NavAccount />
-            </Suspense>
-          )}
           <Suspense fallback={<CartIconFallback />}>
             <CartIcon />
           </Suspense>
