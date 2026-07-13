@@ -11,7 +11,7 @@ import { variantToOptimisticInfo } from "@/lib/product";
 import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { ShopPayLogo } from "./shop-pay-logo";
+import { BuyWithShopLogo } from "./buy-with-shop-logo";
 
 // Keep bundle relationship arrays server-side; the client only needs their gating boolean.
 export interface BuyButtonVariant {
@@ -25,17 +25,19 @@ export interface BuyButtonVariant {
 }
 
 export function BuyButtons({
+  availableForSale = true,
+  buyWithShop = true,
+  featuredImage,
+  handle,
   selectedVariant,
   title,
-  handle,
-  featuredImage,
-  availableForSale = true,
 }: {
+  availableForSale?: boolean;
+  buyWithShop?: boolean;
+  featuredImage: Image | null;
+  handle: string;
   selectedVariant: BuyButtonVariant | undefined;
   title: string;
-  handle: string;
-  featuredImage: Image | null;
-  availableForSale?: boolean;
 }) {
   const selectedVariantId = selectedVariant?.id;
 
@@ -100,33 +102,35 @@ export function BuyButtons({
   };
 
   return (
-    <div className="grid grid-cols-2 gap-2.5">
-      <button
-        type="button"
-        className={cn(
-          "flex h-10.75 flex-1 cursor-pointer items-center justify-center rounded-lg bg-shop px-4 py-2.5 text-white transition-all hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
-          !availableForSale && "invisible",
-        )}
-        disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
-        onClick={handleBuyNow}
-      >
-        {isBuyingNow ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <>
-            <span className="sr-only">{t("buyWithShop")} Shop Pay</span>
-            <ShopPayLogo aria-hidden="true" className="h-auto w-22" />
-          </>
-        )}
-      </button>
+    <div className="grid gap-2.5">
       <Button
         type="button"
         disabled={isOutOfStock || requiresBundleConfiguration}
         onClick={handleAddToCart}
-        className="h-10.75 flex-1 justify-center"
+        className="h-12 w-full justify-center"
       >
         {getButtonText()}
       </Button>
+      {buyWithShop ? (
+        <button
+          type="button"
+          className={cn(
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg border bg-white px-4 transition-colors hover:border-foreground disabled:cursor-not-allowed disabled:opacity-50",
+            !availableForSale && "invisible",
+          )}
+          disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
+          onClick={handleBuyNow}
+        >
+          {isBuyingNow ? (
+            <Loader2 className="size-4 animate-spin text-shop" />
+          ) : (
+            <>
+              <span className="sr-only">{t("buyWithShop")}</span>
+              <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+            </>
+          )}
+        </button>
+      ) : null}
     </div>
   );
 }

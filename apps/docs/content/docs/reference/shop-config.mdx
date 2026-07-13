@@ -30,6 +30,7 @@ export const shopConfig = {
   },
   pdp: {
     bundles: { enabled: true },
+    buyWithShop: { enabled: true },
     complementaryProducts: { enabled: true },
     relatedProducts: { enabled: true },
   },
@@ -74,6 +75,7 @@ Both are `MenuItem[]` in Shopify menu shape and support up to three levels of ne
 The PDP capability flags are enabled by default so storefronts render Shopify's merchandising features whenever the catalog provides data:
 
 - `bundles.enabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
+- `buyWithShop.enabled` renders the full-width Buy with Shop accelerated checkout action below Add to Cart.
 - `complementaryProducts.enabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
 - `relatedProducts.enabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
 

@@ -38,6 +38,9 @@ export interface ShopConfig {
     bundles: {
       enabled: boolean;
     };
+    buyWithShop: {
+      enabled: boolean;
+    };
     complementaryProducts: {
       enabled: boolean;
     };
@@ -93,6 +96,9 @@ export const shopConfig = {
   },
   pdp: {
     bundles: {
+      enabled: true,
+    },
+    buyWithShop: {
       enabled: true,
     },
     complementaryProducts: {

@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
+import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
-import { ShopPayLogo } from "@/components/product-detail/shop-pay-logo";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
@@ -237,6 +237,7 @@ async function ProductInfoArea({
           handle={handle}
           featuredImage={featuredImage}
           availableForSale={availableForSale}
+          buyWithShop={shopConfig.pdp.buyWithShop.enabled}
         />
       ) : (
         <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
@@ -245,6 +246,7 @@ async function ProductInfoArea({
             handle={handle}
             featuredImage={featuredImage}
             availableForSale={availableForSale}
+            buyWithShop={shopConfig.pdp.buyWithShop.enabled}
             variantPromise={variantPromise}
           />
         </Suspense>
@@ -340,16 +342,18 @@ function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVaria
 }
 
 async function ResolvedBuyButtons({
-  title,
-  handle,
-  featuredImage,
   availableForSale,
+  buyWithShop,
+  featuredImage,
+  handle,
+  title,
   variantPromise,
 }: {
-  title: string;
-  handle: string;
-  featuredImage: ProductDetails["featuredImage"];
   availableForSale: boolean;
+  buyWithShop: boolean;
+  featuredImage: ProductDetails["featuredImage"];
+  handle: string;
+  title: string;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const selectedVariant = await variantPromise;
@@ -360,38 +364,43 @@ async function ResolvedBuyButtons({
       handle={handle}
       featuredImage={featuredImage}
       availableForSale={availableForSale}
+      buyWithShop={buyWithShop}
     />
   );
 }
 
 function BuyButtonsFallback({
-  t,
   allInStock,
+  t,
 }: {
-  t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
   allInStock: boolean;
+  t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
 }) {
   if (!t) {
     return (
-      <div className="grid grid-cols-2 gap-2.5">
-        <div className="h-10.75 rounded-lg bg-shop" />
-        <div className="h-10.75 rounded-lg bg-primary" />
+      <div className="grid gap-2.5">
+        <div className="h-12 rounded-lg bg-primary" />
+        {shopConfig.pdp.buyWithShop.enabled ? (
+          <div className="h-12 rounded-lg border bg-white" />
+        ) : null}
       </div>
     );
   }
   return (
-    <div className="grid grid-cols-2 gap-2.5">
-      <div
-        className={cn(
-          "flex h-10.75 items-center justify-center rounded-lg bg-shop px-4 py-2.5 text-white",
-          !allInStock && "invisible",
-        )}
-      >
-        <ShopPayLogo aria-hidden="true" className="h-auto w-22" />
-      </div>
-      <div className="flex h-10.75 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
+    <div className="grid gap-2.5">
+      <div className="flex h-12 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
         {allInStock ? t("addToCart") : t("outOfStock")}
       </div>
+      {shopConfig.pdp.buyWithShop.enabled ? (
+        <div
+          className={cn(
+            "flex h-12 items-center justify-center rounded-lg border bg-white px-4",
+            !allInStock && "invisible",
+          )}
+        >
+          <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+        </div>
+      ) : null}
     </div>
   );
 }
