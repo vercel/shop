@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 
 import { useCart } from "./context";
-import { CartMessages } from "./messages";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
+import { CartWarnings } from "./warnings";
 
 interface OverlayContentProps {
   locale: string;
@@ -48,7 +48,7 @@ function CheckoutButtonContent({
 
 export function OverlayContent({ locale }: OverlayContentProps) {
   const router = useRouter();
-  const { cart, cartWithPending, isUpdatingCart, lastError, setOverlayOpen } = useCart();
+  const { cart, cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
 
@@ -74,11 +74,6 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   if (!displayCart || displayCart.lines.length === 0) {
     return (
       <div className="flex h-full flex-col px-5">
-        {lastError ? (
-          <div className="pt-5">
-            <CartMessages />
-          </div>
-        ) : null}
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <h3 className="mb-6 text-2xl">{t("empty")}</h3>
           <Button
@@ -98,7 +93,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        <CartMessages />
+        <CartWarnings />
         <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
           {displayCart.lines.map((item) => (
             <OverlayItem key={item.id} item={item} locale={locale} />
