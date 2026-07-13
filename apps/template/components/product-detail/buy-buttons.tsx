@@ -111,7 +111,7 @@ export function BuyButtons({
         {quantityPicker ? (
           <div
             aria-label={tCart("itemQuantity")}
-            className="grid h-12 w-36 shrink-0 grid-cols-3 rounded-lg bg-background ring-1 ring-border ring-inset"
+            className="grid h-12 w-32 shrink-0 grid-cols-[3rem_2rem_3rem] rounded-lg bg-background ring-1 ring-border ring-inset"
             role="group"
           >
             <button
@@ -125,7 +125,7 @@ export function BuyButtons({
             </button>
             <span
               aria-live="polite"
-              className="flex size-12 items-center justify-center text-sm font-medium tabular-nums"
+              className="flex h-12 w-8 items-center justify-center text-sm font-medium tabular-nums"
               role="status"
             >
               {quantity}

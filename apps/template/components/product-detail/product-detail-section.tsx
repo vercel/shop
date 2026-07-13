@@ -109,7 +109,8 @@ function ProductMediaArea({
       title={product.title}
       className="lg:col-span-6"
       desktopSlot={
-        <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
+        // Color image is the LCP slot; a pulsing skeleton background flashes harder than empty space.
+        <Suspense fallback={<div className="aspect-square w-full" />}>
           <ResolvedColorImageGrid
             product={product}
             selectedOptionsPromise={selectedOptionsPromise}
@@ -119,9 +120,7 @@ function ProductMediaArea({
       mobileSlot={
         <Suspense
           fallback={
-            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square">
-              <Skeleton className="size-full rounded-none" />
-            </div>
+            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square" />
           }
         >
           <ResolvedColorImageCarousel
@@ -379,12 +378,12 @@ function QuantityPickerFallback() {
   return (
     <div
       aria-hidden="true"
-      className="grid h-12 w-36 shrink-0 grid-cols-3 rounded-lg bg-background ring-1 ring-border ring-inset"
+      className="grid h-12 w-32 shrink-0 grid-cols-[3rem_2rem_3rem] rounded-lg bg-background ring-1 ring-border ring-inset"
     >
       <span className="flex size-12 items-center justify-center opacity-50">
         <MinusIcon className="size-4 shrink-0" />
       </span>
-      <span className="flex size-12 items-center justify-center text-sm font-medium tabular-nums">
+      <span className="flex h-12 w-8 items-center justify-center text-sm font-medium tabular-nums">
         1
       </span>
       <span className="flex size-12 items-center justify-center">
