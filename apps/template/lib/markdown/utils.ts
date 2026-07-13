@@ -6,7 +6,6 @@ export function formatPrice(money: Money, locale: string): string {
   return formatMoney(money, { currencyDisplay: "narrowSymbol", locale }).localizedString;
 }
 
-/** Handles: | (table pipes), * (bold/italic), _ (italic), ` (code), # (headers). */
 export function escapeMarkdown(text: string): string {
   return text
     .replace(/\|/g, "\\|")
@@ -16,7 +15,6 @@ export function escapeMarkdown(text: string): string {
     .replace(/^#/gm, "\\#");
 }
 
-/** Empty rows are dropped; mismatched cell counts are truncated or padded with empty cells. */
 export function createTable(headers: string[], rows: string[][]): string {
   if (headers.length === 0 || rows.length === 0) return "";
 

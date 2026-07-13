@@ -2,12 +2,12 @@ import { UserRoundCheckIcon, UserRoundIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import { getCustomerSession } from "@/lib/auth/server";
+import { isCustomerLoggedIn } from "@/lib/auth/server";
 
 export async function NavAccount() {
-  const [session, t] = await Promise.all([getCustomerSession(), getTranslations("nav")]);
+  const [loggedIn, t] = await Promise.all([isCustomerLoggedIn(), getTranslations("nav")]);
 
-  if (!session) {
+  if (!loggedIn) {
     return (
       <Link
         href="/account/login"

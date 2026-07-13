@@ -3,7 +3,6 @@ import type * as React from "react";
 interface CollectionToolbarProps {
   filterSheet: React.ReactNode;
   sortSelect: React.ReactNode;
-  // Omit on pages without a count so the slot doesn't reserve space.
   resultCount?: React.ReactNode;
 }
 

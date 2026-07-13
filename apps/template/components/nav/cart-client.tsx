@@ -2,20 +2,15 @@
 
 import { HandbagIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCart, useSeedCart } from "@/components/cart/context";
 import type { Cart } from "@/lib/types";
 
 export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
-  const { cartWithPending, openOverlay, setCart, cart } = useCart();
+  const { cartWithPending, openOverlay } = useCart();
   const t = useTranslations("nav");
 
-  useEffect(() => {
-    if (cart === null && initialCart !== null) {
-      setCart(initialCart);
-    }
-  }, [cart, initialCart, setCart]);
+  useSeedCart(initialCart);
 
   const displayCart = cartWithPending ?? initialCart;
   const quantity = displayCart?.totalQuantity ?? 0;

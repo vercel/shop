@@ -61,39 +61,35 @@ Because selection is option-driven, the gallery no longer filters out _every_ im
 
 ## Buy section
 
-The buy section includes stock status and two action buttons:
+The buy section uses two 48 px rows with a 10 px gap:
 
-- **Buy with Shop** - creates a Shopify checkout and redirects to it, styled per [Shopify's brand guidelines](https://help.shopify.com/en/manual/payments/shop-pay/assets)
-- **Add to Cart** - adds the item optimistically to the cart drawer
+- **Quantity and Add to Cart** - a 1–99 quantity picker sits beside the cart action, which fills the remaining width. Minus disables at 1, plus disables at 99, and the selected quantity is added optimistically to the cart.
+- **Buy with Shop** - creates a Shopify checkout for the selected quantity and redirects to it, using Shopify's official [Buy with Shop lock-up](https://help.shopify.com/en/manual/payments/shop-pay/assets) in its approved all-white treatment on Shop purple.
 
-A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity.
+A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity. `pdp.quantityPicker.enabled` and `pdp.buyWithShop.enabled` both default to `true`; set either to `false` in `shop.config.ts` to hide that control.
 
 ### Bundles
 
-`bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
+With `pdp.bundles.enabled` on by default, `bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
 
 - **Bundle Includes** — a fixed bundle's component products, from `components` (`BundleComponents`).
 - **Available in Bundles** — bundles containing the current product, collapsed to one link per bundle, from `groupedBy` (`BundleParents`).
 
-These are product-level facts (which products a bundle contains / which bundles a product belongs to), so they render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query — no layout shift on load.
+Enabling bundles adds these relationship fields to the existing product and selected-variant GraphQL operations; it does not add another HTTP request. The relationships render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query, avoiding layout shift.
 
 A customized bundle parent (`requiresComponents` with no fixed `components`) disables the buy buttons with a "Choose bundle items" label, since the generic storefront can't configure it. The bundle relationship arrays stay server-side; `BuyButtons` receives only a `requiresBundleConfiguration` boolean.
 
 ### Complementary products
 
-`complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
+With `pdp.complementaryProducts.enabled` on by default, `complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
 
-Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. Both recommendation surfaces — this set and the [related grid](#related-products) below the fold — come from a single cached (`use cache: remote`) `getProductRecommendationSets()` operation that fetches both intents in one aliased `productRecommendations` request and is tagged with both `complementary-{handle}` and `recommendations-{handle}`. Because both surfaces call it with the same arguments, they dedupe to **one** Shopify request; this section reads the `complementary` slice, baked into the static PPR/ISR document — there's no skeleton fallback and no layout shift on cached hits (a `Suspense` boundary would instead make it a streamed hole). It shows up to four products as thumbnail + title + price rows and renders nothing when none are configured.
-
-### Specifications
-
-`product-specs.tsx` renders configured product [metafields](/docs/shopify/pdp#metafields) as a label/value "Specifications" list below the description. The set is **opt-in**: `productMetafieldIdentifiers` in `lib/config.ts` is empty by default, so the product query is unchanged and the section renders nothing until a storefront lists the namespaces and keys it populates. Like bundle relationships, it renders eagerly from the cached product in the static shell. Values are formatted by metafield type (measurements, ratings, lists, booleans); reference (product/metaobject) types are skipped pending GID resolution.
+Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. The cached (`use cache: remote`) operation fetches only the `COMPLEMENTARY` intent and uses the existing `recommendations-{handle}` invalidation tag. The result is baked into the static PPR/ISR document, so there is no skeleton fallback or layout shift on cached hits. The component shows up to four products as thumbnail, title, and price rows and renders nothing when none are configured.
 
 ## Related Products
 
-Below the product details, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set. It reads the `related` slice of the same cached `getProductRecommendationSets()` operation the [complementary set](#complementary-products) consumes — so the two surfaces share one Shopify request — and renders inside a `Suspense` boundary with a skeleton grid fallback.
+With `pdp.relatedProducts.enabled` on by default, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set below the product details and on non-empty cart pages. It calls the cached (`use cache: remote`) `getRelatedProducts()` operation, which fetches only the `RELATED` intent under the `recommendations-{handle}` tag, and renders inside a `Suspense` boundary with a skeleton grid fallback.
 
-Related products display as a fixed grid of up to four product cards — two columns on mobile, four on `lg:` and up — matching the homepage's featured-products grid. The Shopify recommendation API typically returns more, but only the first four are rendered so the section reads as a small "you might also like" footer rather than a second browse surface.
+Related products display as a fixed grid of up to four product cards — two columns on mobile, four on `lg:` and up — matching the homepage's featured-products grid. The skeleton uses the same count. Shopify typically returns more recommendations, but the section intentionally remains a small footer rather than a second browse surface.
 
 ## Layout
 
@@ -109,18 +105,5 @@ The page emits two JSON-LD schemas:
 
 - **Product schema** - name, description, images, brand, price range, availability, and variant count
 - **Breadcrumb schema** - Home → Product Title (JSON-LD only, no visible breadcrumb UI)
-
-## Key files
-
-| File                                                   | Purpose                                                                                                              |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| `app/products/[handle]/page.tsx`                       | Route entry: metadata, awaits the product at the top (baked into the shell), streams the per-selection variant query |
-| `components/product-detail/product-detail-section.tsx` | Orchestrates media, options, pricing, and buy buttons with per-section Suspense; emits JSON-LD                       |
-| `components/product-detail/product-media.tsx`          | Responsive image gallery (mobile carousel, desktop grid + lightbox)                                                  |
-| `components/product-detail/buy-buttons.tsx`            | Buy with Shop + add-to-cart client component                                                                         |
-| `components/product-detail/bundle-components.tsx`      | Renders a bundle's contents and the bundles a product is part of                                                     |
-| `components/product-detail/product-specs.tsx`          | Renders configured product metafields as a "Specifications" label/value list                                         |
-| `lib/product.ts`                                       | `parseSelectedOptions`, `buildOptionUrl`, default selection, color-image helpers                                     |
-| `lib/shopify/encoded-variants.ts`                      | Decodes `encodedVariantAvailability`/`Existence` into per-option availability                                        |
 
 The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.

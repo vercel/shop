@@ -7,11 +7,6 @@ function isAtScrollBoundary(el: HTMLElement, deltaY: number) {
   return false;
 }
 
-/**
- * Prevents scroll events (wheel + touch) from propagating through a panel
- * to the page behind it, while still allowing a designated scrollable child
- * to scroll normally within its bounds.
- */
 export function useScrollContain(
   ref: RefObject<HTMLElement | null>,
   enabled: boolean,

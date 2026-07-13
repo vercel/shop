@@ -29,8 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
   const searchParams = searchParamsToRecord(url.searchParams);
 
   try {
-    // /collections/all is a virtual route with no Shopify equivalent; mirror the HTML
-    // page's data path so the same URL is legible to markdown-negotiating agents.
+    // /collections/all is local-only, so markdown must mirror the HTML data path.
     if (handle === ALL_PRODUCTS_HANDLE) {
       const searchStatePromise = getCollectionSearchState(Promise.resolve(searchParams));
       const [collection, data] = await Promise.all([

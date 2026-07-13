@@ -89,20 +89,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  if (product.metafields && product.metafields.length > 0) {
-    sections.push("## Specifications");
-    sections.push("");
-
-    const headers = ["Spec", "Value"];
-    const rows = product.metafields.map((field) => [
-      escapeMarkdown(field.label),
-      escapeMarkdown(field.value),
-    ]);
-
-    sections.push(createTable(headers, rows));
-    sections.push("");
-  }
-
   if (product.images.length > 0) {
     sections.push("## Images");
     sections.push("");

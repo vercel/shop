@@ -21,6 +21,7 @@ import {
   getProductVariant,
 } from "@/lib/shopify/operations/products";
 import type { ProductVariant } from "@/lib/types";
+import { shopConfig } from "@/shop.config";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -93,24 +94,30 @@ export default async function ProductPage({
   const product = await getProduct({ handle, locale });
   if (!product) notFound();
 
-  // Keep searchParams unawaited so only the variant-dependent UI streams. The
-  // picker highlight and color image depend only on searchParams (fast), so they
-  // ride a separate promise from the per-selection variant query (the network
-  // round-trip that price + add-to-cart need) — otherwise the picker would wait
-  // on the network and the selected option would visibly snap in after load.
-  const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then((sp) => ({
-    ...defaultSelectedOptions(product),
-    ...parseSelectedOptions(product.options, sp ?? {}),
-  }));
-  const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(async (sp) => {
-    const fromUrl = parseSelectedOptions(product.options, sp ?? {});
-    if (Object.keys(fromUrl).length === 0) return product.defaultVariant;
-    return getProductVariant({
-      handle,
-      locale,
-      selectedOptions: toSelectedOptionList({ ...defaultSelectedOptions(product), ...fromUrl }),
-    });
-  });
+  // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
+  const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then(
+    (resolvedSearchParams) => ({
+      ...defaultSelectedOptions(product),
+      ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
+    }),
+  );
+  const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
+    async (resolvedSearchParams) => {
+      if (
+        Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
+      ) {
+        return product.defaultVariant;
+      }
+      return getProductVariant({
+        handle,
+        locale,
+        selectedOptions: toSelectedOptionList({
+          ...defaultSelectedOptions(product),
+          ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
+        }),
+      });
+    },
+  );
 
   return (
     <Page className="pt-0">
@@ -123,7 +130,9 @@ export default async function ProductPage({
             locale={locale}
           />
           <ProductReviewsSection />
-          <RelatedProductsSection handle={handle} locale={locale} />
+          {shopConfig.pdp.relatedProducts.enabled ? (
+            <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+          ) : null}
         </Sections>
       </Container>
     </Page>

@@ -14,9 +14,6 @@ export function normalizeSearchParams(
   );
 }
 
-// These types are the contract between data sources and components. Each
-// integration (Shopify, Algolia, etc.) transforms its API responses into these.
-
 export interface Money {
   amount: string;
   currencyCode: string;
@@ -50,9 +47,7 @@ export interface ProductCard {
   featuredImage: Image | null;
   handle: string;
   id: string;
-  /** Highest variant price; equals price for single-price products, else the top of the range. */
   maxPrice: Money;
-  /** Lowest variant price; the card shows a "min – max" range when maxPrice differs. */
   price: Money;
   /** First non-featured image, revealed on card hover; absent when the product has only one image. */
   secondaryImage?: Image | null;
@@ -61,7 +56,6 @@ export interface ProductCard {
 }
 
 export interface ProductDetails extends ProductCard {
-  /** True when every existing variant is in stock (existence trie == availability trie). */
   allVariantsInStock: boolean;
   category?: Category | null;
   categoryId?: string;
@@ -71,19 +65,14 @@ export interface ProductDetails extends ProductCard {
     minVariantPrice: Money;
   };
   currencyCode: string;
-  /** Selected-or-first-available variant; powers the eager/no-params render. */
   defaultVariant?: ProductVariant;
   description: string;
   descriptionHtml: string;
-  /** Trie of option-value combinations with an available variant (Storefront 2024-10+). */
   encodedVariantAvailability?: string;
-  /** Trie of option-value combinations that exist (Storefront 2024-10+). */
   encodedVariantExistence?: string;
-  /** True when min/max price (and compare-at) bounds match, so price renders without a variant. */
   hasUniformPricing: boolean;
   images: Image[];
   manufacturerName: string;
-  metafields?: Metafield[];
   options: ProductOption[];
   priceRange: {
     maxVariantPrice: Money;
@@ -96,7 +85,6 @@ export interface ProductDetails extends ProductCard {
   updatedAt: string;
   /** Only populated by getProductWithVariants (agent + markdown); the PDP omits it. */
   variants?: ProductVariant[];
-  /** Exact variant count from Shopify; authoritative single-variant signal (=== 1). */
   variantsCount: number;
   videos: Video[];
 }
@@ -110,27 +98,22 @@ export interface ProductRating {
 
 export interface ProductVariant {
   availableForSale: boolean;
-  /** Bundle variants this variant is a component of (Shopify `groupedBy`); empty for non-components. */
   bundleParents: ProductVariantReference[];
   compareAtPrice?: Money;
-  /** Fixed-bundle contents (Shopify `components`); empty unless this is a bundle variant. */
   components: ProductVariantComponent[];
   id: string;
   image: Image | null;
   price: Money;
-  /** True when the variant cannot be purchased without components (bundle parent). */
   requiresComponents: boolean;
   selectedOptions: SelectedOption[];
   title: string;
 }
 
-/** A bundle component: a referenced variant and how many of it the bundle includes. */
 export interface ProductVariantComponent {
   quantity: number;
   variant: ProductVariantReference;
 }
 
-/** Lightweight variant pointer used by bundle relationships (no price/availability). */
 export interface ProductVariantReference {
   id: string;
   image: Image | null;
@@ -156,7 +139,6 @@ export interface OptionValueSwatch {
 
 export interface OptionValue {
   id: string;
-  /** Representative variant image for this value (first selectable variant). */
   image?: string;
   name: string;
   swatch?: OptionValueSwatch;
@@ -164,12 +146,6 @@ export interface OptionValue {
 
 export interface SelectedOption {
   name: string;
-  value: string;
-}
-
-export interface Metafield {
-  key: string;
-  label: string;
   value: string;
 }
 
@@ -196,11 +172,8 @@ export interface Cart {
 }
 
 export interface CartLine {
-  /** Shopify edit instruction — false for a fixed bundle's component lines. */
   canRemove: boolean;
-  /** Shopify edit instruction — false for a fixed bundle's component lines. */
   canUpdateQuantity: boolean;
-  /** Nested bundle component lines; empty for ordinary lines. */
   components: CartLine[];
   cost: {
     totalAmount: Money;
@@ -260,8 +233,36 @@ export interface Collection {
 }
 
 export interface CollectionWithThumbnail extends Collection {
-  /** Collection's own image, falling back to the first product's featured image. */
   thumbnail: Image | null;
+}
+
+export interface Blog {
+  articles: BlogArticle[];
+  handle: string;
+  seo: SEO;
+  title: string;
+}
+
+export interface BlogArticle {
+  author?: string;
+  blogHandle: string;
+  blogTitle: string;
+  body?: string;
+  excerpt: string;
+  handle: string;
+  image: Image | null;
+  publishedAt: string;
+  seo: SEO;
+  tags: string[];
+  title: string;
+}
+
+export interface ContentPage {
+  body: string;
+  handle: string;
+  seo: SEO;
+  title: string;
+  updatedAt: string;
 }
 
 export type FilterPresentation = "image" | "swatch" | "text";
@@ -286,6 +287,7 @@ export interface Filter {
 }
 
 export interface PriceRange {
+  currencyCode?: string;
   max: number;
   min: number;
 }
@@ -330,6 +332,12 @@ export interface SearchSuggestion {
   text: string;
 }
 
+export interface ShopPolicy {
+  body: string;
+  handle: string;
+  title: string;
+}
+
 export interface PredictiveSearchCollection {
   handle: string;
   title: string;
@@ -362,10 +370,6 @@ export interface BannerSection {
   id: string;
   subheadline?: string | null;
 }
-
-// Customer account — populated from the Shopify Customer Account API (a separate
-// schema from the Storefront API). Status fields hold raw Shopify enum values
-// (e.g. "FULFILLED", "PAID"); humanize them at the display layer.
 
 export interface CustomerProfile {
   email: string;

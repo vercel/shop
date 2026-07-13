@@ -1,9 +1,6 @@
 import type { ProductOption } from "@/lib/types";
 
-// Decoder for Shopify's encodedVariantExistence / encodedVariantAvailability trie
-// strings (Storefront API 2024-10+). Control chars: ":" descends an option level,
-// "," ends a repeated prefix (consecutive commas pop multiple levels), " " marks a
-// gap between non-contiguous sibling values, "-" a contiguous range of values.
+// Shopify trie controls: `:` descends, `,` pops, space separates, and `-` spans a range.
 export function decodeEncodedVariant(encoded: string): number[][] {
   if (!encoded) return [];
   if (!encoded.startsWith("v1_")) throw new Error("Unsupported option value encoding");
@@ -48,7 +45,6 @@ function v1Decoder(encoded: string): number[][] {
         result.push(combination.slice(0, depth + 1));
       }
     } else {
-      // ","
       if (rangeStart !== null) {
         pushRange(value ?? rangeStart);
       } else if (prevControl !== ",") {
@@ -78,11 +74,7 @@ function v1Decoder(encoded: string): number[][] {
   return result;
 }
 
-// Maps decoded availability combinations to the set of in-stock value names per
-// option. Falls back to "all available" on missing data, decode failure, or the
-// empty result Shopify returns for synthetic single-option products (a known
-// upstream quirk) — the authoritative per-variant availability still gates the
-// add-to-cart button via the suspended variant query.
+// Shopify may return an empty trie for synthetic options; variant lookup still gates purchase.
 export function getAvailableOptionValues(
   options: ProductOption[],
   encodedAvailability: string | undefined,

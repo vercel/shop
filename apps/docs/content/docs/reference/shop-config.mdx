@@ -1,0 +1,96 @@
+---
+title: Shop Configuration
+description: Configure storefront identity, navigation, analytics, and cross-cutting feature availability.
+type: reference
+---
+
+`shop.config.ts` contains secret-free values that describe the storefront across multiple parts of the application: site identity, merchant-authored chrome, analytics integrations, and installation-level feature availability.
+
+Environment variables still own credentials and deployment-specific overrides. Component composition, Shopify query behavior, result counts, and agent runtime policy stay with the code that implements them rather than becoming a configuration API.
+
+## Default configuration
+
+```ts
+export const shopConfig = {
+  agent: {
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false),
+  },
+  analytics: {
+    speedInsights: { enabled: false },
+    vercel: { enabled: false },
+  },
+  auth: {
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+  },
+  navigation: {
+    footer: [],
+    nav: [
+      { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
+    ],
+  },
+  pdp: {
+    bundles: { enabled: true },
+    buyWithShop: { enabled: true },
+    complementaryProducts: { enabled: true },
+    quantityPicker: { enabled: true },
+    relatedProducts: { enabled: true },
+  },
+  site: {
+    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
+    socialLinks: [],
+    url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
+  },
+} satisfies ShopConfig;
+```
+
+Consumers import `shopConfig` directly from `@/shop.config`. The file resolves its public environment-backed values inline; there is no separate configuration resolution module.
+
+## Agent
+
+`agent.enabled` controls whether the shopping assistant is available. It reads `NEXT_PUBLIC_ENABLE_AGENT` and defaults to `false` when unset. When disabled, the assistant button is hidden and the chat endpoint returns `404`.
+
+Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override the default for a deployment. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
+
+## Analytics
+
+- `vercel.enabled` controls Vercel Web Analytics.
+- `speedInsights.enabled` controls Vercel Speed Insights.
+
+Each integration is disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+
+## Authentication
+
+`auth.enabled` controls whether customer authentication is active. It reads `NEXT_PUBLIC_ENABLE_AUTH` and defaults to `false` when unset.
+
+Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
+
+## Navigation
+
+- `nav` contains the fallback primary navigation consumed by the desktop quick links and mobile sheet. It defaults to a Shop link.
+- `footer` contains fallback footer menu columns. It defaults to an empty array, so no columns render.
+
+Both are `MenuItem[]` in Shopify menu shape and support up to three levels of nesting. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill replaces these static defaults with menus managed in Shopify.
+
+## PDP capabilities
+
+The PDP capability flags are enabled by default so storefronts render Shopify's merchandising features whenever the catalog provides data:
+
+- `bundles.enabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
+- `buyWithShop.enabled` renders the full-width Buy with Shop accelerated checkout action below Add to Cart.
+- `complementaryProducts.enabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
+- `quantityPicker.enabled` renders a 1–99 quantity control beside Add to Cart and applies the selected quantity to both purchase actions.
+- `relatedProducts.enabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
+
+Sections with no applicable Shopify data render nothing. Set an individual flag to `false` to skip its fields or recommendation request. Display counts and component composition remain implementation details rather than configuration.
+
+## Site
+
+`site` carries storefront identity and merchant-authored chrome shared by metadata, structured data, navigation, and the footer.
+
+- `name` is the storefront display name. `NEXT_PUBLIC_SITE_NAME` overrides the `"Vercel Shop"` default per deployment.
+- `socialLinks` lists footer social icons. Each entry has a `platform` (one of `facebook`, `github`, `instagram`, `linkedin`, `pinterest`, `tiktok`, `x`, `youtube`) and a `url`. The default empty array hides the social links section.
+- `url` is the canonical base URL, resolved from `NEXT_PUBLIC_BASE_URL` or the Vercel production URL, used for sitemaps, schema, and absolute links.
+
+## What does not belong here
+
+Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `shop.config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.

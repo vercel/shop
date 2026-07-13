@@ -1,6 +1,5 @@
 "use server";
 
-import { getCartIdFromCookie, setCartIdCookie } from "@/lib/cart/server";
 import { isEnabledLocale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import {
@@ -123,7 +122,6 @@ export async function addToCartAction(
   }
 }
 
-/** Aligns cart country/currency with the locale; call on locale change or initial page load. */
 export async function syncCartLocaleAction(locale: string): Promise<CartActionResult> {
   if (!isEnabledLocale(locale)) {
     return {
@@ -135,7 +133,6 @@ export async function syncCartLocaleAction(locale: string): Promise<CartActionRe
   try {
     const result = await updateCartBuyerIdentity(locale);
 
-    // No cart exists yet — nothing to sync, treat as success.
     if (!result) {
       return { success: true };
     }
@@ -186,10 +183,7 @@ export async function applyDiscountCodeAction(code: string): Promise<CartActionR
   }
 
   try {
-    // `cartDiscountCodesUpdate` replaces the entire code set, so we must read
-    // the current codes authoritatively before writing. A read failure has to
-    // surface as a failure here — falling back to `[]` would silently wipe
-    // every previously-applied code.
+    // Shopify replaces the entire discount-code set; never fall back to [] after a read failure.
     const current = await getCart();
     if (!current) {
       return { success: false, error: "Cart not found" };
@@ -205,8 +199,7 @@ export async function applyDiscountCodeAction(code: string): Promise<CartActionR
       return { success: false, error: "Cart not found" };
     }
 
-    // Shopify accepts unknown codes and marks them applicable:false. Reject those
-    // (undo the apply, surface the warning as a form error — no chip, no banner).
+    // Shopify accepts unknown codes as applicable:false, so undo and reject them.
     const applied = result.cart.discountCodes.find((d) => d.code.toUpperCase() === normalized);
     if (applied && !applied.applicable) {
       const reverted = await updateCartDiscountCodes(existing);
@@ -232,8 +225,7 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
   }
 
   try {
-    // Same constraint as apply: the mutation replaces, so a read failure here
-    // would silently wipe every other applied code.
+    // The mutation replaces the whole set; a failed read must not wipe other codes.
     const current = await getCart();
     if (!current) {
       return { success: false, error: "Cart not found" };
@@ -258,14 +250,6 @@ export async function removeDiscountCodeAction(code: string): Promise<CartAction
   }
 }
 
-/** Writes an agent-created cart id to the httpOnly cookie (eve can't set cookies); no-op if one already exists. */
-export async function persistAgentCartAction(cartId: string): Promise<void> {
-  if (!cartId) return;
-  const existing = await getCartIdFromCookie();
-  if (existing) return;
-  await setCartIdCookie(cartId);
-}
-
 /** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */
 export async function buyNowAction(
   merchandiseId: string,
@@ -275,12 +259,15 @@ export async function buyNowAction(
     return { checkoutUrl: null, error: "Invalid product ID" };
   }
 
+  if (quantity < 1 || quantity > 99 || !Number.isInteger(quantity)) {
+    return { checkoutUrl: null, error: "Quantity must be between 1 and 99" };
+  }
+
   const domain = process.env.SHOPIFY_STORE_DOMAIN;
   if (!domain) {
     return { checkoutUrl: null, error: "Store domain not configured" };
   }
 
-  // Extract numeric ID from GID (e.g. "gid://shopify/ProductVariant/123" → "123")
   let numericId: string | null = merchandiseId;
   if (merchandiseId.startsWith("gid://") || !merchandiseId.match(/^\d+$/)) {
     let decoded = merchandiseId;

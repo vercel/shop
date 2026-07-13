@@ -14,7 +14,7 @@ export const IMAGE_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Note: Does not include IMAGE_FRAGMENT - expects parent to include it
+// Parent documents must include IMAGE_FRAGMENT.
 export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   ${MONEY_FRAGMENT}
   fragment ProductVariantFields on ProductVariant {
@@ -37,8 +37,6 @@ export const PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Lightweight variant reference for bundle relationships. Relies on the parent
-// to include IMAGE_FRAGMENT (matches PRODUCT_VARIANT_FRAGMENT).
 export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
   fragment BundleComponentVariantFields on ProductVariant {
     id
@@ -57,14 +55,10 @@ export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// The selected/purchasable variant: base fields plus Shopify bundle relationships.
-// Used only where one variant is resolved (the shell default + the suspended query),
-// never for the full matrix or cards. Relies on the parent to include IMAGE_FRAGMENT.
-export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
-  ${PRODUCT_VARIANT_FRAGMENT}
+// Parent documents must include IMAGE_FRAGMENT.
+export const BUNDLE_RELATIONSHIPS_FRAGMENT = `#graphql
   ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
-  fragment PurchasableProductVariantFields on ProductVariant {
-    ...ProductVariantFields
+  fragment BundleRelationshipFields on ProductVariant {
     requiresComponents
     groupedBy(first: 10) {
       nodes {
@@ -83,6 +77,16 @@ export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
+// Parent documents must include IMAGE_FRAGMENT.
+export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
+  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
+  fragment PurchasableProductVariantFields on ProductVariant {
+    ...BundleRelationshipFields
+    ...ProductVariantFields
+  }
+` as const;
+
 export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
   fragment TaxonomyCategoryFields on TaxonomyCategory {
     id
@@ -94,18 +98,7 @@ export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
   }
 ` as const;
 
-export const METAFIELD_FRAGMENT = `#graphql
-  fragment MetafieldFields on Metafield {
-    key
-    namespace
-    value
-    type
-  }
-` as const;
-
-// A bundle's component lines carry Shopify edit instructions (e.g. canRemove:false
-// so a shopper can't pull one product out of a fixed bundle); the parent bundle line
-// is a ComponentizableCartLine whose lineComponents are ordinary CartLines.
+// Fixed bundle components carry Shopify edit restrictions on nested CartLines.
 export const CART_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   ${MONEY_FRAGMENT}
@@ -292,7 +285,7 @@ export const COLLECTION_FIELDS_FRAGMENT = `#graphql
 
 export const PRODUCT_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
-  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+  ${PRODUCT_VARIANT_FRAGMENT}
   ${TAXONOMY_CATEGORY_FRAGMENT}
   fragment ProductFields on Product {
     id
@@ -352,7 +345,7 @@ export const PRODUCT_FRAGMENT = `#graphql
       count
     }
     selectedOrFirstAvailableVariant {
-      ...PurchasableProductVariantFields
+      ...ProductVariantFields
     }
     options {
       id
@@ -393,9 +386,6 @@ export const PRODUCT_FRAGMENT = `#graphql
   }
 ` as const;
 
-// Extends the slim shell with the full variant matrix. Used by the AI agent and
-// markdown routes, which enumerate variants; the PDP uses the slim ProductFields
-// plus a per-selection variant query instead.
 export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
   ${PRODUCT_FRAGMENT}
   fragment ProductWithVariantsFields on Product {

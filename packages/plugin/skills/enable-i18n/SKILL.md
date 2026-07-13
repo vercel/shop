@@ -17,7 +17,7 @@ Wire next-intl into the template so the storefront serves locale-prefixed URLs (
 
 ## Source of truth: `lib/i18n/index.ts`
 
-The locale list lives in `lib/i18n/index.ts` as `locales` and `enabledLocales`. **Always read those at the start of the skill** — don't hardcode a list. Adding new locales means editing that file plus the `localeCurrency` map; everything downstream (`routing`, sitemap, alternates, switcher) reads from it.
+The locale list lives in `lib/i18n/index.ts` as `locales` and `enabledLocales`. **Always read those at the start of the skill** — don't hardcode a list. Adding new locales means editing that file plus the message loaders/catalogs; everything downstream (`routing`, sitemap, alternates, switcher) reads from it. Do not add a locale-to-currency map; commerce currency comes from Shopify responses when Markets is enabled.
 
 ```ts
 // lib/i18n/index.ts
@@ -165,7 +165,7 @@ Move every route file from `app/` into `app/[locale]/`:
 
 - `app/layout.tsx` → `app/[locale]/layout.tsx` (becomes the root layout for the locale segment). **Delete the original `app/layout.tsx` after the move** — see compatibility A above; both files cannot coexist.
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
-- `app/about/`, `app/account/`, `app/cart/`, `app/collections/`, `app/products/`, `app/search/` → `app/[locale]/...`
+- `app/account/`, `app/cart/`, `app/collections/`, `app/pages/`, `app/policies/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
 **Stay at `app/`:** `api/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`.
 

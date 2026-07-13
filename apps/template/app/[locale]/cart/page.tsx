@@ -9,7 +9,7 @@ import { Header } from "@/components/cart-page/header";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
 import { CartContextSync } from "@/components/cart/context-sync";
-import { CartWarnings } from "@/components/cart/warnings";
+import { CartMessages } from "@/components/cart/messages";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -18,6 +18,7 @@ import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
+import { shopConfig } from "@/shop.config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");
@@ -55,7 +56,7 @@ async function CartContent({ locale }: { locale: Locale }) {
             <Container>
               <Sections>
                 <Header />
-                <CartWarnings />
+                <CartMessages />
                 <div className="grid gap-5 lg:grid-cols-12">
                   <div className="lg:col-span-8 xl:col-span-9">
                     <CartItemsList locale={locale} />
@@ -66,9 +67,11 @@ async function CartContent({ locale }: { locale: Locale }) {
                     </div>
                   </aside>
                 </div>
-                {cart.lines[0]?.merchandise.product.handle ? (
+                {shopConfig.pdp.relatedProducts.enabled &&
+                cart.lines[0]?.merchandise.product.handle ? (
                   <RelatedProductsSection
                     handle={cart.lines[0].merchandise.product.handle}
+                    limit={4}
                     locale={locale}
                   />
                 ) : null}

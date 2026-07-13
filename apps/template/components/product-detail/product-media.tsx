@@ -82,7 +82,6 @@ function MediaVideo({
   );
 }
 
-/** Snap-scroll carousel for mobile viewports. */
 function Carousel({
   mediaItems,
   title,
@@ -102,7 +101,6 @@ function Carousel({
   const prevMediaRef = useRef<string>("");
   const t = useTranslations("product");
 
-  // Reset carousel to first item when the filtered media change
   const joinedKey = mediaItems.map(mediaKey).join(",");
   if (prevMediaRef.current && prevMediaRef.current !== joinedKey) {
     scrollContainerRef.current?.scrollTo({ left: 0 });
@@ -248,7 +246,6 @@ function GridItem({
   );
 }
 
-/** 2-column grid with lightbox for desktop viewports. */
 function Grid({
   mediaItems,
   title,
@@ -283,18 +280,14 @@ function Grid({
   );
 }
 
-/**
- * Renders color-specific images as grid items (desktop).
- * Designed to be used inside a Suspense boundary as children of ProductMedia.
- */
 export function ColorImageGrid({
   images,
-  title,
   overlay,
+  title,
 }: {
   images: ImageType[];
-  title: string;
   overlay?: React.ReactNode;
+  title: string;
 }) {
   return images.map((image, idx) => (
     <GridItem
@@ -309,18 +302,14 @@ export function ColorImageGrid({
   ));
 }
 
-/**
- * Renders color-specific images as carousel items (mobile).
- * Matches the Carousel item structure for consistent snap-scroll behavior.
- */
 export function ColorImageCarouselItems({
   images,
-  title,
   overlay,
+  title,
 }: {
   images: ImageType[];
-  title: string;
   overlay?: React.ReactNode;
+  title: string;
 }) {
   return images.map((image, idx) => {
     const priority = idx === 0;
@@ -377,9 +366,7 @@ export function ProductMedia({
   videos: Video[];
   title: string;
   className?: string;
-  /** Color images rendered as grid items (desktop). */
   desktopSlot?: React.ReactNode;
-  /** Color images rendered as carousel items (mobile). */
   mobileSlot?: React.ReactNode;
   /** Rendered over the first/primary image cell (e.g. the virtual try-on button). */
   overlay?: React.ReactNode;

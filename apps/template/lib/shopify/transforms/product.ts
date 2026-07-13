@@ -8,7 +8,6 @@ import type {
   ProductCard,
   ProductDetails,
   ProductOption,
-  ProductRating,
   ProductVariant,
   ProductVariantComponent,
   ProductVariantReference,
@@ -47,7 +46,6 @@ export interface ShopifyVariant {
   compareAtPrice: ShopifyMoney | null;
   selectedOptions: Array<{ name: string; value: string }>;
   image: ShopifyImage | null;
-  // Bundle relationships — present only on variants fetched via PurchasableProductVariantFields.
   requiresComponents?: boolean;
   groupedBy?: { nodes: ShopifyBundleComponentVariant[] };
   components?: {
@@ -78,13 +76,6 @@ interface ShopifyCategory {
   id: string;
   name: string;
   ancestors: Array<{ id: string; name: string }>;
-}
-
-interface ShopifyMetafield {
-  key: string;
-  namespace: string;
-  value: string;
-  type: string;
 }
 
 interface ShopifyVideoSource {
@@ -145,7 +136,6 @@ export interface ShopifyProduct {
   };
   category?: ShopifyCategory | null;
   collections?: ShopifyEdges<{ handle: string }>;
-  metafields?: (ShopifyMetafield | null)[];
 }
 
 export interface ShopifyProductCard {
@@ -207,7 +197,6 @@ function extractMediaFromProduct(product: ShopifyProduct): {
       const img = transformImage(node.image);
       if (img) images.push(img);
     } else if (node.mediaContentType === "VIDEO") {
-      // Pick the best mp4 source (largest width)
       const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));
       const bestSource = mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
       if (bestSource) {
@@ -226,7 +215,6 @@ function extractMediaFromProduct(product: ShopifyProduct): {
 
 function transformCategory(category: ShopifyCategory | null | undefined): Category | null {
   if (!category) return null;
-  // Cap to 3 levels (Shopify menu limit): keep only the last 2 ancestors
   const cappedAncestors = category.ancestors.slice(-2);
   return {
     id: category.id,
@@ -313,99 +301,6 @@ function transformOption(option: ShopifyOption): ProductOption {
   };
 }
 
-const METAFIELD_LABELS: Record<string, string> = {
-  material: "Material",
-  dimensions: "Dimensions",
-  weight: "Weight",
-  connectivity: "Connectivity",
-  battery_life: "Battery Life",
-  warranty: "Warranty",
-  country_of_origin: "Country of Origin",
-  model_number: "Model Number",
-};
-
-// A single scalar metafield value, already parsed from its JSON envelope: an object
-// for measurement/money/rating types, a primitive otherwise.
-function formatScalarMetafield(type: string, value: unknown): string {
-  switch (type) {
-    case "boolean":
-      return value === true || value === "true" ? "Yes" : "No";
-    case "dimension":
-    case "volume":
-    case "weight": {
-      const v = value as { unit?: string; value?: number };
-      return v?.unit ? `${v.value} ${v.unit}` : String(v?.value ?? value);
-    }
-    case "money": {
-      const v = value as { amount?: string; currency_code?: string };
-      return v?.currency_code ? `${v.amount} ${v.currency_code}` : String(v?.amount ?? value);
-    }
-    case "rating": {
-      const v = value as { value?: number | string };
-      return String(v?.value ?? value);
-    }
-    default:
-      return String(value);
-  }
-}
-
-const STRUCTURED_METAFIELD_TYPES = new Set(["dimension", "money", "rating", "volume", "weight"]);
-
-// Shopify stores measurement/money/rating values as JSON, and list.* values as a JSON
-// array of those. Reference types resolve to GIDs we can't render without extra queries,
-// so they're skipped (null); every list element is formatted by its element type.
-function formatMetafieldValue(type: string, value: string): string | null {
-  if (type.includes("_reference")) return null;
-
-  if (type.startsWith("list.")) {
-    const itemType = type.slice("list.".length);
-    try {
-      const items = JSON.parse(value) as unknown[];
-      if (!Array.isArray(items)) return value;
-      return items.map((item) => formatScalarMetafield(itemType, item)).join(", ");
-    } catch {
-      return value;
-    }
-  }
-
-  if (STRUCTURED_METAFIELD_TYPES.has(type)) {
-    try {
-      return formatScalarMetafield(type, JSON.parse(value));
-    } catch {
-      return value;
-    }
-  }
-
-  return formatScalarMetafield(type, value);
-}
-
-// reviews.rating / reviews.rating_count surface as the dedicated rating stars (see
-// extractRating), so they're kept out of the generic spec list.
-function isRatingMetafield(mf: ShopifyMetafield): boolean {
-  return mf.namespace === "reviews" && (mf.key === "rating" || mf.key === "rating_count");
-}
-
-function transformMetafields(
-  metafields?: (ShopifyMetafield | null)[],
-): Array<{ key: string; label: string; value: string }> {
-  if (!metafields) return [];
-
-  return metafields
-    .filter(
-      (mf): mf is ShopifyMetafield => mf !== null && mf.value !== "" && !isRatingMetafield(mf),
-    )
-    .map((mf) => {
-      const value = formatMetafieldValue(mf.type, mf.value);
-      if (value === null) return null;
-      return { key: mf.key, label: METAFIELD_LABELS[mf.key] || formatKey(mf.key), value };
-    })
-    .filter((mf): mf is { key: string; label: string; value: string } => mf !== null);
-}
-
-function formatKey(key: string): string {
-  return key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
 export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
   // First image that isn't the featured one — used for the hover-reveal on the card.
@@ -489,36 +384,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     manufacturerName: product.vendor,
     categoryId: product.category?.id,
     collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
-    metafields: transformMetafields(product.metafields),
-    rating: extractRating(product.metafields),
   };
-}
-
-// reviews.rating is a JSON envelope ({ value, scale_min, scale_max }); reviews.rating_count
-// is a plain integer string. Returns undefined when the product carries no rating value.
-function extractRating(metafields?: (ShopifyMetafield | null)[]): ProductRating | undefined {
-  if (!metafields) return undefined;
-
-  let value: number | undefined;
-  let count = 0;
-
-  for (const mf of metafields) {
-    if (!mf || mf.namespace !== "reviews" || mf.value === "") continue;
-    if (mf.key === "rating") {
-      try {
-        const parsed = JSON.parse(mf.value) as { value?: number | string };
-        const n = Number(parsed?.value);
-        if (!Number.isNaN(n)) value = n;
-      } catch {
-        // ignore malformed rating payloads
-      }
-    } else if (mf.key === "rating_count") {
-      const n = Number.parseInt(mf.value, 10);
-      if (!Number.isNaN(n)) count = n;
-    }
-  }
-
-  return value === undefined ? undefined : { count, value };
 }
 
 export function transformShopifyProductCards(products: ShopifyProductCard[]): ProductCard[] {

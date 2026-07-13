@@ -1,575 +1,381 @@
 ---
 name: enable-shopify-markets
 description: >
-  Enable Shopify Markets with multi-locale routing using next-intl. Use when
-  the user wants to add internationalization, multi-locale support, locale-prefixed
-  URLs, or Shopify Markets. Supports sub-path and per-domain routing strategies.
-argument-hint: "[sub-path|per-domain]"
+  Enable Shopify Markets with regional locales, localized Storefront API context,
+  and next-intl routing. Supports locale-prefixed, invisible cookie-based, and
+  per-domain routing without a separate market URL segment or market mapping.
+argument-hint: "[sub-path|invisible-cookie|per-domain]"
 ---
 
-# Enable Shopify Markets (Multi-Locale)
+# Enable Shopify Markets
 
-## Description
+Add multi-region commerce to the Vercel Shop template. A validated regional locale such as `en-US`, `en-CA`, or `fr-CA` is the complete market context: its language scopes translated content and its region scopes Shopify's country context. Do not create a separate market key, market-to-locale map, currency map, or `/market/locale` route.
 
-Interactively set up Shopify Markets with multi-locale routing using next-intl. Supports both sub-path routing (`/en/products/...`) and per-domain routing (`en.store.com/products/...`). This skill is the Markets-aware path; if you only want next-intl routing/messages without Markets, use `enable-i18n` instead.
+Examples of valid public routing:
 
-## When to Use This Skill
+- Locale sub-path: `/fr-CA/products/shoe`
+- Invisible cookie routing: `/products/shoe` for every locale
+- Per-domain: `example.ca/fr-CA/products/shoe` or a single locale on `example.fr/products/shoe`
 
-- When the user wants to enable Shopify Markets / multi-locale support
-- When the user wants to add internationalization (i18n) with locale-prefixed URLs
-- When invoked via `/vercel-shop:enable-shopify-markets`
+Never generate redundant paths such as `/ca/fr-CA/products/shoe`.
 
-## Prerequisites
+## Before editing
 
-- The storefront is running in single-locale mode (default state)
-- `next-intl` is installed (it is by default)
-- Shopify Markets are configured in the Shopify admin for the desired locales
+Read the current versions of:
 
----
+- `lib/i18n/index.ts`, `lib/i18n/request.ts`, and `lib/params.ts`
+- `next.config.ts` and any existing `proxy.ts`
+- Every Storefront API operation and cache wrapper
+- Cart creation, cart actions, and buyer identity updates
+- Customer Account auth context
+- Agent/chat request payload and tools
+- SEO, robots, sitemap, and markdown content-negotiation routes
 
-## Step 1: Gather User Preferences
+The template uses Next.js 16 with Cache Components. Read the installed Next.js routing/proxy docs and the installed next-intl routing types before applying examples from the web.
 
-If the user hasn't already specified their preferences, ask them. Use two rounds of questions.
+For any Shopify GraphQL edit, use Shopify AI Toolkit to confirm current API facts and validate the complete operation. Then follow `shopify-graphql-reference` for this template's placement, transforms, cache role, locale flow, and invalidation.
 
-### Round 1 — Strategy and Locales
+## 1. Ask for routing and locales
 
-Ask the user the following questions (use `AskUserQuestion` if available, otherwise ask directly):
+If the user has not already decided, ask which strategy they want:
 
-```json
-{
-  "questions": [
-    {
-      "question": "Which routing strategy do you want for multi-locale URLs?",
-      "options": [
-        "Sub-path routing (/en-US/products/..., /de-DE/products/...)",
-        "Per-domain routing (en.store.com/products/..., de.store.com/products/...)"
-      ]
-    },
-    {
-      "question": "Which locales should be enabled? (en-US is always included as the default). You can pick from the pre-configured locales below, or specify any additional locales — translation files will be generated automatically.",
-      "multiSelect": true,
-      "options": [
-        "en-GB (English - United Kingdom, GBP)",
-        "de-DE (German - Germany, EUR)",
-        "fr-FR (French - France, EUR)",
-        "nl-NL (Dutch - Netherlands, EUR)",
-        "es-ES (Spanish - Spain, EUR)",
-        "Add other locales (e.g., ja-JP, pt-BR, zh-CN, it-IT, ko-KR)"
-      ]
-    }
-  ]
+1. **Locale sub-path** — one regional locale segment, such as `/en-US/...` and `/fr-CA/...`.
+2. **Invisible cookie** — all public paths stay clean; next-intl internally rewrites `/products/...` to `/[locale]/products/...` using the locale cookie.
+3. **Per-domain** — domains select the available/default locale context; paths may be prefixed only when a domain supports multiple languages.
+
+For sub-path routing, ask whether the default locale should be:
+
+- `as-needed`: `/products/...` for the default and `/fr-CA/products/...` for others
+- `always`: `/en-US/products/...` and `/fr-CA/products/...`
+
+Then ask for the default locale and all enabled locales. Require regional BCP 47 tags with both language and region. For example:
+
+```text
+en-US, en-CA, fr-CA, de-DE
+```
+
+Do not accept bare language tags such as `en` or `fr` for Markets mode. Do not ask for a separate market identifier or currency.
+
+Before choosing invisible cookie routing, state its SEO tradeoff: every locale shares one canonical URL, so search engines and shared links cannot target a specific cookie-selected version. Use locale sub-paths or per-domain URLs when each localized version must be independently indexed.
+
+## 2. Make regional locales the source of truth
+
+Update `lib/i18n/index.ts` so the locale list is the only market configuration:
+
+```ts
+export const locales = ["en-US", "en-CA", "fr-CA"] as const;
+
+export type Locale = (typeof locales)[number];
+
+export const defaultLocale: Locale = "en-US";
+export const enabledLocales: readonly Locale[] = locales;
+export const localeSwitchingEnabled = enabledLocales.length > 1;
+export const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
+```
+
+Keep boundary validation through `isEnabledLocale` / `resolveLocale`. Derive Shopify context directly from the validated locale:
+
+```ts
+export function getCountryCode(locale: Locale): string {
+  return new Intl.Locale(locale).region ?? new Intl.Locale(defaultLocale).region ?? "US";
+}
+
+export function getLanguageCode(locale: Locale): string {
+  return new Intl.Locale(locale).language.toUpperCase();
 }
 ```
 
-If the user selects "Add other locales" or provides custom locales via free-form input, ask a follow-up question to get the exact locale codes they want. Any locale in BCP 47 format (e.g., `ja-JP`, `pt-BR`, `zh-CN`, `it-IT`, `ko-KR`, `ar-SA`) is supported — translation files and currency config will be generated for them.
+Prefer `Locale` over `string` for internal locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated.
 
-### Round 2 — Strategy-Specific Options
+### Currency rule
 
-**If sub-path routing was chosen**, ask:
+Currency always comes from Shopify's localized response (`MoneyV2.currencyCode`, cart cost, product prices, etc.). Never infer currency from locale and never add `localeCurrency`, `marketCurrency`, or a locale-to-currency lookup.
 
-```json
-{
-  "questions": [
-    {
-      "question": "Should the default locale (en-US) have a URL prefix?",
-      "options": [
-        "No — clean URLs for default locale, prefixes for others (recommended)",
-        "Yes — always show the locale prefix, including for en-US"
-      ]
-    },
-    {
-      "question": "What format should locale URL prefixes use?",
-      "options": [
-        "Full locale codes (/en-US/, /de-DE/, /fr-FR/)",
-        "Short language codes (/en/, /de/, /fr/)"
-      ]
-    }
-  ]
-}
-```
+When UI outside a price object needs a currency code, pass one from fetched Shopify data. If Shopify returns no product or cart from which to derive it, omit currency-specific UI rather than guessing.
 
-**If per-domain routing was chosen**, ask:
+## 3. Add message catalogs
 
-```json
-{
-  "questions": [
-    {
-      "question": "How should domains map to locales? Provide your domain mapping or pick a starting pattern.",
-      "options": [
-        "Use subdomains (e.g., en.mystore.com, de.mystore.com)",
-        "Use country TLDs (e.g., mystore.com, mystore.de, mystore.fr)"
-      ]
-    }
-  ]
-}
-```
+Add a message loader and catalog for every enabled locale. Reuse a language catalog only intentionally; for example, `en-US` and `en-CA` may share `en.json` while Shopify still receives distinct country contexts.
 
-The user can provide a custom mapping via the "Other" option. Each domain should map to one default locale.
+Validate every generated JSON file after writing it. Keep all locale catalogs structurally aligned.
 
----
+## 4. Configure routing
 
-## Step 2: Update Locale Config
+Create `lib/i18n/routing.ts` and use `enabledLocales` directly. There is no market mapping layer.
 
-**File:** `lib/i18n.ts`
-
-### Enable selected locales
-
-Change `enabledLocales` to include the user's chosen locales:
-
-```ts
-export const enabledLocales: readonly Locale[] = ["en-US", "de-DE", "fr-FR"]; // user's selection
-```
-
-### Add custom locales (if any)
-
-If the user chose locales not in the existing `locales` array, add them:
-
-```ts
-export const locales = [
-  "en-US",
-  "en-GB",
-  "de-DE",
-  "fr-FR",
-  "nl-NL",
-  "es-ES",
-  "ja-JP", // new custom locale
-] as const;
-```
-
-Also add entries to the `localeCurrency` map:
-
-```ts
-const localeCurrency: Record<Locale, { currency: string; symbol: string }> = {
-  // ... existing entries ...
-  "ja-JP": { currency: "JPY", symbol: "¥" },
-};
-```
-
-Use `Intl.NumberFormat` to look up the correct currency symbol if unsure.
-
----
-
-## Step 3: Create Routing Config
-
-**File:** `lib/i18n/routing.ts` (create new)
-
-### Sub-path routing
+### Locale sub-path
 
 ```ts
 import { defineRouting } from "next-intl/routing";
-import { enabledLocales, defaultLocale } from "../i18n";
+
+import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from ".";
 
 export const routing = defineRouting({
-  locales: enabledLocales,
   defaultLocale,
-  localePrefix: "as-needed", // or "always" based on user choice
+  localeCookie: { name: LOCALE_COOKIE_NAME, sameSite: "lax" },
+  localePrefix: "as-needed", // or "always"
+  locales: enabledLocales,
 });
 ```
 
-If the user chose **short prefixes**, use the object form:
+Use full regional locale prefixes. One segment is enough.
+
+### Invisible cookie routing
 
 ```ts
+import { defineRouting } from "next-intl/routing";
+
+import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from ".";
+
 export const routing = defineRouting({
-  locales: enabledLocales,
+  alternateLinks: false,
   defaultLocale,
-  localePrefix: {
-    mode: "as-needed", // or "always"
-    prefixes: {
-      "en-US": "/en",
-      "de-DE": "/de",
-      "fr-FR": "/fr",
-      // ... map each enabled locale to its short prefix
-    },
-  },
+  localeCookie: { name: LOCALE_COOKIE_NAME, sameSite: "lax" },
+  localeDetection: true,
+  localePrefix: "never",
+  locales: enabledLocales,
 });
 ```
+
+`localePrefix: "never"` keeps the locale segment internal. On a request for `/products/shoe`, next-intl resolves the cookie (or first-visit language preference/default), then rewrites internally to a route such as `/fr-CA/products/shoe`. The browser URL stays `/products/shoe`.
+
+Do not implement a second custom market rewrite on top of this. The internal `[locale]` segment is an implementation detail, not a public URL.
 
 ### Per-domain routing
 
 ```ts
-import { defineRouting } from "next-intl/routing";
-import { enabledLocales, defaultLocale } from "../i18n";
-
 export const routing = defineRouting({
-  locales: enabledLocales,
   defaultLocale,
-  localePrefix: "as-needed",
   domains: [
-    {
-      domain: "store.com", // from user's mapping
-      defaultLocale: "en-US",
-      locales: ["en-US"],
-    },
-    {
-      domain: "de.store.com", // from user's mapping
-      defaultLocale: "de-DE",
-      locales: ["de-DE"],
-    },
-    // ... one entry per domain
+    { defaultLocale: "en-US", domain: "example.com", locales: ["en-US"] },
+    { defaultLocale: "en-CA", domain: "example.ca", locales: ["en-CA", "fr-CA"] },
   ],
+  localeCookie: { name: LOCALE_COOKIE_NAME, sameSite: "lax" },
+  localePrefix: "as-needed",
+  locales: enabledLocales,
 });
 ```
 
----
+The domain configuration is routing configuration, not a separate commerce market model. Shopify country and language still derive from the resolved regional locale.
 
-## Step 4: Create Navigation Exports
-
-**File:** `lib/i18n/navigation.ts` (create new)
+Create client navigation exports only for components that explicitly switch locales:
 
 ```ts
 import { createNavigation } from "next-intl/navigation";
+
 import { routing } from "./routing";
 
-export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
+export const { usePathname, useRouter } = createNavigation(routing);
 ```
 
----
+Do not replace every `next/link` import in the Server Component tree. Keep ordinary links request-independent under Cache Components.
 
-## Step 5: Move Routes Under `app/[locale]/`
+## 5. Move page routes under `app/[locale]/`
 
-Move all page routes from `app/` into `app/[locale]/`. Keep `api/`, `robots.ts`, `sitemap.xml/`, `sitemap/`, `favicon.ico`, `globals.css`, and `global-error.tsx` at the root level.
+Move the root layout and all localized pages under `app/[locale]/`. The locale layout must be the root layout; do not leave `app/layout.tsx` above it.
 
-```
-app/layout.tsx          → app/[locale]/layout.tsx
-app/page.tsx            → app/[locale]/page.tsx
-app/error.tsx           → app/[locale]/error.tsx
-app/not-found.tsx       → app/[locale]/not-found.tsx
-app/cart/               → app/[locale]/cart/
-app/collections/        → app/[locale]/collections/
-app/products/           → app/[locale]/products/
-app/search/             → app/[locale]/search/
-app/pages/              → app/[locale]/pages/
-app/account/            → app/[locale]/account/
-app/login/              → app/[locale]/login/
-```
+Move:
 
-Update all `PageProps` and `LayoutProps` type parameters to include `[locale]`:
+- `app/layout.tsx` to `app/[locale]/layout.tsx`
+- Page routes such as home, products, collections, search, cart, and account into `app/[locale]/...`
 
-- `LayoutProps<"/">` → `LayoutProps<"/[locale]">`
-- `PageProps<"/products/[handle]">` → `PageProps<"/[locale]/products/[handle]">`
-- `PageProps<"/collections/[handle]">` → `PageProps<"/[locale]/collections/[handle]">`
-- `PageProps<"/search">` → `PageProps<"/[locale]/search">`
-- `PageProps<"/pages/[slug]">` → `PageProps<"/[locale]/pages/[slug]">`
-- ... and so on for all page components.
+Keep these unlocalized at `app/`:
 
-The `globals.css` import in `app/[locale]/layout.tsx` should be updated to `import "../globals.css"` since the CSS file stays at the `app/` root.
+- `api/`
+- markdown route handlers under `md/`
+- `robots.ts`
+- `sitemap.xml/` and `sitemap/`
+- `globals.css`, `global-error.tsx`, and static metadata files
 
----
+Update typed route generics to include `[locale]`, fix the moved `globals.css` import, and add locale values to every `instant.unstable_samples[].params` object.
 
-## Step 6: Update Root Layout
+Do not call `setRequestLocale` with Cache Components. Resolve locale through the root param so locale becomes an explicit route/cache input.
 
-**File:** `app/[locale]/layout.tsx`
+## 6. Resolve locale from the root param
 
-Add `generateStaticParams`:
-
-```ts
-import { enabledLocales } from "@/lib/i18n";
-
-export const generateStaticParams = async () => {
-  return enabledLocales.map((locale) => ({ locale }));
-};
-```
-
-The rest of the layout stays the same — it already uses `getLocale()`, `getMessages()`, and `NextIntlClientProvider`.
-
-The layout-level `generateStaticParams` provides locale values for all child routes — no per-page changes needed for the locale param.
-
----
-
-## Step 7: Update Locale Resolution
-
-### `lib/params.ts`
-
-Replace the current hardcoded implementation:
+Update `lib/params.ts`:
 
 ```ts
 import { notFound } from "next/navigation";
-import { locale } from "next/root-params";
-import { type Locale, isEnabledLocale } from "./i18n";
+import { locale as rootLocale } from "next/root-params";
+
+import { isEnabledLocale, type Locale } from "./i18n";
 
 export async function getLocale(): Promise<Locale> {
-  const currentLocale = await locale();
-  if (!currentLocale || !isEnabledLocale(currentLocale)) notFound();
-  return currentLocale as Locale;
+  const value = await rootLocale();
+  if (!value || !isEnabledLocale(value)) notFound();
+  return value;
 }
 ```
 
-### `lib/i18n/request.ts`
+Update `lib/i18n/request.ts` to call `getLocale()` and load the matching messages. Do not resolve locale by reading cookies or request headers from a cached component. The proxy owns request negotiation; React receives the validated internal route param.
 
-Update to resolve locale dynamically:
+## 7. Add the proxy
 
-```ts
-import { hasLocale } from "next-intl";
-import { getRequestConfig } from "next-intl/server";
-import { getLocale } from "../params";
-import { routing } from "./routing";
-import type enMessages from "./messages/en.json";
-
-export default getRequestConfig(async () => {
-  const requested = await getLocale();
-  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
-  const language = locale.split("-")[0];
-
-  let messages: typeof enMessages;
-  try {
-    messages = (await import(`./messages/${locale}.json`)).default;
-  } catch {
-    messages = (await import(`./messages/${language}.json`)).default;
-  }
-
-  return { locale, messages };
-});
-```
-
-### Scope menu queries for markets
-
-The base template keeps [`lib/shopify/operations/menu.ts`](../../lib/shopify/operations/menu.ts) unscoped (it takes only `{ handle }`) so menus load before Shopify Markets is configured. When enabling markets, extend `getMenu` to accept the active locale (e.g. `getMenu({ handle, locale })`), derive `country` and `language` from that locale, and query `menu` with `@inContext(country: $country, language: $language)`. Without that change, quick links and footer menu stay pinned to the default market. If the `enable-shopify-menus` skill has been run, the megamenu will also need this scoping.
-
----
-
-## Step 8: Update Middleware
-
-**File:** `proxy.ts`
-
-Add a `proxy.ts` with next-intl middleware for locale routing:
+Create root `proxy.ts`:
 
 ```ts
-export const config = {
-  matcher: [
-    "/((?!.well-known|api|webhooks|_next/static|_next/image|favicon.ico|sitemap.xml|sitemap/|robots.txt).*)",
-  ],
-};
-
-import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
+
 import { routing } from "@/lib/i18n/routing";
 
-const handlei18n = createMiddleware(routing);
+export default createMiddleware(routing);
 
-export function proxy(request: NextRequest) {
-  return handlei18n(request);
-}
-```
-
-> **Note:** Product variant selection stays on Shopify's standard `?variant=` query parameter. The built-in content negotiation rewrite in `next.config.ts` handles markdown negotiation automatically — no proxy.ts changes needed.
-
----
-
-## Step 9: Replace `next/link` with Locale-Aware Link
-
-In all files that import from `next/link`, replace with the locale-aware `Link` from `@/lib/i18n/navigation`. The following files need updating:
-
-```
-components/ui/filter-sidebar.tsx
-components/product/breadcrumb.tsx
-components/prefetch-link.tsx
-components/orders/order-detail.tsx
-components/predictive-search-results.tsx
-components/nav/quick-links.tsx
-components/nav/account-client.tsx
-components/nav/account.tsx
-components/nav/current-page-link.tsx
-components/nav/index.tsx
-components/footer.tsx
-components/collections/pagination.tsx
-components/error-boundary-content.tsx
-components/collections/collection-page.tsx
-components/cart/overlay-content.tsx
-components/cart/overlay-item.tsx
-components/cart/empty-cart.tsx
-components/account/sidebar.tsx
-components/account/mobile-tabs.tsx
-app/search/page.tsx (now app/[locale]/search/page.tsx)
-app/not-found.tsx (now app/[locale]/not-found.tsx)
-app/collections/page.tsx (now app/[locale]/collections/page.tsx)
-app/account/orders/page.tsx
-app/account/orders/[id]/page.tsx
-components/agent/registry.tsx
-```
-
-Change `import Link from "next/link"` to `import { Link } from "@/lib/i18n/navigation"`. The locale-aware `Link` automatically prefixes URLs with the current locale. Its API is the same as `next/link` — no other changes needed in the JSX.
-
----
-
-## Step 10: Wire Locale/Currency Selector into Megamenu
-
-> **Prerequisite:** This step requires the `enable-shopify-menus` skill to have been run first. If the megamenu has not been added, skip this step.
-
-**File:** `components/nav/megamenu/index.tsx`
-
-The `LocaleCurrencySelector` component already exists at `components/nav/locale-currency.tsx`. Add it to the megamenu:
-
-```tsx
-import { LocaleCurrencySelector } from "../locale-currency";
-
-// In MegamenuContent, pass locale to both desktop and mobile:
-<MegamenuDesktop items={data.items} locale={locale}>
-  <LocaleCurrencySelector locale={locale} />
-</MegamenuDesktop>
-
-<MegamenuMobile data={data} locale={locale}>
-  <LocaleCurrencySelector locale={locale} />
-</MegamenuMobile>
-```
-
-Also update `locale-currency.tsx` to use locale-aware routing for locale switching. Replace `useRouter` from `next/navigation` with `useRouter` from `@/lib/i18n/navigation`, and change the `handleLocaleChange` function to navigate to the same path in the new locale:
-
-```ts
-import { useRouter, usePathname } from "@/lib/i18n/navigation";
-
-const handleLocaleChange = (locale: Locale) => {
-  if (locale === currentLocale) return;
-  setOpen(false);
-  startTransition(async () => {
-    const result = await syncCartLocaleAction(locale);
-    if (!result.success) {
-      console.error("Failed to sync cart locale:", result.error);
-    }
-    router.replace(pathname, { locale });
-  });
+export const config = {
+  matcher: [
+    "/((?!.well-known|api|md|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemap/|.*\\..*).*)",
+  ],
 };
 ```
 
----
+The exact exclusions must match the current checkout. Keep API, webhooks, sitemap, robots, static assets, and markdown handlers out of locale routing.
 
-## Step 11: Update SEO with Locale Alternates
+For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 
-**File:** `lib/seo.ts`
+## 8. Propagate locale through commerce
 
-Add a helper to build locale-prefixed paths and update `buildAlternates` to include `hreflang` alternates:
+Audit definitions and real callers. Every localized Storefront API operation must accept the validated `Locale`, derive `country` and `language`, and use Shopify's `@inContext(country: $country, language: $language)`.
+
+This includes:
+
+- products, collections, search, recommendations, and complementary products
+- navigation menus and any megamenu added by `enable-shopify-menus`
+- cart creation and cart reads that depend on buyer country
+- sitemap and markdown catalog/product output
+- agent tools and Storefront MCP calls
+
+Cached functions must receive `locale` explicitly. Never read the locale cookie, `headers()`, or `cookies()` inside a `"use cache"` function. The locale argument naturally separates cache entries; do not add a parallel market cache key.
+
+Keep locale defaults only at compatibility boundaries where the base single-locale template needs them. Once a route has resolved locale, pass it explicitly rather than silently defaulting deeper in the stack.
+
+### Menus
+
+Change `getMenu({ handle })` to `getMenu({ handle, locale })`, add localized Storefront context to the validated query, and update every caller. Without this, navigation remains pinned to the default market.
+
+### Customer Account auth
+
+Pass the active `Locale` into the Shopify/Hydrogen request context instead of using `defaultLocale`. Preserve locale across login, authorize, refresh, and logout return URLs. Validate any locale carried through OAuth state or URL params.
+
+### Chat and agent API
+
+The chat route lives outside `[locale]`, and invisible URLs do not reveal locale in the referer. Send the current locale explicitly in the client request payload, validate it in `app/api/chat/route.ts`, and put it in agent context. Do not infer it from URL segments or fall back unconditionally to `defaultLocale`.
+
+Agent tools, Storefront MCP calls, product context, cart creation, and navigation outputs must use that validated locale.
+
+### Markdown negotiation
+
+After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update content-negotiation rewrites so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
+
+## 9. Switch locale and synchronize cart country
+
+Switching language within the same country must not mutate buyer identity:
+
+- `fr-CA` to `en-CA`: set locale; no cart country update
+- `en-CA` to `en-US`: set locale and update buyer country to `US`
+
+Keep the mutation in a server action, validate both inputs, and rely on `updateCartBuyerIdentity` to invalidate cart cache:
 
 ```ts
-import { enabledLocales, defaultLocale, localeSwitchingEnabled } from "./i18n";
+"use server";
 
-function withLocalePath(locale: string, pathname: string): string {
-  const normalizedPath = normalizePath(pathname);
-  if (normalizedPath === "/") return `/${locale}`;
-  return `/${locale}${normalizedPath}`;
-}
+import { cookies } from "next/headers";
 
-export function buildAlternates({
-  pathname,
-  searchParams,
-}: {
-  pathname: string;
-  searchParams?: SearchParamsInput;
-}): Metadata["alternates"] {
-  const canonical = buildCanonicalPath(pathname, searchParams);
+import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
+import { updateCartBuyerIdentity } from "@/lib/shopify/operations/cart";
 
-  if (!localeSwitchingEnabled) {
-    return { canonical };
+export async function switchLocaleAction(currentValue: string, nextValue: string) {
+  if (!isEnabledLocale(currentValue) || !isEnabledLocale(nextValue)) {
+    return { error: "Unsupported locale", success: false } as const;
   }
 
-  const languages: Record<string, string> = {};
-  for (const locale of enabledLocales) {
-    languages[locale] = withLocalePath(locale, buildCanonicalPath(pathname, searchParams));
+  if (getCountryCode(currentValue) !== getCountryCode(nextValue)) {
+    await updateCartBuyerIdentity(nextValue);
   }
-  languages["x-default"] = withLocalePath(
-    defaultLocale,
-    buildCanonicalPath(pathname, searchParams),
-  );
 
-  return { canonical, languages };
+  const cookieStore = await cookies();
+  cookieStore.set(LOCALE_COOKIE_NAME, nextValue, {
+    path: "/",
+    sameSite: "lax",
+  });
+
+  return { success: true } as const;
 }
 ```
 
----
+The selector remains a leaf Client Component.
 
-## Step 12: Update Sitemap with Per-Locale URLs
+- **Sub-path/per-domain:** call the action, then use next-intl's client router to replace the current pathname with `{ locale: nextLocale }`.
+- **Invisible cookie:** call the action, then call `router.refresh()`. The pathname must not change.
 
-**File:** `app/sitemap/[shard]/route.ts`
+Do not offer a separate currency selector unless the store has a Shopify-backed currency choice independent of country. Display currency from cart/product responses.
 
-Sitemap children are emitted as raw XML by the shard route handler. For each resource, emit one `<url>` per enabled locale, and inside each `<url>` emit `<xhtml:link rel="alternate" hreflang="..." href="..." />` siblings pointing at the other locale variants. Add `xmlns:xhtml="http://www.w3.org/1999/xhtml"` to the `<urlset>` opening tag.
+## 10. Strategy-specific SEO and sitemap behavior
 
-```ts
-import { enabledLocales, localeSwitchingEnabled } from "@/lib/i18n";
+### Locale sub-path or per-domain
 
-function localizePath(locale: string, path: string): string {
-  return path === "/" ? `/${locale}` : `/${locale}${path}`;
-}
+Each locale has a distinct indexable URL:
 
-// Inside renderShard(): if localeSwitchingEnabled, for each item iterate
-// enabledLocales and emit a <url> per locale with <xhtml:link> alternates.
+- Canonical points to the current locale URL.
+- Emit `hreflang` alternates for enabled locale URLs plus `x-default`.
+- Emit one sitemap URL per locale with matching XHTML alternates.
+- Build URLs from the selected routing strategy; do not assume every strategy uses `/${locale}`.
+
+### Invisible cookie
+
+All variants share one public URL:
+
+- Canonical is the clean public path.
+- Do not emit fake locale-specific `hreflang` URLs.
+- Emit one sitemap URL per resource, not one per locale.
+- Keep `alternateLinks: false` in next-intl routing.
+- Treat localization as personalization. Shared links and crawlers without the user's cookie receive negotiated/default content.
+
+Never put internal `/[locale]/...` rewrite targets into metadata or sitemap XML.
+
+## 11. Verification
+
+Run focused checks from `apps/template`:
+
+```bash
+pnpm codegen
+pnpm lint
+pnpm build
 ```
 
-`app/sitemap.xml/route.ts` (the index) doesn't need locale handling — it lists shard URLs which stay locale-agnostic.
+Then run the app and verify the selected strategy.
 
----
+### All strategies
 
-## Step 13: Add Locale-Prefixed Redirects
+- Every enabled regional locale produces the expected Shopify country/language context.
+- Product and cart currency codes come from Shopify responses.
+- Cache entries do not leak products, prices, menus, or cart state between locales.
+- `fr-CA` to `en-CA` does not update buyer country.
+- `en-CA` to `en-US` updates buyer country and invalidates cart cache.
+- Chat/agent operations receive the explicit validated locale.
+- Markdown responses use the same locale as HTML responses.
+- Variant and filter query parameters survive switching and rewrites.
 
-**File:** `next.config.ts`
+### Locale sub-path
 
-Add locale-aware redirect rules for common typos:
+- Locale URLs serve directly with no `/market/locale` nesting.
+- Default-prefix behavior matches `always` or `as-needed`.
+- Canonical, hreflang, and sitemap URLs are locale-specific.
 
-```ts
-redirects: async () => [
-  // existing redirects...
-  { source: "/:locale/product", destination: "/:locale/products", permanent: true },
-  { source: "/:locale/product/:path*", destination: "/:locale/products/:path*", permanent: true },
-],
+### Invisible cookie
+
+```bash
+curl -I http://localhost:3000/products/example
+curl -I --cookie "NEXT_LOCALE=fr-CA" http://localhost:3000/products/example
 ```
 
----
+- Both requests keep `/products/example` as the public URL.
+- The cookie-selected response has `<html lang="fr-CA">` and Shopify country `CA` context.
+- Locale switching changes content/cart context without changing the address bar.
+- `/fr-CA/products/example` does not remain a public canonical URL.
+- Metadata and sitemap contain only clean public paths and no locale alternates.
 
-## Step 14: Generate Translation Files for Custom Locales
+### Per-domain
 
-For each custom locale not already in `lib/i18n/messages/`, create a translation file:
-
-1. Copy `en.json` as the starting point
-2. Translate all string values to the target language
-3. Keep the same JSON structure and key names
-
-Existing translation files:
-
-- `en.json` (English — also used for en-GB)
-- `de-DE.json` (German)
-- `fr-FR.json` (French)
-- `nl-NL.json` (Dutch)
-- `es-ES.json` (Spanish)
-
-For new locales like `ja-JP`, create `lib/i18n/messages/ja-JP.json` with translated content.
-
-### CRITICAL: Validate JSON after generating translation files
-
-Translated strings must not contain unescaped ASCII double-quote characters (`"`, U+0022) inside JSON string values. This is easy to hit when a language uses typographic quotation marks that look similar to ASCII `"`:
-
-- **German:** `„` (U+201E) opens, `"` (U+201C) closes — but LLMs sometimes emit a bare ASCII `"` for the closing mark, which terminates the JSON string early.
-- **French:** `«»` (guillemets) are safe — they are not ASCII `"`.
-
-After writing each translation file, **validate it is parseable JSON** (e.g. `node -e "require('./lib/i18n/messages/de-DE.json')"` or equivalent). If validation fails, escape any rogue inner `"` as `\"` or replace typographic quotes with `\"...\"`.
-
----
-
-## Step 15: Create Root Fallback (if `localePrefix: "always"`)
-
-Only needed if the user chose "always show locale prefix":
-
-Create `app/page.tsx` (outside `[locale]/`) as a redirect fallback:
-
-```tsx
-import { permanentRedirect } from "next/navigation";
-import { defaultLocale } from "@/lib/i18n";
-
-export default function RootPage() {
-  permanentRedirect(`/${defaultLocale}`);
-}
-```
-
-If `localePrefix: "as-needed"`, skip this step — the middleware handles root requests automatically.
-
----
-
-## Verification
-
-After completing all steps, verify the implementation:
-
-1. **Build**: Run `bun build` and confirm no TypeScript errors
-2. **Smoke test**: Run `bun dev` and check:
-   - Default locale URL works (e.g., `http://localhost:3000/products/technest-smart-speaker-pro-jk0c`)
-   - Locale-prefixed URL works (e.g., `http://localhost:3000/de-DE/products/technest-smart-speaker-pro-jk0c`)
-   - Product prices render in the correct currency for each locale
-3. **Locale selector**: Confirm the selector appears in the megamenu and switching locales changes the URL + cart currency
-4. **Variants**: Confirm product variant links preserve `?variant=` across locale-prefixed URLs
-5. **SEO**: Check that page metadata includes `hreflang` alternates for all enabled locales
-6. **Sitemap**: Visit `/sitemap.xml` and confirm per-locale entries
+- Each configured host resolves its allowed/default locales.
+- Cross-domain locale switching uses the correct host.
+- Canonical and hreflang URLs contain the production domains.

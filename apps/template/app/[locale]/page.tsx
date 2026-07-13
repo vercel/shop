@@ -9,9 +9,9 @@ import { MarketingSplit } from "@/components/sections/marketing-split";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import { siteConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { shopConfig } from "@/shop.config";
 
 const CAMPAIGN_COLLECTIONS: readonly string[] = [
   "hoodies",
@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = t("homeDescription");
 
   return {
-    title: `${title} | ${siteConfig.name}`,
+    title: `${title} | ${shopConfig.site.name}`,
     description,
     alternates: buildAlternates({ pathname: "/" }),
     openGraph: buildOpenGraph({
@@ -140,8 +140,8 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
             reverse
             title={t("marketing.secondary.title")}
             body={t("marketing.secondary.body")}
+            ctaLink="/collections/all"
             ctaText={t("marketing.secondary.cta")}
-            ctaLink="/about"
             image={{
               alt: "Two people wearing all-black activewear",
               url: "https://cdn.shopify.com/s/files/1/0748/3002/0662/files/2026-06-27T22-04-19-534Z-landscape-a-man-and-a-woman-of-different-ethnic-backgrounds-in-all-bla.jpg?v=1782597864",

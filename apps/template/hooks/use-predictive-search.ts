@@ -41,7 +41,7 @@ export function usePredictiveSearch(locale: string) {
             setResults(data);
           }
         } catch {
-          // Silently fail — user can still press Enter for full search
+          // Predictive failure must not block full search submission.
         }
       });
     }, DEBOUNCE_MS);

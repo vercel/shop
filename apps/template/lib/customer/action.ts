@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 
 import {
   createCustomerAddress,
@@ -35,8 +36,7 @@ const ADDRESS_FIELDS = [
 
 const UPPERCASE_FIELDS = new Set<keyof CustomerAddressInput>(["territoryCode", "zoneCode"]);
 
-// Customer Account API userErrors carry a `field` path like ["address", "zip"];
-// the last segment is the input field a form can highlight.
+// Customer Account API field paths end with the form field to highlight.
 function mapUserErrors(errors: CustomerUserError[]): AccountActionResult {
   if (errors.length === 0) return { success: true };
 
@@ -85,6 +85,7 @@ export async function createAddressAction(
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Create address failed:", error);
     return {
       success: false,
@@ -109,6 +110,7 @@ export async function updateAddressAction(
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Update address failed:", error);
     return {
       success: false,
@@ -125,6 +127,7 @@ export async function deleteAddressAction(addressId: string): Promise<AccountAct
     if (result.success) revalidatePath("/account/addresses");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Delete address failed:", error);
     return {
       success: false,
@@ -147,6 +150,7 @@ export async function updateProfileAction(raw: {
     if (result.success) revalidatePath("/account/profile");
     return result;
   } catch (error) {
+    unstable_rethrow(error);
     console.error("Update profile failed:", error);
     return {
       success: false,

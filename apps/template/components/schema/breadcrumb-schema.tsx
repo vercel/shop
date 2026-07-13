@@ -1,4 +1,4 @@
-import { siteConfig } from "@/lib/config";
+import { shopConfig } from "@/shop.config";
 
 interface BreadcrumbSchemaItem {
   name: string;
@@ -7,7 +7,7 @@ interface BreadcrumbSchemaItem {
 
 function toAbsoluteUrl(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${siteConfig.url}${path}`;
+  return `${shopConfig.site.url}${path}`;
 }
 
 export function BreadcrumbSchema({ items }: { items: BreadcrumbSchemaItem[] }) {

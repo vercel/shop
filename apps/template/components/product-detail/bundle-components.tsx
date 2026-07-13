@@ -37,8 +37,7 @@ interface BundleParentsProps {
 }
 
 export function BundleParents({ title, variants }: BundleParentsProps) {
-  // A component variant is grouped into many bundle variant combinations that all
-  // belong to the same bundle product — collapse to one link per bundle product.
+  // Shopify groups components by bundle variant, but this surface links each product once.
   const byProduct = new Map<string, ProductVariantReference>();
   for (const variant of variants) {
     if (!byProduct.has(variant.product.handle)) byProduct.set(variant.product.handle, variant);

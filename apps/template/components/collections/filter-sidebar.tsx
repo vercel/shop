@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useRef, useState } from "react";
@@ -29,21 +29,32 @@ import {
 } from "./filter-primitives";
 
 interface CollectionFilterSidebarClientProps {
+  activeFilters: Record<string, string | string[] | undefined>;
   filters: Filter[];
   priceRange?: PriceRange;
-  activeFilters: Record<string, string | string[] | undefined>;
 }
 
 type FilterState = Record<string, string | string[] | undefined>;
 
-function formatPriceRangeLabel(min: number | null, max: number | null): string {
-  if (min !== null && max !== null) {
-    return `$${min} - $${max}`;
-  }
-  if (min !== null) {
-    return `From $${min}`;
-  }
-  return `Up to $${max}`;
+function formatPriceRangeLabel({
+  currencyCode,
+  locale,
+  max,
+  min,
+}: {
+  currencyCode?: string;
+  locale: string;
+  max: number | null;
+  min: number | null;
+}): string {
+  const format = (value: number) =>
+    currencyCode
+      ? new Intl.NumberFormat(locale, { currency: currencyCode, style: "currency" }).format(value)
+      : new Intl.NumberFormat(locale).format(value);
+
+  if (min !== null && max !== null) return `${format(min)} - ${format(max)}`;
+  if (min !== null) return `From ${format(min)}`;
+  return `Up to ${format(max ?? 0)}`;
 }
 
 function getFilterValues(value: string | string[] | undefined): string[] {
@@ -114,6 +125,7 @@ export function CollectionFilterSidebarClient({
   priceRange,
   activeFilters,
 }: CollectionFilterSidebarClientProps) {
+  const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -221,7 +233,12 @@ export function CollectionFilterSidebarClient({
             ))}
             {hasPriceFilter && (
               <FilterBadge variant="primary" onRemove={removePriceRange}>
-                {formatPriceRangeLabel(urlPriceMin, urlPriceMax)}
+                {formatPriceRangeLabel({
+                  currencyCode: priceRange?.currencyCode,
+                  locale,
+                  max: urlPriceMax,
+                  min: urlPriceMin,
+                })}
               </FilterBadge>
             )}
           </FilterSidebarActiveFilters>

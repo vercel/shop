@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 
 import { useCart } from "./context";
+import { CartMessages } from "./messages";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
-import { CartWarnings } from "./warnings";
 
 interface OverlayContentProps {
   locale: string;
@@ -48,7 +48,7 @@ function CheckoutButtonContent({
 
 export function OverlayContent({ locale }: OverlayContentProps) {
   const router = useRouter();
-  const { cart, cartWithPending, setOverlayOpen, isUpdatingCart } = useCart();
+  const { cart, cartWithPending, isUpdatingCart, lastError, setOverlayOpen } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
 
@@ -69,22 +69,28 @@ export function OverlayContent({ locale }: OverlayContentProps) {
     window.location.href = checkoutUrl || cart?.checkoutUrl || displayCart?.checkoutUrl || "";
   };
 
-  // Use cartWithPending for display - it includes optimistic lines
   const displayCart = cartWithPending;
 
   if (!displayCart || displayCart.lines.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-5 text-center">
-        <h3 className="text-2xl mb-6">{t("empty")}</h3>
-        <Button
-          onClick={() => {
-            setOverlayOpen(false);
-            router.push("/");
-          }}
-          className="h-12 px-8"
-        >
-          {t("continueShopping")}
-        </Button>
+      <div className="flex h-full flex-col px-5">
+        {lastError ? (
+          <div className="pt-5">
+            <CartMessages />
+          </div>
+        ) : null}
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <h3 className="mb-6 text-2xl">{t("empty")}</h3>
+          <Button
+            onClick={() => {
+              setOverlayOpen(false);
+              router.push("/");
+            }}
+            className="h-12 px-8"
+          >
+            {t("continueShopping")}
+          </Button>
+        </div>
       </div>
     );
   }
@@ -92,7 +98,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        <CartWarnings />
+        <CartMessages />
         <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
           {displayCart.lines.map((item) => (
             <OverlayItem key={item.id} item={item} locale={locale} />
@@ -100,11 +106,9 @@ export function OverlayContent({ locale }: OverlayContentProps) {
         </ul>
       </div>
 
-      {/* Summary Section */}
       <footer className="px-5 py-5 space-y-5">
         <OverlaySummary cart={displayCart} locale={locale} />
 
-        {/* Checkout Button */}
         <Button
           onClick={handleCheckout}
           className="w-full h-12 justify-center"

@@ -11,10 +11,7 @@ import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
 
-// Shopify's /collections/all is a Liquid-storefront convention with no Storefront API
-// equivalent — the "all" virtual collection is owned entirely by this module and the
-// dedicated app/collections/all/page.tsx route. The data layer (lib/shopify/operations)
-// stays unaware of it.
+// /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
 export interface CollectionSearchState {

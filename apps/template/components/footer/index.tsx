@@ -3,27 +3,41 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
-import { agent, footerItems, siteConfig } from "@/lib/config";
+import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
+import { shopConfig } from "@/shop.config";
 
 import { SocialLinks } from "./social-links";
 
 export async function Footer({ locale }: { locale: string }) {
-  const { socialLinks } = siteConfig;
-  const items = footerItems;
-  const t = await getTranslations("footer");
+  const { socialLinks } = shopConfig.site;
+  const items = shopConfig.navigation.footer;
+  const [policies, t] = await Promise.all([
+    getShopPolicies({ locale }).catch(() => []),
+    getTranslations("footer"),
+  ]);
 
   return (
     <footer className="mt-10 bg-primary text-primary-foreground">
-      {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
-      <Container className={cn("pt-20 pb-10", agent.enabled && "pb-22")}>
+      <Container className={cn("pt-20 pb-10", shopConfig.agent.enabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
-            <p className="text-sm text-primary-foreground/70 leading-5">
-              {t("copyright", { name: siteConfig.name })}
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
+              <p className="text-sm text-primary-foreground/70 leading-5">
+                {t("copyright", { name: shopConfig.site.name })}
+              </p>
+              {policies.map((policy) => (
+                <Link
+                  key={policy.handle}
+                  href={`/policies/${policy.handle}`}
+                  className="cursor-pointer text-sm text-primary-foreground/70 transition-colors hover:text-primary-foreground"
+                >
+                  {policy.title}
+                </Link>
+              ))}
+            </div>
             {socialLinks.length > 0 && <SocialLinks links={socialLinks} />}
           </div>
         </Sections>
@@ -33,9 +47,9 @@ export async function Footer({ locale }: { locale: string }) {
 }
 
 interface MenuLinkProps {
-  url: string;
   children: React.ReactNode;
   className?: string;
+  url: string;
 }
 
 function MenuLink({ url, children, className }: MenuLinkProps) {
