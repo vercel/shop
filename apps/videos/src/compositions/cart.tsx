@@ -21,19 +21,21 @@ const T = {
 export const CART_DURATION = 210;
 
 const products = [
-  { name: "Running", price: "$95", image: "sneakers/sneaker-1.png" },
-  { name: "Sport", price: "$88", image: "sneakers/sneaker-4.png" },
-  { name: "Classic", price: "$62", image: "sneakers/sneaker-2.png" },
+  { name: "Running", price: "$95", image: "sneakers/sneaker-1" },
+  { name: "Sport", price: "$88", image: "sneakers/sneaker-4" },
+  { name: "Classic", price: "$62", image: "sneakers/sneaker-2" },
 ];
 
 export const CartComposition = ({
   kicker = "Vercel Shop · Template",
   title = "A server-driven cart that feels instant",
   layout = "split",
+  theme = "light",
 }: {
   kicker?: string;
   title?: string;
   layout?: StageLayout;
+  theme?: "light" | "dark";
 }) => {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame() - (layout === "full" ? FULL_CONTENT_DELAY : 0);
@@ -59,7 +61,7 @@ export const CartComposition = ({
   });
 
   return (
-    <Stage kicker={kicker} layout={layout} title={title} width={620}>
+    <Stage kicker={kicker} layout={layout} theme={theme} title={title} width={620}>
       <div className="overflow-hidden rounded-xl border border-gray-alpha-400 bg-background-100">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-alpha-400 px-5 py-3.5">
@@ -93,7 +95,10 @@ export const CartComposition = ({
                   key={product.name}
                 >
                   <div className="relative size-14 shrink-0">
-                    <Img className="absolute inset-0 h-full w-full object-contain" src={staticFile(product.image)} />
+                    <Img
+                      className="absolute inset-0 h-full w-full object-contain"
+                      src={staticFile(`${product.image}${theme === "dark" ? "-dark" : ""}.png`)}
+                    />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="text-xs text-foreground">{product.name}</span>
@@ -140,7 +145,7 @@ export const CartComposition = ({
                   <div className="relative flex size-12 shrink-0 items-center justify-center rounded border border-gray-alpha-400 bg-background-100">
                     <Img
                       className="absolute inset-0 h-full w-full object-contain p-1"
-                      src={staticFile("sneakers/sneaker-1.png")}
+                      src={staticFile(`sneakers/sneaker-1${theme === "dark" ? "-dark" : ""}.png`)}
                     />
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col">

@@ -77,11 +77,13 @@ export const AgentComposition = ({
   kicker = "Vercel Shop · Agent Skills",
   title,
   layout = "split",
+  theme = "light",
 }: {
   skillKey?: string;
   kicker?: string;
   title?: string;
   layout?: StageLayout;
+  theme?: "light" | "dark";
 }) => {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame() - (layout === "full" ? FULL_CONTENT_DELAY : 0);
@@ -94,7 +96,7 @@ export const AgentComposition = ({
   const showDone = frame >= m.done;
 
   return (
-    <Stage kicker={kicker} layout={layout} title={title ?? skill.title} width={620}>
+    <Stage kicker={kicker} layout={layout} theme={theme} title={title ?? skill.title} width={620}>
       <BrowserChrome showLockIcon={false} url="Coding Agent">
         <div className="flex h-44 flex-col gap-2.5 overflow-hidden">
           {/* Command input */}
@@ -103,11 +105,11 @@ export const AgentComposition = ({
               <span className="inline-flex size-3.5 shrink-0 items-center justify-center font-mono text-xs leading-none text-amber-800">
                 $
               </span>
-              <span className="font-mono text-xs leading-5 text-black">
+              <span className="font-mono text-xs leading-5 text-foreground">
                 {skill.command.slice(0, chars)}
                 <span
                   aria-hidden
-                  className="ml-0.5 inline-block h-3.5 w-[5px] bg-black/70 align-middle"
+                  className="ml-0.5 inline-block h-3.5 w-[5px] bg-foreground/70 align-middle"
                   style={{ opacity: isTyping ? caretBlink(frame, fps) : 0 }}
                 />
               </span>
@@ -140,7 +142,7 @@ export const AgentComposition = ({
                   >
                     {log.icon === "add" ? "+" : "~"}
                   </span>
-                  <span className="text-black/50">{log.text}</span>
+                  <span className="text-foreground/50">{log.text}</span>
                 </div>
               );
             })}

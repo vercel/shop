@@ -5,8 +5,8 @@
   "scripts": {
     "studio": "remotion studio",
     "render": "remotion render",
-    "render:all": "remotion render Showreel out/showreel.mp4 && remotion render Cart out/cart.mp4 && remotion render AgentMarkets out/agent-markets.mp4 && remotion render AgentAuth out/agent-auth.mp4 && remotion render AgentCMS out/agent-cms.mp4 && remotion render ContentNegotiation out/content-negotiation.mp4 && remotion render Assistant out/assistant.mp4",
-    "render:full": "remotion render Showreel out/full/showreel.mp4 --props='{\"layout\":\"full\"}' && remotion render Cart out/full/cart.mp4 --props='{\"layout\":\"full\"}' && remotion render AgentMarkets out/full/agent-markets.mp4 --props='{\"layout\":\"full\"}' && remotion render AgentAuth out/full/agent-auth.mp4 --props='{\"layout\":\"full\"}' && remotion render AgentCMS out/full/agent-cms.mp4 --props='{\"layout\":\"full\"}' && remotion render ContentNegotiation out/full/content-negotiation.mp4 --props='{\"layout\":\"full\"}' && remotion render Assistant out/full/assistant.mp4 --props='{\"layout\":\"full\"}'"
+    "render:all": "remotion render Showreel out/showreel.mp4 && remotion render Cart out/cart.mp4 && remotion render AgentMarkets out/agent-markets.mp4 && remotion render AgentUpdateShop out/agent-update-shop.mp4 &&remotion render AgentAuth out/agent-auth.mp4 && remotion render AgentCMS out/agent-cms.mp4 && remotion render ContentNegotiation out/content-negotiation.mp4 && remotion render Assistant out/assistant.mp4",
+    "render:full": "remotion render Showreel out/full/showreel.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render Cart out/full/cart.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render AgentMarkets out/full/agent-markets.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render AgentUpdateShop out/full/agent-update-shop.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' &&remotion render AgentAuth out/full/agent-auth.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render AgentCMS out/full/agent-cms.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render ContentNegotiation out/full/content-negotiation.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}' && remotion render Assistant out/full/assistant.mp4 --props='{\"layout\":\"full\",\"theme\":\"dark\"}'"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.0",
@@ -14,7 +14,8 @@
     "@remotion/tailwind-v4": "^4.0.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "remotion": "^4.0.0"
+    "remotion": "^4.0.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.2",

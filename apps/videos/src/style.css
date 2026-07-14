@@ -38,6 +38,7 @@
   --color-gray-alpha-500: var(--ds-gray-alpha-500);
 
   --color-red-800: var(--ds-red-800);
+  --color-amber-300: var(--ds-amber-300);
   --color-amber-800: var(--ds-amber-800);
   --color-green-800: var(--ds-green-800);
 }
@@ -62,6 +63,7 @@
   --ds-gray-alpha-400: oklch(0 0 0 / 0.08);
   --ds-gray-alpha-500: oklch(0 0 0 / 0.21);
   --ds-red-800: oklch(58.19% 0.2482 25.15);
+  --ds-amber-300: oklch(95.93% 0.0636 90.52);
   --ds-amber-800: oklch(77.21% 0.1991 64.28);
   --ds-green-800: oklch(57.81% 0.1507 147.5);
 }
@@ -86,6 +88,7 @@
   --ds-gray-alpha-400: oklch(1 0 0 / 0.14);
   --ds-gray-alpha-500: oklch(1 0 0 / 0.24);
   --ds-red-800: oklch(58.01% 0.227 25.12);
+  --ds-amber-300: oklch(32.34% 0.0837 63.83);
   --ds-amber-800: oklch(77.21% 0.1991 64.28);
   --ds-green-800: oklch(57.81% 0.1776 147.5);
 }

@@ -1,62 +1,84 @@
 import { Img, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 
-import { fadeIn, riseIn } from "../lib/helpers";
+import { caretBlink, fadeIn, riseIn, typedChars, typingDuration } from "../lib/helpers";
 import { AvatarTommy } from "../lib/icons";
 import { FULL_CONTENT_DELAY, Stage, type StageLayout } from "../lib/stage";
 
 /*
- * Port of apps/docs/.../assistant-demo.tsx. The original is static; this
- * adds an entrance choreography (message pops in, results stagger) so it
- * reads as a conversation happening.
+ * Port of apps/docs/.../assistant-demo.tsx, choreographed as a conversation:
+ * the chat bar shows first, the question is typed into it, submit pops the
+ * message bubble, the assistant's reply streams in, then the results stagger.
  */
 
-// The chat bar shows first — it's what makes this read as a chat UI —
-// then the user message, then the results.
+// The light/dark messages must stay the same length: the typing marks are
+// module-level constants, computed once from the light variant.
+const MESSAGE_LIGHT = "Find me a white sneaker under $120";
+const MESSAGE_DARK = "Find me a black sneaker under $120";
+const INTRO = "I have found some options for you:";
+
+const FPS = 30;
+const CPS = 16;
+const INTRO_CPS = 30;
+
 const T = {
   input: 6,
-  bubble: 18,
-  intro: 46,
-  cards: 58,
-  cardStagger: 7,
+  type: 24,
 };
 
-export const ASSISTANT_DURATION = 210;
+const typeEnd = T.type + typingDuration(MESSAGE_LIGHT, FPS, CPS);
+const press = typeEnd + 8;
+const submit = press + 6;
+const intro = submit + 18;
+const introEnd = intro + typingDuration(INTRO, FPS, INTRO_CPS);
+const cards = introEnd + 10;
+const CARD_STAGGER = 7;
+
+export const ASSISTANT_DURATION = cards + 3 * CARD_STAGGER + 90;
 
 const shoes = [
-  { name: "Running", price: "$95", image: "sneakers/sneaker-1.png" },
-  { name: "Street", price: "$88", image: "sneakers/sneaker-2.png" },
-  { name: "Running", price: "$72", image: "sneakers/sneaker-3.png" },
-  { name: "Sport", price: "$60", image: "sneakers/sneaker-4.png" },
+  { name: "Running", price: "$95", image: "sneakers/sneaker-1" },
+  { name: "Street", price: "$88", image: "sneakers/sneaker-2" },
+  { name: "Running", price: "$72", image: "sneakers/sneaker-3" },
+  { name: "Sport", price: "$60", image: "sneakers/sneaker-4" },
 ];
 
 export const AssistantComposition = ({
   kicker = "Vercel Shop · AI Assistant",
   title = "A shopping assistant, built into the template",
   layout = "split",
+  theme = "light",
 }: {
   kicker?: string;
   title?: string;
   layout?: StageLayout;
+  theme?: "light" | "dark";
 }) => {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame() - (layout === "full" ? FULL_CONTENT_DELAY : 0);
 
+  const message = theme === "dark" ? MESSAGE_DARK : MESSAGE_LIGHT;
+  const chars = typedChars(frame, T.type, message, fps, CPS);
+  const isTyping = frame >= T.type && chars < message.length;
+  const isPressing = frame >= press && frame < submit;
+  const introChars = typedChars(frame, intro, INTRO, fps, INTRO_CPS);
+
   const bubble = spring({
-    frame: frame - T.bubble,
+    frame: frame - submit,
     fps,
     config: { damping: 16, stiffness: 220 },
     durationInFrames: 16,
   });
 
   return (
-    <Stage kicker={kicker} layout={layout} title={title} width={620}>
+    <Stage kicker={kicker} layout={layout} theme={theme} title={title} width={620}>
       <div className="w-full rounded-xl border border-gray-alpha-400 bg-background-100 p-4">
         <div className="flex flex-col gap-6">
-          {/* User message */}
+          {/* User message — pops in on submit; a fixed-height slot so the
+              layout doesn't jump while the question is still being typed */}
           <div
-            className="flex flex-col items-end gap-2"
+            className="flex h-[72px] flex-col items-end gap-2"
             style={{
-              opacity: frame >= T.bubble ? bubble : 0,
+              opacity: frame >= submit ? bubble : 0,
               transform: `scale(${0.92 + bubble * 0.08})`,
               transformOrigin: "top right",
             }}
@@ -66,7 +88,7 @@ export const AssistantComposition = ({
               <AvatarTommy className="size-5 rounded-full" />
             </div>
             <div className="relative rounded-2xl bg-gray-100 px-4 py-2 text-sm text-foreground">
-              Find me a white sneaker under $120
+              {message}
               <svg
                 aria-hidden
                 className="absolute -top-[7px] left-full -ml-3.5 text-gray-100"
@@ -82,9 +104,9 @@ export const AssistantComposition = ({
           </div>
 
           <div className="flex flex-col gap-3">
-            {/* Assistant intro */}
-            <div className="text-sm text-foreground" style={{ opacity: fadeIn(frame, T.intro) }}>
-              I have found some options for you:
+            {/* Assistant reply streams in */}
+            <div className="h-5 text-sm text-foreground">
+              {frame >= intro && INTRO.slice(0, introChars)}
             </div>
 
             {/* Product grid */}
@@ -93,10 +115,13 @@ export const AssistantComposition = ({
                 <div
                   className="flex flex-col gap-3 rounded-lg border border-gray-300 p-3"
                   key={`${shoe.name}-${i}`}
-                  style={riseIn(frame, T.cards + i * T.cardStagger, 10)}
+                  style={riseIn(frame, cards + i * CARD_STAGGER, 10)}
                 >
                   <div className="relative h-20 w-full overflow-hidden">
-                    <Img className="absolute inset-0 h-full w-full object-contain" src={staticFile(shoe.image)} />
+                    <Img
+                      className="absolute inset-0 h-full w-full object-contain"
+                      src={staticFile(`${shoe.image}${theme === "dark" ? "-dark" : ""}.png`)}
+                    />
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-foreground">{shoe.name}</span>
@@ -106,15 +131,27 @@ export const AssistantComposition = ({
               ))}
             </div>
 
-            {/* Input */}
+            {/* Input — the question is typed here, then it clears on submit */}
             <div
               className="flex items-center justify-between rounded-lg border border-gray-200 bg-background-200 p-2.5"
               style={{ opacity: fadeIn(frame, T.input) }}
             >
-              <span className="text-sm text-gray-600">Ask anything…</span>
+              <span className="text-sm">
+                {frame < submit && chars > 0 ? (
+                  <span className="text-foreground">{message.slice(0, chars)}</span>
+                ) : (
+                  <span className="text-gray-600">Ask anything…</span>
+                )}
+                <span
+                  aria-hidden
+                  className="ml-0.5 inline-block h-4 w-[5px] bg-foreground/70 align-middle"
+                  style={{ opacity: isTyping ? caretBlink(frame, fps) : 0 }}
+                />
+              </span>
               <button
                 aria-label="Send"
                 className="flex size-7 items-center justify-center rounded-md bg-gray-500 text-background-200"
+                style={{ transform: `scale(${isPressing ? 0.85 : 1})` }}
                 type="button"
               >
                 <svg className="size-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

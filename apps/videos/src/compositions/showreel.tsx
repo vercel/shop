@@ -8,7 +8,7 @@ import {
 } from "remotion";
 
 import type { StageLayout } from "../lib/stage";
-import { AgentComposition, agentDuration, agentSkills } from "./agent";
+import { AGENT_MARKETS_DURATION, AgentMarketsComposition } from "./agent-markets";
 import { AssistantComposition, ASSISTANT_DURATION } from "./assistant";
 import { CartComposition, CART_DURATION } from "./cart";
 import { CONTENT_NEGOTIATION_DURATION, ContentNegotiationComposition } from "./content-negotiation";
@@ -23,7 +23,7 @@ const END_CARD = 90;
 
 export const SHOWREEL_DURATION =
   TITLE_CARD +
-  agentDuration(agentSkills.markets!) +
+  AGENT_MARKETS_DURATION +
   CART_DURATION +
   CONTENT_NEGOTIATION_DURATION +
   ASSISTANT_DURATION +
@@ -33,10 +33,12 @@ const Card = ({
   kicker,
   headline,
   sub,
+  theme = "light",
 }: {
   kicker?: string;
   headline: string;
   sub?: string;
+  theme?: "light" | "dark";
 }) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
@@ -48,11 +50,16 @@ const Card = ({
   });
 
   return (
-    <AbsoluteFill className="bg-background-200 font-sans antialiased">
+    <AbsoluteFill className={`bg-background-200 font-sans antialiased ${theme === "dark" ? "dark" : ""}`}>
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: "radial-gradient(80% 60% at 50% 0%, oklch(1 0 0 / 0.9), transparent)" }}
+        style={{
+          background:
+            theme === "dark"
+              ? "radial-gradient(80% 60% at 50% 0%, oklch(1 0 0 / 0.05), transparent)"
+              : "radial-gradient(80% 60% at 50% 0%, oklch(1 0 0 / 0.9), transparent)",
+        }}
       />
       <div
         className="relative flex h-full w-full flex-col items-center justify-center gap-6 px-32 text-center"
@@ -78,32 +85,34 @@ const Card = ({
 export const ShowreelComposition = ({
   headline = "Production-ready Shopify storefront on Next.js",
   subtitle = "Commerce for the agentic era. Fast by default and built to be customized.",
-  url = "vercel-shop.labs.vercel.dev",
+  url = "vercel.shop",
   layout = "split",
+  theme = "light",
 }: {
   headline?: string;
   subtitle?: string;
   url?: string;
   layout?: StageLayout;
+  theme?: "light" | "dark";
 }) => (
   <Series>
     <Series.Sequence durationInFrames={TITLE_CARD}>
-      <Card headline={headline} kicker="Vercel Shop" sub={subtitle} />
+      <Card headline={headline} kicker="Vercel Shop" sub={subtitle} theme={theme} />
     </Series.Sequence>
-    <Series.Sequence durationInFrames={agentDuration(agentSkills.markets!)}>
-      <AgentComposition layout={layout} skillKey="markets" />
+    <Series.Sequence durationInFrames={AGENT_MARKETS_DURATION}>
+      <AgentMarketsComposition layout={layout} theme={theme} />
     </Series.Sequence>
     <Series.Sequence durationInFrames={CART_DURATION}>
-      <CartComposition layout={layout} />
+      <CartComposition layout={layout} theme={theme} />
     </Series.Sequence>
     <Series.Sequence durationInFrames={CONTENT_NEGOTIATION_DURATION}>
-      <ContentNegotiationComposition layout={layout} />
+      <ContentNegotiationComposition layout={layout} theme={theme} />
     </Series.Sequence>
     <Series.Sequence durationInFrames={ASSISTANT_DURATION}>
-      <AssistantComposition layout={layout} />
+      <AssistantComposition layout={layout} theme={theme} />
     </Series.Sequence>
     <Series.Sequence durationInFrames={END_CARD}>
-      <Card headline="Start with the template" sub={url} />
+      <Card headline="Start with the template" sub={url} theme={theme} />
     </Series.Sequence>
   </Series>
 );

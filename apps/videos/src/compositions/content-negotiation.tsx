@@ -8,7 +8,7 @@ import { FULL_CONTENT_DELAY, Stage, type StageLayout } from "../lib/stage";
 /* Frame-driven port of apps/docs/.../content-negotiation-demo.tsx. */
 
 const CURL_COMMAND =
-  'curl -H "Accept: text/markdown" https://vercel-shop.labs.vercel.dev/en-US/products/classic-tee';
+  'curl -H "Accept: text/markdown" https://vercel.shop/en-US/products/classic-tee';
 
 const MARKDOWN_RESPONSE = `# Classic Tee
 
@@ -50,10 +50,12 @@ export const ContentNegotiationComposition = ({
   kicker = "Vercel Shop · Agent-Native",
   title = "The same URL speaks Markdown to agents",
   layout = "split",
+  theme = "light",
 }: {
   kicker?: string;
   title?: string;
   layout?: StageLayout;
+  theme?: "light" | "dark";
 }) => {
   const { fps } = useVideoConfig();
   const frame = useCurrentFrame() - (layout === "full" ? FULL_CONTENT_DELAY : 0);
@@ -68,6 +70,7 @@ export const ContentNegotiationComposition = ({
       kicker={kicker}
       layout={layout}
       scale={layout === "split" ? 1.5 : 1.7}
+      theme={theme}
       title={title}
       width={640}
     >
@@ -80,7 +83,7 @@ export const ContentNegotiationComposition = ({
                 {CURL_COMMAND.slice(0, chars)}
                 <span
                   aria-hidden
-                  className="ml-0.5 inline-block h-3.5 w-[5px] bg-black/70 align-middle"
+                  className="ml-0.5 inline-block h-3.5 w-[5px] bg-foreground/70 align-middle"
                   style={{ opacity: isTyping ? caretBlink(frame, fps) : 0 }}
                 />
               </span>
