@@ -59,7 +59,7 @@ The handler is enabled by the `SHOPIFY_WEBHOOK_SECRET` environment variable, ver
 | `collections/create` | `collections-index`, `collection-{handle}`                                              |
 | `collections/update` | `collection-{handle}`                                                                   |
 | `collections/delete` | `collections-index`, `collection-{handle}`                                              |
-| `metaobjects/*`      | `cms:all` + type-specific tags (if using Shopify CMS)                                   |
+| `metaobjects/*`      | `metaobjects`, `metaobject-{handle}` (if you read metaobjects)                           |
 
 The handler relies on fine-grained tags: per-product tags stamped on product aggregates and sitemap shards, and per-collection tags stamped on collection reads, the all-collections listing, and sitemap shards. Create and delete also fire `products-index` or `collections-index` because those events change sitemap membership and page counts; `collections-index` additionally refreshes the all-collections listing. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
 

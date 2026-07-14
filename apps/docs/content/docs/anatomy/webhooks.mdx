@@ -26,7 +26,7 @@ A single route handles every supported topic. Shopify sets the topic on each req
 | `collections/create` | `collections-index`, `collection-{handle}`                                              |
 | `collections/update` | `collection-{handle}`                                                                   |
 | `collections/delete` | `collections-index`, `collection-{handle}`                                              |
-| `metaobjects/*`      | `cms:all` plus type-specific tags (see below)                                           |
+| `metaobjects/*`      | `metaobjects`, `metaobject-{handle}`                                                    |
 
 The handler never fires the broad `products` or `collections` tags. Those wrap _every_ read of their type and exist as manual break-glass levers (see below). It relies on fine-grained tags instead, which is sufficient because the reads in `lib/shopify/operations/` stamp each aggregate cache entry with the granular tag of every item it contains — `tagProducts()` adds a `product-{numericId}` tag per product on list/search/collection/recommendation reads, `getCollections`/`getCollectionsListing` add a `collection-{handle}` tag per collection, and sitemap shards add the handle tag for every product or collection they contain:
 
@@ -37,17 +37,11 @@ The handler never fires the broad `products` or `collections` tags. Those wrap _
 
 > **No `inventory_levels/*` branch.** The inventory webhook payload identifies an `inventory_item_id` and `location_id`, not a product — so it can't be scoped to a per-product tag without an extra lookup, and busting the catalog on every stock tick would destroy cache hit rates. The template intentionally omits this branch; availability propagates at cache expiry (or via any live, uncached reads you add). Registering the webhook anyway is harmless — it hits no branch and returns an empty `tagsInvalidated`.
 
+> **No `pages/*`, `blogs/*`, or `articles/*` branch.** Shopify exposes no webhook topics for Online Store pages, blogs, articles, or store policies — only metaobjects (the CMS) emit content webhooks — so there is nothing for the handler to catch. Those reads rely on cache lifetime instead: pages, blogs, articles, and policies all use `cacheLife("max")`, so they surface edits only via a manual `revalidateTag` purge or a redeploy. See [Content pages](/docs/anatomy/pages/content) for the temporary workaround.
+
 ### Metaobject tags
 
-Metaobject topics inspect the payload's `type` field to invalidate narrower CMS tags. The exact mapping follows the conventions used by [Shopify CMS](/docs/skills/enable-shopify-cms):
-
-| Metaobject `type`         | Additional tags                |
-| ------------------------- | ------------------------------ |
-| `cms_page`                | `cms:pages`, `cms:page:{slug}` |
-| `cms_homepage`            | `cms:homepage`                 |
-| `cms_section`, `cms_hero` | `cms:pages`, `cms:homepage`    |
-
-All metaobject topics also invalidate the broad `cms:all` tag as a safety net for unrecognized types.
+Metaobjects are tagged like every other resource: a broad `metaobjects` tag and a `metaobject-{handle}` tag built from the payload `handle` — no `type` inspection. Unlike the catalog, the handler _does_ fire the broad `metaobjects` tag (alongside the handle tag) because metaobjects are typically low-cardinality, so refreshing every metaobject read on any change is cheap and spares them from needing per-type index tags — the same trade the `articles` branch makes. The base template has no metaobject reads; these tags matter only if you read metaobjects yourself — tag those reads with `metaobjects` (and `metaobject-{handle}` where a handle is in scope) so this branch invalidates them.
 
 ## How the handler works
 
@@ -61,7 +55,7 @@ When a request arrives, the handler runs in this order:
 6. Calls `revalidateTag()` for each affected tag
 7. Returns `{ success, topic, tagsInvalidated }` for log inspection
 
-Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the generic `cms:all` tag before parsing, so it still fires on a parse failure. Product and collection create/delete topics likewise seed their narrow index tag before parsing, ensuring sitemap membership is refreshed even if the resource identifiers cannot be read. Update topics need a parseable `handle` or product ID to scope invalidation; malformed update payloads log and invalidate nothing rather than busting the whole catalog. Real Shopify webhooks carry parseable payloads, so this distinction mainly matters for malformed test posts.
+Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the broad `metaobjects` tag before parsing, so it still fires on a parse failure. Product and collection create/delete topics likewise seed their narrow index tag before parsing, ensuring sitemap membership is refreshed even if the resource identifiers cannot be read. Update topics need a parseable `handle` or product ID to scope invalidation; malformed update payloads log and invalidate nothing rather than busting the whole catalog. Real Shopify webhooks carry parseable payloads, so this distinction mainly matters for malformed test posts.
 
 > **Security note:** The secret is the enablement gate, not only a verification option. An unconfigured deployment exposes no active webhook processor; a configured deployment accepts only valid Shopify-signed requests.
 

@@ -66,7 +66,7 @@ export async function getShopPolicies({
   locale = defaultLocale,
 }: { locale?: string } = {}): Promise<ShopPolicy[]> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("max");
   cacheTag("policies");
 
   const country = getCountryCode(locale);

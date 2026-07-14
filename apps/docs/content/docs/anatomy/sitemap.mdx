@@ -24,7 +24,7 @@ The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `
 
 ## Cache behavior
 
-Product, collection, blog, and article page counts and resources use `cacheLife("max")`. Each resource shard carries the same handle-specific tag as its storefront page, so the corresponding webhook can refresh the affected shard and its `lastmod` value. Product and collection create/delete webhooks invalidate `products-index` or `collections-index`; the blog webhook integration should likewise invalidate `blogs-index` or `articles-index` when membership may have shifted. Page sitemap data uses `cacheLife("hours")` and the `pages` tag because Shopify does not expose Page webhook topics. The static shard reads configured policies through the same hourly `policies` cache used by policy pages and the footer.
+All resource page counts and shards use `cacheLife("max")`. Each product and collection shard carries the same handle-specific tag as its storefront page, so its webhook refreshes the affected shard and its `lastmod` value, and product/collection create/delete webhooks invalidate `products-index` or `collections-index` when membership shifts. Pages, blogs, and articles have no Shopify webhook topics, so their shards (tagged `pages`, `blogs`/`blogs-index`, and `articles`/`articles-index`) refresh only via a manual `revalidateTag` purge or a redeploy. The static shard reads configured policies through the same `policies` cache used by policy pages and the footer — also `cacheLife("max")` with no webhook, so it refreshes via the same manual purge or redeploy.
 
 ## Adding more resource types
 

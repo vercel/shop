@@ -9,7 +9,7 @@ The template renders Shopify's built-in editorial content without requiring a se
 - Shopify Pages render at `/pages/[handle]`.
 - Configured store policies render at `/policies/[handle]`.
 - Shopify blogs render at `/blogs/[blogHandle]`.
-- Blog articles render at `/blogs/[blogHandle]/[postHandle]`.
+- Blog articles render at `/blogs/[blogHandle]/[articleHandle]`.
 
 All route types use the active locale as Storefront API context and return `404` for unknown handles. Pages, policies, and articles render Shopify's sanitized rich-text HTML in the shared prose layout. There is intentionally no `/blogs` index route; storefront navigation links to individual blogs such as `/blogs/news`.
 
@@ -17,7 +17,7 @@ All route types use the active locale as Storefront API context and return `404`
 
 Create and edit Pages under **Shopify Admin → Online Store → Pages**. The route reads the page title, HTML body, update timestamp, and SEO fields. When an SEO title or description is absent, it falls back to the page title and body summary.
 
-The page read uses plain `"use cache"` with `cacheLife("hours")`, tagged with both `pages` and `page-{handle}`. This keeps stable page content in the prerendered shell while allowing Shopify Admin edits to propagate on a bounded schedule. Shopify does not expose Page webhook topics.
+The page read uses plain `"use cache"` with `cacheLife("max")`, tagged with both `pages` and `page-{handle}`. Like blogs and articles, pages are long-lived: Shopify does not expose Page webhook topics, so edits surface only via a manual `revalidateTag` purge or a redeploy (see the workaround below).
 
 Page handles come from Shopify. A page with handle `about-us`, for example, is available at `/pages/about-us`.
 
@@ -27,13 +27,15 @@ Configure policies under **Shopify Admin → Settings → Policies**. Shopify ex
 
 The footer automatically links every configured policy. Policies are also included in `/sitemap/static.xml` alongside the home page.
 
-Policy reads use plain `"use cache"` with `cacheLife("hours")` and the `policies` tag. Shopify does not expose a policy-specific webhook topic, so policy pages, footer links, and sitemap entries refresh on that bounded schedule.
+Policy reads use plain `"use cache"` with `cacheLife("max")` and the `policies` tag. Shopify does not expose a policy-specific webhook topic, so — like pages, blogs, and articles — policy pages, footer links, and sitemap entries refresh only via a manual `revalidateTag("policies", { expire: 0 })` purge or a redeploy (see the workaround below).
 
 ## Blogs and articles
 
 Create blogs and articles under **Shopify Admin → Content → Blog posts**. Each blog route lists its latest articles with publication date, excerpt, and optional image. Article routes render the title, author, publication date, image, and HTML body. For example, the `news` blog and its `hello-world` article resolve to `/blogs/news` and `/blogs/news/hello-world`.
 
-Blog and article reads use plain `"use cache"` with `cacheLife("max")`, broad `blogs` and `articles` tags, and handle-specific `blog-{handle}` or `article-{blogHandle}-{postHandle}` tags. This matches product caching: content stays long-lived, ready for Shopify webhooks to invalidate the affected resource tags. The webhook integration should invalidate an article's parent blog tag so listings refresh, while create and delete events should invalidate the relevant index tag for sitemap membership changes.
+Blog and article reads use plain `"use cache"` with `cacheLife("max")`, broad `blogs` and `articles` tags, and handle-specific `blog-{handle}` or `article-{blogHandle}-{articleHandle}` tags. Unlike products and collections, Shopify exposes no webhook topics for blogs, articles, or pages (see [Webhooks](/docs/anatomy/webhooks)), so these tags have no automatic invalidation signal — `cacheLife("max")` blog and article content stays cached until it is purged manually or by a redeploy.
+
+> **Temporary workaround.** Until Shopify ships content webhooks (or you add a poller), force an edit to surface by calling `revalidateTag` for the affected tag from a route handler or server action you trigger yourself — `revalidateTag("articles", { expire: 0 })` after editing an article, or `revalidateTag("blogs", { expire: 0 })` / `revalidateTag("pages", { expire: 0 })` / `revalidateTag("policies", { expire: 0 })` for blog, page, or policy edits. A redeploy also starts from a cold cache. Pages, blogs, articles, and policies all use `cacheLife("max")`, so they all need the manual purge.
 
 ## Localization
 
