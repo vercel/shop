@@ -5,7 +5,7 @@
     "turbo": "2.10.4"
   },
   "name": "@vercel/shop",
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.13.0",
   "private": true,
   "scripts": {
     "build": "turbo run build",
