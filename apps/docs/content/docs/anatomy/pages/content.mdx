@@ -4,47 +4,32 @@ description: Shopify-managed Pages, policies, blogs, and articles rendered as lo
 type: guide
 ---
 
-The template renders Shopify's built-in editorial content without requiring a separate CMS model:
+<ContentBrowser />
+
+The template renders Shopify's built-in editorial content — Pages, policies, blogs, and articles — as storefront routes, without requiring a separate CMS.
 
 - Shopify Pages render at `/pages/[handle]`.
 - Configured store policies render at `/policies/[handle]`.
-- Shopify blogs render at `/blogs/[blogHandle]`.
-- Blog articles render at `/blogs/[blogHandle]/[articleHandle]`.
+- Shopify blogs render at `/blogs/[blogHandle]`, with articles at `/blogs/[blogHandle]/[articleHandle]`.
 
-All route types use the active locale as Storefront API context and return `404` for unknown handles. Pages, policies, and articles render Shopify's sanitized rich-text HTML in the shared prose layout. There is intentionally no `/blogs` index route; storefront navigation links to individual blogs such as `/blogs/news`.
+All route types use the active locale as Storefront API context and return `404` for unknown handles. There is intentionally no `/blogs` index route; storefront navigation links to individual blogs such as `/blogs/news`.
 
-## Shopify Pages
+## How it works
 
-Create and edit Pages under **Shopify Admin → Online Store → Pages**. The route reads the page title, HTML body, update timestamp, and SEO fields. When an SEO title or description is absent, it falls back to the page title and body summary.
+**Shopify's editorial content, not a separate CMS model.** Pages, policies, blogs, and articles come straight from Shopify's native content types (Admin → Online Store → Pages, Settings → Policies, Content → Blog posts) and render through the shared prose layout. There's no additional content schema to maintain — anything editable in Shopify Admin is editable here.
 
-The page read uses plain `"use cache"` with `cacheLife("max")`, tagged with both `pages` and `page-{handle}`. Like blogs and articles, pages are long-lived: Shopify does not expose Page webhook topics, so edits surface only via a manual `revalidateTag` purge or a redeploy (see the workaround below).
+**Long-lived cache, manual invalidation.** Every read uses plain `"use cache"` with `cacheLife("max")`, tagged by content type (`pages`, `policies`, `blogs`, `articles`) and by handle. Unlike products and collections, Shopify exposes no webhook topics for this content (see [Webhooks](/docs/anatomy/webhooks)), so a `cacheLife("max")` read has no automatic invalidation signal — it stays cached until purged manually or by a redeploy.
 
-Page handles come from Shopify. A page with handle `about-us`, for example, is available at `/pages/about-us`.
+> **Temporary workaround.** Until Shopify ships content webhooks (or you add a poller), force an edit to surface by calling `revalidateTag` for the affected tag yourself — `revalidateTag("pages", { expire: 0 })`, `revalidateTag("policies", { expire: 0 })`, `revalidateTag("blogs", { expire: 0 })`, or `revalidateTag("articles", { expire: 0 })` — from a route handler or server action you trigger after editing. A redeploy also starts from a cold cache.
 
-## Store policies
+## Out of the box
 
-Configure policies under **Shopify Admin → Settings → Policies**. Shopify exposes configured contact information, legal notice, privacy, refund, shipping, terms of sale, and terms of service policies through the Storefront API. Only policies with content are returned, so unconfigured policy URLs return `404` rather than rendering empty pages.
+- **Shopify Pages** — title, sanitized rich-text HTML body, and SEO fields, falling back to the page title and body summary when SEO fields are absent.
+- **Store policies** — contact information, legal notice, privacy, refund, shipping, terms of sale, and terms of service; only policies with content are returned, so unconfigured policy URLs `404` instead of rendering empty. The footer automatically links every configured policy.
+- **Blogs and articles** — each blog lists its latest articles with date, excerpt, and optional image; articles render title, author, date, image, and body.
+- **Localization** — every read passes the locale's country and language through Shopify's `@inContext` directive; the Markets and i18n skills can move these routes under locale-aware routing without changing their data contract.
+- **SEO and discovery** — canonical and Open Graph metadata from Shopify's SEO fields, plus paginated `pages-{n}`, `blogs-{n}`, and `articles-{n}` sitemap shards from Shopify's native sitemap query. Policies have no sitemap resource type of their own, so the template adds configured policy URLs to the static shard instead.
 
-The footer automatically links every configured policy. Policies are also included in `/sitemap/static.xml` alongside the home page.
+## Common customizations
 
-Policy reads use plain `"use cache"` with `cacheLife("max")` and the `policies` tag. Shopify does not expose a policy-specific webhook topic, so — like pages, blogs, and articles — policy pages, footer links, and sitemap entries refresh only via a manual `revalidateTag("policies", { expire: 0 })` purge or a redeploy (see the workaround below).
-
-## Blogs and articles
-
-Create blogs and articles under **Shopify Admin → Content → Blog posts**. Each blog route lists its latest articles with publication date, excerpt, and optional image. Article routes render the title, author, publication date, image, and HTML body. For example, the `news` blog and its `hello-world` article resolve to `/blogs/news` and `/blogs/news/hello-world`.
-
-Blog and article reads use plain `"use cache"` with `cacheLife("max")`, broad `blogs` and `articles` tags, and handle-specific `blog-{handle}` or `article-{blogHandle}-{articleHandle}` tags. Unlike products and collections, Shopify exposes no webhook topics for blogs, articles, or pages (see [Webhooks](/docs/anatomy/webhooks)), so these tags have no automatic invalidation signal — `cacheLife("max")` blog and article content stays cached until it is purged manually or by a redeploy.
-
-> **Temporary workaround.** Until Shopify ships content webhooks (or you add a poller), force an edit to surface by calling `revalidateTag` for the affected tag from a route handler or server action you trigger yourself — `revalidateTag("articles", { expire: 0 })` after editing an article, or `revalidateTag("blogs", { expire: 0 })` / `revalidateTag("pages", { expire: 0 })` / `revalidateTag("policies", { expire: 0 })` for blog, page, or policy edits. A redeploy also starts from a cold cache. Pages, blogs, articles, and policies all use `cacheLife("max")`, so they all need the manual purge.
-
-## Localization
-
-All content operations pass the locale's country and language through Shopify's `@inContext` directive. The default single-locale storefront therefore reads `en-US`; the Markets and i18n skills can move the routes under locale-aware routing without changing their data contract.
-
-Translations must also be published in Shopify. If Shopify has no translation for the active language, its normal Storefront API fallback behavior applies.
-
-## SEO and discovery
-
-Page metadata uses Shopify's page SEO fields and emits canonical and Open Graph metadata. Policies use their Shopify title and canonical policy URL. Blogs use their Shopify SEO title and description, while articles add article Open Graph metadata and use the article image when one is available.
-
-The sitemap index includes paginated `pages-{n}`, `blogs-{n}`, and `articles-{n}` shards from Shopify's native sitemap query. Policies have no equivalent sitemap resource type, so the template adds configured policy URLs to the static shard.
+The template's content routes assume Shopify Admin as the source of truth. If a project needs richer authoring than Shopify Pages and blogs offer — structured layouts, custom fields, editor previews — the natural extension is swapping in a headless CMS (Sanity, Contentful, Builder.io, etc.) behind the same route contracts, fetching from the CMS instead of `getPage` / `getBlog` while keeping the caching, SEO, and sitemap patterns above. This isn't wired up today, but the route boundaries are built to make that swap contained rather than a rewrite.
