@@ -4,31 +4,29 @@ description: A sitemap index plus paged child sitemaps backed by Shopify's Store
 type: guide
 ---
 
-The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `/sitemap/{shard}.xml`. Each child holds up to 250 entries — Shopify's Storefront `sitemap(type:)` query computes the pagination, so the storefront just iterates.
+The storefront exposes a sitemap index at `/sitemap.xml` and paged children at `/sitemap/{shard}.xml`. Each child holds up to 250 entries — Shopify's Storefront `sitemap(type:)` query computes the pagination, so the storefront just iterates. `robots.ts` points crawlers at `/sitemap.xml`; that URL alone is enough to discover every product, collection, Shopify Page, blog, article, and configured policy.
 
-`robots.ts` points crawlers at `/sitemap.xml`; that URL alone is enough to discover every product, collection, Shopify Page, blog, article, and configured policy.
+## How it works
 
-## URLs
+**Shopify computes pagination; the storefront just iterates and shards.** Each resource type gets its own paged shards (`products-{n}`, `collections-{n}`, and so on), `{n}` 1-indexed and running to the `pagesCount` Shopify returns for that type. The index route lists every child shard so crawlers only need one entry point.
+
+**Cache invalidation piggybacks on the same handle tags as storefront pages.** All resource page counts and shards use `cacheLife("max")`. Each product and collection shard carries the same handle-specific tag as its storefront page, so its [webhook](/docs/anatomy/webhooks) refreshes the affected shard and its `lastmod` value alongside the page itself, and product/collection create/delete webhooks invalidate `products-index` or `collections-index` when membership shifts. Pages, blogs, and articles have no Shopify webhook topics, so their shards (tagged `pages`, `blogs`/`blogs-index`, and `articles`/`articles-index`) refresh only via a manual `revalidateTag` purge or a redeploy — the static shard's policy entries share that same limitation through the `policies` cache tag used by policy pages and the footer.
+
+## Out of the box
 
 | URL                            | Contents                                  |
-| ------------------------------ | ----------------------------------------- |
-| `/sitemap.xml`                 | Sitemap index listing every child shard   |
-| `/sitemap/static.xml`          | Home page and configured Shopify policies |
-| `/sitemap/products-{n}.xml`    | Up to 250 products per shard              |
-| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard           |
-| `/sitemap/pages-{n}.xml`       | Up to 250 Shopify Pages per shard         |
-| `/sitemap/blogs-{n}.xml`       | Up to 250 Shopify blogs per shard         |
-| `/sitemap/articles-{n}.xml`    | Up to 250 Shopify articles per shard      |
+| ------------------------------ | ------------------------------------------ |
+| `/sitemap.xml`                 | Sitemap index listing every child shard    |
+| `/sitemap/static.xml`          | Home page and configured Shopify policies  |
+| `/sitemap/products-{n}.xml`    | Up to 250 products per shard               |
+| `/sitemap/collections-{n}.xml` | Up to 250 collections per shard            |
+| `/sitemap/pages-{n}.xml`       | Up to 250 Shopify Pages per shard          |
+| `/sitemap/blogs-{n}.xml`       | Up to 250 Shopify blogs per shard          |
+| `/sitemap/articles-{n}.xml`    | Up to 250 Shopify articles per shard       |
 
-`{n}` is 1-indexed and runs to the `pagesCount` Shopify returns for each type.
+## Common customizations
 
-## Cache behavior
-
-All resource page counts and shards use `cacheLife("max")`. Each product and collection shard carries the same handle-specific tag as its storefront page, so its webhook refreshes the affected shard and its `lastmod` value, and product/collection create/delete webhooks invalidate `products-index` or `collections-index` when membership shifts. Pages, blogs, and articles have no Shopify webhook topics, so their shards (tagged `pages`, `blogs`/`blogs-index`, and `articles`/`articles-index`) refresh only via a manual `revalidateTag` purge or a redeploy. The static shard reads configured policies through the same `policies` cache used by policy pages and the footer — also `cacheLife("max")` with no webhook, so it refreshes via the same manual purge or redeploy.
-
-## Adding more resource types
-
-The template scopes paginated Shopify sitemaps to products, collections, Pages, blogs, and articles. Shopify's `SitemapType` enum also covers `METAOBJECT`. Both routes name the supported types explicitly, so adding one touches three places:
+**Adding a resource type Shopify's sitemap API supports but the template doesn't shard yet** — the template scopes paginated sitemaps to products, collections, Pages, blogs, and articles, but Shopify's `SitemapType` enum also covers `METAOBJECT`. Both routes name the supported types explicitly, so adding one touches three places:
 
 1. **`lib/shopify/operations/sitemap.ts`** — extend the `ShopifySitemapType` union.
 2. **`app/sitemap.xml/route.ts`** — fetch the new type's `getShopifySitemapPagesCount(...)` and spread its `{type}-{n}` ids into the index alongside the product and collection shards. The index lists only what you add here — it does not discover new types on its own.
