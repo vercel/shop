@@ -6,84 +6,24 @@ type: guide
 
 <PLPBrowser />
 
-The PLP covers two routes - `/collections/[handle]` for browsing a collection and `/search` for query-based product search. Both share the same grid, filtering, sorting, and infinite scroll components.
+The Product Listing Page (PLP) covers two routes — `/collections/[handle]` for browsing a collection and `/search` for query-based results. Both share the same grid, filtering, sorting, and infinite scroll.
 
-## Rendering strategy
+## How it works
 
-The collection PLP splits, like the [PDP](/docs/anatomy/pages/pdp), between what bakes into the static prerender and what streams per request. Collection metadata is fetched with `getCollection` — plain `"use cache"`, `cacheLife("max")`, and a `collection-{handle}` tag — and **awaited at the top of the page**, so the collection header (title, description, JSON-LD) is rendered into the **static shell** as a single, coherent copy.
+Two decisions shape the PLP.
 
-Two structural choices keep that copy coherent. The resolved collection is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the header at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — a React hydration mismatch and copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag`.
+**Static header, live grid.** Collection metadata (title, description, image) is awaited at the top of the page and baked into the static shell, the same pattern as the [PDP](/docs/anatomy/pages/pdp). The product grid is the opposite: it's read live from Shopify on every request, deliberately uncached. Caching it produced duplicate products at page boundaries, because two cached cursor pages could be snapshotted at different times and drift out of order. Reading every page live keeps a scroll session's cursors consistent. `/search` has no cacheable header at all — its body is entirely query-driven — so it skips the static-shell step altogether.
 
-The dynamic inputs are the filter, sort, and cursor `searchParams`. Rather than block the whole page on them, the route passes the `searchParams` promise — unawaited — into the results data. The header renders from the collection resolved at the top; the toolbar's result count, filter sidebar, sort select, and the product grid each sit inside their own Suspense boundary so changing a filter or sort streams the affected slot without skeletonizing the header.
+**Filter, sort, and cursor state live in the URL.** Changing a filter or sort is a `searchParams` update, not client state, so results are shareable and bookmarkable. `useOptimistic` shows the new filter state instantly while the server request is in flight, and `useTransition` keeps sort changes non-blocking — so the UI feels instant even though every result comes from a live request.
 
-The product-grid read is deliberately **uncached** — `fetchCollectionProducts` (and `fetchSearchIndexProducts` for `/collections/all` and `/search`) calls Shopify live on every request, inside its Suspense boundary. Caching it was the source of a duplicate-at-the-page-boundary bug: the first page and each cursor page were stored as independent `cacheLife("max")` snapshots taken at different times, so a first page's `endCursor` could be resolved against a later, drifted ordering and re-emit the boundary product as a duplicate. Reading every page live keeps the cursor handoff consistent within a scroll session. The facet reads are uncached as well (`fetchSearchFacets`): on `/collections/[handle]` the facet counts already ride along inside the live product query, and `/collections/all` and `/search` now read facets live too — so the filter list reflects current Search & Discovery config (newly enabled filters, swatch setup) instead of a long-lived `cacheLife("max")` snapshot, and all three browse routes behave consistently. The collection header stays cached. The cached wrappers `getCollectionProducts` / `searchIndexProducts` / `getSearchFacets` remain for non-paginated consumers (the `/md` routes and agent tools).
+## Out of the box
 
-The `/search` route is different: its body is fully request-driven (the query lives entirely in `searchParams`), so there is no cacheable collection body to bake into a shell, and it does not follow this await-at-top pattern.
+- **Faceted filtering** — checkbox filters for size, color, vendor, type, and tags, plus a price range slider with presets.
+- **Swatch filters** — color (or other swatch-enabled) filters render as a color/image grid instead of a text list, driven by Shopify's filter presentation data.
+- **Sorting** — all eight Shopify sort keys on collections; search excludes name and date, which Shopify's search sort doesn't support.
+- **Infinite scroll** — cursor-based pagination that loads more products as the user scrolls, with duplicate protection against a live ranking shift mid-scroll.
+- **Toolbar** — filter trigger, result count, and sort dropdown above the grid.
+- **Predictive search** — suggestion chips and product results as the user types, from the nav search modal.
+- **Structured data** — Collection JSON-LD on collection pages.
 
-## Product grid
-
-Products display in a responsive grid: 2 columns on mobile, 3 on tablet, 4 on desktop. During filter or sort transitions, a pending overlay dims the grid to signal loading.
-
-Each product renders as a card with the featured image (with hover slideshow on desktop), title, price, compare-at price, and availability status.
-
-## Filtering
-
-A filter sidebar provides multi-select faceted filters for:
-
-- **Size, Color, Vendor, Product Type, Tags** - checkbox-based multi-select
-- **Price range** - slider with presets (Under \$50, \$50–\$100, \$100–\$200, Over \$200)
-
-> **Shopify limitation:** Price filtering works only when the **Price** filter is enabled in Shopify's Search & Discovery app. The Storefront API advertises and applies only filters enabled for the store; adding `filter.v.price.gte` or `filter.v.price.lte` to a URL does not enable price filtering, and Shopify can ignore those inputs otherwise. See Shopify's [product filtering requirements](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/products-collections/filter-products#requirements).
-
-Filters whose Shopify `presentation` is `SWATCH` (typically Color) render as a grid of color/image swatches via the `Swatch` primitive (`components/ui/swatch.tsx`) instead of the text list — `presentation` and each value's `swatch { color, image }` come straight from the Storefront API. All other filters use the text list.
-
-Active filters appear as badges with remove buttons. Filter state is encoded in URL search params using Shopify's standard format (`?filter.v.option.color=red&filter.v.price.gte=10&filter.v.price.lte=100`) so filtered views are shareable and compatible with Shopify themes.
-
-Filters use `useOptimistic` for instant UI feedback while the server request is in flight, coordinated through a `FilterTransitionProvider` context. On mobile, filters are accessible through a sheet overlay triggered from the toolbar.
-
-The filter UI primitives (checkboxes, price slider, section headers) are extracted into `filter-primitives.tsx` for reuse, while the async server-side filter data fetching lives in `filter-sidebar.tsx`.
-
-## Sorting
-
-A select dropdown offers sort options. Collection pages support all eight:
-
-- Best Matches (default)
-- Best Selling
-- Name: A to Z
-- Name: Z to A
-- Price: Low to High
-- Price: High to Low
-- Date: Old to New
-- Date: New to Old
-
-The search page excludes name and date sorts because Shopify's `SearchSortKeys` does not support them.
-
-Sort changes use `useTransition` for non-blocking navigation.
-
-## Infinite scroll
-
-Products load progressively using an `InfiniteProductGrid` component backed by `IntersectionObserver`. When the user scrolls near the bottom, a server action fetches the next page using Shopify's cursor-based pagination (`endCursor`). That load-more read is uncached, like the initial grid (see [Rendering strategy](#rendering-strategy)), so consecutive pages come from consistent snapshots. A loading indicator appears while the next batch loads.
-
-The cursor resets automatically when filters or sort change. Each batch renders [product cards](/docs/anatomy/product-card) inline using the same card primitives as the initial grid. As a final safeguard against a ranking shift mid-scroll, the grid tracks already-rendered product ids and skips any duplicate a live cursor page might surface.
-
-## Toolbar
-
-A `CollectionToolbar` component sits above the grid and contains:
-
-- **Filter sheet trigger** — opens the filter sidebar (with active filter count badge)
-- **Result count** — visible on desktop, hidden on mobile
-- **Sort dropdown** — the sort select control
-
-## Collection pages
-
-The `/collections/[handle]` route resolves collection metadata (title, description, image, SEO) at the top of the page so the header bakes into the static shell (see [Rendering strategy](#rendering-strategy)), then streams the products keyed on the request's filter/sort/cursor `searchParams`. Collection metadata is cached with plain `"use cache"`, `cacheLife("max")`, and tagged for granular revalidation (`collection-{handle}`).
-
-Products within a collection are fetched via `getCollectionProducts()`, which accepts Shopify `ProductFilter[]` for server-side filtering by variant options, price, vendor, type, tags, and metafields.
-
-> **Note:** Filters are driven by Shopify's `ProductFilter` type and the filters enabled in Search & Discovery. Adding a supported metafield filter requires configuring it in Shopify as well as mapping its URL input to `ProductFilter` in `lib/shopify/operations/products.ts`; changing the query alone does not enable the filter.
-
-## Search page
-
-The `/search` route accepts a `q` query parameter and combines it with the same filter, sort, and infinite scroll controls. The search page displays a heading with the query and shows a "no results" message with i18n support when the query returns empty. Predictive search is available from the navbar search modal, which shows suggestion chips and product results as the user types.
-
-The toolbar, sort select, mobile filter sheet, filter primitives, transition context, search results layout, and product card live alongside these in `components/collections/`, `components/search/`, and `components/product-card/`.
+None of the PLP's features are toggled in `shop.config.ts` today — they ship on for every storefront.
