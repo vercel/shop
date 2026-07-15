@@ -8,29 +8,26 @@ prerequisites:
 
 This page covers the Shopify admin configuration the PDP expects. For how the page renders and how variant selection works, see [Anatomy → PDP](/docs/anatomy/pages/pdp).
 
-## Basic setup
+## How it works
 
-A product needs a **title** and **description** (rendered as HTML via `descriptionHtml`), at least one **variant** (single-option products still get a default variant), and a **featured image** plus up to 10 media items. The PDP shell fetches options and Shopify's encoded variant-availability data rather than the full variant list, resolving the selected variant per request from its options; the AI agent and markdown routes fetch the full variant list (up to 250) via `getProductWithVariants`.
+**A product needs a title, description, one variant, and a featured image.** `descriptionHtml` renders as the body copy; even single-option products get a default variant. The PDP shell fetches product options and Shopify's encoded variant-availability data rather than the full variant list, resolving the selected variant per request from its options — the AI agent and markdown routes fetch the full variant list (up to 250) via `getProductWithVariants` instead.
 
-Products must belong to at least one collection to appear on collection listing pages.
+**Swatches, SEO, and taxonomy fall back gracefully when unset.** A product option with swatch data (a hex color or swatch image, read from `optionValues.swatch`) renders as color swatches; without it, the option renders as a standard text picker. `seo.title`/`seo.description` populate the page title and Open Graph tags when set, falling back to the product title and description otherwise. Product Taxonomy category (up to 3 levels) feeds structured data when configured under a product's **Category** field.
 
-## Color swatches
+**Related and complementary products come from two different Shopify systems.** Related products use Shopify's automatic recommendation API (purchase history and similarity) — nothing to configure. Complementary products ("Pairs Well With") are **configured by hand** per product in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app's **Product recommendations** settings; a product with none configured renders nothing.
 
-A product option with swatch data (a hex color or swatch image, read from `optionValues.swatch`) renders as color swatches instead of text buttons. Configure it in Shopify admin: edit a product → open an option like "Color" → assign a swatch color or image to each value. Options without swatch data fall back to standard text pickers.
+**Bundles publish to a separate sales channel from the storefront.** The Shopify Bundles app publishes to **Online Store** only, but the template reads from the **Headless** channel — a bundle that 404s on the storefront while showing fine in admin is almost always missing from Headless.
 
-## SEO fields
+## Out of the box
 
-`seo.title` and `seo.description` populate the page `<title>`/meta description and Open Graph tags when set; otherwise the template falls back to the product title and description. Product Taxonomy category (up to 3 levels, set under a product's **Category** field) feeds structured data.
+- **Basic fields** — title, `descriptionHtml`, variants, featured image, and up to 10 media items (images or videos). Products must belong to at least one collection to appear on collection listing pages.
+- **Color swatches** — configure in Shopify admin: edit a product → open an option like "Color" → assign a swatch color or image to each value.
+- **SEO fields** — `seo.title` and `seo.description`, editable per product.
+- **Related products** — Shopify's automatic recommendation API. On by default; disable with `pdp.relatedProducts.enabled: false` in `shop.config.ts`.
+- **Complementary products** — hand-curated in the Search & Discovery app. On by default; disable with `pdp.complementaryProducts.enabled: false`.
+- **Bundles** — fixed bundles (e.g. from the free **Shopify Bundles** app) render contents and add to cart normally via `components` (a bundle's items and quantities) and `groupedBy` (up to 10 bundles containing the current product). Disable with `pdp.bundles.enabled: false`.
 
-## Recommendations
+## Common customizations
 
-- **Related products** — Shopify's automatic recommendation API (purchase history and similarity). On by default; disable with `pdp.relatedProducts.enabled: false` in `shop.config.ts`.
-- **Complementary products** — the merchant-curated "Pairs Well With" list, powered by `productRecommendations(intent: COMPLEMENTARY)`. Unlike related products, these are **configured by hand** per product in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app's **Product recommendations** settings; a product with none configured renders nothing. Disable with `pdp.complementaryProducts.enabled: false`.
-
-## Bundles
-
-The template renders Shopify [product bundles](https://help.shopify.com/en/manual/products/bundles) from the Storefront API's variant-level relationships: `components` (a fixed bundle's items and quantities), `groupedBy` (up to 10 bundles containing the current product), and `requiresComponents` (marks a customized bundle that needs shopper-selected components). Disable with `pdp.bundles.enabled: false`.
-
-Fixed bundles (e.g. from the free **Shopify Bundles** app) render and add to cart normally. A customized bundle (`requiresComponents` set, no fixed `components`) stays disabled in the buy buttons until you build a component picker that sends selections through `CartLineInput.parent`.
-
-> **Publish bundles to your Headless channel.** Shopify Bundles publishes to **Online Store** only; the template reads from **Headless**. A bundle that 404s on the storefront but looks fine in admin is almost always missing from Headless — add it under the product's **Publishing** section. See [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
+- **Customized bundles** — a bundle whose parent sets `requiresComponents` but has no fixed `components` stays disabled in the buy buttons until you build a component picker that sends shopper selections through `CartLineInput.parent`.
+- **Bundles not appearing** — publish the bundle to the **Headless** channel under the product's **Publishing** section. See [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
