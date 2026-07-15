@@ -153,70 +153,12 @@ Check the transform in lib/shopify/transforms/product.ts.
 
 ## Try it yourself
 
-Each one is a single agent prompt - describe what you want and let the agent handle the implementation.
+Ideas worth a single agent prompt - describe the outcome and let the agent work out the implementation.
 
-- **Recently viewed products** — a horizontal carousel of the last few products a shopper visited.
-
-  ```
-  Add a "Recently Viewed" section to the bottom of the PDP.
-  It should display the last 4 products the user visited as a horizontal carousel.
-  Store the viewed product handles in localStorage.
-  Only show the section when there are at least 2 items.
-  ```
-
-- **Narrower product grid** — 3 columns instead of 4 on desktop.
-
-  ```
-  Change the product grid from 4 columns to 3 on desktop. Keep 2 columns on mobile.
-  ```
-
+- **Recently viewed** — a carousel of the last few products a shopper visited, backed by `localStorage`.
+- **Narrower product grid** — 3 columns instead of 4 on desktop, without touching the mobile layout.
 - **Back to top button** — appears once the shopper scrolls past the fold.
-
-  ```
-  Add a "Back to top" button that appears when the user scrolls past the fold.
-  Use smooth scrolling. Place it in the bottom-right corner.
-  ```
-
-- **Promotional banner** — a dismissible banner above the nav, driven by a metafield.
-
-  ```
-  Add a dismissible promotional banner above the navigation.
-  Store the dismissed state in localStorage so it stays hidden.
-  The banner text should come from a "banner_text" metafield on the shop object.
-  ```
-
-- **Product reviews from metafields** — no third-party service, just a metafield.
-
-  ```
-  Add a reviews section below recommendations on the PDP.
-  Use a "reviews" JSON metafield on each product with an array of
-  { rating, author, text, date } objects.
-  Show average star rating, individual reviews, and "No reviews yet" when empty.
-  ```
-
-- **Third-party reviews integration** — Judge.me instead of a metafield.
-
-  ```
-  Integrate Judge.me for product reviews.
-  Use their public API to fetch reviews by product handle.
-  Add a reviews section below recommendations on the PDP.
-  Show average rating in the product card on collection pages.
-  ```
-
-- **Wishlist** — heart icons, a saved-products page, synced across tabs.
-
-  ```
-  Add a wishlist feature using localStorage.
-  Add a heart icon to each product card and the PDP buy section.
-  Create a /wishlist page that displays saved products in the same grid as collections.
-  Sync the wishlist state across tabs.
-  ```
-
-- **Swap search providers** — Algolia instead of built-in Shopify search.
-
-  ```
-  Replace the built-in Shopify search with Algolia.
-  Use the Algolia InstantSearch React library.
-  Index products from Shopify and keep the existing filter sidebar UI.
-  Fall back to Shopify search if Algolia is not configured.
-  ```
+- **Promotional banner** — dismissible, driven by a metafield on the shop object.
+- **Product reviews** — from a metafield, or integrated with a service like Judge.me.
+- **Wishlist** — heart icons on cards and the PDP, a saved-products page, synced across tabs via `localStorage`.
+- **Swap search providers** — Algolia instead of built-in Shopify search, same filter sidebar.
