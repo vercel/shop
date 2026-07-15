@@ -188,10 +188,9 @@
     "copyright": "© {name}. All rights reserved."
   },
   "home": {
-    "ctaText": "Shop Now",
     "headline": "Agentic Infrastructure for Commerce",
     "productsTitle": "Products",
-    "subheadline": "A production-ready, agent-friendly Shopify storefront built on Next.js."
+    "subheadline": "An agent-friendly Shopify storefront built with Next.js and Hydrogen."
   },
   "nav": {
     "account": "Account",
