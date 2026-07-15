@@ -1,109 +1,31 @@
 ---
 title: Product Detail Page (PDP)
-description: Individual product pages with variants, media, and add-to-cart.
+description: A single product page with variants, media, and add-to-cart.
 type: guide
 ---
 
 <PDPBrowser />
 
-The Product Detail Page renders a single product with variant selection, an image gallery, buy actions, and recommendations. It is entirely server-rendered - variant selection happens through navigation, not client-side state.
+The Product Detail Page (PDP) is a single product page — title, price, media, variant selection, and add-to-cart. It's the smallest unit of commerce in the storefront.
 
-## Rendering strategy
+## The big bets
 
-The PDP runs under Next.js 16 Cache Components, with a deliberate split between what gets baked into the static prerender and what streams per request. Product data is fetched with `getProduct` — plain `"use cache"`, `cacheLife("max")`, and a `product-{handle}` tag — and **awaited at the top of the page**, so the product body (title, description, gallery, JSON-LD) is rendered into the **static shell** as a single, coherent copy.
+Two decisions shape the PDP.
 
-Two structural choices keep that copy coherent, and both are load-bearing. The product promise is **not** threaded into a `<Suspense>` boundary, and the route does **not** set `prefetch = "allow-runtime"`. Either one re-renders the body at request time into a separate RSC flight that can drift from the frozen shell when the cached value changes — the symptom is a React hydration mismatch and product copy that appears to change on its own. Use plain `"use cache"` here rather than `"use cache: remote"`: `remote` resolves at request time, _outside_ the static shell, so it would not bake in. The shell refreshes when it regenerates on its `cacheLife` window or when a Shopify [webhook](/docs/anatomy/webhooks) calls `revalidateTag` — that governs freshness (how quickly edits surface), not coherence.
+**Static-first rendering.** Product data is awaited at the top of the page and baked into the static shell, so the title, price, gallery, and description ship as one coherent copy. Freshness comes from cache invalidation — a Shopify webhook calling `revalidateTag`, plus the `cacheLife` window — not a per-request fetch, so the body never re-renders at request time.
 
-The only dynamic input is the selected-options query (`?color=Blue&size=XS`). Rather than block the whole page on that lookup, the route passes the `searchParams` promise — unawaited — down into `ProductDetailSection`. Anything that doesn't depend on the chosen variant (title, shared gallery images, uniformly-priced variants, the description) renders from the product resolved at the top of the page, baked into the static shell. Anything that does (the color-specific gallery slot, variant-specific price, option highlight, buy buttons) sits inside its own Suspense boundary so an option change streams the affected slot without skeletonizing the rest of the page. The chosen variant itself is resolved by a second, per-selection Shopify query (`getProductVariant`) rather than from an inline variant list — so the cached shell stays small and the price/availability reflect the exact selection.
+**Variant selection through URL searchParams.** Each option change is a navigation (`/products/tee?color=Blue&size=XS`), not client state. That gives you shareable URLs, working browser back/forward, and a fully server-rendered page with zero layout shift. The selected variant resolves from a second, per-selection Shopify query kept off the critical path, so the picker highlights at URL speed rather than waiting on the network.
 
-## Variant selection
+## Out of the box
 
-Variants are selected via `searchParams`. Each option (color, size, etc.) renders as a `<Link>` pointing to the same product with one query parameter per option, keyed by the lowercased option name:
+- **Variant picker** — color, size, and other options rendered as links, with swatch availability decoded from Shopify's encoded variant data.
+- **Color-aware image gallery** — a desktop grid with lightbox and a mobile snap carousel, leading with the selected color's image when color options have distinct media.
+- **Add to cart** — optimistic add of the selected variant.
+- **Quantity picker** — a 1–99 picker beside the cart action.
+- **Buy with Shop** — Shopify's official lock-up that creates a checkout and redirects to it.
+- **Bundles** — "includes" and "available in" bundle relationships below the buy buttons.
+- **Complementary products** — merchant-curated "Pairs Well With" add-ons.
+- **Related products** — algorithmic "you might also like" set below the product details.
+- **Structured data** — Product and Breadcrumb JSON-LD for search and social.
 
-```
-/products/classic-tee?color=Blue&size=XS
-```
-
-The page receives `searchParams` as a promise and derives two things from it. `parseSelectedOptions()` reads the option params (merged with the default variant's options for anything unset) into a `selectedOptions` record on a **fast promise** — it depends only on the URL, and drives the picker highlight and the color image so they resolve at `searchParams` speed. The **variant** (for price + add-to-cart) rides a separate promise: `getProductVariant({ handle, selectedOptions })` resolves it via Shopify's `selectedOrFirstAvailableVariant(selectedOptions:)` field. Keeping the picker off the network promise stops the selected option from snapping in late. Everything is threaded down as props with no client-side variant context or `useState`. This means:
-
-- Every variant selection is a navigation, giving you browser back/forward for free
-- URLs are shareable and human-readable - opening a link loads the exact variant
-- The page is fully server-rendered with zero layout shift
-- Option links use `scroll={false}` to prevent the page from jumping to the top on selection
-
-The `buildOptionUrl()` helper in `lib/product.ts` computes the target URL for each option — a pure merge of the current selection with the changed option, no variant lookup required. When no option params are present, the page skips the variant query and renders the cached default variant.
-
-While that promise streams, the fallback renders with no active selection rather than seeding the default, so switching options never flashes the default value before the chosen one resolves.
-
-Swatch availability comes from Shopify's `encodedVariantAvailability` field, decoded in `lib/shopify/encoded-variants.ts` into the set of in-stock values per option. Unavailable options render as inert `<span>` elements instead of links.
-
-Options with a single value render as a plain `Name: Value` label without a picker — there is no choice to surface, but the attribute is still useful information to the shopper (e.g. `Finish: Natural White Oak` on a one-variant product). Shopify's synthetic `Title: Default Title` option (emitted for products with no variant axes) is the only single-value option that is hidden entirely.
-
-## Image gallery
-
-The gallery is handled by a single `ProductMedia` component that adapts to screen size:
-
-**Desktop** - A two-column grid of images with a lightbox for full-screen viewing. Videos are supported inline with autoplay.
-
-**Mobile** - A horizontal snap-scroll carousel with dot indicators below. Swiping or tapping a dot navigates between images.
-
-Both layouts receive pre-filtered images as props from the server.
-
-When a product has no images or videos at all, `ProductMedia` renders a single `ImagePlaceholder` (`components/ui/image-placeholder.tsx`) as if it were the gallery's only image — flowing through the same grid/carousel path as a real media item: one `aspect-square` cell in the desktop grid, a single full-bleed item in the mobile carousel. The placeholder has no lightbox trigger (there is nothing to enlarge), so the desktop grid skips the `Lightbox` wrapper entirely in this case. This keeps the gallery consistent with a one-image product instead of special-casing a full-width block.
-
-### Color-based image filtering
-
-When the **color** option has multiple values with distinct representative images (each value's `firstSelectableVariant` image, exposed as `OptionValue.image`), the gallery leads with the selected color's image. The shared media — product images that aren't a specific color's representative image, via `getSharedImages()` in `lib/product.ts` — renders immediately in the static shell, while the leading color slot streams behind a small Suspense fallback so changing the selection does not skeletonize the whole gallery. The slot resolves from the fast options promise via `getSelectedColorImage()` (no variant query), so it streams at `searchParams` speed. Non-color axes like size or finish never trigger a streamed slot — those products keep a fully static gallery.
-
-If no option has representative images (one color, or no color option), all product images are shown.
-
-Because selection is option-driven, the gallery no longer filters out _every_ image belonging to other colors — that required the full inline variant list, which the PDP no longer fetches. It leads with the selected variant's image followed by the shared media instead.
-
-## Buy section
-
-The buy section uses two 48 px rows with a 10 px gap:
-
-- **Quantity and Add to Cart** - a 1–99 quantity picker sits beside the cart action, which fills the remaining width. Minus disables at 1, plus disables at 99, and the selected quantity is added optimistically to the cart.
-- **Buy with Shop** - creates a Shopify checkout for the selected quantity and redirects to it, using Shopify's official [Buy with Shop lock-up](https://help.shopify.com/en/manual/payments/shop-pay/assets) in its approved all-white treatment on Shop purple.
-
-A single `BuyButtons` component renders identically on both mobile and desktop. It receives the `selectedVariant` as a prop and is a client component for cart interactivity. `pdp.quantityPicker.enabled` and `pdp.buyWithShop.enabled` both default to `true`; set either to `false` in `shop.config.ts` to hide that control.
-
-### Bundles
-
-With `pdp.bundles.enabled` on by default, `bundle-components.tsx` renders Shopify's [bundle relationships](/docs/shopify/pdp#bundles) below the buy buttons:
-
-- **Bundle Includes** — a fixed bundle's component products, from `components` (`BundleComponents`).
-- **Available in Bundles** — bundles containing the current product, collapsed to one link per bundle, from `groupedBy` (`BundleParents`).
-
-Enabling bundles adds these relationship fields to the existing product and selected-variant GraphQL operations; it does not add another HTTP request. The relationships render **eagerly from the cached default variant in the static shell** rather than streaming in behind the variant query, avoiding layout shift.
-
-A customized bundle parent (`requiresComponents` with no fixed `components`) disables the buy buttons with a "Choose bundle items" label, since the generic storefront can't configure it. The bundle relationship arrays stay server-side; `BuyButtons` receives only a `requiresBundleConfiguration` boolean.
-
-### Complementary products
-
-With `pdp.complementaryProducts.enabled` on by default, `complementary-products.tsx` renders the merchant-curated "Pairs Well With" set below the bundle relationships — Shopify's [complementary products](/docs/shopify/pdp#complementary-products) from `productRecommendations(intent: COMPLEMENTARY)`. These are distinct from the algorithmic related products below the fold (`intent: RELATED`): complementary products are deliberately chosen add-ons, so they sit beside the buy section like bundle relationships rather than in the footer grid.
-
-Like bundle relationships, the section renders **eagerly into the prerendered shell** rather than streaming. The cached (`use cache: remote`) operation fetches only the `COMPLEMENTARY` intent and uses the existing `recommendations-{handle}` invalidation tag. The result is baked into the static PPR/ISR document, so there is no skeleton fallback or layout shift on cached hits. The component shows up to four products as thumbnail, title, and price rows and renders nothing when none are configured.
-
-## Related Products
-
-With `pdp.relatedProducts.enabled` on by default, a `RelatedProductsSection` component renders Shopify's algorithmic "you might also like" set below the product details and on non-empty cart pages. It calls the cached (`use cache: remote`) `getRelatedProducts()` operation, which fetches only the `RELATED` intent under the `recommendations-{handle}` tag, and renders inside a `Suspense` boundary with a skeleton grid fallback.
-
-Related products display as a fixed grid of up to four product cards — two columns on mobile, four on `lg:` and up — matching the homepage's featured-products grid. The skeleton uses the same count. Shopify typically returns more recommendations, but the section intentionally remains a small footer rather than a second browse surface.
-
-## Layout
-
-The page uses a single responsive layout wrapped in a `Container`:
-
-- Below the `lg:` breakpoint, content stacks vertically: carousel, buy buttons, product info
-- At `lg:` and up, a 12-column grid places the image gallery in 7 columns on the left and product info (title/price, option pickers, buy buttons, description) in 5 columns on the right
-- The product info column is sticky on desktop, staying visible while the gallery scrolls
-
-## Structured data
-
-The page emits two JSON-LD schemas:
-
-- **Product schema** - name, description, images, brand, price range, availability, and variant count
-- **Breadcrumb schema** - Home → Product Title (JSON-LD only, no visible breadcrumb UI)
-
-The rest of the PDP — option pickers, price display, lightbox, schema, and so on — lives in `components/product-detail/`. Browse the directory when you need them.
+The quantity picker, Buy with Shop, bundles, complementary products, and related products are on by default and toggled under `pdp` in `shop.config.ts`.
