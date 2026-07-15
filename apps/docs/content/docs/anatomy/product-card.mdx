@@ -33,17 +33,21 @@ The card renders `product.featuredImage` with `next/image` (`fill`, `object-cove
 
 When the product is unavailable, an out-of-stock overlay darkens the image and shows the localized out-of-stock label on top.
 
-> The card uses a single image by default. It intentionally does **not** ship a hover image carousel - see the recipe below to add one.
+> The card uses a single image by default. It intentionally does **not** ship a hover image carousel - see [Common customizations](#common-customizations) below to add one.
 
 ## Skeleton
 
 `ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block (the same `ImagePlaceholder`, pulsing via `animate-pulse`) plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads. Because the loading block and the no-image fallback are the same element, the only visual difference between "still loading" and "no image" is the pulse.
 
-## Recipes
+## Common customizations
 
-Customizations you can apply to the card. Each recipe is a single prompt - paste it into your coding agent and let it implement the change.
+The card doesn't ship these, but they're common additions teams layer on top.
 
-### Add a hover image carousel
+- **Hover image carousel** - reveal additional product images on desktop hover instead of showing only the featured image. Full recipe below.
+- **Variant selection from the grid** - swatches on the card itself (usually color) so shoppers can preview or add a specific variant without opening the PDP.
+- **Quick add** - an add-to-cart action on the card that skips the PDP for simple, single-variant products.
+
+### Hover image carousel
 
 By default the card shows only the featured image. The template previously shipped a desktop hover carousel that revealed additional product images; it was removed as a default to keep grids lean and avoid fetching extra images on every card. This recipe re-adds it as an opt-in feature.
 
