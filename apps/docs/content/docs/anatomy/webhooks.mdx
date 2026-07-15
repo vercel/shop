@@ -8,27 +8,9 @@ Read paths in the template are cached aggressively with `"use cache"` or `"use c
 
 The handler is opt-in through `SHOPIFY_WEBHOOK_SECRET`. When the secret is unset, `POST /api/webhooks/shopify` returns `404` before reading the request body. Set the secret and register webhooks in Shopify Admin to enable the endpoint in any environment.
 
-## The endpoint
+## How it works
 
-```
-POST /api/webhooks/shopify
-```
-
-A single route handles every supported topic. Shopify sets the topic on each request via the `x-shopify-topic` header, and the handler dispatches to the appropriate tag set.
-
-## Topics and cache tags
-
-| Webhook topic        | Tags invalidated                                                                        |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| `products/create`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}`                   |
-| `products/delete`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `collections/create` | `collections-index`, `collection-{handle}`                                              |
-| `collections/update` | `collection-{handle}`                                                                   |
-| `collections/delete` | `collections-index`, `collection-{handle}`                                              |
-| `metaobjects/*`      | `metaobjects`, `metaobject-{handle}`                                                    |
-
-The handler never fires the broad `products` or `collections` tags. Those wrap _every_ read of their type and exist as manual break-glass levers (see below). It relies on fine-grained tags instead, which is sufficient because the reads in `lib/shopify/operations/` stamp each aggregate cache entry with the granular tag of every item it contains — `tagProducts()` adds a `product-{numericId}` tag per product on list/search/collection/recommendation reads, `getCollections`/`getCollectionsListing` add a `collection-{handle}` tag per collection, and sitemap shards add the handle tag for every product or collection they contain:
+**Fine-grained tags cascade rather than one broad flush per resource type.** The handler never fires the broad `products` or `collections` tags — those wrap _every_ read of their type and exist as manual break-glass levers (see below). It relies on fine-grained tags instead, which is sufficient because the reads in `lib/shopify/operations/` stamp each aggregate cache entry with the granular tag of every item it contains — `tagProducts()` adds a `product-{numericId}` tag per product on list/search/collection/recommendation reads, `getCollections`/`getCollectionsListing` add a `collection-{handle}` tag per collection, and sitemap shards add the handle tag for every product or collection they contain:
 
 - **Product topics** fire per-product tags. Invalidating one product cascades to exactly the surfaces that display it, including the sitemap shard carrying its `product-{handle}` tag. The numeric tag is derived from `admin_graphql_api_id` (falling back to the payload `id`) so reads that cache by ID are invalidated alongside handle-based PDP reads. Create and delete additionally fire **`products-index`**, which refreshes sitemap page counts and all product shards because their membership may shift.
 - **Collection topics** fire the `collection-{handle}` tag, which busts that collection's PLP reads — `getCollection` (metadata) and `getCollectionProducts` (the product list, including membership and sort changes) — and, because aggregate reads stamp every collection they return with that same tag, the all-collections listing and the affected sitemap shard whenever an existing collection is edited. Create and delete change the _set_ of collections (and a brand-new collection has no tag on already-cached entries), so they additionally fire **`collections-index`** — a tag carried by the all-collections reads (`getCollections`, `getCollectionsListing`) and every collections sitemap count or shard. So create/delete refresh the listing, page counts, and shifted shards without touching any individual collection's PLP. Product cards inside a collection list are independently covered by their own `product-{numericId}` tags via the product webhook. Navigation menus aren't busted here; menu titles and links are edited independently in Shopify Navigation, and there is no menu webhook topic.
@@ -39,13 +21,9 @@ The handler never fires the broad `products` or `collections` tags. Those wrap _
 
 > **No `pages/*`, `blogs/*`, or `articles/*` branch.** Shopify exposes no webhook topics for Online Store pages, blogs, articles, or store policies — only metaobjects (the CMS) emit content webhooks — so there is nothing for the handler to catch. Those reads rely on cache lifetime instead: pages, blogs, articles, and policies all use `cacheLife("max")`, so they surface edits only via a manual `revalidateTag` purge or a redeploy. See [Content pages](/docs/anatomy/pages/content) for the temporary workaround.
 
-### Metaobject tags
+**Metaobjects trade per-type index tags for a cheap broad flush.** Metaobjects are tagged like every other resource: a broad `metaobjects` tag and a `metaobject-{handle}` tag built from the payload `handle` — no `type` inspection. Unlike the catalog, the handler _does_ fire the broad `metaobjects` tag (alongside the handle tag) because metaobjects are typically low-cardinality, so refreshing every metaobject read on any change is cheap and spares them from needing per-type index tags — the same trade the `articles` branch makes. The base template has no metaobject reads; these tags matter only if you read metaobjects yourself — tag those reads with `metaobjects` (and `metaobject-{handle}` where a handle is in scope) so this branch invalidates them.
 
-Metaobjects are tagged like every other resource: a broad `metaobjects` tag and a `metaobject-{handle}` tag built from the payload `handle` — no `type` inspection. Unlike the catalog, the handler _does_ fire the broad `metaobjects` tag (alongside the handle tag) because metaobjects are typically low-cardinality, so refreshing every metaobject read on any change is cheap and spares them from needing per-type index tags — the same trade the `articles` branch makes. The base template has no metaobject reads; these tags matter only if you read metaobjects yourself — tag those reads with `metaobjects` (and `metaobject-{handle}` where a handle is in scope) so this branch invalidates them.
-
-## How the handler works
-
-When a request arrives, the handler runs in this order:
+**The handler validates before it trusts anything in the payload.** On each request:
 
 1. Returns `404` immediately if `SHOPIFY_WEBHOOK_SECRET` is unset
 2. Reads the raw body as text — required for stable HMAC verification
@@ -59,7 +37,21 @@ Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the broad `m
 
 > **Security note:** The secret is the enablement gate, not only a verification option. An unconfigured deployment exposes no active webhook processor; a configured deployment accepts only valid Shopify-signed requests.
 
-## Setting up webhooks in Shopify
+## Out of the box
+
+A single route (`POST /api/webhooks/shopify`) handles every supported topic. Shopify sets the topic on each request via the `x-shopify-topic` header, and the handler dispatches to the appropriate tag set:
+
+| Webhook topic        | Tags invalidated                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------- |
+| `products/create`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
+| `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}`                   |
+| `products/delete`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
+| `collections/create` | `collections-index`, `collection-{handle}`                                              |
+| `collections/update` | `collection-{handle}`                                                                   |
+| `collections/delete` | `collections-index`, `collection-{handle}`                                              |
+| `metaobjects/*`      | `metaobjects`, `metaobject-{handle}`                                                    |
+
+**Setting up webhooks in Shopify:**
 
 1. Open **Shopify Admin → Settings → Notifications → Webhooks**
 2. Set the URL to `https://your-domain.com/api/webhooks/shopify`
@@ -67,19 +59,17 @@ Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the broad `m
 4. Create a webhook for each topic in the table above
 5. Copy the webhook signing secret and set it as `SHOPIFY_WEBHOOK_SECRET` in your environment
 
-You can register only the topics you care about. Skipping `collections/*`, for example, just means collection edits propagate at cache expiry instead of immediately. The handler has no `inventory_levels/*` branch (see the note above), so there's no need to register that topic.
+You can register only the topics you care about. Skipping `collections/*`, for example, just means collection edits propagate at cache expiry instead of immediately. The handler has no `inventory_levels/*` branch (see above), so there's no need to register that topic.
 
-## Environment variables
+**Environment variables:**
 
 | Variable                 | When to set                                                                                                                                              |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SHOPIFY_WEBHOOK_SECRET` | Set in every environment where Shopify posts to `/api/webhooks/shopify`. Without it, the endpoint is disabled and returns `404` before reading the body. |
 
 See [Environment Variables](/docs/reference/env-vars) for the full reference.
 
-## Verifying it works
-
-With `SHOPIFY_WEBHOOK_SECRET` unset, confirm the endpoint is disabled without sending a body:
+**Verifying it works:** with `SHOPIFY_WEBHOOK_SECRET` unset, confirm the endpoint is disabled without sending a body:
 
 ```bash
 curl -i -X POST http://localhost:3000/api/webhooks/shopify
@@ -87,9 +77,9 @@ curl -i -X POST http://localhost:3000/api/webhooks/shopify
 
 The response should be `404`. After setting the secret, an unsigned request should return `401`. To verify successful processing with a valid signature, use the **Send test notification** button on each webhook in Shopify Admin and watch your function logs for the received topic and invalidated tags.
 
-## Adding a new topic
+## Common customizations
 
-To handle a new Shopify topic:
+**Adding a new topic:**
 
 1. Register the webhook in Shopify Admin pointing at `/api/webhooks/shopify`
 2. Add a branch in `app/api/webhooks/shopify/route.ts` that matches the topic prefix and pushes the cache tags you want to invalidate
