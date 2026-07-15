@@ -4,87 +4,26 @@ description: The shared tile that displays a product's image, title, and price i
 type: guide
 ---
 
-Used in the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It is a compound component, so each piece can be composed independently while sharing the same styling hooks.
+Used in the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It's the same component everywhere a product is shown as a tile, so a change to the card is a change everywhere at once.
 
-## Composition
+## How it works
 
-`ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` — the bare product URL, which renders the first-available (default) variant. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.) as a stable styling hook.
+**Compound component with stable styling hooks.** `ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` — the bare product URL, which renders the first-available (default) variant. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.), so the pieces can be composed or restyled independently without touching the underlying markup.
 
-## Variants
+**Loading, empty, and out-of-stock states share one footprint.** The skeleton, the no-image placeholder, and the loaded image all render inside the same aspect-ratio box using the same `ImagePlaceholder` element, so grids never shift as cards move between states. An out-of-stock overlay draws on top of the image rather than replacing it, keeping that same footprint.
 
-`variant` is either `default` or `featured`:
+## Out of the box
 
-- **`default`** - the standard tile used in grids and sliders.
-- **`featured`** - adds a "Featured" badge (clipped corner ribbon) and a top-down gradient behind the image container. Used for highlighting hero products.
-
-The badge label comes from the `product.featuredBadge` translation key, so it stays localized.
-
-## Price
-
-`ProductCard` carries both `price` (the lowest variant price) and `maxPrice` (the highest). When they differ — the product's variants span a price range — the card renders both bounds as a `min – max` range (_$48.00 – $96.00_); otherwise it shows the single price. Because per-variant discounts differ across a range, the compare-at strike-through and discount badge are suppressed when a range is shown; single-price products keep the strike-through and percent-off badge. The PDP, which has variant selection, instead resolves the exact selected variant's price rather than the range.
-
-## Aspect ratio
-
-`ProductCardImage` accepts `aspectRatio` of `square` (default), `portrait`, or `landscape`, applied via `data-[aspect-ratio=...]` selectors. The skeleton honors the same prop so the placeholder matches the loaded card.
-
-## Image fallback
-
-The card renders `product.featuredImage` with `next/image` (`fill`, `object-cover`). When a product has **no featured image**, the card does not show a broken image - the image box keeps its aspect-ratio footprint and renders the shared `ImagePlaceholder` (`components/ui/image-placeholder.tsx`): a white square centering a Lucide image icon tinted with the skeleton color (`text-accent`) and sized relative to the box. This keeps grids visually aligned even for products that are missing imagery, and makes the empty state read as a settled version of the loading skeleton.
-
-When the product is unavailable, an out-of-stock overlay darkens the image and shows the localized out-of-stock label on top.
-
-> The card uses a single image by default. It intentionally does **not** ship a hover image carousel - see [Common customizations](#common-customizations) below to add one.
-
-## Skeleton
-
-`ProductCardSkeleton` mirrors the card's footprint - an aspect-ratio image block (the same `ImagePlaceholder`, pulsing via `animate-pulse`) plus title and price bars - for use in Suspense fallbacks and during infinite-scroll loads. Because the loading block and the no-image fallback are the same element, the only visual difference between "still loading" and "no image" is the pulse.
+- **Two variants** — `default` for standard grids and sliders, and `featured`, which adds a "Featured" badge and a top-down gradient behind the image for highlighting hero products.
+- **Price ranges** — when a product's variants span a price range, the card shows both bounds (_$48.00 – $96.00_) instead of a single price; compare-at strike-through and the discount badge only appear for a single price, since per-variant discounts differ across a range.
+- **Configurable aspect ratio** — `square` (default), `portrait`, or `landscape`, applied to both the loaded image and its skeleton.
+- **Image fallback** — products with no featured image render a placeholder icon instead of a broken image, so grids stay visually aligned.
+- **Out-of-stock overlay** — a darkened image with a localized "out of stock" label when the product is unavailable.
 
 ## Common customizations
 
 The card doesn't ship these, but they're common additions teams layer on top.
 
-- **Hover image carousel** - reveal additional product images on desktop hover instead of showing only the featured image. Full recipe below.
-- **Variant selection from the grid** - swatches on the card itself (usually color) so shoppers can preview or add a specific variant without opening the PDP.
-- **Quick add** - an add-to-cart action on the card that skips the PDP for simple, single-variant products.
-
-### Hover image carousel
-
-By default the card shows only the featured image. The template previously shipped a desktop hover carousel that revealed additional product images; it was removed as a default to keep grids lean and avoid fetching extra images on every card. This recipe re-adds it as an opt-in feature.
-
-```
-Add a hover image carousel to the product card.
-
-Data:
-- In lib/shopify/fragments.ts, add an `images(first: 5)` block (using ...ImageFields)
-  to PRODUCT_CARD_FRAGMENT, and add a `variants(first: 50)` block selecting each
-  variant's `image { url }`.
-- In lib/shopify/transforms/product.ts, restore an `images: Image[]` value on the
-  object returned by transformShopifyProductCard. Compute it with a
-  `filterVariantImages(product)` helper that flattens product.images, then excludes
-  any image whose URL (ignoring query params) matches a non-default variant's image -
-  so color-swatch variant images don't leak into the carousel. Add the matching
-  `images?` and `variants?` fields back to the ShopifyProductCard response interface.
-- In lib/types.ts, add `images: Image[]` back to the ProductCard interface.
-
-Component:
-- Create components/product-card/slideshow.tsx as a "use client" component
-  `ProductCardSlideshow` that takes `images` and `sizes`. It should skip the first
-  image (the featured one), render the rest in a horizontal snap-scroll track, and
-  show prev/next chevron buttons. It must be desktop-only and hover-revealed:
-  absolutely positioned, `hidden lg:block`, `opacity-0`, fading in on
-  `group-hover/image` (guard with `[@media(hover:hover)]`). Return null when there
-  are fewer than two slideshow images. The chevron click handlers must call
-  preventDefault/stopPropagation so they don't trigger the card's link navigation.
-
-Wiring:
-- In components/product-card/components.tsx, add an `images` prop to
-  ProductCardImage, restore the `group/image` class on the image wrapper div, and
-  render <ProductCardSlideshow images={images} sizes={sizes} /> when there is more
-  than one image and the product is not out of stock.
-- Pass `images={product.images}` to ProductCardImage in both
-  components/product-card/product-card.tsx and the ClientProductCard in
-  components/collections/infinite-product-grid.tsx.
-
-Verify: hover a multi-image card on desktop - the carousel fades in with working
-chevrons; single-image and no-image cards are unchanged; mobile shows no carousel.
-```
+- **Hover image carousel** — reveal additional product images on desktop hover instead of showing only the featured image.
+- **Variant selection from the grid** — swatches on the card itself (usually color) so shoppers can preview or add a specific variant without opening the PDP.
+- **Quick add** — an add-to-cart action on the card that skips the PDP for simple, single-variant products.
