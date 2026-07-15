@@ -1,6 +1,7 @@
 ---
 title: Authentication
 description: Built-in customer authentication with Hydrogen and Shopify Customer Account API OIDC.
+type: guide
 ---
 
 The template includes opt-in customer authentication using the framework-neutral session and OAuth helpers from `@shopify/hydrogen/customer-account`. Customers can sign in through Shopify, view their profile, order history, and address book, refresh expired access tokens, and sign out of both the storefront and Shopify identity provider.
@@ -18,88 +19,28 @@ SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
 NEXT_PUBLIC_BASE_URL="https://your-domain.com"
 ```
 
-Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, but it does not provide `CUSTOMER_ACCOUNT_SESSION_SECRET`. Generate that private, app-owned secret with `openssl rand -base64 32`. The template uses it to derive the AES-256-GCM key that encrypts Hydrogen's OAuth session data in HttpOnly cookies. Keep the value server-only and consistent across deployment instances. Rotating it invalidates every existing customer session.
-
-The session secret is required by this template's encrypted-cookie storage, not by the Customer Account API itself. If you replace the cookie implementation with opaque session IDs backed by protected server-side storage, use that system's key management instead. Do not remove the secret while storing access, refresh, and ID tokens in client-held cookies.
-
-`next.config.ts` throws at build time whenever auth is enabled without the session secret and client ID. The `NEXT_PUBLIC_ENABLE_AUTH` override must remain public so conditional rendering matches between server and client under cache components.
+Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, but not `CUSTOMER_ACCOUNT_SESSION_SECRET`. Generate that private, app-owned secret with `openssl rand -base64 32` — the template uses it to derive the AES-256-GCM key that encrypts Hydrogen's OAuth session data in HttpOnly cookies. Keep it server-only and consistent across deployment instances; rotating it invalidates every existing customer session. `next.config.ts` throws at build time whenever auth is enabled without the session secret and client ID.
 
 Customer Account OAuth requires a public HTTPS origin. Use a tunnel for local OAuth testing and set `NEXT_PUBLIC_BASE_URL` to that registered origin.
 
-### Shopify Admin setup
+To enable it in Shopify Admin:
 
-1. Enable customer accounts: **Shopify Admin → Settings → Customer accounts → Edit**, choose **Customer accounts**, and Save
+1. Enable customer accounts: **Settings → Customer accounts → Edit**, choose **Customer accounts**, and Save
 2. Install the **Headless** sales channel from the Shopify App Store
 3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
 4. Use a public Customer Account API client; Hydrogen performs authorization code + PKCE without a client secret
-5. Set the callback URI to `{YOUR_DOMAIN}/account/authorize`
-6. Set the logout URI to `{YOUR_DOMAIN}/`
-7. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`
-8. Ensure the store domain matches `SHOPIFY_STORE_DOMAIN`
+5. Set the callback URI to `{YOUR_DOMAIN}/account/authorize` and the logout URI to `{YOUR_DOMAIN}/`
+6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `SHOPIFY_STORE_DOMAIN`
 
-Shopify does not support wildcard callback or logout URIs. Register each production, preview, or tunnel origin that needs authentication.
-
-See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
+Shopify does not support wildcard callback or logout URIs — register each production, preview, or tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
 ## How it works
 
-Authentication is built on these modules:
+**No client-side auth SDK.** Sign-in is a normal GET navigation to `/account/login`; sign-out is a same-origin POST form to `/account/logout`. The universal `isAuthEnabled` flag (`lib/auth/index.ts`) re-exports `shopConfig.auth.enabled`, safe to import from server and client code alike. When it's false: the account icon disappears from the nav, the Hydrogen auth routes and protected account pages return `404`, and the shared session/access-token helpers in `lib/auth/server.ts` fail before initializing Hydrogen — no auth-related code runs at request time.
 
-| Module                            | Purpose                                                                                                                                                                                   |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/auth/index.ts`               | Universal `isAuthEnabled` flag. Safe to import from server and client code.                                                                                                               |
-| `lib/auth/server.ts`              | Encrypted, chunked HttpOnly cookie storage plus Hydrogen session helpers for login state, strict access-token reads, refresh redirects, and request-scoped session managers. Server-only. |
-| `app/account/[action]/route.ts`   | Installs Hydrogen's standard login, authorize, refresh, and logout handlers through `handleShopifyRoutes`.                                                                                |
-| `lib/shopify/customer-account.ts` | Creates Hydrogen's Customer Account GraphQL client and sends the server-only access token with each operation.                                                                            |
+**The session lives in an encrypted cookie, not a server store.** `/account/login` asks Hydrogen to generate state, nonce, and PKCE values, which the app encrypts into chunked AES-256-GCM HttpOnly cookies. Shopify redirects to `/account/authorize`, where Hydrogen validates state, nonce, issuer, audience, and ID-token expiry before exchanging the authorization code — access, refresh, and ID tokens then replace the pending-login state in that same cookie. Server Components only perform read-only login and token checks; they never mutate cookies.
 
-There is no client-side auth SDK. Sign-in is a normal GET navigation to `/account/login`; sign-out is a same-origin POST form to `/account/logout`.
-
-### Feature gating
-
-The `isAuthEnabled` flag re-exports the resolved `shopConfig.auth.enabled` value from `shop.config.ts`. That value uses `NEXT_PUBLIC_ENABLE_AUTH` when set and otherwise falls back to `false`. When false:
-
-- The account icon does not appear in the nav
-- The Hydrogen account auth routes return 404
-- Protected account pages return 404
-- Shared session and access-token helpers fail before initializing Hydrogen
-- No auth-related code runs at request time
-
-## Routes
-
-| Route                  | Method | Description                                                                                                   |
-| ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------- |
-| `/account/login`       | GET    | Creates PKCE state in the encrypted session cookie and redirects to Shopify. Accepts sanitized `return_to`.   |
-| `/account/authorize`   | GET    | Validates the OAuth callback, exchanges the code, stores tokens, and redirects to the original account route. |
-| `/account/refresh`     | GET    | Refreshes an expired access token at a writable response boundary and redirects back to `return_to`.          |
-| `/account/logout`      | POST   | Clears the local session and redirects through Shopify's logout endpoint before returning home.               |
-| `/account`             | GET    | Redirects to `/account/profile`.                                                                              |
-| `/account/profile`     | GET    | View and edit the customer's name; email shown read-only.                                                     |
-| `/account/orders`      | GET    | Paginated order history, newest first.                                                                        |
-| `/account/orders/[id]` | GET    | Order detail: line items, totals, shipping address, and status-page link.                                     |
-| `/account/addresses`   | GET    | Address book with create, edit, delete, and default selection.                                                |
-
-The `(authenticated)` route group gates protected account pages without claiming the auth-handler paths.
-
-## Architecture
-
-### Session flow
-
-1. `/account/login` asks Hydrogen to generate state, nonce, and PKCE values
-2. The app encrypts Hydrogen's pending-login state into chunked AES-256-GCM HttpOnly cookies
-3. Shopify redirects to `/account/authorize`
-4. Hydrogen validates state, nonce, issuer, audience, and ID-token expiry before exchanging the authorization code
-5. Access, refresh, and ID tokens replace the pending-login state in the encrypted cookie
-6. Server Components only perform read-only login and token checks; they never mutate cookies
-
-### Token refresh
-
-`isCustomerLoggedIn()` treats a refreshable session as logged in, so the nav does not flicker to signed out when the access token expires. Customer Account API operations call `requireCustomerAccessToken()`. If only a refresh token remains, it redirects through `/account/refresh`, where Hydrogen can rotate tokens and commit the updated cookie before returning to the account page.
-
-### Logout
-
-The sign-out button submits a same-origin POST to `/account/logout`. Hydrogen clears the local session, includes the stored ID token as `id_token_hint`, and redirects through Shopify's logout endpoint. This ends both the storefront session and Shopify SSO session before returning to `/`.
-
-### Server-side usage
+**Token refresh happens out-of-band, not inline.** `isCustomerLoggedIn()` treats a refreshable session as logged in, so the nav doesn't flicker to signed-out when the access token expires. `requireCustomerAccessToken()` redirects through `/account/refresh` when only a refresh token remains, where Hydrogen rotates tokens and commits the updated cookie before returning to the account page. Logout mirrors this: the sign-out button POSTs to `/account/logout`, which clears the local session and redirects through Shopify's logout endpoint with `id_token_hint`, ending both the storefront session and the Shopify SSO session.
 
 ```ts
 import {
@@ -115,30 +56,14 @@ const accessToken = await requireCustomerAccessToken("/account/orders");
 
 Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` for account-page gates, and `requireCustomerAccessToken()` immediately before private Customer Account API work.
 
-### Account data
+> **Guardrails.** Never expose access, refresh, or ID tokens to Client Components or browser-readable storage. Keep Server Components on the read-only session-manager path — token refresh belongs in `/account/refresh`. Keep login as GET and logout as same-origin POST, and keep the callback/logout URIs registered exactly in Shopify. Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately, since rotation invalidates every existing session, and keep `NEXT_PUBLIC_ENABLE_AUTH` public so server/client feature gates agree under cache components.
 
-The account pages read and write customer data through the Shopify Customer Account API, a separate GraphQL endpoint and schema from the Storefront API.
+## Out of the box
 
-| Module                               | Purpose                                                                                                                                                                       |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `lib/shopify/customer-account.ts`    | `customerAccountFetch()` wraps Hydrogen's `createCustomerAccountClient`. The numeric shop ID is derived from the Shopify OIDC discovery issuer and cached.                    |
-| `lib/shopify/operations/customer.ts` | Queries profile, orders, order detail, and addresses; mutates addresses and profile data. Each call resolves a currently usable token through `requireCustomerAccessToken()`. |
-| `lib/shopify/transforms/customer.ts` | Maps Customer Account API responses to provider-agnostic domain types in `lib/types.ts`.                                                                                      |
-| `lib/customer/action.ts`             | Server actions for address and profile forms. They validate input, surface Shopify `userErrors`, and revalidate affected paths.                                               |
+- **Auth routes** — `/account/login` (GET, starts PKCE and redirects to Shopify), `/account/authorize` (GET, validates the OAuth callback), `/account/refresh` (GET, rotates an expired access token), and `/account/logout` (POST, clears the session). All four are installed via Hydrogen's standard handlers through `handleShopifyRoutes` in `app/account/[action]/route.ts`.
+- **Account pages** — `/account` (redirects to profile), `/account/profile` (edit name, read-only email), `/account/orders` (paginated order history), `/account/orders/[id]` (order detail), and `/account/addresses` (address book with create, edit, delete, and default selection). The `(authenticated)` route group gates these without claiming the auth-handler paths.
+- **Customer Account API data** — a separate GraphQL endpoint and schema from the Storefront API. `lib/shopify/customer-account.ts` wraps Hydrogen's `createCustomerAccountClient`; `lib/shopify/operations/customer.ts` queries and mutates profile, orders, and addresses, resolving a usable token through `requireCustomerAccessToken()` on every call; `lib/shopify/transforms/customer.ts` maps responses to domain types. Order and profile pages are Server Components in Suspense; address and profile editing use client forms backed by server actions in `lib/customer/action.ts` that validate input, surface Shopify `userErrors`, and revalidate affected paths. Customer responses are personalized and never publicly cached.
 
-Order and profile pages are Server Components wrapped in Suspense. Address and profile editing use client forms that call server actions. Customer responses are personalized and never publicly cached.
+## Common customizations
 
-## Guardrails
-
-- Never expose access, refresh, or ID tokens to Client Components or browser-readable storage
-- Keep Server Components on the read-only session-manager path; token refresh belongs in `/account/refresh`
-- Always resolve a current access token before a Customer Account API operation
-- Keep login as GET and logout as same-origin POST
-- Keep the callback and logout URIs registered exactly in Shopify
-- Preserve Hydrogen's PKCE, state, nonce, return-path sanitization, and `no-store` response behavior
-- Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately; rotation invalidates every existing encrypted session
-- Keep `NEXT_PUBLIC_ENABLE_AUTH` public so server/client feature gates agree under cache components
-
-## Extending
-
-To add account data such as store credit, subscriptions, draft orders, or richer order fields, add an operation in `lib/shopify/operations/customer.ts`, a transform in `lib/shopify/transforms/customer.ts`, and a matching domain type in `lib/types.ts`. Validate new fields against the live Customer Account API schema. Mutations should run through a server action in `lib/customer/action.ts` so validation and revalidation stay centralized.
+- **Additional account data** — store credit, subscriptions, draft orders, or richer order fields. Add an operation in `lib/shopify/operations/customer.ts`, a transform in `lib/shopify/transforms/customer.ts`, and a matching domain type in `lib/types.ts`, validated against the live Customer Account API schema. Route mutations through a server action in `lib/customer/action.ts` so validation and revalidation stay centralized.
