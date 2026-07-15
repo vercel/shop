@@ -6,86 +6,26 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The template connects to Shopify through the Storefront API. This page covers the Shopify-side configuration that the template expects after your storefront token and permissions are in place - concept mapping, required menus, and cache invalidation.
+The template connects to Shopify through the Storefront API. This page is an orientation map from Shopify concepts to the template routes and docs that cover them — start here, then follow the links for the mechanics.
 
-For token setup and required scopes, see [Getting Started](/docs/getting-started) and [Storefront API Permissions](/docs/reference/storefront-api-permissions).
-
-For the API client and query patterns, see [Storefront API](/docs/reference/storefront-api).
+For token setup and required scopes, see [Getting Started](/docs/getting-started) and [Storefront API Permissions](/docs/reference/storefront-api-permissions). For the API client and query patterns, see [Storefront API](/docs/reference/storefront-api).
 
 ## Concept mapping
 
-| Shopify concept | Template route          | What renders it                                                   |
-| --------------- | ----------------------- | ----------------------------------------------------------------- |
-| Products        | `/products/[handle]`    | Product detail page with variants, gallery, buy section           |
-| Collections     | `/collections/[handle]` | Product grid with filtering, sorting, pagination                  |
-| Menus           | Navigation, footer      | Quick links bar (with hover panels), mobile sheet, footer columns |
-| Pages           | `/pages/[handle]`       | Localized Shopify Page rich text and SEO metadata                 |
-| Policies        | `/policies/[handle]`    | Configured store policies, also linked from the footer            |
-| Search          | `/search`               | Same grid as collections, driven by query param                   |
-| Cart            | `/cart` + overlay       | Cart context with optimistic updates                              |
+| Shopify concept | Template route          | What renders it                                                    | Docs                                                     |
+| ---------------- | ------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------- |
+| Products         | `/products/[handle]`    | Product detail page with variants, gallery, buy section             | [PDP anatomy](/docs/anatomy/pages/pdp), [Product setup](/docs/shopify/pdp) |
+| Collections      | `/collections/[handle]` | Product grid with filtering, sorting, pagination                    | [PLP anatomy](/docs/anatomy/pages/plp)                    |
+| Menus            | Navigation, footer       | Quick links bar (with hover panels), mobile sheet, footer columns   | [Navigation](/docs/anatomy/navigation), [Enable Shopify menus](/docs/skills/enable-shopify-menus) |
+| Pages            | `/pages/[handle]`       | Localized Shopify Page rich text and SEO metadata                   | [Content pages](/docs/anatomy/pages/content)              |
+| Policies         | `/policies/[handle]`    | Configured store policies, also linked from the footer              | [Footer](/docs/anatomy/footer)                            |
+| Search           | `/search`                | Same grid as collections, driven by query param                     | [PLP & Search anatomy](/docs/anatomy/pages/plp)           |
+| Cart             | `/cart` + overlay        | Cart context with optimistic updates                                 | [Cart](/docs/anatomy/cart)                                |
 
-## Required menus
+## Menus
 
-By default, the template uses hardcoded navigation links and an empty footer. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to replace them with dynamic menus fetched from Shopify.
+By default, the template uses hardcoded navigation links and an empty footer. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch `main-menu` and `footer` menus from **Online Store → Navigation** in Shopify admin instead. See [Navigation](/docs/anatomy/navigation) for how the nav renders.
 
-When enabled, the template fetches menus by handle from **Online Store → Navigation** in Shopify admin. Common handles:
+## Cache invalidation
 
-| Menu handle | Where it renders     | Structure                        |
-| ----------- | -------------------- | -------------------------------- |
-| `main-menu` | Top navigation links | Flat list or 3-level hierarchy   |
-| `footer`    | Footer link columns  | 2-level: column headings → links |
-
-Menu items can link to collections, products, pages, or custom URLs.
-
-## Webhooks and cache invalidation
-
-Public reads use either plain `"use cache"` for content that belongs coherently in a prerendered shell or `"use cache: remote"` for reusable request-time results. Both use established cache tags. Without webhooks, Shopify changes may remain cached until the configured lifetime expires, so configure Shopify webhooks to hit the template's invalidation endpoint.
-
-### Webhook endpoint
-
-```
-POST /api/webhooks/shopify
-```
-
-The handler is enabled by the `SHOPIFY_WEBHOOK_SECRET` environment variable, verifies the HMAC signature, then calls `revalidateTag()` for the affected cache tags. Without the secret, it returns `404` before reading the request body.
-
-### Supported topics
-
-| Webhook topic        | Cache tags invalidated                                                                  |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| `products/create`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}`                   |
-| `products/delete`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
-| `collections/create` | `collections-index`, `collection-{handle}`                                              |
-| `collections/update` | `collection-{handle}`                                                                   |
-| `collections/delete` | `collections-index`, `collection-{handle}`                                              |
-| `metaobjects/*`      | `metaobjects`, `metaobject-{handle}` (if you read metaobjects)                           |
-
-The handler relies on fine-grained tags: per-product tags stamped on product aggregates and sitemap shards, and per-collection tags stamped on collection reads, the all-collections listing, and sitemap shards. Create and delete also fire `products-index` or `collections-index` because those events change sitemap membership and page counts; `collections-index` additionally refreshes the all-collections listing. The broad `products` and `collections` tags sit on every read of their type but are never fired automatically; they're manual break-glass levers (`revalidateTag("collections")`) for purging all data of a type at once. There is intentionally no `inventory_levels/*` branch. See [Webhooks](/docs/anatomy/webhooks) for the full rationale.
-
-### Setting up webhooks
-
-In your Shopify admin, go to **Settings → Notifications → Webhooks**:
-
-1. Set the webhook URL to `https://your-domain.com/api/webhooks/shopify`
-2. Select **JSON** as the format
-3. Create webhooks for each topic in the table above
-4. Copy the webhook signing secret and add it to your environment:
-
-```bash
-SHOPIFY_WEBHOOK_SECRET="your-webhook-signing-secret"
-```
-
-> **Important:** `SHOPIFY_WEBHOOK_SECRET` enables the endpoint. Without it, the handler returns `404`; once enabled, unsigned or invalid requests return `401`.
-
-### How it works
-
-When Shopify sends a webhook, the handler:
-
-1. Verifies the HMAC-SHA256 signature using `crypto.timingSafeEqual`
-2. Parses the topic header to determine what changed
-3. Extracts the product/collection handle from the payload for targeted invalidation
-4. Calls `revalidateTag()` for each affected cache tag
-5. Returns the list of invalidated tags for logging
-
-This means a product update in Shopify invalidates only that product's cache and its recommendations - not every page on the site.
+Shopify data is cached (`"use cache"` or `"use cache: remote"`) rather than fetched fresh on every request. Configure Shopify webhooks pointed at `/api/webhooks/shopify` so edits in Shopify Admin invalidate the right cache tags instead of waiting for the cache lifetime to expire. See [Webhooks](/docs/anatomy/webhooks) for the endpoint, supported topics, and setup steps.
