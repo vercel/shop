@@ -27,3 +27,12 @@ The Product Detail Page (PDP) is a single product page — title, price, media, 
 - **Structured data** — Product and Breadcrumb JSON-LD for search and social.
 
 The quantity picker, Buy with Shop, bundles, complementary products, and related products are on by default and toggled under `pdp` in `shop.config.ts`.
+
+## Extending
+
+Common additions teams build on top of the PDP. None of these ship by default — bring your own data source and component, then wire it in alongside the other sections in `product-detail-section.tsx`.
+
+- **Reviews** — a ratings summary near the price and a review list below the details, usually backed by a reviews app or Shopify metafields.
+- **Virtual try-on** — an AR or camera overlay launched from the gallery, typically a modal wrapping a partner SDK.
+- **Metafield accordion** — an accordion below the description surfacing metafields (materials, care, sizing) that aren't part of the default fields.
+- **Waitlist** — a restock signup that replaces Add to Cart when the selected variant is unavailable.
