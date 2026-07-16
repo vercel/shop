@@ -4,18 +4,42 @@ title: Introduction
 type: overview
 ---
 
-Vercel Shop is a Next.js storefront template for Shopify, built from the ground up for agentic development.
+Vercel Shop is a Shopify storefront template for Next.js, built to be the best way to use Next.js's newest rendering primitives — Cache Components, the React Compiler — against a real commerce backend, and just as deliberately built to be easy for a coding agent to extend. Drop in your Shopify credentials and you have a fully-featured store in minutes; see [Getting Started](/docs/getting-started).
 
-## Agentic development
+## How it works
 
-The template ships with context, feedback loops, and project-scoped plugins that let coding agents understand and extend your store. Recipes and `vercel-shop` skills describe common tasks - from enabling Shopify Markets to swapping your CMS - so an agent can execute them in a single command.
+**Cache Components are the rendering model every route follows, not an add-on.** Static-first pages like the PDP bake their Shopify data into a shell cached with `"use cache"` and `cacheLife`, kept fresh by a Shopify webhook calling `revalidateTag()` instead of a per-request round-trip. Request-bound work — a selected variant, a filtered grid, cart state — streams into the smallest `Suspense` boundary that needs it, so the parts of a page that can be instant are instant. Getting this cache/streaming split right by hand, against a real commerce backend, is normally weeks of trial and error; the template applies it consistently across every route from the start.
 
-Every skill includes the context an agent needs: which files to touch, what patterns to follow, and how to validate the result. This means less back-and-forth and more correct code on the first pass.
+**Shopify data flows through Hydrogen's own client, not a bespoke wrapper.** `lib/shopify/storefront.ts` builds on `@shopify/hydrogen`'s `createStorefrontClient`, and customer authentication builds on `@shopify/hydrogen/customer-account` — the same primitives Shopify ships and documents, so cache tags, locale context, and OAuth session handling follow patterns Shopify already supports instead of a one-off abstraction only this template understands.
 
-## What's included
+**The codebase is legible to agents, not just to whoever wrote it.** Every route, Shopify operation, and transform follows one documented shape (`AGENTS.md`, the `vercel-shop` skills), so a coding agent can safely extend the storefront on day one instead of guessing at conventions from scratch. Skills describe common tasks — from enabling Shopify Markets to swapping your CMS — naming the files to touch, the patterns to follow, and how to validate the result, so an agent can execute them in a single command instead of a long back-and-forth. See [Extending with Agents](/docs/getting-started/extending-with-agents).
 
-- **Collections and search** with filtering and optimistic filter updates - all high performance
-- **Product detail pages** with statically cached layouts and streamed dynamic content
-- **Shopify pages support** for rendering custom pages from your Shopify admin
-- **Optimistic cart** with instant add-to-cart and quantity changes
-- **Cache Components** for instant static responses with dynamic parts streamed in
+## Out of the box
+
+Your Shopify credentials are the only thing standing between a fresh clone and a fully working storefront — everything below ships pre-wired.
+
+| Area                      | Ships with                                                                                                                                                                  |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Product pages**         | Variant picker, color-aware gallery, optimistic add-to-cart, bundles, complementary & related products, Buy with Shop, structured data — see [PDP](/docs/anatomy/pages/pdp) |
+| **Collections & search**  | Faceted filters, swatch filters, sorting, infinite scroll, predictive search — see [PLP](/docs/anatomy/pages/plp)                                                           |
+| **Cart**                  | Optimistic overlay and full cart page, server-action mutations, bundle-aware line items — see [Cart](/docs/anatomy/cart)                                                    |
+| **Content**               | Shopify Pages, policies, blogs, and articles rendered as storefront routes — see [Content pages](/docs/anatomy/pages/content)                                               |
+| **Navigation & footer**   | Responsive nav and mobile menu, policy links, social links — see [Navigation](/docs/anatomy/navigation)                                                                     |
+| **AI shopping assistant** | Opt-in agent with product discovery, cart tools, and generative UI, built on AI SDK — see [Agent](/docs/anatomy/agent)                                                      |
+| **Customer accounts**     | Opt-in Hydrogen OAuth, profile, orders, and address book — see [Authentication](/docs/anatomy/authentication)                                                               |
+| **AEO & GEO**             | Markdown content negotiation, `llms.txt`, JSON-LD, sitemap — see [AEO & GEO](/docs/anatomy/aeo-geo)                                                                         |
+| **Cache invalidation**    | Signed Shopify webhook handler that busts exactly the right cache tags — see [Webhooks](/docs/anatomy/webhooks)                                                             |
+
+Analytics (Vercel Web Analytics, Speed Insights) and multi-locale routing (Shopify Markets, or plain i18n) live in the codebase already and turn on with a skill or a flag, not a rewrite — see [Enable Analytics](/docs/skills/enable-analytics) and [Enable Shopify Markets](/docs/skills/enable-shopify-markets).
+
+<Cards>
+  <Card title="Getting Started" href="/docs/getting-started">
+    Set up Shopify, create a project, and run the storefront locally.
+  </Card>
+  <Card title="Extending with Agents" href="/docs/getting-started/extending-with-agents">
+    Extend and customize the storefront with Claude Code or Cursor.
+  </Card>
+  <Card title="Why Use This" href="/docs/why-use-this">
+    Why we built Vercel Shop as an agent-first Shopify starter.
+  </Card>
+</Cards>
