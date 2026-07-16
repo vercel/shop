@@ -10,12 +10,14 @@ minimumReleaseAgeExclude:
   - "@ai-sdk/*"
   - "@next/*"
   - "@shopify/hydrogen"
+  - "@tailwindcss/*"
   - "@types/react"
   - "@vercel/*"
   - ai
   - next
   - react
   - react-dom
+  - tailwindcss
 
 packages:
   - "apps/*"
