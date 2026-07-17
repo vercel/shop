@@ -57,19 +57,13 @@ function ProductCardImageContainer({
   );
 }
 
-type ProductCardAspectRatio = "landscape" | "portrait" | "square";
-
-const aspectRatioClasses =
-  "data-[aspect-ratio=landscape]:aspect-[4/3] data-[aspect-ratio=portrait]:aspect-[3/4] data-[aspect-ratio=square]:aspect-square";
-
 interface ProductCardImageProps {
-  src?: string | null;
   alt: string;
-  sizes?: string;
+  className?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
-  aspectRatio?: ProductCardAspectRatio;
-  className?: string;
+  sizes?: string;
+  src?: string | null;
 }
 
 function ProductCardImage({
@@ -78,14 +72,12 @@ function ProductCardImage({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
-  aspectRatio = "square",
   className,
 }: ProductCardImageProps) {
   return (
     <div
       data-slot="product-card-image"
-      data-aspect-ratio={aspectRatio}
-      className={cn("relative overflow-hidden", aspectRatioClasses, className)}
+      className={cn("relative aspect-square overflow-hidden", className)}
     >
       {src ? (
         <Image
@@ -135,13 +127,13 @@ function ProductCardTitle({ className, children, ...props }: React.ComponentProp
 
 interface ProductCardPriceProps {
   amount: string;
-  currencyCode: string;
-  maxAmount?: string;
+  className?: string;
   compareAtAmount?: string;
   compareAtCurrencyCode?: string;
+  currencyCode: string;
+  discountVariant?: "blue" | "green";
   locale: string;
-  discountVariant?: "green" | "blue";
-  className?: string;
+  maxAmount?: string;
 }
 
 function getDiscountPercent(price: number, compareAtPrice: number | undefined): number | null {
@@ -203,29 +195,19 @@ function ProductCardPrice({
   );
 }
 
-function ProductCardSkeleton({
-  aspectRatio = "square",
-  className,
-}: {
-  aspectRatio?: ProductCardAspectRatio;
-  className?: string;
-}) {
+function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
       className={cn("flex flex-col overflow-hidden", className)}
     >
-      <ImagePlaceholder
-        data-aspect-ratio={aspectRatio}
-        className={cn("animate-pulse", aspectRatioClasses)}
-      />
+      <ImagePlaceholder className="aspect-square animate-pulse" />
     </div>
   );
 }
 
 export {
   ProductCard,
-  type ProductCardAspectRatio,
   ProductCardBadge,
   ProductCardContent,
   ProductCardImage,

@@ -165,7 +165,7 @@ export function BuyButtons({
           ) : (
             <>
               <span className="sr-only">{t("buyWithShop")}</span>
-              <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+              <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
             </>
           )}
         </button>

@@ -5,7 +5,6 @@ import type { Locale } from "@/lib/i18n";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 import {
-  type ProductCardAspectRatio,
   ProductCardBadge,
   ProductCardImage,
   ProductCardImageContainer,
@@ -14,18 +13,16 @@ import {
 } from "./components";
 
 export interface ProductCardProps {
-  product: ProductCardType;
-  locale: Locale;
-  aspectRatio?: ProductCardAspectRatio;
-  variant?: "default" | "featured";
-  outOfStockText?: string;
-  sizes?: string;
   className?: string;
+  locale: Locale;
+  outOfStockText?: string;
+  product: ProductCardType;
+  sizes?: string;
+  variant?: "default" | "featured";
 }
 
 export async function ProductCard({
   product,
-  aspectRatio = "square",
   variant = "default",
   outOfStockText,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
@@ -51,7 +48,6 @@ export async function ProductCard({
             sizes={sizes}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
-            aspectRatio={aspectRatio}
           />
         </ProductCardImageContainer>
       </ProductCardRoot>
