@@ -9,8 +9,6 @@ import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { Image as ImageType, Video } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { Lightbox, LightboxTrigger } from "./lightbox";
-
 type MediaItem =
   | { type: "image"; image: ImageType }
   | { type: "placeholder" }
@@ -149,7 +147,7 @@ function Carousel({
     <div className="grid gap-5">
       <div
         ref={scrollContainerRef}
-        className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-5 w-[calc(100%+2.5rem)]"
+        className="relative -mx-5 flex w-[calc(100%+2.5rem)] snap-x snap-mandatory overflow-x-auto overscroll-x-contain scrollbar-hide md:mx-0 md:w-full"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
@@ -201,93 +199,6 @@ function Carousel({
   );
 }
 
-function GridItem({
-  item,
-  title,
-  idx,
-  priority,
-  eager,
-}: {
-  item: MediaItem;
-  title: string;
-  idx: number;
-  priority: boolean;
-  eager: boolean;
-}) {
-  return (
-    <div className="relative w-full overflow-hidden aspect-square">
-      {item.type === "video" ? (
-        <MediaVideo
-          item={item}
-          sizes="(min-width: 1024px) 25vw, 50vw"
-          priority={priority || eager}
-        />
-      ) : item.type === "placeholder" ? (
-        <ImagePlaceholder className="size-full" />
-      ) : (
-        <LightboxTrigger item={item}>
-          <MediaImage
-            item={item}
-            title={title}
-            idx={idx}
-            sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={priority}
-            eager={eager}
-          />
-        </LightboxTrigger>
-      )}
-    </div>
-  );
-}
-
-function Grid({
-  mediaItems,
-  title,
-  hasColorSlot,
-  interactive = true,
-  children,
-}: {
-  mediaItems: MediaItem[];
-  title: string;
-  hasColorSlot: boolean;
-  interactive?: boolean;
-  children?: React.ReactNode;
-}) {
-  const grid = (
-    <div className="grid grid-cols-2 gap-2.5">
-      {children}
-      {mediaItems.map((item, idx) => {
-        const priority = !hasColorSlot && idx === 0;
-        return (
-          <GridItem
-            key={mediaKey(item)}
-            item={item}
-            title={title}
-            idx={idx}
-            priority={priority}
-            eager
-          />
-        );
-      })}
-    </div>
-  );
-
-  return interactive ? <Lightbox label={title}>{grid}</Lightbox> : grid;
-}
-
-export function ColorImageGrid({ images, title }: { images: ImageType[]; title: string }) {
-  return images.map((image, idx) => (
-    <GridItem
-      key={image.url}
-      item={{ type: "image", image }}
-      title={title}
-      idx={idx}
-      priority={idx === 0}
-      eager
-    />
-  ));
-}
-
 export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
   return images.map((image, idx) => {
     const priority = idx === 0;
@@ -313,19 +224,10 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
 }
 
 export function ProductMediaSkeleton({ className }: { className?: string }) {
-  const tile = "aspect-square w-full animate-pulse";
   return (
-    <div className={className}>
-      <div className="grid gap-5 lg:hidden -mx-5">
-        <ImagePlaceholder className={tile} />
-        <div className="h-1.5" />
-      </div>
-      <div className="hidden lg:grid grid-cols-2 gap-2.5">
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-      </div>
+    <div className={cn("grid gap-5", className)}>
+      <ImagePlaceholder className="-mx-5 aspect-square w-[calc(100%+2.5rem)] animate-pulse md:mx-0 md:w-full" />
+      <div className="h-1.5" />
     </div>
   );
 }
@@ -356,21 +258,9 @@ export function ProductMedia({
 
   return (
     <div className={className}>
-      <div className="lg:hidden">
-        <Carousel mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot}>
-          {mobileSlot}
-        </Carousel>
-      </div>
-      <div className="hidden lg:block">
-        <Grid
-          mediaItems={mediaItems}
-          title={title}
-          hasColorSlot={hasColorSlot}
-          interactive={!isEmpty}
-        >
-          {desktopSlot}
-        </Grid>
-      </div>
+      <Carousel mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot}>
+        {mobileSlot ?? desktopSlot}
+      </Carousel>
     </div>
   );
 }
