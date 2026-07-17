@@ -415,7 +415,7 @@ function BuyButtonsFallback({
             !allInStock && "invisible",
           )}
         >
-          <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+          <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
         </div>
       ) : null}
     </div>
