@@ -10,7 +10,7 @@ The Product Listing Page (PLP) covers two routes — `/collections/[handle]` for
 
 ## How it works
 
-**Static header, live grid.** Collection metadata (title, description, image) is awaited at the top of the page and baked into the static shell, the same pattern as the [PDP](/docs/anatomy/pages/pdp). The product grid is the opposite: it's read live from Shopify on every request, deliberately uncached. Caching it produced duplicate products at page boundaries, because two cached cursor pages could be snapshotted at different times and drift out of order. Reading every page live keeps a scroll session's cursors consistent. `/search` has no cacheable header at all — its body is entirely query-driven — so it skips the static-shell step altogether.
+**Static header, live grid.** Collection metadata (title, description, image) is awaited at the top of the page and baked into the static shell. The product grid is the opposite: it's read live from Shopify on every request, deliberately uncached. Caching it produced duplicate products at page boundaries, because two cached cursor pages could be snapshotted at different times and drift out of order. Reading every page live keeps a scroll session's cursors consistent. `/search` has no cacheable header at all — its body is entirely query-driven — so it skips the static-shell step altogether.
 
 **Filter, sort, and cursor state live in the URL.** Changing a filter or sort is a `searchParams` update, not client state, so results are shareable and bookmarkable. `useOptimistic` shows the new filter state instantly while the server request is in flight, and `useTransition` keeps sort changes non-blocking — so the UI feels instant even though every result comes from a live request.
 

@@ -10,7 +10,7 @@ The Product Detail Page (PDP) is a single product page — title, price, media, 
 
 ## How it works
 
-**Static-first rendering.** Product data is awaited at the top of the page and baked into the static shell, so the title, price, gallery, and description ship as one coherent copy. Freshness comes from cache invalidation — a Shopify webhook calling `revalidateTag`, plus the `cacheLife` window — not a per-request fetch, so the body never re-renders at request time.
+**Instant loading shell.** The page renders a full PDP skeleton immediately while product data resolves behind a top-level Suspense boundary. Product reads are cached, so cold visits can stream the resolved title, price, gallery, and description into that shell while repeat visits usually reuse the rendered result. Shopify webhook invalidation and the `cacheLife` window keep that cached product data fresh.
 
 **Variant selection through URL searchParams.** Each option change is a navigation (`/products/tee?color=Blue&size=XS`), not client state. That gives you shareable URLs, working browser back/forward, and a fully server-rendered page with zero layout shift. The selected variant resolves from a second, per-selection Shopify query kept off the critical path, so the picker highlights at URL speed rather than waiting on the network.
 

@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
+import {
+  ProductDetailSection,
+  ProductDetailSectionSkeleton,
+} from "@/components/product-detail/product-detail-section";
+import {
+  RelatedProductsSection,
+  RelatedProductsSectionSkeleton,
+} from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
@@ -83,17 +90,25 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export default async function ProductPage({
-  params,
-  searchParams,
-}: PageProps<"/products/[handle]">) {
+export default function ProductPage(props: PageProps<"/products/[handle]">) {
+  return (
+    <Page className="pt-0">
+      <Container className="bg-background">
+        <Suspense fallback={<ProductPageFallback />}>
+          <ProductPageContent {...props} />
+        </Suspense>
+      </Container>
+    </Page>
+  );
+}
+
+async function ProductPageContent({ params, searchParams }: PageProps<"/products/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
   const product = await getProduct({ handle, locale });
   if (!product) notFound();
 
-  // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
   const selectedOptionsPromise: Promise<SelectedOptions> = searchParams.then(
     (resolvedSearchParams) => ({
       ...defaultSelectedOptions(product),
@@ -119,20 +134,25 @@ export default async function ProductPage({
   );
 
   return (
-    <Page className="pt-0">
-      <Container className="bg-background">
-        <Sections>
-          <ProductDetailSection
-            product={product}
-            selectedOptionsPromise={selectedOptionsPromise}
-            variantPromise={variantPromise}
-            locale={locale}
-          />
-          {shopConfig.pdp.relatedProducts.enabled ? (
-            <RelatedProductsSection handle={handle} limit={4} locale={locale} />
-          ) : null}
-        </Sections>
-      </Container>
-    </Page>
+    <Sections>
+      <ProductDetailSection
+        product={product}
+        selectedOptionsPromise={selectedOptionsPromise}
+        variantPromise={variantPromise}
+        locale={locale}
+      />
+      {shopConfig.pdp.relatedProducts.enabled ? (
+        <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+      ) : null}
+    </Sections>
+  );
+}
+
+function ProductPageFallback() {
+  return (
+    <Sections>
+      <ProductDetailSectionSkeleton />
+      {shopConfig.pdp.relatedProducts.enabled ? <RelatedProductsSectionSkeleton limit={4} /> : null}
+    </Sections>
   );
 }
