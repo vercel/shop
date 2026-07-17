@@ -8,35 +8,17 @@ prerequisites:
 
 The storefront includes an opt-in AI shopping assistant built with [AI SDK](https://ai-sdk.dev). It can search products, browse collections, manage the cart, answer store-policy questions, and render rich product cards through natural conversation. The default model is Google Gemini 3.5 Flash through the Vercel AI Gateway.
 
-## Configuration
+## How it works
 
-The assistant defaults to disabled through `agent.enabled` in `shop.config.ts`, which reads `NEXT_PUBLIC_ENABLE_AGENT` and falls back to `false`. Set `NEXT_PUBLIC_ENABLE_AGENT="1"` to enable it for a deployment, or `"0"` to disable it. When disabled, the button is hidden and `POST /api/chat` returns `404` before reading the request body or creating a cart.
+**Feature-flagged, single-file runtime.** The assistant defaults to disabled through `agent.enabled` in `shop.config.ts`, which reads `NEXT_PUBLIC_ENABLE_AGENT` (`"1"` to enable, `"0"` to disable). When disabled, the button is hidden and `POST /api/chat` returns `404` before reading the request body or creating a cart. The model, loop limit, prompts, and tool registry all live together in `lib/agent/server.ts`, since they form one runtime implementation rather than a storefront configuration API: `AgentPanel` (`useChat`) posts to `/api/chat`, which runs a request-scoped `ToolLoopAgent` against the Shopify tools and streams the result back.
 
-The AI Gateway model, loop limit, prompts, and tool registry live together in `lib/agent/server.ts` because they form one runtime implementation rather than a storefront configuration API. On Vercel, the model uses the project's OIDC token automatically; elsewhere set `AI_GATEWAY_API_KEY` or run `vercel link` to mint a local `VERCEL_OIDC_TOKEN`.
+**Trusted page context, not client-supplied state.** The route derives context from the same-origin `Referer` header rather than trusting a client-supplied product or collection object. Product and collection handles are resolved through Shopify before being added to the system prompt, so the assistant can understand phrases like "this product" while prices, variants, and availability stay authoritative. A request-scoped `AsyncLocalStorage` exposes the current locale, cart ID, chat ID, and page context to every tool during that request.
 
-## Architecture
+**Generative UI settles before it renders.** The model's response streams through json-render's `pipeJsonRender`, which adds structured UI data parts to the normal AI SDK stream; `useJsonRenderMessage` reconstructs the spec on the client for `<Renderer>`. Cards render only after the turn settles, so a partial spec never flashes an incorrect card. `CartReconciler` watches completed cart-tool calls in the message stream and updates the global cart context — opening the overlay on a successful mutation, updating state silently for a plain `getCart`.
 
-```
-AgentPanel (useChat) → POST /api/chat → ToolLoopAgent → Shopify tools → streamed UI message
-```
+## Out of the box
 
-1. `components/agent/agent-panel.tsx` uses `useChat` with `DefaultChatTransport`.
-2. `app/api/chat/route.ts` checks the feature flag, validates UI messages, resolves trusted page context from the `Referer` header, and initializes the Shopify cart before streaming.
-3. `lib/agent/server.ts` creates a request-scoped `ToolLoopAgent` with the system prompt and 14 tools.
-4. The response passes through json-render's `pipeJsonRender`, adding structured UI data parts to the normal AI SDK stream.
-5. `useJsonRenderMessage` reads those parts and renders the registered product, cart, and variant components.
-
-The server uses `AsyncLocalStorage` to expose the current locale, cart ID, chat ID, and trusted page context to tools during one request. Conversation history is browser-local rather than server-durable.
-
-## Page context
-
-The route derives context from the same-origin `Referer` instead of trusting a client-supplied product or collection object. Product and collection handles are resolved through Shopify before being added to the system prompt. This lets the assistant understand phrases such as "this product" while keeping prices, variants, and availability authoritative.
-
-## Tools
-
-Each tool is an AI SDK `tool()` under `lib/agent/tools/`. GraphQL-backed tools call the normal Shopify operation layer, so existing caching, transforms, locale handling, and cart invalidation remain in effect.
-
-### Product discovery
+**Product discovery**
 
 | Tool                        | Purpose                                                                              |
 | --------------------------- | ------------------------------------------------------------------------------------ |
@@ -46,60 +28,20 @@ Each tool is an AI SDK `tool()` under `lib/agent/tools/`. GraphQL-backed tools c
 | `listCollections`           | All store categories                                                                 |
 | `browseCollection`          | Products within a collection with sorting                                            |
 
-### Cart management
+**Cart management** — `addToCart`, `getCart`, `updateCartItemQuantity`, `removeFromCart`, and `addCartNote`, all funneled through `lib/shopify/operations/cart.ts` so existing cache invalidation applies. The route creates a cart before streaming when needed and returns its httpOnly cookie in the response headers.
 
-| Tool                     | Purpose                                             |
-| ------------------------ | --------------------------------------------------- |
-| `addToCart`              | Add a variant to cart (requires Shopify variant ID) |
-| `getCart`                | View cart contents, line items, and costs           |
-| `updateCartItemQuantity` | Change quantity of a line item                      |
-| `removeFromCart`         | Remove items by line ID                             |
-| `addCartNote`            | Delivery notes, gift messages, special instructions |
+**Navigation** — `navigateUser` generates links to product pages, collections, search, cart, checkout, account, and orders.
 
-Every cart mutation goes through `lib/shopify/operations/cart.ts`, which invalidates the cart cache. The route creates a cart before streaming when needed and returns its httpOnly cookie in the response headers.
+**Native Shopify (Storefront MCP)** — `searchCatalog`, `getCatalogProduct`, and `searchShopPoliciesAndFaqs` call Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) endpoint as an alternative discovery path. `searchCatalog` accepts natural-language intent and enriches results with storefront handles so they can feed normal navigation and cart flows. Set `UCP_AGENT_PROFILE_URL` only when the store requires an agent profile.
 
-### Navigation
+**Generative UI components** — `AgentProductCard`, `AgentProductGrid`, `AgentCartSummary`, `AgentCartConfirmation`, and `AgentVariantPicker`, registered in the json-render catalog in `lib/agent/index.ts`.
 
-| Tool           | Purpose                                                                               |
-| -------------- | ------------------------------------------------------------------------------------- |
-| `navigateUser` | Generate links to product pages, collections, search, cart, checkout, account, orders |
+**Chat UI and persistence** — a compact-to-capped panel with streaming "Thinking…" state, bottom pinning, click-outside behavior, and clear/minimize controls. The chat ID, draft input, and UI messages persist to `localStorage` under `template-agent-chat:v3`, so a conversation survives reloads until cleared — persistence is browser-local; there is no durable server-side session.
 
-### Native Shopify (Storefront MCP)
+## Common customizations
 
-These tools call Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) endpoint as an alternative discovery path. `searchCatalog` accepts natural-language intent and enriches results with storefront handles so they can feed normal navigation and cart flows. Set `UCP_AGENT_PROFILE_URL` only when the store requires an agent profile.
+The agent doesn't ship these, but they're worth adding before real traffic or production use.
 
-| Tool                        | Purpose                                                                     |
-| --------------------------- | --------------------------------------------------------------------------- |
-| `searchCatalog`             | Native semantic catalog search; returns storefront handle and product GID   |
-| `getCatalogProduct`         | Product details by product GID; returns storefront handle and variant ID    |
-| `searchShopPoliciesAndFaqs` | Grounded answers for policy, shipping, returns, warranty, and FAQ questions |
-
-## Generative UI
-
-The json-render catalog in `lib/agent/index.ts` exposes:
-
-- **AgentProductCard** - image, title, price, compare-at price, and availability
-- **AgentProductGrid** - responsive wrapper for multiple product cards
-- **AgentCartSummary** - line items, bundle components, costs, and checkout link
-- **AgentCartConfirmation** - confirmation after a successful add-to-cart call
-- **AgentVariantPicker** - display-only product variant choices
-
-The model emits json-render specs in its response. `pipeJsonRender` converts the spec stream into AI SDK data parts, and `useJsonRenderMessage` reconstructs the final spec for `<Renderer>`. Cards render only after the turn settles, preventing partial specs from flashing an incorrect card.
-
-## Cart reconciliation
-
-`CartReconciler` watches completed cart-tool parts in AI SDK messages. Successful mutations update the global cart context immediately and open the cart overlay; `getCart` updates state without opening the overlay.
-
-## Chat UI and persistence
-
-The panel keeps the current compact-to-capped layout, streaming "Thinking…" state, bottom pinning, click-outside behavior, and clear/minimize controls. The chat ID, draft input, and UI messages persist to localStorage under `template-agent-chat:v3`, so a conversation survives reloads until cleared. Persistence is browser-local; there is no durable Workflow session.
-
-## Abuse protection
-
-`POST /api/chat` is anonymous when the feature is enabled. The feature flag is a deployment guard, not abuse protection. Before exposing the endpoint to real traffic, add an appropriate perimeter:
-
-- **[Vercel BotID](https://vercel.com/docs/botid)** to reject automated traffic
-- **Per-IP rate limiting** backed by shared infrastructure such as Vercel Runtime Cache
-- **A model output/token cap** to bound worst-case gateway spend
-
-Run bot and rate-limit checks before `request.json()` and before cart creation. If the route is already behind a WAF, prefer that policy and keep the model cap.
+- **Abuse protection** — `POST /api/chat` is anonymous when enabled; the feature flag is a deployment guard, not abuse protection. Add [Vercel BotID](https://vercel.com/docs/botid) to reject automated traffic, per-IP rate limiting backed by shared infrastructure such as Vercel Runtime Cache, and a model output/token cap to bound worst-case gateway spend — run bot and rate-limit checks before `request.json()` and before cart creation. If the route already sits behind a WAF, prefer that policy and keep the model cap.
+- **Durable chat sessions** — conversation history is browser-local only today; swapping in a server-durable store (a database, or a Workflow session) would let a conversation survive a device switch or a cleared cache.
+- **Additional tools** — new capabilities are added the same way as the shipped ones: an AI SDK `tool()` under `lib/agent/tools/` that calls the normal Shopify operation layer, then registered in `lib/agent/server.ts`.

@@ -1,35 +1,30 @@
 ---
 title: Home
-description: The storefront landing page - hero, products, and promotional content.
+description: The storefront landing page - a headline and a products grid.
 type: guide
 ---
 
 <HomeBrowser />
 
-The home page is a server component that renders a hero banner and a products grid. Product data is fetched server-side from Shopify.
+The home page is a server component: a headline section followed by a grid of the storefront's top products. It's the simplest route in the template and the one most teams customize first.
 
-## Hero section
+## How it works
 
-A full-width banner with a background image or autoplaying background video, gradient overlay, headline, subheadline, and a CTA link. On mobile, the hero height comes from its vertical padding; on medium screens and up, it keeps a wide `3 / 1` aspect ratio.
+**Static headline, live-fetched grid.** The headline and description are static strings from the `home` translation namespace, rendered with no data dependency, so they ship as part of the static shell with zero layout shift. The products grid is a separate `Suspense` boundary below it, so a slow catalog fetch never blocks the headline from painting.
 
-By default, when no `backgroundImage` or `backgroundVideo` is provided, the hero renders with no background — the headline and subheadline use `text-foreground` and the CTA uses the default (primary) button variant, so the banner blends into the page above the products grid. When media is present, the banner switches to a dark `bg-foreground` container with the existing gradient overlay, white text, and a light CTA so the copy stays legible against the image or video. To add a background image, pass a `backgroundImage` prop — either a static import (`import myHero from "@/public/my-hero.jpg"`), which enables automatic blur placeholders and prevents layout shift, or a remote URL object (`{ url: "https://...", alt: "..." }`).
+**The grid mirrors `/collections/all`, not a curated list.** Products come from `searchIndexProducts()` — the same relevance-ranked Storefront `search` path (wildcard `*` query) that backs the all-products collection page — so the home grid shows exactly the first 8 products a shopper would see there, rather than a separate best-selling or hand-picked list.
 
-To use a video hero, pass `backgroundVideo: { url: "https://...", previewImage: { url: "https://...", alt: "..." } }`. Videos use the shared `AutoPlayVideo` component, so they autoplay when visible and pause when off-screen. When both `backgroundVideo` and `backgroundImage` are present, the video is used.
+## Out of the box
 
-The headline and CTA are configurable through the `BannerSection` component's `hero` prop. By default the CTA links to `/search` to browse the catalog.
+- **Headline section** — a centered `h1` and description above the grid, with a `4/1` aspect-ratio spacer on desktop and compact padding on mobile.
+- **Products grid** — the top 8 products via `searchIndexProducts({ limit: 8, locale })`, cached with `cacheLife("max")` and product-level cache tags for granular revalidation.
+- **"View all" link** — the grid's section heading links to `/collections/all` by default, set via the `title` and `collectionUrl` props on `ProductsGrid` in `app/page.tsx`.
+- **Responsive columns** — 2 columns on mobile, 4 on desktop, using the standard [product card](/docs/anatomy/product-card).
 
-On mobile, the subheadline and CTA text are hidden to keep the banner compact.
+## Common customizations
 
-## Products grid
+The home page doesn't ship these, but they're common additions teams layer on top.
 
-A responsive grid showing the top 8 products fetched via `searchIndexProducts()`. The grid uses the `ProductsGrid` component with a section title and a link to the full catalog. Each item is a [product card](/docs/anatomy/product-card) with:
-
-- Featured image, with a muted image-icon placeholder when the product has no image
-- Out-of-stock overlay when unavailable
-- Title and price (with compare-at price for discounts)
-
-The grid is responsive: 2 columns on mobile, 3 on tablet, 4 on desktop. A `ProductsSlider` component is also available as a reference building block for a horizontally scrollable layout, though it is not currently wired into any page.
-
-## Data fetching
-
-Products are fetched server-side with `searchIndexProducts({ limit: 8, locale })` — the same relevance-ranked Storefront `search` path (wildcard `*` query) that backs `/collections/all`, so the home grid shows exactly the first 8 products a shopper sees on that page rather than a separate best-selling list or a curated collection. The result is cached with `cacheLife("max")` and product-level cache tags for granular revalidation. The section heading and its "view all" link are set by the `title` and `collectionUrl` props on the `ProductsGrid` call in `app/page.tsx`, which point at `/collections/all` by default.
+- **Hero banner** — an image or video banner above the headline, for a merchandising-led landing page instead of a plain text intro.
+- **Curated or best-selling sections** — additional `ProductsGrid` instances backed by a specific collection instead of the search index, for "New Arrivals" or "Best Sellers" rows.
+- **Promotional content** — editorial blocks and banners between sections. The template ships a `ProductsSlider` component for a horizontally scrollable row of the same [product card](/docs/anatomy/product-card), though it isn't wired into any page by default.

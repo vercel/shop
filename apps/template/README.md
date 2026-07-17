@@ -71,7 +71,6 @@ Vercel Shop includes a `vercel-shop` plugin with skills for extending the storef
 | `build-shop`             | Build or adapt storefront routes with Vercel Shop patterns                 |
 | `enable-i18n`            | Locale-prefixed URL routing + next-intl message catalogs (no Markets)      |
 | `enable-analytics`       | Add Vercel Analytics, Speed Insights, and Google Tag Manager               |
-| `enable-shopify-cms`     | Wire Shopify metaobjects as a CMS for homepage and marketing pages         |
 | `enable-shopify-markets` | Multi-locale support with Shopify Markets and next-intl                    |
 | `enable-shopify-menus`   | Replace hardcoded nav/footer with Shopify-powered menus, optional megamenu |
 

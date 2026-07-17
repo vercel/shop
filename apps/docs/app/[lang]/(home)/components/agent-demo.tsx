@@ -24,29 +24,6 @@ const skills: Skill[] = [
     ],
     done: "Shopify Markets enabled — 4 locales configured",
   },
-  {
-    label: "Auth",
-    command: "/vercel-shop:enable-shopify-auth",
-    logs: [
-      { icon: "add", text: "Installed better-auth with Shopify OIDC" },
-      {
-        icon: "add",
-        text: "Created account pages: profile, orders, addresses",
-      },
-      { icon: "edit", text: "Added login button to navigation" },
-    ],
-    done: "Customer auth enabled — login flow ready",
-  },
-  {
-    label: "CMS",
-    command: "/vercel-shop:enable-shopify-cms",
-    logs: [
-      { icon: "add", text: "Created cms_homepage metaobject definition" },
-      { icon: "add", text: "Added GraphQL queries for metaobjects" },
-      { icon: "edit", text: "Wired MarketingPageRenderer to CMS data" },
-    ],
-    done: "Shopify CMS enabled — homepage connected",
-  },
 ];
 
 type Phase = "idle" | "typing-command" | "running" | "log-1" | "log-2" | "log-3" | "done";

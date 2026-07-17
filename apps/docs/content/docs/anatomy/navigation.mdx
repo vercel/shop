@@ -6,38 +6,27 @@ type: guide
 
 The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. By default, navigation links are hardcoded. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch menus from Shopify.
 
-## Navbar
+## How it works
 
-A sticky header (`z-30`) that composes the logo/brand link, quick links, and the cart icon. On mobile, a hamburger menu appears to the left of the logo and the quick links are hidden.
+**Desktop and mobile split at the `md` breakpoint, not just visually.** Desktop gets a full sticky navbar (`z-30`) with the logo, quick links, and cart icon. Below `md`, quick links hide and a hamburger to the left of the logo opens a left-sliding `Sheet` with the same links, rendered as padded touch targets with breathing room below the close button; the cart and search icons stay in the top bar, and an optional agent button lives in a separate fixed bottom bar that only renders when it has children.
 
-## Quick links
+**Links are hardcoded but already Shopify-shaped.** The quick-links component accepts a Shopify-shaped `MenuItem[]` and renders up to three levels via an inline hover panel, even though the default data is a single hardcoded `Shop` link. The mobile sheet reuses the same link data. Because the shape already matches Shopify Navigation, the `enable-shopify-menus` skill only needs to swap the data source — desktop, mobile, and footer links all switch over together.
 
-A horizontal link bar with a hardcoded `Shop` link by default. The component already accepts a Shopify-shaped `MenuItem[]` and renders up to three levels via an inline hover panel; the `enable-shopify-menus` skill swaps the data source over to a Shopify Navigation menu. Hidden on mobile (`md:flex`).
+**Search is a self-contained modal, not a page.** A search icon opens a centered dialog with predictive results from Shopify's `predictiveSearch` API — suggestion chips and matching products appear as the user types. Clicking a product navigates directly to its page; "View all" goes to the full search results page. The modal closes on navigation, Escape, or an outside click.
 
-## Mobile menu
+**The cart icon is a server/client pair.** The server half reads the `shopify_cartId` cookie and fetches the initial cart so the count is correct on first paint; the client half renders the quantity badge, animates pending additions, and opens the cart overlay on click.
 
-A hamburger icon to the left of the logo, visible below the `md` breakpoint. Tapping it opens a `Sheet` sliding in from the left with the same navigation links as the desktop quick links. The sheet closes automatically when a link is tapped. By default the mobile sheet leaves breathing room below the close button and renders each link as a padded touch target instead of plain text rows. The same hardcoded links are used by default; the `enable-shopify-menus` skill can replace them with Shopify-powered menus.
+## Out of the box
 
-## Search
+- **Navbar** — sticky header composing the logo, quick links, and cart icon.
+- **Quick links** — horizontal link bar, hidden on mobile (`md:flex`).
+- **Mobile menu** — hamburger-triggered `Sheet` with the same links as quick links; closes automatically on tap.
+- **Search modal** — predictive search dialog, described above.
+- **Cart icon** — server-rendered initial count, client-rendered badge and overlay trigger.
+- **Footer** — renders a copyright notice by default; see [Footer](/docs/anatomy/footer) for its full composition, including the `enable-shopify-menus` menu columns.
+- **Mobile bottom bar** — fixed bar reserved for optional children such as the agent button.
 
-A search icon in the navbar opens a centered modal dialog. The modal contains a search input with predictive results powered by Shopify's `predictiveSearch` API. When the user types, suggestion chips and matching products appear below the input. Clicking a product navigates to its page; a "View all" button navigates to the full search results page. The modal closes on navigation, Escape, or clicking outside.
+## Common customizations
 
-## Cart icon
-
-The cart icon is a server/client component pair. The server component reads the `shopify_cartId` cookie and fetches the initial cart. The client component renders a quantity badge with an animation for pending additions and opens the cart overlay on click.
-
-## Footer
-
-By default the footer renders only a copyright notice. The `enable-shopify-menus` skill adds Shopify-powered footer columns with headings and links.
-
-## Mobile bottom bar
-
-A fixed bar at the bottom of the viewport. It renders only when it has children (e.g. the optional agent button).
-
-## Responsive behavior
-
-**Desktop** (`md` and up) - full horizontal navbar with quick links and cart sheet.
-
-**Mobile** (below `md`) - hamburger menu to the left of the logo opens a left-sliding sheet with navigation links. The cart and search icons remain in the top bar. The agent button (when enabled) lives in the fixed bottom bar.
-
-`quick-links`, `cart` / `cart-client`, and the footer components sit in their respective directories; the [footer page](/docs/anatomy/footer) covers footer composition.
+- **Shopify-powered menus** — the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill replaces the hardcoded quick links, mobile menu links, and footer columns with a Shopify Navigation menu in one pass.
+- **Additional bottom-bar actions** — the mobile bottom bar only renders when it has children, so adding another mobile-only action (beyond the agent button) is a matter of passing it another child rather than restructuring the bar.

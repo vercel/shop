@@ -190,7 +190,6 @@ If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" abov
 - Integrating Shopify-validated GraphQL into the template: `/vercel-shop:shopify-graphql-reference`
 - Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
 - Locale-prefixed routing + i18n (no Markets): `/vercel-shop:enable-i18n`
-- Shopify metaobject CMS: `/vercel-shop:enable-shopify-cms`
 - Navigation menus: `/vercel-shop:enable-shopify-menus`
 - Analytics: `/vercel-shop:enable-analytics`
 - Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-shop`

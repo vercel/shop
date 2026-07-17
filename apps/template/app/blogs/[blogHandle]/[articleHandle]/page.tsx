@@ -14,28 +14,28 @@ export async function generateStaticParams() {
     const { items } = await getShopifySitemapPage("BLOG", 1);
     const firstBlog = items[0];
     if (!firstBlog) {
-      return [{ blogHandle: PLACEHOLDER_HANDLE, postHandle: PLACEHOLDER_HANDLE }];
+      return [{ blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE }];
     }
 
     const blog = await getBlog({ handle: firstBlog.handle, limit: 1 });
     const firstArticle = blog?.articles[0];
     return [
       firstArticle
-        ? { blogHandle: blog.handle, postHandle: firstArticle.handle }
-        : { blogHandle: PLACEHOLDER_HANDLE, postHandle: PLACEHOLDER_HANDLE },
+        ? { blogHandle: blog.handle, articleHandle: firstArticle.handle }
+        : { blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE },
     ];
   } catch {
-    return [{ blogHandle: PLACEHOLDER_HANDLE, postHandle: PLACEHOLDER_HANDLE }];
+    return [{ blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE }];
   }
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/blogs/[blogHandle]/[postHandle]">): Promise<Metadata> {
-  const [{ blogHandle, postHandle }, locale] = await Promise.all([params, getLocale()]);
-  if (blogHandle === PLACEHOLDER_HANDLE || postHandle === PLACEHOLDER_HANDLE) return {};
+}: PageProps<"/blogs/[blogHandle]/[articleHandle]">): Promise<Metadata> {
+  const [{ blogHandle, articleHandle }, locale] = await Promise.all([params, getLocale()]);
+  if (blogHandle === PLACEHOLDER_HANDLE || articleHandle === PLACEHOLDER_HANDLE) return {};
 
-  const article = await getBlogArticle({ articleHandle: postHandle, blogHandle, locale });
+  const article = await getBlogArticle({ articleHandle, blogHandle, locale });
   if (!article) notFound();
 
   const pathname = `/blogs/${article.blogHandle}/${article.handle}`;
@@ -72,11 +72,11 @@ export async function generateMetadata({
 
 export default async function BlogArticlePage({
   params,
-}: PageProps<"/blogs/[blogHandle]/[postHandle]">) {
-  const [{ blogHandle, postHandle }, locale] = await Promise.all([params, getLocale()]);
-  if (blogHandle === PLACEHOLDER_HANDLE || postHandle === PLACEHOLDER_HANDLE) notFound();
+}: PageProps<"/blogs/[blogHandle]/[articleHandle]">) {
+  const [{ blogHandle, articleHandle }, locale] = await Promise.all([params, getLocale()]);
+  if (blogHandle === PLACEHOLDER_HANDLE || articleHandle === PLACEHOLDER_HANDLE) notFound();
 
-  const article = await getBlogArticle({ articleHandle: postHandle, blogHandle, locale });
+  const article = await getBlogArticle({ articleHandle, blogHandle, locale });
   if (!article) notFound();
 
   return <ArticlePage article={article} locale={locale} />;

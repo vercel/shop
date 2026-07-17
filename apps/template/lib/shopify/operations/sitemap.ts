@@ -91,11 +91,7 @@ function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResourc
 
 export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   "use cache: remote";
-  if (type === "PAGE") {
-    cacheLife("hours");
-  } else {
-    cacheLife("max");
-  }
+  cacheLife("max");
   cacheTag(...cacheTagsFor(type));
 
   const response = await storefront.request<{ sitemap: { pagesCount: { count: number } } }>(
@@ -114,11 +110,7 @@ export async function getShopifySitemapPage(
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
   "use cache: remote";
-  if (type === "PAGE") {
-    cacheLife("hours");
-  } else {
-    cacheLife("max");
-  }
+  cacheLife("max");
   cacheTag(...cacheTagsFor(type));
 
   if (type === "ARTICLE") {

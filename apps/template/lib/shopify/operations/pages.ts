@@ -42,7 +42,7 @@ export async function getPage({
   locale?: string;
 }): Promise<ContentPage | undefined> {
   "use cache";
-  cacheLife("hours");
+  cacheLife("max");
   cacheTag("pages", `page-${handle}`);
 
   const country = getCountryCode(locale);
