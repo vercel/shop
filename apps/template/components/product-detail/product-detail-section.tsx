@@ -13,7 +13,6 @@ import {
 } from "@/components/product-detail/product-info";
 import {
   ColorImageCarouselItems,
-  ColorImageGrid,
   ProductMedia,
   ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
@@ -71,14 +70,22 @@ export function ProductDetailSection({
           { name: product.title, path: `/products/${product.handle}` },
         ]}
       />
-      <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
-        <ProductInfoArea
-          product={product}
-          selectedOptionsPromise={selectedOptionsPromise}
-          variantPromise={variantPromise}
-          locale={locale}
-        />
+      <div className="relative left-1/2 -ml-[50vw] w-screen overflow-hidden pb-10">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 flex h-[min(100vw,36rem)] items-center overflow-hidden md:h-[min(calc(100vw_-_2.5rem),33.5rem)]"
+        >
+          <ProductMarquee title={product.title} />
+        </div>
+        <div className="relative z-10 mx-auto grid w-full max-w-xl gap-5 px-5">
+          <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
+          <ProductInfoArea
+            product={product}
+            selectedOptionsPromise={selectedOptionsPromise}
+            variantPromise={variantPromise}
+            locale={locale}
+          />
+        </div>
       </div>
     </>
   );
@@ -93,12 +100,7 @@ function ProductMediaArea({
 }) {
   if (!hasColorImagePartitioning(product.options)) {
     return (
-      <ProductMedia
-        otherImages={product.images}
-        videos={product.videos}
-        title={product.title}
-        className="lg:col-span-6"
-      />
+      <ProductMedia otherImages={product.images} videos={product.videos} title={product.title} />
     );
   }
 
@@ -107,20 +109,10 @@ function ProductMediaArea({
       otherImages={getSharedImages(product.images, product.options)}
       videos={product.videos}
       title={product.title}
-      className="lg:col-span-6"
-      desktopSlot={
-        // Color image is the LCP slot; a pulsing skeleton background flashes harder than empty space.
-        <Suspense fallback={<div className="aspect-square w-full" />}>
-          <ResolvedColorImageGrid
-            product={product}
-            selectedOptionsPromise={selectedOptionsPromise}
-          />
-        </Suspense>
-      }
       mobileSlot={
         <Suspense
           fallback={
-            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square" />
+            <div className="relative aspect-square w-full shrink-0 snap-start snap-always overflow-hidden" />
           }
         >
           <ResolvedColorImageCarousel
@@ -133,18 +125,6 @@ function ProductMediaArea({
   );
 }
 
-async function ResolvedColorImageGrid({
-  product,
-  selectedOptionsPromise,
-}: {
-  product: ProductDetails;
-  selectedOptionsPromise: Promise<SelectedOptions>;
-}) {
-  const image = getSelectedColorImage(product, await selectedOptionsPromise);
-  if (!image) return null;
-  return <ColorImageGrid images={[image]} title={product.title} />;
-}
-
 async function ResolvedColorImageCarousel({
   product,
   selectedOptionsPromise,
@@ -155,6 +135,17 @@ async function ResolvedColorImageCarousel({
   const image = getSelectedColorImage(product, await selectedOptionsPromise);
   if (!image) return null;
   return <ColorImageCarouselItems images={[image]} title={product.title} />;
+}
+
+function ProductMarquee({ title }: { title: string }) {
+  return (
+    <div className="animate-marquee flex shrink-0 whitespace-nowrap font-mono text-[16rem] leading-none font-bold tracking-tight text-background [-webkit-text-stroke:2px_var(--foreground)] [paint-order:stroke_fill] motion-reduce:animate-none">
+      <span className="pr-[1ch]">{title}</span>
+      <span className="pr-[1ch]">{title}</span>
+      <span className="pr-[1ch]">{title}</span>
+      <span className="pr-[1ch]">{title}</span>
+    </div>
+  );
 }
 
 async function ProductInfoArea({
@@ -181,9 +172,9 @@ async function ProductInfoArea({
   const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
 
   return (
-    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      <div data-slot="product-info-header">
-        <h1 className="text-foreground text-3xl">{title}</h1>
+    <div className="grid gap-10">
+      <div data-slot="product-info-header" className="font-mono text-sm">
+        <h1 className="font-bold text-foreground">{title}</h1>
         {uniformPrice ? (
           <ProductPrice
             amount={product.priceRange.minVariantPrice.amount}
@@ -424,11 +415,13 @@ function BuyButtonsFallback({
 
 export function ProductDetailSectionSkeleton() {
   return (
-    <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-      <ProductMediaSkeleton className="lg:col-span-6" />
-      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-32 w-full" />
+    <div className="relative left-1/2 -ml-[50vw] w-screen overflow-hidden pb-10">
+      <div className="relative z-10 mx-auto grid w-full max-w-xl gap-5 px-5">
+        <ProductMediaSkeleton />
+        <div className="grid gap-10">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
       </div>
     </div>
   );
