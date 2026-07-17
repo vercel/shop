@@ -10,13 +10,13 @@ Used in the home featured grid, collection (PLP) and search grids, the related-p
 
 **Compound component with stable styling hooks.** `ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` — the bare product URL, which renders the first-available (default) variant. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.), so the pieces can be composed or restyled independently without touching the underlying markup.
 
-**Loading, empty, and out-of-stock states share one footprint.** The skeleton, the no-image placeholder, and the loaded image all render inside the same aspect-ratio box using the same `ImagePlaceholder` element, so grids never shift as cards move between states. An out-of-stock overlay draws on top of the image rather than replacing it, keeping that same footprint.
+**Loading, empty, and out-of-stock states share one footprint.** The skeleton, the no-image placeholder, and the loaded image all render inside the same square box using the same `ImagePlaceholder` element, so grids never shift as cards move between states. An out-of-stock overlay draws on top of the image rather than replacing it, keeping that same footprint.
 
 ## Out of the box
 
 - **Two variants** — `default` for standard grids and sliders, and `featured`, which adds a "Featured" badge and a top-down gradient behind the image for highlighting hero products.
 - **Price ranges** — when a product's variants span a price range, the card shows both bounds (_$48.00 – $96.00_) instead of a single price; compare-at strike-through and the discount badge only appear for a single price, since per-variant discounts differ across a range.
-- **Configurable aspect ratio** — `square` (default), `portrait`, or `landscape`, applied to both the loaded image and its skeleton.
+- **Square media** — loaded images, no-image placeholders, and skeletons use the same square footprint by default.
 - **Image fallback** — products with no featured image render a placeholder icon instead of a broken image, so grids stay visually aligned.
 - **Out-of-stock overlay** — a darkened image with a localized "out of stock" label when the product is unavailable.
 
@@ -24,6 +24,7 @@ Used in the home featured grid, collection (PLP) and search grids, the related-p
 
 The card doesn't ship these, but they're common additions teams layer on top.
 
+- **Non-square media** — replace `aspect-square` on `ProductCardImage` and `ProductCardSkeleton` in `components/product-card/components.tsx` with the same portrait or landscape aspect utility so loaded and loading states keep matching footprints.
 - **Hover image carousel** — reveal additional product images on desktop hover instead of showing only the featured image.
 - **Variant selection from the grid** — swatches on the card itself (usually color) so shoppers can preview or add a specific variant without opening the PDP.
 - **Quick add** — an add-to-cart action on the card that skips the PDP for simple, single-variant products.
