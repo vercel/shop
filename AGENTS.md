@@ -10,7 +10,7 @@ The docs app is in apps/docs using the package-based Geistdocs architecture ([`@
 
 * The main app in this monorepo is apps/template, which is a template/reference architecture for using Shopify and Next.js. Learn more by reading the AGENTS.md in the directory.
 * You MUST check if a feature being updated in the template is documented in the docs application. If so, also update the documentation.
-* Template rollout changelog entries are paused. Do not require or add an entry to `packages/plugin/template-rollout-log/` for pull requests.
+* When a pull request is opened that touches `apps/template`, before other work, run a quick changelog-worthiness check. Add a changelog entry only if the change affects downstream storefronts: user-visible behavior, routes, config or environment variables, caching or cache invalidation, data contracts (GraphQL operations/types), dependencies that change runtime behavior, or breaking changes. Skip the entry for pure docs, tests, chore, tooling, or refactors with no behavior change. When in doubt, add an entry. To add one, create `apps/docs/content/changelog/<slug>.md` with frontmatter (`title`, `changeKey`, `introducedOn` as the PR's merge date, `pr`, `changeType`, `defaultAction`, `appliesTo`, `paths`, optional `relatedSkills`) and the Summary / Why it matters / Apply when / Safe to skip when / Validation sections. Land the entry in the same PR as the code change so the timestamp matches merge time. Entries aggregate into weekly releases on the changelog page; do not cut a release per PR. This rule is advisory — there is no CI enforcement.
 
 ## Skills
 

@@ -19,29 +19,28 @@ Infer the mode from the user's request:
 
 1. `.vercel-shop/bootstrap.json` in the project root — original `templateVersion` and `scaffoldedAt`
 2. `.vercel-shop/rollout-state.json` in the project root — decisions recorded by earlier runs of this skill (may not exist)
-3. The current rollout log and template version, fetched from upstream (see below)
+3. The current changelog, fetched from upstream (see below)
 4. `AGENTS.md` and `.claude/settings.json` in the project if present
-5. The current project structure and any files named by matching rollout entries
+5. The current project structure and any files named by matching changelog entries
 
 If `.vercel-shop/bootstrap.json` is missing, say the project predates plugin bootstrap metadata and continue with a best-effort heuristic audit.
 
-### Fetch the current rollout log
+### Fetch the current changelog
 
-The rollout log is maintained upstream in `github.com/vercel/shop`. The plugin bundles a copy of `template-rollout-log/` and `template-version.json`, but it is only as fresh as the installed plugin, so prefer the upstream copy:
+The changelog is maintained upstream in `github.com/vercel/shop` at `apps/docs/content/changelog`. Each `.md` file is one entry with frontmatter (`changeKey`, `introducedOn`, `appliesTo`, `paths`, `defaultAction`, `relatedSkills`) and the Summary / Apply when / Safe to skip when / Validation sections. Fetch the upstream copy:
 
 ```bash
 dir=$(mktemp -d)
 curl -fsSL https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main |
   tar -xz --strip-components=3 -C "$dir" \
-    shop-main/packages/plugin/template-rollout-log \
-    shop-main/packages/plugin/template-version.json
+    shop-main/apps/docs/content/changelog
 ```
 
-Read every markdown entry in the extracted `template-rollout-log/` except `README.md`. If the fetch fails (offline or restricted network), fall back to the copies bundled with this plugin and say in the report that the log may be stale until the plugin is updated.
+Read every `.md` entry in the extracted `changelog/` except `_template.md` and `README.md`. If the fetch fails (offline or restricted network), say in the report that the changelog could not be fetched and stop before the plan phase — there is no bundled fallback.
 
 ## Phase 1 — audit
 
-Compare the scaffold metadata against the current recommended template version and check for structural drift:
+Compare the scaffold metadata against the current template state and check for structural drift:
 
 - missing `.vercel-shop/bootstrap.json`
 - missing `AGENTS.md`
@@ -49,13 +48,13 @@ Compare the scaffold metadata against the current recommended template version a
 - legacy local skill files such as `.agents/skills/` or a legacy `.claude/skills` symlink
 - obvious divergence from the expected Vercel Shop structure such as missing `lib/shopify/` or `components/`
 
-Report the original scaffold version, the scaffold timestamp, the current recommended template version, and a short note on overall drift. If the scaffold version matches the current version, say so explicitly. In audit mode, stop here.
+Report the original scaffold version, the scaffold timestamp, and a short note on overall drift. In audit mode, stop here.
 
 ## Phase 2 — plan
 
-Build the candidate list from the rollout log:
+Build the candidate list from the changelog:
 
-1. If bootstrap metadata includes `scaffoldedAt`, treat entries with a newer `introducedOn` as the primary candidates. Versions are only hints.
+1. If bootstrap metadata includes `scaffoldedAt`, treat entries with a newer `introducedOn` as the primary candidates.
 2. Add older entries that still look applicable from the current project state.
 3. Drop entries that `.vercel-shop/rollout-state.json` already records as adopted, skipped, or not applicable — unless the user asks to revisit them.
 

@@ -1,4 +1,13 @@
 {
   "title": "Docs",
-  "pages": ["index", "why-use-this", "getting-started", "anatomy", "shopify", "skills", "reference"]
+  "pages": [
+    "index",
+    "why-use-this",
+    "getting-started",
+    "anatomy",
+    "shopify",
+    "skills",
+    "reference",
+    "changelog"
+  ]
 }

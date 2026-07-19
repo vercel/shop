@@ -38,7 +38,7 @@ npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-For upgrade work, use the [`update-shop` skill](/docs/skills/update-shop). The `vercel-shop` plugin carries a template rollout log so agents can reason about change-level updates instead of guessing from a single scaffold version. New scaffolds record bootstrap metadata so agents can compare rollout entries against when a project was created.
+For upgrade work, use the [`update-shop` skill](/docs/skills/update-shop). The template publishes a changelog of change-level entries, so agents can reason about individual updates instead of guessing from a single scaffold version. New scaffolds record bootstrap metadata so agents can compare changelog entries against when a project was created.
 
 To initialize a storefront from an agent, use the `init-vercel-shop` skill and provide an explicit target directory. The skill delegates filesystem changes to `create-vercel-shop`, verifies the generated project, and can use Shopify CLI to connect an existing store or fall back to the Headless channel.
 
