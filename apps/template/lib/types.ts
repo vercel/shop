@@ -47,6 +47,7 @@ export interface ProductCard {
   featuredImage: Image | null;
   handle: string;
   id: string;
+  isGiftCard: boolean;
   maxPrice: Money;
   price: Money;
   /** First non-featured image, revealed on card hover; absent when the product has only one image. */

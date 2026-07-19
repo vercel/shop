@@ -297,6 +297,7 @@ export const PRODUCT_FRAGMENT = `#graphql
     tags
     updatedAt
     availableForSale
+    isGiftCard
     featuredImage {
       ...ImageFields
     }
@@ -409,6 +410,7 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
     handle
     vendor
     availableForSale
+    isGiftCard
     featuredImage {
       ...ImageFields
     }
