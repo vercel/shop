@@ -1,3 +1,4 @@
+import { MinusIcon, PlusIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 
@@ -118,7 +119,8 @@ function ProductMediaArea({
       className="lg:col-span-6"
       overlay={tryOnOverlay}
       desktopSlot={
-        <Suspense fallback={<Skeleton className="w-full rounded-none aspect-square" />}>
+        // Color image is the LCP slot; a pulsing skeleton background flashes harder than empty space.
+        <Suspense fallback={<div className="aspect-square w-full" />}>
           <ResolvedColorImageGrid
             product={product}
             selectedOptionsPromise={selectedOptionsPromise}
@@ -129,9 +131,7 @@ function ProductMediaArea({
       mobileSlot={
         <Suspense
           fallback={
-            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square">
-              <Skeleton className="size-full rounded-none" />
-            </div>
+            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square" />
           }
         >
           <ResolvedColorImageCarousel
@@ -400,6 +400,25 @@ async function ResolvedBuyButtons({
   );
 }
 
+function QuantityPickerFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="grid h-12 w-32 shrink-0 grid-cols-[3rem_2rem_3rem] rounded-lg bg-background ring-1 ring-border ring-inset"
+    >
+      <span className="flex size-12 items-center justify-center opacity-50">
+        <MinusIcon className="size-4 shrink-0" />
+      </span>
+      <span className="flex h-12 w-8 items-center justify-center text-sm font-medium tabular-nums">
+        1
+      </span>
+      <span className="flex size-12 items-center justify-center">
+        <PlusIcon className="size-4 shrink-0" />
+      </span>
+    </div>
+  );
+}
+
 function BuyButtonsFallback({
   allInStock,
   t,
@@ -407,31 +426,12 @@ function BuyButtonsFallback({
   allInStock: boolean;
   t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
 }) {
-  if (!t) {
-    return (
-      <div className="grid gap-2.5">
-        <div className="flex gap-2.5">
-          {shopConfig.pdp.quantityPicker.enabled ? (
-            <div className="h-12 w-32 rounded-lg border bg-background" />
-          ) : null}
-          <div className="h-12 flex-1 rounded-lg bg-primary" />
-        </div>
-        {shopConfig.pdp.buyWithShop.enabled ? <div className="h-12 rounded-lg bg-shop" /> : null}
-      </div>
-    );
-  }
   return (
     <div className="grid gap-2.5">
       <div className="flex gap-2.5">
-        {shopConfig.pdp.quantityPicker.enabled ? (
-          <div className="flex h-12 w-32 items-center justify-between rounded-lg border bg-background px-4 text-sm font-medium">
-            <span aria-hidden>−</span>
-            <span>1</span>
-            <span aria-hidden>+</span>
-          </div>
-        ) : null}
+        {shopConfig.pdp.quantityPicker.enabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
-          {allInStock ? t("addToCart") : t("outOfStock")}
+          {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
         </div>
       </div>
       {shopConfig.pdp.buyWithShop.enabled ? (
@@ -441,7 +441,7 @@ function BuyButtonsFallback({
             !allInStock && "invisible",
           )}
         >
-          <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+          <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
         </div>
       ) : null}
     </div>

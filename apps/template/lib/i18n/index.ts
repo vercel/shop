@@ -22,11 +22,11 @@ export function resolveLocale(value: string | null | undefined): Locale {
   return value && isEnabledLocale(value) ? value : defaultLocale;
 }
 
-export interface LocaleData {
+export type LocaleData = {
   code: string;
   countryCode: string;
   label: string;
-}
+};
 
 export function getLocaleData(locale: Locale): LocaleData {
   const [language, country] = locale.split("-");
@@ -48,7 +48,7 @@ export function getLanguageCode(locale: string): string {
   return (locale.split("-")[0] ?? "en").toUpperCase();
 }
 
-export interface LocaleOption {
+export type LocaleOption = {
   countryCode: string;
   label: string;
   locale: Locale;

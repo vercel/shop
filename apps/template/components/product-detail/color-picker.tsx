@@ -39,7 +39,9 @@ export function ColorPicker({
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
           const isAvailable = !available || available.has(value.name);
-          const imageUrl = hideImages ? undefined : value.swatch?.image || value.image;
+          const imageUrl = hideImages
+            ? undefined
+            : value.swatch?.image || (value.swatch?.color ? undefined : value.image);
           const href = buildOptionUrl(handle, selectedOptions, option.name, value.name);
 
           const swatch = (

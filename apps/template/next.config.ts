@@ -36,6 +36,8 @@ function assertRequiredEnv() {
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
+  experimental: { useTypeScriptCli: true },
   images: {
     deviceSizes: [1080, 1920],
     imageSizes: [],

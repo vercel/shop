@@ -20,6 +20,7 @@ export async function Footer({ locale }: { locale: string }) {
 
   return (
     <footer className="mt-10 bg-primary text-primary-foreground">
+      {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
       <Container className={cn("pt-20 pb-10", shopConfig.agent.enabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}

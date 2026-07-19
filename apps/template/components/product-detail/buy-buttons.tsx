@@ -111,21 +111,21 @@ export function BuyButtons({
         {quantityPicker ? (
           <div
             aria-label={tCart("itemQuantity")}
-            className="flex h-12 shrink-0 items-center rounded-lg border bg-background"
+            className="grid h-12 w-32 shrink-0 grid-cols-[3rem_2rem_3rem] rounded-lg bg-background ring-1 ring-border ring-inset"
             role="group"
           >
             <button
               type="button"
               aria-label={tCart("decreaseQuantity")}
-              className="flex size-12 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex size-12 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={quantity === 1}
               onClick={() => setQuantity((currentQuantity) => Math.max(1, currentQuantity - 1))}
             >
-              <MinusIcon className="size-4" />
+              <MinusIcon className="size-4 shrink-0" />
             </button>
             <span
               aria-live="polite"
-              className="flex min-w-8 items-center justify-center text-sm font-medium tabular-nums"
+              className="flex h-12 w-8 items-center justify-center text-sm font-medium tabular-nums"
               role="status"
             >
               {quantity}
@@ -133,11 +133,11 @@ export function BuyButtons({
             <button
               type="button"
               aria-label={tCart("increaseQuantity")}
-              className="flex size-12 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex size-12 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={quantity === 99}
               onClick={() => setQuantity((currentQuantity) => Math.min(99, currentQuantity + 1))}
             >
-              <PlusIcon className="size-4" />
+              <PlusIcon className="size-4 shrink-0" />
             </button>
           </div>
         ) : null}
@@ -165,7 +165,7 @@ export function BuyButtons({
           ) : (
             <>
               <span className="sr-only">{t("buyWithShop")}</span>
-              <BuyWithShopLogo aria-hidden="true" className="h-auto w-32.75" />
+              <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
             </>
           )}
         </button>

@@ -1,0 +1,41 @@
+---
+description: Configure Shopify's Headless channel, Search & Discovery, and optional storefront apps.
+title: Shopify Setup
+type: guide
+prerequisites:
+  - /docs/getting-started
+---
+
+Vercel Shop works with a standard Shopify catalog, but a few free Shopify apps unlock the storefront's full product discovery and merchandising experience.
+
+## Headless
+
+Install Shopify's **Headless** sales channel and create a storefront. This gives you the Storefront API access token used by Vercel Shop and controls which products are available to it.
+
+Enable the template's required [Storefront API permissions](/docs/reference/storefront-api-permissions), then publish your products and collections to the **Headless** channel. Content published only to **Online Store** will not appear in Vercel Shop.
+
+## Search & Discovery
+
+Install the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app. Use it to configure storefront filters and complementary product recommendations.
+
+Filters power the collection and search sidebars. Complementary products appear as “Pairs Well With” on product pages; products without recommendations simply omit that section. Shopify provides related product recommendations automatically.
+
+## Shopify Bundles
+
+For fixed product bundles, install the free [Shopify Bundles](https://apps.shopify.com/shopify-bundles) app. Vercel Shop displays bundle contents on product pages and preserves them as grouped items in the cart.
+
+Bundles publish to **Online Store** by default. Publish each bundle to **Headless** as well or it will not appear in the storefront.
+
+## Next steps
+
+<Cards>
+  <Card title="Product Setup" href="/docs/shopify/pdp">
+    Configure variants, swatches, recommendations, bundles, and product SEO.
+  </Card>
+  <Card title="Shopify Integration" href="/docs/shopify">
+    See how Shopify concepts map to storefront routes and features.
+  </Card>
+  <Card title="Webhooks" href="/docs/anatomy/webhooks">
+    Keep cached storefront data in sync with Shopify Admin changes.
+  </Card>
+</Cards>

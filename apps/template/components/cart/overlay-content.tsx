@@ -48,7 +48,7 @@ function CheckoutButtonContent({
 
 export function OverlayContent({ locale }: OverlayContentProps) {
   const router = useRouter();
-  const { cart, cartWithPending, isUpdatingCart, lastError, setOverlayOpen } = useCart();
+  const { cart, cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
 
@@ -74,11 +74,6 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   if (!displayCart || displayCart.lines.length === 0) {
     return (
       <div className="flex h-full flex-col px-5">
-        {lastError ? (
-          <div className="pt-5">
-            <CartMessages />
-          </div>
-        ) : null}
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <h3 className="mb-6 text-2xl">{t("empty")}</h3>
           <Button

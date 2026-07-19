@@ -11,7 +11,7 @@ import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
-export async function Nav() {
+export async function Nav({ locale }: { locale: string }) {
   const items = shopConfig.navigation.nav;
 
   return (

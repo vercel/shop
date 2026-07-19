@@ -10,10 +10,12 @@ import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { CartProvider } from "@/components/cart/context";
+import { CartNotifications } from "@/components/cart/notifications";
 import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
+import { Toaster } from "@/components/ui/sonner";
 import { enabledLocales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -54,7 +56,8 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider initialCart={null}>
             <AnnouncementBar />
-            <Nav />
+            <CartNotifications />
+            <Nav locale={locale} />
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
             </main>
@@ -66,6 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
               <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
+          <Toaster closeButton />
         </NextIntlClientProvider>
         <AnalyticsComponents />
       </body>

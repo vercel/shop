@@ -31,8 +31,6 @@ export async function POST(request: Request) {
     return Response.json({ error: "Missing topic header" }, { status: 400 });
   }
 
-  console.log(`[Shopify Webhook] Received: ${topic}`);
-
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
@@ -62,7 +60,7 @@ export async function POST(request: Request) {
     }
 
     for (const tag of productTags) {
-      revalidateTag(tag, "max");
+      revalidateTag(tag, { expire: 0 });
       tagsInvalidated.push(tag);
     }
   }
@@ -85,43 +83,29 @@ export async function POST(request: Request) {
     }
 
     for (const tag of collectionTags) {
-      revalidateTag(tag, "max");
+      revalidateTag(tag, { expire: 0 });
       tagsInvalidated.push(tag);
     }
   }
 
   if (topic.startsWith("metaobjects/")) {
-    const cmsTags = ["cms:all"];
+    // Metaobjects are low-cardinality, so fire the broad tag too (unlike catalog) — aggregate reads refresh without per-type index tags.
+    const metaobjectTags = ["metaobjects"];
 
     try {
       const payload = JSON.parse(body);
-      const type = payload.type || payload.metaobject?.type || payload.metaobject_type;
-      const handle = payload.handle || payload.metaobject?.handle || payload.metaobject_handle;
-
-      if (type === "cms_page") {
-        cmsTags.push("cms:pages");
-        if (typeof handle === "string") {
-          const slug = handle.split("--")[0];
-          if (slug) {
-            cmsTags.push(`cms:page:${slug}`);
-          }
-        }
-      } else if (type === "cms_homepage") {
-        cmsTags.push("cms:homepage");
-      } else if (type === "cms_section" || type === "cms_hero") {
-        cmsTags.push("cms:pages", "cms:homepage");
+      if (payload.handle) {
+        metaobjectTags.push(`metaobject-${payload.handle}`);
       }
     } catch {
-      // Parse failure: fall through and invalidate the base CMS tag only.
+      console.error("[Shopify Webhook] Could not parse metaobjects payload");
     }
 
-    for (const tag of cmsTags) {
-      revalidateTag(tag, "max");
+    for (const tag of metaobjectTags) {
+      revalidateTag(tag, { expire: 0 });
       tagsInvalidated.push(tag);
     }
   }
-
-  console.log(`[Shopify Webhook] Invalidated tags: ${tagsInvalidated.join(", ")}`);
 
   return Response.json({
     success: true,

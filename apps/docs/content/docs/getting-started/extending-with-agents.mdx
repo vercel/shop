@@ -8,12 +8,13 @@ prerequisites:
 
 Vercel Shop is built for agentic development. Instead of copy-pasting snippets from docs, you describe what you want and a coding agent handles the implementation - editing files, running commands, and validating the result.
 
-This works because the template ships with structured context that agents read automatically:
+## How it works
 
-- **`AGENTS.md`** - architecture rules and conventions. Tells the agent things like "every cart mutation must call `invalidateCartCache()`" or "components in `ui/` must not import domain types."
-- **Project-scoped plugins** - `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` provide template conventions, platform guidance, and authoritative Shopify documentation and validation.
+**The template ships with structured context that agents read automatically.** `AGENTS.md` carries architecture rules and conventions - things like "every cart mutation must call `invalidateCartCache()`" or "components in `ui/` must not import domain types." Project-scoped plugins (`vercel-shop`, `vercel-plugin`, `shopify-ai-toolkit`) add template conventions, platform guidance, and authoritative Shopify documentation and validation on top.
 
-For best results, use an agent that reads `AGENTS.md` and supports skills and project-scoped plugins - for example [Claude Code](https://claude.ai/code), [Cursor](https://cursor.sh), or [Codex](https://openai.com/index/introducing-codex/). Claude Code has the deepest integration via the plugin install flow; Cursor and Codex lean more on the repo context and docs.
+**Skills are agent-ready playbooks for specific tasks.** Each one names the files to touch, the patterns to follow, and the checks to run after. They're written and tested against the template, which means fewer hallucinations and consistent output than an ad-hoc prompt for the same task.
+
+**Not every agent integrates equally.** For best results, use an agent that reads `AGENTS.md` and supports skills and project-scoped plugins - for example [Claude Code](https://claude.ai/code), [Cursor](https://cursor.sh), or [Codex](https://openai.com/index/introducing-codex/). Claude Code has the deepest integration via the plugin install flow; Cursor and Codex lean more on the repo context and docs.
 
 ## Setting up
 
@@ -68,8 +69,6 @@ Everything outside these markers is yours. Add team conventions or domain constr
 
 ## Skills
 
-Skills are agent-ready playbooks - markdown files that describe exactly how to complete a specific task. Each one names the files to touch, the patterns to follow, and the checks to run after. They're written and tested against the template, which means fewer hallucinations and consistent output.
-
 To run a storefront skill in Claude Code:
 
 ```bash
@@ -90,8 +89,6 @@ Enable multi-locale support with Shopify Markets
 
 You can also follow any skill manually from the docs, or inspect the source in the `vercel/shop` repository.
 
-### Available skills
-
 <Cards>
   <Card title="Build with Vercel Shop" href="/docs/skills/build-shop">
     Source-backed storefront architecture and commerce behavior.
@@ -99,21 +96,13 @@ You can also follow any skill manually from the docs, or inspect the source in t
   <Card title="Enable Shopify Markets" href="/docs/skills/enable-shopify-markets">
     Multi-locale and multi-currency support.
   </Card>
-  <Card title="Enable Shopify Auth" href="/docs/skills/enable-shopify-auth">
-    Customer login, account pages, and nav integration.
-  </Card>
-  <Card title="Shopify CMS" href="/docs/skills/enable-shopify-cms">
-    Wire metaobjects as the CMS for homepage and marketing pages.
-  </Card>
 </Cards>
 
 ## Working effectively with an agent
 
 Skills cover the common path. Most of your work will be ad-hoc prompts - restyle the PDP, add a wishlist, integrate a review system. A few habits make this go much smoother.
 
-### Let the agent propose first
-
-Before any code gets written, ask for the plan:
+**Let the agent propose first.** Before any code gets written, ask for the plan:
 
 ```
 Add a size guide to the PDP. Before writing code, tell me your plan.
@@ -121,15 +110,7 @@ Add a size guide to the PDP. Before writing code, tell me your plan.
 
 A good proposal names the files it will touch, the patterns it will follow, and how it will validate the result. Redirect there - not after the diff lands.
 
-### Be specific about what, where, and when
-
-Vague prompts get vague code. Compare:
-
-```
-add size guide
-```
-
-with:
+**Be specific about what, where, and when.** Vague prompts get vague code. Compare `add size guide` with:
 
 ```
 Add a size guide accordion below the product description on the PDP.
@@ -139,9 +120,7 @@ Only show the section when the metafield exists.
 
 The second version names the placement, the data source, and the empty-state behavior - all things the agent would otherwise guess.
 
-### Iterate with targeted follow-ups
-
-After the first pass, refine in place rather than re-prompting the whole task:
+**Iterate with targeted follow-ups.** After the first pass, refine in place rather than re-prompting the whole task:
 
 ```
 Make the accordion closed by default on mobile
@@ -149,16 +128,14 @@ Make the accordion closed by default on mobile
 
 The agent retains context from the previous exchange.
 
-### Use a browser feedback loop
-
-Storefront changes should be checked in a real browser, not only by reading diffs. v0 has this feedback loop built in. For agents without built-in browser control, install the standalone [`agent-browser`](https://github.com/vercel-labs/agent-browser) CLI:
+**Use a browser feedback loop.** Storefront changes should be checked in a real browser, not only by reading diffs. v0 has this feedback loop built in. For agents without built-in browser control, install the standalone [`agent-browser`](https://github.com/vercel-labs/agent-browser) CLI:
 
 ```bash
 npm install -g agent-browser
 agent-browser install
 ```
 
-Then ask the agent to start the dev server, open the affected route, capture a snapshot and screenshot, interact through the changed commerce flow, and repeat until the browser result matches the intended behavior.
+Then ask the agent to start the dev server, open the affected route, capture a snapshot and screenshot, interact through the changed commerce flow, and repeat until the browser result matches the intended behavior:
 
 ```bash
 agent-browser open http://localhost:3000/products/example
@@ -167,11 +144,21 @@ agent-browser snapshot
 agent-browser screenshot --full
 ```
 
-### When something breaks, name the failure
-
-Specific error messages and likely files beat "fix it":
+**When something breaks, name the failure.** Specific error messages and likely files beat "fix it":
 
 ```
 The build fails with "Type 'string' is not assignable to type 'Money'".
 Check the transform in lib/shopify/transforms/product.ts.
 ```
+
+## Try it yourself
+
+Ideas worth a single agent prompt - describe the outcome and let the agent work out the implementation.
+
+- **Recently viewed** — a carousel of the last few products a shopper visited, backed by `localStorage`.
+- **Narrower product grid** — 3 columns instead of 4 on desktop, without touching the mobile layout.
+- **Back to top button** — appears once the shopper scrolls past the fold.
+- **Promotional banner** — dismissible, driven by a metafield on the shop object.
+- **Product reviews** — from a metafield, or integrated with a service like Judge.me.
+- **Wishlist** — heart icons on cards and the PDP, a saved-products page, synced across tabs via `localStorage`.
+- **Swap search providers** — Algolia instead of built-in Shopify search, same filter sidebar.

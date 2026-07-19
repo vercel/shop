@@ -4,114 +4,60 @@ title: Setup
 type: guide
 ---
 
-## Step 1: Set up Shopify for headless
+Vercel Shop needs a Shopify storefront token and three environment variables. You can scaffold it locally or deploy it directly to Vercel.
 
-If you don't already have a Shopify store, create one at [shopify.com](https://www.shopify.com). Then set up the Headless channel:
+## Connect Shopify
 
-1. In your Shopify admin, go to **Settings → Apps and sales channels → Develop apps**
-2. Install the **Headless** channel from the Shopify App Store
-3. Open the Headless channel and create a new storefront
-4. Copy the **Storefront API access token** - you'll need this for your environment variables
-5. Under **Storefront API permissions**, enable the scopes required by the template
+Install Shopify's **Headless** sales channel, create a storefront, and copy its **Storefront API access token**. Enable the permissions used by the template; see [Storefront API Permissions](/docs/reference/storefront-api-permissions) for the exact scopes.
 
-The default storefront needs product listings, inventory, collection listings, checkout, and content access. For the exact scope names, plus optional scopes for Shopify Auth and Shopify CMS, see [Storefront API permissions](/docs/reference/storefront-api-permissions).
+## Create your project
 
-## Step 2: Create your project
-
-There are three ways to get started:
-
-### Deploy with Vercel
-
-The fastest way - deploy directly to Vercel and it will create the repository for you.
-
-<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&env=SHOPIFY_STOREFRONT_ACCESS_TOKEN,SHOPIFY_STORE_DOMAIN,NEXT_PUBLIC_SITE_NAME&envDescription=Required%20values%20to%20work%20with%20Shopify&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Freference%2Fenv-vars&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22shopify%22%2C%22productSlug%22%3A%22shopify%22%2C%22protocol%22%3A%22other%22%7D%5D">
-  <img src="https://vercel.com/button" alt="Deploy with Vercel" />
-</a>
-
-### Clone with create-vercel-shop
+Scaffold a local project:
 
 ```bash
 npx create-vercel-shop@latest my-store
 ```
 
-`create-vercel-shop` also installs the `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` plugins in project scope so a coding agent can start working with the project immediately.
+Or deploy the template directly to Vercel:
 
-### Add the agent setup to an existing project
+<a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&env=SHOPIFY_STOREFRONT_ACCESS_TOKEN,SHOPIFY_STORE_DOMAIN,NEXT_PUBLIC_SITE_NAME&envDescription=Required%20values%20to%20work%20with%20Shopify&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Freference%2Fenv-vars&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22shopify%22%2C%22productSlug%22%3A%22shopify%22%2C%22protocol%22%3A%22other%22%7D%5D">
+  <img src="https://vercel.com/button" alt="Deploy with Vercel" />
+</a>
 
-If you already have a repo and only want the project-scoped agent plugins, run this from the project root:
+## Add your credentials
 
-```bash
-npx create-vercel-shop@latest --no-template
-```
-
-This skips the storefront scaffold and only installs the `vercel-shop`, `vercel-plugin`, and `shopify-ai-toolkit` plugins in project scope.
-
-### Start from v0
-
-You can also use [v0](https://v0.dev) to generate a storefront and iterate on the design before connecting it to Shopify.
-
-## Step 3: Add your environment variables
-
-Create a `.env.local` file in your project root:
+Create `.env.local` in the project root:
 
 ```bash
 SHOPIFY_STORE_DOMAIN="your-store.myshopify.com"
-SHOPIFY_STOREFRONT_ACCESS_TOKEN="your-storefront-access-token"
+SHOPIFY_STOREFRONT_ACCESS_TOKEN="[redacted]"
 NEXT_PUBLIC_SITE_NAME="Your Store Name"
 ```
 
-You can find the storefront token in **Settings → Apps and sales channels → Headless**. For the full variable list, see [Environment Variables](/docs/reference/env-vars).
+See [Environment Variables](/docs/reference/env-vars) for optional features and deployment settings.
 
-## Step 4: Run locally
+## Run locally
 
-If you scaffolded the storefront, `create-vercel-shop` uses the package manager you used to scaffold the project. Start the dev server with the matching command:
+Start the development server with your package manager:
 
 ```bash
-pnpm dev
 npm run dev
-yarn dev
-bun dev
 ```
 
-Your store is now running at [localhost:3000](http://localhost:3000).
+Open [localhost:3000](http://localhost:3000).
 
-### Run over HTTPS at a custom domain (optional)
-
-Some flows behave differently over plain `http://localhost` - Shopify customer-account and OAuth callbacks and `Secure` cookies expect a real HTTPS origin. The template ships a `dev:portless` script that runs the dev server behind [portless](https://portless.sh), a local reverse proxy that serves the app over trusted HTTPS at `https://shop.localhost` with no port in the URL.
-
-Install portless globally (requires Node 24+):
-
-```bash
-npm install -g portless
-```
-
-Then start the dev server through it, using the run command for your package manager:
-
-```bash
-pnpm dev:portless
-npm run dev:portless
-yarn dev:portless
-bun dev:portless
-```
-
-Your store is now running at [shop.localhost](https://shop.localhost). The first run asks for `sudo` once to bind port 443 and trusts a local certificate authority; later runs are silent. To serve a different subdomain, change the `shop` argument in the `dev:portless` script.
+> **Local HTTPS:** Install [Portless](https://portless.sh) with `npm install -g portless`, then run `npm run dev:portless` to serve the storefront at [shop.localhost](https://shop.localhost). This is useful for testing OAuth callbacks and secure cookies.
 
 ## Next steps
 
 <Cards>
-  <Card title="Environment Variables" href="/docs/reference/env-vars">
-    Full reference for required and optional environment variables.
-  </Card>
-  <Card title="Storefront API Permissions" href="/docs/reference/storefront-api-permissions">
-    Required Shopify scopes for the default storefront and optional skills.
-  </Card>
-  <Card title="Storefront API" href="/docs/reference/storefront-api">
-    How the template structures Shopify queries, caching, and transforms.
-  </Card>
-  <Card title="Shopify Integration" href="/docs/shopify">
-    How the template maps Shopify products, collections, menus, and webhooks.
+  <Card title="Shopify Setup" href="/docs/getting-started/shopify-setup">
+    Configure the Shopify apps and sales channel used by the storefront.
   </Card>
   <Card title="Extending with Agents" href="/docs/getting-started/extending-with-agents">
-    Extend and customize the storefront with Claude Code or Cursor.
+    Customize the storefront with coding agents and project skills.
+  </Card>
+  <Card title="Environment Variables" href="/docs/reference/env-vars">
+    Configure authentication, the shopping assistant, and other optional features.
   </Card>
 </Cards>

@@ -61,6 +61,7 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 - Add each new page to the relevant `meta.json` so it appears in the sidebar.
 - Plain markdown copied into MDX must have `{`, `}`, and bare `<` escaped outside code blocks.
 - Do not add `Key files`, file inventory, or file-to-purpose table sections. Mention a path inline only when it directly supports the surrounding instruction or explanation.
+- Keep customization suggestions concise and user-facing: say what can be changed and why someone might change it. Avoid implementation steps, code symbols, and file paths unless they are necessary to complete the customization or the reader asks for them.
 - Keep slugs stable unless the task explicitly includes redirects or link updates.
 
 ## Commands

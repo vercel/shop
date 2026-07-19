@@ -57,11 +57,6 @@ function ProductCardImageContainer({
   );
 }
 
-type ProductCardAspectRatio = "landscape" | "portrait" | "square";
-
-const aspectRatioClasses =
-  "data-[aspect-ratio=landscape]:aspect-[4/3] data-[aspect-ratio=portrait]:aspect-[3/4] data-[aspect-ratio=square]:aspect-square";
-
 interface ProductCardImageProps {
   src?: string | null;
   hoverSrc?: string | null;
@@ -69,7 +64,6 @@ interface ProductCardImageProps {
   sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
-  aspectRatio?: ProductCardAspectRatio;
   className?: string;
 }
 
@@ -80,14 +74,12 @@ function ProductCardImage({
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
-  aspectRatio = "square",
   className,
 }: ProductCardImageProps) {
   return (
     <div
       data-slot="product-card-image"
-      data-aspect-ratio={aspectRatio}
-      className={cn("relative overflow-hidden", aspectRatioClasses, className)}
+      className={cn("relative aspect-square overflow-hidden", className)}
     >
       {src ? (
         <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
@@ -209,22 +201,13 @@ function ProductCardPrice({
   );
 }
 
-function ProductCardSkeleton({
-  aspectRatio = "square",
-  className,
-}: {
-  aspectRatio?: ProductCardAspectRatio;
-  className?: string;
-}) {
+function ProductCardSkeleton({ className }: { className?: string }) {
   return (
     <div
       data-slot="product-card-skeleton"
       className={cn("flex flex-col overflow-hidden", className)}
     >
-      <ImagePlaceholder
-        data-aspect-ratio={aspectRatio}
-        className={cn("animate-pulse", aspectRatioClasses)}
-      />
+      <ImagePlaceholder className="aspect-square animate-pulse" />
       <div className="py-2.5 h-12 box-content grid gap-2">
         <div className="h-4 w-full bg-accent animate-pulse" />
         <div className="h-4 w-12 bg-accent animate-pulse" />
@@ -235,7 +218,6 @@ function ProductCardSkeleton({
 
 export {
   ProductCard,
-  type ProductCardAspectRatio,
   ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
