@@ -16,6 +16,18 @@ import { cn } from "@/lib/utils";
 export function SearchModal() {
   const [open, setOpen] = useState(false);
 
+  // ⌘K / Ctrl+K toggles the modal from anywhere on the page.
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <SearchTrigger />
@@ -36,6 +48,10 @@ function SearchTrigger() {
         >
           <Search className="size-5" />
           <span className="sr-only">{t("search")}</span>
+          <kbd className="hidden md:inline-flex items-center gap-0.5 ml-1.5 rounded-xs border border-border/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground/50 leading-none">
+            <span>⌘</span>
+            <span>K</span>
+          </kbd>
         </button>
       }
     />
