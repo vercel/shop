@@ -48,10 +48,6 @@ function SearchTrigger() {
         >
           <Search className="size-5" />
           <span className="sr-only">{t("search")}</span>
-          <kbd className="hidden md:inline-flex items-center gap-0.5 ml-1.5 rounded-xs border border-border/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground/50 leading-none">
-            <span>⌘</span>
-            <span>K</span>
-          </kbd>
         </button>
       }
     />
@@ -330,8 +326,10 @@ function ProductResult({
 function LoadingSkeleton() {
   return (
     <div className="px-4 py-3 space-y-3">
+      <div className="pt-1.5 pb-2 h-6 w-40 rounded bg-accent/40 animate-pulse" />
+      <div className="h-3 w-24 rounded bg-accent/40 animate-pulse" />
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
-        <div key={key} className="flex items-center gap-3">
+        <div key={key} className="flex items-center gap-3 py-2.5">
           <div className="size-14 bg-accent animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3.5 w-3/4 rounded bg-accent animate-pulse" />
@@ -339,6 +337,9 @@ function LoadingSkeleton() {
           </div>
         </div>
       ))}
+      <div className="pt-2 pb-1 flex justify-center">
+        <div className="h-9 w-32 rounded-lg bg-accent/40 animate-pulse" />
+      </div>
     </div>
   );
 }
