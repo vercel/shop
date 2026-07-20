@@ -62,9 +62,9 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-5" noValidate>
+    <form onSubmit={handleSubmit} className="group grid gap-5">
       <div data-slot="gift-card-fields" className="grid gap-2.5">
-        <div className="grid gap-1.5">
+        <div className="grid gap-2.5">
           <Label htmlFor="gift-card-email">{t("recipientEmail")}</Label>
           <Input
             id="gift-card-email"
@@ -73,11 +73,10 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
             required
             autoComplete="email"
             placeholder={t("recipientEmailPlaceholder")}
-            aria-invalid={!!error}
           />
         </div>
 
-        <div className="grid gap-1.5">
+        <div className="grid gap-2.5">
           <Label htmlFor="gift-card-name">{t("recipientName")}</Label>
           <Input
             id="gift-card-name"
@@ -88,7 +87,7 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           />
         </div>
 
-        <div className="grid gap-1.5">
+        <div className="grid gap-2.5">
           <Label htmlFor="gift-card-message">{t("message")}</Label>
           <Textarea
             id="gift-card-message"
@@ -98,7 +97,7 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           />
         </div>
 
-        <div className="grid gap-1.5">
+        <div className="grid gap-2.5">
           <div className="flex items-center gap-2.5">
             <button
               type="button"
@@ -110,7 +109,7 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
             </button>
           </div>
           {sendOnEnabled ? (
-            <div className="grid gap-1.5">
+            <div className="grid gap-2.5">
               <Label htmlFor="gift-card-send-on">{t("sendOnLabel")}</Label>
               <Input id="gift-card-send-on" name="sendOn" type="date" />
             </div>
@@ -124,7 +123,14 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
         </p>
       ) : null}
 
-      <Button type="submit" disabled={isPending} className={cn("h-12 w-full justify-center")}>
+      <Button
+        type="submit"
+        disabled={isPending}
+        className={cn(
+          "h-12 w-full justify-center",
+          "group-invalid:cursor-not-allowed group-invalid:opacity-50",
+        )}
+      >
         {isPending ? (
           <span className="flex items-center gap-2">
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
