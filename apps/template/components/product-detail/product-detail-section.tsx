@@ -21,8 +21,10 @@ import {
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -400,23 +402,22 @@ function GiftCardPurchaseFormFallback({
 }: {
   t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
-  // Labels are static translations — render them now. Only the inputs (which
-  // await the variant id) are skeletons, sized to the real Input/Textarea to
-  // avoid layout shift.
+  // Labels and placeholders are static translations. Render the real inputs
+  // disabled so the only change on resolve is the inputs becoming editable.
   return (
     <div className="grid gap-5">
       <div className="grid gap-5">
         <div className="grid gap-2.5">
           <Label>{t("giftCard.recipientEmail")}</Label>
-          <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+          <Input type="email" disabled placeholder={t("giftCard.recipientEmailPlaceholder")} />
         </div>
         <div className="grid gap-2.5">
           <Label>{t("giftCard.recipientName")}</Label>
-          <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+          <Input type="text" disabled placeholder={t("giftCard.recipientNamePlaceholder")} />
         </div>
         <div className="grid gap-2.5">
           <Label>{t("giftCard.message")}</Label>
-          <div className="min-h-16 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+          <Textarea rows={3} disabled placeholder={t("giftCard.messagePlaceholder")} />
         </div>
         <span className="text-sm font-medium text-foreground">{t("giftCard.sendOn")}</span>
       </div>
