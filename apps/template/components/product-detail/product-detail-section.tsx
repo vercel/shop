@@ -6,6 +6,7 @@ import { BundleComponents, BundleParents } from "@/components/product-detail/bun
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductInfoDescription,
@@ -230,7 +231,14 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {eagerSelection ? (
+      {product.isGiftCard ? (
+        <Suspense fallback={<GiftCardPurchaseFormFallback />}>
+          <ResolvedGiftCardPurchaseForm
+            eagerVariantId={eagerSelection?.selectedVariant?.id}
+            variantPromise={variantPromise}
+          />
+        </Suspense>
+      ) : eagerSelection ? (
         <BuyButtons
           selectedVariant={toBuyButtonVariant(eagerSelection.selectedVariant)}
           title={title}
@@ -254,11 +262,11 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {shopConfig.pdp.bundles.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.bundles.enabled ? (
         <BundleRelationships variant={product.defaultVariant} t={t} />
       ) : null}
 
-      {shopConfig.pdp.complementaryProducts.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.complementaryProducts.enabled ? (
         <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
       ) : null}
 
@@ -371,6 +379,37 @@ async function ResolvedBuyButtons({
       buyWithShop={buyWithShop}
       quantityPicker={quantityPicker}
     />
+  );
+}
+
+async function ResolvedGiftCardPurchaseForm({
+  eagerVariantId,
+  variantPromise,
+}: {
+  eagerVariantId: string | undefined;
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
+  const variant = eagerVariantId ? { id: eagerVariantId } : await variantPromise;
+  if (!variant?.id) return null;
+  return <GiftCardPurchaseForm merchandiseId={variant.id} />;
+}
+
+function GiftCardPurchaseFormFallback() {
+  // Mirror the resolved form's geometry: three label+input groups, a send-on
+  // toggle row, and the h-12 submit button — sized to avoid layout shift.
+  return (
+    <div aria-hidden="true" className="grid gap-5">
+      <div className="grid gap-2.5">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={`gift-card-fallback-field-${i}`} className="grid gap-2.5">
+            <div className="h-4 w-28 rounded-sm bg-muted" />
+            <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+          </div>
+        ))}
+        <div className="h-4 w-32 rounded-sm bg-muted" />
+      </div>
+      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary" />
+    </div>
   );
 }
 

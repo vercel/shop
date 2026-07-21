@@ -129,6 +129,58 @@ export async function addToCartAction(
   }
 }
 
+export async function addGiftCardAction(input: {
+  merchandiseId: string;
+  recipient: {
+    email: string;
+    name?: string;
+    message?: string;
+    sendOn?: string;
+  };
+}): Promise<CartActionResult> {
+  const { merchandiseId, recipient } = input;
+  if (!merchandiseId) {
+    return { success: false, error: "Invalid product ID" };
+  }
+
+  const email = recipient.email.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: "A valid recipient email is required" };
+  }
+
+  if (recipient.sendOn) {
+    const parsed = new Date(`${recipient.sendOn}T00:00:00`);
+    if (Number.isNaN(parsed.getTime()) || parsed < new Date(new Date().toDateString())) {
+      return { success: false, error: "Send date must be today or later" };
+    }
+  }
+
+  const attributes: { key: string; value: string }[] = [
+    { key: "__shopify_send_gift_card_to_recipient", value: "true" },
+    { key: "Recipient email", value: email },
+  ];
+  if (recipient.name?.trim())
+    attributes.push({ key: "Recipient name", value: recipient.name.trim() });
+  if (recipient.message?.trim())
+    attributes.push({ key: "Message", value: recipient.message.trim() });
+  if (recipient.sendOn) {
+    attributes.push({ key: "Send on", value: recipient.sendOn });
+    attributes.push({ key: "__shopify_offset", value: String(new Date().getTimezoneOffset()) });
+  }
+
+  try {
+    const { cart, warnings } = await addToCart([{ attributes, merchandiseId, quantity: 1 }]);
+
+    return { success: true, cart, warnings };
+  } catch (error) {
+    console.error("Add gift card to cart failed:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to add gift card to cart",
+    };
+  }
+}
+
 export async function syncCartLocaleAction(locale: string): Promise<CartActionResult> {
   if (!isEnabledLocale(locale)) {
     return {
