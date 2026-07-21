@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
 import { useCart } from "./context";
@@ -19,21 +17,22 @@ function CartCountBadge() {
 }
 
 interface CartOverlayProps {
+  description: string;
   locale: string;
+  title: string;
 }
 
-export function CartOverlay({ locale }: CartOverlayProps) {
+export function CartOverlay({ description, locale, title }: CartOverlayProps) {
   const { isOverlayOpen, setOverlayOpen } = useCart();
-  const t = useTranslations("cart");
 
   return (
     <Sheet open={isOverlayOpen} onOpenChange={setOverlayOpen}>
       <SheetContent side="right" className="p-0 gap-0">
         <div className="flex h-16 shrink-0 items-center gap-2 px-5">
-          <SheetTitle className="text-lg font-semibold">{t("shoppingCart")}</SheetTitle>
+          <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
           <CartCountBadge />
         </div>
-        <SheetDescription className="sr-only">{t("reviewCartDescription")}</SheetDescription>
+        <SheetDescription className="sr-only">{description}</SheetDescription>
         <OverlayContent locale={locale} />
       </SheetContent>
     </Sheet>

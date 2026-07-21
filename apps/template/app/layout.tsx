@@ -30,10 +30,11 @@ const geistMono = Geist_Mono({
 });
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, messages, t] = await Promise.all([
+  const [locale, messages, t, cartT] = await Promise.all([
     getLocale(),
     getMessages(),
     getTranslations("accessibility"),
+    getTranslations("cart"),
   ]);
 
   return (
@@ -58,7 +59,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             </main>
             <Footer locale={locale} />
             <Suspense>
-              <CartOverlay locale={locale} />
+              <CartOverlay
+                description={cartT("reviewCartDescription")}
+                locale={locale}
+                title={cartT("shoppingCart")}
+              />
             </Suspense>
             <Suspense>
               <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
