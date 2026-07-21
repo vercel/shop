@@ -21,6 +21,7 @@ import {
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import {
@@ -232,7 +233,7 @@ async function ProductInfoArea({
       )}
 
       {product.isGiftCard ? (
-        <Suspense fallback={<GiftCardPurchaseFormFallback />}>
+        <Suspense fallback={<GiftCardPurchaseFormFallback t={t} />}>
           <ResolvedGiftCardPurchaseForm
             eagerVariantId={eagerSelection?.selectedVariant?.id}
             variantPromise={variantPromise}
@@ -394,28 +395,32 @@ async function ResolvedGiftCardPurchaseForm({
   return <GiftCardPurchaseForm merchandiseId={variant.id} />;
 }
 
-function GiftCardPurchaseFormFallback() {
-  // Mirror the resolved form's geometry: two label+input groups, a label+textarea
-  // group (textarea is min-h-16, not h-9), a send-on toggle row, and the h-12
-  // submit button — sized to avoid layout shift.
+function GiftCardPurchaseFormFallback({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
+}) {
+  // Labels are static translations — render them now. Only the inputs (which
+  // await the variant id) are skeletons, sized to the real Input/Textarea to
+  // avoid layout shift.
   return (
-    <div aria-hidden="true" className="grid gap-5">
+    <div className="grid gap-5">
       <div className="grid gap-5">
         <div className="grid gap-2.5">
-          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <Label>{t("giftCard.recipientEmail")}</Label>
           <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
         </div>
         <div className="grid gap-2.5">
-          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <Label>{t("giftCard.recipientName")}</Label>
           <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
         </div>
         <div className="grid gap-2.5">
-          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <Label>{t("giftCard.message")}</Label>
           <div className="min-h-16 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
         </div>
-        <div className="h-4 w-32 rounded-sm bg-muted" />
+        <span className="text-sm font-medium text-foreground">{t("giftCard.sendOn")}</span>
       </div>
-      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary" />
+      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary opacity-50" />
     </div>
   );
 }
