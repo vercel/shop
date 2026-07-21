@@ -395,17 +395,24 @@ async function ResolvedGiftCardPurchaseForm({
 }
 
 function GiftCardPurchaseFormFallback() {
-  // Mirror the resolved form's geometry: three label+input groups, a send-on
-  // toggle row, and the h-12 submit button — sized to avoid layout shift.
+  // Mirror the resolved form's geometry: two label+input groups, a label+textarea
+  // group (textarea is min-h-16, not h-9), a send-on toggle row, and the h-12
+  // submit button — sized to avoid layout shift.
   return (
     <div aria-hidden="true" className="grid gap-5">
-      <div className="grid gap-2.5">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={`gift-card-fallback-field-${i}`} className="grid gap-2.5">
-            <div className="h-4 w-28 rounded-sm bg-muted" />
-            <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
-          </div>
-        ))}
+      <div className="grid gap-5">
+        <div className="grid gap-2.5">
+          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+        </div>
+        <div className="grid gap-2.5">
+          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+        </div>
+        <div className="grid gap-2.5">
+          <div className="h-3.5 w-28 rounded-sm bg-muted" />
+          <div className="min-h-16 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+        </div>
         <div className="h-4 w-32 rounded-sm bg-muted" />
       </div>
       <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary" />

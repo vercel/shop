@@ -23,7 +23,12 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
+
+  function handleChange(event: React.FormEvent<HTMLFormElement>) {
+    setIsFormValid(event.currentTarget.checkValidity());
+  }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -62,8 +67,8 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="group grid gap-5">
-      <div data-slot="gift-card-fields" className="grid gap-2.5">
+    <form onSubmit={handleSubmit} onChange={handleChange} className="group grid gap-5">
+      <div data-slot="gift-card-fields" className="grid gap-5">
         <div className="grid gap-2.5">
           <Label htmlFor="gift-card-email">{t("recipientEmail")}</Label>
           <Input
@@ -125,11 +130,8 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
 
       <Button
         type="submit"
-        disabled={isPending}
-        className={cn(
-          "h-12 w-full justify-center",
-          "group-invalid:cursor-not-allowed group-invalid:opacity-50",
-        )}
+        disabled={isPending || !isFormValid}
+        className={cn("h-12 w-full justify-center", "disabled:cursor-not-allowed")}
       >
         {isPending ? (
           <span className="flex items-center gap-2">
