@@ -420,7 +420,9 @@ function GiftCardPurchaseFormFallback({
         </div>
         <span className="text-sm font-medium text-foreground">{t("giftCard.sendOn")}</span>
       </div>
-      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary opacity-50" />
+      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground opacity-50 cursor-not-allowed">
+        {t("giftCard.addToCart")}
+      </div>
     </div>
   );
 }
