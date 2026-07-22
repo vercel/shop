@@ -44,7 +44,11 @@ export default async function CartPage() {
 }
 
 async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages] = await Promise.all([withFallback(getCart(), undefined), getMessages()]);
+  const [cart, messages, t] = await Promise.all([
+    withFallback(getCart(), undefined),
+    getMessages(),
+    getTranslations("cart"),
+  ]);
 
   return (
     <NextIntlClientProvider messages={{ cart: messages.cart }}>
@@ -55,15 +59,25 @@ async function CartContent({ locale }: { locale: Locale }) {
           <Page>
             <Container>
               <Sections>
-                <Header />
+                <Header title={t("shoppingCart")} />
                 <CartWarnings />
                 <div className="grid gap-5 lg:grid-cols-12">
                   <div className="lg:col-span-8 xl:col-span-9">
-                    <CartItemsList locale={locale} />
+                    <CartItemsList
+                      emptyLabel={t("empty")}
+                      itemsLabel={t("cartItemsLabel")}
+                      locale={locale}
+                    />
                   </div>
                   <aside className="lg:col-span-4 xl:col-span-3">
                     <div className="lg:sticky lg:top-20">
-                      <Summary locale={locale} />
+                      <Summary
+                        completeCheckoutLabel={t("completeCheckout")}
+                        estimatedTotalLabel={t("estimatedTotal")}
+                        locale={locale}
+                        taxesAndShippingNote={t("taxesAndShippingNote")}
+                        updatingCartLabel={t("updatingCart")}
+                      />
                     </div>
                   </aside>
                 </div>
