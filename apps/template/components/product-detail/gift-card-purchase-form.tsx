@@ -9,6 +9,7 @@ import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { addGiftCardAction } from "@/lib/cart/action";
 import { cn } from "@/lib/utils";
@@ -99,20 +100,18 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
         </div>
 
         <div className="grid gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setSendOnEnabled((prev) => !prev)}
-              className="cursor-pointer text-sm font-medium text-foreground"
-              aria-pressed={sendOnEnabled}
-            >
-              {sendOnEnabled ? t("sendNow") : t("sendOn")}
-            </button>
+          <div className="flex items-center justify-between gap-2.5 rounded-lg border p-3">
+            <Label htmlFor="gift-card-send-later">{t("sendLater")}</Label>
+            <Switch
+              id="gift-card-send-later"
+              checked={sendOnEnabled}
+              onCheckedChange={setSendOnEnabled}
+            />
           </div>
           {sendOnEnabled ? (
             <div className="grid gap-2.5">
               <Label htmlFor="gift-card-send-on">{t("sendOnLabel")}</Label>
-              <Input id="gift-card-send-on" name="sendOn" type="date" />
+              <Input id="gift-card-send-on" name="sendOn" type="date" required />
             </div>
           ) : null}
         </div>

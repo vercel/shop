@@ -301,9 +301,8 @@
       "recipientEmailPlaceholder": "friend@example.com",
       "recipientName": "Recipient name",
       "recipientNamePlaceholder": "Friend's name (optional)",
-      "sendNow": "Send now",
-      "sendOn": "Send on",
-      "sendOnLabel": "Send on date (optional)",
+      "sendLater": "Schedule for later",
+      "sendOnLabel": "Delivery date",
       "title": "Gift card details"
     },
     "goToImage": "Go to image {number}",

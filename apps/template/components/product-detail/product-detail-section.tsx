@@ -419,7 +419,10 @@ function GiftCardPurchaseFormFallback({
           <Label>{t("giftCard.message")}</Label>
           <Textarea rows={3} disabled placeholder={t("giftCard.messagePlaceholder")} />
         </div>
-        <span className="text-sm font-medium text-foreground">{t("giftCard.sendOn")}</span>
+        <div className="flex items-center justify-between gap-2.5 rounded-lg border p-3">
+          <Label>{t("giftCard.sendLater")}</Label>
+          <span className="inline-flex h-[1.15rem] w-8 items-center rounded-full bg-input opacity-50" />
+        </div>
       </div>
       <div className="flex h-12 w-full cursor-not-allowed items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground opacity-50">
         {t("giftCard.addToCart")}
