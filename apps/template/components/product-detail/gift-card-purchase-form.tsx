@@ -37,6 +37,8 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
     const sendOn = String(formData.get("sendOn") ?? "");
     const form = event.currentTarget;
 
+    const scheduled = sendOnEnabled && sendOn;
+
     startTransition(async () => {
       const result = await addGiftCardAction({
         merchandiseId,
@@ -44,7 +46,9 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           email,
           message: message || undefined,
           name: name || undefined,
-          sendOn: sendOnEnabled && sendOn ? sendOn : undefined,
+          sendOn: scheduled ? sendOn : undefined,
+          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
         },
       });
 
