@@ -45,6 +45,7 @@ export interface ProductCard {
   featuredImage: Image | null;
   handle: string;
   id: string;
+  isGiftCard: boolean;
   maxPrice: Money;
   price: Money;
   title: string;

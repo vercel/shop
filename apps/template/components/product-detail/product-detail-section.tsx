@@ -6,6 +6,7 @@ import { BundleComponents, BundleParents } from "@/components/product-detail/bun
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductInfoDescription,
@@ -20,7 +21,10 @@ import {
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -230,7 +234,14 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {eagerSelection ? (
+      {product.isGiftCard ? (
+        <Suspense fallback={<GiftCardPurchaseFormFallback t={t} />}>
+          <ResolvedGiftCardPurchaseForm
+            eagerVariantId={eagerSelection?.selectedVariant?.id}
+            variantPromise={variantPromise}
+          />
+        </Suspense>
+      ) : eagerSelection ? (
         <BuyButtons
           selectedVariant={toBuyButtonVariant(eagerSelection.selectedVariant)}
           title={title}
@@ -254,11 +265,11 @@ async function ProductInfoArea({
         </Suspense>
       )}
 
-      {shopConfig.pdp.bundles.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.bundles.enabled ? (
         <BundleRelationships variant={product.defaultVariant} t={t} />
       ) : null}
 
-      {shopConfig.pdp.complementaryProducts.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.complementaryProducts.enabled ? (
         <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
       ) : null}
 
@@ -371,6 +382,49 @@ async function ResolvedBuyButtons({
       buyWithShop={buyWithShop}
       quantityPicker={quantityPicker}
     />
+  );
+}
+
+async function ResolvedGiftCardPurchaseForm({
+  eagerVariantId,
+  variantPromise,
+}: {
+  eagerVariantId: string | undefined;
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
+  const variant = eagerVariantId ? { id: eagerVariantId } : await variantPromise;
+  if (!variant?.id) return null;
+  return <GiftCardPurchaseForm merchandiseId={variant.id} />;
+}
+
+function GiftCardPurchaseFormFallback({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
+}) {
+  // Labels and placeholders are static translations, so render the real disabled inputs — the only
+  // change on resolve is the fields becoming editable, which keeps geometry stable and avoids CLS.
+  return (
+    <div className="grid gap-5">
+      <div className="grid gap-2.5">
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.recipientEmail")}</Label>
+          <Input type="email" disabled placeholder={t("giftCard.recipientEmailPlaceholder")} />
+        </div>
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.recipientName")}</Label>
+          <Input type="text" disabled placeholder={t("giftCard.recipientNamePlaceholder")} />
+        </div>
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.message")}</Label>
+          <Textarea rows={3} disabled placeholder={t("giftCard.messagePlaceholder")} />
+        </div>
+        <span className="text-sm font-medium text-foreground">{t("giftCard.sendOn")}</span>
+      </div>
+      <div className="flex h-12 w-full cursor-not-allowed items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground opacity-50">
+        {t("giftCard.addToCart")}
+      </div>
+    </div>
   );
 }
 
