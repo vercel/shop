@@ -112,6 +112,7 @@ export interface ShopifyProduct {
   tags: string[];
   updatedAt: string;
   availableForSale: boolean;
+  isGiftCard: boolean;
   featuredImage: ShopifyImage | null;
   media?: ShopifyEdges<ShopifyMediaNode>;
   /** @deprecated Kept for stale cache compatibility — new queries use `media` */
@@ -144,6 +145,7 @@ export interface ShopifyProductCard {
   handle: string;
   vendor: string;
   availableForSale: boolean;
+  isGiftCard: boolean;
   featuredImage: ShopifyImage | null;
   priceRange: {
     minVariantPrice: ShopifyMoney;
@@ -312,6 +314,7 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
+    isGiftCard: product.isGiftCard,
     defaultVariantId: defaultVariant?.id,
     defaultVariantNumericId: defaultVariant
       ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
@@ -347,6 +350,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
+    isGiftCard: product.isGiftCard,
     allVariantsInStock:
       !product.encodedVariantExistence ||
       product.encodedVariantExistence === product.encodedVariantAvailability,

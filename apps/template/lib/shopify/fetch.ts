@@ -275,6 +275,7 @@ export type CollectionProductsResult = {
 export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
 
 export interface CartLineInput {
+  attributes?: { key: string; value: string }[];
   merchandiseId: string;
   parent?: { lineId?: string; merchandiseId?: string };
   quantity: number;
