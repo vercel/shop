@@ -99,8 +99,8 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           />
         </div>
 
-        <div className="grid gap-2.5">
-          <div className="flex items-center justify-between gap-2.5 rounded-lg border p-3">
+        <div className="grid gap-3 rounded-lg border p-3">
+          <div className="flex items-center justify-between gap-2.5">
             <Label htmlFor="gift-card-send-later">{t("sendLater")}</Label>
             <Switch
               id="gift-card-send-later"
