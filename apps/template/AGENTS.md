@@ -205,14 +205,14 @@ Key files:
 
 - `lib/auth/index.ts` — universal `isAuthEnabled` flag
 - `lib/auth/server.ts` — encrypted HttpOnly cookie adapter plus read-only login/token helpers
-- `app/account/[action]/route.ts` — Hydrogen login, authorize, refresh, and logout handlers
+- `proxy.ts` — Hydrogen login, authorize, refresh, and logout handlers on the customer-account OAuth paths
 - `app/account/(authenticated)/` — auth-gated account pages
 - `components/nav/account.tsx` — read-only nav session state inside Suspense
 - `components/account/sign-out-button.tsx` — same-origin POST logout form
 
 Server Components must not refresh tokens because they cannot commit cookies. Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API operations. The latter redirects refreshable sessions through `/account/refresh`, where Hydrogen can rotate tokens and commit the encrypted cookie.
 
-The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(authenticated)` route group owns protected account UI, while the sibling `[action]` route owns OAuth response boundaries. Logout must remain a same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
+The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(authenticated)` route group owns protected account UI, while `proxy.ts` owns the OAuth response boundaries via Hydrogen's registered handlers. Logout must remain a same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
 
 ## Shopify GraphQL Workflow
 
