@@ -184,24 +184,6 @@
     "notFoundDesc": "The link may be incorrect, or the page has been removed.",
     "tryAgain": "Try again"
   },
-  "contact": {
-    "description": "Have a question about an order or product? Send us a message and we'll get back to you.",
-    "email": "Email",
-    "emailPlaceholder": "you@example.com",
-    "invalidError": "Enter a valid email and message.",
-    "message": "Message",
-    "messagePlaceholder": "How can we help?",
-    "name": "Name",
-    "namePlaceholder": "Your name",
-    "phone": "Phone",
-    "phonePlaceholder": "Your phone number (optional)",
-    "send": "Send message",
-    "sending": "Sending...",
-    "submitError": "We couldn't send your message. Please try again.",
-    "successDescription": "We'll get back to you as soon as we can.",
-    "successTitle": "Thanks for reaching out",
-    "title": "Contact us"
-  },
   "footer": {
     "copyright": "© {name}. All rights reserved."
   },
