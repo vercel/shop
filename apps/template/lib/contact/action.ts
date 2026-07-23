@@ -85,7 +85,7 @@ async function getStorefrontCookie(storeUrl: URL, password: string): Promise<str
     throw new Error(`Shopify storefront authentication failed with status ${response.status}`);
   }
 
-  const verificationResponse = await fetch(new URL("/contact", storeUrl), {
+  const verificationResponse = await fetch(new URL("/pages/contact", storeUrl), {
     cache: "no-store",
     headers: {
       Accept: "text/html",
@@ -148,7 +148,7 @@ export async function submitContactAction(
         "Content-Type": "application/x-www-form-urlencoded",
         Cookie: cookie,
         Origin: storeUrl.origin,
-        Referer: new URL("/contact", storeUrl).toString(),
+        Referer: new URL("/pages/contact", storeUrl).toString(),
       },
       method: "POST",
       redirect: "manual",
