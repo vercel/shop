@@ -16,6 +16,12 @@ The template connects to Shopify through the Storefront API. This page is an ori
 
 **Cached reads need a webhook to invalidate promptly.** Public reads use `"use cache"` or `"use cache: remote"` with a long `cacheLife`, not a per-request fetch. Without webhooks configured, edits made in Shopify Admin surface only once the cache lifetime expires.
 
+## Contact forms
+
+Shopify does not provide a general-purpose forms API for headless storefronts. Its native contact endpoint is designed for Shopify-hosted theme forms and uses browser-executed CAPTCHA protection. Forwarding a headless form submission to that endpoint from a server action can be rejected by Shopify's bot protection even when the payload matches the native form.
+
+Build headless contact forms with a dedicated form or email backend instead. Shopify's native contact form remains an option only when the form runs on a Shopify-hosted Online Store page.
+
 ## Out of the box
 
 | Shopify concept | Template route          | Docs                                                                                              |
