@@ -15,7 +15,7 @@ type: reference
 | `/collections/all`                    | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
 | `/search`                             | Search results (same grid as collections)                                                          |
 | `/cart`                               | Full cart page with related products                                                               |
-| `/contact`                            | Contact form that forwards submissions to Shopify's hosted contact handler                         |
+| `/contact`                            | Contact form that authenticates to the protected Shopify storefront, then forwards the submission  |
 | `/blogs/[blogHandle]`                 | Shopify blog listing with latest articles                                                          |
 | `/blogs/[blogHandle]/[articleHandle]` | Shopify article with localized rich text and SEO metadata                                          |
 | `/pages/[handle]`                     | Shopify Page with localized rich text and SEO metadata                                             |
