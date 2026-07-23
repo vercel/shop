@@ -31,9 +31,15 @@ function getField(formData: FormData, name: string, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function isPasswordRedirect(response: Response, storeUrl: URL): boolean {
+async function isPasswordResponse(response: Response, storeUrl: URL): Promise<boolean> {
   const location = response.headers.get("location");
-  return location ? new URL(location, storeUrl).pathname === "/password" : false;
+  if (location && new URL(location, storeUrl).pathname === "/password") return true;
+
+  const contentType = response.headers.get("content-type");
+  if (!contentType?.includes("text/html")) return false;
+
+  const html = await response.clone().text();
+  return html.includes('value="storefront_password"');
 }
 
 async function getStorefrontCookie(storeUrl: URL, password: string): Promise<string> {
@@ -75,13 +81,27 @@ async function getStorefrontCookie(storeUrl: URL, password: string): Promise<str
   addResponseCookies(cookies, response);
   const cookie = getCookieHeader(cookies);
 
-  if (
-    response.status < 300 ||
-    response.status >= 400 ||
-    isPasswordRedirect(response, storeUrl) ||
-    !cookie
-  ) {
+  if (response.status >= 400 || (await isPasswordResponse(response, storeUrl)) || !cookie) {
     throw new Error(`Shopify storefront authentication failed with status ${response.status}`);
+  }
+
+  const verificationResponse = await fetch(new URL("/contact", storeUrl), {
+    cache: "no-store",
+    headers: {
+      Accept: "text/html",
+      Cookie: cookie,
+    },
+    method: "GET",
+    redirect: "manual",
+  });
+
+  if (
+    verificationResponse.status >= 400 ||
+    (await isPasswordResponse(verificationResponse, storeUrl))
+  ) {
+    throw new Error(
+      `Shopify storefront session verification failed with status ${verificationResponse.status}`,
+    );
   }
 
   return cookie;
@@ -134,7 +154,7 @@ export async function submitContactAction(
       redirect: "manual",
     });
 
-    if (response.status >= 400 || isPasswordRedirect(response, storeUrl)) {
+    if (response.status >= 400 || (await isPasswordResponse(response, storeUrl))) {
       console.error(`Contact form submission failed with status ${response.status}`);
       return { error: "submit", success: false };
     }
