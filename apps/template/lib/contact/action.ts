@@ -5,6 +5,11 @@ export interface ContactActionState {
   success: boolean;
 }
 
+interface StorefrontContactSession {
+  contactId: string;
+  cookie: string;
+}
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 320;
 const MAX_MESSAGE_LENGTH = 5_000;
@@ -31,6 +36,15 @@ function getField(formData: FormData, name: string, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+function getContactId(html: string): string {
+  const match = html.match(
+    /<input\b(?=[^>]*\bname=["']contact\[id\]["'])(?=[^>]*\bvalue=["']([^"']+)["'])[^>]*>/i,
+  );
+
+  if (!match) throw new Error("Shopify contact form ID was not found");
+  return match[1];
+}
+
 async function isPasswordResponse(response: Response, storeUrl: URL): Promise<boolean> {
   const location = response.headers.get("location");
   if (location && new URL(location, storeUrl).pathname === "/password") return true;
@@ -42,7 +56,10 @@ async function isPasswordResponse(response: Response, storeUrl: URL): Promise<bo
   return html.includes('value="storefront_password"');
 }
 
-async function getStorefrontCookie(storeUrl: URL, password: string): Promise<string> {
+async function getStorefrontContactSession(
+  storeUrl: URL,
+  password: string,
+): Promise<StorefrontContactSession> {
   const cookies = new Map<string, string>();
   const passwordUrl = new URL("/password", storeUrl);
   const passwordPageResponse = await fetch(passwordUrl, {
@@ -104,7 +121,8 @@ async function getStorefrontCookie(storeUrl: URL, password: string): Promise<str
     );
   }
 
-  return cookie;
+  const contactId = getContactId(await verificationResponse.text());
+  return { contactId, cookie };
 }
 
 export async function submitContactAction(
@@ -139,7 +157,9 @@ export async function submitContactAction(
 
   try {
     const storeUrl = new URL(`https://${storeDomain}`);
-    const cookie = await getStorefrontCookie(storeUrl, storefrontPassword);
+    const { contactId, cookie } = await getStorefrontContactSession(storeUrl, storefrontPassword);
+    payload.set("contact[id]", contactId);
+
     const response = await fetch(new URL("/contact", storeUrl), {
       body: payload,
       cache: "no-store",
