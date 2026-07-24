@@ -88,7 +88,7 @@ export function InfiniteProductGrid<TParams>({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {children}
         {additionalProducts.map((product) => (
           <ClientProductCard
@@ -129,7 +129,6 @@ function ClientProductCard({
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
           />

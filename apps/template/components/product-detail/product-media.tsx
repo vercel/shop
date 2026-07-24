@@ -157,7 +157,7 @@ function Carousel({
           return (
             <div
               key={mediaKey(item)}
-              className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square bg-white"
+              className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
             >
               {item.type === "video" ? (
                 <MediaVideo item={item} sizes="100vw" fetchPriority={fetchPriority} />
@@ -210,7 +210,7 @@ function GridItem({
   fetchPriority: "auto" | "high";
 }) {
   return (
-    <div className="relative w-full overflow-hidden aspect-square bg-white">
+    <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
         <MediaVideo
           item={item}
@@ -284,7 +284,7 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
   return images.map((image, idx) => (
     <div
       key={image.url}
-      className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square bg-white"
+      className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
     >
       <Image
         src={image.url}
