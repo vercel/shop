@@ -39,7 +39,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             </DialogPrimitive.Close>
 
             {activeItem?.type === "image" && (
-              <div className="pointer-events-none relative h-full w-full">
+              <div className="pointer-events-none relative h-full w-full bg-white">
                 <Image
                   src={activeItem.image.url}
                   alt={activeItem.image.altText || `${label} enlarged`}

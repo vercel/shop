@@ -111,8 +111,8 @@ function ProductMediaArea({
       title={product.title}
       className="lg:col-span-6"
       desktopSlot={
-        // Color image is the LCP slot; a pulsing skeleton background flashes harder than a neutral tile.
-        <Suspense fallback={<div className="aspect-square w-full bg-accent" />}>
+        // Color image is the LCP slot; a pulsing skeleton flashes harder than an empty image canvas.
+        <Suspense fallback={<div className="aspect-square w-full bg-white" />}>
           <ResolvedColorImageGrid
             product={product}
             selectedOptionsPromise={selectedOptionsPromise}
@@ -122,7 +122,7 @@ function ProductMediaArea({
       mobileSlot={
         <Suspense
           fallback={
-            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square bg-accent" />
+            <div className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square bg-white" />
           }
         >
           <ResolvedColorImageCarousel
