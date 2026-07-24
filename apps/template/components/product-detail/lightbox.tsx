@@ -46,7 +46,8 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
                   fill
                   className="object-contain"
                   sizes="90vw"
-                  priority
+                  fetchPriority="high"
+                  loading="eager"
                 />
               </div>
             )}
@@ -64,7 +65,8 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
                       : null
                   }
                   sizes="90vw"
-                  priorityImage
+                  previewImageFetchPriority="high"
+                  previewImageLoading="eager"
                   className="pointer-events-auto max-h-full max-w-full object-contain"
                 />
               </div>
