@@ -235,14 +235,13 @@ export function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
-    "/((?!_next/|_vercel/|apple-icon(?:/|$)|browserconfig\\.xml|favicon\\.ico|icon(?:/|$)|llms\\.txt|manifest\\.(?:json|webmanifest)|opengraph-image(?:/|$)|robots\\.txt|site\\.webmanifest|sitemap\\.xml|sitemap/|twitter-image(?:/|$)|.*\\.(?:7z|avif|bmp|bz2|css|csv|doc|docx|eot|epub|gif|gz|heic|heif|htm|html|ico|jpeg|jpg|js|json|map|md|mjs|mp3|mp4|mpeg|ogg|otf|pdf|png|ppt|pptx|rar|rss|svg|tar|tif|tiff|tsv|ttf|txt|wasm|wav|webm|webmanifest|webp|woff|woff2|xls|xlsx|xml|zip)$).*)",
-    "/api/:path*",
+    "/((?!_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
 };
 ```
 
-Preserve any other request handling already composed in `proxy()` and keep the template matcher unless the current checkout adds a route with different requirements. The matcher explicitly excludes framework internals, metadata routes, and common static asset extensions while keeping application routes and `/.well-known/*` in proxy processing.
+Preserve any other request handling already composed in `proxy()` and keep the template matcher unless the current checkout adds a route with different requirements. The matcher excludes framework internals and public files while keeping application routes and `/.well-known/*` in proxy processing.
 
 For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 
