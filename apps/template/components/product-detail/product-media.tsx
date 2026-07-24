@@ -27,16 +27,14 @@ function MediaImage({
   title,
   idx,
   sizes,
-  priority,
-  eager,
+  fetchPriority,
   className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
   title: string;
   idx: number;
   sizes: string;
-  priority: boolean;
-  eager: boolean;
+  fetchPriority: "auto" | "high";
   className?: string;
 }) {
   return (
@@ -46,8 +44,8 @@ function MediaImage({
       fill
       className={cn("object-cover", className)}
       sizes={sizes}
-      priority={priority}
-      loading={priority || eager ? "eager" : "lazy"}
+      fetchPriority={fetchPriority}
+      loading="lazy"
       draggable={false}
     />
   );
@@ -56,12 +54,12 @@ function MediaImage({
 function MediaVideo({
   item,
   sizes,
-  priority,
+  fetchPriority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
   sizes: string;
-  priority: boolean;
+  fetchPriority: "auto" | "high";
   className?: string;
 }) {
   return (
@@ -76,7 +74,8 @@ function MediaVideo({
           : null
       }
       sizes={sizes}
-      priorityImage={priority}
+      previewImageFetchPriority={fetchPriority}
+      previewImageLoading="lazy"
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
@@ -154,15 +153,14 @@ function Carousel({
       >
         {children}
         {mediaItems.map((item, idx) => {
-          const priority = !hasColorSlot && idx === 0;
-          const eager = hasColorSlot ? idx === 0 : idx === 1;
+          const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
           return (
             <div
               key={mediaKey(item)}
               className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
             >
               {item.type === "video" ? (
-                <MediaVideo item={item} sizes="100vw" priority={priority || eager} />
+                <MediaVideo item={item} sizes="100vw" fetchPriority={fetchPriority} />
               ) : item.type === "placeholder" ? (
                 <ImagePlaceholder className="size-full" />
               ) : (
@@ -171,8 +169,7 @@ function Carousel({
                   title={title}
                   idx={idx}
                   sizes="100vw"
-                  priority={priority}
-                  eager={eager}
+                  fetchPriority={fetchPriority}
                 />
               )}
             </div>
@@ -205,14 +202,12 @@ function GridItem({
   item,
   title,
   idx,
-  priority,
-  eager,
+  fetchPriority,
 }: {
   item: MediaItem;
   title: string;
   idx: number;
-  priority: boolean;
-  eager: boolean;
+  fetchPriority: "auto" | "high";
 }) {
   return (
     <div className="relative w-full overflow-hidden aspect-square">
@@ -220,7 +215,7 @@ function GridItem({
         <MediaVideo
           item={item}
           sizes="(min-width: 1024px) 25vw, 50vw"
-          priority={priority || eager}
+          fetchPriority={fetchPriority}
         />
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
@@ -231,8 +226,7 @@ function GridItem({
             title={title}
             idx={idx}
             sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={priority}
-            eager={eager}
+            fetchPriority={fetchPriority}
           />
         </LightboxTrigger>
       )}
@@ -257,15 +251,14 @@ function Grid({
     <div className="grid grid-cols-2 gap-2.5">
       {children}
       {mediaItems.map((item, idx) => {
-        const priority = !hasColorSlot && idx === 0;
+        const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
         return (
           <GridItem
             key={mediaKey(item)}
             item={item}
             title={title}
             idx={idx}
-            priority={priority}
-            eager
+            fetchPriority={fetchPriority}
           />
         );
       })}
@@ -282,52 +275,29 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
       item={{ type: "image", image }}
       title={title}
       idx={idx}
-      priority={idx === 0}
-      eager
+      fetchPriority={idx === 0 ? "high" : "auto"}
     />
   ));
 }
 
 export function ColorImageCarouselItems({ images, title }: { images: ImageType[]; title: string }) {
-  return images.map((image, idx) => {
-    const priority = idx === 0;
-    const eager = idx === 1;
-    return (
-      <div
-        key={image.url}
-        className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
-      >
-        <Image
-          src={image.url}
-          alt={image.altText || `${title} image ${idx + 1}`}
-          fill
-          className="object-cover"
-          sizes="100vw"
-          priority={priority}
-          loading={priority || eager ? "eager" : "lazy"}
-          draggable={false}
-        />
-      </div>
-    );
-  });
-}
-
-export function ProductMediaSkeleton({ className }: { className?: string }) {
-  const tile = "aspect-square w-full animate-pulse";
-  return (
-    <div className={className}>
-      <div className="grid gap-5 lg:hidden -mx-5">
-        <ImagePlaceholder className={tile} />
-        <div className="h-1.5" />
-      </div>
-      <div className="hidden lg:grid grid-cols-2 gap-2.5">
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-        <ImagePlaceholder className={tile} />
-      </div>
+  return images.map((image, idx) => (
+    <div
+      key={image.url}
+      className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
+    >
+      <Image
+        src={image.url}
+        alt={image.altText || `${title} image ${idx + 1}`}
+        fill
+        className="object-cover"
+        sizes="100vw"
+        fetchPriority={idx === 0 ? "high" : "auto"}
+        loading="lazy"
+        draggable={false}
+      />
     </div>
-  );
+  ));
 }
 
 export function ProductMedia({

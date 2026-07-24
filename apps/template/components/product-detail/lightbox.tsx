@@ -39,14 +39,15 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             </DialogPrimitive.Close>
 
             {activeItem?.type === "image" && (
-              <div className="pointer-events-none relative h-full w-full">
+              <div className="pointer-events-none relative h-full w-full bg-background">
                 <Image
                   src={activeItem.image.url}
                   alt={activeItem.image.altText || `${label} enlarged`}
                   fill
                   className="object-contain"
                   sizes="90vw"
-                  priority
+                  fetchPriority="high"
+                  loading="eager"
                 />
               </div>
             )}
@@ -64,7 +65,8 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
                       : null
                   }
                   sizes="90vw"
-                  priorityImage
+                  previewImageFetchPriority="high"
+                  previewImageLoading="eager"
                   className="pointer-events-auto max-h-full max-w-full object-contain"
                 />
               </div>

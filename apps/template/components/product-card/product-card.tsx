@@ -20,7 +20,6 @@ export interface ProductCardProps {
   locale: Locale;
   variant?: "default" | "featured";
   outOfStockText?: string;
-  sizes?: string;
   className?: string;
 }
 
@@ -29,7 +28,6 @@ export async function ProductCard({
   locale,
   variant = "default",
   outOfStockText,
-  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   className,
 }: ProductCardProps) {
   const isFeatured = variant === "featured";
@@ -49,7 +47,6 @@ export async function ProductCard({
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
-            sizes={sizes}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
           />

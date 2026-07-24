@@ -16,14 +16,12 @@ import {
   ColorImageCarouselItems,
   ColorImageGrid,
   ProductMedia,
-  ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import type { Locale } from "@/lib/i18n";
 import {
@@ -113,7 +111,7 @@ function ProductMediaArea({
       title={product.title}
       className="lg:col-span-6"
       desktopSlot={
-        // Color image is the LCP slot; a pulsing skeleton background flashes harder than empty space.
+        // Color image is the LCP slot; a pulsing skeleton flashes harder than an empty image canvas.
         <Suspense fallback={<div className="aspect-square w-full" />}>
           <ResolvedColorImageGrid
             product={product}
@@ -477,18 +475,6 @@ function BuyButtonsFallback({
           <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
         </div>
       ) : null}
-    </div>
-  );
-}
-
-export function ProductDetailSectionSkeleton() {
-  return (
-    <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-      <ProductMediaSkeleton className="lg:col-span-6" />
-      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
     </div>
   );
 }
