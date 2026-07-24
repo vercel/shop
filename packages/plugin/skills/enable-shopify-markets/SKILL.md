@@ -228,7 +228,7 @@ export function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
 };
