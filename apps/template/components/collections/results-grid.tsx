@@ -12,7 +12,12 @@ import { RESULTS_PER_PAGE } from "@/lib/utils";
 import { InfiniteProductGrid } from "./infinite-product-grid";
 
 function Fallback() {
-  return <ProductsGridSkeleton count={RESULTS_PER_PAGE} />;
+  return (
+    <ProductsGridSkeleton
+      count={RESULTS_PER_PAGE}
+      className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+    />
+  );
 }
 
 async function Render({

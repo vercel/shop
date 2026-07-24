@@ -5,14 +5,16 @@ import { Suspense } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
 import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { cn } from "@/lib/utils";
 
 interface ProductsGridSkeletonProps {
   count: number;
+  className?: string;
 }
 
-export function ProductsGridSkeleton({ count }: ProductsGridSkeletonProps) {
+export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonProps) {
   return (
-    <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+    <div className={cn("grid grid-cols-2 gap-5 lg:grid-cols-4", className)}>
       {Array.from({ length: count }, (_, index) => (
         <ProductCardSkeleton key={index} />
       ))}

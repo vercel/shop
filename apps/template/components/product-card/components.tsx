@@ -60,7 +60,6 @@ function ProductCardImageContainer({
 interface ProductCardImageProps {
   src?: string | null;
   alt: string;
-  sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
   className?: string;
@@ -69,7 +68,6 @@ interface ProductCardImageProps {
 function ProductCardImage({
   src,
   alt,
-  sizes = "(max-width: 1024px) 50vw, 25vw",
   outOfStock = false,
   outOfStockText,
   className,
@@ -80,7 +78,7 @@ function ProductCardImage({
       className={cn("relative aspect-square overflow-hidden", className)}
     >
       {src ? (
-        <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
+        <Image src={src} alt={alt} fill className="object-cover" sizes="100vw" />
       ) : (
         <ImagePlaceholder className="size-full" />
       )}

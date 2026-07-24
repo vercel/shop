@@ -46,7 +46,6 @@ export const { registry } = defineRegistry(catalog, {
                 alt={props.title}
                 outOfStock={!props.available}
                 outOfStockText={t("outOfStock")}
-                sizes="(max-width: 640px) 45vw, 180px"
               />
               <ProductCardContent>
                 <ProductCardTitle>{props.title}</ProductCardTitle>

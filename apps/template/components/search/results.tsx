@@ -78,7 +78,14 @@ export async function SearchResultsGrid({
   searchResultsDataPromise: Promise<SearchResultsData>;
 }) {
   return (
-    <Suspense fallback={<ProductsGridSkeleton count={RESULTS_PER_PAGE} />}>
+    <Suspense
+      fallback={
+        <ProductsGridSkeleton
+          count={RESULTS_PER_PAGE}
+          className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+        />
+      }
+    >
       <SearchResultsGridRender
         locale={locale}
         searchResultsDataPromise={searchResultsDataPromise}
