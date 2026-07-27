@@ -2,6 +2,8 @@ import type { MenuItem } from "@/lib/shopify/types/menu";
 
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
+export type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
+
 export type SocialPlatform =
   | "facebook"
   | "github"
@@ -22,6 +24,10 @@ export interface ShopConfig {
     enabled: boolean;
   };
   analytics: {
+    shopify: {
+      consentMode: ShopifyConsentMode;
+      enabled: boolean;
+    };
     speedInsights: {
       enabled: boolean;
     };
@@ -74,6 +80,16 @@ function envFlag(value: string | undefined, fallback: boolean): boolean {
 
 const agentEnabled = envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false);
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
+// Shopify's hosted banner is the only default that keeps EU/UK/CA visitors trackable, so production opts into it unless overridden.
+const shopifyConsentMode: ShopifyConsentMode =
+  process.env.NEXT_PUBLIC_SHOPIFY_CONSENT_MODE === "custom-banner"
+    ? "custom-banner"
+    : process.env.NEXT_PUBLIC_SHOPIFY_CONSENT_MODE === "no-banner" || isDevelopment
+      ? "no-banner"
+      : "default-banner";
+
 const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : "http://localhost:3000";
@@ -83,6 +99,10 @@ export const shopConfig = {
     enabled: agentEnabled,
   },
   analytics: {
+    shopify: {
+      consentMode: shopifyConsentMode,
+      enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS, isDevelopment),
+    },
     speedInsights: {
       enabled: false,
     },

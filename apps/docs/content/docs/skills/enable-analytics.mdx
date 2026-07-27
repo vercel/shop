@@ -43,10 +43,13 @@ If the storefront has `analytics` configuration in `shop.config.ts`, enable only
 
 ```ts
 analytics: {
+  shopify: { consentMode: shopifyConsentMode, enabled: isDevelopment },
   speedInsights: { enabled: false },
   vercel: { enabled: false },
 },
 ```
+
+The `shopify` gate is separate: it controls Shopify storefront analytics, which the storefront already ships. Leave it alone unless the user asked about Shopify analytics, and see Part D.
 
 ### A1. Install dependencies
 
@@ -142,6 +145,16 @@ import { AnalyticsComponents } from "@/components/analytics";
 ```
 
 The root component remains mounted as the extension point for current and future analytics providers. Provider gates stay inside it so disabled integrations are not mounted.
+
+## Part D: Shopify storefront analytics
+
+Only make changes here if the user asked about Shopify analytics.
+
+The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is on in development and off in production. To enable it for a deployment, set `NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS="1"`.
+
+Consent mode is set by `NEXT_PUBLIC_SHOPIFY_CONSENT_MODE` and defaults to `no-banner` in development and `default-banner` in production. `default-banner` renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
+
+This integration covers page views only. Commerce events such as product views and cart activity are not wired up.
 
 ## Guardrails
 

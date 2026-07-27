@@ -14,6 +14,7 @@ import { CartOverlay } from "@/components/cart/overlay";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
+import { ShopifyAnalytics } from "@/components/shopify-analytics";
 import { Toaster } from "@/components/ui/sonner";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -72,6 +73,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <Toaster closeButton />
         </NextIntlClientProvider>
         <AnalyticsComponents />
+        <Suspense>
+          <ShopifyAnalytics locale={locale} />
+        </Suspense>
       </body>
     </html>
   );

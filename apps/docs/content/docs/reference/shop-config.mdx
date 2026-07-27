@@ -18,6 +18,7 @@ export const shopConfig = {
     enabled: agentEnabled,
   },
   analytics: {
+    shopify: { consentMode: shopifyConsentMode, enabled: isDevelopment },
     speedInsights: { enabled: false },
     vercel: { enabled: false },
   },
@@ -62,8 +63,13 @@ Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override the default for a deploy
 
 - `vercel.enabled` controls Vercel Web Analytics.
 - `speedInsights.enabled` controls Vercel Speed Insights.
+- `shopify.enabled` controls Shopify storefront analytics.
 
-Each integration is disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+The Vercel integrations are disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+
+`shopify.enabled` sends storefront page views to Shopify analytics through Hydrogen's analytics bus, so they appear in Shopify admin alongside the rest of the store's reporting. It defaults to on in development and off in production; set `NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS="1"` to enable it for a deployment.
+
+`shopify.consentMode` selects how visitors grant tracking consent. It defaults to `no-banner` in development and `default-banner` in production, where Shopify's hosted privacy banner is rendered for visitors in regions that require consent. Use `custom-banner` when the storefront provides its own consent UI. Choosing `no-banner` in production means visitors in those regions have no way to grant consent and their events are never delivered.
 
 ## Authentication
 
