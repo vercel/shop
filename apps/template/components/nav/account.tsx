@@ -8,14 +8,16 @@ export async function NavAccount() {
   const [loggedIn, t] = await Promise.all([isCustomerLoggedIn(), getTranslations("nav")]);
 
   if (!loggedIn) {
+    // Sign-in must be a full document navigation; the proxy auth route issues an OAuth redirect and must never be prefetched.
     return (
-      <Link
+      // eslint-disable-next-line next/no-html-link-for-pages
+      <a
         href="/account/login"
         className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
       >
         <UserRoundIcon className="size-5" />
         <span className="sr-only">{t("signIn")}</span>
-      </Link>
+      </a>
     );
   }
 
