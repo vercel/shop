@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
   // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
   experimental: { useTypeScriptCli: true },
   images: {
-    deviceSizes: [1080, 1920],
+    deviceSizes: [1080],
     imageSizes: [],
     minimumCacheTTL: 31536000,
     remotePatterns: [
