@@ -42,7 +42,7 @@ Payload parsing is wrapped in `try`/`catch`. Metaobject topics seed the broad `m
 A single route (`POST /api/webhooks/shopify`) handles every supported topic. Shopify sets the topic on each request via the `x-shopify-topic` header, and the handler dispatches to the appropriate tag set:
 
 | Webhook topic        | Tags invalidated                                                                        |
-| --------------------- | ----------------------------------------------------------------------------------------- |
+| -------------------- | --------------------------------------------------------------------------------------- |
 | `products/create`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
 | `products/update`    | `product-{handle}`, `product-{numericId}`, `recommendations-{handle}`                   |
 | `products/delete`    | `products-index`, `product-{handle}`, `product-{numericId}`, `recommendations-{handle}` |
@@ -64,7 +64,7 @@ You can register only the topics you care about. Skipping `collections/*`, for e
 **Environment variables:**
 
 | Variable                 | When to set                                                                                                                                              |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `SHOPIFY_WEBHOOK_SECRET` | Set in every environment where Shopify posts to `/api/webhooks/shopify`. Without it, the endpoint is disabled and returns `404` before reading the body. |
 
 See [Environment Variables](/docs/reference/env-vars) for the full reference.
