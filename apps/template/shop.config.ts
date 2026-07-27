@@ -1,5 +1,7 @@
 import type { MenuItem } from "@/lib/shopify/types/menu";
 
+export type BotIdCheckLevel = "basic" | "deepAnalysis";
+
 export type SocialPlatform =
   | "facebook"
   | "github"
@@ -28,6 +30,10 @@ export interface ShopConfig {
     };
   };
   auth: {
+    enabled: boolean;
+  };
+  botid: {
+    checkLevel: BotIdCheckLevel;
     enabled: boolean;
   };
   navigation: {
@@ -66,13 +72,15 @@ function envFlag(value: string | undefined, fallback: boolean): boolean {
   return value === undefined ? fallback : value === "1";
 }
 
+const agentEnabled = envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false);
+
 const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false),
+    enabled: agentEnabled,
   },
   analytics: {
     speedInsights: {
@@ -84,6 +92,11 @@ export const shopConfig = {
   },
   auth: {
     enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+  },
+  botid: {
+    checkLevel:
+      process.env.NEXT_PUBLIC_BOTID_CHECK_LEVEL === "deepAnalysis" ? "deepAnalysis" : "basic",
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_BOTID, agentEnabled),
   },
   navigation: {
     footer: [],

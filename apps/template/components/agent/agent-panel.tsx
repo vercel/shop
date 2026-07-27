@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
+import { BOTID_DENIED_CODE } from "@/lib/botid";
 
 import { CartReconciler } from "./cart-reconciler";
 import { ChatMessage } from "./chat-message";
@@ -147,7 +148,11 @@ function AgentConversation({ onContentChange }: { onContentChange: (has: boolean
         status={status}
         value={input}
       />
-      {error && <p className="px-5 pb-2 text-red-500 text-xs">{error.message}</p>}
+      {error && (
+        <p className="px-5 pb-2 text-red-500 text-xs">
+          {error.message.includes(BOTID_DENIED_CODE) ? t("blocked") : error.message}
+        </p>
+      )}
     </>
   );
 }

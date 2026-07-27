@@ -1,3 +1,4 @@
+import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -81,7 +82,9 @@ const withNextIntl = createNextIntlPlugin({
   requestConfig: "./lib/i18n/request.ts",
 });
 
-const config = withNextIntl(nextConfig);
+const intlConfig = withNextIntl(nextConfig);
+
+const config = shopConfig.botid.enabled ? withBotId(intlConfig) : intlConfig;
 
 function getConfig(phase: string): NextConfig {
   // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.

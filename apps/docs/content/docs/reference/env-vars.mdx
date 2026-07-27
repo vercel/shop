@@ -16,10 +16,11 @@ type: reference
 
 The canonical feature defaults live in [`shop.config.ts`](/docs/reference/shop-config) and are disabled initially. The `NEXT_PUBLIC_ENABLE_*` variables override those defaults per deployment; set them to `"1"` or `"0"`. The `NEXT_PUBLIC_` prefix is required so conditional rendering matches between server and client under cache components.
 
-| Variable                   | Description                                                                                                                                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` or `"0"` to control `auth.enabled` (default `false`). Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing. |
-| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` or `"0"` to control `agent.enabled` (default `false`), showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                   |
+| Variable                   | Description                                                                                                                                                                                                                     |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` or `"0"` to control `auth.enabled` (default `false`). Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing.                          |
+| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` or `"0"` to control `agent.enabled` (default `false`), showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                                            |
+| `NEXT_PUBLIC_ENABLE_BOTID` | Set to `"1"` or `"0"` to control `botid.enabled`, which protects the chat endpoint with [Vercel BotID](https://vercel.com/docs/botid). Defaults to whatever the agent flag resolves to. Set `"0"` when self-hosting off Vercel. |
 
 ## Customer Authentication
 
@@ -34,12 +35,13 @@ The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies.
 
 ## Optional
 
-| Variable                 | Description                                                                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `CMS_DRAFT_MODE_SECRET`  | Secret token guarding the `/api/draft` route for CMS preview links. Generate with `openssl rand -base64 32`.                               |
-| `DEBUG_SHOPIFY`          | Set to `true` to log every Shopify Storefront API request and response in the server console.                                              |
-| `NEXT_PUBLIC_BASE_URL`   | Absolute base URL used for sitemap entries, OG tags, and auth callbacks. Defaults to `https://${VERCEL_PROJECT_PRODUCTION_URL}` on Vercel. |
-| `SHOPIFY_API_VERSION`    | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.              |
-| `SHOPIFY_WEBHOOK_SECRET` | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`.                                      |
+| Variable                        | Description                                                                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CMS_DRAFT_MODE_SECRET`         | Secret token guarding the `/api/draft` route for CMS preview links. Generate with `openssl rand -base64 32`.                                         |
+| `NEXT_PUBLIC_BOTID_CHECK_LEVEL` | Set to `"deepAnalysis"` to use BotID's machine-learning detection, which is billed per check on Pro plans. Defaults to `"basic"`, free on all plans. |
+| `DEBUG_SHOPIFY`                 | Set to `true` to log every Shopify Storefront API request and response in the server console.                                                        |
+| `NEXT_PUBLIC_BASE_URL`          | Absolute base URL used for sitemap entries, OG tags, and auth callbacks. Defaults to `https://${VERCEL_PROJECT_PRODUCTION_URL}` on Vercel.           |
+| `SHOPIFY_API_VERSION`           | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.                        |
+| `SHOPIFY_WEBHOOK_SECRET`        | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`.                                                |
 
 System variables auto-injected on Vercel that the build reads (`VERCEL_PROJECT_PRODUCTION_URL`, `NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, `V0_CALLBACK_URL`) are listed in `turbo.json` `globalEnv` so Turbo's strict-mode build sees them. You don't set these yourself.
