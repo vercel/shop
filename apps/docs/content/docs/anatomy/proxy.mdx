@@ -4,7 +4,7 @@ description: The root proxy that adds Shopify request context to every storefron
 type: guide
 ---
 
-Next.js 16 renamed Middleware to Proxy: a single `proxy.ts` at the project root runs before routing and can rewrite, redirect, adjust headers, or answer a request outright. The template ships one, and by default it is a pass-through — it attaches Hydrogen's request context to every matched request and hands the request to the app unchanged. Its one short-circuit is customer account authentication, where Hydrogen's own route handlers answer before Next.js routing happens.
+The storefront ships a [proxy](https://nextjs.org/docs/app/getting-started/proxy) — frequently called middleware — that runs before routing. By default it is a pass-through: it attaches Hydrogen's request context to every matched request and hands the request to the app unchanged. Its one short-circuit is customer account authentication, where Hydrogen's own route handlers answer the request directly.
 
 ## How it works
 
@@ -14,19 +14,12 @@ Next.js 16 renamed Middleware to Proxy: a single `proxy.ts` at the project root 
 
 **The matcher covers application routes only.** Framework internals, static assets, and the API surface never reach the proxy, so nothing that doesn't need it pays for it.
 
-> **Guardrails.**
->
-> - Keep the proxy fast. It runs on every page request, and Next.js does not intend it for data fetching.
-> - Compose new behavior into the existing `proxy()` function; Next.js supports only one proxy file per project.
-> - Keep the matcher config statically analyzable — Next.js reads it at build time.
-
 ## Out of the box
 
 | Request                | What the proxy does                                                  |
 | ---------------------- | -------------------------------------------------------------------- |
 | Any matched page route | Attaches Hydrogen's request context and applies its response headers |
 | Customer account auth  | Handled by Hydrogen's auth routes when authentication is enabled     |
-| Assets and API routes  | Skipped entirely                                                     |
 
 No environment variables configure the proxy itself. Its only conditional branch follows the authentication feature flag — see [Environment Variables](/docs/reference/env-vars).
 
