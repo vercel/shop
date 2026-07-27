@@ -11,9 +11,11 @@ Environment variables still own credentials and deployment-specific overrides. C
 ## Default configuration
 
 ```ts
+const agentEnabled = envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false);
+
 export const shopConfig = {
   agent: {
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false),
+    enabled: agentEnabled,
   },
   analytics: {
     speedInsights: { enabled: false },
@@ -21,6 +23,11 @@ export const shopConfig = {
   },
   auth: {
     enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+  },
+  botid: {
+    checkLevel:
+      process.env.NEXT_PUBLIC_BOTID_CHECK_LEVEL === "deepAnalysis" ? "deepAnalysis" : "basic",
+    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_BOTID, agentEnabled),
   },
   navigation: {
     footer: [],
@@ -63,6 +70,14 @@ Each integration is disabled by default. Set an individual integration to `true`
 `auth.enabled` controls whether customer authentication is active. It reads `NEXT_PUBLIC_ENABLE_AUTH` and defaults to `false` when unset.
 
 Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
+
+## BotID
+
+`botid.enabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to whatever `agent.enabled` resolves to, so enabling the assistant protects it automatically. Set `NEXT_PUBLIC_ENABLE_BOTID="1"` or `"0"` to decouple the two.
+
+`botid.checkLevel` selects the detection level and reads `NEXT_PUBLIC_BOTID_CHECK_LEVEL`. It defaults to `basic`, which is free on all plans. Setting it to `deepAnalysis` enables Vercel's machine-learning detection, which is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans. The client and server always read this single value, which keeps the two sides of a BotID check in agreement.
+
+Verification only runs on Vercel; elsewhere every request is treated as human. Turn the flag off when self-hosting so the storefront doesn't ship a challenge it can't verify.
 
 ## Navigation
 

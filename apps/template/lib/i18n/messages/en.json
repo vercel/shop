@@ -50,6 +50,7 @@
   },
   "agent": {
     "assistantLabel": "Shopping assistant",
+    "blocked": "We couldn't verify this request. Reload the page and try again.",
     "clearChat": "Clear chat",
     "greeting": "Hi, how can I help?",
     "inputPlaceholder": "Ask anything…",
