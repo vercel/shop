@@ -101,7 +101,7 @@ export const shopConfig = {
   analytics: {
     shopify: {
       consentMode: shopifyConsentMode,
-      enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS, isDevelopment),
+      enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS, true),
     },
     speedInsights: {
       enabled: false,
