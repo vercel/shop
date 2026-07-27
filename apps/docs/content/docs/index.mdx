@@ -28,6 +28,7 @@ Your Shopify credentials are the only thing standing between a fresh clone and a
 | **AI shopping assistant** | Opt-in agent with product discovery, cart tools, and generative UI, built on AI SDK — see [Agent](/docs/anatomy/agent)                                                      |
 | **Customer accounts**     | Opt-in Hydrogen OAuth, profile, orders, and address book — see [Authentication](/docs/anatomy/authentication)                                                               |
 | **AEO & GEO**             | Markdown content negotiation, `llms.txt`, JSON-LD, sitemap — see [AEO & GEO](/docs/anatomy/aeo-geo)                                                                         |
+| **Request handling**      | Root proxy that adds Hydrogen's request context and hosts the customer account auth routes — see [Proxy](/docs/anatomy/proxy)                                               |
 | **Cache invalidation**    | Signed Shopify webhook handler that busts exactly the right cache tags — see [Webhooks](/docs/anatomy/webhooks)                                                             |
 
 Analytics (Vercel Web Analytics, Speed Insights) and multi-locale routing (Shopify Markets, or plain i18n) live in the codebase already and turn on with a skill or a flag, not a rewrite — see [Enable Analytics](/docs/skills/enable-analytics) and [Enable Shopify Markets](/docs/skills/enable-shopify-markets).
