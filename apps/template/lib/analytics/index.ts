@@ -13,8 +13,8 @@ export { AnalyticsEvent };
 
 export const isShopifyAnalyticsEnabled = shopConfig.analytics.shopify.enabled;
 
-// The CDN script's shop.channel must be exactly "hydrogen" or "headless"; its
-// hydrogenSubchannelId is only forwarded to monorail, not used for channel.
+// The CDN script requires shop.channel to be exactly "hydrogen" or "headless";
+// hydrogenSubchannelId is forwarded to monorail, not used for channel.
 type AnalyticsBusShop = ShopAnalytics & { channel: "headless" };
 
 let bus: StorefrontAnalytics | null = null;
@@ -26,14 +26,13 @@ export function configureAnalytics(shop: ShopAnalyticsData): void {
   analyticsShop = { ...shop, channel: "headless", hydrogenSubchannelId: "0" };
 }
 
-// Constructing at module scope would run during SSR and crash on browser globals.
 export function getAnalytics(): StorefrontAnalytics | null {
+  // Module-scope construction would run during SSR and crash on browser globals.
   if (typeof window === "undefined") return null;
   if (!isShopifyAnalyticsEnabled || !analyticsShop || !analyticsShopData) return null;
 
-  // The CDN analytics script expects a Liquid-injected window.Shopify config; seed
-  // locale, country, and currency.active before the bus loads that script. The
-  // customerPrivacy methods come from Shopify's consent banner (default/custom mode).
+  // The CDN script reads a Liquid-injected window.Shopify config, so seed it
+  // before the bus loads that script. The consent banner supplies customerPrivacy.
   const shopifyWindow = window as unknown as {
     Shopify?: {
       country?: string;
