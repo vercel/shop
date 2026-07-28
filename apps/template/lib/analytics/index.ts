@@ -5,6 +5,7 @@ import {
   type StorefrontAnalytics,
 } from "@shopify/hydrogen";
 
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { ShopAnalyticsData } from "@/lib/types";
 import { shopConfig } from "@/shop.config";
 
@@ -26,6 +27,12 @@ export function getAnalytics(): StorefrontAnalytics | null {
 
   // Same-origin consentDomain makes the browser post the consent handshake to
   // /api/unstable/graphql.json, where the token is injected server-side.
+  const locale = defaultLocale;
+  const shopifyWindow = window as unknown as { Shopify?: Record<string, unknown> };
+  const shopifyGlobal = (shopifyWindow.Shopify ??= {});
+  shopifyGlobal.country ??= getCountryCode(locale);
+  shopifyGlobal.locale ??= getLanguageCode(locale).toLowerCase();
+
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
     consent: {
