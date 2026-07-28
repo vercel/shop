@@ -15,23 +15,34 @@ export const isShopifyAnalyticsEnabled = shopConfig.analytics.shopify.enabled;
 
 let bus: StorefrontAnalytics | null = null;
 let analyticsShop: ShopAnalytics | null = null;
+let analyticsShopData: ShopAnalyticsData | null = null;
 
 export function configureAnalytics(shop: ShopAnalyticsData): void {
+  analyticsShopData = shop;
   analyticsShop = { ...shop, hydrogenSubchannelId: "0" };
 }
 
 // Constructing at module scope would run during SSR and crash on browser globals.
 export function getAnalytics(): StorefrontAnalytics | null {
   if (typeof window === "undefined") return null;
-  if (!isShopifyAnalyticsEnabled || !analyticsShop) return null;
+  if (!isShopifyAnalyticsEnabled || !analyticsShop || !analyticsShopData) return null;
 
-  // Same-origin consentDomain makes the browser post the consent handshake to
-  // /api/unstable/graphql.json, where the token is injected server-side.
-  const locale = defaultLocale;
-  const shopifyWindow = window as unknown as { Shopify?: Record<string, unknown> };
+  // The CDN analytics script expects a Liquid-injected window.Shopify config; seed it
+  // (country, locale, currency.active, shop) before the bus loads that script.
+  const shopifyWindow = window as unknown as {
+    Shopify?: {
+      country?: string;
+      currency?: { active?: string };
+      locale?: string;
+      shop?: string;
+    };
+  };
   const shopifyGlobal = (shopifyWindow.Shopify ??= {});
-  shopifyGlobal.country ??= getCountryCode(locale);
-  shopifyGlobal.locale ??= getLanguageCode(locale).toLowerCase();
+  shopifyGlobal.country ??= getCountryCode(defaultLocale);
+  shopifyGlobal.locale ??= getLanguageCode(defaultLocale).toLowerCase();
+  shopifyGlobal.currency ??= {};
+  shopifyGlobal.currency.active ??= analyticsShopData.currency;
+  shopifyGlobal.shop ??= analyticsShopData.shopDomain;
 
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
