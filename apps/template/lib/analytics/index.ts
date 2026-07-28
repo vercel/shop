@@ -24,8 +24,13 @@ export function getAnalytics(): StorefrontAnalytics | null {
   if (typeof window === "undefined") return null;
   if (!isShopifyAnalyticsEnabled || !analyticsShop) return null;
 
+  // Same-origin consentDomain makes the browser post the consent handshake to
+  // /api/unstable/graphql.json, where the token is injected server-side.
   bus ??= createStorefrontAnalytics({
-    consent: { mode: shopConfig.analytics.shopify.consentMode },
+    consent: {
+      consentDomain: typeof window === "undefined" ? undefined : window.location.host,
+      mode: shopConfig.analytics.shopify.consentMode,
+    },
     shop: analyticsShop,
   });
 
