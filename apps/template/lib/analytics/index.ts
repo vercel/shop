@@ -27,6 +27,7 @@ export function getAnalytics(): StorefrontAnalytics | null {
   // Same-origin consentDomain makes the browser post the consent handshake to
   // /api/unstable/graphql.json, where the token is injected server-side.
   bus ??= createStorefrontAnalytics({
+    canTrack: () => true,
     consent: {
       consentDomain: typeof window === "undefined" ? undefined : window.location.host,
       mode: shopConfig.analytics.shopify.consentMode,
