@@ -37,6 +37,11 @@ export function getAnalytics(): StorefrontAnalytics | null {
     Shopify?: {
       country?: string;
       currency?: { active?: string };
+      customerPrivacy?: {
+        analyticsProcessingAllowed?: () => boolean;
+        marketingAllowed?: () => boolean;
+        saleOfDataAllowed?: () => boolean;
+      };
       locale?: string;
     };
   };
@@ -45,6 +50,14 @@ export function getAnalytics(): StorefrontAnalytics | null {
   shopifyGlobal.locale ??= getLanguageCode(defaultLocale).toLowerCase();
   shopifyGlobal.currency ??= {};
   shopifyGlobal.currency.active ??= analyticsShopData.currency;
+
+  // With consent mode "no-banner", Hydrogen never loads the privacy-banner script
+  // that defines these methods, but the CDN analytics script calls them. Default
+  // them to allowed so sending doesn't crash; a real banner can still override.
+  shopifyGlobal.customerPrivacy ??= {};
+  shopifyGlobal.customerPrivacy.analyticsProcessingAllowed ??= () => true;
+  shopifyGlobal.customerPrivacy.marketingAllowed ??= () => true;
+  shopifyGlobal.customerPrivacy.saleOfDataAllowed ??= () => true;
 
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
