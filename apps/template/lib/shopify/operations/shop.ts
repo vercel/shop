@@ -17,9 +17,6 @@ const GET_SHOP_ANALYTICS_QUERY = `#graphql
     }
     shop {
       id
-      primaryDomain {
-        host
-      }
     }
   }
 ` as const;
@@ -34,9 +31,6 @@ interface ShopAnalyticsResponse {
   };
   shop: {
     id: string;
-    primaryDomain: {
-      host: string;
-    };
   };
 }
 
@@ -57,7 +51,6 @@ export async function getShopAnalytics({
   return {
     acceptedLanguage: language,
     currency: response.data.localization.country.currency.isoCode,
-    shopDomain: response.data.shop.primaryDomain.host,
     shopId: response.data.shop.id,
   };
 }
