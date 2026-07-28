@@ -1,7 +1,6 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,8 +9,21 @@ import { Label } from "@/components/ui/label";
 import { updateProfileAction } from "@/lib/customer/action";
 import type { CustomerProfile } from "@/lib/types";
 
-export function ProfileForm({ profile }: { profile: CustomerProfile }) {
-  const t = useTranslations("account");
+interface ProfileFormLabels {
+  email: string;
+  firstName: string;
+  lastName: string;
+  profileUpdated: string;
+  save: string;
+}
+
+export function ProfileForm({
+  labels,
+  profile,
+}: {
+  labels: ProfileFormLabels;
+  profile: CustomerProfile;
+}) {
   const [firstName, setFirstName] = useState(profile.firstName ?? "");
   const [lastName, setLastName] = useState(profile.lastName ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +49,7 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
     <form onSubmit={handleSubmit} className="grid max-w-md gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-1.5">
-          <Label htmlFor="firstName">{t("firstName")}</Label>
+          <Label htmlFor="firstName">{labels.firstName}</Label>
           <Input
             id="firstName"
             name="firstName"
@@ -50,7 +62,7 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
           />
         </div>
         <div className="grid gap-1.5">
-          <Label htmlFor="lastName">{t("lastName")}</Label>
+          <Label htmlFor="lastName">{labels.lastName}</Label>
           <Input
             id="lastName"
             name="lastName"
@@ -65,7 +77,7 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="email">{t("email")}</Label>
+        <Label htmlFor="email">{labels.email}</Label>
         <Input id="email" type="email" value={profile.email} disabled autoComplete="email" />
       </div>
 
@@ -77,10 +89,10 @@ export function ProfileForm({ profile }: { profile: CustomerProfile }) {
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={isPending}>
-          {isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : t("save")}
+          {isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : labels.save}
         </Button>
         {saved ? (
-          <span className="text-sm text-muted-foreground">{t("profileUpdated")}</span>
+          <span className="text-sm text-muted-foreground">{labels.profileUpdated}</span>
         ) : null}
       </div>
     </form>

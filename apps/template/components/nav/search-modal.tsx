@@ -16,6 +16,18 @@ import { cn } from "@/lib/utils";
 export function SearchModal() {
   const [open, setOpen] = useState(false);
 
+  // ⌘K / Ctrl+K toggles the modal from anywhere on the page.
+  useEffect(() => {
+    function handleShortcut(event: KeyboardEvent) {
+      if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+        event.preventDefault();
+        setOpen((prev) => !prev);
+      }
+    }
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, []);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <SearchTrigger />
@@ -314,8 +326,10 @@ function ProductResult({
 function LoadingSkeleton() {
   return (
     <div className="px-4 py-3 space-y-3">
+      <div className="pt-1.5 pb-2 h-6 w-40 rounded bg-accent/40 animate-pulse" />
+      <div className="h-3 w-24 rounded bg-accent/40 animate-pulse" />
       {["skeleton-1", "skeleton-2", "skeleton-3"].map((key) => (
-        <div key={key} className="flex items-center gap-3">
+        <div key={key} className="flex items-center gap-3 py-2.5">
           <div className="size-14 bg-accent animate-pulse shrink-0" />
           <div className="flex-1 space-y-1.5">
             <div className="h-3.5 w-3/4 rounded bg-accent animate-pulse" />
@@ -323,6 +337,9 @@ function LoadingSkeleton() {
           </div>
         </div>
       ))}
+      <div className="pt-2 pb-1 flex justify-center">
+        <div className="h-9 w-32 rounded-lg bg-accent/40 animate-pulse" />
+      </div>
     </div>
   );
 }

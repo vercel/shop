@@ -16,13 +16,15 @@ interface AutoPlayVideoProps extends Omit<
   "autoPlay" | "loop" | "muted" | "onCanPlay" | "playsInline" | "ref"
 > {
   previewImage?: AutoPlayVideoPreviewImage | null;
+  previewImageFetchPriority?: "auto" | "high" | "low";
+  previewImageLoading?: "eager" | "lazy";
   sizes?: string;
-  priorityImage?: boolean;
 }
 export function AutoPlayVideo({
   previewImage,
+  previewImageFetchPriority,
+  previewImageLoading,
   sizes,
-  priorityImage,
   className,
   ...props
 }: AutoPlayVideoProps) {
@@ -60,8 +62,8 @@ export function AutoPlayVideo({
           fill
           className={cn("object-cover", className)}
           sizes={sizes}
-          priority={priorityImage}
-          loading={priorityImage ? "eager" : "lazy"}
+          fetchPriority={previewImageFetchPriority}
+          loading={previewImageLoading}
           draggable={false}
         />
       )}

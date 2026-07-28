@@ -16,15 +16,16 @@ import {
   ColorImageCarouselItems,
   ColorImageGrid,
   ProductMedia,
-  ProductMediaSkeleton,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { PLACEHOLDER_REVIEW_SUMMARY } from "@/components/product-detail/product-reviews-section";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { VirtualTryOn } from "@/components/product-detail/virtual-try-on";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/ui/rating-stars";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -120,7 +121,7 @@ function ProductMediaArea({
       className="lg:col-span-6"
       overlay={tryOnOverlay}
       desktopSlot={
-        // Color image is the LCP slot; a pulsing skeleton background flashes harder than empty space.
+        // Color image is the LCP slot; a pulsing skeleton flashes harder than an empty image canvas.
         <Suspense fallback={<div className="aspect-square w-full" />}>
           <ResolvedColorImageGrid
             product={product}
@@ -258,7 +259,7 @@ async function ProductInfoArea({
       )}
 
       {product.isGiftCard ? (
-        <Suspense fallback={<GiftCardPurchaseFormFallback />}>
+        <Suspense fallback={<GiftCardPurchaseFormFallback t={t} />}>
           <ResolvedGiftCardPurchaseForm
             eagerVariantId={eagerSelection?.selectedVariant?.id}
             variantPromise={variantPromise}
@@ -420,21 +421,38 @@ async function ResolvedGiftCardPurchaseForm({
   return <GiftCardPurchaseForm merchandiseId={variant.id} />;
 }
 
-function GiftCardPurchaseFormFallback() {
-  // Mirror the resolved form's geometry: three label+input groups, a send-on
-  // toggle row, and the h-12 submit button — sized to avoid layout shift.
+function GiftCardPurchaseFormFallback({
+  t,
+}: {
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
+}) {
+  // Labels and placeholders are static translations, so render the real disabled inputs — the only
+  // change on resolve is the fields becoming editable, which keeps geometry stable and avoids CLS.
   return (
-    <div aria-hidden="true" className="grid gap-5">
+    <div className="grid gap-5">
       <div className="grid gap-2.5">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={`gift-card-fallback-field-${i}`} className="grid gap-2.5">
-            <div className="h-4 w-28 rounded-sm bg-muted" />
-            <div className="h-9 w-full rounded-md bg-background ring-1 ring-border ring-inset" />
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.recipientEmail")}</Label>
+          <Input type="email" disabled placeholder={t("giftCard.recipientEmailPlaceholder")} />
+        </div>
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.recipientName")}</Label>
+          <Input type="text" disabled placeholder={t("giftCard.recipientNamePlaceholder")} />
+        </div>
+        <div className="grid gap-2.5">
+          <Label>{t("giftCard.message")}</Label>
+          <Textarea rows={3} disabled placeholder={t("giftCard.messagePlaceholder")} />
+        </div>
+        <div className="grid gap-3 rounded-lg border p-3">
+          <div className="flex items-center justify-between gap-2.5">
+            <Label>{t("giftCard.sendLater")}</Label>
+            <span className="inline-flex h-[1.15rem] w-8 items-center rounded-full bg-input opacity-50" />
           </div>
-        ))}
-        <div className="h-4 w-32 rounded-sm bg-muted" />
+        </div>
       </div>
-      <div className="flex h-12 w-full items-center justify-center rounded-lg bg-primary" />
+      <div className="flex h-12 w-full cursor-not-allowed items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground opacity-50">
+        {t("giftCard.addToCart")}
+      </div>
     </div>
   );
 }
@@ -483,18 +501,6 @@ function BuyButtonsFallback({
           <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
         </div>
       ) : null}
-    </div>
-  );
-}
-
-export function ProductDetailSectionSkeleton() {
-  return (
-    <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-      <ProductMediaSkeleton className="lg:col-span-6" />
-      <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
     </div>
   );
 }

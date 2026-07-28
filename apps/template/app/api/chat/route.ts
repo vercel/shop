@@ -6,8 +6,10 @@ import {
   safeValidateUIMessages,
   toUIMessageStream,
 } from "ai";
+import { checkBotId } from "botid/server";
 
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
+import { BOTID_DENIED_CODE, botIdCheckOptions, isBotIdEnabled } from "@/lib/botid";
 import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
@@ -55,6 +57,12 @@ async function resolvePageContext(
 
 export async function POST(request: Request) {
   if (!shopConfig.agent.enabled) return new Response(null, { status: 404 });
+
+  // Runs before body parsing and cart creation so rejected traffic costs no Shopify or gateway work.
+  if (isBotIdEnabled) {
+    const { isBot } = await checkBotId(botIdCheckOptions);
+    if (isBot) return Response.json({ error: BOTID_DENIED_CODE }, { status: 403 });
+  }
 
   let body: { id?: unknown; messages?: unknown };
   try {

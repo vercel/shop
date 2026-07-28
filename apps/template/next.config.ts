@@ -1,3 +1,4 @@
+import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import {
@@ -39,7 +40,7 @@ const nextConfig: NextConfig = {
   // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
   experimental: { useTypeScriptCli: true },
   images: {
-    deviceSizes: [1080, 1920],
+    deviceSizes: [1080],
     imageSizes: [],
     minimumCacheTTL: 31536000,
     remotePatterns: [
@@ -84,7 +85,9 @@ const withNextIntl = createNextIntlPlugin({
   requestConfig: "./lib/i18n/request.ts",
 });
 
-const config = withNextIntl(nextConfig);
+const intlConfig = withNextIntl(nextConfig);
+
+const config = shopConfig.botid.enabled ? withBotId(intlConfig) : intlConfig;
 
 function getConfig(phase: string): NextConfig {
   // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.

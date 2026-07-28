@@ -1,14 +1,18 @@
 "use client";
 
 import { HandbagIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 import { useCart, useSeedCart } from "@/components/cart/context";
 import type { Cart } from "@/lib/types";
 
-export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
+export function CartIconClient({
+  cartLabel,
+  initialCart,
+}: {
+  cartLabel: string;
+  initialCart: Cart | null;
+}) {
   const { cartWithPending, openOverlay } = useCart();
-  const t = useTranslations("nav");
 
   useSeedCart(initialCart);
 
@@ -29,7 +33,7 @@ export function CartIconClient({ initialCart }: { initialCart: Cart | null }) {
           </span>
         )}
       </span>
-      <span className="sr-only">{t("cart")}</span>
+      <span className="sr-only">{cartLabel}</span>
     </button>
   );
 }

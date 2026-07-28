@@ -217,25 +217,31 @@ export async function getLocale(): Promise<Locale> {
 
 Update `lib/i18n/request.ts` to call `getLocale()` and load the matching messages. Do not resolve locale by reading cookies or request headers from a cached component. The proxy owns request negotiation; React receives the validated internal route param.
 
-## 7. Add the proxy
+## 7. Extend the proxy
 
-Create root `proxy.ts`:
+Update the existing root `proxy.ts` to run next-intl for matched requests:
 
 ```ts
 import createMiddleware from "next-intl/middleware";
+import type { NextRequest, NextResponse } from "next/server";
 
 import { routing } from "@/lib/i18n/routing";
 
-export default createMiddleware(routing);
+const handleI18n = createMiddleware(routing);
+
+export function proxy(request: NextRequest): NextResponse {
+  return handleI18n(request);
+}
 
 export const config = {
   matcher: [
-    "/((?!.well-known|api|md|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemap/|.*\\..*).*)",
+    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/.well-known/:path*",
   ],
 };
 ```
 
-The exact exclusions must match the current checkout. Keep API, webhooks, sitemap, robots, static assets, and markdown handlers out of locale routing.
+Preserve any other request handling already composed in `proxy()` and keep the template matcher unless the current checkout adds a route with different requirements. The matcher excludes framework internals and public files while keeping application routes and `/.well-known/*` in proxy processing.
 
 For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 

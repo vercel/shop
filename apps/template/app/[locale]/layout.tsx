@@ -34,10 +34,11 @@ const geistMono = Geist_Mono({
 export const generateStaticParams = async () => enabledLocales.map((locale) => ({ locale }));
 
 export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
-  const [locale, messages, t] = await Promise.all([
+  const [locale, messages, t, cartT] = await Promise.all([
     getLocale(),
     getMessages(),
     getTranslations("accessibility"),
+    getTranslations("cart"),
   ]);
 
   return (
@@ -63,7 +64,11 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
             </main>
             <Footer locale={locale} />
             <Suspense>
-              <CartOverlay locale={locale} />
+              <CartOverlay
+                description={cartT("reviewCartDescription")}
+                locale={locale}
+                title={cartT("shoppingCart")}
+              />
             </Suspense>
             <Suspense>
               <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>

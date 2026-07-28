@@ -322,9 +322,8 @@
       "recipientEmailPlaceholder": "ami@example.com",
       "recipientName": "Nom du destinataire",
       "recipientNamePlaceholder": "Nom de l'ami (facultatif)",
-      "sendNow": "Envoyer maintenant",
-      "sendOn": "Envoyer le",
-      "sendOnLabel": "Date d'envoi (facultatif)",
+      "sendLater": "Planifier pour plus tard",
+      "sendOnLabel": "Date de livraison",
       "title": "Détails de la carte-cadeau"
     },
     "goToImage": "Aller à l'image {number}",

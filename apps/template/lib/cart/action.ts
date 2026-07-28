@@ -133,9 +133,10 @@ export async function addGiftCardAction(input: {
   merchandiseId: string;
   recipient: {
     email: string;
-    name?: string;
     message?: string;
+    name?: string;
     sendOn?: string;
+    timezoneOffset?: number;
   };
 }): Promise<CartActionResult> {
   const { merchandiseId, recipient } = input;
@@ -155,6 +156,7 @@ export async function addGiftCardAction(input: {
     }
   }
 
+  // Keys with the `__shopify_` prefix are recognized by Shopify to schedule and route gift card delivery.
   const attributes: { key: string; value: string }[] = [
     { key: "__shopify_send_gift_card_to_recipient", value: "true" },
     { key: "Recipient email", value: email },
@@ -165,7 +167,10 @@ export async function addGiftCardAction(input: {
     attributes.push({ key: "Message", value: recipient.message.trim() });
   if (recipient.sendOn) {
     attributes.push({ key: "Send on", value: recipient.sendOn });
-    attributes.push({ key: "__shopify_offset", value: String(new Date().getTimezoneOffset()) });
+    // Offset must reflect the buyer's browser, so it is captured client-side and passed in — never computed here (server runs in UTC).
+    if (typeof recipient.timezoneOffset === "number" && Number.isFinite(recipient.timezoneOffset)) {
+      attributes.push({ key: "__shopify_offset", value: String(recipient.timezoneOffset) });
+    }
   }
 
   try {

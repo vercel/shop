@@ -222,17 +222,20 @@ export default getRequestConfig(async () => {
 });
 ```
 
-### Step 5: `proxy.ts` middleware
+### Step 5: Extend `proxy.ts`
+
+Update the existing root proxy to run next-intl for matched requests:
 
 ```ts
 import createMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
+
 import { routing } from "@/lib/i18n/routing";
 
-const handlei18n = createMiddleware(routing);
+const handleI18n = createMiddleware(routing);
 
-export default function middleware(request: NextRequest): NextResponse {
-  const response = handlei18n(request);
+export function proxy(request: NextRequest): NextResponse {
+  const response = handleI18n(request);
   if (!response.ok) return response;
 
   const rewriteHeader = response.headers.get("x-middleware-rewrite");
@@ -246,11 +249,14 @@ export default function middleware(request: NextRequest): NextResponse {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+  matcher: [
+    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/.well-known/:path*",
+  ],
 };
 ```
 
-> The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
+Preserve any other request handling already composed in `proxy()`. The matcher excludes framework internals and public files while keeping application routes and `/.well-known/*` in proxy processing. The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
 
 ### Step 6: Internal hrefs — keep `next/link`
 

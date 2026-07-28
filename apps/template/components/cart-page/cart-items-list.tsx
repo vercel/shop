@@ -1,25 +1,24 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import { useCartRender } from "@/components/cart/context-sync";
 import { OverlayItem } from "@/components/cart/overlay-item";
 
 interface CartItemsListProps {
+  emptyLabel: string;
+  itemsLabel: string;
   locale: string;
 }
 
-export function CartItemsList({ locale }: CartItemsListProps) {
+export function CartItemsList({ emptyLabel, itemsLabel, locale }: CartItemsListProps) {
   const cart = useCartRender();
-  const t = useTranslations("cart");
   const lines = cart?.lines ?? [];
 
   return lines.length === 0 ? (
     <div className="text-center py-10">
-      <p className="text-muted-foreground">{t("empty")}</p>
+      <p className="text-muted-foreground">{emptyLabel}</p>
     </div>
   ) : (
-    <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
+    <ul className="space-y-5" aria-label={itemsLabel}>
       {lines.map((item) => (
         <OverlayItem key={item.id} item={item} locale={locale} />
       ))}

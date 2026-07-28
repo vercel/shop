@@ -52,7 +52,7 @@ export type LocaleOption = {
   countryCode: string;
   label: string;
   locale: Locale;
-}
+};
 
 export function getEnabledLocaleOptions(): LocaleOption[] {
   return enabledLocales.map((locale) => {

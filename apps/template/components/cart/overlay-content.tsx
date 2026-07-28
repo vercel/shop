@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 
 import { useCart } from "./context";
-import { CartMessages } from "./messages";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
+import { CartWarnings } from "./warnings";
 
 interface OverlayContentProps {
   locale: string;
@@ -93,7 +93,7 @@ export function OverlayContent({ locale }: OverlayContentProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
-        <CartMessages />
+        <CartWarnings />
         <ul className="space-y-5" aria-label={t("cartItemsLabel")}>
           {displayCart.lines.map((item) => (
             <OverlayItem key={item.id} item={item} locale={locale} />

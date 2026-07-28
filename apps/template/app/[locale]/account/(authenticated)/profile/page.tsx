@@ -20,10 +20,21 @@ export default async function ProfilePage() {
 }
 
 async function ProfileContent() {
-  const profile = await getCustomerProfile();
+  const [profile, t] = await Promise.all([getCustomerProfile(), getTranslations("account")]);
   if (!profile) return null;
 
-  return <ProfileForm profile={profile} />;
+  return (
+    <ProfileForm
+      labels={{
+        email: t("email"),
+        firstName: t("firstName"),
+        lastName: t("lastName"),
+        profileUpdated: t("profileUpdated"),
+        save: t("save"),
+      }}
+      profile={profile}
+    />
+  );
 }
 
 function ProfileSkeleton() {

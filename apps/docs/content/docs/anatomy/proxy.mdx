@@ -1,0 +1,31 @@
+---
+title: Proxy
+description: The root proxy that adds Shopify request context to every storefront request and hosts the customer account auth routes.
+type: guide
+---
+
+The storefront ships a [proxy](https://nextjs.org/docs/app/getting-started/proxy) — frequently called middleware — that runs before routing. By default it is a pass-through: it attaches Hydrogen's request context to every matched request and hands the request to the app unchanged. Its one short-circuit is customer account authentication, where Hydrogen's own route handlers answer the request directly.
+
+## How it works
+
+**Every matched request carries Hydrogen's request context.** The proxy builds that context and forwards it to the app, then applies Hydrogen's response headers on the way out. This is Hydrogen's standard Next.js integration, and it's what lets Storefront API calls, analytics, and personalized-response cache safety work correctly without any per-route setup.
+
+**Authentication runs only on the auth paths.** When authentication is enabled and a request hits one of the customer account auth paths, the proxy hands it to Hydrogen's customer account handlers and returns their response. Every other request skips that work. See [Authentication](/docs/anatomy/authentication) for the flow those handlers implement.
+
+**The matcher covers application routes only.** Framework internals, static assets, and the API surface never reach the proxy, so nothing that doesn't need it pays for it.
+
+## Out of the box
+
+| Request                | What the proxy does                                                  |
+| ---------------------- | -------------------------------------------------------------------- |
+| Any matched page route | Attaches Hydrogen's request context and applies its response headers |
+| Customer account auth  | Handled by Hydrogen's auth routes when authentication is enabled     |
+
+No environment variables configure the proxy itself. Its only conditional branch follows the authentication feature flag — see [Environment Variables](/docs/reference/env-vars).
+
+## Common customizations
+
+- **Multi-locale routing** — both [Enable Shopify Markets](/docs/skills/enable-shopify-markets) and [Enable i18n](/docs/skills/enable-i18n) extend the proxy to negotiate a locale and route to it. They add to the existing proxy rather than replacing it.
+- **Redirects and experiments** — programmatic redirects based on the incoming request, or bucketing visitors for an A/B test, both fit naturally here. Static redirects belong in `next.config.ts` instead, where they cost nothing at request time.
+- **Geo and coarse bot handling** — request geo and user-agent data is available before routing, which makes the proxy a good place for gating that shouldn't reach page code. Verified bot detection on the assistant's chat endpoint is already handled by [Vercel BotID](https://vercel.com/docs/botid) rather than here.
+- **Matcher scope** — adding a route that needs proxy handling but isn't matched by default means widening the matcher.

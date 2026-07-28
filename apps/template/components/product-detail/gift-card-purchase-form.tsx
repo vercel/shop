@@ -9,6 +9,7 @@ import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { addGiftCardAction } from "@/lib/cart/action";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,9 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
     const name = String(formData.get("name") ?? "");
     const message = String(formData.get("message") ?? "");
     const sendOn = String(formData.get("sendOn") ?? "");
+    const form = event.currentTarget;
+
+    const scheduled = sendOnEnabled && sendOn;
 
     startTransition(async () => {
       const result = await addGiftCardAction({
@@ -42,7 +46,9 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           email,
           message: message || undefined,
           name: name || undefined,
-          sendOn: sendOnEnabled && sendOn ? sendOn : undefined,
+          sendOn: scheduled ? sendOn : undefined,
+          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
         },
       });
 
@@ -54,7 +60,7 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
       if (result.cart) setCart(result.cart);
       setWarnings(result.warnings ?? []);
 
-      event.currentTarget.reset();
+      form.reset();
       setSendOnEnabled(false);
       setOverlayOpen(true);
       router.refresh();
@@ -97,21 +103,19 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
           />
         </div>
 
-        <div className="grid gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => setSendOnEnabled((prev) => !prev)}
-              className="cursor-pointer text-sm font-medium text-foreground"
-              aria-pressed={sendOnEnabled}
-            >
-              {sendOnEnabled ? t("sendNow") : t("sendOn")}
-            </button>
+        <div className="grid gap-3 rounded-lg border p-3">
+          <div className="flex items-center justify-between gap-2.5">
+            <Label htmlFor="gift-card-send-later">{t("sendLater")}</Label>
+            <Switch
+              id="gift-card-send-later"
+              checked={sendOnEnabled}
+              onCheckedChange={setSendOnEnabled}
+            />
           </div>
           {sendOnEnabled ? (
             <div className="grid gap-2.5">
               <Label htmlFor="gift-card-send-on">{t("sendOnLabel")}</Label>
-              <Input id="gift-card-send-on" name="sendOn" type="date" />
+              <Input id="gift-card-send-on" name="sendOn" type="date" required />
             </div>
           ) : null}
         </div>

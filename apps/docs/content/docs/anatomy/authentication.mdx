@@ -19,7 +19,13 @@ SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
 NEXT_PUBLIC_BASE_URL="https://your-domain.com"
 ```
 
-Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, but not `CUSTOMER_ACCOUNT_SESSION_SECRET`. Generate that private, app-owned secret with `openssl rand -base64 32` — the template uses it to derive the AES-256-GCM key that encrypts Hydrogen's OAuth session data in HttpOnly cookies. Keep it server-only and consistent across deployment instances; rotating it invalidates every existing customer session. `next.config.ts` throws at build time whenever auth is enabled without the session secret and client ID.
+Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. It does not provide `CUSTOMER_ACCOUNT_SESSION_SECRET` — that one is app-owned, so generate it yourself:
+
+```bash
+openssl rand -base64 32
+```
+
+The template derives its cookie encryption key from that secret. Keep it server-only and identical across every instance of a deployment, and treat rotation as deliberate: it invalidates every existing customer session. Enabling auth without both values fails the build.
 
 Customer Account OAuth requires a public HTTPS origin. Use a tunnel for local OAuth testing and set `NEXT_PUBLIC_BASE_URL` to that registered origin.
 
@@ -56,14 +62,22 @@ const accessToken = await requireCustomerAccessToken("/account/orders");
 
 Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` for account-page gates, and `requireCustomerAccessToken()` immediately before private Customer Account API work.
 
-> **Guardrails.** Never expose access, refresh, or ID tokens to Client Components or browser-readable storage. Keep Server Components on the read-only session-manager path — token refresh belongs in `/account/refresh`. Keep login as GET and logout as same-origin POST, and keep the callback/logout URIs registered exactly in Shopify. Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately, since rotation invalidates every existing session, and keep `NEXT_PUBLIC_ENABLE_AUTH` public so server/client feature gates agree under cache components.
+> **Guardrails.**
+>
+> - Never expose access, refresh, or ID tokens to Client Components or browser-readable storage.
+> - Keep Server Components on the read-only session path. Token refresh belongs in `/account/refresh`.
+> - Keep login as GET and logout as same-origin POST, and register the callback and logout URIs in Shopify exactly.
+> - Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately — rotation invalidates every existing session.
+> - Keep `NEXT_PUBLIC_ENABLE_AUTH` public so server and client feature gates agree under cache components.
 
 ## Out of the box
 
-- **Auth routes** — `/account/login` (GET, starts PKCE and redirects to Shopify), `/account/authorize` (GET, validates the OAuth callback), `/account/refresh` (GET, rotates an expired access token), and `/account/logout` (POST, clears the session). All four are installed via Hydrogen's standard handlers through `handleShopifyRoutes` in `app/account/[action]/route.ts`.
+- **Auth routes** — `/account/login` (GET, starts PKCE and redirects to Shopify), `/account/authorize` (GET, validates the OAuth callback), `/account/refresh` (GET, rotates an expired access token), and `/account/logout` (POST, clears the session). All four are installed via Hydrogen's standard handlers through `handleShopifyRoutes` in the [proxy](/docs/anatomy/proxy), which intercepts the customer-account OAuth paths before routing.
 - **Account pages** — `/account` (redirects to profile), `/account/profile` (edit name, read-only email), `/account/orders` (paginated order history), `/account/orders/[id]` (order detail), and `/account/addresses` (address book with create, edit, delete, and default selection). The `(authenticated)` route group gates these without claiming the auth-handler paths.
-- **Customer Account API data** — a separate GraphQL endpoint and schema from the Storefront API. `lib/shopify/customer-account.ts` wraps Hydrogen's `createCustomerAccountClient`; `lib/shopify/operations/customer.ts` queries and mutates profile, orders, and addresses, resolving a usable token through `requireCustomerAccessToken()` on every call; `lib/shopify/transforms/customer.ts` maps responses to domain types. Order and profile pages are Server Components in Suspense; address and profile editing use client forms backed by server actions in `lib/customer/action.ts` that validate input, surface Shopify `userErrors`, and revalidate affected paths. Customer responses are personalized and never publicly cached.
+- **Customer Account API data** — profile, orders, and addresses come from the Customer Account API, which has its own GraphQL endpoint and schema, separate from the Storefront API. Every call resolves a usable access token first, routing through the refresh step when only a refresh token remains, so no operation runs with an expired token. Customer responses are personalized and never publicly cached.
+- **Rendering and mutations** — order and profile pages are Server Components wrapped in Suspense. Address and profile editing use client forms backed by server actions that validate input, surface Shopify `userErrors`, and revalidate the affected pages.
 
 ## Common customizations
 
-- **Additional account data** — store credit, subscriptions, draft orders, or richer order fields. Add an operation in `lib/shopify/operations/customer.ts`, a transform in `lib/shopify/transforms/customer.ts`, and a matching domain type in `lib/types.ts`, validated against the live Customer Account API schema. Route mutations through a server action in `lib/customer/action.ts` so validation and revalidation stay centralized.
+- **Additional account data** — store credit, subscriptions, draft orders, or richer order fields all follow the same path as the shipped account data: a Customer Account API operation, a transform to a domain type, and a server action for anything that mutates. Validate new fields against the live Customer Account API schema, since it differs from the Storefront API.
+- **Account page composition** — the shipped profile, orders, and addresses pages are a starting point. Reordering them, adding a landing dashboard, or splitting order history into its own section is presentation work that leaves the auth flow untouched.
