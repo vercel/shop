@@ -34,7 +34,10 @@ export function getAnalytics(): StorefrontAnalytics | null {
       country?: string;
       currency?: { active?: string };
       locale?: string;
-      shop?: string;
+      shop?: {
+        channel?: string;
+        domain?: string;
+      };
     };
   };
   const shopifyGlobal = (shopifyWindow.Shopify ??= {});
@@ -42,7 +45,9 @@ export function getAnalytics(): StorefrontAnalytics | null {
   shopifyGlobal.locale ??= getLanguageCode(defaultLocale).toLowerCase();
   shopifyGlobal.currency ??= {};
   shopifyGlobal.currency.active ??= analyticsShopData.currency;
-  shopifyGlobal.shop ??= analyticsShopData.shopDomain;
+  shopifyGlobal.shop ??= {};
+  shopifyGlobal.shop.channel ??= "hydrogen";
+  shopifyGlobal.shop.domain ??= analyticsShopData.shopDomain;
 
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
