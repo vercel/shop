@@ -21,7 +21,7 @@ The canonical feature defaults live in [`shop.config.ts`](/docs/reference/shop-c
 | `NEXT_PUBLIC_ENABLE_AUTH`              | Set to `"1"` or `"0"` to control `auth.enabled` (default `false`). Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing.                          |
 | `NEXT_PUBLIC_ENABLE_AGENT`             | Set to `"1"` or `"0"` to control `agent.enabled` (default `false`), showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                                            |
 | `NEXT_PUBLIC_ENABLE_BOTID`             | Set to `"1"` or `"0"` to control `botid.enabled`, which protects the chat endpoint with [Vercel BotID](https://vercel.com/docs/botid). Defaults to whatever the agent flag resolves to. Set `"0"` when self-hosting off Vercel. |
-| `NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS` | Set to `"1"` or `"0"` to control `analytics.shopify.enabled`, which sends storefront page views to Shopify analytics. Enabled by default; uses the Storefront API credentials above.                                            |
+| `NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS` | Set to `"1"` or `"0"` to control `analytics.shopify.enabled`, which sends storefront page views to Shopify analytics. Disabled by default; set `"1"` to turn it on. Uses the Storefront API credentials above.                  |
 | `NEXT_PUBLIC_SHOPIFY_CONSENT_MODE`     | Set to `"default-banner"`, `"custom-banner"`, or `"no-banner"` to control `analytics.shopify.consentMode`. Defaults to `no-banner` in development and `default-banner` in production.                                           |
 
 ## Customer Authentication
