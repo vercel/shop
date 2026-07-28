@@ -2,7 +2,7 @@
   "dependencies": {
     "@changesets/changelog-github": "0.7.0",
     "@changesets/cli": "2.31.0",
-    "turbo": "2.10.4"
+    "turbo": "2.10.7"
   },
   "name": "@vercel/shop",
   "packageManager": "pnpm@11.16.0",
@@ -17,8 +17,5 @@
     "start": "turbo run start",
     "test": "turbo run test",
     "version": "changeset version"
-  },
-  "workspaces": [
-    "apps/*"
-  ]
+  }
 }
