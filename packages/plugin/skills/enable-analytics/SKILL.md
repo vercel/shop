@@ -5,7 +5,7 @@ description: Add Vercel Analytics, Vercel Speed Insights, and Google Tag Manager
 
 # Enable Analytics
 
-The current storefront includes support for Vercel Web Analytics and Vercel Speed Insights, with each integration disabled by default in `shop.config.ts`. This skill enables or adds those integrations and can also add Google Tag Manager using the recommended integration.
+The current storefront includes support for Vercel Web Analytics and Vercel Speed Insights, with each integration disabled by default in `lib/config.ts`. This skill enables or adds those integrations and can also add Google Tag Manager using the recommended integration.
 
 ## Before you start
 
@@ -28,11 +28,11 @@ Wait for the user to answer both questions before proceeding.
 
 ## Part A: Vercel Analytics and Speed Insights
 
-If the storefront has `analytics` configuration in `shop.config.ts`, enable only the selected integrations. If the user selected neither, keep both integration gates disabled and skip the remaining steps in this section.
+If the storefront has `analytics` configuration in `lib/config.ts`, enable only the selected integrations. If the user selected neither, keep both integration gates disabled and skip the remaining steps in this section.
 
 ```ts
 analytics: {
-  shopify: { consentMode: shopifyConsentMode, enabled: true },
+  shopify: { consentMode: "default-banner", enabled: false },
   speedInsights: { enabled: false },
   vercel: { enabled: false },
 },
@@ -82,7 +82,7 @@ Set the actual value in `.env.local` or in the Vercel dashboard under Environmen
 
 ### B3. Add GTM to `components/analytics.tsx`
 
-Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `shop.config.ts` with a GTM integration gate, apply that gate inside the same component.
+Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `lib/config.ts` with a GTM integration gate, apply that gate inside the same component.
 
 ---
 
@@ -97,7 +97,7 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export function AnalyticsComponents() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
@@ -139,9 +139,9 @@ The root component remains mounted as the extension point for current and future
 
 Only make changes here if the user asked about Shopify analytics.
 
-The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is enabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn it off for a deployment, set `NEXT_PUBLIC_ENABLE_SHOPIFY_ANALYTICS="0"`.
+The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn it on, set `analytics.shopify.enabled` to `true` in `lib/config.ts`.
 
-Consent mode is set by `NEXT_PUBLIC_SHOPIFY_CONSENT_MODE` and defaults to `no-banner` in development and `default-banner` in production. `default-banner` renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
+Consent mode is set by `analytics.shopify.consentMode` in `lib/config.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 
 This integration covers page views only. Commerce events such as product views and cart activity are not wired up.
 

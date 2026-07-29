@@ -1,4 +1,4 @@
-import { type BotIdCheckLevel, shopConfig } from "@/shop.config";
+import { type BotIdCheckLevel, shopConfig } from "@/lib/config";
 
 export interface BotIdProtectedRoute {
   advancedOptions: { checkLevel: BotIdCheckLevel };

@@ -2,8 +2,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { isShopifyAnalyticsEnabled } from "@/lib/analytics";
+import { shopConfig } from "@/lib/config";
 import { getShopAnalytics } from "@/lib/shopify/operations/shop";
-import { shopConfig } from "@/shop.config";
 
 import { ShopifyAnalyticsTracker } from "./shopify-analytics-client";
 

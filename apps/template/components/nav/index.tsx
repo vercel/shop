@@ -3,7 +3,8 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { isAuthEnabled } from "@/lib/auth";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
+import type { MenuItem } from "@/lib/shopify/types/menu";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
@@ -12,7 +13,9 @@ import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
 export async function Nav({ locale }: { locale: string }) {
-  const items = shopConfig.navigation.nav;
+  const items: MenuItem[] = [
+    { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
+  ];
 
   return (
     <nav

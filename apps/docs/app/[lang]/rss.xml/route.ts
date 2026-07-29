@@ -5,7 +5,7 @@ import { title } from "@/geistdocs";
 import { source } from "@/lib/geistdocs/source";
 
 const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-const baseUrl = `${protocol}://${process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`;
+const baseUrl = `${protocol}://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
 
 export const revalidate = false;
 

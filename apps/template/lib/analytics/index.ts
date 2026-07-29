@@ -7,7 +7,7 @@ import {
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { ShopAnalyticsData } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export { AnalyticsEvent };
 

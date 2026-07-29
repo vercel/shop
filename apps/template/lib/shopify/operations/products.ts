@@ -10,7 +10,7 @@ import type {
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 import { assertStorefrontOk } from "../errors";
 import {

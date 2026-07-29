@@ -10,7 +10,7 @@ The storefront includes an opt-in AI shopping assistant built with [AI SDK](http
 
 ## How it works
 
-**Feature-flagged, single-file runtime.** The assistant defaults to disabled through `agent.enabled` in `shop.config.ts`, which reads `NEXT_PUBLIC_ENABLE_AGENT` (`"1"` to enable, `"0"` to disable). When disabled, the button is hidden and `POST /api/chat` returns `404` before reading the request body or creating a cart. The model, loop limit, prompts, and tool registry all live together in `lib/agent/server.ts`, since they form one runtime implementation rather than a storefront configuration API: `AgentPanel` (`useChat`) posts to `/api/chat`, which runs a request-scoped `ToolLoopAgent` against the Shopify tools and streams the result back.
+**Feature-flagged, single-file runtime.** The assistant defaults to disabled through `agent.enabled` in `lib/config.ts`. When disabled, the button is hidden and `POST /api/chat` returns `404` before reading the request body or creating a cart. The model, loop limit, prompts, and tool registry all live together in `lib/agent/server.ts`, since they form one runtime implementation rather than a storefront configuration API: `AgentPanel` (`useChat`) posts to `/api/chat`, which runs a request-scoped `ToolLoopAgent` against the Shopify tools and streams the result back.
 
 **Bot protection is on by default.** The chat endpoint is anonymous and every message costs model tokens, so it is a natural target for automated abuse. Enabling the assistant also enables [Vercel BotID](https://vercel.com/docs/botid), an invisible CAPTCHA that turns away automated traffic before it can reach the model or touch a cart. See [Shop Configuration](/docs/reference/shop-config) to change the detection level or turn it off.
 

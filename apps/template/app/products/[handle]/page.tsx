@@ -20,7 +20,7 @@ import {
   getProductVariant,
 } from "@/lib/shopify/operations/products";
 import type { ProductVariant } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

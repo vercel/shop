@@ -16,7 +16,7 @@ import { withFallback } from "@/lib/shopify/errors";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProductWithVariants } from "@/lib/shopify/operations/products";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 function parseReferer(referer: string | null): { locale: Locale; segments: string[] } {
   if (!referer) return { locale: defaultLocale, segments: [] };
