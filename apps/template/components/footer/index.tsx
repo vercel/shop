@@ -3,10 +3,10 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/lib/config";
 
 import { SocialLinks } from "./social-links";
 import type { SocialLink } from "./social-links";

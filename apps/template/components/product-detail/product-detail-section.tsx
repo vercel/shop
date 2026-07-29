@@ -23,6 +23,7 @@ import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -34,7 +35,6 @@ import {
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/lib/config";
 
 export function ProductDetailSection({
   product,

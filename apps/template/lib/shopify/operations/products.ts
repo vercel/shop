@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
+import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type {
   Filter,
@@ -10,7 +11,6 @@ import type {
   ProductVariant,
   SelectedOption,
 } from "@/lib/types";
-import { shopConfig } from "@/lib/config";
 
 import { assertStorefrontOk } from "../errors";
 import {
