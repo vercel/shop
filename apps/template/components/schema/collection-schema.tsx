@@ -1,4 +1,4 @@
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 interface CollectionSchemaData {
   handle: string;

@@ -17,7 +17,7 @@ import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

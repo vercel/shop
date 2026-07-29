@@ -6,7 +6,7 @@ type: guide
 
 The template includes opt-in customer authentication using the framework-neutral session and OAuth helpers from `@shopify/hydrogen/customer-account`. Customers can sign in through Shopify, view their profile, order history, and address book, refresh expired access tokens, and sign out of both the storefront and Shopify identity provider.
 
-Authentication is disabled by default. The canonical default lives in `shop.config.ts`, and a deployment can override it with `NEXT_PUBLIC_ENABLE_AUTH`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
+Authentication is disabled by default. The canonical default lives in `lib/config.ts` as `auth.enabled`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
 
 ## Configuration
 
@@ -16,7 +16,7 @@ Set the feature flag, Customer Account API client ID, session secret, and public
 NEXT_PUBLIC_ENABLE_AUTH="1"
 CUSTOMER_ACCOUNT_SESSION_SECRET="[redacted]"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
-NEXT_PUBLIC_BASE_URL="https://your-domain.com"
+NEXT_PUBLIC_BASE_URL="your-domain.com"
 ```
 
 Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. It does not provide `CUSTOMER_ACCOUNT_SESSION_SECRET` — that one is app-owned, so generate it yourself:
@@ -27,7 +27,7 @@ openssl rand -base64 32
 
 The template derives its cookie encryption key from that secret. Keep it server-only and identical across every instance of a deployment, and treat rotation as deliberate: it invalidates every existing customer session. Enabling auth without both values fails the build.
 
-Customer Account OAuth requires a public HTTPS origin. Use a tunnel for local OAuth testing and set `NEXT_PUBLIC_BASE_URL` to that registered origin.
+Customer Account OAuth requires a public HTTPS origin. Use a tunnel for local OAuth testing and set `NEXT_PUBLIC_BASE_URL` to that tunnel's bare domain (no protocol).
 
 To enable it in Shopify Admin:
 

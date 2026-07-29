@@ -6,25 +6,14 @@ type: reference
 
 ## Required
 
-| Variable                          | Description                                                                                                                                                                 |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SHOPIFY_STORE_DOMAIN`            | Your Shopify store domain, e.g. `your-store.myshopify.com`. Found in **Settings → Domains** in your Shopify admin.                                                          |
-| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token. Found in **Settings → Apps and sales channels → Headless**.                                                                             |
-| `NEXT_PUBLIC_SITE_NAME`           | The storefront's display name. Used in the nav logo, footer copyright, page titles, SEO metadata, and the AI agent's system prompt. Falls back to `"Vercel Shop"` if unset. |
-
-## Feature flags
-
-The canonical feature defaults live in [`shop.config.ts`](/docs/reference/shop-config) and are disabled initially. The `NEXT_PUBLIC_ENABLE_*` variables override those defaults per deployment; set them to `"1"` or `"0"`. The `NEXT_PUBLIC_` prefix is required so conditional rendering matches between server and client under cache components.
-
-| Variable                   | Description                                                                                                                                                                                                                     |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_ENABLE_AUTH`  | Set to `"1"` or `"0"` to control `auth.enabled` (default `false`). Enabled auth requires the two Customer Authentication variables below — `next.config.ts` throws at build time if either is missing.                          |
-| `NEXT_PUBLIC_ENABLE_AGENT` | Set to `"1"` or `"0"` to control `agent.enabled` (default `false`), showing or hiding the assistant and `POST /api/chat`. The configured model routes through the Vercel AI Gateway.                                            |
-| `NEXT_PUBLIC_ENABLE_BOTID` | Set to `"1"` or `"0"` to control `botid.enabled`, which protects the chat endpoint with [Vercel BotID](https://vercel.com/docs/botid). Defaults to whatever the agent flag resolves to. Set `"0"` when self-hosting off Vercel. |
+| Variable                          | Description                                                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `SHOPIFY_STORE_DOMAIN`            | Your Shopify store domain, e.g. `your-store.myshopify.com`. Found in **Settings → Domains** in your Shopify admin. |
+| `SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token. Found in **Settings → Apps and sales channels → Headless**.                    |
 
 ## Customer Authentication
 
-Required when `NEXT_PUBLIC_ENABLE_AUTH="1"`. These variables have different owners: Shopify provides the Customer Account API client ID, while you generate the session secret for this application.
+Required when `auth.enabled` is set to `true` in [`lib/config.ts`](/docs/reference/shop-config). These variables have different owners: Shopify provides the Customer Account API client ID, while you generate the session secret for this application.
 
 The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies. `CUSTOMER_ACCOUNT_SESSION_SECRET` is the private application key used to derive the AES-256-GCM encryption key for those cookies; it is not a Shopify credential. Generate it with `openssl rand -base64 32`, keep one stable value across all instances of a deployment, and store it only in server-side environment variables. Rotating it invalidates all existing customer sessions. The variable is required by the template's encrypted-cookie implementation, but an application that replaces it with protected server-side session storage can use that storage system's key management instead.
 
@@ -35,13 +24,11 @@ The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies.
 
 ## Optional
 
-| Variable                        | Description                                                                                                                                          |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CMS_DRAFT_MODE_SECRET`         | Secret token guarding the `/api/draft` route for CMS preview links. Generate with `openssl rand -base64 32`.                                         |
-| `NEXT_PUBLIC_BOTID_CHECK_LEVEL` | Set to `"deepAnalysis"` to use BotID's machine-learning detection, which is billed per check on Pro plans. Defaults to `"basic"`, free on all plans. |
-| `DEBUG_SHOPIFY`                 | Set to `true` to log every Shopify Storefront API request and response in the server console.                                                        |
-| `NEXT_PUBLIC_BASE_URL`          | Absolute base URL used for sitemap entries, OG tags, and auth callbacks. Defaults to `https://${VERCEL_PROJECT_PRODUCTION_URL}` on Vercel.           |
-| `SHOPIFY_API_VERSION`           | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.                        |
-| `SHOPIFY_WEBHOOK_SECRET`        | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`.                                                |
+| Variable                 | Description                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DEBUG_SHOPIFY`          | Set to `true` to log every Shopify Storefront API request and response in the server console.                                              |
+| `NEXT_PUBLIC_BASE_URL`   | Bare domain (no protocol) used to build the canonical base URL for sitemap entries, OG tags, and auth callbacks. Defaults to `VERCEL_PROJECT_PRODUCTION_URL` on Vercel. |
+| `SHOPIFY_API_VERSION`    | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.              |
+| `SHOPIFY_WEBHOOK_SECRET` | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`.                                      |
 
-System variables auto-injected on Vercel that the build reads (`VERCEL_PROJECT_PRODUCTION_URL`, `NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL`, `V0_CALLBACK_URL`) are listed in `turbo.json` `globalEnv` so Turbo's strict-mode build sees them. You don't set these yourself.
+System variables auto-injected on Vercel that the build reads (`VERCEL_PROJECT_PRODUCTION_URL`, `V0_CALLBACK_URL`) are listed in `turbo.json` `globalEnv` so Turbo's strict-mode build sees them. You don't set these yourself.

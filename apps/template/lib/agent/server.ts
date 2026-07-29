@@ -1,6 +1,6 @@
 import { isStepCount, ToolLoopAgent } from "ai";
 
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 import { catalog } from ".";
 import type { Locale } from "../i18n";
