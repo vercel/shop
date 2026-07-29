@@ -1,3 +1,3 @@
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export const isAuthEnabled = shopConfig.auth.enabled;

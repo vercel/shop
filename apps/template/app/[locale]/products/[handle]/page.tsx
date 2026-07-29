@@ -7,6 +7,7 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import {
   defaultSelectedOptions,
@@ -21,7 +22,6 @@ import {
   getProductVariant,
 } from "@/lib/shopify/operations/products";
 import type { ProductVariant } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

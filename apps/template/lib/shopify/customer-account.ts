@@ -7,12 +7,12 @@ import {
   gql,
 } from "@shopify/hydrogen/customer-account";
 
+import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import { shopConfig } from "@/shop.config";
 
 import { resolveShopId } from "./discovery";
 
-const DEBUG = process.env.DEBUG_SHOPIFY === "true";
+const DEBUG = process.env.DEBUG_SHOPIFY === "1";
 
 // Hydrogen requires an HTTPS Origin matching the OAuth-registered auth base URL.
 export async function customerAccountFetch<T>({

@@ -16,10 +16,10 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { shopConfig } from "@/lib/config";
 import { enabledLocales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
-import { shopConfig } from "@/shop.config";
 
 const geistSans = Geist({
   subsets: ["latin"],

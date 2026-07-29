@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Textarea } from "@/components/ui/textarea";
+import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -37,7 +38,6 @@ import {
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/shop.config";
 
 export function ProductDetailSection({
   product,

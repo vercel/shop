@@ -1,4 +1,17 @@
-import type { SocialLink } from "@/shop.config";
+export type SocialPlatform =
+  | "facebook"
+  | "github"
+  | "instagram"
+  | "linkedin"
+  | "pinterest"
+  | "tiktok"
+  | "x"
+  | "youtube";
+
+export interface SocialLink {
+  platform: SocialPlatform;
+  url: string;
+}
 
 const PLATFORM_LABELS: Record<string, string> = {
   facebook: "Facebook",

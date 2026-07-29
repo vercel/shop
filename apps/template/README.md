@@ -37,7 +37,6 @@ cp .env.example .env.local
 ```
 SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
 SHOPIFY_STOREFRONT_ACCESS_TOKEN=your-token
-NEXT_PUBLIC_SITE_NAME="Your Store Name"
 ```
 
 3. Start the development server with the same package manager you used to scaffold the project:
@@ -55,7 +54,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 - **Next.js 16 App Router** with React 19 and React Compiler
 - **Shopify Storefront API** via GraphQL with type-safe operations
-- **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via env vars
+- **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via `lib/config.ts`
 - **Tailwind CSS 4** and shadcn/ui components
 - **Internationalization-ready** with next-intl
 - **AI-ready** with Vercel AI SDK integration

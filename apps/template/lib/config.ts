@@ -1,9 +1,5 @@
-import {
-  enterpriseFooterItems,
-  enterpriseNavItems,
-  socialLinks,
-} from "@/lib/enterprise-navigation";
-import type { MenuItem } from "@/lib/shopify/types/menu";
+import { enterpriseFooterItems, enterpriseNavItems, socialLinks } from "./enterprise-navigation";
+import type { MenuItem } from "./shopify/types/menu";
 
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
@@ -73,19 +69,16 @@ function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
 }
 
-function envFlag(value: string | undefined, fallback: boolean): boolean {
-  return value === undefined ? fallback : value === "1";
-}
+// Vercel injects bare domains (no protocol); NEXT_PUBLIC_BASE_URL follows the same convention.
+const bareHost =
+  trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || "") ||
+  process.env.VERCEL_PROJECT_PRODUCTION_URL;
 
-const agentEnabled = envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false);
-
-const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : "http://localhost:3000";
+const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {
-    enabled: agentEnabled,
+    enabled: true,
   },
   analytics: {
     speedInsights: {
@@ -96,12 +89,11 @@ export const shopConfig = {
     },
   },
   auth: {
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+    enabled: true,
   },
   botid: {
-    checkLevel:
-      process.env.NEXT_PUBLIC_BOTID_CHECK_LEVEL === "deepAnalysis" ? "deepAnalysis" : "basic",
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_BOTID, agentEnabled),
+    checkLevel: "basic",
+    enabled: true,
   },
   navigation: {
     footer: enterpriseFooterItems,
@@ -127,6 +119,6 @@ export const shopConfig = {
   site: {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Ship Shop",
     socialLinks,
-    url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
+    url: defaultUrl,
   },
 } satisfies ShopConfig;

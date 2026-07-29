@@ -3,7 +3,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { isAuthEnabled } from "@/lib/auth";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";

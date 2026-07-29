@@ -16,3 +16,7 @@ The docs app is in apps/docs using the package-based Geistdocs architecture ([`@
 
 Skills to be used by the template and docs are written to `packages/plugin/skills`.
 When a skill in that directory gets updated, you MUST ask if that skill should be updated in the docs as well via the docs skill sync script.
+
+## Environment files
+
+`.env.example` files are examples, not secret manifests — never use redaction language like `[redacted]` or `<secret>` in them. Use realistic placeholders: Shopify values get their real format or prefix (`your-store.myshopify.com`, `shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`, a sample Storefront token), and everything else gets a `your-…-here`-style string (`your-session-secret-here`).

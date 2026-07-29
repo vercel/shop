@@ -388,9 +388,13 @@ export const PRODUCT_FRAGMENT = `#graphql
 ` as const;
 
 export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
+  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
   ${PRODUCT_FRAGMENT}
   fragment ProductWithVariantsFields on Product {
     ...ProductFields
+    selectedOrFirstAvailableVariant {
+      ...BundleRelationshipFields
+    }
     variants(first: 250) {
       edges {
         node {

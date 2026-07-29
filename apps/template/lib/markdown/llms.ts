@@ -1,5 +1,5 @@
+import { shopConfig } from "@/lib/config";
 import type { Collection } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
 
 import { escapeMarkdown } from "./utils";
 

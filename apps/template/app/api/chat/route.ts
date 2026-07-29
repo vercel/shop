@@ -11,12 +11,12 @@ import { checkBotId } from "botid/server";
 import { createAgent, type PageContext, type User, withAgentContext } from "@/lib/agent/server";
 import { BOTID_DENIED_CODE, botIdCheckOptions, isBotIdEnabled } from "@/lib/botid";
 import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
+import { shopConfig } from "@/lib/config";
 import { defaultLocale, type Locale } from "@/lib/i18n";
 import { withFallback } from "@/lib/shopify/errors";
 import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { getProductWithVariants } from "@/lib/shopify/operations/products";
-import { shopConfig } from "@/shop.config";
 
 function parseReferer(referer: string | null): { locale: Locale; segments: string[] } {
   if (!referer) return { locale: defaultLocale, segments: [] };

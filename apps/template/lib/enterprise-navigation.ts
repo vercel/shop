@@ -1,5 +1,4 @@
-import type { SocialLink } from "@/shop.config";
-
+import type { SocialLink } from "./config";
 import type { MenuItem } from "./shopify/types/menu";
 
 export const socialLinks: SocialLink[] = [

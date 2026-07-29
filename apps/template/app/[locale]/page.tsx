@@ -9,9 +9,9 @@ import { MarketingSplit } from "@/components/sections/marketing-split";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { shopConfig } from "@/shop.config";
 
 const CAMPAIGN_COLLECTIONS: readonly string[] = [
   "hoodies",

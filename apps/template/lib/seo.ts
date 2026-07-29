@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 type SearchParamsInput =
   | URLSearchParams
