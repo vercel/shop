@@ -44,10 +44,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             </DialogPrimitive.Close>
 
             {activeItem?.type === "image" && (
-              <div
-                className="pointer-events-none relative h-full max-w-full bg-background"
-                style={{ aspectRatio: `${activeItem.image.width} / ${activeItem.image.height}` }}
-              >
+              <div className="pointer-events-none relative h-full w-full bg-background">
                 <Image
                   src={activeItem.image.url}
                   alt={activeItem.image.altText || `${label} enlarged`}
