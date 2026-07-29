@@ -7,7 +7,7 @@ import {
   PHASE_PRODUCTION_SERVER,
 } from "next/constants";
 
-import { shopConfig } from "./shop.config";
+import { shopConfig } from "./lib/config";
 
 function assertRequiredEnv() {
   const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
@@ -29,7 +29,7 @@ function assertRequiredEnv() {
     if (missing.length > 0) {
       throw new Error(
         `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth in shop.config.ts or NEXT_PUBLIC_ENABLE_AUTH.`,
+          `Set the missing variables or disable auth via auth.enabled in lib/config.ts.`,
       );
     }
   }

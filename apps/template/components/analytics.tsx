@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export function AnalyticsComponents() {
   return (

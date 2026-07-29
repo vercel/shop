@@ -18,7 +18,7 @@ import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");

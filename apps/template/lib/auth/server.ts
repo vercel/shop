@@ -15,7 +15,7 @@ import { cache } from "react";
 import { isAuthEnabled } from "@/lib/auth";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { resolveShopId } from "@/lib/shopify/discovery";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 const COOKIE_CHUNK_SIZE = 3_800;
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;

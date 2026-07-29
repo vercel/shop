@@ -1,5 +1,5 @@
 import type { Image, Money } from "@/lib/types";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 interface ProductSchemaData {
   id: string;

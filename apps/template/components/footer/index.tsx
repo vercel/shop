@@ -6,13 +6,14 @@ import { Sections } from "@/components/ui/sections";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 import { SocialLinks } from "./social-links";
+import type { SocialLink } from "./social-links";
 
 export async function Footer({ locale }: { locale: string }) {
-  const { socialLinks } = shopConfig.site;
-  const items = shopConfig.navigation.footer;
+  const socialLinks: SocialLink[] = [];
+  const items: MenuItem[] = [];
   const [policies, t] = await Promise.all([
     getShopPolicies({ locale }).catch(() => []),
     getTranslations("footer"),

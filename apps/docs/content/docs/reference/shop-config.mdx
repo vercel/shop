@@ -1,39 +1,30 @@
 ---
 title: Shop Configuration
-description: Configure storefront identity, navigation, analytics, and cross-cutting feature availability.
+description: Configure storefront identity, analytics, and cross-cutting feature availability.
 type: reference
 ---
 
-`shop.config.ts` contains secret-free values that describe the storefront across multiple parts of the application: site identity, merchant-authored chrome, analytics integrations, and installation-level feature availability.
+`lib/config.ts` contains secret-free values that describe the storefront across multiple parts of the application: site identity, analytics integrations, and installation-level feature availability.
 
 Environment variables still own credentials and deployment-specific overrides. Component composition, Shopify query behavior, result counts, and agent runtime policy stay with the code that implements them rather than becoming a configuration API.
 
 ## Default configuration
 
 ```ts
-const agentEnabled = envFlag(process.env.NEXT_PUBLIC_ENABLE_AGENT, false);
-
 export const shopConfig = {
   agent: {
-    enabled: agentEnabled,
+    enabled: false,
   },
   analytics: {
     speedInsights: { enabled: false },
     vercel: { enabled: false },
   },
   auth: {
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_AUTH, false),
+    enabled: false,
   },
   botid: {
-    checkLevel:
-      process.env.NEXT_PUBLIC_BOTID_CHECK_LEVEL === "deepAnalysis" ? "deepAnalysis" : "basic",
-    enabled: envFlag(process.env.NEXT_PUBLIC_ENABLE_BOTID, agentEnabled),
-  },
-  navigation: {
-    footer: [],
-    nav: [
-      { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
-    ],
+    checkLevel: "basic",
+    enabled: false,
   },
   pdp: {
     bundles: { enabled: true },
@@ -43,20 +34,17 @@ export const shopConfig = {
     relatedProducts: { enabled: true },
   },
   site: {
-    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Vercel Shop",
-    socialLinks: [],
-    url: trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || defaultUrl),
+    name: "Vercel Shop",
+    url: defaultUrl,
   },
 } satisfies ShopConfig;
 ```
 
-Consumers import `shopConfig` directly from `@/shop.config`. The file resolves its public environment-backed values inline; there is no separate configuration resolution module.
+Consumers import `shopConfig` directly from `@/lib/config`. Feature flags are literal booleans edited in this file; `site.url` is the only environment-backed value.
 
 ## Agent
 
-`agent.enabled` controls whether the shopping assistant is available. It reads `NEXT_PUBLIC_ENABLE_AGENT` and defaults to `false` when unset. When disabled, the assistant button is hidden and the chat endpoint returns `404`.
-
-Set `NEXT_PUBLIC_ENABLE_AGENT="1"` or `"0"` to override the default for a deployment. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
+`agent.enabled` controls whether the shopping assistant is available. It defaults to `false`. When disabled, the assistant button is hidden and the chat endpoint returns `404`. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
 
 ## Analytics
 
@@ -67,24 +55,21 @@ Each integration is disabled by default. Set an individual integration to `true`
 
 ## Authentication
 
-`auth.enabled` controls whether customer authentication is active. It reads `NEXT_PUBLIC_ENABLE_AUTH` and defaults to `false` when unset.
+`auth.enabled` controls whether customer authentication is active. It defaults to `false`.
 
-Set `NEXT_PUBLIC_ENABLE_AUTH="1"` or `"0"` to override the default. Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
+Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
 
 ## BotID
 
-`botid.enabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to whatever `agent.enabled` resolves to, so enabling the assistant protects it automatically. Set `NEXT_PUBLIC_ENABLE_BOTID="1"` or `"0"` to decouple the two.
+`botid.enabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to `false`; enable it alongside `agent.enabled` to protect the assistant.
 
-`botid.checkLevel` selects the detection level and reads `NEXT_PUBLIC_BOTID_CHECK_LEVEL`. It defaults to `basic`, which is free on all plans. Setting it to `deepAnalysis` enables Vercel's machine-learning detection, which is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
+`botid.checkLevel` selects the detection level. It defaults to `basic`, which is free on all plans. Setting it to `deepAnalysis` enables Vercel's machine-learning detection, which is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
 
-Verification only runs on Vercel; elsewhere every request is treated as human. Turn the flag off when self-hosting so the storefront doesn't ship a challenge it can't verify.
+Verification only runs on Vercel; elsewhere every request is treated as human. Leave the flag off when self-hosting so the storefront doesn't ship a challenge it can't verify.
 
-## Navigation
+## Navigation and footer
 
-- `nav` contains the fallback primary navigation consumed by the desktop quick links and mobile sheet. It defaults to a Shop link.
-- `footer` contains fallback footer menu columns. It defaults to an empty array, so no columns render.
-
-Both are `MenuItem[]` in Shopify menu shape and support up to three levels of nesting. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill replaces these static defaults with menus managed in Shopify.
+The primary navigation and footer menus are not part of `shopConfig`. Each is an inline `MenuItem[]` literal in its own component: the nav default (a single Shop link) in `components/nav/index.tsx`, and the footer menu columns plus social links in `components/footer/index.tsx`. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill swaps these static defaults for menus managed in Shopify.
 
 ## PDP capabilities
 
@@ -100,12 +85,11 @@ Sections with no applicable Shopify data render nothing. Set an individual flag 
 
 ## Site
 
-`site` carries storefront identity and merchant-authored chrome shared by metadata, structured data, navigation, and the footer.
+`site` carries storefront identity shared by metadata, structured data, sitemaps, and the footer.
 
-- `name` is the storefront display name. `NEXT_PUBLIC_SITE_NAME` overrides the `"Vercel Shop"` default per deployment.
-- `socialLinks` lists footer social icons. Each entry has a `platform` (one of `facebook`, `github`, `instagram`, `linkedin`, `pinterest`, `tiktok`, `x`, `youtube`) and a `url`. The default empty array hides the social links section.
-- `url` is the canonical base URL, resolved from `NEXT_PUBLIC_BASE_URL` or the Vercel production URL, used for sitemaps, schema, and absolute links.
+- `name` is the storefront display name, used in the nav logo, footer copyright, page titles, SEO metadata, and the agent's system prompt. Defaults to `"Vercel Shop"`.
+- `url` is the canonical base URL, resolved from `NEXT_PUBLIC_BASE_URL` (a bare domain, no protocol) or the Vercel production URL, used for sitemaps, schema, and absolute links.
 
 ## What does not belong here
 
-Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `shop.config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.
+Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `lib/config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.

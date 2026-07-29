@@ -23,7 +23,7 @@ This page covers the Shopify admin configuration the PDP expects. For how the pa
 - **Basic fields** — title, `descriptionHtml`, variants, featured image, and up to 10 media items (images or videos). Products must belong to at least one collection to appear on collection listing pages.
 - **Color swatches** — configure in Shopify admin: edit a product → open an option like "Color" → assign a swatch color or image to each value.
 - **SEO fields** — `seo.title` and `seo.description`, editable per product.
-- **Related products** — Shopify's automatic recommendation API. On by default; disable with `pdp.relatedProducts.enabled: false` in `shop.config.ts`.
+- **Related products** — Shopify's automatic recommendation API. On by default; disable with `pdp.relatedProducts.enabled: false` in `lib/config.ts`.
 - **Complementary products** — hand-curated in the Search & Discovery app. On by default; disable with `pdp.complementaryProducts.enabled: false`.
 - **Bundles** — fixed bundles (e.g. from the free **Shopify Bundles** app) render contents and add to cart normally via `components` (a bundle's items and quantities) and `groupedBy` (up to 10 bundles containing the current product). Disable with `pdp.bundles.enabled: false`.
 

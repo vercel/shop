@@ -34,7 +34,7 @@ import {
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/shop.config";
+import { shopConfig } from "@/lib/config";
 
 export function ProductDetailSection({
   product,
