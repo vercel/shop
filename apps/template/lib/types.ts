@@ -320,6 +320,13 @@ export interface SearchSuggestion {
   text: string;
 }
 
+export interface ShopAnalyticsData {
+  acceptedLanguage: string;
+  currency: string;
+  shopId: string;
+  storeDomain: string;
+}
+
 export interface ShopPolicy {
   body: string;
   handle: string;

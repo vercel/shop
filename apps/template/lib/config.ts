@@ -1,10 +1,16 @@
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
+export type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
+
 export interface ShopConfig {
   agent: {
     isEnabled: boolean;
   };
   analytics: {
+    shopify: {
+      consentMode: ShopifyConsentMode;
+      isEnabled: boolean;
+    };
     speedInsights: {
       isEnabled: boolean;
     };
@@ -58,6 +64,10 @@ export const shopConfig = {
     isEnabled: false,
   },
   analytics: {
+    shopify: {
+      consentMode: "default-banner",
+      isEnabled: false,
+    },
     speedInsights: {
       isEnabled: false,
     },

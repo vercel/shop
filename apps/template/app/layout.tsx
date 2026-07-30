@@ -71,7 +71,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </CartProvider>
           <Toaster closeButton />
         </NextIntlClientProvider>
-        <AnalyticsComponents />
+        <Suspense>
+          <AnalyticsComponents locale={locale} />
+        </Suspense>
       </body>
     </html>
   );
