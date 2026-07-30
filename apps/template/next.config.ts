@@ -10,7 +10,7 @@ import {
 import { shopConfig } from "./lib/config";
 
 function assertRequiredEnv() {
-  const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
+  const missingShopify = ["SHOPIFY_STORE_DOMAIN", "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
     (key) => !process.env[key],
   );
 
