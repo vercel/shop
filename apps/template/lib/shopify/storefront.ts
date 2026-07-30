@@ -9,7 +9,7 @@ import {
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN as string;
+const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const DEBUG = process.env.DEBUG_SHOPIFY === "1";

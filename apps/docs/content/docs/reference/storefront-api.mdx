@@ -32,7 +32,7 @@ const { data } = response;
 
 ## Request details
 
-The client `POST`s to `https://{SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three behaviors the SDK doesn't provide on its own: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and `DEBUG_SHOPIFY` timing logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
+The client `POST`s to `https://{NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three behaviors the SDK doesn't provide on its own: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and `DEBUG_SHOPIFY` timing logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
 
 ## Writing a query
 

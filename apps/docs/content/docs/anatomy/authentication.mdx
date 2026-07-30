@@ -10,10 +10,21 @@ Authentication is disabled by default. The canonical default lives in `lib/confi
 
 ## Configuration
 
-Set the feature flag, Customer Account API client ID, session secret, and public storefront URL:
+Enable the feature in `lib/config.ts`:
+
+```ts
+export const shopConfig = {
+  // ...
+  auth: {
+    isEnabled: true,
+  },
+  // ...
+};
+```
+
+Then set the Customer Account API client ID, session secret, and public base URL:
 
 ```bash
-NEXT_PUBLIC_ENABLE_AUTH="1"
 CUSTOMER_ACCOUNT_SESSION_SECRET="[redacted]"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
 NEXT_PUBLIC_BASE_URL="your-domain.com"
@@ -36,7 +47,7 @@ To enable it in Shopify Admin:
 3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
 4. Use a public Customer Account API client; Hydrogen performs authorization code + PKCE without a client secret
 5. Set the callback URI to `{YOUR_DOMAIN}/account/authorize` and the logout URI to `{YOUR_DOMAIN}/`
-6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `SHOPIFY_STORE_DOMAIN`
+6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`
 
 Shopify does not support wildcard callback or logout URIs — register each production, preview, or tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
@@ -68,7 +79,7 @@ Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` fo
 > - Keep Server Components on the read-only session path. Token refresh belongs in `/account/refresh`.
 > - Keep login as GET and logout as same-origin POST, and register the callback and logout URIs in Shopify exactly.
 > - Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately — rotation invalidates every existing session.
-> - Keep `NEXT_PUBLIC_ENABLE_AUTH` public so server and client feature gates agree under cache components.
+> - `auth.isEnabled` lives in `lib/config.ts` (not an env var), so the server and client feature gates read one shared value and stay in agreement under cache components.
 
 ## Out of the box
 
