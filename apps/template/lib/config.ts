@@ -2,38 +2,38 @@ export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
 export interface ShopConfig {
   agent: {
-    enabled: boolean;
+    isEnabled: boolean;
   };
   analytics: {
     speedInsights: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     vercel: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
   };
   auth: {
-    enabled: boolean;
+    isEnabled: boolean;
   };
   botid: {
     checkLevel: BotIdCheckLevel;
-    enabled: boolean;
+    isEnabled: boolean;
   };
   pdp: {
     bundles: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     buyWithShop: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     complementaryProducts: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     quantityPicker: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     relatedProducts: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
   };
   site: {
@@ -55,38 +55,38 @@ const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {
-    enabled: false,
+    isEnabled: false,
   },
   analytics: {
     speedInsights: {
-      enabled: false,
+      isEnabled: false,
     },
     vercel: {
-      enabled: false,
+      isEnabled: false,
     },
   },
   auth: {
-    enabled: false,
+    isEnabled: false,
   },
   botid: {
     checkLevel: "basic",
-    enabled: false,
+    isEnabled: false,
   },
   pdp: {
     bundles: {
-      enabled: true,
+      isEnabled: true,
     },
     buyWithShop: {
-      enabled: true,
+      isEnabled: true,
     },
     complementaryProducts: {
-      enabled: true,
+      isEnabled: true,
     },
     quantityPicker: {
-      enabled: true,
+      isEnabled: true,
     },
     relatedProducts: {
-      enabled: true,
+      isEnabled: true,
     },
   },
   site: {

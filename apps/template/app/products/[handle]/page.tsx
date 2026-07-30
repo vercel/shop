@@ -6,6 +6,7 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import {
   defaultSelectedOptions,
@@ -20,7 +21,6 @@ import {
   getProductVariant,
 } from "@/lib/shopify/operations/products";
 import type { ProductVariant } from "@/lib/types";
-import { shopConfig } from "@/lib/config";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -128,7 +128,7 @@ export default async function ProductPage({
             variantPromise={variantPromise}
             locale={locale}
           />
-          {shopConfig.pdp.relatedProducts.enabled ? (
+          {shopConfig.pdp.relatedProducts.isEnabled ? (
             <RelatedProductsSection handle={handle} limit={4} locale={locale} />
           ) : null}
         </Sections>

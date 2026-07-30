@@ -7,8 +7,8 @@ import {
   gql,
 } from "@shopify/hydrogen/customer-account";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { shopConfig } from "@/lib/config";
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 import { resolveShopId } from "./discovery";
 

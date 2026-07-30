@@ -6,8 +6,8 @@ import { shopConfig } from "@/lib/config";
 export function AnalyticsComponents() {
   return (
     <>
-      {shopConfig.analytics.vercel.enabled ? <Analytics /> : null}
-      {shopConfig.analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+      {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
+      {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
     </>
   );
 }
