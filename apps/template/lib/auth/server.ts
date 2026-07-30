@@ -12,7 +12,6 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
-import { isAuthEnabled } from "@/lib/auth";
 import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { resolveShopId } from "@/lib/shopify/discovery";
@@ -170,7 +169,7 @@ function createSessionManager(
 let customerSessionPromise: Promise<HydrogenCustomerSession> | undefined;
 
 export function getHydrogenCustomerSession(): Promise<HydrogenCustomerSession> {
-  if (!isAuthEnabled) notFound();
+  if (!shopConfig.auth.isEnabled) notFound();
 
   if (!customerSessionPromise) {
     customerSessionPromise = resolveShopId().then((shopId) =>
@@ -237,7 +236,7 @@ const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext>
 });
 
 export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
-  if (!isAuthEnabled) return false;
+  if (!shopConfig.auth.isEnabled) return false;
 
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
@@ -248,7 +247,7 @@ export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
 });
 
 export const getCustomerAccessToken = cache(async (): Promise<string | undefined> => {
-  if (!isAuthEnabled) return undefined;
+  if (!shopConfig.auth.isEnabled) return undefined;
 
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
@@ -259,12 +258,12 @@ export const getCustomerAccessToken = cache(async (): Promise<string | undefined
 });
 
 export async function requireCustomerSession(): Promise<void> {
-  if (!isAuthEnabled) notFound();
+  if (!shopConfig.auth.isEnabled) notFound();
   if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
 }
 
 export async function requireCustomerAccessToken(returnTo = "/account"): Promise<string> {
-  if (!isAuthEnabled) notFound();
+  if (!shopConfig.auth.isEnabled) notFound();
 
   const accessToken = await getCustomerAccessToken();
   if (accessToken) return accessToken;

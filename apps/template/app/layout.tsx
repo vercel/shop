@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               />
             </Suspense>
             <Suspense>
-              <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
+              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
           <Toaster closeButton />

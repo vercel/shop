@@ -199,11 +199,10 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.enabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. The flag is resolved in `lib/config.ts` and re-exported as `isAuthEnabled` from `lib/auth/index.ts`, keeping server and client feature gates aligned under cache components.
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
 
 Key files:
 
-- `lib/auth/index.ts` — universal `isAuthEnabled` flag
 - `lib/auth/server.ts` — encrypted HttpOnly cookie adapter plus read-only login/token helpers
 - `proxy.ts` — Hydrogen login, authorize, refresh, and logout handlers on the customer-account OAuth paths
 - `app/account/(authenticated)/` — auth-gated account pages

@@ -10,8 +10,8 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isAuthEnabled } from "@/lib/auth";
 import { getCustomerAccessToken, requireCustomerSession } from "@/lib/auth/server";
+import { shopConfig } from "@/lib/config";
 import { getCustomerProfile } from "@/lib/shopify/operations/customer";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -60,13 +60,13 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 }
 
 async function AccountGate({ children }: { children: React.ReactNode }) {
-  if (!isAuthEnabled) notFound();
+  if (!shopConfig.auth.isEnabled) notFound();
   await requireCustomerSession();
   return <>{children}</>;
 }
 
 async function AccountLabel() {
-  if (!isAuthEnabled) notFound();
+  if (!shopConfig.auth.isEnabled) notFound();
   await requireCustomerSession();
 
   const accessToken = await getCustomerAccessToken();

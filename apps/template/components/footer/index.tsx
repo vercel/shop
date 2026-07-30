@@ -22,7 +22,7 @@ export async function Footer({ locale }: { locale: string }) {
   return (
     <footer>
       {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
-      <Container className={cn("pt-20 pb-10", shopConfig.agent.enabled && "pb-22")}>
+      <Container className={cn("pt-20 pb-10", shopConfig.agent.isEnabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">

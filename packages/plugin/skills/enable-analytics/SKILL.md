@@ -32,9 +32,9 @@ If the storefront has `analytics` configuration in `lib/config.ts`, enable only 
 
 ```ts
 analytics: {
-  shopify: { consentMode: "default-banner", enabled: false },
-  speedInsights: { enabled: false },
-  vercel: { enabled: false },
+  shopify: { consentMode: "default-banner", isEnabled: false },
+  speedInsights: { isEnabled: false },
+  vercel: { isEnabled: false },
 },
 ```
 
@@ -104,8 +104,8 @@ export function AnalyticsComponents() {
 
   return (
     <>
-      {shopConfig.analytics.vercel.enabled ? <Analytics /> : null}
-      {shopConfig.analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+      {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
+      {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
       {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
     </>
   );
@@ -139,7 +139,7 @@ The root component remains mounted as the extension point for current and future
 
 Only make changes here if the user asked about Shopify analytics.
 
-The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn it on, set `analytics.shopify.enabled` to `true` in `lib/config.ts`.
+The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn it on, set `analytics.shopify.isEnabled` to `true` in `lib/config.ts`.
 
 Consent mode is set by `analytics.shopify.consentMode` in `lib/config.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 

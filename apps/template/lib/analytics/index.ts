@@ -26,7 +26,7 @@ export function configureAnalytics(shop: ShopAnalyticsData): void {
 export function getAnalytics(): StorefrontAnalytics | null {
   // Module-scope construction would run during SSR and crash on browser globals.
   if (typeof window === "undefined") return null;
-  if (!shopConfig.analytics.shopify.enabled || !analyticsShop || !analyticsShopData) return null;
+  if (!shopConfig.analytics.shopify.isEnabled || !analyticsShop || !analyticsShopData) return null;
 
   // The CDN script reads a Liquid-injected window.Shopify config, so seed it
   // before the bus loads that script. The consent banner supplies customerPrivacy.
