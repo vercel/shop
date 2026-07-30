@@ -46,8 +46,11 @@ export function getAnalytics(): StorefrontAnalytics | null {
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
     consent: {
-      consentDomain: typeof window === "undefined" ? undefined : window.location.host,
       mode: shopConfig.analytics.shopify.consentMode,
+      // Public token is safe in the browser; with it set, the consent handshake
+      // calls the SFAPI directly and the same-origin proxy is unnecessary.
+      publicStorefrontAccessToken:
+        process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     },
     shop: analyticsShop,
   });
