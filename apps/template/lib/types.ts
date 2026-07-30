@@ -324,6 +324,7 @@ export interface ShopAnalyticsData {
   acceptedLanguage: string;
   currency: string;
   shopId: string;
+  storeDomain: string;
 }
 
 export interface ShopPolicy {

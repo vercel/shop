@@ -48,20 +48,16 @@ export function getAnalytics(): StorefrontAnalytics | null {
     // Gate delivery on the consent API: customerPrivacy only gains
     // analyticsProcessingAllowed after the customer-privacy script loads inside
     // initConsent. Blocked events buffer and replay on the consent ready hooks.
-    canTrack: () =>
-      Boolean(
-        shopifyWindow.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.(),
-      ),
+    canTrack: () => Boolean(shopifyWindow.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.()),
     consent: {
       // consentDomain must be the shop domain so Hydrogen fetches
       // https://{shop}.myshopify.com/api/unstable/graphql.json instead of the
       // same-origin proxy (which doesn't exist here).
-      consentDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
+      consentDomain: analyticsShopData.storeDomain,
       mode: shopConfig.analytics.shopify.consentMode,
       // Public token is safe in the browser; Hydrogen sends it as the
       // X-Shopify-Storefront-Access-Token header on the consent handshake.
-      publicStorefrontAccessToken:
-        process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+      publicStorefrontAccessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     },
     shop: analyticsShop,
   });

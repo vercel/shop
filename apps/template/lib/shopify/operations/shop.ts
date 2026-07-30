@@ -52,5 +52,8 @@ export async function getShopAnalytics({
     acceptedLanguage: language,
     currency: response.data.localization.country.currency.isoCode,
     shopId: response.data.shop.id,
+    // Read server-side and passed to the client via props, so it never needs a
+    // NEXT_PUBLIC_ env var.
+    storeDomain: process.env.SHOPIFY_STORE_DOMAIN as string,
   };
 }

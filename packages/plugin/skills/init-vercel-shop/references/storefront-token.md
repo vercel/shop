@@ -49,7 +49,7 @@ Pass `{ "input": { "title": "Vercel Shop" } }` through `--variables`.
 Do not print the token in the final response. Write these values to `.env.local`:
 
 - `SHOPIFY_STORE_DOMAIN`: normalized `.myshopify.com` domain
-- `SHOPIFY_STOREFRONT_ACCESS_TOKEN`: reused or created public token
+- `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`: reused or created public token
 - `NEXT_PUBLIC_SITE_NAME`: `shop.name`
 
 ## Fallback
@@ -57,5 +57,5 @@ Do not print the token in the final response. Write these values to `.env.local`
 The authenticated connector might not be allowed to read or create Storefront tokens. If Shopify returns `ACCESS_DENIED`, reports that the app is not extendable, or lacks the required unauthenticated scopes:
 
 1. Direct the user to **Shopify admin → Sales channels → Headless**.
-2. Ask them to create or select a storefront and copy its public Storefront API token directly into `.env.local` as `SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
+2. Ask them to create or select a storefront and copy its public Storefront API token directly into `.env.local` as `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
 3. Never ask them to paste the token into chat.
