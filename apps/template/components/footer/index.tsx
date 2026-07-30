@@ -3,10 +3,10 @@ import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/lib/config";
 
 import { SocialLinks } from "./social-links";
 import type { SocialLink } from "./social-links";
@@ -22,7 +22,7 @@ export async function Footer({ locale }: { locale: string }) {
   return (
     <footer>
       {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
-      <Container className={cn("pt-20 pb-10", shopConfig.agent.enabled && "pb-22")}>
+      <Container className={cn("pt-20 pb-10", shopConfig.agent.isEnabled && "pb-22")}>
         <Sections className="gap-10">
           {items.length > 0 && <FooterMenu items={items} />}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">

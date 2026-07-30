@@ -13,7 +13,7 @@ type: reference
 
 ## Customer Authentication
 
-Required when `auth.enabled` is set to `true` in [`lib/config.ts`](/docs/reference/shop-config). These variables have different owners: Shopify provides the Customer Account API client ID, while you generate the session secret for this application.
+Required when `auth.isEnabled` is set to `true` in [`lib/config.ts`](/docs/reference/shop-config). These variables have different owners: Shopify provides the Customer Account API client ID, while you generate the session secret for this application.
 
 The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies. `CUSTOMER_ACCOUNT_SESSION_SECRET` is the private application key used to derive the AES-256-GCM encryption key for those cookies; it is not a Shopify credential. Generate it with `openssl rand -base64 32`, keep one stable value across all instances of a deployment, and store it only in server-side environment variables. Rotating it invalidates all existing customer sessions. The variable is required by the template's encrypted-cookie implementation, but an application that replaces it with protected server-side session storage can use that storage system's key management instead.
 

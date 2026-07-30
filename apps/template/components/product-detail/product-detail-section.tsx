@@ -23,6 +23,7 @@ import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
@@ -34,7 +35,6 @@ import {
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { shopConfig } from "@/lib/config";
 
 export function ProductDetailSection({
   product,
@@ -246,8 +246,8 @@ async function ProductInfoArea({
           handle={handle}
           featuredImage={featuredImage}
           availableForSale={availableForSale}
-          buyWithShop={shopConfig.pdp.buyWithShop.enabled}
-          quantityPicker={shopConfig.pdp.quantityPicker.enabled}
+          buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+          quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
         />
       ) : (
         <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
@@ -256,18 +256,18 @@ async function ProductInfoArea({
             handle={handle}
             featuredImage={featuredImage}
             availableForSale={availableForSale}
-            buyWithShop={shopConfig.pdp.buyWithShop.enabled}
-            quantityPicker={shopConfig.pdp.quantityPicker.enabled}
+            buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+            quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
             variantPromise={variantPromise}
           />
         </Suspense>
       )}
 
-      {!product.isGiftCard && shopConfig.pdp.bundles.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.bundles.isEnabled ? (
         <BundleRelationships variant={product.defaultVariant} t={t} />
       ) : null}
 
-      {!product.isGiftCard && shopConfig.pdp.complementaryProducts.enabled ? (
+      {!product.isGiftCard && shopConfig.pdp.complementaryProducts.isEnabled ? (
         <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
       ) : null}
 
@@ -460,12 +460,12 @@ function BuyButtonsFallback({
   return (
     <div className="grid gap-2.5">
       <div className="flex gap-2.5">
-        {shopConfig.pdp.quantityPicker.enabled ? <QuantityPickerFallback /> : null}
+        {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
           {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
         </div>
       </div>
-      {shopConfig.pdp.buyWithShop.enabled ? (
+      {shopConfig.pdp.buyWithShop.isEnabled ? (
         <div
           className={cn(
             "flex h-12 items-center justify-center rounded-lg bg-shop px-4 text-white",

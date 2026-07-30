@@ -14,11 +14,11 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
 import { getCart } from "@/lib/shopify/operations/cart";
-import { shopConfig } from "@/lib/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");
@@ -81,7 +81,7 @@ async function CartContent({ locale }: { locale: Locale }) {
                     </div>
                   </aside>
                 </div>
-                {shopConfig.pdp.relatedProducts.enabled &&
+                {shopConfig.pdp.relatedProducts.isEnabled &&
                 cart.lines[0]?.merchandise.product.handle ? (
                   <RelatedProductsSection
                     handle={cart.lines[0].merchandise.product.handle}

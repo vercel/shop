@@ -8,13 +8,13 @@ import {
 } from "@shopify/hydrogen/customer-account";
 import { NextResponse, type NextRequest } from "next/server";
 
-import { isAuthEnabled } from "@/lib/auth";
 import {
   createCustomerRequestContext,
   createCustomerSessionManager,
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
 const AUTH_PATHS = new Set<string>([
@@ -28,7 +28,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
 
   // Only pay for Hydrogen session/route work on the customer-account OAuth paths.
-  if (isAuthEnabled && AUTH_PATHS.has(request.nextUrl.pathname)) {
+  if (shopConfig.auth.isEnabled && AUTH_PATHS.has(request.nextUrl.pathname)) {
     const shopifyRoute = await handleShopifyRoutes({
       handlers: [
         createCustomerAccountServerHandlers({

@@ -1,7 +1,8 @@
 import { initBotId } from "botid/client/core";
 
-import { botIdProtectedRoutes, isBotIdEnabled } from "@/lib/botid";
+import { botIdProtectedRoutes } from "@/lib/botid";
+import { shopConfig } from "@/lib/config";
 
-if (isBotIdEnabled && botIdProtectedRoutes.length > 0) {
+if (shopConfig.botid.isEnabled && botIdProtectedRoutes.length > 0) {
   initBotId({ protect: botIdProtectedRoutes });
 }

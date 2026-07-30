@@ -5,9 +5,9 @@ import { ProductsGrid } from "@/components/product/products-grid";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { shopConfig } from "@/lib/config";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("seo");

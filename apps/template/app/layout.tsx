@@ -15,9 +15,9 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
-import { shopConfig } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               />
             </Suspense>
             <Suspense>
-              <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
+              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
           <Toaster closeButton />

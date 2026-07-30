@@ -43,8 +43,8 @@ If the storefront has `analytics` configuration in `lib/config.ts`, enable only 
 
 ```ts
 analytics: {
-  speedInsights: { enabled: false },
-  vercel: { enabled: false },
+  speedInsights: { isEnabled: false },
+  vercel: { isEnabled: false },
 },
 ```
 
@@ -112,8 +112,8 @@ export function AnalyticsComponents() {
 
   return (
     <>
-      {shopConfig.analytics.vercel.enabled ? <Analytics /> : null}
-      {shopConfig.analytics.speedInsights.enabled ? <SpeedInsights /> : null}
+      {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
+      {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
       {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
     </>
   );
