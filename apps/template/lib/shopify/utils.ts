@@ -19,7 +19,7 @@ export function getNumericShopifyId(gid: string): string | null {
   return match?.[1] ?? null;
 }
 
-const SHOPIFY_STORE_DOMAIN = process.env.SHOPIFY_STORE_DOMAIN ?? "";
+const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN ?? "";
 
 export function transformShopifyMenuItemUrl(
   url: string | null,
