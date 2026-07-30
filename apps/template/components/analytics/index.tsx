@@ -9,11 +9,11 @@ import { ShopifyAnalyticsTracker } from "./shopify-client";
 export async function AnalyticsComponents({ locale }: { locale: string }) {
   return (
     <>
-      {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
-      {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
-      {shopConfig.analytics.shopify.isEnabled ? (
+      {shopConfig.analytics.vercel.isEnabled && <Analytics />}
+      {shopConfig.analytics.speedInsights.isEnabled && <SpeedInsights />}
+      {shopConfig.analytics.shopify.isEnabled && (
         <ShopifyAnalyticsTracker shop={await getShopAnalytics({ locale })} />
-      ) : null}
+      )}
     </>
   );
 }
