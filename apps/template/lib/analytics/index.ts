@@ -34,6 +34,7 @@ export function getAnalytics(): StorefrontAnalytics | null {
     Shopify?: {
       country?: string;
       currency?: { active?: string };
+      customerPrivacy?: { analyticsProcessingAllowed?: () => boolean };
       locale?: string;
     };
   };
@@ -44,7 +45,13 @@ export function getAnalytics(): StorefrontAnalytics | null {
   shopifyGlobal.currency.active ??= analyticsShopData.currency;
 
   bus ??= createStorefrontAnalytics({
-    canTrack: () => true,
+    // Gate delivery on the consent API: customerPrivacy only gains
+    // analyticsProcessingAllowed after the customer-privacy script loads inside
+    // initConsent. Blocked events buffer and replay on the consent ready hooks.
+    canTrack: () =>
+      Boolean(
+        shopifyWindow.Shopify?.customerPrivacy?.analyticsProcessingAllowed?.(),
+      ),
     consent: {
       // consentDomain must be the shop domain so Hydrogen fetches
       // https://{shop}.myshopify.com/api/unstable/graphql.json instead of the
