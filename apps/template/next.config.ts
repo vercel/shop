@@ -11,8 +11,8 @@ import { shopConfig } from "./lib/config";
 
 function assertRequiredEnv() {
   const missingShopify = [
-    "SHOPIFY_STORE_DOMAIN",
     "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
+    "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
   ].filter((key) => !process.env[key]);
 
   if (missingShopify.length > 0) {
@@ -89,7 +89,6 @@ const intlConfig = withNextIntl(nextConfig);
 const config = shopConfig.botid.isEnabled ? withBotId(intlConfig) : intlConfig;
 
 function getConfig(phase: string): NextConfig {
-  // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.
   const isTypegen = process.argv.includes("typegen");
   const isRuntime =
     phase === PHASE_DEVELOPMENT_SERVER ||
