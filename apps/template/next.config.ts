@@ -1,37 +1,30 @@
 import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
-import {
-  PHASE_DEVELOPMENT_SERVER,
-  PHASE_PRODUCTION_BUILD,
-  PHASE_PRODUCTION_SERVER,
-} from "next/constants";
 
 import { shopConfig } from "./lib/config";
 
-function assertRequiredEnv() {
-  const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
-    (key) => !process.env[key],
+const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
+  (key) => !process.env[key],
+);
+
+if (missingShopify.length > 0) {
+  throw new Error(
+    `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
   );
+}
 
-  if (missingShopify.length > 0) {
+if (shopConfig.auth.enabled) {
+  const missing = [
+    "CUSTOMER_ACCOUNT_SESSION_SECRET",
+    "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
+  ].filter((key) => !process.env[key]);
+
+  if (missing.length > 0) {
     throw new Error(
-      `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
+      `Enabled auth requires: ${missing.join(", ")}. ` +
+        `Set the missing variables or disable auth via auth.enabled in lib/config.ts.`,
     );
-  }
-
-  if (shopConfig.auth.enabled) {
-    const missing = [
-      "CUSTOMER_ACCOUNT_SESSION_SECRET",
-      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
-    ].filter((key) => !process.env[key]);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth via auth.enabled in lib/config.ts.`,
-      );
-    }
   }
 }
 
@@ -87,19 +80,4 @@ const intlConfig = withNextIntl(nextConfig);
 
 const config = shopConfig.botid.enabled ? withBotId(intlConfig) : intlConfig;
 
-function getConfig(phase: string): NextConfig {
-  // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.
-  const isTypegen = process.argv.includes("typegen");
-  const isRuntime =
-    phase === PHASE_DEVELOPMENT_SERVER ||
-    phase === PHASE_PRODUCTION_BUILD ||
-    phase === PHASE_PRODUCTION_SERVER;
-
-  if (isRuntime && !isTypegen) {
-    assertRequiredEnv();
-  }
-
-  return config;
-}
-
-export default getConfig;
+export default config;
