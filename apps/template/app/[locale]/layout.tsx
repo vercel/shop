@@ -71,12 +71,14 @@ export default async function RootLayout({ children }: LayoutProps<"/[locale]">)
               />
             </Suspense>
             <Suspense>
-              <ActionBar>{shopConfig.agent.enabled && <AgentButton />}</ActionBar>
+              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
             </Suspense>
           </CartProvider>
           <Toaster closeButton />
         </NextIntlClientProvider>
-        <AnalyticsComponents />
+        <Suspense>
+          <AnalyticsComponents locale={locale} />
+        </Suspense>
       </body>
     </html>
   );

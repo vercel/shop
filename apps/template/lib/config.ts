@@ -3,6 +3,8 @@ import type { MenuItem } from "./shopify/types/menu";
 
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
+export type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
+
 export type SocialPlatform =
   | "facebook"
   | "github"
@@ -20,22 +22,26 @@ export interface SocialLink {
 
 export interface ShopConfig {
   agent: {
-    enabled: boolean;
+    isEnabled: boolean;
   };
   analytics: {
+    shopify: {
+      consentMode: ShopifyConsentMode;
+      isEnabled: boolean;
+    };
     speedInsights: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     vercel: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
   };
   auth: {
-    enabled: boolean;
+    isEnabled: boolean;
   };
   botid: {
     checkLevel: BotIdCheckLevel;
-    enabled: boolean;
+    isEnabled: boolean;
   };
   navigation: {
     footer: MenuItem[];
@@ -43,19 +49,19 @@ export interface ShopConfig {
   };
   pdp: {
     bundles: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     buyWithShop: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     complementaryProducts: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     quantityPicker: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
     relatedProducts: {
-      enabled: boolean;
+      isEnabled: boolean;
     };
   };
   site: {
@@ -78,22 +84,26 @@ const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {
-    enabled: true,
+    isEnabled: true,
   },
   analytics: {
+    shopify: {
+      consentMode: "default-banner",
+      isEnabled: false,
+    },
     speedInsights: {
-      enabled: false,
+      isEnabled: false,
     },
     vercel: {
-      enabled: false,
+      isEnabled: false,
     },
   },
   auth: {
-    enabled: true,
+    isEnabled: true,
   },
   botid: {
     checkLevel: "basic",
-    enabled: true,
+    isEnabled: true,
   },
   navigation: {
     footer: enterpriseFooterItems,
@@ -101,19 +111,19 @@ export const shopConfig = {
   },
   pdp: {
     bundles: {
-      enabled: true,
+      isEnabled: true,
     },
     buyWithShop: {
-      enabled: true,
+      isEnabled: true,
     },
     complementaryProducts: {
-      enabled: true,
+      isEnabled: true,
     },
     quantityPicker: {
-      enabled: true,
+      isEnabled: true,
     },
     relatedProducts: {
-      enabled: true,
+      isEnabled: true,
     },
   },
   site: {

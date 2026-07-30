@@ -13,25 +13,26 @@ Environment variables still own credentials and deployment-specific overrides. C
 ```ts
 export const shopConfig = {
   agent: {
-    enabled: false,
+    isEnabled: false,
   },
   analytics: {
-    speedInsights: { enabled: false },
-    vercel: { enabled: false },
+    shopify: { consentMode: "default-banner", isEnabled: false },
+    speedInsights: { isEnabled: false },
+    vercel: { isEnabled: false },
   },
   auth: {
-    enabled: false,
+    isEnabled: false,
   },
   botid: {
     checkLevel: "basic",
-    enabled: false,
+    isEnabled: false,
   },
   pdp: {
-    bundles: { enabled: true },
-    buyWithShop: { enabled: true },
-    complementaryProducts: { enabled: true },
-    quantityPicker: { enabled: true },
-    relatedProducts: { enabled: true },
+    bundles: { isEnabled: true },
+    buyWithShop: { isEnabled: true },
+    complementaryProducts: { isEnabled: true },
+    quantityPicker: { isEnabled: true },
+    relatedProducts: { isEnabled: true },
   },
   site: {
     name: "Vercel Shop",
@@ -44,24 +45,29 @@ Consumers import `shopConfig` directly from `@/lib/config`. Feature flags are li
 
 ## Agent
 
-`agent.enabled` controls whether the shopping assistant is available. It defaults to `false`. When disabled, the assistant button is hidden and the chat endpoint returns `404`. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
+`agent.isEnabled` controls whether the shopping assistant is available. It defaults to `false`. When disabled, the assistant button is hidden and the chat endpoint returns `404`. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
 
 ## Analytics
 
-- `vercel.enabled` controls Vercel Web Analytics.
-- `speedInsights.enabled` controls Vercel Speed Insights.
+- `vercel.isEnabled` controls Vercel Web Analytics.
+- `speedInsights.isEnabled` controls Vercel Speed Insights.
+- `shopify.isEnabled` controls Shopify storefront analytics.
 
-Each integration is disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+The Vercel integrations are disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+
+`shopify.isEnabled` sends storefront page views to Shopify analytics through Hydrogen's analytics bus, so they appear in Shopify admin alongside the rest of the store's reporting. It is disabled by default and needs no credentials beyond the Storefront API variables the storefront already requires. Set it to `true` to turn it on.
+
+`shopify.consentMode` selects how visitors grant tracking consent and defaults to `default-banner`, where Shopify's hosted privacy banner is rendered for visitors in regions that require consent. Use `custom-banner` when the storefront provides its own consent UI. Choosing `no-banner` means visitors in those regions have no way to grant consent and their events are never delivered.
 
 ## Authentication
 
-`auth.enabled` controls whether customer authentication is active. It defaults to `false`.
+`auth.isEnabled` controls whether customer authentication is active. It defaults to `false`.
 
 Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
 
 ## BotID
 
-`botid.enabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to `false`; enable it alongside `agent.enabled` to protect the assistant.
+`botid.isEnabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to `false`; enable it alongside `agent.isEnabled` to protect the assistant.
 
 `botid.checkLevel` selects the detection level. It defaults to `basic`, which is free on all plans. Setting it to `deepAnalysis` enables Vercel's machine-learning detection, which is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
 
@@ -75,11 +81,11 @@ The primary navigation and footer menus are not part of `shopConfig`. Each is an
 
 The PDP capability flags are enabled by default so storefronts render Shopify's merchandising features whenever the catalog provides data:
 
-- `bundles.enabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
-- `buyWithShop.enabled` renders the full-width Buy with Shop accelerated checkout action below Add to Cart.
-- `complementaryProducts.enabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
-- `quantityPicker.enabled` renders a 1–99 quantity control beside Add to Cart and applies the selected quantity to both purchase actions.
-- `relatedProducts.enabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
+- `bundles.isEnabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
+- `buyWithShop.isEnabled` renders the full-width Buy with Shop accelerated checkout action below Add to Cart.
+- `complementaryProducts.isEnabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
+- `quantityPicker.isEnabled` renders a 1–99 quantity control beside Add to Cart and applies the selected quantity to both purchase actions.
+- `relatedProducts.isEnabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
 
 Sections with no applicable Shopify data render nothing. Set an individual flag to `false` to skip its fields or recommendation request. Display counts and component composition remain implementation details rather than configuration.
 

@@ -6,14 +6,25 @@ type: guide
 
 The template includes opt-in customer authentication using the framework-neutral session and OAuth helpers from `@shopify/hydrogen/customer-account`. Customers can sign in through Shopify, view their profile, order history, and address book, refresh expired access tokens, and sign out of both the storefront and Shopify identity provider.
 
-Authentication is disabled by default. The canonical default lives in `lib/config.ts` as `auth.enabled`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
+Authentication is disabled by default. The canonical default lives in `lib/config.ts` as `auth.isEnabled`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
 
 ## Configuration
 
-Set the feature flag, Customer Account API client ID, session secret, and public storefront URL:
+Enable the feature in `lib/config.ts`:
+
+```ts
+export const shopConfig = {
+  // ...
+  auth: {
+    isEnabled: true,
+  },
+  // ...
+};
+```
+
+Then set the Customer Account API client ID, session secret, and public base URL:
 
 ```bash
-NEXT_PUBLIC_ENABLE_AUTH="1"
 CUSTOMER_ACCOUNT_SESSION_SECRET="[redacted]"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
 NEXT_PUBLIC_BASE_URL="your-domain.com"
@@ -36,13 +47,13 @@ To enable it in Shopify Admin:
 3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
 4. Use a public Customer Account API client; Hydrogen performs authorization code + PKCE without a client secret
 5. Set the callback URI to `{YOUR_DOMAIN}/account/authorize` and the logout URI to `{YOUR_DOMAIN}/`
-6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `SHOPIFY_STORE_DOMAIN`
+6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`
 
 Shopify does not support wildcard callback or logout URIs — register each production, preview, or tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
 ## How it works
 
-**No client-side auth SDK.** Sign-in is a normal GET navigation to `/account/login`; sign-out is a same-origin POST form to `/account/logout`. The universal `isAuthEnabled` flag (`lib/auth/index.ts`) re-exports `shopConfig.auth.enabled`, safe to import from server and client code alike. When it's false: the account icon disappears from the nav, the Hydrogen auth routes and protected account pages return `404`, and the shared session/access-token helpers in `lib/auth/server.ts` fail before initializing Hydrogen — no auth-related code runs at request time.
+**No client-side auth SDK.** Sign-in is a normal GET navigation to `/account/login`; sign-out is a same-origin POST form to `/account/logout`. The `shopConfig.auth.isEnabled` flag (`lib/config.ts`) gates every auth surface and is safe to read from server and client code alike. When it's false: the account icon disappears from the nav, the Hydrogen auth routes and protected account pages return `404`, and the shared session/access-token helpers in `lib/auth/server.ts` fail before initializing Hydrogen — no auth-related code runs at request time.
 
 **The session lives in an encrypted cookie, not a server store.** `/account/login` asks Hydrogen to generate state, nonce, and PKCE values, which the app encrypts into chunked AES-256-GCM HttpOnly cookies. Shopify redirects to `/account/authorize`, where Hydrogen validates state, nonce, issuer, audience, and ID-token expiry before exchanging the authorization code — access, refresh, and ID tokens then replace the pending-login state in that same cookie. Server Components only perform read-only login and token checks; they never mutate cookies.
 
@@ -68,7 +79,7 @@ Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` fo
 > - Keep Server Components on the read-only session path. Token refresh belongs in `/account/refresh`.
 > - Keep login as GET and logout as same-origin POST, and register the callback and logout URIs in Shopify exactly.
 > - Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately — rotation invalidates every existing session.
-> - Keep `NEXT_PUBLIC_ENABLE_AUTH` public so server and client feature gates agree under cache components.
+> - `auth.isEnabled` lives in `lib/config.ts` (not an env var), so the server and client feature gates read one shared value and stay in agreement under cache components.
 
 ## Out of the box
 

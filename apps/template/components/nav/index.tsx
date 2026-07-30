@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
-import { isAuthEnabled } from "@/lib/auth";
 import { shopConfig } from "@/lib/config";
 
 import { NavAccount, NavAccountFallback } from "./account";
@@ -31,7 +30,7 @@ export async function Nav({ locale }: { locale: string }) {
 
         <div className="flex flex-1 items-center justify-end gap-5">
           <SearchModal />
-          {isAuthEnabled && (
+          {shopConfig.auth.isEnabled && (
             <Suspense fallback={<NavAccountFallback />}>
               <NavAccount />
             </Suspense>

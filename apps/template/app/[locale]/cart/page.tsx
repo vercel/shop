@@ -81,7 +81,7 @@ async function CartContent({ locale }: { locale: Locale }) {
                     </div>
                   </aside>
                 </div>
-                {shopConfig.pdp.relatedProducts.enabled &&
+                {shopConfig.pdp.relatedProducts.isEnabled &&
                 cart.lines[0]?.merchandise.product.handle ? (
                   <RelatedProductsSection
                     handle={cart.lines[0].merchandise.product.handle}

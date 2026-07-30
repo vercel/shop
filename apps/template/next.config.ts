@@ -10,9 +10,10 @@ import {
 import { shopConfig } from "./lib/config";
 
 function assertRequiredEnv() {
-  const missingShopify = ["SHOPIFY_STORE_DOMAIN", "SHOPIFY_STOREFRONT_ACCESS_TOKEN"].filter(
-    (key) => !process.env[key],
-  );
+  const missingShopify = [
+    "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
+    "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
+  ].filter((key) => !process.env[key]);
 
   if (missingShopify.length > 0) {
     throw new Error(
@@ -20,7 +21,7 @@ function assertRequiredEnv() {
     );
   }
 
-  if (shopConfig.auth.enabled) {
+  if (shopConfig.auth.isEnabled) {
     const missing = [
       "CUSTOMER_ACCOUNT_SESSION_SECRET",
       "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
@@ -29,7 +30,7 @@ function assertRequiredEnv() {
     if (missing.length > 0) {
       throw new Error(
         `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth via auth.enabled in lib/config.ts.`,
+          `Set the missing variables or disable auth via auth.isEnabled in lib/config.ts.`,
       );
     }
   }
@@ -88,10 +89,9 @@ const withNextIntl = createNextIntlPlugin({
 
 const intlConfig = withNextIntl(nextConfig);
 
-const config = shopConfig.botid.enabled ? withBotId(intlConfig) : intlConfig;
+const config = shopConfig.botid.isEnabled ? withBotId(intlConfig) : intlConfig;
 
 function getConfig(phase: string): NextConfig {
-  // `next typegen` shares PHASE_PRODUCTION_BUILD but runs before any .env exists (create-next-app), so exclude it.
   const isTypegen = process.argv.includes("typegen");
   const isRuntime =
     phase === PHASE_DEVELOPMENT_SERVER ||

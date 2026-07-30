@@ -106,7 +106,7 @@ export async function getProduct({
   const language = getLanguageCode(locale);
 
   const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-    shopConfig.pdp.bundles.enabled
+    shopConfig.pdp.bundles.isEnabled
       ? GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY
       : GET_PRODUCT_BY_HANDLE_QUERY,
     {
@@ -168,7 +168,7 @@ export async function getProductVariant({
   const response = await storefront.request<{
     productByHandle: { selectedOrFirstAvailableVariant: ShopifyVariant | null } | null;
   }>(
-    shopConfig.pdp.bundles.enabled
+    shopConfig.pdp.bundles.isEnabled
       ? GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY
       : GET_PRODUCT_VARIANT_QUERY,
     {
