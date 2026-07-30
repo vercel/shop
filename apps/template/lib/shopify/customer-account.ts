@@ -14,7 +14,6 @@ import { resolveShopId } from "./discovery";
 
 const DEBUG = process.env.DEBUG_SHOPIFY === "1";
 
-// Hydrogen requires an HTTPS Origin matching the OAuth-registered auth base URL.
 export async function customerAccountFetch<T>({
   accessToken,
   operation,

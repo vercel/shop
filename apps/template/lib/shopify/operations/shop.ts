@@ -52,8 +52,6 @@ export async function getShopAnalytics({
     acceptedLanguage: language,
     currency: response.data.localization.country.currency.isoCode,
     shopId: response.data.shop.id,
-    // Passed to the client via props; the store domain is a public value, so it
-    // uses the NEXT_PUBLIC_ env var like the rest of the template.
     storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,
   };
 }
