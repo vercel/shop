@@ -5,7 +5,7 @@ import { isShopifyAnalyticsEnabled } from "@/lib/analytics";
 import { shopConfig } from "@/lib/config";
 import { getShopAnalytics } from "@/lib/shopify/operations/shop";
 
-import { ShopifyAnalyticsTracker } from "./shopify-analytics-client";
+import { ShopifyAnalyticsTracker } from "./shopify-client";
 
 export async function AnalyticsComponents({ locale }: { locale: string }) {
   return (
