@@ -8,6 +8,7 @@ import type {
   ProductCard,
   ProductDetails,
   ProductOption,
+  ProductRating,
   ProductVariant,
   ProductVariantComponent,
   ProductVariantReference,
@@ -128,6 +129,8 @@ export interface ShopifyProduct {
   encodedVariantAvailability?: string | null;
   encodedVariantExistence?: string | null;
   variantsCount: { count: number };
+  reviewsRating?: { value: string } | null;
+  reviewsRatingCount?: { value: string } | null;
   selectedOrFirstAvailableVariant?: ShopifyVariant | null;
   variants?: ShopifyEdges<ShopifyVariant>;
   options: ShopifyOption[];
@@ -339,6 +342,24 @@ function hasUniformPriceRange(product: ShopifyProduct): boolean {
   return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
 }
 
+// reviews.rating stores JSON like {"value":"4.5","scale_min":"1.0","scale_max":"5.0"};
+// reviews.rating_count stores a bare integer string. Either can be absent when unrated.
+function transformReviewsRating(product: ShopifyProduct): ProductRating | undefined {
+  const countRaw = product.reviewsRatingCount?.value;
+  if (!countRaw) return undefined;
+  const count = Number.parseInt(countRaw, 10);
+  if (!Number.isFinite(count) || count <= 0) return undefined;
+  let value = 0;
+  try {
+    const parsed = JSON.parse(product.reviewsRating?.value ?? "") as { value?: unknown };
+    const v = Number(parsed?.value);
+    if (Number.isFinite(v)) value = v;
+  } catch {
+    // value stays 0; count alone still renders "N reviews"
+  }
+  return { count, value };
+}
+
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   const variants = product.variants
     ? flattenEdges(product.variants).map(transformVariant)
@@ -388,6 +409,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     manufacturerName: product.vendor,
     categoryId: product.category?.id,
     collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
+    rating: transformReviewsRating(product),
   };
 }
 

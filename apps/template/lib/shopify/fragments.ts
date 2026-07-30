@@ -374,6 +374,12 @@ export const PRODUCT_FRAGMENT = `#graphql
       title
       description
     }
+    reviewsRating: metafield(namespace: "reviews", key: "rating") {
+      value
+    }
+    reviewsRatingCount: metafield(namespace: "reviews", key: "rating_count") {
+      value
+    }
     category {
       ...TaxonomyCategoryFields
     }

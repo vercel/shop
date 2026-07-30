@@ -18,7 +18,6 @@ import {
   ProductMedia,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
-import { PLACEHOLDER_REVIEW_SUMMARY } from "@/components/product-detail/product-reviews-section";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { VirtualTryOn } from "@/components/product-detail/virtual-try-on";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
@@ -197,18 +196,20 @@ async function ProductInfoArea({
   const t = await getTranslations("product");
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
-  const reviewSummary = product.rating ?? PLACEHOLDER_REVIEW_SUMMARY;
+  const reviewSummary = product.rating;
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
       <div data-slot="product-info-header" className="grid gap-2.5">
-        <RatingStars
-          value={reviewSummary.value}
-          label={t("ratingLabel", { max: 5, rating: reviewSummary.value })}
-          countLabel={
-            reviewSummary.count > 0 ? t("reviews", { count: reviewSummary.count }) : undefined
-          }
-        />
+        {reviewSummary ? (
+          <RatingStars
+            value={reviewSummary.value}
+            label={t("ratingLabel", { max: 5, rating: reviewSummary.value })}
+            countLabel={
+              reviewSummary.count > 0 ? t("reviews", { count: reviewSummary.count }) : undefined
+            }
+          />
+        ) : null}
         <div>
           <h1 className="text-foreground text-3xl">{title}</h1>
           {uniformPrice ? (
