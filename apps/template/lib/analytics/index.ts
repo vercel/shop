@@ -46,9 +46,13 @@ export function getAnalytics(): StorefrontAnalytics | null {
   bus ??= createStorefrontAnalytics({
     canTrack: () => true,
     consent: {
+      // consentDomain must be the shop domain so Hydrogen fetches
+      // https://{shop}.myshopify.com/api/unstable/graphql.json instead of the
+      // same-origin proxy (which doesn't exist here).
+      consentDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
       mode: shopConfig.analytics.shopify.consentMode,
-      // Public token is safe in the browser; with it set, the consent handshake
-      // calls the SFAPI directly and the same-origin proxy is unnecessary.
+      // Public token is safe in the browser; Hydrogen sends it as the
+      // X-Shopify-Storefront-Access-Token header on the consent handshake.
       publicStorefrontAccessToken:
         process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     },

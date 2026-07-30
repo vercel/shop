@@ -42,6 +42,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN:
       process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN ?? "",
+    NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN: process.env.SHOPIFY_STORE_DOMAIN ?? "",
   },
   partialPrefetching: true,
   // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
