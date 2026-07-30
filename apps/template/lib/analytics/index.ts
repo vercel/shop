@@ -10,9 +10,6 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import type { ShopAnalyticsData } from "@/lib/types";
 
 export { AnalyticsEvent };
-
-export const isShopifyAnalyticsEnabled = shopConfig.analytics.shopify.enabled;
-
 // The CDN script requires shop.channel to be exactly "hydrogen" or "headless";
 // hydrogenSubchannelId is forwarded to monorail, not used for channel.
 type AnalyticsBusShop = ShopAnalytics & { channel: "headless" };
@@ -29,7 +26,7 @@ export function configureAnalytics(shop: ShopAnalyticsData): void {
 export function getAnalytics(): StorefrontAnalytics | null {
   // Module-scope construction would run during SSR and crash on browser globals.
   if (typeof window === "undefined") return null;
-  if (!isShopifyAnalyticsEnabled || !analyticsShop || !analyticsShopData) return null;
+  if (!shopConfig.analytics.shopify.enabled || !analyticsShop || !analyticsShopData) return null;
 
   // The CDN script reads a Liquid-injected window.Shopify config, so seed it
   // before the bus loads that script. The consent banner supplies customerPrivacy.
