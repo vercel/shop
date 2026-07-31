@@ -66,7 +66,7 @@ export const shopConfig = {
   analytics: {
     shopify: {
       consentMode: "default-banner",
-      isEnabled: true,
+      isEnabled: false,
     },
     speedInsights: {
       isEnabled: false,
