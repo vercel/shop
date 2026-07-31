@@ -50,6 +50,7 @@ export async function getShopAnalytics({
 
   return {
     acceptedLanguage: language,
+    country,
     currency: response.data.localization.country.currency.isoCode,
     shopId: response.data.shop.id,
     storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,

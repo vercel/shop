@@ -322,6 +322,7 @@ export interface SearchSuggestion {
 
 export interface ShopAnalyticsData {
   acceptedLanguage: string;
+  country: string;
   currency: string;
   shopId: string;
   storeDomain: string;
