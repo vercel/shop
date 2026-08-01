@@ -51,7 +51,6 @@ interface ShopifyCartLine {
   };
   lineComponents?: ShopifyCartLine[];
   merchandise: {
-    compareAtPrice?: ShopifyMoney | null;
     id: string;
     image?: ShopifyImage | null;
     price?: ShopifyMoney;
@@ -162,7 +161,6 @@ function transformCartLine(line: ShopifyCartLine): CartLine {
       totalAmount: line.cost.totalAmount,
     },
     merchandise: {
-      compareAtPrice: line.merchandise.compareAtPrice ?? undefined,
       id: line.merchandise.id,
       title: line.merchandise.title,
       image: line.merchandise.image ? transformImage(line.merchandise.image) : undefined,

@@ -195,7 +195,6 @@ export interface CartWarning {
 }
 
 export interface CartMerchandise {
-  compareAtPrice?: Money;
   id: string;
   image?: Image;
   price?: Money;
