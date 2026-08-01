@@ -6,6 +6,7 @@ import {
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 } from "@shopify/hydrogen/customer-account";
+import { checkBotId } from "botid/server";
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
@@ -14,6 +15,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { BOTID_DENIED_CODE, botIdCheckOptions } from "@/lib/botid";
 import { cartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
@@ -40,6 +42,13 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const isCartPath = pathname === CART_API_PATH;
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
+
+  // BotID runs here, not in the route handler: handleShopifyRoutes short-circuits
+  // /api/cart before the App Router route executes, so a gate there never fires.
+  if (isCartPath && request.method === "POST" && shopConfig.botid.isEnabled) {
+    const { isBot } = await checkBotId(botIdCheckOptions);
+    if (isBot) return NextResponse.json({ error: BOTID_DENIED_CODE }, { status: 403 });
+  }
 
   if (isCartPath || isAuthPath) {
     const handlers: Array<

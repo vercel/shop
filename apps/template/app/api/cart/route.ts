@@ -1,10 +1,7 @@
 import { createShopifyRequestContext, type I18nConfig } from "@shopify/hydrogen";
-import { checkBotId } from "botid/server";
 import { NextResponse } from "next/server";
 
-import { BOTID_DENIED_CODE, botIdCheckOptions } from "@/lib/botid";
 import { cartHandlers } from "@/lib/cart/server";
-import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -41,11 +38,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  // Runs before the cart handler so rejected traffic costs no Shopify work.
-  if (shopConfig.botid.isEnabled) {
-    const { isBot } = await checkBotId(botIdCheckOptions);
-    if (isBot) return NextResponse.json({ error: BOTID_DENIED_CODE }, { status: 403 });
-  }
   const result = await cartHandlers.post({ request, storefrontClient: storefrontClient(request) });
   return toResponse(result as CartRouteResult, request);
 }
