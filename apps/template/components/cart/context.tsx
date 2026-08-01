@@ -1,8 +1,12 @@
 "use client";
 
 import type { CartState } from "@shopify/hydrogen";
-import { useCart as useHydrogenCart } from "@shopify/hydrogen/react";
 import {
+  CartProvider as HydrogenCartProvider,
+  useCart as useHydrogenCart,
+} from "@shopify/hydrogen/react";
+import {
+  type ComponentProps,
   createContext,
   type ReactNode,
   useCallback,
@@ -256,3 +260,39 @@ export function useCart() {
 }
 
 export function useSeedCart(_initialCart: Cart | null) {}
+
+type CartInitialData = ComponentProps<typeof HydrogenCartProvider>["initialData"];
+
+interface CartProviderWrapperProps {
+  cartData: CartInitialData;
+  children: ReactNode;
+}
+
+export function CartProviderWrapper({ cartData, children }: CartProviderWrapperProps) {
+  return (
+    <HydrogenCartProvider initialData={cartData}>
+      <CartProvider>{children}</CartProvider>
+    </HydrogenCartProvider>
+  );
+}
+
+const CartRenderContext = createContext<Cart | null>(null);
+
+interface CartContextSyncProps {
+  cart: Cart | null;
+  children: ReactNode;
+}
+
+export function CartContextSync({ cart, children }: CartContextSyncProps) {
+  const { cart: currentCart } = useCart();
+  useSeedCart(cart);
+
+  // Fall back to the server-fetched cart until the provider is seeded — avoids a hydration flash.
+  return (
+    <CartRenderContext.Provider value={currentCart ?? cart}>{children}</CartRenderContext.Provider>
+  );
+}
+
+export function useCartRender() {
+  return useContext(CartRenderContext);
+}

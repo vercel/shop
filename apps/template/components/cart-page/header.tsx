@@ -1,6 +1,6 @@
 "use client";
 
-import { useCartRender } from "@/components/cart/context-sync";
+import { useCartRender } from "@/components/cart/context";
 
 export function Header({ title }: { title: string }) {
   const cart = useCartRender();

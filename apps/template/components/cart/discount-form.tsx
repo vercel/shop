@@ -9,7 +9,7 @@ import { useCart } from "@/components/cart/context";
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cartDiscountAmount } from "@/lib/cart/amount";
+import { cartDiscountAmount } from "@/lib/cart";
 import type { Cart, Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

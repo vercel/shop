@@ -1,12 +1,16 @@
 import "server-only";
-import { createShopifyRequestContext, type I18nConfig } from "@shopify/hydrogen";
+import {
+  createCartServerHandlers,
+  createShopifyRequestContext,
+  type I18nConfig,
+} from "@shopify/hydrogen";
 import { revalidateTag, updateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
-import { cartHandlers } from "./handlers";
+export const cartHandlers = createCartServerHandlers();
 
 // Shared with the Hydrogen cart handlers, RSC cart reads, and the AI agent.
 const CART_ID_COOKIE = "cart";

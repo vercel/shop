@@ -8,7 +8,7 @@ import { Empty } from "@/components/cart-page/empty-cart";
 import { Header } from "@/components/cart-page/header";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
 import { Summary } from "@/components/cart-page/summary";
-import { CartContextSync } from "@/components/cart/context-sync";
+import { CartContextSync } from "@/components/cart/context";
 import { CartWarnings } from "@/components/cart/warnings";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";

@@ -14,7 +14,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
-import { cartHandlers } from "@/lib/cart/handlers";
+import { cartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 

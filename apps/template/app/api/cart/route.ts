@@ -1,7 +1,7 @@
 import { createShopifyRequestContext, type I18nConfig } from "@shopify/hydrogen";
 import { NextResponse } from "next/server";
 
-import { cartHandlers } from "@/lib/cart/handlers";
+import { cartHandlers } from "@/lib/cart/server";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 

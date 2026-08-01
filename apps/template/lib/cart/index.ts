@@ -1,8 +1,8 @@
-"use client";
+import type { Cart } from "@/lib/types";
 
-import { createCartComponents } from "@shopify/hydrogen/react";
-
-import type { cartHandlers } from "./handlers";
-
-export const { CartProvider, useCart, useCartForm, useOptionalCart, useSuspenseCart } =
-  createCartComponents<typeof cartHandlers>();
+export function cartDiscountAmount(cart: Cart): number {
+  return cart.discountAllocations.reduce(
+    (sum, a) => sum + parseFloat(a.discountedAmount.amount),
+    0,
+  );
+}
