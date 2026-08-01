@@ -105,9 +105,8 @@ function dispatchLinesUpdate(
   document.dispatchEvent(event);
 }
 
-// Bypasses the preview's broken standard-actions updateCart handler: POST the add
-// to our route and feed the standard lines-update event the store listens for, so
-// optimistic state and reconciliation still work.
+// Bypasses the preview's broken standard-actions updateCart handler: POST to our
+// route and feed the standard lines-update event the store listens for.
 export function addToCart(
   merchandiseId: string,
   quantity: number,
@@ -119,7 +118,6 @@ export function addToCart(
   dispatchLinesAdd([{ merchandiseId, quantity }], productInfo, promise);
 }
 
-// quantity=0 removes the line.
 export function updateCartLine(lineId: string, quantity: number): void {
   const promise = postCart({ lines: [{ id: lineId, quantity }] }).then((result) => ({
     cart: result.cart ? toStandardCart(result.cart) : null,

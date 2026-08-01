@@ -1,9 +1,14 @@
 import "server-only";
+import { createShopifyRequestContext, type I18nConfig } from "@shopify/hydrogen";
 import { revalidateTag, updateTag } from "next/cache";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
-// Matches @shopify/hydrogen's cart cookie so the Hydrogen cart handlers,
-// RSC cart reads, and the AI agent all operate on the same cart id.
+import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
+
+import { cartHandlers } from "./handlers";
+
+// Shared with the Hydrogen cart handlers, RSC cart reads, and the AI agent.
 const CART_ID_COOKIE = "cart";
 const CART_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;
 const CART_GID_PREFIX = "gid://shopify/Cart/";
@@ -33,6 +38,24 @@ export function buildCartIdSetCookieHeader(id: string): string {
   const secure = process.env.NODE_ENV === "production";
   const sameSite = CART_ID_COOKIE_SAME_SITE === "strict" ? "Strict" : "Lax";
   return `${CART_ID_COOKIE}=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${CART_ID_COOKIE_MAX_AGE}${secure ? "; Secure" : ""}`;
+}
+
+/** Starts the full-cart read from the request cookie without awaiting it. */
+export function seedCartData() {
+  return (async () => {
+    const i18n = {
+      country: getCountryCode(defaultLocale),
+      language: getLanguageCode(defaultLocale),
+    } as I18nConfig;
+    const requestContext = createShopifyRequestContext({
+      i18n,
+      request: { headers: await headers() },
+    });
+    const { data } = await cartHandlers.get({
+      storefrontClient: createRequestStorefrontClient(requestContext),
+    });
+    return data;
+  })();
 }
 
 export function invalidateCartCache(): void {

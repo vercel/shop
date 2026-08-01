@@ -9,13 +9,13 @@ import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
 import { CartNotifications } from "@/components/cart/notifications";
-import { CartOverlay } from "@/components/cart/overlay";
+import { CartOverlayBridge } from "@/components/cart/overlay-bridge";
 import { CartProviderWrapper } from "@/components/cart/provider";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
-import { seedCartData } from "@/lib/cart/seed";
+import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -37,8 +37,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     getTranslations("accessibility"),
   ]);
 
-  // Un-awaited: the promise streams to the client provider, which resolves it
-  // into the cart store. Never block the shell on it.
+  // Un-awaited: the promise streams to the client provider; never block the shell on it.
   const cartData = seedCartData();
 
   return (
@@ -75,11 +74,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </body>
     </html>
   );
-}
-
-async function CartOverlayBridge() {
-  const t = await getTranslations("cart");
-  return <CartOverlay description={t("reviewCartDescription")} title={t("shoppingCart")} />;
 }
 
 export const generateMetadata = async (): Promise<Metadata> => {
