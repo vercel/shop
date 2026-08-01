@@ -1,12 +1,14 @@
 "use client";
 
 import { CartProvider as HydrogenCartProvider } from "@/lib/cart";
-import type { seedCartData } from "@/lib/cart/seed";
+import type { ComponentProps } from "react";
 
 import { CartProvider } from "./context";
 
+type CartInitialData = ComponentProps<typeof HydrogenCartProvider>["initialData"];
+
 interface CartProviderWrapperProps {
-  cartData: Promise<Awaited<ReturnType<typeof seedCartData>>>;
+  cartData: CartInitialData;
   children: React.ReactNode;
 }
 
