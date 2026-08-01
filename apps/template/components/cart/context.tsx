@@ -22,6 +22,9 @@ import type { Cart, CartLine, CartWarning } from "@/lib/types";
 
 export type CartMutationError = "add" | "remove" | "update";
 
+// Matches Hydrogen's OPTIMISTIC_LINE_ID_PREFIX; server cart returns new lines first, so optimistic lines sort to the front.
+const OPTIMISTIC_LINE_ID_PREFIX = "optimistic:";
+
 type CartContextType = {
   addToCartOptimistic: (
     variantId: string,
@@ -105,7 +108,13 @@ function toLegacyCart(data: CartState["data"]): Cart | null {
       code: d.code,
     })),
     id: data.id ?? undefined,
-    lines: data.lines.nodes.map((l) => toLegacyLine(l as unknown as LegacyLine)),
+    lines: data.lines.nodes
+      .map((l) => toLegacyLine(l as unknown as LegacyLine))
+      .sort(
+        (a, b) =>
+          Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -
+          Number(a.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false),
+      ),
     note: data.note ?? null,
     shippingCost: null,
     totalQuantity: data.totalQuantity,
