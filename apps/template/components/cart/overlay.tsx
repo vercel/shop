@@ -18,11 +18,10 @@ function CartCountBadge() {
 
 interface CartOverlayProps {
   description: string;
-  locale: string;
   title: string;
 }
 
-export function CartOverlay({ description, locale, title }: CartOverlayProps) {
+export function CartOverlay({ description, title }: CartOverlayProps) {
   const { isOverlayOpen, setOverlayOpen } = useCart();
 
   return (
@@ -33,7 +32,7 @@ export function CartOverlay({ description, locale, title }: CartOverlayProps) {
           <CartCountBadge />
         </div>
         <SheetDescription className="sr-only">{description}</SheetDescription>
-        <OverlayContent locale={locale} />
+        <OverlayContent />
       </SheetContent>
     </Sheet>
   );

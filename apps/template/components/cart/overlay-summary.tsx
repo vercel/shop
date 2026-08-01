@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { DiscountForm } from "@/components/cart/discount-form";
 import { Price } from "@/components/product/price";
-import { cartDiscountAmount } from "@/lib/cart";
+import { cartDiscountAmount } from "@/lib/cart/amount";
 import type { Cart } from "@/lib/types";
 
 interface OverlaySummaryProps {

@@ -3,18 +3,20 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
-import { CartProvider } from "@/components/cart/context";
 import { CartNotifications } from "@/components/cart/notifications";
 import { CartOverlay } from "@/components/cart/overlay";
+import { CartProviderWrapper } from "@/components/cart/provider";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { seedCartData } from "@/lib/cart/seed";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -30,11 +32,10 @@ const geistMono = Geist_Mono({
 });
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, messages, t, cartT] = await Promise.all([
+  const [locale, messages, t] = await Promise.all([
     getLocale(),
     getMessages(),
     getTranslations("accessibility"),
-    getTranslations("cart"),
   ]);
 
   return (
@@ -51,24 +52,17 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <CartProvider initialCart={null}>
-            <CartNotifications />
-            <Nav locale={locale} />
-            <main id="main-content" className="flex flex-1 flex-col min-w-0">
-              {children}
-            </main>
-            <Footer locale={locale} />
-            <Suspense>
-              <CartOverlay
-                description={cartT("reviewCartDescription")}
-                locale={locale}
-                title={cartT("shoppingCart")}
-              />
-            </Suspense>
-            <Suspense>
-              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
-            </Suspense>
-          </CartProvider>
+          <Nav locale={locale} />
+          <main id="main-content" className="flex flex-1 flex-col min-w-0">
+            {children}
+          </main>
+          <Footer locale={locale} />
+          <Suspense fallback={null}>
+            <CartBoundary />
+          </Suspense>
+          <Suspense>
+            <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
+          </Suspense>
           <Toaster closeButton />
         </NextIntlClientProvider>
         <Suspense>
@@ -77,6 +71,26 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </body>
     </html>
   );
+}
+
+// The only dynamic piece: seeds the cart store from the request and mounts the
+// provider + cart chrome. Everything else renders from the static shell.
+async function CartBoundary() {
+  await connection();
+
+  const cartData = seedCartData();
+
+  return (
+    <CartProviderWrapper cartData={cartData}>
+      <CartNotifications />
+      <CartOverlayBridge />
+    </CartProviderWrapper>
+  );
+}
+
+async function CartOverlayBridge() {
+  const t = await getTranslations("cart");
+  return <CartOverlay description={t("reviewCartDescription")} title={t("shoppingCart")} />;
 }
 
 export const generateMetadata = async (): Promise<Metadata> => {

@@ -1,15 +1,15 @@
 "use client";
 
+import { useCartForm } from "@shopify/hydrogen/react";
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { type SubmitEvent, useEffect, useRef, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cartDiscountAmount } from "@/lib/cart";
-import { applyDiscountCodeAction, removeDiscountCodeAction } from "@/lib/cart/action";
+import { cartDiscountAmount } from "@/lib/cart/amount";
 import type { Cart, Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -29,43 +29,50 @@ function discountTotal(cart: Cart): Money | null {
 
 export function DiscountForm({ cart, locale }: DiscountFormProps) {
   const t = useTranslations("cart");
-  const { setCart, setWarnings } = useCart();
+  const { setWarnings } = useCart();
+  const { formProps, register } = useCartForm();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+  const [removeCode, setRemoveCode] = useState<string | null>(null);
+  const removeFormRef = useRef<HTMLFormElement>(null);
 
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  useEffect(() => {
+    if (removeCode) removeFormRef.current?.requestSubmit();
+  }, [removeCode]);
+
+  const handleApply = (event: SubmitEvent<HTMLFormElement>) => {
     const trimmed = code.trim();
     if (!trimmed) {
+      event.preventDefault();
       setError(t("discountInvalidCode"));
       return;
     }
-
-    startTransition(async () => {
-      const result = await applyDiscountCodeAction(trimmed);
-      if (result.cart) setCart(result.cart);
-      if (result.success) {
-        setWarnings(result.warnings ?? []);
+    setError(null);
+    setIsPending(true);
+    formProps({
+      afterSubmit: () => {
+        setIsPending(false);
         setCode("");
-      } else {
-        setError(result.error ?? t("discountInvalidCode"));
-      }
-    });
+        setWarnings([]);
+      },
+    }).onSubmit?.(event);
   };
 
   const handleRemove = (target: string) => {
     setError(null);
-    startTransition(async () => {
-      const result = await removeDiscountCodeAction(target);
-      if (result.success && result.cart) {
-        setCart(result.cart);
-        setWarnings(result.warnings ?? []);
-      } else if (result.error) {
-        setError(result.error);
-      }
-    });
+    setIsPending(true);
+    setRemoveCode(target);
+  };
+
+  const handleRemoveSubmit = (event: SubmitEvent<HTMLFormElement>) => {
+    formProps({
+      afterSubmit: () => {
+        setIsPending(false);
+        setRemoveCode(null);
+        setWarnings([]);
+      },
+    }).onSubmit?.(event);
   };
 
   const totalDiscount = discountTotal(cart);
@@ -96,6 +103,15 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
             t("applyDiscount")
           )}
         </Button>
+      </form>
+
+      <form {...formProps()} hidden ref={removeFormRef} onSubmit={handleRemoveSubmit} aria-hidden>
+        {removeCode ? (
+          <>
+            <input {...register("discountCode", { value: removeCode })} readOnly />
+            <button type="submit" {...register("discount-remove")} />
+          </>
+        ) : null}
       </form>
 
       {error ? (
