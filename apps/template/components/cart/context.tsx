@@ -76,6 +76,7 @@ const serverFallbackCartContext: CartContextType = {
 };
 
 type LegacyMerchandise = {
+  compareAtPrice?: { amount: string; currencyCode: string } | null;
   id?: string;
   image?: {
     altText?: string | null;
@@ -196,6 +197,7 @@ function toLegacyLine(line: LegacyLine, override?: LineCostOverride): CartLine {
       : [],
     id: line.id,
     merchandise: {
+      ...(merchandise?.compareAtPrice ? { compareAtPrice: merchandise.compareAtPrice } : {}),
       id: merchandise?.id ?? "",
       ...(image ? { image: toLegacyImage(image) } : {}),
       ...(merchandise?.price ? { price: merchandise.price } : {}),
