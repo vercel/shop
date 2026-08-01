@@ -19,6 +19,10 @@ interface GraphqlMoney {
 
 interface GraphqlCartLine {
   attributes?: { key: string; value: string }[];
+  cost?: {
+    amountPerQuantity?: GraphqlMoney | null;
+    totalAmount?: GraphqlMoney;
+  };
   id: string;
   merchandise: { id: string };
   quantity: number;
@@ -138,6 +142,12 @@ export interface DiscountResolution {
   cart: {
     discountCodes: { applicable: boolean; code: string }[];
     id?: string | null;
+    lines?: {
+      id: string;
+      originalAmount: GraphqlMoney;
+      quantity: number;
+      totalAmount: GraphqlMoney;
+    }[];
   } | null;
   error: string | null;
 }
@@ -158,6 +168,16 @@ async function setDiscountCodes(discountCodes: string[]): Promise<DiscountResolu
       cart: {
         discountCodes: cart.discountCodes ?? [],
         id: cart.id,
+        // The mutation response carries the post-discount line costs; forward them so the
+        // overlay can reprice immediately instead of waiting on a store refetch.
+        lines: cart.lines.nodes
+          .filter((l) => l.cost?.totalAmount && l.cost?.amountPerQuantity)
+          .map((l) => ({
+            id: l.id,
+            originalAmount: l.cost?.amountPerQuantity as GraphqlMoney,
+            quantity: l.quantity,
+            totalAmount: l.cost?.totalAmount as GraphqlMoney,
+          })),
       },
       error: null,
     };

@@ -101,9 +101,19 @@ type LegacyLine = {
   quantity: number;
 };
 
+// Line costs from a just-resolved discount mutation, keyed by line id. The Hydrogen
+// store refetch can lag behind the mutation response, so these keep prices truthful
+// in the meantime.
+type LineCostOverride = {
+  originalAmount: { amount: string; currencyCode: string };
+  quantity: number;
+  totalAmount: { amount: string; currencyCode: string };
+};
+
 function toLegacyCart(
   data: CartState["data"],
   discountOverride?: { applicable: boolean; code: string }[] | null,
+  lineOverrides?: Map<string, LineCostOverride> | null,
 ): Cart | null {
   if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
   return {
@@ -122,7 +132,10 @@ function toLegacyCart(
     ),
     id: data.id ?? undefined,
     lines: data.lines.nodes
-      .map((l) => toLegacyLine(l as unknown as LegacyLine))
+      .map((l) => {
+        const legacy = l as unknown as LegacyLine;
+        return toLegacyLine(legacy, lineOverrides?.get(legacy.id) ?? undefined);
+      })
       .sort(
         (a, b) =>
           Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -
@@ -143,19 +156,23 @@ function toLegacyImage(image: LegacyMerchandise["image"]) {
   };
 }
 
-function toLegacyLine(line: LegacyLine): CartLine {
+function toLegacyLine(line: LegacyLine, override?: LineCostOverride): CartLine {
   const merchandise = line.merchandise;
   const image = merchandise?.image;
-  const totalAmount = line.cost.totalAmount;
-  const amountPerQuantity = line.cost.amountPerQuantity;
+  const totalAmount = override?.totalAmount ?? line.cost.totalAmount;
   // amountPerQuantity is the pre-discount unit price; a lower line total means a discount applied.
+  const originalAmount = override?.originalAmount ?? line.cost.amountPerQuantity;
+  const originalTotal = originalAmount
+    ? Number.parseFloat(originalAmount.amount) * (override?.quantity ?? line.quantity)
+    : null;
   const discountedPerUnit =
-    amountPerQuantity &&
-    line.quantity > 0 &&
-    Number.parseFloat(totalAmount.amount) <
-      Number.parseFloat(amountPerQuantity.amount) * line.quantity
+    originalTotal != null &&
+    originalTotal > 0 &&
+    Number.parseFloat(totalAmount.amount) < originalTotal
       ? {
-          amount: (Number.parseFloat(totalAmount.amount) / line.quantity).toFixed(2),
+          amount: (
+            Number.parseFloat(totalAmount.amount) / (override?.quantity ?? line.quantity)
+          ).toFixed(2),
           currencyCode: totalAmount.currencyCode,
         }
       : undefined;
@@ -212,7 +229,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [appliedDiscountCodes, setAppliedDiscountCodes] = useState<
     { applicable: boolean; code: string }[] | null
   >(null);
-  const cart = toLegacyCart(cartState.data, appliedDiscountCodes);
+  const [lineCostOverrides, setLineCostOverrides] = useState<Map<string, LineCostOverride> | null>(
+    null,
+  );
+  const cart = toLegacyCart(cartState.data, appliedDiscountCodes, lineCostOverrides);
   const isUpdatingCart = cartState.pending.lines.size > 0 || cartState.pending.note;
 
   const isOverlayOpenRef = useRef(isOverlayOpen);
@@ -264,12 +284,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     function onResolved(event: Event) {
       const detail = (event as CustomEvent<DiscountResolution>).detail;
       setAppliedDiscountCodes(detail.cart?.discountCodes ?? null);
+      setLineCostOverrides(
+        detail.cart?.lines?.length ? new Map(detail.cart.lines.map((l) => [l.id, l])) : null,
+      );
     }
     document.addEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
     return () => document.removeEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
   }, []);
 
-  // Clear the local override once the Hydrogen store catches up (e.g. after a refetch).
+  // Clear the local overrides once the Hydrogen store catches up (e.g. after a refetch).
   useEffect(() => {
     if (!appliedDiscountCodes) return;
     const storeCodes = cartState.data.discountCodes ?? [];
@@ -278,6 +301,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       storeCodes.every((c, i) => c.code === appliedDiscountCodes[i]?.code)
     ) {
       setAppliedDiscountCodes(null);
+      setLineCostOverrides(null);
     }
   }, [cartState.data.discountCodes, appliedDiscountCodes]);
 
