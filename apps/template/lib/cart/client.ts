@@ -8,6 +8,7 @@ const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
 const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 
 interface CartMutationLine {
+  attributes?: { key: string; value: string }[];
   merchandiseId: string;
   quantity: number;
 }
@@ -112,11 +113,13 @@ export function addToCart(
   merchandiseId: string,
   quantity: number,
   productInfo?: OptimisticProductInfo,
+  attributes?: { key: string; value: string }[],
 ): void {
-  const promise = postCart({ lines: [{ merchandiseId, quantity }] }).then((result) => ({
+  const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
+  const promise = postCart({ lines: [line] }).then((result) => ({
     cart: result.cart ? toStandardCart(result.cart) : null,
   }));
-  dispatchLinesAdd([{ merchandiseId, quantity }], productInfo, promise);
+  dispatchLinesAdd([line], productInfo, promise);
 }
 
 export function updateCartLine(lineId: string, quantity: number): void {
