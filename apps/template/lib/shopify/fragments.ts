@@ -143,6 +143,9 @@ export const CART_FRAGMENT = `#graphql
         price {
           ...MoneyFields
         }
+        compareAtPrice {
+          ...MoneyFields
+        }
         product {
           id
           title
@@ -189,6 +192,9 @@ export const CART_FRAGMENT = `#graphql
           ...ImageFields
         }
         price {
+          ...MoneyFields
+        }
+        compareAtPrice {
           ...MoneyFields
         }
         product {

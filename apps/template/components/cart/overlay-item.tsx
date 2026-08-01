@@ -28,6 +28,12 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const unitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
     : parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const compareAtUnitPrice =
+    item.merchandise.compareAtPrice != null
+      ? parseFloat(item.merchandise.compareAtPrice.amount)
+      : null;
+  // Strike only on a genuine compare-at on the unit price — never from stepping quantity.
+  const hasCompareAt = compareAtUnitPrice != null && compareAtUnitPrice > unitPrice;
   const discountedTotal = item.discountAllocations.length
     ? parseFloat(item.discountAllocations[0].discountedAmount.amount)
     : null;
@@ -143,20 +149,16 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       </div>
 
       <div className="self-start py-0.5 text-sm text-right">
-        {discountedTotal != null ? (
-          <div className="grid gap-0.5">
-            <span className="font-medium text-foreground">
-              {formatPrice(discountedTotal, currencyCode, locale)}
-            </span>
-            <span className="text-xs text-muted-foreground line-through">
-              {formatPrice(unitPrice * quantity, currencyCode, locale)}
-            </span>
-          </div>
-        ) : (
+        <div className="grid gap-0.5">
           <span className="font-medium text-foreground">
-            {formatPrice(unitPrice * quantity, currencyCode, locale)}
+            {formatPrice(unitPrice, currencyCode, locale)}
           </span>
-        )}
+          {hasCompareAt ? (
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(compareAtUnitPrice, currencyCode, locale)}
+            </span>
+          ) : null}
+        </div>
       </div>
     </li>
   );
