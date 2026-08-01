@@ -35,24 +35,24 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative w-16 h-16 overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-20 self-end overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
           src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}
           alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
           fill
           className="object-cover"
-          sizes="64px"
+          sizes="80px"
         />
       </Link>
 
-      <div className="flex-1 min-w-0 flex flex-col gap-2 py-0.5">
+      <div className="flex-1 min-w-0 flex flex-col gap-2 pt-0.5">
         <div>
           <Link
             href={`/products/${item.merchandise.product.handle}`}
             className="hover:opacity-70 transition-opacity"
           >
-            <h3 className="font-medium text-sm text-foreground line-clamp-2">
+            <h3 className="font-medium text-sm text-foreground line-clamp-1">
               {item.merchandise.product.title}
             </h3>
           </Link>
@@ -81,34 +81,38 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="size-7 rounded-full"
-            onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
-            disabled={!item.canUpdateQuantity || quantity === 1}
-            aria-label={t("decreaseQuantity")}
+        <div className="flex items-center gap-1.5 mt-auto">
+          <div
+            aria-label={t("itemQuantity")}
+            className="grid h-7 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
+            role="group"
           >
-            <MinusIcon className="size-3" />
-          </Button>
-
-          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-10.5 h-7 px-2.5 text-xs font-medium text-foreground">
-            {quantity}
-          </span>
-
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="size-7 rounded-full"
-            onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
-            disabled={!item.canUpdateQuantity || quantity === 99}
-            aria-label={t("increaseQuantity")}
-          >
-            <PlusIcon className="size-3" />
-          </Button>
+            <button
+              type="button"
+              aria-label={t("decreaseQuantity")}
+              className="flex h-7 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!item.canUpdateQuantity || quantity === 1}
+              onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
+            >
+              <MinusIcon className="size-3 shrink-0" />
+            </button>
+            <span
+              aria-live="polite"
+              className="flex h-7 w-6 items-center justify-center text-xs font-medium tabular-nums"
+              role="status"
+            >
+              {quantity}
+            </span>
+            <button
+              type="button"
+              aria-label={t("increaseQuantity")}
+              className="flex h-7 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!item.canUpdateQuantity || quantity === 99}
+              onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
+            >
+              <PlusIcon className="size-3 shrink-0" />
+            </button>
+          </div>
 
           <Button
             type="button"
