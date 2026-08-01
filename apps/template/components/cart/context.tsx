@@ -105,6 +105,7 @@ type LegacyLine = {
 // store refetch can lag behind the mutation response, so these keep prices truthful
 // in the meantime.
 type LineCostOverride = {
+  catalogPrice: { amount: string; currencyCode: string } | null;
   originalAmount: { amount: string; currencyCode: string };
   quantity: number;
   totalAmount: { amount: string; currencyCode: string };
@@ -160,19 +161,26 @@ function toLegacyLine(line: LegacyLine, override?: LineCostOverride): CartLine {
   const merchandise = line.merchandise;
   const image = merchandise?.image;
   const totalAmount = override?.totalAmount ?? line.cost.totalAmount;
-  // amountPerQuantity is the pre-discount unit price; a lower line total means a discount applied.
-  const originalAmount = override?.originalAmount ?? line.cost.amountPerQuantity;
-  const originalTotal = originalAmount
-    ? Number.parseFloat(originalAmount.amount) * (override?.quantity ?? line.quantity)
-    : null;
+  const quantity = override?.quantity ?? line.quantity;
+  // The catalog unit price is the true pre-discount price. Fall back to amountPerQuantity
+  // (pre-discount for order/item discounts, already-reduced for line-price discounts).
+  const catalogPrice = override?.catalogPrice ?? merchandise?.price;
+  const catalogUnit = catalogPrice ? Number.parseFloat(catalogPrice.amount) : null;
+  const perQuantityUnit =
+    (override?.originalAmount ?? line.cost.amountPerQuantity) != null
+      ? Number.parseFloat((override?.originalAmount ?? line.cost.amountPerQuantity)!.amount)
+      : null;
+  const originalUnit =
+    catalogUnit != null && (perQuantityUnit == null || catalogUnit > perQuantityUnit)
+      ? catalogUnit
+      : perQuantityUnit;
+  const originalTotal = originalUnit != null ? originalUnit * quantity : null;
   const discountedPerUnit =
     originalTotal != null &&
     originalTotal > 0 &&
     Number.parseFloat(totalAmount.amount) < originalTotal
       ? {
-          amount: (
-            Number.parseFloat(totalAmount.amount) / (override?.quantity ?? line.quantity)
-          ).toFixed(2),
+          amount: (Number.parseFloat(totalAmount.amount) / quantity).toFixed(2),
           currencyCode: totalAmount.currencyCode,
         }
       : undefined;

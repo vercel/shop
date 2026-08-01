@@ -24,7 +24,7 @@ interface GraphqlCartLine {
     totalAmount?: GraphqlMoney;
   };
   id: string;
-  merchandise: { id: string };
+  merchandise: { id: string; price?: GraphqlMoney | null };
   quantity: number;
 }
 
@@ -143,6 +143,7 @@ export interface DiscountResolution {
     discountCodes: { applicable: boolean; code: string }[];
     id?: string | null;
     lines?: {
+      catalogPrice: GraphqlMoney | null;
       id: string;
       originalAmount: GraphqlMoney;
       quantity: number;
@@ -173,6 +174,7 @@ async function setDiscountCodes(discountCodes: string[]): Promise<DiscountResolu
         lines: cart.lines.nodes
           .filter((l) => l.cost?.totalAmount && l.cost?.amountPerQuantity)
           .map((l) => ({
+            catalogPrice: l.merchandise.price ?? null,
             id: l.id,
             originalAmount: l.cost?.amountPerQuantity as GraphqlMoney,
             quantity: l.quantity,

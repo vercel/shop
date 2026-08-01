@@ -2,6 +2,7 @@ import "server-only";
 import {
   createCartServerHandlers,
   createShopifyRequestContext,
+  gql,
   type I18nConfig,
 } from "@shopify/hydrogen";
 import { revalidateTag, updateTag } from "next/cache";
@@ -10,7 +11,31 @@ import { cookies, headers } from "next/headers";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
-export const cartHandlers = createCartServerHandlers();
+// The default Hydrogen fragment omits merchandise.price, so the cart line only carries
+// discount-adjusted costs. This adds the catalog unit price (and compare-at) so the
+// storefront can show a truthful pre-discount strikethrough regardless of discount type.
+const CART_FRAGMENT = gql(/* GraphQL */ `
+  fragment CartFragment on Cart {
+    lines(first: 250) {
+      nodes {
+        merchandise {
+          ... on ProductVariant {
+            price {
+              amount
+              currencyCode
+            }
+            compareAtPrice {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
 
 // Shared with the Hydrogen cart handlers, RSC cart reads, and the AI agent.
 const CART_ID_COOKIE = "cart";
