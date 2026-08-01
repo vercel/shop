@@ -5,7 +5,6 @@ import type { OptimisticProductInfo } from "@/lib/product";
 const ENDPOINT = "/api/cart";
 const TIMEOUT_MS = 10_000;
 const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
-const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 
 interface CartMutationLine {
   attributes?: { key: string; value: string }[];
@@ -19,6 +18,7 @@ interface GraphqlMoney {
 }
 
 interface GraphqlCartLine {
+  attributes?: { key: string; value: string }[];
   id: string;
   merchandise: { id: string };
   quantity: number;
@@ -129,35 +129,71 @@ export function updateCartLine(lineId: string, quantity: number): void {
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
 }
 
+// Discounts bypass the Hydrogen discount-update event: its handler renders new codes as
+// `applicable: false` until the server resolves, which flashes an "invalid" pill. We await
+// the mutation and hand the resolved cart to the overlay through this local event instead.
+const DISCOUNT_RESOLVED_EVENT = "shop:cart:discount-resolved";
+
+export interface DiscountResolution {
+  cart: {
+    discountCodes: { applicable: boolean; code: string }[];
+    id?: string | null;
+  } | null;
+  error: string | null;
+}
+
 // The discount mutation replaces the whole code set, so apply/remove recompute the full list.
-function dispatchDiscountUpdate(
-  discountCodes: string[],
-  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
-): void {
-  const event = new Event(DISCOUNT_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
-    discountCodes: { code: string }[];
-    promise: typeof promise;
-  };
-  event.discountCodes = discountCodes.map((code) => ({ code }));
-  event.promise = promise;
-  document.dispatchEvent(event);
+async function setDiscountCodes(discountCodes: string[]): Promise<DiscountResolution> {
+  try {
+    const result = await postCart({ discountCodes });
+    if (!result.cart) {
+      const message =
+        result.userErrors?.[0]?.message ??
+        result.warnings?.[0]?.message ??
+        "Failed to update discount";
+      return { cart: null, error: message };
+    }
+    const cart = result.cart;
+    return {
+      cart: {
+        discountCodes: cart.discountCodes ?? [],
+        id: cart.id,
+      },
+      error: null,
+    };
+  } catch (error) {
+    return { cart: null, error: error instanceof Error ? error.message : "Network error" };
+  }
 }
 
-function setDiscountCodes(discountCodes: string[]): void {
-  const promise = postCart({ discountCodes }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
-  dispatchDiscountUpdate(discountCodes, promise);
-}
-
-export function applyDiscount(code: string, existingCodes: string[]): void {
+export async function applyDiscount(
+  code: string,
+  existingCodes: string[],
+): Promise<DiscountResolution> {
   const normalized = code.trim().toUpperCase();
-  if (!normalized) return;
-  if (existingCodes.some((c) => c.toUpperCase() === normalized)) return;
-  setDiscountCodes([...existingCodes, normalized]);
+  if (!normalized) return { cart: null, error: "Empty discount code" };
+  if (existingCodes.some((c) => c.toUpperCase() === normalized)) {
+    return { cart: null, error: null };
+  }
+  const resolution = await setDiscountCodes([...existingCodes, normalized]);
+  document.dispatchEvent(
+    new CustomEvent<DiscountResolution>(DISCOUNT_RESOLVED_EVENT, { detail: resolution }),
+  );
+  return resolution;
 }
 
-export function removeDiscount(code: string, existingCodes: string[]): void {
+export async function removeDiscount(
+  code: string,
+  existingCodes: string[],
+): Promise<DiscountResolution> {
   const normalized = code.trim().toUpperCase();
-  setDiscountCodes(existingCodes.filter((c) => c.toUpperCase() !== normalized));
+  const resolution = await setDiscountCodes(
+    existingCodes.filter((c) => c.toUpperCase() !== normalized),
+  );
+  document.dispatchEvent(
+    new CustomEvent<DiscountResolution>(DISCOUNT_RESOLVED_EVENT, { detail: resolution }),
+  );
+  return resolution;
 }
+
+export { DISCOUNT_RESOLVED_EVENT };

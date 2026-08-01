@@ -16,7 +16,12 @@ import {
   useState,
 } from "react";
 
-import { addToCart, updateCartLine } from "@/lib/cart/client";
+import {
+  addToCart,
+  DISCOUNT_RESOLVED_EVENT,
+  type DiscountResolution,
+  updateCartLine,
+} from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
 import type { Cart, CartLine, CartWarning } from "@/lib/types";
 
@@ -93,7 +98,10 @@ type LegacyLine = {
   quantity: number;
 };
 
-function toLegacyCart(data: CartState["data"]): Cart | null {
+function toLegacyCart(
+  data: CartState["data"],
+  discountOverride?: { applicable: boolean; code: string }[] | null,
+): Cart | null {
   if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
   return {
     appliedGiftCards: [],
@@ -103,10 +111,12 @@ function toLegacyCart(data: CartState["data"]): Cart | null {
       totalAmount: data.cost.totalAmount,
     },
     discountAllocations: [],
-    discountCodes: (data.discountCodes ?? []).map((d: { applicable: boolean; code: string }) => ({
-      applicable: d.applicable,
-      code: d.code,
-    })),
+    discountCodes: (discountOverride ?? data.discountCodes ?? []).map(
+      (d: { applicable: boolean; code: string }) => ({
+        applicable: d.applicable,
+        code: d.code,
+      }),
+    ),
     id: data.id ?? undefined,
     lines: data.lines.nodes
       .map((l) => toLegacyLine(l as unknown as LegacyLine))
@@ -181,11 +191,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearWarnings = useCallback(() => setLocalWarnings([]), []);
 
   const cartState = useHydrogenCart((state) => state);
-  const cart = toLegacyCart(cartState.data);
-  const isUpdatingCart =
-    cartState.pending.lines.size > 0 ||
-    cartState.pending.discountCodes.size > 0 ||
-    cartState.pending.note;
+  const [appliedDiscountCodes, setAppliedDiscountCodes] = useState<
+    { applicable: boolean; code: string }[] | null
+  >(null);
+  const cart = toLegacyCart(cartState.data, appliedDiscountCodes);
+  const isUpdatingCart = cartState.pending.lines.size > 0 || cartState.pending.note;
 
   const isOverlayOpenRef = useRef(isOverlayOpen);
   useEffect(() => {
@@ -230,6 +240,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setLocalWarnings(toLegacyWarnings(cartState.errors.cart));
     }
   }, [cartState.errors]);
+
+  // Discount codes bypass the Hydrogen event flow (see lib/cart/client) and land here resolved.
+  useEffect(() => {
+    function onResolved(event: Event) {
+      const detail = (event as CustomEvent<DiscountResolution>).detail;
+      setAppliedDiscountCodes(detail.cart?.discountCodes ?? null);
+    }
+    document.addEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
+    return () => document.removeEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
+  }, []);
+
+  // Clear the local override once the Hydrogen store catches up (e.g. after a refetch).
+  useEffect(() => {
+    if (!appliedDiscountCodes) return;
+    const storeCodes = cartState.data.discountCodes ?? [];
+    if (
+      storeCodes.length === appliedDiscountCodes.length &&
+      storeCodes.every((c, i) => c.code === appliedDiscountCodes[i]?.code)
+    ) {
+      setAppliedDiscountCodes(null);
+    }
+  }, [cartState.data.discountCodes, appliedDiscountCodes]);
 
   return (
     <CartContext.Provider

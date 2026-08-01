@@ -17,9 +17,10 @@ interface DiscountFormProps {
 
 export function DiscountForm({ cart }: DiscountFormProps) {
   const t = useTranslations("cart");
-  const { isUpdatingCart, setWarnings } = useCart();
+  const { setWarnings } = useCart();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
 
   const existingCodes = cart.discountCodes.map((d) => d.code);
 
@@ -32,14 +33,27 @@ export function DiscountForm({ cart }: DiscountFormProps) {
     }
     setError(null);
     setWarnings([]);
-    applyDiscount(trimmed, existingCodes);
-    setCode("");
+    setIsPending(true);
+    applyDiscount(trimmed, existingCodes)
+      .then((result) => {
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+        setCode("");
+      })
+      .finally(() => setIsPending(false));
   };
 
   const handleRemove = (target: string) => {
     setError(null);
     setWarnings([]);
-    removeDiscount(target, existingCodes);
+    setIsPending(true);
+    removeDiscount(target, existingCodes)
+      .then((result) => {
+        if (result.error) setError(result.error);
+      })
+      .finally(() => setIsPending(false));
   };
 
   return (
@@ -56,13 +70,13 @@ export function DiscountForm({ cart }: DiscountFormProps) {
           placeholder={t("discountCode")}
           aria-label={t("discountCode")}
           aria-invalid={error ? true : undefined}
-          disabled={isUpdatingCart}
+          disabled={isPending}
           autoComplete="off"
           spellCheck={false}
           className="flex-1"
         />
-        <Button type="submit" disabled={isUpdatingCart || code.trim() === ""}>
-          {isUpdatingCart ? (
+        <Button type="submit" disabled={isPending || code.trim() === ""}>
+          {isPending ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
             t("applyDiscount")
@@ -98,7 +112,7 @@ export function DiscountForm({ cart }: DiscountFormProps) {
                   type="button"
                   onClick={() => handleRemove(d.code)}
                   aria-label={`${t("removeDiscount")}: ${d.code}`}
-                  disabled={isUpdatingCart}
+                  disabled={isPending}
                   className={cn(
                     "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
                     d.applicable ? "hover:bg-primary-foreground/15" : "hover:bg-foreground/10",

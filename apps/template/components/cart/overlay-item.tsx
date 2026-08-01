@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -37,13 +38,23 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
         href={`/products/${item.merchandise.product.handle}`}
         className="shrink-0 relative size-18 self-end overflow-hidden hover:opacity-80 transition-opacity"
       >
-        <Image
-          src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}
-          alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
-          fill
-          className="object-cover"
-          sizes="72px"
-        />
+        {(() => {
+          const imageUrl =
+            item.merchandise.image?.url || item.merchandise.product.featuredImage.url;
+          return imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={
+                item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText
+              }
+              fill
+              className="object-cover"
+              sizes="72px"
+            />
+          ) : (
+            <ImagePlaceholder className="size-full" />
+          );
+        })()}
       </Link>
 
       <div className="flex-1 min-w-0 min-h-18 flex flex-col gap-2 pt-0.5">
