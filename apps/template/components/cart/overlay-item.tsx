@@ -28,6 +28,9 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const unitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
     : parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const discountedTotal = item.discountAllocations.length
+    ? parseFloat(item.discountAllocations[0].discountedAmount.amount)
+    : null;
 
   return (
     <li
@@ -139,8 +142,21 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
         </div>
       </div>
 
-      <div className="text-sm font-medium text-foreground self-start py-0.5">
-        {formatPrice(unitPrice * quantity, currencyCode, locale)}
+      <div className="self-start py-0.5 text-sm text-right">
+        {discountedTotal != null ? (
+          <div className="grid gap-0.5">
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(unitPrice * quantity, currencyCode, locale)}
+            </span>
+            <span className="font-medium text-foreground">
+              {formatPrice(discountedTotal, currencyCode, locale)}
+            </span>
+          </div>
+        ) : (
+          <span className="font-medium text-foreground">
+            {formatPrice(unitPrice * quantity, currencyCode, locale)}
+          </span>
+        )}
       </div>
     </li>
   );

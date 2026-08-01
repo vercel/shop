@@ -90,7 +90,10 @@ type LegacyMerchandise = {
 };
 
 type LegacyLine = {
-  cost: { totalAmount: { amount: string; currencyCode: string } };
+  cost: {
+    amountPerQuantity?: { amount: string; currencyCode: string } | null;
+    totalAmount: { amount: string; currencyCode: string };
+  };
   id: string;
   instructions?: { canRemove: boolean; canUpdateQuantity: boolean } | null;
   lineComponents?: LegacyLine[] | null;
@@ -143,14 +146,29 @@ function toLegacyImage(image: LegacyMerchandise["image"]) {
 function toLegacyLine(line: LegacyLine): CartLine {
   const merchandise = line.merchandise;
   const image = merchandise?.image;
+  const totalAmount = line.cost.totalAmount;
+  const amountPerQuantity = line.cost.amountPerQuantity;
+  // amountPerQuantity is the pre-discount unit price; a lower line total means a discount applied.
+  const discountedPerUnit =
+    amountPerQuantity &&
+    line.quantity > 0 &&
+    Number.parseFloat(totalAmount.amount) <
+      Number.parseFloat(amountPerQuantity.amount) * line.quantity
+      ? {
+          amount: (Number.parseFloat(totalAmount.amount) / line.quantity).toFixed(2),
+          currencyCode: totalAmount.currencyCode,
+        }
+      : undefined;
   return {
     canRemove: line.instructions?.canRemove ?? true,
     canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
     components: (line.lineComponents ?? []).map((c) => toLegacyLine(c)),
     cost: {
-      totalAmount: line.cost.totalAmount,
+      totalAmount,
     },
-    discountAllocations: [],
+    discountAllocations: discountedPerUnit
+      ? [{ discountedAmount: totalAmount, kind: "custom", title: "Discount" }]
+      : [],
     id: line.id,
     merchandise: {
       id: merchandise?.id ?? "",
