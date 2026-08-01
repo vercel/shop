@@ -1,7 +1,8 @@
 "use client";
 
-import { CartProvider as HydrogenCartProvider } from "@/lib/cart";
 import type { ComponentProps } from "react";
+
+import { CartProvider as HydrogenCartProvider } from "@/lib/cart";
 
 import { CartProvider } from "./context";
 

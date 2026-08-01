@@ -1,11 +1,10 @@
 "use client";
 
 import type { CartState } from "@shopify/hydrogen";
-import { useCartForm, useCart as useHydrogenCart } from "@shopify/hydrogen/react";
+import { useCart as useHydrogenCart } from "@shopify/hydrogen/react";
 import {
   createContext,
   type ReactNode,
-  type SubmitEvent,
   useCallback,
   useContext,
   useEffect,
@@ -13,6 +12,7 @@ import {
   useState,
 } from "react";
 
+import { addToCart, updateCartLine } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
 import type { Cart, CartLine, CartWarning } from "@/lib/types";
 
@@ -160,8 +160,6 @@ function toLegacyWarnings(group: { warnings: { code: string; message: string }[]
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { formProps, register } = useCartForm();
-
   const [isOverlayOpen, setOverlayOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [lastError, setLastError] = useState<CartMutationError | null>(null);
@@ -183,37 +181,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const openOverlay = useCallback(() => setOverlayOpen(true), []);
 
-  const [addFields, setAddFields] = useState<{
-    merchandiseId: string;
-    quantity: number;
-  } | null>(null);
-  const addFormRef = useRef<HTMLFormElement>(null);
-  const [updateFields, setUpdateFields] = useState<{
-    lineId: string;
-    quantity: number;
-  } | null>(null);
-  const updateFormRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (addFields) addFormRef.current?.requestSubmit();
-  }, [addFields]);
-
-  useEffect(() => {
-    if (updateFields) updateFormRef.current?.requestSubmit();
-  }, [updateFields]);
-
   useEffect(() => {
     if (cartState.pending.lines.size === 0) setIsAddingToCart(false);
   }, [cartState.pending.lines]);
 
   const addToCartOptimistic = useCallback(
-    (variantId: string, quantity: number, _productInfo?: OptimisticProductInfo) => {
+    (variantId: string, quantity: number, productInfo?: OptimisticProductInfo) => {
       setLastError(null);
       if (!isOverlayOpenRef.current) {
         setIsAddingToCart(true);
         setOverlayOpen(true);
       }
-      setAddFields({ merchandiseId: variantId, quantity });
+      addToCart(variantId, quantity, productInfo);
     },
     [],
   );
@@ -223,7 +202,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (quantity < 0 || quantity > 99) return;
       const line = findLine(cart?.lines ?? [], lineId);
       if (!line) return;
-      setUpdateFields({ lineId, quantity });
+      updateCartLine(lineId, quantity);
     },
     [cart?.lines],
   );
@@ -238,18 +217,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setLocalWarnings(toLegacyWarnings(cartState.errors.cart));
     }
   }, [cartState.errors]);
-
-  const handleAddSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-    formProps({
-      afterSubmit: () => setAddFields(null),
-    }).onSubmit?.(event);
-  };
-
-  const handleUpdateSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-    formProps({
-      afterSubmit: () => setUpdateFields(null),
-    }).onSubmit?.(event);
-  };
 
   return (
     <CartContext.Provider
@@ -272,27 +239,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         updateItemOptimistic,
       }}
     >
-      <form {...formProps()} hidden ref={addFormRef} onSubmit={handleAddSubmit} aria-hidden>
-        {addFields ? (
-          <>
-            <input {...register("merchandiseId", { value: addFields.merchandiseId })} readOnly />
-            <input {...register("quantity", { value: addFields.quantity })} readOnly />
-            <button type="submit" {...register("add")} />
-          </>
-        ) : null}
-      </form>
-      <form {...formProps()} hidden ref={updateFormRef} onSubmit={handleUpdateSubmit} aria-hidden>
-        {updateFields ? (
-          <>
-            <input {...register("lineId", { value: updateFields.lineId })} readOnly />
-            <input {...register("quantity", { value: updateFields.quantity })} readOnly />
-            <button
-              type="submit"
-              {...(updateFields.quantity === 0 ? register("remove") : register("set"))}
-            />
-          </>
-        ) : null}
-      </form>
       {children}
     </CartContext.Provider>
   );
