@@ -46,7 +46,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
         />
       </Link>
 
-      <div className="flex-1 min-w-0 flex flex-col gap-2 pt-0.5">
+      <div className="flex-1 min-w-0 min-h-18 flex flex-col gap-2 pt-0.5">
         <div>
           <Link
             href={`/products/${item.merchandise.product.handle}`}
