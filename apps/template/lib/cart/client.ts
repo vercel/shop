@@ -5,6 +5,7 @@ import type { OptimisticProductInfo } from "@/lib/product";
 const ENDPOINT = "/api/cart";
 const TIMEOUT_MS = 10_000;
 const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
+const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 
 interface CartMutationLine {
   merchandiseId: string;
@@ -123,4 +124,37 @@ export function updateCartLine(lineId: string, quantity: number): void {
     cart: result.cart ? toStandardCart(result.cart) : null,
   }));
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
+}
+
+// The discount mutation replaces the whole code set, so apply/remove recompute the full list.
+function dispatchDiscountUpdate(
+  discountCodes: string[],
+  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
+): void {
+  const event = new Event(DISCOUNT_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
+    discountCodes: { code: string }[];
+    promise: typeof promise;
+  };
+  event.discountCodes = discountCodes.map((code) => ({ code }));
+  event.promise = promise;
+  document.dispatchEvent(event);
+}
+
+function setDiscountCodes(discountCodes: string[]): void {
+  const promise = postCart({ discountCodes }).then((result) => ({
+    cart: result.cart ? toStandardCart(result.cart) : null,
+  }));
+  dispatchDiscountUpdate(discountCodes, promise);
+}
+
+export function applyDiscount(code: string, existingCodes: string[]): void {
+  const normalized = code.trim().toUpperCase();
+  if (!normalized) return;
+  if (existingCodes.some((c) => c.toUpperCase() === normalized)) return;
+  setDiscountCodes([...existingCodes, normalized]);
+}
+
+export function removeDiscount(code: string, existingCodes: string[]): void {
+  const normalized = code.trim().toUpperCase();
+  setDiscountCodes(existingCodes.filter((c) => c.toUpperCase() !== normalized));
 }

@@ -90,7 +90,7 @@ export function Summary({
 
   return (
     <div className="space-y-5">
-      <DiscountForm cart={cart} locale={locale} />
+      <DiscountForm cart={cart} />
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>

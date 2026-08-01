@@ -1,81 +1,46 @@
 "use client";
 
-import { useCartForm } from "@shopify/hydrogen/react";
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { type SubmitEvent, useEffect, useRef, useState } from "react";
+import { type SubmitEvent, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cartDiscountAmount } from "@/lib/cart";
-import type { Cart, Money } from "@/lib/types";
+import { applyDiscount, removeDiscount } from "@/lib/cart/client";
+import type { Cart } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface DiscountFormProps {
   cart: Cart;
-  locale: string;
 }
 
-function discountTotal(cart: Cart): Money | null {
-  const amount = cartDiscountAmount(cart);
-  if (amount === 0) return null;
-  return {
-    amount: amount.toString(),
-    currencyCode: cart.discountAllocations[0].discountedAmount.currencyCode,
-  };
-}
-
-export function DiscountForm({ cart, locale }: DiscountFormProps) {
+export function DiscountForm({ cart }: DiscountFormProps) {
   const t = useTranslations("cart");
-  const { setWarnings } = useCart();
-  const { formProps, register } = useCartForm();
+  const { isUpdatingCart, setWarnings } = useCart();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-  const [removeCode, setRemoveCode] = useState<string | null>(null);
-  const removeFormRef = useRef<HTMLFormElement>(null);
 
-  useEffect(() => {
-    if (removeCode) removeFormRef.current?.requestSubmit();
-  }, [removeCode]);
+  const existingCodes = cart.discountCodes.map((d) => d.code);
 
   const handleApply = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const trimmed = code.trim();
     if (!trimmed) {
-      event.preventDefault();
       setError(t("discountInvalidCode"));
       return;
     }
     setError(null);
-    setIsPending(true);
-    formProps({
-      afterSubmit: () => {
-        setIsPending(false);
-        setCode("");
-        setWarnings([]);
-      },
-    }).onSubmit?.(event);
+    setWarnings([]);
+    applyDiscount(trimmed, existingCodes);
+    setCode("");
   };
 
   const handleRemove = (target: string) => {
     setError(null);
-    setIsPending(true);
-    setRemoveCode(target);
+    setWarnings([]);
+    removeDiscount(target, existingCodes);
   };
-
-  const handleRemoveSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-    formProps({
-      afterSubmit: () => {
-        setIsPending(false);
-        setRemoveCode(null);
-        setWarnings([]);
-      },
-    }).onSubmit?.(event);
-  };
-
-  const totalDiscount = discountTotal(cart);
 
   return (
     <div className="grid gap-2.5">
@@ -91,27 +56,18 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
           placeholder={t("discountCode")}
           aria-label={t("discountCode")}
           aria-invalid={error ? true : undefined}
-          disabled={isPending}
+          disabled={isUpdatingCart}
           autoComplete="off"
           spellCheck={false}
           className="flex-1"
         />
-        <Button type="submit" disabled={isPending || code.trim() === ""}>
-          {isPending ? (
+        <Button type="submit" disabled={isUpdatingCart || code.trim() === ""}>
+          {isUpdatingCart ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : (
             t("applyDiscount")
           )}
         </Button>
-      </form>
-
-      <form {...formProps()} hidden ref={removeFormRef} onSubmit={handleRemoveSubmit} aria-hidden>
-        {removeCode ? (
-          <>
-            <input {...register("discountCode", { value: removeCode })} readOnly />
-            <button type="submit" {...register("discount-remove")} />
-          </>
-        ) : null}
       </form>
 
       {error ? (
@@ -126,7 +82,7 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
             <li key={d.code}>
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs",
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
                   d.applicable
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground border border-input",
@@ -142,7 +98,7 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
                   type="button"
                   onClick={() => handleRemove(d.code)}
                   aria-label={`${t("removeDiscount")}: ${d.code}`}
-                  disabled={isPending}
+                  disabled={isUpdatingCart}
                   className={cn(
                     "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
                     d.applicable ? "hover:bg-primary-foreground/15" : "hover:bg-foreground/10",
@@ -154,21 +110,6 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
             </li>
           ))}
         </ul>
-      ) : null}
-
-      {totalDiscount ? (
-        <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">{t("discount")}</span>
-          <span className="tabular-nums text-foreground">
-            <span aria-hidden="true">−</span>
-            <Price
-              amount={totalDiscount.amount}
-              currencyCode={totalDiscount.currencyCode}
-              locale={locale}
-              className="inline text-sm"
-            />
-          </span>
-        </div>
       ) : null}
     </div>
   );

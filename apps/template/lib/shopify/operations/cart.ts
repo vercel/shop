@@ -42,26 +42,6 @@ const CART_BUYER_IDENTITY_UPDATE_MUTATION = `#graphql
   }
 ` as const;
 
-const CART_DISCOUNT_CODES_UPDATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
-    cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
-      cart {
-        ...CartFields
-      }
-      userErrors {
-        field
-        message
-      }
-      warnings {
-        code
-        message
-        target
-      }
-    }
-  }
-` as const;
-
 const GET_CART_SELECTABLE_ADDRESSES_QUERY = `#graphql
   query getCartSelectableAddresses($cartId: ID!) {
     cart(id: $cartId) {
@@ -266,28 +246,6 @@ export async function updateCartNote(
   if (!cartId) return undefined;
 
   const result = await updateCartNoteCore(note, cartId);
-  invalidateCartCache();
-  return result;
-}
-
-export async function updateCartDiscountCodes(
-  discountCodes: string[],
-  cartIdOverride?: string,
-): Promise<CartMutationResult | undefined> {
-  const cartId = cartIdOverride || (await getCartIdFromCookie());
-  if (!cartId) return undefined;
-
-  const response = await storefront.request<{
-    cartDiscountCodesUpdate: CartMutationPayload<ShopifyCart>;
-  }>(CART_DISCOUNT_CODES_UPDATE_MUTATION, {
-    variables: { cartId, discountCodes },
-  });
-  assertStorefrontOk(response, "cartDiscountCodesUpdate");
-
-  const result = applyCartMutation(
-    response.data.cartDiscountCodesUpdate,
-    "cartDiscountCodesUpdate",
-  );
   invalidateCartCache();
   return result;
 }

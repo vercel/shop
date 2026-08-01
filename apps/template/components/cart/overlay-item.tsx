@@ -35,14 +35,14 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative size-20 self-end overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-18 self-end overflow-hidden hover:opacity-80 transition-opacity"
       >
         <Image
           src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}
           alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
           fill
           className="object-cover"
-          sizes="80px"
+          sizes="72px"
         />
       </Link>
 
@@ -84,13 +84,13 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
         <div className="flex items-center gap-1.5 mt-auto">
           <div
             aria-label={t("itemQuantity")}
-            className="grid h-7 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
+            className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
             role="group"
           >
             <button
               type="button"
               aria-label={t("decreaseQuantity")}
-              className="flex h-7 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!item.canUpdateQuantity || quantity === 1}
               onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
             >
@@ -98,7 +98,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             </button>
             <span
               aria-live="polite"
-              className="flex h-7 w-6 items-center justify-center text-xs font-medium tabular-nums"
+              className="flex h-6 w-6 items-center justify-center text-xs font-medium tabular-nums"
               role="status"
             >
               {quantity}
@@ -106,7 +106,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
             <button
               type="button"
               aria-label={t("increaseQuantity")}
-              className="flex h-7 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={!item.canUpdateQuantity || quantity === 99}
               onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
             >
