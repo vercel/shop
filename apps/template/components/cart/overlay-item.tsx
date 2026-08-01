@@ -35,7 +35,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatPrice(unitPrice * quantity, currencyCode, locale)}`}
+      aria-label={`${item.merchandise.product.title} - ${formatPrice(discountedTotal ?? unitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
@@ -145,11 +145,11 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       <div className="self-start py-0.5 text-sm text-right">
         {discountedTotal != null ? (
           <div className="grid gap-0.5">
-            <span className="text-xs text-muted-foreground line-through">
-              {formatPrice(unitPrice * quantity, currencyCode, locale)}
-            </span>
             <span className="font-medium text-foreground">
               {formatPrice(discountedTotal, currencyCode, locale)}
+            </span>
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(unitPrice * quantity, currencyCode, locale)}
             </span>
           </div>
         ) : (

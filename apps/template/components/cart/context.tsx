@@ -167,7 +167,7 @@ function toLegacyLine(line: LegacyLine): CartLine {
       totalAmount,
     },
     discountAllocations: discountedPerUnit
-      ? [{ discountedAmount: totalAmount, kind: "custom", title: "Discount" }]
+      ? [{ discountedAmount: totalAmount, kind: "custom" as const, title: "Discount" }]
       : [],
     id: line.id,
     merchandise: {
