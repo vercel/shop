@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
@@ -38,6 +37,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     getTranslations("accessibility"),
   ]);
 
+  // Un-awaited: the promise streams to the client provider, which resolves it
+  // into the cart store. Never block the shell on it.
+  const cartData = seedCartData();
+
   return (
     <html lang={locale}>
       <head />
@@ -52,14 +55,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <SiteSchema locale={locale} />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Nav locale={locale} />
-          <main id="main-content" className="flex flex-1 flex-col min-w-0">
-            {children}
-          </main>
-          <Footer locale={locale} />
-          <Suspense fallback={null}>
-            <CartBoundary />
-          </Suspense>
+          <CartProviderWrapper cartData={cartData}>
+            <Nav locale={locale} />
+            <main id="main-content" className="flex flex-1 flex-col min-w-0">
+              {children}
+            </main>
+            <Footer locale={locale} />
+            <CartNotifications />
+            <CartOverlayBridge />
+          </CartProviderWrapper>
           <Suspense>
             <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
           </Suspense>
@@ -70,21 +74,6 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         </Suspense>
       </body>
     </html>
-  );
-}
-
-// The only dynamic piece: seeds the cart store from the request and mounts the
-// provider + cart chrome. Everything else renders from the static shell.
-async function CartBoundary() {
-  await connection();
-
-  const cartData = seedCartData();
-
-  return (
-    <CartProviderWrapper cartData={cartData}>
-      <CartNotifications />
-      <CartOverlayBridge />
-    </CartProviderWrapper>
   );
 }
 
