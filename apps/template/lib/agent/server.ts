@@ -77,7 +77,8 @@ function createSystemPrompt(context: AgentContext): string {
   return `${prompt}\n${catalog.prompt({
     customRules: [
       "When searchProducts, searchCatalog, browseCollection, getProductRecommendations, getProductDetails, or getCatalogProduct returns products successfully, render them with AgentProductCard components. Wrap multiple cards in AgentProductGrid.",
-      "Pass price and compareAtPrice strings directly from tool results.",
+      "Do not use repeat, $item, $state, $index, or $bindItem. Give each AgentProductCard its own /elements/<key> entry with concrete prop values copied directly from the tool result, and list the card keys in the grid's children array.",
+      "Pass price and compareAtPrice strings directly from tool results. When a product has no compareAtPrice, use null — never a zero amount.",
       "When getCart returns a non-empty cart, render AgentCartSummary using its items, subtotal, total, totalQuantity, and checkoutUrl.",
       "After addToCart succeeds, render AgentCartConfirmation using known product context.",
       "When multiple variants need a choice, render AgentVariantPicker from getProductDetails and ask the user which variant they want.",
