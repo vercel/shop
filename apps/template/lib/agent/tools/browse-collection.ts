@@ -10,7 +10,7 @@ export function browseCollectionTool() {
     description: `Browse products in a collection. Get handles from listCollections or the current page context.`,
     inputSchema: z.object({
       collection: z.string(),
-      limit: z.number().min(1).max(10).default(5),
+      limit: z.number().min(1).max(10).default(6),
       sortKey: z
         .enum(["best-matches", "price-low-to-high", "price-high-to-low", "BEST_SELLING", "CREATED"])
         .default("best-matches"),
