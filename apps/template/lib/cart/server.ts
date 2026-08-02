@@ -5,7 +5,7 @@ import {
   gql,
   type I18nConfig,
 } from "@shopify/hydrogen";
-import { revalidateTag, updateTag } from "next/cache";
+import { io, revalidateTag, updateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
@@ -72,6 +72,8 @@ export function buildCartIdSetCookieHeader(id: string): string {
 /** Starts the full-cart read from the request cookie without awaiting it. */
 export function seedCartData() {
   return (async () => {
+    // Hydrogen's createShopifyRequestContext calls crypto.randomUUID(); exclude it from the static shell.
+    await io();
     const i18n = {
       country: getCountryCode(defaultLocale),
       language: getLanguageCode(defaultLocale),
