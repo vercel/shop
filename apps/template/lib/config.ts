@@ -61,7 +61,7 @@ const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {
-    isEnabled: true,
+    isEnabled: false,
   },
   analytics: {
     shopify: {
