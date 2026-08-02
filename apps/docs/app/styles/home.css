@@ -68,7 +68,15 @@
   --ring: oklch(0.556 0 0);
 }
 
-/* Homepage heading scale */
+/* Homepage heading scale (aligned to the Geist text-heading-* scale) */
+@utility text-heading-24 {
+  @apply font-sans font-semibold text-[24px] leading-[32px] tracking-[-0.96px];
+}
+
+@utility text-heading-32 {
+  @apply font-sans font-semibold text-[32px] leading-[40px] tracking-[-1.28px];
+}
+
 @utility text-heading-40 {
   @apply font-sans font-semibold text-[40px] leading-[48px] tracking-[-2.4px];
 }
@@ -79,6 +87,10 @@
 
 @utility text-heading-56 {
   @apply font-sans font-semibold text-[56px] leading-[56px] tracking-[-3.36px];
+}
+
+@utility text-heading-64 {
+  @apply font-sans font-semibold text-[64px] leading-[64px] tracking-[-3.84px];
 }
 
 /* Logos marquee animation */

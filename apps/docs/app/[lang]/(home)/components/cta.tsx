@@ -25,7 +25,7 @@ export const CTA = ({ title, description, primary, secondary, className }: CTAPr
     )}
   >
     <div className="flex flex-col gap-0.5">
-      <h2 className="font-sans font-semibold text-xl tracking-tight text-foreground sm:text-2xl md:text-3xl lg:text-[40px]">
+      <h2 className="font-sans font-semibold text-heading-24 tracking-tighter text-foreground sm:text-heading-32 md:text-heading-40">
         {title}
       </h2>
       <p className="text-lg text-muted-foreground">{description}</p>
