@@ -107,7 +107,7 @@ const tools = {
 export function createAgent() {
   return new ToolLoopAgent({
     instructions: createSystemPrompt(getAgentContext()),
-    model: "google/gemini-3.5-flash",
+    model: "openai/gpt-5.6-luna",
     stopWhen: isStepCount(10),
     tools,
   });
