@@ -22,7 +22,7 @@ const columns: Column[] = [
 export const ShopifyCommerce = () => (
   <div className="grid gap-12 py-12 lg:grid-cols-3 lg:gap-16">
     <div className="flex flex-col gap-4">
-      <h2 className="font-sans font-semibold text-heading-24 tracking-tighter text-foreground sm:text-heading-32">
+      <h2 className="font-sans text-heading-24 tracking-tighter text-foreground sm:text-heading-32">
         Shopify as the commerce engine
       </h2>
       <p className="text-lg text-muted-foreground">

@@ -13,7 +13,7 @@ export const CenteredSection = ({ title, description, aside, children }: Centere
   <div className="grid gap-12 py-8 sm:py-12">
     <div className={cn("grid gap-6 sm:items-center sm:gap-10", aside && "md:grid-cols-2")}>
       <div className="grid gap-4">
-        <h2 className="font-sans font-semibold text-heading-32 text-gray-1000 tracking-tighter sm:text-heading-40">
+        <h2 className="font-sans text-heading-32 text-gray-1000 tracking-tighter sm:text-heading-40">
           {title}
         </h2>
         <p className="text-balance text-lg text-muted-foreground">{description}</p>
