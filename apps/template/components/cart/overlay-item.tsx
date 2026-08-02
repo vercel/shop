@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -27,32 +28,51 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const unitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
     : parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const compareAtUnitPrice =
+    item.merchandise.compareAtPrice != null
+      ? parseFloat(item.merchandise.compareAtPrice.amount)
+      : null;
+  // Strike only a genuine compare-at on the unit price — never from stepping quantity.
+  const hasCompareAt = compareAtUnitPrice != null && compareAtUnitPrice > unitPrice;
+  const discountedTotal = item.discountAllocations.length
+    ? parseFloat(item.discountAllocations[0].discountedAmount.amount)
+    : null;
 
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatPrice(unitPrice * quantity, currencyCode, locale)}`}
+      aria-label={`${item.merchandise.product.title} - ${formatPrice(discountedTotal ?? unitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative w-16 h-16 bg-muted overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-18 self-end overflow-hidden hover:opacity-80 transition-opacity"
       >
-        <Image
-          src={item.merchandise.image?.url || item.merchandise.product.featuredImage.url}
-          alt={item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText}
-          fill
-          className="object-cover"
-          sizes="64px"
-        />
+        {(() => {
+          const imageUrl =
+            item.merchandise.image?.url || item.merchandise.product.featuredImage.url;
+          return imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={
+                item.merchandise.image?.altText || item.merchandise.product.featuredImage.altText
+              }
+              fill
+              className="object-cover"
+              sizes="72px"
+            />
+          ) : (
+            <ImagePlaceholder className="size-full" />
+          );
+        })()}
       </Link>
 
-      <div className="flex-1 min-w-0 flex flex-col gap-2 py-0.5">
+      <div className="flex-1 min-w-0 min-h-18 flex flex-col gap-2 pt-0.5">
         <div>
           <Link
             href={`/products/${item.merchandise.product.handle}`}
             className="hover:opacity-70 transition-opacity"
           >
-            <h3 className="font-medium text-sm text-foreground line-clamp-2">
+            <h3 className="font-medium text-sm text-foreground line-clamp-1">
               {item.merchandise.product.title}
             </h3>
           </Link>
@@ -81,34 +101,38 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="size-7 rounded-full"
-            onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
-            disabled={!item.canUpdateQuantity || quantity === 1}
-            aria-label={t("decreaseQuantity")}
+        <div className="flex items-center gap-1.5 mt-auto">
+          <div
+            aria-label={t("itemQuantity")}
+            className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
+            role="group"
           >
-            <MinusIcon className="size-3" />
-          </Button>
-
-          <span className="inline-flex items-center justify-center rounded-full bg-muted min-w-10.5 h-7 px-2.5 text-xs font-medium text-foreground">
-            {quantity}
-          </span>
-
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            className="size-7 rounded-full"
-            onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
-            disabled={!item.canUpdateQuantity || quantity === 99}
-            aria-label={t("increaseQuantity")}
-          >
-            <PlusIcon className="size-3" />
-          </Button>
+            <button
+              type="button"
+              aria-label={t("decreaseQuantity")}
+              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!item.canUpdateQuantity || quantity === 1}
+              onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
+            >
+              <MinusIcon className="size-3 shrink-0" />
+            </button>
+            <span
+              aria-live="polite"
+              className="flex h-6 w-6 items-center justify-center text-xs font-medium tabular-nums"
+              role="status"
+            >
+              {quantity}
+            </span>
+            <button
+              type="button"
+              aria-label={t("increaseQuantity")}
+              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={!item.canUpdateQuantity || quantity === 99}
+              onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
+            >
+              <PlusIcon className="size-3 shrink-0" />
+            </button>
+          </div>
 
           <Button
             type="button"
@@ -124,8 +148,17 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
         </div>
       </div>
 
-      <div className="text-sm font-medium text-foreground self-start py-0.5">
-        {formatPrice(unitPrice * quantity, currencyCode, locale)}
+      <div className="self-start py-0.5 text-sm text-right">
+        <div className="grid gap-0.5">
+          <span className="font-medium text-foreground">
+            {formatPrice(unitPrice, currencyCode, locale)}
+          </span>
+          {hasCompareAt ? (
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(compareAtUnitPrice, currencyCode, locale)}
+            </span>
+          ) : null}
+        </div>
       </div>
     </li>
   );

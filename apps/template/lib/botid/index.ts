@@ -13,12 +13,22 @@ export const botIdCheckOptions = {
   advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
 };
 
-export const botIdProtectedRoutes: BotIdProtectedRoute[] = shopConfig.agent.isEnabled
-  ? [
-      {
-        advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
-        method: "POST",
-        path: "/api/chat",
-      },
-    ]
-  : [];
+export const botIdProtectedRoutes: BotIdProtectedRoute[] = [
+  // The cart route fronts every Shopify cart mutation, so it's protected whenever
+  // BotID is on — independent of the agent. The webhook route is excluded: Shopify's
+  // own servers call it and would fail bot detection.
+  {
+    advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
+    method: "POST",
+    path: "/api/cart",
+  },
+  ...(shopConfig.agent.isEnabled
+    ? [
+        {
+          advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
+          method: "POST",
+          path: "/api/chat",
+        },
+      ]
+    : []),
+];

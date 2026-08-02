@@ -1,21 +1,16 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { prepareCheckoutAction } from "@/lib/cart/action";
 
 import { useCart } from "./context";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
 import { CartWarnings } from "./warnings";
-
-interface OverlayContentProps {
-  locale: string;
-}
 
 function CheckoutButtonContent({
   isCheckingOut,
@@ -46,9 +41,10 @@ function CheckoutButtonContent({
   return <span>{t("completeCheckout")}</span>;
 }
 
-export function OverlayContent({ locale }: OverlayContentProps) {
+export function OverlayContent() {
   const router = useRouter();
-  const { cart, cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
+  const locale = useLocale();
+  const { cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
 
@@ -61,15 +57,13 @@ export function OverlayContent({ locale }: OverlayContentProps) {
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
-  const handleCheckout = async () => {
-    if (!cart?.checkoutUrl && !displayCart?.checkoutUrl) return;
-    setIsCheckingOut(true);
-
-    const { checkoutUrl } = await prepareCheckoutAction();
-    window.location.href = checkoutUrl || cart?.checkoutUrl || displayCart?.checkoutUrl || "";
-  };
-
   const displayCart = cartWithPending;
+
+  const handleCheckout = () => {
+    if (!displayCart?.checkoutUrl) return;
+    setIsCheckingOut(true);
+    window.location.href = displayCart.checkoutUrl;
+  };
 
   if (!displayCart || displayCart.lines.length === 0) {
     return (

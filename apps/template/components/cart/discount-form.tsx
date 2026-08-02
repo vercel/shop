@@ -2,73 +2,59 @@
 
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { type SubmitEvent, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cartDiscountAmount } from "@/lib/cart";
-import { applyDiscountCodeAction, removeDiscountCodeAction } from "@/lib/cart/action";
-import type { Cart, Money } from "@/lib/types";
+import { applyDiscount, removeDiscount } from "@/lib/cart/client";
+import type { Cart } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface DiscountFormProps {
   cart: Cart;
-  locale: string;
 }
 
-function discountTotal(cart: Cart): Money | null {
-  const amount = cartDiscountAmount(cart);
-  if (amount === 0) return null;
-  return {
-    amount: amount.toString(),
-    currencyCode: cart.discountAllocations[0].discountedAmount.currencyCode,
-  };
-}
-
-export function DiscountForm({ cart, locale }: DiscountFormProps) {
+export function DiscountForm({ cart }: DiscountFormProps) {
   const t = useTranslations("cart");
-  const { setCart, setWarnings } = useCart();
+  const { setWarnings } = useCart();
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
 
-  const handleApply = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+  const existingCodes = cart.discountCodes.map((d) => d.code);
+
+  const handleApply = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
     const trimmed = code.trim();
     if (!trimmed) {
       setError(t("discountInvalidCode"));
       return;
     }
-
-    startTransition(async () => {
-      const result = await applyDiscountCodeAction(trimmed);
-      if (result.cart) setCart(result.cart);
-      if (result.success) {
-        setWarnings(result.warnings ?? []);
+    setError(null);
+    setWarnings([]);
+    setIsPending(true);
+    applyDiscount(trimmed, existingCodes)
+      .then((result) => {
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
         setCode("");
-      } else {
-        setError(result.error ?? t("discountInvalidCode"));
-      }
-    });
+      })
+      .finally(() => setIsPending(false));
   };
 
   const handleRemove = (target: string) => {
     setError(null);
-    startTransition(async () => {
-      const result = await removeDiscountCodeAction(target);
-      if (result.success && result.cart) {
-        setCart(result.cart);
-        setWarnings(result.warnings ?? []);
-      } else if (result.error) {
-        setError(result.error);
-      }
-    });
+    setWarnings([]);
+    setIsPending(true);
+    removeDiscount(target, existingCodes)
+      .then((result) => {
+        if (result.error) setError(result.error);
+      })
+      .finally(() => setIsPending(false));
   };
-
-  const totalDiscount = discountTotal(cart);
 
   return (
     <div className="grid gap-2.5">
@@ -110,7 +96,7 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
             <li key={d.code}>
               <span
                 className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs",
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
                   d.applicable
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground border border-input",
@@ -138,21 +124,6 @@ export function DiscountForm({ cart, locale }: DiscountFormProps) {
             </li>
           ))}
         </ul>
-      ) : null}
-
-      {totalDiscount ? (
-        <div className="flex items-baseline justify-between text-sm">
-          <span className="text-muted-foreground">{t("discount")}</span>
-          <span className="tabular-nums text-foreground">
-            <span aria-hidden="true">−</span>
-            <Price
-              amount={totalDiscount.amount}
-              currencyCode={totalDiscount.currencyCode}
-              locale={locale}
-              className="inline text-sm"
-            />
-          </span>
-        </div>
       ) : null}
     </div>
   );

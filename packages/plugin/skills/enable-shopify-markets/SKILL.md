@@ -279,15 +279,26 @@ Switching language within the same country must not mutate buyer identity:
 - `fr-CA` to `en-CA`: set locale; no cart country update
 - `en-CA` to `en-US`: set locale and update buyer country to `US`
 
-Keep the mutation in a server action, validate both inputs, and rely on `updateCartBuyerIdentity` to invalidate cart cache:
+Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly — read the cart id from the shared `cart` cookie, issue `cartBuyerIdentityUpdate` through `storefront.request`, then call `invalidateCartCache()`:
 
 ```ts
 "use server";
 
 import { cookies } from "next/headers";
 
+import { getCartIdFromCookie, invalidateCartCache } from "@/lib/cart/server";
 import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
-import { updateCartBuyerIdentity } from "@/lib/shopify/operations/cart";
+import { storefront } from "@/lib/shopify/storefront";
+
+const BUYER_IDENTITY_MUTATION = /* GraphQL */ `
+  mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+      cart {
+        id
+      }
+    }
+  }
+`;
 
 export async function switchLocaleAction(currentValue: string, nextValue: string) {
   if (!isEnabledLocale(currentValue) || !isEnabledLocale(nextValue)) {
@@ -295,7 +306,16 @@ export async function switchLocaleAction(currentValue: string, nextValue: string
   }
 
   if (getCountryCode(currentValue) !== getCountryCode(nextValue)) {
-    await updateCartBuyerIdentity(nextValue);
+    const cartId = await getCartIdFromCookie();
+    if (cartId) {
+      await storefront.request(BUYER_IDENTITY_MUTATION, {
+        variables: {
+          buyerIdentity: { countryCode: getCountryCode(nextValue) },
+          cartId,
+        },
+      });
+      invalidateCartCache();
+    }
   }
 
   const cookieStore = await cookies();
@@ -307,6 +327,8 @@ export async function switchLocaleAction(currentValue: string, nextValue: string
   return { success: true } as const;
 }
 ```
+
+`getCartIdFromCookie()` (in `lib/cart/server.ts`) reads the shared `cart` cookie and returns the full `gid://shopify/Cart/...` id, so the action reuses the same format the Hydrogen handlers write.
 
 The selector remains a leaf Client Component.
 

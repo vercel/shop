@@ -31,6 +31,7 @@ import {
   getSharedImages,
   hasColorImagePartitioning,
   type SelectedOptions,
+  variantToOptimisticInfo,
 } from "@/lib/product";
 import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
@@ -236,6 +237,7 @@ async function ProductInfoArea({
         <Suspense fallback={<GiftCardPurchaseFormFallback t={t} />}>
           <ResolvedGiftCardPurchaseForm
             eagerVariantId={eagerSelection?.selectedVariant?.id}
+            product={product}
             variantPromise={variantPromise}
           />
         </Suspense>
@@ -385,14 +387,22 @@ async function ResolvedBuyButtons({
 
 async function ResolvedGiftCardPurchaseForm({
   eagerVariantId,
+  product,
   variantPromise,
 }: {
   eagerVariantId: string | undefined;
+  product: ProductDetails;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
-  const variant = eagerVariantId ? { id: eagerVariantId } : await variantPromise;
-  if (!variant?.id) return null;
-  return <GiftCardPurchaseForm merchandiseId={variant.id} />;
+  const variant = await variantPromise;
+  const merchandiseId = eagerVariantId ?? variant?.id;
+  if (!merchandiseId) return null;
+  return (
+    <GiftCardPurchaseForm
+      merchandiseId={merchandiseId}
+      productInfo={variant ? variantToOptimisticInfo(variant, product) : undefined}
+    />
+  );
 }
 
 function GiftCardPurchaseFormFallback({
