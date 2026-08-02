@@ -286,7 +286,7 @@ Switching language within the same country must not mutate buyer identity:
 - `fr-CA` to `en-CA`: set locale; no cart country update
 - `en-CA` to `en-US`: set locale and update buyer country to `US`
 
-Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly. The Hydrogen cart stack has no `updateCartBuyerIdentity` operation — read the cart id from the shared `cart` cookie, issue `cartBuyerIdentityUpdate` through `storefront.request`, then call `invalidateCartCache()`:
+Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly — read the cart id from the shared `cart` cookie, issue `cartBuyerIdentityUpdate` through `storefront.request`, then call `invalidateCartCache()`:
 
 ```ts
 "use server";
