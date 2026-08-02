@@ -109,6 +109,8 @@ export async function POST(request: Request) {
           pipeJsonRender(
             toUIMessageStream({
               originalMessages: safeMessages.data,
+              // pipeJsonRender only understands text deltas; reasoning parts would pass through unhandled.
+              sendReasoning: false,
               stream: result.stream,
               tools: agent.tools,
             }),

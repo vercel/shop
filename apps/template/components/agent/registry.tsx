@@ -20,7 +20,7 @@ import type { Money } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function parsePriceString(price: string): Money {
-  const parts = price.split(" ");
+  const parts = typeof price === "string" ? price.split(" ") : [];
   return {
     amount: parts[0] || "0",
     currencyCode: parts[1] || "USD",

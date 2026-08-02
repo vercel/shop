@@ -15,7 +15,7 @@ export function searchCatalogTool() {
     description: `Search Shopify's native catalog semantically. Prefer this for vague, descriptive, or preference-driven requests.`,
     inputSchema: z.object({
       intent: z.string().optional(),
-      limit: z.number().min(1).max(10).default(5),
+      limit: z.number().min(1).max(10).default(6),
       query: z.string(),
     }),
     execute: async ({ intent, limit, query }) => {

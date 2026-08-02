@@ -1,3 +1,4 @@
+import { io } from "next/cache";
 import { cache } from "react";
 
 import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib/cart/server";
@@ -24,6 +25,8 @@ export const getCart = cache(async (): Promise<Cart | undefined> => {
 });
 
 export async function getCartById(cartId: string): Promise<Cart | undefined> {
+  // Hydrogen's request context calls crypto.randomUUID(); exclude the cart read from the static shell.
+  await io();
   return fetchCart(cartId);
 }
 
