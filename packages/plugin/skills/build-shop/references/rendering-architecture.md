@@ -90,7 +90,7 @@ Invariants the shape enforces:
 | Public content that belongs in the prerendered shell | Plain `"use cache"` with the existing `cacheLife` and `cacheTag` policy |
 | Public results resolved after request inputs such as filters or search params | `"use cache: remote"` when a shared runtime cache is justified |
 | Customer, session, cart, or authorization-dependent data | Uncached or private per-session handling; never place it in a shared remote cache |
-| Mutation results | Preserve the domain invalidation path; every cart mutation must call `invalidateCartCache()` |
+| Mutation results | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |
 
 Keep cache directives in the data layer. Do not add a second cache in presentation code.
 
@@ -113,7 +113,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 - Isolate search dialogs, filters, variant controls, cart controls, galleries, and forms into leaf client components.
 - Pass primitives or narrow serializable view models rather than complete domain objects.
 - Keep optimistic state close to the mutation it predicts, then reconcile with the canonical server result.
-- Invalidate only the affected domain data. Preserve `invalidateCartCache()` for every cart mutation.
+- Invalidate only the affected domain data. Carts are never in the Next.js data cache, so cart mutations need no cache invalidation step.
 - Lazy-load expensive closed overlays or optional tools, but do not lazy-load primary content to improve a bundle report.
 
 ## Architect media and third parties

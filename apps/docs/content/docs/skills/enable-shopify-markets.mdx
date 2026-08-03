@@ -286,14 +286,14 @@ Switching language within the same country must not mutate buyer identity:
 - `fr-CA` to `en-CA`: set locale; no cart country update
 - `en-CA` to `en-US`: set locale and update buyer country to `US`
 
-Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly — read the cart id from the shared `cart` cookie, issue `cartBuyerIdentityUpdate` through `storefront.request`, then call `invalidateCartCache()`:
+Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly — read the cart id from the shared `cart` cookie and issue `cartBuyerIdentityUpdate` through `storefront.request`:
 
 ```ts
 "use server";
 
 import { cookies } from "next/headers";
 
-import { getCartIdFromCookie, invalidateCartCache } from "@/lib/cart/server";
+import { getCartIdFromCookie } from "@/lib/cart/server";
 import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 import { storefront } from "@/lib/shopify/storefront";
 
@@ -321,7 +321,6 @@ export async function switchLocaleAction(currentValue: string, nextValue: string
           cartId,
         },
       });
-      invalidateCartCache();
     }
   }
 
