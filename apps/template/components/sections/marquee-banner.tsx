@@ -8,7 +8,7 @@ export function MarqueeBanner({ items }: MarqueeBannerProps) {
   return (
     <section
       aria-label={items.join(", ")}
-      className="flex overflow-hidden border-y border-border bg-accent py-4"
+      className="flex overflow-hidden py-2"
       data-slot="marquee-banner"
     >
       {/* Two identical tracks each shift a full width, so the second slides into the first's place seamlessly. */}
@@ -19,10 +19,7 @@ export function MarqueeBanner({ items }: MarqueeBannerProps) {
           className="flex shrink-0 animate-marquee items-center gap-10 pr-10"
         >
           {items.map((item) => (
-            <li
-              key={item}
-              className="whitespace-nowrap text-sm font-medium uppercase tracking-widest text-muted-foreground"
-            >
+            <li key={item} className="whitespace-nowrap text-2xl tracking-tight sm:text-3xl">
               {item}
             </li>
           ))}

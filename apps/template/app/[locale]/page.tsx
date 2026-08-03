@@ -6,13 +6,11 @@ import { ProductsGrid } from "@/components/product/products-grid";
 import { BannerSection } from "@/components/sections/banner-section";
 import { CategoryRail } from "@/components/sections/category-rail";
 import { CategorySlider } from "@/components/sections/category-slider";
-import { EditorialGrid } from "@/components/sections/editorial-grid";
 import { HeroBanner } from "@/components/sections/hero-banner";
 import { MarketingSplit } from "@/components/sections/marketing-split";
 import { MarqueeBanner } from "@/components/sections/marquee-banner";
 import { PromoDuo } from "@/components/sections/promo-duo";
 import { Testimonials } from "@/components/sections/testimonials";
-import { ValueProps } from "@/components/sections/value-props";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
@@ -78,6 +76,70 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
         </Container>
 
         <Container>
+          <CategorySlider
+            categories={[
+              {
+                href: "/collections/womens",
+                image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
+                label: t("categories.womens"),
+              },
+              {
+                href: "/collections/mens",
+                image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
+                label: t("categories.mens"),
+              },
+              {
+                href: "/collections/unisex",
+                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
+                label: t("categories.unisex"),
+              },
+              {
+                href: "/collections/youth",
+                image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
+                label: t("categories.youth"),
+              },
+            ]}
+          />
+        </Container>
+
+        <Container>
+          <CollectionSlider
+            collection="jackets"
+            collectionUrl="/collections/jackets"
+            limit={8}
+            locale={locale}
+            title={t("jackets")}
+          />
+        </Container>
+
+        <Container>
+          <PromoDuo
+            tiles={[
+              {
+                ctaText: t("promo.clearance.cta"),
+                headline: t("promo.clearance.headline"),
+                href: "/collections/clearance",
+                image: {
+                  alt: "",
+                  url: `${CDN}/files/atlasrange-jacket-mens-871b4a-main-yellow.png?v=1780164276`,
+                },
+                kicker: t("promo.clearance.kicker"),
+              },
+              {
+                ctaText: t("promo.youth.cta"),
+                headline: t("promo.youth.headline"),
+                href: "/collections/youth",
+                image: {
+                  alt: "",
+                  url: `${CDN}/collections/2026-06-27T21-32-29-493Z-landscape-youth-hero-motion-blur.jpg?v=1782596029`,
+                },
+                kicker: t("promo.youth.kicker"),
+              },
+            ]}
+          />
+        </Container>
+
+        <Container>
           <CategoryRail
             title={t("categoryRail")}
             items={[
@@ -113,7 +175,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
               },
               {
                 href: "/collections/tanks",
-                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
+                image: `${CDN}/files/pacecurrent-tank-womens-470c4a-main-yellow.png?v=1785786490`,
                 label: t("rail.tanks"),
               },
             ]}
@@ -121,89 +183,15 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
         </Container>
 
         <Container>
-          <CategorySlider
-            categories={[
-              {
-                href: "/collections/womens",
-                image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
-                label: t("categories.womens"),
-              },
-              {
-                href: "/collections/mens",
-                image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
-                label: t("categories.mens"),
-              },
-              {
-                href: "/collections/unisex",
-                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
-                label: t("categories.unisex"),
-              },
-              {
-                href: "/collections/youth",
-                image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
-                label: t("categories.youth"),
-              },
-            ]}
-          />
-        </Container>
-
-        <MarqueeBanner
-          items={[
-            t("marquee.shipping"),
-            t("marquee.fit"),
-            t("marquee.made"),
-            t("marquee.carbon"),
-            t("marquee.members"),
-          ]}
-        />
-
-        <Container>
           <ProductsGrid
             campaignCollections={CAMPAIGN_COLLECTIONS}
-            columns={5}
+            columns={4}
             fallbackSortKey="price-high-to-low"
-            limit={5}
+            limit={8}
             locale={locale}
             rememberedCollectionCookie="state_v0"
             searchParams={searchParams}
             title={t("pickedForYou")}
-          />
-        </Container>
-
-        <Container>
-          <PromoDuo
-            tiles={[
-              {
-                ctaText: t("promo.clearance.cta"),
-                headline: t("promo.clearance.headline"),
-                href: "/collections/clearance",
-                image: {
-                  alt: "",
-                  url: `${CDN}/files/atlasrange-jacket-mens-871b4a-main-yellow.png?v=1780164276`,
-                },
-                kicker: t("promo.clearance.kicker"),
-              },
-              {
-                ctaText: t("promo.youth.cta"),
-                headline: t("promo.youth.headline"),
-                href: "/collections/youth",
-                image: {
-                  alt: "",
-                  url: `${CDN}/collections/2026-06-27T21-32-29-493Z-landscape-youth-hero-motion-blur.jpg?v=1782596029`,
-                },
-                kicker: t("promo.youth.kicker"),
-              },
-            ]}
-          />
-        </Container>
-
-        <Container>
-          <CollectionSlider
-            collection="jackets"
-            collectionUrl="/collections/jackets"
-            limit={8}
-            locale={locale}
-            title={t("jackets")}
           />
         </Container>
 
@@ -222,56 +210,12 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
         />
 
         <Container>
-          <EditorialGrid
-            title={t("editorial.title")}
-            stories={[
-              {
-                href: "/collections/womens",
-                image: {
-                  alt: "",
-                  url: `${CDN}/collections/2026-06-27T12-59-10-736Z-landscape-athleisure-dark-split-hero-banner.jpg?v=1782580131`,
-                },
-                kicker: t("editorial.studio.kicker"),
-                title: t("editorial.studio.title"),
-              },
-              {
-                href: "/collections/mens",
-                image: {
-                  alt: "",
-                  url: `${CDN}/collections/2026-06-27T21-15-47-232Z-landscape-landscape-monochrome-male-runner-recovery-hero.jpg?v=1782595019`,
-                },
-                kicker: t("editorial.layering.kicker"),
-                title: t("editorial.layering.title"),
-              },
-              {
-                href: "/collections/unisex",
-                image: {
-                  alt: "",
-                  url: `${CDN}/collections/2026-06-27T21-26-52-691Z-landscape-unisex-running-hero-abstract-bw.jpg?v=1782595744`,
-                },
-                kicker: t("editorial.fabric.kicker"),
-                title: t("editorial.fabric.title"),
-              },
-            ]}
-          />
-        </Container>
-
-        <Container>
           <CollectionSlider
             collection="hoodies"
             collectionUrl="/collections/hoodies"
             limit={8}
             locale={locale}
             title={t("bestsellers")}
-          />
-        </Container>
-
-        <Container>
-          <ProductsGrid
-            collection="frontpage"
-            limit={4}
-            locale={locale}
-            title={t("allTimeFavorites")}
           />
         </Container>
 
@@ -316,32 +260,15 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
           />
         </Container>
 
-        <Container>
-          <ValueProps
-            items={[
-              {
-                body: t("valueProps.shipping.body"),
-                icon: "shipping",
-                title: t("valueProps.shipping.title"),
-              },
-              {
-                body: t("valueProps.returns.body"),
-                icon: "returns",
-                title: t("valueProps.returns.title"),
-              },
-              {
-                body: t("valueProps.materials.body"),
-                icon: "leaf",
-                title: t("valueProps.materials.title"),
-              },
-              {
-                body: t("valueProps.support.body"),
-                icon: "support",
-                title: t("valueProps.support.title"),
-              },
-            ]}
-          />
-        </Container>
+        <MarqueeBanner
+          items={[
+            t("marquee.shipping"),
+            t("marquee.fit"),
+            t("marquee.made"),
+            t("marquee.carbon"),
+            t("marquee.members"),
+          ]}
+        />
       </Sections>
     </Page>
   );

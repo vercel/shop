@@ -204,21 +204,6 @@
     },
     "categoryRail": "Shop by Category",
     "ctaText": "Shop Now",
-    "editorial": {
-      "fabric": {
-        "kicker": "Materials",
-        "title": "The fabric that breathes with you"
-      },
-      "layering": {
-        "kicker": "Guide",
-        "title": "Five ways to layer for shoulder season"
-      },
-      "studio": {
-        "kicker": "Lookbook",
-        "title": "Inside the winter studio sessions"
-      },
-      "title": "The Edit"
-    },
     "headline": "You Can Just Shop Things",
     "jackets": "Jackets, Built for Weather",
     "marketing": {
@@ -279,24 +264,6 @@
         "author": "Devon C.",
         "detail": "Verified buyer",
         "quote": "Third season in the same hoodie and the cuffs haven't stretched out. Worth every dollar."
-      }
-    },
-    "valueProps": {
-      "materials": {
-        "body": "Responsibly sourced fabric, traceable to the mill.",
-        "title": "Considered materials"
-      },
-      "returns": {
-        "body": "30 days to change your mind, no questions asked.",
-        "title": "Easy returns"
-      },
-      "shipping": {
-        "body": "Free standard delivery on every order over $100.",
-        "title": "Free shipping"
-      },
-      "support": {
-        "body": "Real humans, seven days a week.",
-        "title": "Styling support"
       }
     }
   },

@@ -200,21 +200,6 @@
     },
     "categoryRail": "Magasiner par catégorie",
     "ctaText": "Magasiner maintenant",
-    "editorial": {
-      "fabric": {
-        "kicker": "Matières",
-        "title": "Le tissu qui respire avec vous"
-      },
-      "layering": {
-        "kicker": "Guide",
-        "title": "Cinq façons de superposer en mi-saison"
-      },
-      "studio": {
-        "kicker": "Lookbook",
-        "title": "Dans les coulisses des séances d'hiver"
-      },
-      "title": "La sélection"
-    },
     "headline": "Magasinez, tout simplement",
     "jackets": "Manteaux, pensés pour la météo",
     "marketing": {
@@ -275,24 +260,6 @@
         "author": "Devon C.",
         "detail": "Achat vérifié",
         "quote": "Troisième saison avec le même chandail et les poignets n'ont pas cédé. Chaque dollar en vaut la peine."
-      }
-    },
-    "valueProps": {
-      "materials": {
-        "body": "Tissus sourcés de façon responsable, traçables jusqu'à l'usine.",
-        "title": "Matières réfléchies"
-      },
-      "returns": {
-        "body": "30 jours pour changer d'avis, sans question.",
-        "title": "Retours faciles"
-      },
-      "shipping": {
-        "body": "Livraison standard gratuite dès 100 $ d'achat.",
-        "title": "Livraison gratuite"
-      },
-      "support": {
-        "body": "De vraies personnes, sept jours sur sept.",
-        "title": "Conseils de style"
       }
     }
   },

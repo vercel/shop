@@ -25,14 +25,14 @@ export function CategoryRail({ items, title }: CategoryRailProps) {
               href={item.href}
               className="group grid cursor-pointer justify-items-center gap-2.5"
             >
-              <div className="relative size-24 overflow-hidden rounded-full bg-accent lg:size-auto lg:aspect-square lg:w-full">
+              <div className="relative aspect-square w-full">
                 {item.image ? (
                   <Image
                     src={item.image}
                     alt=""
                     fill
-                    sizes="(max-width: 1024px) 6rem, 12vw"
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    sizes="(max-width: 1024px) 6rem, 11vw"
+                    className="object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
                   <ImagePlaceholder className="size-full" />
