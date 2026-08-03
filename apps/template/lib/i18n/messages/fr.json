@@ -187,7 +187,14 @@
     "tryAgain": "Réessayer"
   },
   "footer": {
-    "copyright": "© {name}. Tous droits réservés."
+    "copyright": "© {name}. Tous droits réservés.",
+    "marquee": {
+      "carbon": "Livraison carboneutre",
+      "fit": "Échanges de taille gratuits",
+      "made": "Fabriqué de façon responsable",
+      "members": "Accès anticipé pour les membres",
+      "shipping": "Livraison gratuite dès 100 $"
+    }
   },
   "home": {
     "allTimeFavorites": "Favoris de toujours",
@@ -209,27 +216,8 @@
         "title": "Notre histoire"
       }
     },
-    "marquee": {
-      "carbon": "Livraison carboneutre",
-      "fit": "Échanges de taille gratuits",
-      "made": "Fabriqué de façon responsable",
-      "members": "Accès anticipé pour les membres",
-      "shipping": "Livraison gratuite dès 100 $"
-    },
     "newArrivalsTitle": "Nouveautés",
     "pickedForYou": "Sélectionné pour vous",
-    "promo": {
-      "clearance": {
-        "cta": "Voir les soldes",
-        "headline": "Jusqu'à 50 % de rabais en fin de saison",
-        "kicker": "Dernière démarque"
-      },
-      "youth": {
-        "cta": "Magasiner enfants",
-        "headline": "Conçu pour les jeunes sportifs",
-        "kicker": "Collection enfants"
-      }
-    },
     "rail": {
       "hoodies": "Chandails à capuchon",
       "jackets": "Manteaux",

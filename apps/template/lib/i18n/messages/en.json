@@ -191,7 +191,14 @@
     "tryAgain": "Try again"
   },
   "footer": {
-    "copyright": "© {name}. All rights reserved."
+    "copyright": "© {name}. All rights reserved.",
+    "marquee": {
+      "carbon": "Carbon-neutral delivery",
+      "fit": "Free fit exchanges",
+      "made": "Responsibly made",
+      "members": "Member early access",
+      "shipping": "Free shipping over $100"
+    }
   },
   "home": {
     "allTimeFavorites": "All-time Favorites",
@@ -213,27 +220,8 @@
         "title": "Our Story"
       }
     },
-    "marquee": {
-      "carbon": "Carbon-neutral delivery",
-      "fit": "Free fit exchanges",
-      "made": "Responsibly made",
-      "members": "Member early access",
-      "shipping": "Free shipping over $100"
-    },
     "newArrivalsTitle": "New Arrivals",
     "pickedForYou": "Picked for You",
-    "promo": {
-      "clearance": {
-        "cta": "Shop Clearance",
-        "headline": "Up to 50% off end-of-season",
-        "kicker": "Final Markdown"
-      },
-      "youth": {
-        "cta": "Shop Youth",
-        "headline": "Built for growing athletes",
-        "kicker": "Youth Collection"
-      }
-    },
     "rail": {
       "hoodies": "Hoodies",
       "jackets": "Jackets",

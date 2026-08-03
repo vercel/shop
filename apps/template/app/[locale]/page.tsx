@@ -8,8 +8,6 @@ import { CategoryRail } from "@/components/sections/category-rail";
 import { CategorySlider } from "@/components/sections/category-slider";
 import { HeroBanner } from "@/components/sections/hero-banner";
 import { MarketingSplit } from "@/components/sections/marketing-split";
-import { MarqueeBanner } from "@/components/sections/marquee-banner";
-import { PromoDuo } from "@/components/sections/promo-duo";
 import { Testimonials } from "@/components/sections/testimonials";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -109,33 +107,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
             limit={8}
             locale={locale}
             title={t("jackets")}
-          />
-        </Container>
-
-        <Container>
-          <PromoDuo
-            tiles={[
-              {
-                ctaText: t("promo.clearance.cta"),
-                headline: t("promo.clearance.headline"),
-                href: "/collections/clearance",
-                image: {
-                  alt: "",
-                  url: `${CDN}/files/atlasrange-jacket-mens-871b4a-main-yellow.png?v=1780164276`,
-                },
-                kicker: t("promo.clearance.kicker"),
-              },
-              {
-                ctaText: t("promo.youth.cta"),
-                headline: t("promo.youth.headline"),
-                href: "/collections/youth",
-                image: {
-                  alt: "",
-                  url: `${CDN}/collections/2026-06-27T21-32-29-493Z-landscape-youth-hero-motion-blur.jpg?v=1782596029`,
-                },
-                kicker: t("promo.youth.kicker"),
-              },
-            ]}
           />
         </Container>
 
@@ -259,16 +230,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
             }}
           />
         </Container>
-
-        <MarqueeBanner
-          items={[
-            t("marquee.shipping"),
-            t("marquee.fit"),
-            t("marquee.made"),
-            t("marquee.carbon"),
-            t("marquee.members"),
-          ]}
-        />
       </Sections>
     </Page>
   );

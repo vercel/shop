@@ -1,15 +1,15 @@
-interface MarqueeBannerProps {
+interface FooterMarqueeProps {
   items: string[];
 }
 
-export function MarqueeBanner({ items }: MarqueeBannerProps) {
+export function FooterMarquee({ items }: FooterMarqueeProps) {
   if (items.length === 0) return null;
 
   return (
     <section
       aria-label={items.join(", ")}
-      className="flex overflow-hidden py-2"
-      data-slot="marquee-banner"
+      className="flex overflow-hidden py-5"
+      data-slot="footer-marquee"
     >
       {/* Two identical tracks each shift a full width, so the second slides into the first's place seamlessly. */}
       {[0, 1].map((track) => (
