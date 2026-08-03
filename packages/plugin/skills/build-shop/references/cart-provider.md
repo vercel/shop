@@ -52,7 +52,7 @@ Use a memoized pure projection, a reducer over explicit pending intent, or an eq
 
 1. Enqueue the quantity under the purchasable-line key and render it immediately. Open the overlay when the interaction calls for it.
 2. Accumulate or debounce rapid adds for the same key when that reduces network work without delaying feedback.
-3. Send the accumulated quantity to a server action. The action creates the cart when necessary, persists the cart ID through the server cookie path, calls `invalidateCartCache()`, and returns the updated Shopify cart plus warnings or errors.
+3. Send the accumulated quantity to a server action. The action creates the cart when necessary, persists the cart ID through the server cookie path, and returns the updated Shopify cart plus warnings or errors.
 4. On success, replace `confirmedCart` with that returned cart and retire only the quantity acknowledged by the response. Preserve intent queued while the request was in flight.
 5. On failure, retire the failed intent, reveal the last confirmed cart, and surface the error near the initiating action or cart.
 

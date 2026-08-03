@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { useCartRender } from "@/components/cart/context-sync";
+import { useCartRender } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
@@ -90,7 +90,7 @@ export function Summary({
 
   return (
     <div className="space-y-5">
-      <DiscountForm cart={cart} locale={locale} />
+      <DiscountForm cart={cart} />
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>

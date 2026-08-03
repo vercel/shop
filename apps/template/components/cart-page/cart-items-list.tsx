@@ -1,6 +1,6 @@
 "use client";
 
-import { useCartRender } from "@/components/cart/context-sync";
+import { useCartRender } from "@/components/cart/context";
 import { OverlayItem } from "@/components/cart/overlay-item";
 
 interface CartItemsListProps {

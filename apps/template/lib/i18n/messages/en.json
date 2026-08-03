@@ -320,6 +320,8 @@
     "giftCard": {
       "addToCart": "Add to Cart",
       "addingToCart": "Adding to Cart...",
+      "invalidEmail": "A valid recipient email is required",
+      "invalidSendDate": "Send date must be today or later",
       "message": "Message",
       "messagePlaceholder": "Write a personal note (optional)",
       "recipientEmail": "Recipient email",

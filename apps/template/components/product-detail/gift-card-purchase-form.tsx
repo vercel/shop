@@ -1,9 +1,7 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
@@ -11,18 +9,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { addGiftCardAction } from "@/lib/cart/action";
+import { addToCart } from "@/lib/cart/client";
+import type { OptimisticProductInfo } from "@/lib/product";
 import { cn } from "@/lib/utils";
 
 interface GiftCardPurchaseFormProps {
   merchandiseId: string;
+  productInfo?: OptimisticProductInfo;
 }
 
-export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProps) {
+// Keys with the `__shopify_` prefix are recognized by Shopify to schedule and route gift card delivery.
+function giftCardAttributes(recipient: {
+  email: string;
+  message?: string;
+  name?: string;
+  sendOn?: string;
+  timezoneOffset?: number;
+}): { key: string; value: string }[] {
+  const attributes = [
+    { key: "__shopify_send_gift_card_to_recipient", value: "true" },
+    { key: "Recipient email", value: recipient.email },
+  ];
+  if (recipient.name) attributes.push({ key: "Recipient name", value: recipient.name });
+  if (recipient.message) attributes.push({ key: "Message", value: recipient.message });
+  if (recipient.sendOn) {
+    attributes.push({ key: "Send on", value: recipient.sendOn });
+    // Offset must reflect the buyer's browser, so it is captured client-side — never computed server-side (UTC).
+    if (typeof recipient.timezoneOffset === "number" && Number.isFinite(recipient.timezoneOffset)) {
+      attributes.push({ key: "__shopify_offset", value: String(recipient.timezoneOffset) });
+    }
+  }
+  return attributes;
+}
+
+export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
   const t = useTranslations("product.giftCard");
-  const { setCart, setOverlayOpen, setWarnings } = useCart();
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { setOverlayOpen, setWarnings } = useCart();
   const [error, setError] = useState<string | null>(null);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
 
@@ -31,40 +53,44 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const email = String(formData.get("email") ?? "");
-    const name = String(formData.get("name") ?? "");
-    const message = String(formData.get("message") ?? "");
+    const email = String(formData.get("email") ?? "").trim();
+    const name = String(formData.get("name") ?? "").trim();
+    const message = String(formData.get("message") ?? "").trim();
     const sendOn = String(formData.get("sendOn") ?? "");
     const form = event.currentTarget;
 
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError(t("invalidEmail"));
+      return;
+    }
+
     const scheduled = sendOnEnabled && sendOn;
-
-    startTransition(async () => {
-      const result = await addGiftCardAction({
-        merchandiseId,
-        recipient: {
-          email,
-          message: message || undefined,
-          name: name || undefined,
-          sendOn: scheduled ? sendOn : undefined,
-          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
-          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
-        },
-      });
-
-      if (!result.success) {
-        setError(result.error ?? "Failed to add gift card to cart");
+    if (scheduled) {
+      const parsed = new Date(`${sendOn}T00:00:00`);
+      if (Number.isNaN(parsed.getTime()) || parsed < new Date(new Date().toDateString())) {
+        setError(t("invalidSendDate"));
         return;
       }
+    }
 
-      if (result.cart) setCart(result.cart);
-      setWarnings(result.warnings ?? []);
+    setWarnings([]);
+    addToCart(
+      merchandiseId,
+      1,
+      productInfo,
+      giftCardAttributes({
+        email,
+        message: message || undefined,
+        name: name || undefined,
+        sendOn: scheduled ? sendOn : undefined,
+        // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+        timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
+      }),
+    );
 
-      form.reset();
-      setSendOnEnabled(false);
-      setOverlayOpen(true);
-      router.refresh();
-    });
+    form.reset();
+    setSendOnEnabled(false);
+    setOverlayOpen(true);
   }
 
   return (
@@ -129,20 +155,12 @@ export function GiftCardPurchaseForm({ merchandiseId }: GiftCardPurchaseFormProp
 
       <Button
         type="submit"
-        disabled={isPending}
         className={cn(
           "h-12 w-full justify-center",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",
         )}
       >
-        {isPending ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            <span>{t("addingToCart")}</span>
-          </span>
-        ) : (
-          <span>{t("addToCart")}</span>
-        )}
+        <span>{t("addToCart")}</span>
       </Button>
     </form>
   );

@@ -28,7 +28,7 @@ Read `references/REFERENCE.md` before editing.
 5. Pass locale context through existing country and language helpers when Shopify localizes the result.
 6. Keep raw Shopify response types under `lib/shopify/**`; transform them into provider-independent domain types before presentation.
 7. Preserve cache tags and the existing webhook invalidation hierarchy. Do not cache mutations.
-8. Call `invalidateCartCache()` after every successful cart mutation.
+8. Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
 
 ## Revalidate both boundaries
 
