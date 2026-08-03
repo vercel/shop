@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
-import { ProductsGrid } from "@/components/product/products-grid";
-import { Container } from "@/components/ui/container";
+import { HomeHero } from "@/components/home/hero";
+import { HomeLayers } from "@/components/home/home-layers";
 import { Page } from "@/components/ui/page";
-import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -28,30 +27,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [locale, t] = await Promise.all([getLocale(), getTranslations("home")]);
+  const locale = await getLocale();
 
   return (
     <Page className="pt-0">
-      <Sections>
-        <section className="grid">
-          <div className="col-start-1 row-start-1 hidden md:block md:aspect-4/1" />
-          <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-10 lg:px-10">
-            <div className="flex flex-col items-center text-center gap-2.5">
-              <h1 className="text-3xl md:text-5xl max-w-3xl text-foreground">{t("headline")}</h1>
-              <p className="text-sm md:text-base max-w-xl text-foreground">{t("subheadline")}</p>
-            </div>
-          </div>
-        </section>
-
-        <Container>
-          <ProductsGrid
-            title={t("productsTitle")}
-            limit={8}
-            locale={locale}
-            collectionUrl="/collections/all"
-          />
-        </Container>
-      </Sections>
+      <HomeHero />
+      <HomeLayers locale={locale} />
     </Page>
   );
 }

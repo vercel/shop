@@ -3,6 +3,67 @@
 
 @plugin '@tailwindcss/typography';
 
+@theme {
+  /* Merch palette — each home rail maps 1:1 to a layer-X ink/paper pair below. */
+  --color-merch-1: #2b2622;
+  --color-merch-2: #5c2f2a;
+  --color-merch-3: #c47f43;
+  --color-merch-4: #6b7250;
+  --color-merch-5: #24584f;
+  --color-merch-6: #323d5c;
+  --color-merch-7: #a4543b;
+  --color-merch-8: #7a5f78;
+  --color-merch-9: #b23b32;
+  --color-merch-10: #3f3a35;
+  --color-merch-11: #25424e;
+  --color-merch-12: #4b3a5e;
+  --color-merch-13: #101010;
+  --color-merch-14: #8a8378;
+
+  --color-layer-1: var(--color-merch-1);
+  --color-layer-1-foreground: #f6f2ea;
+  --color-layer-1-subtle: #cbc2b2;
+  --color-layer-2: var(--color-merch-2);
+  --color-layer-2-foreground: #f6efe9;
+  --color-layer-2-subtle: #d9c4ba;
+  --color-layer-3: var(--color-merch-3);
+  --color-layer-3-foreground: #2b1c0f;
+  --color-layer-3-subtle: #54402a;
+  --color-layer-4: var(--color-merch-4);
+  --color-layer-4-foreground: #f2f4ea;
+  --color-layer-4-subtle: #d6dcc0;
+  --color-layer-5: var(--color-merch-5);
+  --color-layer-5-foreground: #ecf4f0;
+  --color-layer-5-subtle: #b9d2c8;
+  --color-layer-6: var(--color-merch-6);
+  --color-layer-6-foreground: #edf0f8;
+  --color-layer-6-subtle: #c0c8de;
+  --color-layer-7: var(--color-merch-7);
+  --color-layer-7-foreground: #f9f0ea;
+  --color-layer-7-subtle: #e6c8b8;
+  --color-layer-8: var(--color-merch-8);
+  --color-layer-8-foreground: #f6f1f5;
+  --color-layer-8-subtle: #dccfda;
+  --color-layer-9: var(--color-merch-9);
+  --color-layer-9-foreground: #fbeeec;
+  --color-layer-9-subtle: #edc4be;
+  --color-layer-10: var(--color-merch-10);
+  --color-layer-10-foreground: #f4f1ec;
+  --color-layer-10-subtle: #cfc9bf;
+  --color-layer-11: var(--color-merch-11);
+  --color-layer-11-foreground: #eaf2f5;
+  --color-layer-11-subtle: #b8cdd4;
+  --color-layer-12: var(--color-merch-12);
+  --color-layer-12-foreground: #f3eff8;
+  --color-layer-12-subtle: #cfc4de;
+  --color-layer-13: var(--color-merch-13);
+  --color-layer-13-foreground: #f5f5f5;
+  --color-layer-13-subtle: #b3b3b3;
+  --color-layer-14: var(--color-merch-14);
+  --color-layer-14-foreground: #1e1c19;
+  --color-layer-14-subtle: #4c463f;
+}
+
 @theme inline {
   --breakpoint-3xl: 112rem; /* 1792px */
   --breakpoint-4xl: 140rem; /* 2240px */

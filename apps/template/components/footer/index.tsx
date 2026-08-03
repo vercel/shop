@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
+import { getCollections } from "@/lib/shopify/operations/collections";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
@@ -13,11 +14,18 @@ import type { SocialLink } from "./social-links";
 
 export async function Footer({ locale }: { locale: string }) {
   const socialLinks: SocialLink[] = [];
-  const items: MenuItem[] = [];
-  const [policies, t] = await Promise.all([
+  const [collections, policies, t] = await Promise.all([
+    getCollections({ limit: 8, locale }).catch(() => []),
     getShopPolicies({ locale }).catch(() => []),
     getTranslations("footer"),
   ]);
+  const items: MenuItem[] = collections.map((collection) => ({
+    id: collection.handle,
+    items: [],
+    title: collection.title,
+    type: "COLLECTION",
+    url: `/collections/${collection.handle}`,
+  }));
 
   return (
     <footer>
