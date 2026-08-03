@@ -1,7 +1,7 @@
 import { io } from "next/cache";
 import { cache } from "react";
 
-import { getCartIdFromCookie, invalidateCartCache, setCartIdCookie } from "@/lib/cart/server";
+import { getCartIdFromCookie, setCartIdCookie } from "@/lib/cart/server";
 import { defaultLocale } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
@@ -18,6 +18,7 @@ import {
 
 export type { CartLineInput, CartMutationResult };
 
+// Carts are never put in the Next.js data cache — only this per-request memoization.
 export const getCart = cache(async (): Promise<Cart | undefined> => {
   const cartId = await getCartIdFromCookie();
   if (!cartId) return undefined;
@@ -34,9 +35,7 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
 export async function createCartWithoutCookie(
   locale: string = defaultLocale,
 ): Promise<CartMutationResult> {
-  const result = await createCartCore(locale);
-  invalidateCartCache();
-  return result;
+  return createCartCore(locale);
 }
 
 export async function createCart(locale: string = defaultLocale): Promise<CartMutationResult> {
@@ -60,9 +59,7 @@ export async function addToCart(
   }
   if (!resolvedCartId) throw new Error("Cart ID not found");
 
-  const result = await addToCartCore(lines, resolvedCartId);
-  invalidateCartCache();
-  return result;
+  return addToCartCore(lines, resolvedCartId);
 }
 
 export async function updateCart(
@@ -72,9 +69,7 @@ export async function updateCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const result = await updateCartCore(lines, cartId);
-  invalidateCartCache();
-  return result;
+  return updateCartCore(lines, cartId);
 }
 
 export async function removeFromCart(
@@ -84,9 +79,7 @@ export async function removeFromCart(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) throw new Error("Cart ID not found");
 
-  const result = await removeFromCartCore(lineIds, cartId);
-  invalidateCartCache();
-  return result;
+  return removeFromCartCore(lineIds, cartId);
 }
 
 export async function updateCartNote(
@@ -96,7 +89,5 @@ export async function updateCartNote(
   const cartId = cartIdOverride || (await getCartIdFromCookie());
   if (!cartId) return undefined;
 
-  const result = await updateCartNoteCore(note, cartId);
-  invalidateCartCache();
-  return result;
+  return updateCartNoteCore(note, cartId);
 }

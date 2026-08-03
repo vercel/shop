@@ -158,9 +158,8 @@ Cached public operations use the established `cacheLife` and tags. Combined with
 | `collections`              | All collection queries               |
 | `collection-{handle}`      | Single collection                    |
 | `menus`                    | Navigation menus                     |
-| `cart`                     | All cart operations                  |
 
-Invalidate with `revalidateTag("product-blue-tee")` or `updateTag("cart")` in server actions. Cart mutations must always call `invalidateCartCache()` from `lib/cart/server` - this is a hard requirement.
+Invalidate with `revalidateTag("product-blue-tee")` in server actions. Carts are never placed in the Next.js data cache — cart reads are memoized per request via `getCart`, so cart mutations don't need any cache invalidation step.
 
 ## Mutations
 
@@ -174,7 +173,6 @@ export async function addToCart(lines: CartLineInput[], cartId: string, locale: 
   );
   assertStorefrontOk(response, "addToCart");
 
-  invalidateCartCache();
   return transformShopifyCart(response.data.cartLinesAdd.cart);
 }
 ```
