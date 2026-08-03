@@ -191,14 +191,32 @@
   },
   "home": {
     "allTimeFavorites": "Favoris de toujours",
+    "bestsellers": "Meilleures ventes",
     "categories": {
       "mens": "Hommes",
       "unisex": "Unisexe",
       "womens": "Femmes",
       "youth": "Enfants"
     },
+    "categoryRail": "Magasiner par catégorie",
     "ctaText": "Magasiner maintenant",
+    "editorial": {
+      "fabric": {
+        "kicker": "Matières",
+        "title": "Le tissu qui respire avec vous"
+      },
+      "layering": {
+        "kicker": "Guide",
+        "title": "Cinq façons de superposer en mi-saison"
+      },
+      "studio": {
+        "kicker": "Lookbook",
+        "title": "Dans les coulisses des séances d'hiver"
+      },
+      "title": "La sélection"
+    },
     "headline": "Magasinez, tout simplement",
+    "jackets": "Manteaux, pensés pour la météo",
     "marketing": {
       "secondary": {
         "body": "Du studio à la rue, nous créons des essentiels réfléchis, conçus pour bouger avec vous. Découvrez les gens et les principes derrière la marque.",
@@ -206,11 +224,76 @@
         "title": "Notre histoire"
       }
     },
+    "marquee": {
+      "carbon": "Livraison carboneutre",
+      "fit": "Échanges de taille gratuits",
+      "made": "Fabriqué de façon responsable",
+      "members": "Accès anticipé pour les membres",
+      "shipping": "Livraison gratuite dès 100 $"
+    },
     "newArrivalsTitle": "Nouveautés",
     "pickedForYou": "Sélectionné pour vous",
+    "promo": {
+      "clearance": {
+        "cta": "Voir les soldes",
+        "headline": "Jusqu'à 50 % de rabais en fin de saison",
+        "kicker": "Dernière démarque"
+      },
+      "youth": {
+        "cta": "Magasiner enfants",
+        "headline": "Conçu pour les jeunes sportifs",
+        "kicker": "Collection enfants"
+      }
+    },
+    "rail": {
+      "hoodies": "Chandails à capuchon",
+      "jackets": "Manteaux",
+      "longTees": "T-shirts longs",
+      "sweatshirts": "Chandails molletonnés",
+      "tanks": "Camisoles",
+      "tees": "T-shirts",
+      "vests": "Vestes sans manches"
+    },
     "secondaryHero": {
       "ctaText": "Voir les soldes",
       "headline": "Des offres uniques rien que pour vous"
+    },
+    "testimonials": {
+      "one": {
+        "author": "Maya R.",
+        "detail": "Achat vérifié",
+        "quote": "Le manteau affronte un trajet sous la pluie et reste impeccable au bureau. J'ai laissé tomber la deuxième couche."
+      },
+      "rating": "Noté {rating} sur 5",
+      "three": {
+        "author": "Priya N.",
+        "detail": "Achat vérifié",
+        "quote": "La taille correspondait exactement à la description et l'échange a pris deux jours. Le retour le plus simple que j'aie fait."
+      },
+      "title": "Ce que les gens en disent",
+      "two": {
+        "author": "Devon C.",
+        "detail": "Achat vérifié",
+        "quote": "Troisième saison avec le même chandail et les poignets n'ont pas cédé. Chaque dollar en vaut la peine."
+      }
+    },
+    "valueProps": {
+      "materials": {
+        "body": "Tissus sourcés de façon responsable, traçables jusqu'à l'usine.",
+        "title": "Matières réfléchies"
+      },
+      "returns": {
+        "body": "30 jours pour changer d'avis, sans question.",
+        "title": "Retours faciles"
+      },
+      "shipping": {
+        "body": "Livraison standard gratuite dès 100 $ d'achat.",
+        "title": "Livraison gratuite"
+      },
+      "support": {
+        "body": "De vraies personnes, sept jours sur sept.",
+        "title": "Conseils de style"
+      }
     }
   },
   "nav": {

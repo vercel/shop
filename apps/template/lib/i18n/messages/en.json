@@ -195,14 +195,32 @@
   },
   "home": {
     "allTimeFavorites": "All-time Favorites",
+    "bestsellers": "Bestsellers",
     "categories": {
       "mens": "Mens",
       "unisex": "Unisex",
       "womens": "Womens",
       "youth": "Youth"
     },
+    "categoryRail": "Shop by Category",
     "ctaText": "Shop Now",
+    "editorial": {
+      "fabric": {
+        "kicker": "Materials",
+        "title": "The fabric that breathes with you"
+      },
+      "layering": {
+        "kicker": "Guide",
+        "title": "Five ways to layer for shoulder season"
+      },
+      "studio": {
+        "kicker": "Lookbook",
+        "title": "Inside the winter studio sessions"
+      },
+      "title": "The Edit"
+    },
     "headline": "You Can Just Shop Things",
+    "jackets": "Jackets, Built for Weather",
     "marketing": {
       "secondary": {
         "body": "From the studio to the street, we make considered essentials built to move with you. Get to know the people and the principles behind the label.",
@@ -210,11 +228,76 @@
         "title": "Our Story"
       }
     },
+    "marquee": {
+      "carbon": "Carbon-neutral delivery",
+      "fit": "Free fit exchanges",
+      "made": "Responsibly made",
+      "members": "Member early access",
+      "shipping": "Free shipping over $100"
+    },
     "newArrivalsTitle": "New Arrivals",
     "pickedForYou": "Picked for You",
+    "promo": {
+      "clearance": {
+        "cta": "Shop Clearance",
+        "headline": "Up to 50% off end-of-season",
+        "kicker": "Final Markdown"
+      },
+      "youth": {
+        "cta": "Shop Youth",
+        "headline": "Built for growing athletes",
+        "kicker": "Youth Collection"
+      }
+    },
+    "rail": {
+      "hoodies": "Hoodies",
+      "jackets": "Jackets",
+      "longTees": "Long Tees",
+      "sweatshirts": "Sweatshirts",
+      "tanks": "Tanks",
+      "tees": "Tees",
+      "vests": "Vests"
+    },
     "secondaryHero": {
       "ctaText": "Shop Clearance",
       "headline": "Once-in-a-lifetime deals are yours"
+    },
+    "testimonials": {
+      "one": {
+        "author": "Maya R.",
+        "detail": "Verified buyer",
+        "quote": "The jacket handles a wet commute and still looks sharp in the office. I stopped carrying a second layer."
+      },
+      "rating": "Rated {rating} out of 5",
+      "three": {
+        "author": "Priya N.",
+        "detail": "Verified buyer",
+        "quote": "Sizing was exactly as described, and the fit exchange took two days. Easiest returns I've dealt with."
+      },
+      "title": "What People Are Saying",
+      "two": {
+        "author": "Devon C.",
+        "detail": "Verified buyer",
+        "quote": "Third season in the same hoodie and the cuffs haven't stretched out. Worth every dollar."
+      }
+    },
+    "valueProps": {
+      "materials": {
+        "body": "Responsibly sourced fabric, traceable to the mill.",
+        "title": "Considered materials"
+      },
+      "returns": {
+        "body": "30 days to change your mind, no questions asked.",
+        "title": "Easy returns"
+      },
+      "shipping": {
+        "body": "Free standard delivery on every order over $100.",
+        "title": "Free shipping"
+      },
+      "support": {
+        "body": "Real humans, seven days a week.",
+        "title": "Styling support"
+      }
     }
   },
   "nav": {
