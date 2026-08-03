@@ -31,7 +31,7 @@ Verify commerce outcomes without prescribing visual composition. Adapt the prese
 - Create a cart when none exists and persist its identifier using the existing server cookie path.
 - Apply each optimistic intent exactly once, then reconcile warnings, errors, and the canonical Shopify cart without quantity flashes or reversions.
 - Preserve line identity, attributes, discounts, buyer identity, delivery state, totals, currency, and checkout URL.
-- Call `invalidateCartCache()` after every cart mutation.
+- Carts are never in the Next.js data cache, so cart mutations need no cache invalidation step.
 - Keep checkout handoff usable without requiring unrelated client state to finish hydrating.
 
 ## Customer account

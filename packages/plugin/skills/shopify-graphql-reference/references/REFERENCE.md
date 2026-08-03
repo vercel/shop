@@ -22,7 +22,7 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/shopify/transforms/*.ts` | Shopify response to domain mapping |
 | `lib/shopify/types/**` | Raw Shopify response shapes and generated validation output |
 | `lib/types.ts` | Provider-independent types consumed by presentation |
-| `lib/cart/server.ts` | Cart cookie helpers and `invalidateCartCache()` |
+| `lib/cart/server.ts` | Cart cookie helpers and server-side cart read seeding |
 | `app/api/webhooks/shopify/route.ts` | Public-content invalidation entry point |
 
 ## Data flow
@@ -73,7 +73,7 @@ Current examples of intent:
 - Reuse established product, collection, menu, recommendation, sitemap, CMS, and cart tags.
 - Add a new tag only when the webhook or mutation path can invalidate it correctly.
 - Keep public-content tags aligned with `app/api/webhooks/shopify/route.ts`.
-- Call `invalidateCartCache()` after every successful cart mutation.
+- Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
 - Never rely on public cache invalidation for Customer Account privacy or authorization.
 
 ## Completion checklist
