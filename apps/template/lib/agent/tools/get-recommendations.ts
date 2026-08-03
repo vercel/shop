@@ -23,7 +23,7 @@ export function getRecommendationsTool() {
           return true;
         });
         return {
-          products: products.slice(0, 5).map((product) => ({
+          products: products.slice(0, 6).map((product) => ({
             available: product.availableForSale,
             handle: product.handle,
             image: product.featuredImage?.url ?? null,

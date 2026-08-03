@@ -9,7 +9,7 @@ export function searchProductsTool() {
   return tool({
     description: `Search for products by keyword. Use this for exact product lookups or price-sorted searches.`,
     inputSchema: z.object({
-      limit: z.number().min(1).max(10).default(5),
+      limit: z.number().min(1).max(10).default(6),
       query: z.string(),
       sortKey: z
         .enum(["best-matches", "price-low-to-high", "price-high-to-low"])
