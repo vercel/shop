@@ -5,7 +5,6 @@ import {
   gql,
   type I18nConfig,
 } from "@shopify/hydrogen";
-import { revalidateTag, updateTag } from "next/cache";
 import { cookies, headers } from "next/headers";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
@@ -85,13 +84,4 @@ export function seedCartData() {
     });
     return data;
   })();
-}
-
-export function invalidateCartCache(): void {
-  try {
-    updateTag("cart");
-  } catch {
-    // Fallback when used outside of server actions where updateTag is not available
-    revalidateTag("cart", { expire: 0 });
-  }
 }

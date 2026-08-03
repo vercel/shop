@@ -6,7 +6,6 @@ import {
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 } from "@shopify/hydrogen/customer-account";
-import { checkBotId } from "botid/server";
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
@@ -15,12 +14,8 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
-import { BOTID_DENIED_CODE, botIdCheckOptions } from "@/lib/botid";
-import { cartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
-
-const CART_API_PATH = "/api/cart";
 
 const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
@@ -29,47 +24,28 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-const NOOP_SESSION_MANAGER = {
-  getSessionItem: () => undefined,
-  getSessionOrigin: () => "",
-  removeSessionItem: () => {},
-  setSessionItem: () => {},
-};
-
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
 
-  const isCartPath = pathname === CART_API_PATH;
+  // /api/cart is deliberately NOT registered here: its App Router route handler owns the
+  // request (BotID gate + response shaping). Passing cartHandlers to handleShopifyRoutes
+  // would short-circuit the proxy and the route handler would never run.
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
 
-  // BotID runs here, not in the route handler: handleShopifyRoutes short-circuits
-  // /api/cart before the App Router route executes, so a gate there never fires.
-  if (isCartPath && request.method === "POST" && shopConfig.botid.isEnabled) {
-    const { isBot } = await checkBotId(botIdCheckOptions);
-    if (isBot) return NextResponse.json({ error: BOTID_DENIED_CODE }, { status: 403 });
-  }
-
-  if (isCartPath || isAuthPath) {
-    const handlers: Array<
-      typeof cartHandlers | ReturnType<typeof createCustomerAccountServerHandlers>
-    > = [cartHandlers];
-    if (isAuthPath) {
-      handlers.push(
+  if (isAuthPath) {
+    const shopifyRoute = await handleShopifyRoutes({
+      handlers: [
         createCustomerAccountServerHandlers({
           customerSession: await getHydrogenCustomerSession(),
           defaultPostLoginRedirectPathname: "/account",
           origin: getCustomerRequestOrigin,
           postLogoutRedirectUri: "/",
         }),
-      );
-    }
-    const shopifyRoute = await handleShopifyRoutes({
-      handlers,
+      ],
       request,
       requestContext,
-      // The session manager is only exercised by the customer-account handlers.
-      sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+      sessionManager: createCustomerSessionManager(request),
       storefrontClient: createRequestStorefrontClient(requestContext),
     });
     if (shopifyRoute) return shopifyRoute as NextResponse;
