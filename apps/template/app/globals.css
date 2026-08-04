@@ -181,6 +181,17 @@
       background-position: 0 0;
     }
   }
+
+  --animate-marquee: tw-marquee 40s linear infinite;
+
+  @keyframes tw-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
 }
 
 @utility shimmer {
@@ -213,5 +224,9 @@
     animation: none;
     background-image: none;
     -webkit-text-fill-color: currentColor;
+  }
+
+  .animate-marquee {
+    animation: none;
   }
 }

@@ -191,18 +191,28 @@
     "tryAgain": "Try again"
   },
   "footer": {
-    "copyright": "© {name}. All rights reserved."
+    "copyright": "© {name}. All rights reserved.",
+    "marquee": {
+      "carbon": "Carbon-neutral delivery",
+      "fit": "Free fit exchanges",
+      "made": "Responsibly made",
+      "members": "Member early access",
+      "shipping": "Free shipping over $100"
+    }
   },
   "home": {
     "allTimeFavorites": "All-time Favorites",
+    "bestsellers": "Bestsellers",
     "categories": {
       "mens": "Mens",
       "unisex": "Unisex",
       "womens": "Womens",
       "youth": "Youth"
     },
+    "categoryRail": "Shop by Category",
     "ctaText": "Shop Now",
     "headline": "You Can Just Shop Things",
+    "jackets": "Jackets, Built for Weather",
     "marketing": {
       "secondary": {
         "body": "From the studio to the street, we make considered essentials built to move with you. Get to know the people and the principles behind the label.",
@@ -212,9 +222,37 @@
     },
     "newArrivalsTitle": "New Arrivals",
     "pickedForYou": "Picked for You",
+    "rail": {
+      "hoodies": "Hoodies",
+      "jackets": "Jackets",
+      "longTees": "Long Tees",
+      "sweatshirts": "Sweatshirts",
+      "tanks": "Tanks",
+      "tees": "Tees",
+      "vests": "Vests"
+    },
     "secondaryHero": {
       "ctaText": "Shop Clearance",
       "headline": "Once-in-a-lifetime deals are yours"
+    },
+    "testimonials": {
+      "one": {
+        "author": "Maya R.",
+        "detail": "Verified buyer",
+        "quote": "The jacket handles a wet commute and still looks sharp in the office. I stopped carrying a second layer."
+      },
+      "rating": "Rated {rating} out of 5",
+      "three": {
+        "author": "Priya N.",
+        "detail": "Verified buyer",
+        "quote": "Sizing was exactly as described, and the fit exchange took two days. Easiest returns I've dealt with."
+      },
+      "title": "What People Are Saying",
+      "two": {
+        "author": "Devon C.",
+        "detail": "Verified buyer",
+        "quote": "Third season in the same hoodie and the cuffs haven't stretched out. Worth every dollar."
+      }
     }
   },
   "nav": {
