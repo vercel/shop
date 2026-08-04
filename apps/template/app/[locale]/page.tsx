@@ -74,43 +74,6 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
         </Container>
 
         <Container>
-          <CategorySlider
-            categories={[
-              {
-                href: "/collections/womens",
-                image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
-                label: t("categories.womens"),
-              },
-              {
-                href: "/collections/mens",
-                image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
-                label: t("categories.mens"),
-              },
-              {
-                href: "/collections/unisex",
-                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
-                label: t("categories.unisex"),
-              },
-              {
-                href: "/collections/youth",
-                image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
-                label: t("categories.youth"),
-              },
-            ]}
-          />
-        </Container>
-
-        <Container>
-          <CollectionSlider
-            collection="jackets"
-            collectionUrl="/collections/jackets"
-            limit={8}
-            locale={locale}
-            title={t("jackets")}
-          />
-        </Container>
-
-        <Container>
           <CategoryRail
             title={t("categoryRail")}
             items={[
@@ -148,6 +111,33 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
                 href: "/collections/tanks",
                 image: `${CDN}/files/pacecurrent-tank-womens-470c4a-main-yellow.png?v=1785786490`,
                 label: t("rail.tanks"),
+              },
+            ]}
+          />
+        </Container>
+
+        <Container>
+          <CategorySlider
+            categories={[
+              {
+                href: "/collections/womens",
+                image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
+                label: t("categories.womens"),
+              },
+              {
+                href: "/collections/mens",
+                image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
+                label: t("categories.mens"),
+              },
+              {
+                href: "/collections/unisex",
+                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
+                label: t("categories.unisex"),
+              },
+              {
+                href: "/collections/youth",
+                image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
+                label: t("categories.youth"),
               },
             ]}
           />

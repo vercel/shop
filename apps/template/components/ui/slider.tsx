@@ -6,8 +6,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useEffectEvent,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -40,14 +40,28 @@ function Slider({ className, children, ...props }: React.ComponentProps<"section
   const updateScrollState = useEffectEvent(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    setCanScrollLeft(container.scrollLeft > 0);
+    setCanScrollLeft(container.scrollLeft > 1);
     setCanScrollRight(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
   });
 
-  useEffect(() => {
+  // Re-measure in layout effect (before paint, after DOM mutations) and whenever the
+  // content size changes, so the arrows reflect real overflow on first render — not a
+  // post-hydration effect that can run before the scroller's children have laid out.
+  useLayoutEffect(() => {
     updateScrollState();
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(updateScrollState);
+    observer.observe(container);
+    for (const child of Array.from(container.children)) {
+      observer.observe(child);
+    }
     window.addEventListener("resize", updateScrollState);
-    return () => window.removeEventListener("resize", updateScrollState);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
   }, []);
 
   const scroll = useCallback((direction: "left" | "right") => {
