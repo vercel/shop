@@ -1,5 +1,6 @@
 "use client";
 
+import type { Spec } from "@json-render/core";
 import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
 import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
@@ -26,6 +27,27 @@ const Markdown = memo(
   (previous, next) => previous.children === next.children,
 );
 Markdown.displayName = "Markdown";
+
+/**
+ * Models sometimes name the root key something that was never added to `elements`
+ * (e.g. root "hoodies" alongside a "hoodie-grid" element), which renders nothing.
+ * Repoint the root at the element no other element claims as a child.
+ */
+function withResolvedRoot(spec: Spec): Spec {
+  if (spec.root && spec.elements[spec.root]) return spec;
+
+  const keys = Object.keys(spec.elements);
+  if (keys.length === 0) return spec;
+
+  const claimed = new Set(
+    keys
+      .flatMap((key) => spec.elements[key]?.children ?? [])
+      .filter((child) => child !== spec.root),
+  );
+  const orphans = keys.filter((key) => !claimed.has(key));
+  const root = orphans.length === 1 ? orphans[0] : undefined;
+  return root ? { ...spec, root } : spec;
+}
 
 function activeToolName(parts: UIMessage["parts"]): string | undefined {
   for (const part of parts) {
@@ -65,7 +87,7 @@ export function ChatMessage({
       {hasSpec && spec && (
         <AgentProductProvider parts={message.parts}>
           <JSONUIProvider registry={registry}>
-            <Renderer registry={registry} spec={spec} />
+            <Renderer registry={registry} spec={withResolvedRoot(spec)} />
           </JSONUIProvider>
         </AgentProductProvider>
       )}

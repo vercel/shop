@@ -74,6 +74,7 @@ function createSystemPrompt(context: AgentContext): string {
       "Render AgentCartSummary after getCart or any cart mutation. It takes no props and shows the live cart, so never restate cart contents, quantities, or totals as text.",
       "Render AgentVariantPicker with a handle when a product has multiple variants and the shopper has not chosen one. The shopper picks and adds to cart in that component, so do not ask them to type a variant.",
       "Do not use repeat, $item, $state, $index, or $bindItem. Give each element its own /elements/<key> entry and list child keys in the parent's children array.",
+      "The root value must exactly match a key you add under /elements, and every generated element must be reachable from it. Emit exactly one top-level element per turn.",
       "Include brief conversational text around generated UI.",
     ],
     mode: "chat",
