@@ -11,13 +11,13 @@ interface CategoryRailItem {
 
 interface CategoryRailProps {
   items: CategoryRailItem[];
-  title: string;
+  title?: string;
 }
 
 export function CategoryRail({ items, title }: CategoryRailProps) {
   return (
     <div className="grid gap-4" data-slot="category-rail">
-      <h2 className="text-2xl sm:text-3xl">{title}</h2>
+      {title ? <h2 className="text-2xl sm:text-3xl">{title}</h2> : null}
       <ul className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 scroll-px-5 scrollbar-hide lg:mx-0 lg:grid lg:grid-cols-7 lg:overflow-visible lg:px-0">
         {items.map((item) => (
           <li key={item.href} className="w-24 shrink-0 snap-start lg:w-auto">

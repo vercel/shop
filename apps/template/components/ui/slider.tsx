@@ -2,20 +2,12 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffectEvent,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
 interface SliderContextValue {
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+  registerContainer: (node: HTMLDivElement | null) => void;
   canScrollLeft: boolean;
   canScrollRight: boolean;
   scroll: (direction: "left" | "right") => void;
@@ -33,52 +25,56 @@ function useSlider() {
 }
 
 function Slider({ className, children, ...props }: React.ComponentProps<"section">) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const cleanupRef = useRef<(() => void) | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
-  const updateScrollState = useEffectEvent(() => {
-    const container = scrollContainerRef.current;
+  const updateScrollState = useCallback(() => {
+    const container = containerRef.current;
     if (!container) return;
     setCanScrollLeft(container.scrollLeft > 1);
     setCanScrollRight(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
-  });
-
-  // The scroller's children stream in via Suspense after the header (and its nav) has
-  // already painted, so neither a mount effect nor observing only the initial children
-  // is enough. Watch for child additions/removals and container resizes and re-measure
-  // on each, so the arrows appear as soon as the content genuinely overflows.
-  useLayoutEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    updateScrollState();
-
-    const resizeObserver = new ResizeObserver(updateScrollState);
-    resizeObserver.observe(container);
-
-    const mutationObserver = new MutationObserver(() => {
-      updateScrollState();
-      for (const child of Array.from(container.children)) {
-        resizeObserver.observe(child);
-      }
-    });
-    mutationObserver.observe(container, { childList: true });
-
-    for (const child of Array.from(container.children)) {
-      resizeObserver.observe(child);
-    }
-
-    window.addEventListener("resize", updateScrollState);
-    return () => {
-      resizeObserver.disconnect();
-      mutationObserver.disconnect();
-      window.removeEventListener("resize", updateScrollState);
-    };
   }, []);
 
+  // The scroller mounts as a sibling that streams in via Suspense, so a mount effect on
+  // this parent runs while the ref is still null. Attach measurement from the scroller's
+  // own callback ref instead, then keep it current on scroll, resize, and child changes.
+  const registerContainer = useCallback(
+    (node: HTMLDivElement | null) => {
+      cleanupRef.current?.();
+      cleanupRef.current = null;
+      containerRef.current = node;
+      if (!node) return;
+
+      updateScrollState();
+
+      const resizeObserver = new ResizeObserver(updateScrollState);
+      resizeObserver.observe(node);
+      for (const child of Array.from(node.children)) {
+        resizeObserver.observe(child);
+      }
+
+      const mutationObserver = new MutationObserver(() => {
+        updateScrollState();
+        for (const child of Array.from(node.children)) {
+          resizeObserver.observe(child);
+        }
+      });
+      mutationObserver.observe(node, { childList: true });
+
+      window.addEventListener("resize", updateScrollState);
+      cleanupRef.current = () => {
+        resizeObserver.disconnect();
+        mutationObserver.disconnect();
+        window.removeEventListener("resize", updateScrollState);
+      };
+    },
+    [updateScrollState],
+  );
+
   const scroll = useCallback((direction: "left" | "right") => {
-    const container = scrollContainerRef.current;
+    const container = containerRef.current;
     if (!container) return;
     const firstItem = container.querySelector<HTMLElement>("[data-slot='slider-item']");
     const gap = Number.parseFloat(getComputedStyle(container).columnGap) || 0;
@@ -94,7 +90,7 @@ function Slider({ className, children, ...props }: React.ComponentProps<"section
   return (
     <SliderContext.Provider
       value={{
-        scrollContainerRef,
+        registerContainer,
         canScrollLeft,
         canScrollRight,
         scroll,
@@ -169,11 +165,11 @@ function SliderNav({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 function SliderContent({ className, children, ...props }: React.ComponentProps<"div">) {
-  const { scrollContainerRef, handleScroll } = useSlider();
+  const { registerContainer, handleScroll } = useSlider();
 
   return (
     <div
-      ref={scrollContainerRef}
+      ref={registerContainer}
       onScroll={handleScroll}
       data-slot="slider-content"
       className={cn(

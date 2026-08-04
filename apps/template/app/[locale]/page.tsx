@@ -74,73 +74,72 @@ export default async function HomePage({ searchParams }: PageProps<"/[locale]">)
         </Container>
 
         <Container>
-          <CategorySlider
-            categories={[
-              {
-                href: "/collections/womens",
-                image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
-                label: t("categories.womens"),
-              },
-              {
-                href: "/collections/mens",
-                image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
-                label: t("categories.mens"),
-              },
-              {
-                href: "/collections/unisex",
-                image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
-                label: t("categories.unisex"),
-              },
-              {
-                href: "/collections/youth",
-                image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
-                label: t("categories.youth"),
-              },
-            ]}
-          />
-        </Container>
-
-        <Container>
-          <CategoryRail
-            title={t("categoryRail")}
-            items={[
-              {
-                href: "/collections/jackets",
-                image: `${CDN}/files/glidestack-jacket-unisex-5c042a-main-blue.png?v=1780098768`,
-                label: t("rail.jackets"),
-              },
-              {
-                href: "/collections/hoodies",
-                image: `${CDN}/files/halogauge-hoodie-unisex-a7831c-main-green.png?v=1782862978`,
-                label: t("rail.hoodies"),
-              },
-              {
-                href: "/collections/sweatshirts",
-                image: `${CDN}/files/vitalmode-sweatshirt-womens-3f2c60-main-red.png?v=1785542444`,
-                label: t("rail.sweatshirts"),
-              },
-              {
-                href: "/collections/tees",
-                image: `${CDN}/files/axissync-tee-womens-228e89-main-blue.png?v=1782834466`,
-                label: t("rail.tees"),
-              },
-              {
-                href: "/collections/long-tees",
-                image: `${CDN}/files/cadenceshield-long-tee-womens-68926e-main-grey.png?v=1782762408`,
-                label: t("rail.longTees"),
-              },
-              {
-                href: "/collections/vests",
-                image: `${CDN}/files/frameprime-vest-youth-841ab9-main-green.png?v=1782590238`,
-                label: t("rail.vests"),
-              },
-              {
-                href: "/collections/tanks",
-                image: `${CDN}/files/pacecurrent-tank-womens-470c4a-main-yellow.png?v=1785786490`,
-                label: t("rail.tanks"),
-              },
-            ]}
-          />
+          <div className="grid gap-5">
+            <h2 className="text-2xl sm:text-3xl">{t("categoryRail")}</h2>
+            <CategorySlider
+              categories={[
+                {
+                  href: "/collections/womens",
+                  image: `${CDN}/files/embermode-hoodie-womens-3c6080-fashion-full-body-yellow.png?v=1780094433`,
+                  label: t("categories.womens"),
+                },
+                {
+                  href: "/collections/mens",
+                  image: `${CDN}/files/pacepoint-tee-mens-c96538-fashion-full-body-grey.png?v=1781011245`,
+                  label: t("categories.mens"),
+                },
+                {
+                  href: "/collections/unisex",
+                  image: `${CDN}/files/pivotlink-tee-unisex-58a99a-fashion-full-body-yellow.png?v=1779626845`,
+                  label: t("categories.unisex"),
+                },
+                {
+                  href: "/collections/youth",
+                  image: `${CDN}/files/orbitstructure-jacket-youth-21e051-fashion-full-body-black.png?v=1778847729`,
+                  label: t("categories.youth"),
+                },
+              ]}
+            />
+            <CategoryRail
+              items={[
+                {
+                  href: "/collections/jackets",
+                  image: `${CDN}/files/glidestack-jacket-unisex-5c042a-main-blue.png?v=1780098768`,
+                  label: t("rail.jackets"),
+                },
+                {
+                  href: "/collections/hoodies",
+                  image: `${CDN}/files/halogauge-hoodie-unisex-a7831c-main-green.png?v=1782862978`,
+                  label: t("rail.hoodies"),
+                },
+                {
+                  href: "/collections/sweatshirts",
+                  image: `${CDN}/files/vitalmode-sweatshirt-womens-3f2c60-main-red.png?v=1785542444`,
+                  label: t("rail.sweatshirts"),
+                },
+                {
+                  href: "/collections/tees",
+                  image: `${CDN}/files/axissync-tee-womens-228e89-main-blue.png?v=1782834466`,
+                  label: t("rail.tees"),
+                },
+                {
+                  href: "/collections/long-tees",
+                  image: `${CDN}/files/cadenceshield-long-tee-womens-68926e-main-grey.png?v=1782762408`,
+                  label: t("rail.longTees"),
+                },
+                {
+                  href: "/collections/vests",
+                  image: `${CDN}/files/frameprime-vest-youth-841ab9-main-green.png?v=1782590238`,
+                  label: t("rail.vests"),
+                },
+                {
+                  href: "/collections/tanks",
+                  image: `${CDN}/files/pacecurrent-tank-womens-470c4a-main-yellow.png?v=1785786490`,
+                  label: t("rail.tanks"),
+                },
+              ]}
+            />
+          </div>
         </Container>
 
         <Container>
