@@ -133,6 +133,67 @@ export function updateCartLine(lineId: string, quantity: number): void {
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
 }
 
+export interface ServerCartLine {
+  components?: ServerCartLine[];
+  cost: { totalAmount: GraphqlMoney };
+  id?: string;
+  merchandise: {
+    compareAtPrice?: GraphqlMoney;
+    id: string;
+    image?: { altText: string; height: number; url: string; width: number };
+    price?: GraphqlMoney;
+    product: { handle: string; id: string; title: string };
+    selectedOptions: { name: string; value: string }[];
+    title: string;
+  };
+  quantity: number;
+}
+
+export interface ServerCart {
+  checkoutUrl: string;
+  cost: { subtotalAmount: GraphqlMoney; totalAmount: GraphqlMoney };
+  discountCodes?: { applicable: boolean; code: string }[];
+  id?: string;
+  lines: ServerCartLine[];
+  note?: string | null;
+  totalQuantity: number;
+}
+
+// The store reads bundle children from `lineComponents`, so the domain name must be translated.
+function toStoreLine(line: ServerCartLine): Record<string, unknown> {
+  return {
+    ...line,
+    id: line.id ?? "",
+    lineComponents: (line.components ?? []).map(toStoreLine),
+  };
+}
+
+/**
+ * Applies a cart already mutated on the server (by the assistant) to the client store.
+ * The store only accepts cart state through the standard events, so this dispatches one
+ * with a settled promise instead of re-running the mutation.
+ */
+export function applyServerCart(
+  action: "add" | "remove" | "update",
+  cart: ServerCart,
+  changedLines: { id?: string; merchandiseId?: string; quantity: number }[],
+): void {
+  const resolved = Promise.resolve({
+    cart: { ...cart, lines: cart.lines.map(toStoreLine) },
+  });
+  const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
+    action: string;
+    detail?: { products: unknown[] };
+    lines: unknown[];
+    promise: typeof resolved;
+  };
+  event.action = action;
+  event.lines = changedLines;
+  if (action === "add") event.detail = { products: [] };
+  event.promise = resolved;
+  document.dispatchEvent(event);
+}
+
 // Discounts bypass the Hydrogen discount-update event: its handler renders new codes as
 // `applicable: false` until the server resolves, which flashes an "invalid" pill. We await
 // the mutation and hand the resolved cart to the overlay through this local event instead.

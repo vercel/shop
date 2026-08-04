@@ -2,11 +2,13 @@
 
 import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
 import type { UIMessage } from "ai";
+import { isToolUIPart } from "ai";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 
+import { AgentProductProvider } from "./product-context";
 import { registry } from "./registry";
 import { AgentThinking } from "./thinking";
 
@@ -24,6 +26,15 @@ const Markdown = memo(
   (previous, next) => previous.children === next.children,
 );
 Markdown.displayName = "Markdown";
+
+function activeToolName(parts: UIMessage["parts"]): string | undefined {
+  for (const part of parts) {
+    if (isToolUIPart(part) && part.state !== "output-available" && part.state !== "output-error") {
+      return part.type === "dynamic-tool" ? part.toolName : part.type.slice(5);
+    }
+  }
+  return undefined;
+}
 
 export function ChatMessage({
   isStreaming,
@@ -48,13 +59,15 @@ export function ChatMessage({
   }
 
   return (
-    <div className="space-y-2.5 text-sm text-foreground">
-      <AgentThinking active={isStreaming && !text} />
+    <div className="space-y-2.5 text-foreground text-sm">
+      <AgentThinking active={isStreaming && !text} tool={activeToolName(message.parts)} />
       {text && <Markdown>{text}</Markdown>}
       {hasSpec && spec && (
-        <JSONUIProvider registry={registry}>
-          <Renderer registry={registry} spec={spec} />
-        </JSONUIProvider>
+        <AgentProductProvider parts={message.parts}>
+          <JSONUIProvider registry={registry}>
+            <Renderer registry={registry} spec={spec} />
+          </JSONUIProvider>
+        </AgentProductProvider>
       )}
     </div>
   );
