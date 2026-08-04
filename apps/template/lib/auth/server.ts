@@ -8,6 +8,7 @@ import {
   type ReadonlyCustomerSessionManager,
   type WritableCustomerSessionManager,
 } from "@shopify/hydrogen/customer-account";
+import { io } from "next/cache";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
@@ -227,6 +228,8 @@ const getReadonlySessionManager = cache(async (): Promise<ReadonlyCustomerSessio
 });
 
 const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext> => {
+  // Hydrogen's createShopifyRequestContext calls crypto.randomUUID(); exclude it from the static shell.
+  await io();
   const requestHeaders = await headers();
   return createCustomerRequestContext(
     new Request(shopConfig.site.url, {
