@@ -6,6 +6,7 @@ import {
   type StorefrontClient,
   type StorefrontQueryString,
 } from "@shopify/hydrogen";
+import { io } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
@@ -84,6 +85,8 @@ export const storefront = {
       typeof variables?.country === "string" ? variables.country : getCountryCode(defaultLocale);
     const language =
       typeof variables?.language === "string" ? variables.language : getLanguageCode(defaultLocale);
+
+    await io();
 
     // Brand runtime strings so Hydrogen does not infer `never` variables.
     const doc = query as StorefrontQueryString<T, Record<string, unknown>>;
