@@ -16,11 +16,36 @@ import { toAgentProduct, toAgentProductDetails } from "../products";
 import { getAgentContext } from "../server";
 
 const RESULT_LIMIT = 6;
+// Shopify pads results to the requested count, so constrained searches scan a wider pool
+// and keep only genuine matches.
+const CONSTRAINED_POOL = 50;
+
+type ProductOption = { name: string; value: string };
+
+/**
+ * Strips option words from the query text. Option values are enforced structurally against
+ * each product's real options, and leaving them in the query pulls in every garment sharing
+ * that colour ("orange jackets" also matches orange hoodies and tees).
+ */
+function queryWithoutOptions(query: string, options: ProductOption[]): string {
+  let stripped = query;
+  for (const option of options) {
+    const escaped = option.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    stripped = stripped.replace(new RegExp(`\\b${escaped}\\b`, "gi"), " ");
+  }
+  const cleaned = stripped.replace(/\s+/g, " ").trim();
+  return cleaned || query;
+}
 
 // Shopify's semantic catalog search returns GIDs only, so canonical fields always come
 // from the Storefront API; a semantic miss falls back to the keyword index.
-async function semanticProducts(query: string, intent: string | undefined, locale: string) {
-  const { products = [] } = await searchCatalog({ intent, limit: RESULT_LIMIT, locale, query });
+async function semanticProducts(
+  query: string,
+  intent: string | undefined,
+  locale: string,
+  limit: number,
+) {
+  const { products = [] } = await searchCatalog({ intent, limit, locale, query });
   const ids = products.map((product) => product.id);
   if (ids.length === 0) return [];
   const resolved = await getProductsByIds({ ids, locale });
@@ -32,13 +57,13 @@ async function semanticProducts(query: string, intent: string | undefined, local
 }
 
 /**
- * Shopify ranks matches first but always pads results out to the requested limit, and
- * `productFilters` only narrows facet counts rather than results, so a hard constraint
- * like "orange" has to be enforced here or the grid shows six items for two matches.
+ * Keeps only products that genuinely carry every stated option. `productFilters` can't do
+ * this — it narrows facet counts, not results — so an empty result must stay empty rather
+ * than fall back to the unfiltered list the shopper didn't ask for.
  */
 async function keepMatching(
   products: ProductCard[],
-  options: Array<{ name: string; value: string }>,
+  options: ProductOption[],
 ): Promise<ProductCard[]> {
   if (options.length === 0 || products.length === 0) return products;
 
@@ -46,16 +71,13 @@ async function keepMatching(
     ids: products.map((product) => product.id),
   });
 
-  const matches = products.filter((product) => {
+  return products.filter((product) => {
     const available = optionValues.get(product.handle);
     if (!available) return false;
     return options.every((option) =>
       available.get(option.name.toLowerCase())?.has(option.value.toLowerCase()),
     );
   });
-
-  // A constraint Shopify's index doesn't model as an option shouldn't blank the results.
-  return matches.length > 0 ? matches : products;
 }
 
 export const searchProductsTool = tool({
@@ -83,24 +105,33 @@ export const searchProductsTool = tool({
   }),
   execute: async ({ intent, mode, options, query, sortKey }) => {
     const { user } = getAgentContext();
+    const constrained = options.length > 0;
+    const searchQuery = queryWithoutOptions(query, options);
+    const poolSize = constrained ? CONSTRAINED_POOL : RESULT_LIMIT;
 
     try {
+      let pool: ProductCard[] = [];
       if (mode === "semantic") {
-        const products = await semanticProducts(query, intent, user.locale);
-        if (products.length > 0) {
-          const matching = await keepMatching(products, options);
-          return { products: matching.map(toAgentProduct) };
-        }
+        pool = await semanticProducts(searchQuery, intent, user.locale, poolSize);
+      }
+      if (pool.length === 0) {
+        const { products } = await searchIndexProducts({
+          limit: poolSize,
+          locale: user.locale,
+          query: searchQuery,
+          sortKey,
+        });
+        pool = products;
       }
 
-      const { products } = await searchIndexProducts({
-        limit: RESULT_LIMIT,
-        locale: user.locale,
-        query,
-        sortKey,
-      });
-      const matching = await keepMatching(products, options);
-      return { products: matching.map(toAgentProduct) };
+      const matching = await keepMatching(pool, options);
+      if (constrained && matching.length === 0) {
+        return {
+          products: [],
+          unmatchedOptions: options,
+        };
+      }
+      return { products: matching.slice(0, RESULT_LIMIT).map(toAgentProduct) };
     } catch (error) {
       console.error("Failed to search products:", error);
       return { error: "Product search is unavailable right now." };

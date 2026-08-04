@@ -64,7 +64,8 @@ function createSystemPrompt(context: AgentContext): string {
     `The active locale is ${user.locale}.`,
     "You can search products, browse collections, recommend products, answer store policy questions, manage the cart, and build on-site links.",
     "Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.",
-    'When the shopper names a required product option such as a color or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) instead of relying on the query text. Fewer results than expected is the correct outcome; say how many matched rather than padding with near misses.',
+    'When the shopper names a required product option such as a colour or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) and keep the query focused on the product itself ("jackets"). Fewer results than expected is the correct outcome; state how many matched.',
+    "Only describe results as matching a colour, size, or other option when the tool returned them under that option. If searchProducts reports unmatchedOptions, tell the shopper nothing matched and offer to drop or change the constraint — never present other products as if they satisfied it.",
     describePage(page),
   ].filter(Boolean);
 
