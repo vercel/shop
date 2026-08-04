@@ -86,7 +86,6 @@ export const storefront = {
     const language =
       typeof variables?.language === "string" ? variables.language : getLanguageCode(defaultLocale);
 
-    // Hydrogen's createShopifyRequestContext calls crypto.randomUUID(); no-op inside "use cache".
     await io();
 
     // Brand runtime strings so Hydrogen does not infer `never` variables.
