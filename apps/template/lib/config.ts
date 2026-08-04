@@ -76,7 +76,7 @@ export const shopConfig = {
     },
   },
   auth: {
-    isEnabled: true,
+    isEnabled: false,
   },
   botid: {
     checkLevel: "basic",
