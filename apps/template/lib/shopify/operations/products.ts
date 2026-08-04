@@ -20,9 +20,11 @@ import {
   escapeProductQuery,
   fetchCollectionProducts,
   fetchComplementaryProducts,
+  fetchProductOptionValues,
   fetchProductWithVariants,
   fetchRelatedProducts,
   fetchSearchIndexProducts,
+  type ProductOptionValues,
   type SearchIndexProductsParams,
   type SearchIndexProductsResult,
 } from "../fetch";
@@ -567,6 +569,16 @@ export async function getSearchFacets(params: SearchFacetsParams): Promise<Searc
   cacheTag("products");
 
   return fetchSearchFacets(params);
+}
+
+export async function getProductOptionValues(params: {
+  ids: string[];
+}): Promise<ProductOptionValues> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products");
+
+  return fetchProductOptionValues(params.ids);
 }
 
 export async function searchIndexProducts(
