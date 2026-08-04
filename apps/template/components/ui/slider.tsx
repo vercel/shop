@@ -44,22 +44,35 @@ function Slider({ className, children, ...props }: React.ComponentProps<"section
     setCanScrollRight(container.scrollLeft + container.clientWidth < container.scrollWidth - 1);
   });
 
-  // Re-measure in layout effect (before paint, after DOM mutations) and whenever the
-  // content size changes, so the arrows reflect real overflow on first render — not a
-  // post-hydration effect that can run before the scroller's children have laid out.
+  // The scroller's children stream in via Suspense after the header (and its nav) has
+  // already painted, so neither a mount effect nor observing only the initial children
+  // is enough. Watch for child additions/removals and container resizes and re-measure
+  // on each, so the arrows appear as soon as the content genuinely overflows.
   useLayoutEffect(() => {
-    updateScrollState();
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const observer = new ResizeObserver(updateScrollState);
-    observer.observe(container);
+    updateScrollState();
+
+    const resizeObserver = new ResizeObserver(updateScrollState);
+    resizeObserver.observe(container);
+
+    const mutationObserver = new MutationObserver(() => {
+      updateScrollState();
+      for (const child of Array.from(container.children)) {
+        resizeObserver.observe(child);
+      }
+    });
+    mutationObserver.observe(container, { childList: true });
+
     for (const child of Array.from(container.children)) {
-      observer.observe(child);
+      resizeObserver.observe(child);
     }
+
     window.addEventListener("resize", updateScrollState);
     return () => {
-      observer.disconnect();
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener("resize", updateScrollState);
     };
   }, []);
