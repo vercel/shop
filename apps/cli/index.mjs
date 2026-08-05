@@ -12,6 +12,8 @@ export const DEFAULT_PROJECT_NAME = 'my-shop';
 export const TEMPLATE_TARBALL_URL =
   'https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main';
 export const TEMPLATE_TARBALL_PREFIX = 'shop-main/apps/template';
+export const WORKSPACE_CONFIG_URL =
+  'https://raw.githubusercontent.com/vercel/shop/main/pnpm-workspace.yaml';
 
 const PACKAGE_MANAGER_FLAGS = {
   '--use-bun': 'bun',
@@ -162,6 +164,36 @@ export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
 
+async function fetchText(url) {
+  const response = await fetchResponse(url);
+  response.setEncoding('utf8');
+  let body = '';
+  for await (const chunk of response) {
+    body += chunk;
+  }
+  return body;
+}
+
+// The monorepo workspace file carries supply-chain policies (minimumReleaseAge
+// and its excludes) and allowBuilds that scaffolded projects must retain, but
+// the `packages` list only describes the monorepo layout.
+export function stripWorkspacePackages(yaml) {
+  const withoutPackages = yaml
+    .replace(/^packages:[^\n]*\n(?:[ \t]+[^\n]*\n?)*/m, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return withoutPackages ? `${withoutPackages}\n` : '';
+}
+
+export async function writeWorkspaceConfig(
+  projectDir,
+  { fetchConfig = fetchText, url = WORKSPACE_CONFIG_URL } = {},
+) {
+  const contents = stripWorkspacePackages(await fetchConfig(url));
+  if (!contents) return;
+  await writeFile(join(projectDir, 'pnpm-workspace.yaml'), contents, 'utf8');
+}
+
 export async function writeBootstrapMetadata(
   projectDir,
   templateVersion,
@@ -225,6 +257,7 @@ export async function main({
   run = runCommand,
   scaffold = fetchTemplate,
   userAgent = process.env.npm_config_user_agent ?? '',
+  writeWorkspace = writeWorkspaceConfig,
 } = {}) {
   const plan = createExecutionPlan({ cliArgs, cwd, execPath, userAgent });
 
@@ -257,6 +290,13 @@ export async function main({
       await writeBootstrapMetadata(projectDir, templateVersion);
     } catch (error) {
       console.warn('\nScaffold completed, but bootstrap metadata could not be written.');
+      console.warn(error instanceof Error ? error.message : String(error));
+    }
+
+    try {
+      await writeWorkspace(projectDir);
+    } catch (error) {
+      console.warn('\nScaffold completed, but pnpm-workspace.yaml could not be written.');
       console.warn(error instanceof Error ? error.message : String(error));
     }
 
