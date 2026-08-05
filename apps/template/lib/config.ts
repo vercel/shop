@@ -60,9 +60,8 @@ const bareHost =
 const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
 
 export const shopConfig = {
-  // TODO(laugharn): revert to false before merging — temporarily on to test the assistant in preview.
   agent: {
-    isEnabled: true,
+    isEnabled: false,
   },
   analytics: {
     shopify: {
