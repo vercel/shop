@@ -51,14 +51,30 @@
   "agent": {
     "assistantLabel": "Shopping assistant",
     "blocked": "We couldn't verify this request. Reload the page and try again.",
+    "cartLiveNote": "This cart updates as you change it.",
+    "chooseVariant": "Choose an option",
     "clearChat": "Clear chat",
+    "error": "Something went wrong. Try again.",
     "greeting": "Hi, how can I help?",
     "inputPlaceholder": "Ask anything…",
     "minimizeAssistant": "Minimize assistant",
     "name": "Shop Assistant",
     "openAssistant": "Open shopping assistant",
+    "productUnavailable": "This product is no longer available.",
+    "send": "Send",
+    "stop": "Stop",
     "thinking": "Thinking…",
-    "title": ""
+    "toolAddCartNote": "Adding your note…",
+    "toolAddToCart": "Adding to cart…",
+    "toolBrowseCollection": "Browsing the collection…",
+    "toolGetCart": "Checking your cart…",
+    "toolGetProductDetails": "Looking up product details…",
+    "toolGetRecommendations": "Finding recommendations…",
+    "toolListCollections": "Looking at collections…",
+    "toolNavigate": "Finding the page…",
+    "toolSearchPolicies": "Checking store policies…",
+    "toolSearchProducts": "Searching products…",
+    "toolUpdateCart": "Updating your cart…"
   },
   "blog": {
     "empty": "No articles found."
