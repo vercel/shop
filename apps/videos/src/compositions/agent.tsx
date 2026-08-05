@@ -98,18 +98,18 @@ export const AgentComposition = ({
   return (
     <Stage kicker={kicker} layout={layout} theme={theme} title={title ?? skill.title} width={620}>
       <BrowserChrome showLockIcon={false} url="Coding Agent">
-        <div className="flex h-44 flex-col gap-2.5 overflow-hidden">
+        <div className="flex h-48 flex-col gap-2.5 overflow-hidden">
           {/* Command input */}
           {frame >= PROMPT_START && (
-            <div className="flex h-5 items-center gap-2" style={{ opacity: fadeIn(frame, PROMPT_START, 4) }}>
-              <span className="inline-flex size-3.5 shrink-0 items-center justify-center font-mono text-xs leading-none text-amber-800">
+            <div className="flex h-6 items-center gap-2" style={{ opacity: fadeIn(frame, PROMPT_START, 4) }}>
+              <span className="inline-flex size-4 shrink-0 items-center justify-center font-mono text-sm leading-none text-amber-800">
                 $
               </span>
-              <span className="font-mono text-xs leading-5 text-foreground">
+              <span className="font-mono text-sm leading-6 text-foreground">
                 {skill.command.slice(0, chars)}
                 <span
                   aria-hidden
-                  className="ml-0.5 inline-block h-3.5 w-[5px] bg-foreground/70 align-middle"
+                  className="ml-0.5 inline-block h-4 w-[5px] bg-foreground/70 align-middle"
                   style={{ opacity: isTyping ? caretBlink(frame, fps) : 0 }}
                 />
               </span>
@@ -119,8 +119,8 @@ export const AgentComposition = ({
           {/* Spinner */}
           {showSpinner && (
             <div style={{ opacity: fadeIn(frame, m.spinner, 5) }}>
-              <span className="inline-flex items-center gap-2 text-xs text-gray-1000">
-                <span className="inline-flex size-3.5 shrink-0 items-center justify-center">
+              <span className="inline-flex items-center gap-2 text-sm text-gray-1000">
+                <span className="inline-flex size-4 shrink-0 items-center justify-center">
                   <SpinnerIcon rotation={spinnerRotation(frame, fps)} />
                 </span>
                 Running skill…
@@ -134,9 +134,9 @@ export const AgentComposition = ({
               const start = m.logs[i]!;
               if (frame < start) return null;
               return (
-                <div className="flex items-start gap-2 font-mono text-xs" key={log.text} style={riseIn(frame, start)}>
+                <div className="flex items-start gap-2 font-mono text-sm" key={log.text} style={riseIn(frame, start)}>
                   <span
-                    className={`inline-flex size-3.5 shrink-0 items-center justify-center text-sm leading-none ${
+                    className={`inline-flex size-4 shrink-0 items-center justify-center text-base leading-none ${
                       log.icon === "add" ? "text-green-800" : "text-amber-800"
                     }`}
                   >
@@ -150,7 +150,7 @@ export const AgentComposition = ({
 
           {/* Done */}
           {showDone && (
-            <div className="flex items-center gap-2 font-mono text-xs text-green-800" style={riseIn(frame, m.done)}>
+            <div className="flex items-center gap-2 font-mono text-sm text-green-800" style={riseIn(frame, m.done)}>
               <CheckIcon />
               {skill.done}
             </div>

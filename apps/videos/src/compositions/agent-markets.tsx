@@ -100,88 +100,96 @@ const TerminalScene = ({ frame, fps }: { frame: number; fps: number }) => {
 
   return (
     <div className="flex h-[320px] flex-col gap-2.5 overflow-hidden">
-      {/* Transcript streams from the top */}
-      {frame >= submit && (
-        <div className="flex items-center gap-2 font-mono text-xs" style={riseIn(frame, submit, 5)}>
-          <span className="text-gray-600">❯</span>
-          <span className="text-foreground">{COMMAND}</span>
-        </div>
-      )}
-
-      {frame >= intro && (
-        <div className="text-xs leading-5 text-gray-1000">{INTRO.slice(0, introChars)}</div>
-      )}
-
-      {frame >= chosen && (
-        <div className="flex items-center gap-2 font-mono text-xs text-green-800" style={riseIn(frame, chosen, 5)}>
-          <CheckIcon />
-          Locales: de-DE, fr-FR, es-ES, nl-NL
-        </div>
-      )}
-
-      {/* Skill run */}
-      {showSpinner && (
-        <div style={{ opacity: fadeIn(frame, run, 5) }}>
-          <span className="inline-flex items-center gap-2 text-xs text-gray-1000">
-            <SpinnerIcon rotation={spinnerRotation(frame, fps)} />
-            Running skill…
-          </span>
-        </div>
-      )}
-      {LOGS.map((log, i) => {
-        const start = logs[i]!;
-        if (frame < start) return null;
-        return (
-          <div className="flex items-start gap-2 font-mono text-xs" key={log.text} style={riseIn(frame, start)}>
-            <span
-              className={`inline-flex size-3.5 shrink-0 items-center justify-center text-sm leading-none ${
-                log.icon === "add" ? "text-green-800" : "text-amber-800"
-              }`}
-            >
-              {log.icon === "add" ? "+" : "~"}
-            </span>
-            <span className="text-foreground/50">{log.text}</span>
+      {/* Bottom-anchored transcript, chat style: new lines push older ones
+          up and eventually off the top, like a scrolling terminal. */}
+      <div className="relative flex min-h-0 flex-1 flex-col justify-end gap-2.5 overflow-hidden">
+        {/* Scrolled-off lines dissolve instead of clipping mid-glyph */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-10 h-8 bg-gradient-to-b from-background-100 to-transparent"
+        />
+        {frame >= submit && (
+          <div className="flex items-center gap-2 font-mono text-sm" style={riseIn(frame, submit, 5)}>
+            <span className="text-gray-600">❯</span>
+            <span className="text-foreground">{COMMAND}</span>
           </div>
-        );
-      })}
-      {frame >= done && (
-        <div className="flex items-center gap-2 font-mono text-xs text-green-800" style={riseIn(frame, done)}>
-          <CheckIcon />
-          Shopify Markets enabled — 4 locales configured
-        </div>
-      )}
+        )}
+
+        {frame >= intro && (
+          <div className="text-sm leading-6 text-gray-1000">{INTRO.slice(0, introChars)}</div>
+        )}
+
+        {frame >= chosen && (
+          <div className="flex items-center gap-2 font-mono text-sm text-green-800" style={riseIn(frame, chosen, 5)}>
+            <CheckIcon />
+            Locales: de-DE, fr-FR, es-ES, nl-NL
+          </div>
+        )}
+
+        {/* Skill run */}
+        {showSpinner && (
+          <div style={{ opacity: fadeIn(frame, run, 5) }}>
+            <span className="inline-flex items-center gap-2 text-sm text-gray-1000">
+              <SpinnerIcon rotation={spinnerRotation(frame, fps)} />
+              Running skill…
+            </span>
+          </div>
+        )}
+        {LOGS.map((log, i) => {
+          const start = logs[i]!;
+          if (frame < start) return null;
+          return (
+            <div className="flex items-start gap-2 font-mono text-sm" key={log.text} style={riseIn(frame, start)}>
+              <span
+                className={`inline-flex size-4 shrink-0 items-center justify-center text-base leading-none ${
+                  log.icon === "add" ? "text-green-800" : "text-amber-800"
+                }`}
+              >
+                {log.icon === "add" ? "+" : "~"}
+              </span>
+              <span className="text-foreground/50">{log.text}</span>
+            </div>
+          );
+        })}
+        {frame >= done && (
+          <div className="flex items-center gap-2 font-mono text-sm text-green-800" style={riseIn(frame, done)}>
+            <CheckIcon />
+            Shopify Markets enabled — 4 locales configured
+          </div>
+        )}
+      </div>
 
       {/* Bottom slot, Claude Code style: the AskUserQuestion panel takes the
           place of the prompt input while a question is pending. */}
-      <div className="mt-auto flex flex-col gap-1">
+      <div className="flex flex-col gap-1">
         {showAsk ? (
           <div
             className="flex flex-col gap-1.5 rounded-lg border border-gray-alpha-400 bg-background-200 p-3"
             style={riseIn(frame, ask, 8)}
           >
-            <span className="text-xs font-medium text-foreground">{QUESTION}</span>
-            <div className="flex items-center gap-2 rounded bg-gray-100 px-2 py-1 font-mono text-xs text-foreground">
+            <span className="text-sm font-medium text-foreground">{QUESTION}</span>
+            <div className="flex items-center gap-2 rounded bg-gray-100 px-2 py-1 font-mono text-sm text-foreground">
               <span className="text-gray-600">❯</span> 1. {OPTION_1}
             </div>
-            <div className="px-2 py-1 font-mono text-xs text-gray-700">
+            <div className="px-2 py-1 font-mono text-sm text-gray-700">
               <span className="mr-2 opacity-0">❯</span>2. {OPTION_2}
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border border-gray-alpha-400 bg-background-100 px-3 py-2.5">
-            <span className="font-mono text-xs text-gray-600">❯</span>
-            <span className="font-mono text-xs text-foreground">
+            <span className="font-mono text-sm text-gray-600">❯</span>
+            <span className="font-mono text-sm text-foreground">
               {frame < submit ? COMMAND.slice(0, chars) : ""}
               {frame >= submit && <span className="text-gray-500">Ask anything…</span>}
               <span
                 aria-hidden
-                className="ml-0.5 inline-block h-3.5 w-[5px] bg-foreground/70 align-middle"
+                className="ml-0.5 inline-block h-4 w-[5px] bg-foreground/70 align-middle"
                 style={{ opacity: isTyping ? caretBlink(frame, fps) : 0 }}
               />
             </span>
           </div>
         )}
-        <span className="self-end font-mono text-[9px] text-gray-500">
+        <span className="self-end font-mono text-[11px] text-gray-500">
           {showAsk ? "↵ to select" : "↵ to run"}
         </span>
       </div>
