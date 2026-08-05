@@ -24,15 +24,17 @@ The storefront includes an opt-in AI shopping assistant built with [AI SDK](http
 
 **Product discovery**
 
-| Tool                        | Purpose                                                                                          |
-| --------------------------- | ------------------------------------------------------------------------------------------------ |
-| `searchProducts`            | One search tool with a semantic mode (Shopify's catalog search) and a keyword mode with sorting   |
-| `getProductDetails`         | Full product info: description, prices, options, variants, availability, and images               |
-| `getProductRecommendations` | Complementary and related products                                                                |
-| `listCollections`           | All store collections and categories                                                              |
-| `browseCollection`          | Products within a collection with sorting                                                         |
+| Tool                        | Purpose                                                                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `searchProducts`            | One search tool with a semantic mode (Shopify's catalog search) and a keyword mode with sorting, plus enforced product-option constraints |
+| `getProductDetails`         | Full product info: description, prices, options, variants, availability, and images                                                       |
+| `getProductRecommendations` | Complementary and related products                                                                                                        |
+| `listCollections`           | All store collections and categories                                                                                                      |
+| `browseCollection`          | Products within a collection with sorting                                                                                                 |
 
 Semantic search calls Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) endpoint, which returns product IDs only; those IDs are always resolved back through the Storefront API so results carry the same canonical fields as the rest of the storefront. A semantic miss falls back to the keyword index automatically rather than asking the model to retry. Set `UCP_AGENT_PROFILE_URL` only when the store requires an agent profile.
+
+When a shopper states a hard requirement such as a colour or size, the model passes it as a product option rather than leaving it in the query text. Shopify ranks matches first but pads results out to the requested count, and its `productFilters` argument narrows facet counts rather than results, so the tool checks each candidate against the product's real option values and keeps only genuine matches. A constrained search therefore returns fewer results than the usual six, and returns none at all when nothing matches, so the assistant can say a colour is unavailable instead of presenting near misses as matches.
 
 **Cart management** — `getCart`, `addToCart`, `updateCartItem` (quantity `0` removes the line), and `addCartNote`, all funneled through `lib/shopify/operations/cart.ts` so existing cache invalidation applies. The route creates a cart before streaming when needed and returns its httpOnly cookie in the response headers.
 
