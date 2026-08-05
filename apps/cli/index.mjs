@@ -175,23 +175,18 @@ async function fetchText(url) {
 }
 
 // The monorepo workspace file carries supply-chain policies (minimumReleaseAge
-// and its excludes) and allowBuilds that scaffolded projects must retain, but
-// the `packages` list only describes the monorepo layout.
-export function stripWorkspacePackages(yaml) {
-  const withoutPackages = yaml
-    .replace(/^packages:[^\n]*\n(?:[ \t]+[^\n]*\n?)*/m, '')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-  return withoutPackages ? `${withoutPackages}\n` : '';
-}
-
+// and its excludes) and allowBuilds that scaffolded projects must retain; only
+// the monorepo-layout `packages` list is dropped.
 export async function writeWorkspaceConfig(
   projectDir,
   { fetchConfig = fetchText, url = WORKSPACE_CONFIG_URL } = {},
 ) {
-  const contents = stripWorkspacePackages(await fetchConfig(url));
+  const contents = (await fetchConfig(url))
+    .replace(/^packages:[^\n]*\n(?:[ \t]+[^\n]*\n?)*/m, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
   if (!contents) return;
-  await writeFile(join(projectDir, 'pnpm-workspace.yaml'), contents, 'utf8');
+  await writeFile(join(projectDir, 'pnpm-workspace.yaml'), `${contents}\n`, 'utf8');
 }
 
 export async function writeBootstrapMetadata(

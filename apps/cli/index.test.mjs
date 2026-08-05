@@ -8,7 +8,6 @@ import {
   createExecutionPlan,
   main,
   readTemplateVersion,
-  stripWorkspacePackages,
   writeWorkspaceConfig,
 } from './index.mjs';
 
@@ -60,42 +59,39 @@ test('createExecutionPlan falls back to npm when nothing is detected', () => {
   assert.equal(plan.positionalName, null);
 });
 
-test('stripWorkspacePackages drops the packages list and keeps policies', () => {
-  const stripped = stripWorkspacePackages(WORKSPACE_YAML);
-
-  assert.ok(!stripped.includes('packages:'));
-  assert.ok(!stripped.includes('apps/*'));
-  assert.ok(stripped.includes('minimumReleaseAge: 2880'));
-  assert.ok(stripped.includes('next@16.3.0'));
-  assert.ok(stripped.includes('"@next/env@16.3.0"'));
-  assert.ok(stripped.includes('allowBuilds:'));
-  assert.ok(stripped.endsWith('\n'));
-  assert.ok(!stripped.includes('\n\n\n'));
-});
-
-test('stripWorkspacePackages handles packages in the middle of the file', () => {
-  const stripped = stripWorkspacePackages(
-    'packages:\n  - "apps/*"\n  - "packages/*"\n\nminimumReleaseAge: 2880\n',
-  );
-
-  assert.equal(stripped, 'minimumReleaseAge: 2880\n');
-});
-
-test('writeWorkspaceConfig writes the stripped workspace file', async () => {
+test('writeWorkspaceConfig drops the packages list and keeps policies', async () => {
   const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
-  const fetchedUrls = [];
 
   try {
     await writeWorkspaceConfig(tempRoot, {
-      fetchConfig: async (url) => {
-        fetchedUrls.push(url);
-        return WORKSPACE_YAML;
-      },
+      fetchConfig: async () => WORKSPACE_YAML,
     });
 
-    assert.equal(fetchedUrls.length, 1);
     const written = await readFile(join(tempRoot, 'pnpm-workspace.yaml'), 'utf8');
-    assert.equal(written, stripWorkspacePackages(WORKSPACE_YAML));
+    assert.ok(!written.includes('packages:'));
+    assert.ok(!written.includes('apps/*'));
+    assert.ok(written.includes('allowBuilds:'));
+    assert.ok(written.includes('minimumReleaseAge: 2880'));
+    assert.ok(written.includes('next@16.3.0'));
+    assert.ok(written.includes('"@next/env@16.3.0"'));
+    assert.ok(written.endsWith('\n'));
+    assert.ok(!written.includes('\n\n\n'));
+  } finally {
+    await rm(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test('writeWorkspaceConfig handles a packages list in the middle of the file', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
+
+  try {
+    await writeWorkspaceConfig(tempRoot, {
+      fetchConfig: async () =>
+        'packages:\n  - "apps/*"\n  - "packages/*"\n\nminimumReleaseAge: 2880\n',
+    });
+
+    const written = await readFile(join(tempRoot, 'pnpm-workspace.yaml'), 'utf8');
+    assert.equal(written, 'minimumReleaseAge: 2880\n');
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }
