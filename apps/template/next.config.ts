@@ -54,6 +54,14 @@ const nextConfig: NextConfig = {
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
   reactCompiler: true,
+  turbopack: {
+    rules: {
+      "*.css": {
+        as: "*.css",
+        loaders: ["@tailwindcss/turbopack"],
+      },
+    },
+  },
   async rewrites() {
     return {
       beforeFiles: [
