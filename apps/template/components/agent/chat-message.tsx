@@ -1,12 +1,15 @@
 "use client";
 
+import type { Spec } from "@json-render/core";
 import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
 import type { UIMessage } from "ai";
+import { isToolUIPart } from "ai";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 
+import { AgentProductProvider } from "./product-context";
 import { registry } from "./registry";
 import { AgentThinking } from "./thinking";
 
@@ -24,6 +27,36 @@ const Markdown = memo(
   (previous, next) => previous.children === next.children,
 );
 Markdown.displayName = "Markdown";
+
+/**
+ * Models sometimes name the root key something that was never added to `elements`
+ * (e.g. root "hoodies" alongside a "hoodie-grid" element), which renders nothing.
+ * Repoint the root at the element no other element claims as a child.
+ */
+function withResolvedRoot(spec: Spec): Spec {
+  if (spec.root && spec.elements[spec.root]) return spec;
+
+  const keys = Object.keys(spec.elements);
+  if (keys.length === 0) return spec;
+
+  const claimed = new Set(
+    keys
+      .flatMap((key) => spec.elements[key]?.children ?? [])
+      .filter((child) => child !== spec.root),
+  );
+  const orphans = keys.filter((key) => !claimed.has(key));
+  const root = orphans.length === 1 ? orphans[0] : undefined;
+  return root ? { ...spec, root } : spec;
+}
+
+function activeToolName(parts: UIMessage["parts"]): string | undefined {
+  for (const part of parts) {
+    if (isToolUIPart(part) && part.state !== "output-available" && part.state !== "output-error") {
+      return part.type === "dynamic-tool" ? part.toolName : part.type.slice(5);
+    }
+  }
+  return undefined;
+}
 
 export function ChatMessage({
   isStreaming,
@@ -48,13 +81,15 @@ export function ChatMessage({
   }
 
   return (
-    <div className="space-y-2.5 text-sm text-foreground">
-      <AgentThinking active={isStreaming && !text} />
+    <div className="space-y-2.5 text-foreground text-sm">
+      <AgentThinking active={isStreaming && !text} tool={activeToolName(message.parts)} />
       {text && <Markdown>{text}</Markdown>}
       {hasSpec && spec && (
-        <JSONUIProvider registry={registry}>
-          <Renderer registry={registry} spec={spec} />
-        </JSONUIProvider>
+        <AgentProductProvider parts={message.parts}>
+          <JSONUIProvider registry={registry}>
+            <Renderer registry={registry} spec={withResolvedRoot(spec)} />
+          </JSONUIProvider>
+        </AgentProductProvider>
       )}
     </div>
   );

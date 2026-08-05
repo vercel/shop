@@ -488,30 +488,52 @@ export async function fetchCart(cartId: string): Promise<Cart | undefined> {
   return response.data.cart ? transformShopifyCart(response.data.cart) : undefined;
 }
 
-const NODE_HANDLES_QUERY = `#graphql
-  query nodeHandles($ids: [ID!]!) {
+const PRODUCT_OPTION_VALUES_QUERY = `#graphql
+  query productOptionValues($ids: [ID!]!) {
     nodes(ids: $ids) {
       ... on Product {
-        id
         handle
+        options {
+          name
+          optionValues {
+            name
+          }
+        }
       }
     }
   }
 ` as const;
 
-export async function fetchProductHandlesByIds(ids: string[]): Promise<Map<string, string>> {
-  const handles = new Map<string, string>();
-  if (ids.length === 0) return handles;
+export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
+
+/**
+ * Option values per product handle, lowercased for comparison. ProductCardFields only carries
+ * the default variant's options, so a product's other colors/sizes need this separate read.
+ */
+export async function fetchProductOptionValues(ids: string[]): Promise<ProductOptionValues> {
+  const byHandle: ProductOptionValues = new Map();
+  if (ids.length === 0) return byHandle;
 
   const response = await storefront.request<{
-    nodes: Array<{ handle: string; id: string } | null>;
-  }>(NODE_HANDLES_QUERY, { variables: { ids } });
-  assertStorefrontOk(response, "nodeHandles");
+    nodes: Array<{
+      handle: string;
+      options: Array<{ name: string; optionValues: Array<{ name: string }> }>;
+    } | null>;
+  }>(PRODUCT_OPTION_VALUES_QUERY, { variables: { ids } });
+  assertStorefrontOk(response, "productOptionValues");
 
   for (const node of response.data.nodes) {
-    if (node?.id && node.handle) handles.set(node.id, node.handle);
+    if (!node?.handle) continue;
+    const options = new Map<string, Set<string>>();
+    for (const option of node.options ?? []) {
+      options.set(
+        option.name.toLowerCase(),
+        new Set((option.optionValues ?? []).map((value) => value.name.toLowerCase())),
+      );
+    }
+    byHandle.set(node.handle, options);
   }
-  return handles;
+  return byHandle;
 }
 
 export async function createCartCore(locale: string = defaultLocale): Promise<CartMutationResult> {

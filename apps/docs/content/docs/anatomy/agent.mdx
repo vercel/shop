@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an opt-in AI shopping assistant built with [AI SDK](https://ai-sdk.dev). It can search products, browse collections, manage the cart, answer store-policy questions, and render rich product cards through natural conversation. The default model is OpenAI GPT-5.6 Luna through the Vercel AI Gateway.
+The storefront includes an opt-in AI shopping assistant built with [AI SDK](https://ai-sdk.dev). It can search products, browse collections, manage the cart, answer store-policy questions, and render interactive product and cart UI through natural conversation. The default model is OpenAI GPT-5.6 Luna through the Vercel AI Gateway.
 
 ## How it works
 
@@ -14,31 +14,37 @@ The storefront includes an opt-in AI shopping assistant built with [AI SDK](http
 
 **Bot protection is on by default.** The chat endpoint is anonymous and every message costs model tokens, so it is a natural target for automated abuse. Enabling the assistant also enables [Vercel BotID](https://vercel.com/docs/botid), an invisible CAPTCHA that turns away automated traffic before it can reach the model or touch a cart. See [Shop Configuration](/docs/reference/shop-config) to change the detection level or turn it off.
 
-**Trusted page context, not client-supplied state.** The route derives context from the same-origin `Referer` header rather than trusting a client-supplied product or collection object. Product and collection handles are resolved through Shopify before being added to the system prompt, so the assistant can understand phrases like "this product" while prices, variants, and availability stay authoritative. A request-scoped `AsyncLocalStorage` exposes the current locale, cart ID, chat ID, and page context to every tool during that request.
+**Trusted page context, not client-supplied state.** The route derives context from the same-origin `Referer` header rather than trusting a client-supplied product or collection object. It passes only the handle of the current product or collection into the system prompt, so the assistant understands phrases like "this product" while every price, variant, and availability fact still comes from a tool call. A request-scoped `AsyncLocalStorage` exposes the current locale, cart ID, and page context to every tool during that request.
 
-**Generative UI settles before it renders.** The model's response streams through json-render's `pipeJsonRender`, which adds structured UI data parts to the normal AI SDK stream; `useJsonRenderMessage` reconstructs the spec on the client for `<Renderer>`. Cards render only after the turn settles, so a partial spec never flashes an incorrect card. `CartReconciler` watches completed cart-tool calls in the message stream and updates the global cart context — opening the overlay on a successful mutation, updating state silently for a plain `getCart`.
+**The model chooses layout; the storefront owns the data.** Responses stream through json-render's `pipeJsonRender`, which adds structured UI data parts to the normal AI SDK stream, and `useJsonRenderMessage` reconstructs the spec on the client for `<Renderer>`. Generated components reference products by handle rather than restating their fields, and the client resolves each handle against the tool results from that turn. A model cannot invent a price, and cards render only after the turn settles, so a partial spec never flashes an incorrect card.
+
+**One cart, one source of truth.** Cart tools mutate through `lib/shopify/operations/cart.ts`, and `AgentCartBridge` applies the resulting cart to the client cart store through the same standard event the rest of the storefront uses. The assistant's cart summary, the cart overlay, and the nav badge therefore read identical state, and the assistant never narrates cart contents as text it could get wrong.
 
 ## Out of the box
 
 **Product discovery**
 
-| Tool                        | Purpose                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `searchProducts`            | Keyword search with sorting (best matches, price low/high); returns up to 10 results |
-| `getProductDetails`         | Full product info: description, prices, variants, availability, and images           |
-| `getProductRecommendations` | Complementary and related products (up to 5)                                         |
-| `listCollections`           | All store categories                                                                 |
-| `browseCollection`          | Products within a collection with sorting                                            |
+| Tool                        | Purpose                                                                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `searchProducts`            | One search tool with a semantic mode (Shopify's catalog search) and a keyword mode with sorting, plus enforced product-option constraints |
+| `getProductDetails`         | Full product info: description, prices, options, variants, availability, and images                                                       |
+| `getProductRecommendations` | Complementary and related products                                                                                                        |
+| `listCollections`           | All store collections and categories                                                                                                      |
+| `browseCollection`          | Products within a collection with sorting                                                                                                 |
 
-**Cart management** — `addToCart`, `getCart`, `updateCartItemQuantity`, `removeFromCart`, and `addCartNote`, all funneled through `lib/shopify/operations/cart.ts` so existing cache invalidation applies. The route creates a cart before streaming when needed and returns its httpOnly cookie in the response headers.
+Semantic search calls Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) endpoint, which returns product IDs only; those IDs are always resolved back through the Storefront API so results carry the same canonical fields as the rest of the storefront. A semantic miss falls back to the keyword index automatically rather than asking the model to retry. Set `UCP_AGENT_PROFILE_URL` only when the store requires an agent profile.
 
-**Navigation** — `navigateUser` generates links to product pages, collections, search, cart, checkout, account, and orders.
+When a shopper states a hard requirement such as a colour or size, the model passes it as a product option rather than leaving it in the query text. Shopify ranks matches first but pads results out to the requested count, and its `productFilters` argument narrows facet counts rather than results, so the tool checks each candidate against the product's real option values and keeps only genuine matches. A constrained search therefore returns fewer results than the usual six, and returns none at all when nothing matches, so the assistant can say a colour is unavailable instead of presenting near misses as matches.
 
-**Native Shopify (Storefront MCP)** — `searchCatalog`, `getCatalogProduct`, and `searchShopPoliciesAndFaqs` call Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp) endpoint as an alternative discovery path. `searchCatalog` accepts natural-language intent and enriches results with storefront handles so they can feed normal navigation and cart flows. Set `UCP_AGENT_PROFILE_URL` only when the store requires an agent profile.
+**Cart management** — `getCart`, `addToCart`, `updateCartItem` (quantity `0` removes the line), and `addCartNote`, all funneled through `lib/shopify/operations/cart.ts` so existing cache invalidation applies. The route creates a cart before streaming when needed and returns its httpOnly cookie in the response headers.
 
-**Generative UI components** — `AgentProductCard`, `AgentProductGrid`, `AgentCartSummary`, `AgentCartConfirmation`, and `AgentVariantPicker`, registered in the json-render catalog in `lib/agent/index.ts`.
+**Store knowledge** — `searchShopPolicies` answers policy, shipping, returns, payment, warranty, sizing, and care questions from Shopify's own content, so the model never guesses them.
 
-**Chat UI and persistence** — a compact-to-capped panel with streaming "Thinking…" state, bottom pinning, click-outside behavior, and clear/minimize controls. The chat ID, draft input, and UI messages persist to `localStorage` under `template-agent-chat:v3`, so a conversation survives reloads until cleared — persistence is browser-local; there is no durable server-side session.
+**Navigation** — `navigateUser` builds links to product pages, collections, search, cart, checkout, account, and orders from the same route map the tool and page-context parser share.
+
+**Generative UI components** — `AgentProductCard`, `AgentProductGrid`, `AgentCartSummary`, and `AgentVariantPicker`, registered in the json-render catalog in `lib/agent/index.ts`. The cart summary and variant picker are interactive: shoppers step quantities, remove lines, pick a variant, and add to cart directly from the conversation, reusing the storefront's own cart mutation path.
+
+**Chat UI and persistence** — a compact-to-capped panel with a per-tool streaming status, bottom pinning, click-outside behavior, a working stop button, and clear/minimize controls. The panel stays mounted while browsing, so a conversation survives navigation. Draft input and UI messages persist to `localStorage` under `template-agent-chat`, so a conversation also survives reloads until cleared — persistence is browser-local; there is no durable server-side session.
 
 ## Common customizations
 

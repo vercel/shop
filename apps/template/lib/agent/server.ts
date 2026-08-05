@@ -4,35 +4,21 @@ import { shopConfig } from "@/lib/config";
 
 import { catalog } from ".";
 import type { Locale } from "../i18n";
-import type { ProductDetails } from "../types";
-import { addCartNoteTool } from "./tools/add-cart-note";
-import { addToCartTool } from "./tools/add-to-cart";
-import { browseCollectionTool } from "./tools/browse-collection";
-import { getCartTool } from "./tools/get-cart";
-import { getCatalogProductTool } from "./tools/get-catalog-product";
-import { getProductDetailsTool } from "./tools/get-product-details";
-import { getRecommendationsTool } from "./tools/get-recommendations";
-import { listCollectionsTool } from "./tools/list-collections";
+import type { PageContext } from "./routes";
+import { addCartNoteTool, addToCartTool, getCartTool, updateCartItemTool } from "./tools/cart";
+import { browseCollectionTool, listCollectionsTool } from "./tools/collections";
 import { navigateTool } from "./tools/navigate";
-import { removeFromCartTool } from "./tools/remove-from-cart";
-import { searchCatalogTool } from "./tools/search-catalog";
-import { searchProductsTool } from "./tools/search-products";
-import { searchShopPoliciesTool } from "./tools/search-shop-policies";
-import { updateCartItemTool } from "./tools/update-cart-item";
+import { searchShopPoliciesTool } from "./tools/policies";
+import {
+  getProductDetailsTool,
+  getRecommendationsTool,
+  searchProductsTool,
+} from "./tools/products";
 
 export type User = { locale: Locale; type: "guest" };
 
-export type PageContext =
-  | { type: "cart" }
-  | { handle: string; title: string; type: "collection" }
-  | { type: "home" }
-  | { product: ProductDetails; type: "product" }
-  | { query: string; type: "search" }
-  | null;
-
 export interface AgentContext {
   cart: string | undefined;
-  chatId: string;
   page: PageContext;
   user: User;
 }
@@ -49,40 +35,48 @@ export function withAgentContext<T>(context: AgentContext, callback: () => T): T
   return agentContext.run(context, callback);
 }
 
+function describePage(page: PageContext): string {
+  if (!page) return "";
+  switch (page.type) {
+    case "cart":
+      return "The shopper is viewing their cart.";
+    case "collection":
+      return `The shopper is browsing the "${page.handle}" collection.`;
+    case "home":
+      return "The shopper is on the home page. Help them discover products or collections.";
+    case "product":
+      return `The shopper is viewing the product "${page.handle}". When they say "this product", call getProductDetails with that handle.`;
+    case "search":
+      return page.query
+        ? `The shopper is searching for "${page.query}".`
+        : "The shopper is on the search page.";
+    default:
+      return "";
+  }
+}
+
 function createSystemPrompt(context: AgentContext): string {
   const { page, user } = context;
-  let prompt = `You're a helpful shopping assistant for ${shopConfig.site.name}. Never use emojis. Always respond in the same language as the user, preferring the user's language when unclear.\n\nThe active locale is ${user.locale}.\n\nYou can search products, browse collections, get recommendations and product details, answer store policy questions, manage the cart, and generate on-site navigation links. Prefer searchCatalog for vague, descriptive, or preference-driven requests; use searchProducts for exact keyword lookups or price sorting. If searchCatalog fails or returns nothing, retry with searchProducts. Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.\n`;
 
-  if (page?.type === "home") {
-    prompt += "\nThe user is on the home page. Help them discover products or collections.\n";
-  } else if (page?.type === "product") {
-    const { product } = page;
-    const variants = (product.variants ?? [])
-      .map((variant) => {
-        const options = variant.selectedOptions
-          .map((option) => `${option.name}: ${option.value}`)
-          .join(", ");
-        return `- ${variant.title} (${options}) — ${variant.price.amount} ${variant.price.currencyCode}; ${variant.availableForSale ? "in stock" : "out of stock"}; variantId: ${variant.id}`;
-      })
-      .join("\n");
-    prompt += `\nThe user is viewing ${product.title} (handle: ${product.handle}). Price: ${product.price.amount} ${product.price.currencyCode}. Available: ${product.availableForSale ? "yes" : "no"}. Description: ${product.description}\nVariants:\n${variants}\nWhen the user says "this product", use this trusted context. Ask for variant choices when multiple variants exist before adding to cart.\n`;
-  } else if (page?.type === "collection") {
-    prompt += `\nThe user is browsing the ${page.title} collection (handle: ${page.handle}).\n`;
-  } else if (page?.type === "search") {
-    prompt += `\nThe user is on the search page${page.query ? ` with query "${page.query}"` : ""}.\n`;
-  } else if (page?.type === "cart") {
-    prompt += "\nThe user is viewing their shopping cart.\n";
-  }
+  const instructions = [
+    `You're a helpful shopping assistant for ${shopConfig.site.name}.`,
+    "Never use emojis. Always respond in the same language as the shopper, preferring their language when unclear.",
+    `The active locale is ${user.locale}.`,
+    "You can search products, browse collections, recommend products, answer store policy questions, manage the cart, and build on-site links.",
+    "Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.",
+    'When the shopper names a required product option such as a colour or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) and keep the query focused on the product itself ("jackets"). Fewer results than expected is the correct outcome; state how many matched.',
+    "Only describe results as matching a colour, size, or other option when the tool returned them under that option. If searchProducts reports unmatchedOptions, tell the shopper nothing matched and offer to drop or change the constraint — never present other products as if they satisfied it.",
+    describePage(page),
+  ].filter(Boolean);
 
-  return `${prompt}\n${catalog.prompt({
+  return `${instructions.join("\n\n")}\n\n${catalog.prompt({
     customRules: [
-      "When searchProducts, searchCatalog, browseCollection, getProductRecommendations, getProductDetails, or getCatalogProduct returns products successfully, render them with AgentProductCard components. Wrap multiple cards in AgentProductGrid.",
-      "Never pass a limit to searchProducts, searchCatalog, or browseCollection — omit it so the default of 6 applies. Render every returned product; do not trim the grid to fewer cards.",
-      "Do not use repeat, $item, $state, $index, or $bindItem. Give each AgentProductCard its own /elements/<key> entry with concrete prop values copied directly from the tool result, and list the card keys in the grid's children array.",
-      "Pass price and compareAtPrice strings directly from tool results. When a product has no compareAtPrice, use null — never a zero amount.",
-      "When getCart returns a non-empty cart, render AgentCartSummary using its items, subtotal, total, totalQuantity, and checkoutUrl.",
-      "After addToCart succeeds, render AgentCartConfirmation using known product context.",
-      "When multiple variants need a choice, render AgentVariantPicker from getProductDetails and ask the user which variant they want.",
+      "When a tool returns products, render every one of them: an AgentProductCard per product, wrapped in a single AgentProductGrid.",
+      "AgentProductCard takes only a handle. Never invent props for titles, prices, images, or availability — the card resolves those from the tool result.",
+      "Render AgentCartSummary after getCart or any cart mutation. It takes no props and shows the live cart, so never restate cart contents, quantities, or totals as text.",
+      "Render AgentVariantPicker with a handle when a product has multiple variants and the shopper has not chosen one. The shopper picks and adds to cart in that component, so do not ask them to type a variant.",
+      "Do not use repeat, $item, $state, $index, or $bindItem. Give each element its own /elements/<key> entry and list child keys in the parent's children array.",
+      "The root value must exactly match a key you add under /elements, and every generated element must be reachable from it. Emit exactly one top-level element per turn.",
       "Include brief conversational text around generated UI.",
     ],
     mode: "chat",
@@ -90,20 +84,17 @@ function createSystemPrompt(context: AgentContext): string {
 }
 
 const tools = {
-  addCartNote: addCartNoteTool(),
-  addToCart: addToCartTool(),
-  browseCollection: browseCollectionTool(),
-  getCart: getCartTool(),
-  getCatalogProduct: getCatalogProductTool(),
-  getProductDetails: getProductDetailsTool(),
-  getProductRecommendations: getRecommendationsTool(),
-  listCollections: listCollectionsTool(),
-  navigateUser: navigateTool(),
-  removeFromCart: removeFromCartTool(),
-  searchCatalog: searchCatalogTool(),
-  searchProducts: searchProductsTool(),
-  searchShopPoliciesAndFaqs: searchShopPoliciesTool(),
-  updateCartItemQuantity: updateCartItemTool(),
+  addCartNote: addCartNoteTool,
+  addToCart: addToCartTool,
+  browseCollection: browseCollectionTool,
+  getCart: getCartTool,
+  getProductDetails: getProductDetailsTool,
+  getProductRecommendations: getRecommendationsTool,
+  listCollections: listCollectionsTool,
+  navigateUser: navigateTool,
+  searchProducts: searchProductsTool,
+  searchShopPolicies: searchShopPoliciesTool,
+  updateCartItem: updateCartItemTool,
 };
 
 export function createAgent() {

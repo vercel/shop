@@ -1,6 +1,7 @@
 "use client";
 
 import { CornerDownLeftIcon, Loader2Icon, SquareIcon, XIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { KeyboardEvent } from "react";
 
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
@@ -11,6 +12,7 @@ export type AgentStatus = "error" | "ready" | "streaming" | "submitted";
 interface AgentComposerProps {
   value: string;
   onChange: (value: string) => void;
+  onStop: () => void;
   onSubmit: (text: string) => void;
   status: AgentStatus;
   placeholder?: string;
@@ -20,14 +22,20 @@ interface AgentComposerProps {
 export function AgentComposer({
   value,
   onChange,
+  onStop,
   onSubmit,
   status,
   placeholder,
   className,
 }: AgentComposerProps) {
+  const t = useTranslations("agent");
   const isBusy = status === "submitted" || status === "streaming";
 
   const submit = () => {
+    if (status === "streaming") {
+      onStop();
+      return;
+    }
     const text = value.trim();
     if (!text || isBusy) return;
     onSubmit(text);
@@ -43,6 +51,8 @@ export function AgentComposer({
   if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
   else if (status === "streaming") icon = <SquareIcon className="size-4" />;
   else if (status === "error") icon = <XIcon className="size-4" />;
+
+  const isStopping = status === "streaming";
 
   return (
     <form
@@ -65,8 +75,8 @@ export function AgentComposer({
           type="submit"
           size="icon-sm"
           variant="default"
-          aria-label="Send"
-          disabled={!value.trim() && !isBusy}
+          aria-label={isStopping ? t("stop") : t("send")}
+          disabled={!value.trim() && !isStopping}
           className="mr-1.5 mb-1.5"
         >
           {icon}
