@@ -4,6 +4,14 @@ import type { NextConfig } from "next";
 const withMDX = createMDX();
 
 const config: NextConfig = {
+  turbopack: {
+    rules: {
+      "*.css": {
+        as: "*.css",
+        loaders: ["@tailwindcss/turbopack"],
+      },
+    },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

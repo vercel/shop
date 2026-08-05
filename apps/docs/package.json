@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "4.3.3",
+    "@tailwindcss/turbopack": "4.3.3",
     "@types/mdx": "2.0.14",
     "@types/node": "26.1.2",
     "@types/react": "19.2.18",
@@ -32,7 +32,6 @@
     "next": "16.3.0",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
-    "postcss": "8.5.22",
     "radix-ui": "1.6.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
