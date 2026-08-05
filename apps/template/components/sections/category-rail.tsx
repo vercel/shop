@@ -38,9 +38,7 @@ export function CategoryRail({ items, title }: CategoryRailProps) {
                   <ImagePlaceholder className="size-full" />
                 )}
               </div>
-              <span className="text-center text-sm font-medium group-hover:underline">
-                {item.label}
-              </span>
+              <span className="text-center text-sm font-medium">{item.label}</span>
             </Link>
           </li>
         ))}
