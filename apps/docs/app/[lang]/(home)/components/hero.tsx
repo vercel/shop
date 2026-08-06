@@ -7,9 +7,9 @@ interface HeroProps {
 }
 
 export const Hero = ({ title, description, children }: HeroProps) => (
-  <section className="space-y-6 pt-16 pb-32 text-center sm:pt-24 sm:pb-40">
+  <section className="space-y-6 pt-16 pb-16 text-center sm:pt-24 sm:pb-20">
     <div className="mx-auto w-full max-w-4xl space-y-5">
-      <h1 className="font-sans text-balance text-center text-heading-40 sm:text-heading-48 lg:text-heading-56">
+      <h1 className="font-sans text-balance text-center font-normal text-heading-40 sm:text-heading-48 lg:text-heading-64">
         {title}
       </h1>
       <p className="mx-auto max-w-3xl text-balance text-muted-foreground leading-relaxed sm:text-xl">
