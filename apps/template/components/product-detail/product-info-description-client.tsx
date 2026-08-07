@@ -5,21 +5,16 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { AboutItem } from "./about-item";
-
-interface ProductInfoDescriptionClientProps {
-  descriptionHtml: string;
+interface AccordionSectionProps {
+  children: React.ReactNode;
   title: string;
 }
 
-export function ProductInfoDescriptionClient({
-  descriptionHtml,
-  title,
-}: ProductInfoDescriptionClientProps) {
+export function AccordionSection({ children, title }: AccordionSectionProps) {
   const [open, setOpen] = useState(true);
 
   return (
-    <div data-slot="product-info-description" className="grid gap-2.5">
+    <div data-slot="accordion-section" className="grid gap-2.5">
       <button
         type="button"
         aria-expanded={open}
@@ -33,7 +28,7 @@ export function ProductInfoDescriptionClient({
           <PlusIcon className="size-4 shrink-0" aria-hidden />
         )}
       </button>
-      <AboutItem descriptionHtml={descriptionHtml} className={cn(!open && "hidden")} />
+      <div className={cn(!open && "hidden")}>{children}</div>
     </div>
   );
 }

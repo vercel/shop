@@ -309,10 +309,10 @@
   },
   "product": {
     "aboutThisItem": "Description",
+    "addToCart": "Add to Cart",
     "addedToCart": "✓ Added to Cart!",
     "addingQuantity": "Adding {quantity}...",
     "addingToCart": "Adding to Cart...",
-    "addToCart": "Add to Cart",
     "availableInBundles": "Available in Bundles",
     "brand": "Brand",
     "breadcrumb": {
@@ -368,6 +368,8 @@
       "washGentle": "Use gentle cycle",
       "washing": "Washing"
     },
+    "fabricCare": "Fabric + Care",
+    "fabricCareBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim",
     "featuredBadge": "Assistant's pick",
     "freeShipping": "FREE",
     "giftCard": {
@@ -387,8 +389,8 @@
     },
     "goToImage": "Go to image {number}",
     "inCart": "You have {quantity} {quantity, plural, one {item} other {items}} in your cart",
-    "increaseQuantity": "Increase quantity",
     "inStock": "In Stock",
+    "increaseQuantity": "Increase quantity",
     "manageAddressBook": "Manage address book",
     "noImage": "No image",
     "officialStore": "Official Store",
@@ -402,6 +404,8 @@
     "seeAllSpecs": "See all specs",
     "selectVariant": "Please select a variant",
     "selectVariantLabel": "Select {name}: {value}",
+    "shippingReturns": "Shipping + Returns",
+    "shippingReturnsBody": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim",
     "sku": "SKU",
     "specifications": "Specifications",
     "stockLeft": "({stock} left)",

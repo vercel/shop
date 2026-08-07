@@ -4,9 +4,10 @@ import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+import { AboutItem } from "./about-item";
 import { ColorPicker, type ProductTranslator } from "./color-picker";
 import { OptionPicker } from "./option-picker";
-import { ProductInfoDescriptionClient } from "./product-info-description-client";
+import { AccordionSection } from "./product-info-description-client";
 import { ProductPrice } from "./product-price";
 
 interface ProductInfoHeaderProps extends React.ComponentProps<"div"> {
@@ -117,7 +118,24 @@ interface ProductInfoDescriptionProps {
 
 function ProductInfoDescription({ descriptionHtml, title }: ProductInfoDescriptionProps) {
   if (!descriptionHtml) return null;
-  return <ProductInfoDescriptionClient descriptionHtml={descriptionHtml} title={title} />;
+  return (
+    <AccordionSection title={title}>
+      <AboutItem descriptionHtml={descriptionHtml} />
+    </AccordionSection>
+  );
 }
 
-export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions };
+interface ProductInfoTextAccordionProps {
+  body: string;
+  title: string;
+}
+
+function ProductInfoTextAccordion({ body, title }: ProductInfoTextAccordionProps) {
+  return (
+    <AccordionSection title={title}>
+      <p className="text-sm text-foreground/80">{body}</p>
+    </AccordionSection>
+  );
+}
+
+export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions, ProductInfoTextAccordion };

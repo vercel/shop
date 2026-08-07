@@ -11,6 +11,7 @@ import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
+  ProductInfoTextAccordion,
 } from "@/components/product-detail/product-info";
 import {
   ColorImageCarouselItems,
@@ -312,6 +313,8 @@ async function ProductInfoArea({
       ) : null}
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
+      <ProductInfoTextAccordion body={t("fabricCareBody")} title={t("fabricCare")} />
+      <ProductInfoTextAccordion body={t("shippingReturnsBody")} title={t("shippingReturns")} />
     </div>
   );
 }
