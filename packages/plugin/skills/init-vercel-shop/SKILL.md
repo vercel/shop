@@ -15,6 +15,8 @@ Ask for the target directory if the user did not provide one. Always pass it exp
    ```
 
    Preserve an explicitly requested package manager with `--use-pnpm`, `--use-npm`, `--use-yarn`, or `--use-bun`.
+
+   The CLI enforces step 1: it exits with code 1 when the target is non-empty, because agents run it non-interactively. Treat that as a stop, report the conflicting files, and ask the user for a different target. Only add `--force` when the user has explicitly confirmed that overwriting the existing files is what they want.
 3. Confirm the generated project contains `.vercel-shop/bootstrap.json`, `.agents/skills/`, `AGENTS.md`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
 4. Read the generated `AGENTS.md` before making further changes.
 5. If `.agents/skills/` is missing, keep the generated project and restore the inlined agent skills from the project root:
