@@ -1,8 +1,18 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import {
+  cp,
+  mkdir,
+  mkdtemp,
+  readdir,
+  readFile,
+  rm,
+  symlink,
+  writeFile,
+} from 'node:fs/promises';
 import { get } from 'node:https';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
@@ -12,6 +22,8 @@ export const DEFAULT_PROJECT_NAME = 'my-shop';
 export const TEMPLATE_TARBALL_URL =
   'https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main';
 export const TEMPLATE_TARBALL_PREFIX = 'shop-main/apps/template';
+export const SKILLS_TARBALL_PREFIX = 'shop-main/packages/plugin/skills';
+export const COMMANDS_TARBALL_PREFIX = 'shop-main/packages/plugin/commands';
 
 const PACKAGE_MANAGER_FLAGS = {
   '--use-bun': 'bun',
@@ -20,12 +32,6 @@ const PACKAGE_MANAGER_FLAGS = {
   '--use-yarn': 'yarn',
 };
 const INTERNAL_FLAGS = new Set([NO_TEMPLATE_FLAG, ...Object.keys(PACKAGE_MANAGER_FLAGS)]);
-
-const pluginInstalls = [
-  ['vercel/shop', '--scope', 'project', '--yes'],
-  ['vercel/vercel-plugin', '--scope', 'project', '--yes'],
-  ['Shopify/shopify-ai-toolkit', '--scope', 'project', '--yes'],
-];
 
 export function explicitPackageManager(args) {
   for (const arg of args) {
@@ -134,28 +140,84 @@ function fetchResponse(url, depth = 0) {
   });
 }
 
+export async function inlineAgentAssets(projectDir, stagingDir) {
+  const skillsSrc = join(stagingDir, SKILLS_TARBALL_PREFIX);
+  const commandsSrc = join(stagingDir, COMMANDS_TARBALL_PREFIX);
+
+  const agentSkillsDir = join(projectDir, '.agents', 'skills');
+  const claudeSkillsDir = join(projectDir, '.claude', 'skills');
+  const claudeCommandsDir = join(projectDir, '.claude', 'commands');
+
+  await mkdir(agentSkillsDir, { recursive: true });
+  await mkdir(claudeSkillsDir, { recursive: true });
+  await mkdir(claudeCommandsDir, { recursive: true });
+
+  const skillNames = (await readdir(skillsSrc, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+
+  for (const name of skillNames) {
+    const canonical = join(agentSkillsDir, name);
+    await rm(canonical, { force: true, recursive: true });
+    await cp(join(skillsSrc, name), canonical, { recursive: true });
+
+    // Claude Code discovers project skills in .claude/skills. Link to the
+    // canonical .agents/skills copy (same layout `npx skills add` produces);
+    // fall back to a copy where symlinks are unavailable (e.g. Windows
+    // without Developer Mode).
+    const link = join(claudeSkillsDir, name);
+    await rm(link, { force: true, recursive: true });
+    try {
+      await symlink(join('..', '..', '.agents', 'skills', name), link, 'junction');
+    } catch {
+      await cp(join(skillsSrc, name), link, { recursive: true });
+    }
+  }
+
+  await cp(commandsSrc, claudeCommandsDir, { recursive: true });
+
+  return skillNames;
+}
+
 export async function fetchTemplate(
   projectDir,
-  { url = TEMPLATE_TARBALL_URL, prefix = TEMPLATE_TARBALL_PREFIX } = {},
+  {
+    includeTemplate = true,
+    prefix = TEMPLATE_TARBALL_PREFIX,
+    url = TEMPLATE_TARBALL_URL,
+  } = {},
 ) {
-  const stripComponents = prefix.split('/').length;
-  const tar = spawn(
-    'tar',
-    ['-xz', `--strip-components=${stripComponents}`, '-C', projectDir, prefix],
-    { stdio: ['pipe', 'inherit', 'inherit'] },
-  );
+  const stagingDir = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
 
-  const tarClosed = new Promise((resolveTar, rejectTar) => {
-    tar.on('error', rejectTar);
-    tar.on('close', (code) => {
-      if (code === 0) resolveTar();
-      else rejectTar(new Error(`tar exited with code ${code}`));
+  try {
+    const extractPaths = [SKILLS_TARBALL_PREFIX, COMMANDS_TARBALL_PREFIX];
+    if (includeTemplate) extractPaths.unshift(prefix);
+
+    const tar = spawn('tar', ['-xz', '-C', stagingDir, ...extractPaths], {
+      stdio: ['pipe', 'inherit', 'inherit'],
     });
-  });
 
-  const response = await fetchResponse(url);
-  response.pipe(tar.stdin);
-  await tarClosed;
+    const tarClosed = new Promise((resolveTar, rejectTar) => {
+      tar.on('error', rejectTar);
+      tar.on('close', (code) => {
+        if (code === 0) resolveTar();
+        else rejectTar(new Error(`tar exited with code ${code}`));
+      });
+    });
+
+    const response = await fetchResponse(url);
+    response.pipe(tar.stdin);
+    await tarClosed;
+
+    if (includeTemplate) {
+      await cp(join(stagingDir, prefix), projectDir, { recursive: true });
+    }
+
+    await inlineAgentAssets(projectDir, stagingDir);
+  } finally {
+    await rm(stagingDir, { force: true, recursive: true });
+  }
 }
 
 export async function ensureProjectDir(projectDir) {
@@ -186,33 +248,13 @@ export function initGit(projectDir, run = runCommand) {
   return run('git', ['init', '--quiet'], { cwd: projectDir });
 }
 
-export async function installProjectPlugins(projectDir, run = runCommand) {
-  const failures = [];
-
-  for (const args of pluginInstalls) {
-    const code = await run('npx', ['plugins', 'add', ...args], {
-      cwd: projectDir,
-    });
-
-    if (code !== 0) {
-      failures.push(args[0]);
-    }
-  }
-
-  return failures;
-}
-
-export function printRetryCommands(projectDir, { scaffolded = true } = {}) {
-  if (scaffolded) {
-    console.warn('\nVercel Shop scaffolded successfully, but one or more plugin installs failed.');
-  } else {
-    console.warn('\nProject plugin installation failed.');
-  }
-
-  console.warn(`Retry from ${projectDir}:`);
-  console.warn('  npx plugins add vercel/shop --scope project --yes');
-  console.warn('  npx plugins add vercel/vercel-plugin --scope project --yes');
-  console.warn('  npx plugins add Shopify/shopify-ai-toolkit --scope project --yes');
+export function printAgentSetupSummary() {
+  console.log(
+    '\nAgent skills installed to .agents/skills (Claude Code links in .claude/skills, commands in .claude/commands).',
+  );
+  console.log('\nRecommended companion plugins (optional, run from the project root):');
+  console.log('  npx plugins add vercel/vercel-plugin --scope project --yes');
+  console.log('  npx plugins add Shopify/shopify-ai-toolkit --scope project --yes');
 }
 
 export async function main({
@@ -243,39 +285,45 @@ export async function main({
 
   await ensureProjectDir(projectDir);
 
-  if (!plan.noTemplate) {
+  if (plan.noTemplate) {
     try {
-      await scaffold(projectDir);
+      await scaffold(projectDir, { includeTemplate: false });
     } catch (error) {
-      console.error('\nFailed to download the Vercel Shop template.');
+      console.error('\nFailed to download the Vercel Shop agent skills.');
       console.error(error instanceof Error ? error.message : String(error));
       return 1;
     }
 
-    try {
-      const templateVersion = await readTemplateVersion(importMetaUrl);
-      await writeBootstrapMetadata(projectDir, templateVersion);
-    } catch (error) {
-      console.warn('\nScaffold completed, but bootstrap metadata could not be written.');
-      console.warn(error instanceof Error ? error.message : String(error));
-    }
-
-    const installCode = await installDependencies(projectDir, plan.packageManager, run);
-    if (installCode !== 0) {
-      console.warn(
-        `\n${plan.packageManager} install failed. Re-run it from ${projectDir} once resolved.`,
-      );
-    }
-
-    await initGit(projectDir, run);
+    printAgentSetupSummary();
+    return 0;
   }
 
-  const failedPlugins = await installProjectPlugins(projectDir, run);
-
-  if (failedPlugins.length > 0) {
-    printRetryCommands(projectDir, { scaffolded: !plan.noTemplate });
+  try {
+    await scaffold(projectDir);
+  } catch (error) {
+    console.error('\nFailed to download the Vercel Shop template.');
+    console.error(error instanceof Error ? error.message : String(error));
+    return 1;
   }
 
+  try {
+    const templateVersion = await readTemplateVersion(importMetaUrl);
+    await writeBootstrapMetadata(projectDir, templateVersion);
+  } catch (error) {
+    console.warn('\nScaffold completed, but bootstrap metadata could not be written.');
+    console.warn(error instanceof Error ? error.message : String(error));
+  }
+
+  const installCode = await installDependencies(projectDir, plan.packageManager, run);
+  if (installCode !== 0) {
+    console.warn(
+      `\n${plan.packageManager} install failed. Re-run it from ${projectDir} once resolved.`,
+    );
+  }
+
+  await initGit(projectDir, run);
+
+  printAgentSetupSummary();
   return 0;
 }
 

@@ -59,7 +59,7 @@ For each layer's full ownership boundary, see the responsibility table in `refer
 
 Use the installed Shopify AI Toolkit for Shopify API documentation, schema facts, operation design, and validation. Invoke its API-specific skill before adding or changing Storefront or Customer Account GraphQL. For metafields or metaobjects, use its custom-data skill first.
 
-Use `/vercel-shop:shopify-graphql-reference` only after Shopify validation to apply Vercel Shop conventions: operation placement, domain transforms, cache role, locale flow, invalidation, and route integration. Never treat this architecture skill as a substitute for authoritative Shopify validation.
+Use the `shopify-graphql-reference` skill only after Shopify validation to apply Vercel Shop conventions: operation placement, domain transforms, cache role, locale flow, invalidation, and route integration. Never treat this architecture skill as a substitute for authoritative Shopify validation.
 
 ## Prevent blocking
 
