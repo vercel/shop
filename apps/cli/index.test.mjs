@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
-import { lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import {
+  lstat,
+  mkdir,
+  mkdtemp,
+  readFile,
+  readlink,
+  realpath,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import test from 'node:test';
 
 import {
@@ -12,6 +21,7 @@ import {
   main,
   readTargetEntries,
   readTemplateVersion,
+  skillLinkTarget,
   SKILLS_TARBALL_PREFIX,
 } from './index.mjs';
 
@@ -526,5 +536,78 @@ test('inlineAgentAssets copies skills to .agents/skills, links .claude/skills, a
     );
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test('skillLinkTarget keeps the POSIX link target relative to the link', () => {
+  const projectDir = join(tmpdir(), 'project');
+  const link = join(projectDir, '.claude', 'skills', 'build-shop');
+  const canonical = join(projectDir, '.agents', 'skills', 'build-shop');
+
+  assert.equal(
+    skillLinkTarget(link, canonical, 'linux'),
+    join('..', '..', '.agents', 'skills', 'build-shop'),
+  );
+});
+
+test('skillLinkTarget resolves the Windows junction target against the link directory', () => {
+  const projectDir = join(tmpdir(), 'project');
+  const link = join(projectDir, '.claude', 'skills', 'build-shop');
+  const canonical = join(projectDir, '.agents', 'skills', 'build-shop');
+
+  const target = skillLinkTarget(link, canonical, 'win32');
+
+  // Node resolves a relative junction target against process.cwd(), so it has to
+  // be absolute — otherwise the junction silently points outside the project.
+  assert.ok(isAbsolute(target), `expected an absolute junction target, got ${target}`);
+  assert.equal(target, canonical);
+});
+
+test('inlineAgentAssets links .claude/skills to .agents/skills from an unrelated cwd', async () => {
+  const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
+  const unrelatedCwd = await mkdtemp(join(tmpdir(), 'create-vercel-shop-cwd-'));
+  const originalCwd = process.cwd();
+
+  try {
+    const stagingDir = join(tempRoot, 'staging');
+    const projectDir = join(tempRoot, 'project');
+    const skillsSrc = join(stagingDir, SKILLS_TARBALL_PREFIX);
+    const commandsSrc = join(stagingDir, COMMANDS_TARBALL_PREFIX);
+    await mkdir(join(skillsSrc, 'enable-analytics'), { recursive: true });
+    await writeFile(
+      join(skillsSrc, 'enable-analytics', 'SKILL.md'),
+      '# enable-analytics\n',
+      'utf8',
+    );
+    await mkdir(commandsSrc, { recursive: true });
+    await writeFile(join(commandsSrc, 'vercel-shop-bootstrap.md'), '# bootstrap\n', 'utf8');
+    await mkdir(projectDir, { recursive: true });
+
+    // The CLI is normally run from somewhere other than the project's parent —
+    // the link target must not depend on the working directory.
+    process.chdir(unrelatedCwd);
+    await inlineAgentAssets(projectDir, stagingDir);
+    process.chdir(originalCwd);
+
+    const claudeSkill = join(projectDir, '.claude', 'skills', 'enable-analytics');
+    const canonical = join(projectDir, '.agents', 'skills', 'enable-analytics');
+
+    assert.equal(await readFile(join(claudeSkill, 'SKILL.md'), 'utf8'), '# enable-analytics\n');
+
+    const stats = await lstat(claudeSkill);
+    if (stats.isSymbolicLink()) {
+      assert.equal(await realpath(claudeSkill), await realpath(canonical));
+
+      const target = await readlink(claudeSkill);
+      assert.equal(
+        await realpath(resolve(dirname(claudeSkill), target)),
+        await realpath(canonical),
+        'link target must resolve to the canonical skill from the link directory',
+      );
+    }
+  } finally {
+    process.chdir(originalCwd);
+    await rm(tempRoot, { force: true, recursive: true });
+    await rm(unrelatedCwd, { force: true, recursive: true });
   }
 });

@@ -13,7 +13,7 @@ import {
 } from 'node:fs/promises';
 import { get } from 'node:https';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
@@ -163,6 +163,19 @@ function fetchResponse(url, depth = 0) {
   });
 }
 
+// Target for the .claude/skills/<name> link pointing at .agents/skills/<name>.
+//
+// POSIX symlinks resolve against the link's own directory, so a relative target
+// keeps the scaffolded project movable. Windows junctions are always absolute,
+// and Node resolves a relative target against `process.cwd()` rather than the
+// link's directory — running the CLI from anywhere but the project's parent
+// produced a junction pointing at a path that does not exist, with no error.
+// Resolve it against the link's directory instead.
+export function skillLinkTarget(link, canonical, platform = process.platform) {
+  const relativeTarget = relative(dirname(link), canonical);
+  return platform === 'win32' ? resolve(dirname(link), relativeTarget) : relativeTarget;
+}
+
 export async function inlineAgentAssets(projectDir, stagingDir) {
   const skillsSrc = join(stagingDir, SKILLS_TARBALL_PREFIX);
   const commandsSrc = join(stagingDir, COMMANDS_TARBALL_PREFIX);
@@ -192,7 +205,7 @@ export async function inlineAgentAssets(projectDir, stagingDir) {
     const link = join(claudeSkillsDir, name);
     await rm(link, { force: true, recursive: true });
     try {
-      await symlink(join('..', '..', '.agents', 'skills', name), link, 'junction');
+      await symlink(skillLinkTarget(link, canonical), link, 'junction');
     } catch {
       await cp(join(skillsSrc, name), link, { recursive: true });
     }
