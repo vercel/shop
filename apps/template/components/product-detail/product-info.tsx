@@ -4,9 +4,9 @@ import type { SelectedOptions } from "@/lib/product";
 import type { ProductOption, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-import { AboutItem } from "./about-item";
 import { ColorPicker, type ProductTranslator } from "./color-picker";
 import { OptionPicker } from "./option-picker";
+import { ProductInfoDescriptionClient } from "./product-info-description-client";
 import { ProductPrice } from "./product-price";
 
 interface ProductInfoHeaderProps extends React.ComponentProps<"div"> {
@@ -110,21 +110,14 @@ function ProductInfoOptions({
   );
 }
 
-interface ProductInfoDescriptionProps extends React.ComponentProps<"div"> {
+interface ProductInfoDescriptionProps {
   descriptionHtml: string;
+  title: string;
 }
 
-function ProductInfoDescription({
-  descriptionHtml,
-  className,
-  ...props
-}: ProductInfoDescriptionProps) {
+function ProductInfoDescription({ descriptionHtml, title }: ProductInfoDescriptionProps) {
   if (!descriptionHtml) return null;
-  return (
-    <div data-slot="product-info-description" className={className} {...props}>
-      <AboutItem descriptionHtml={descriptionHtml} />
-    </div>
-  );
+  return <ProductInfoDescriptionClient descriptionHtml={descriptionHtml} title={title} />;
 }
 
 export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions };

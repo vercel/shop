@@ -311,7 +311,7 @@ async function ProductInfoArea({
         <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
       ) : null}
 
-      <ProductInfoDescription descriptionHtml={descriptionHtml} />
+      <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
     </div>
   );
 }
