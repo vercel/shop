@@ -6,7 +6,7 @@ import {
   CUSTOMER_ACCOUNT_LOGOUT_PATH,
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 } from "@shopify/hydrogen/customer-account";
-import { precompute } from "flags/next";
+import { evaluate, serialize } from "flags/next";
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
@@ -58,7 +58,10 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const first = pathname.split("/")[1];
   if (isLocale(first)) return NextResponse.next();
 
-  const code = await precompute(precomputedFlags);
+  // evaluate with the request so the toolbar's vercel-flag-overrides cookie is
+  // honored; precompute() reads next/headers, which has no request in proxy.
+  const values = await evaluate(precomputedFlags, request);
+  const code = await serialize(precomputedFlags, precomputedFlags.map((_, i) => values[i]));
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   const target = cookieLocale && isEnabledLocale(cookieLocale) ? cookieLocale : defaultLocale;
 
