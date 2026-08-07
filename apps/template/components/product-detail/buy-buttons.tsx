@@ -159,7 +159,7 @@ export function BuyButtons({
         <button
           type="button"
           className={cn(
-            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg border border-foreground bg-transparent px-4 text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50",
             !availableForSale && "invisible",
           )}
           disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}

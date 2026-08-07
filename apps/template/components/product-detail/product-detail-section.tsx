@@ -526,7 +526,7 @@ function BuyButtonsFallback({
       {shopConfig.pdp.buyWithShop.isEnabled ? (
         <div
           className={cn(
-            "flex h-12 items-center justify-center rounded-lg bg-shop px-4 text-white",
+            "flex h-12 items-center justify-center rounded-lg border border-foreground bg-transparent px-4 text-foreground",
             !allInStock && "invisible",
           )}
         >
