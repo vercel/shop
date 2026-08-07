@@ -42,7 +42,9 @@ export function LocalePicker({ locale }: LocalePickerProps) {
         className="hidden md:flex shrink-0 cursor-pointer items-center gap-1.5 text-current disabled:cursor-not-allowed disabled:opacity-50"
       >
         <GlobeIcon className="size-4" aria-hidden />
-        <span className="text-sm font-medium">{locale.split("-")[1]?.toUpperCase()}</span>
+        <span className="text-sm font-medium">
+          {locale.split("-")[0]?.toUpperCase()} / {locale.split("-")[1]?.toUpperCase()}
+        </span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
         {enabledLocales.map((code) => (

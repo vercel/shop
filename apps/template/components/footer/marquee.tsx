@@ -8,7 +8,7 @@ export function FooterMarquee({ items }: FooterMarqueeProps) {
   return (
     <section
       aria-label={items.join(", ")}
-      className="flex overflow-hidden py-5"
+      className="flex overflow-hidden pt-5"
       data-slot="footer-marquee"
     >
       {/* Two identical tracks each shift a full width, so the second slides into the first's place seamlessly. */}
