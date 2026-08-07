@@ -62,6 +62,24 @@ To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/s
 
 Multi-locale commerce requires Shopify Markets to be enabled. The template ships as single-locale by default. Run the [`enable-shopify-markets` skill](/docs/skills/enable-shopify-markets) to add regional locale routing and propagate Shopify's localized country, language, and currency context. The skill supports locale-prefixed, invisible cookie-based, and per-domain routing.
 
+## Scaffold stops with "is not empty"
+
+`create-vercel-shop` copies the template over the target directory, so it refuses to run against a directory that already contains files rather than overwriting them. On a terminal it asks for confirmation first; in CI or from a coding agent it exits with code 1.
+
+Scaffold into a new or empty directory:
+
+```bash
+npx create-vercel-shop@latest my-store
+```
+
+If you meant to write into the existing directory, opt in explicitly:
+
+```bash
+npx create-vercel-shop@latest my-store --force
+```
+
+To add only the agent skills to a project you already have, use `--no-template` instead — it never overwrites application code.
+
 ## Agent can't find context files
 
 Coding agents rely on `AGENTS.md` in the project root plus the inlined storefront skills. If an agent is missing context or skills:
