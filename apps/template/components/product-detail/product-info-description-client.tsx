@@ -7,21 +7,24 @@ import { cn } from "@/lib/utils";
 
 interface AccordionSectionProps {
   children: React.ReactNode;
+  defaultOpen?: boolean;
   title: string;
 }
 
-export function AccordionSection({ children, title }: AccordionSectionProps) {
-  const [open, setOpen] = useState(true);
+export function AccordionSection({ children, defaultOpen = false, title }: AccordionSectionProps) {
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div data-slot="accordion-section" className="grid gap-2.5">
+    <div data-slot="accordion-section">
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full cursor-pointer items-center justify-between gap-2.5 text-left"
+        className={cn(
+          "flex w-full cursor-pointer items-center justify-between gap-2.5 py-2.5 text-left",
+        )}
       >
-        <span className="text-sm font-medium text-foreground/70">{title}</span>
+        <span className="text-sm font-medium">{title}</span>
         {open ? (
           <MinusIcon className="size-4 shrink-0" aria-hidden />
         ) : (

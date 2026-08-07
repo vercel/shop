@@ -312,9 +312,11 @@ async function ProductInfoArea({
         <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
       ) : null}
 
-      <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
-      <ProductInfoTextAccordion body={t("fabricCareBody")} title={t("fabricCare")} />
-      <ProductInfoTextAccordion body={t("shippingReturnsBody")} title={t("shippingReturns")} />
+      <div className="divide-y divide-border">
+        <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
+        <ProductInfoTextAccordion body={t("fabricCareBody")} title={t("fabricCare")} />
+        <ProductInfoTextAccordion body={t("shippingReturnsBody")} title={t("shippingReturns")} />
+      </div>
     </div>
   );
 }

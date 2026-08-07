@@ -119,7 +119,7 @@ interface ProductInfoDescriptionProps {
 function ProductInfoDescription({ descriptionHtml, title }: ProductInfoDescriptionProps) {
   if (!descriptionHtml) return null;
   return (
-    <AccordionSection title={title}>
+    <AccordionSection defaultOpen title={title}>
       <AboutItem descriptionHtml={descriptionHtml} />
     </AccordionSection>
   );
@@ -133,7 +133,7 @@ interface ProductInfoTextAccordionProps {
 function ProductInfoTextAccordion({ body, title }: ProductInfoTextAccordionProps) {
   return (
     <AccordionSection title={title}>
-      <p className="text-sm text-foreground/80">{body}</p>
+      <p className="pb-2.5 text-sm text-foreground/80">{body}</p>
     </AccordionSection>
   );
 }
