@@ -19,7 +19,7 @@ export function ProductInfoDescriptionClient({
   const [open, setOpen] = useState(true);
 
   return (
-    <div data-slot="product-info-description">
+    <div data-slot="product-info-description" className="grid gap-2.5">
       <button
         type="button"
         aria-expanded={open}
