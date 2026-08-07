@@ -21,7 +21,8 @@ export function AccordionSection({ children, defaultOpen = false, title }: Accor
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex w-full cursor-pointer items-center justify-between gap-2.5 pb-2.5 text-left",
+          "flex w-full cursor-pointer items-center justify-between gap-2.5 pt-5 pb-2.5 text-left",
+          "group-first:pt-0",
         )}
       >
         <span className="text-sm font-medium">{title}</span>
