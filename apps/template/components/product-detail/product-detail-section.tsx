@@ -313,9 +313,15 @@ async function ProductInfoArea({
       ) : null}
 
       <div className="divide-y divide-border">
-        <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
-        <ProductInfoTextAccordion body={t("fabricCareBody")} title={t("fabricCare")} />
-        <ProductInfoTextAccordion body={t("shippingReturnsBody")} title={t("shippingReturns")} />
+        <div className="pt-5 first:pt-0">
+          <ProductInfoDescription descriptionHtml={descriptionHtml} title={t("aboutThisItem")} />
+        </div>
+        <div className="pt-5">
+          <ProductInfoTextAccordion body={t("fabricCareBody")} title={t("fabricCare")} />
+        </div>
+        <div className="pt-5">
+          <ProductInfoTextAccordion body={t("shippingReturnsBody")} title={t("shippingReturns")} />
+        </div>
       </div>
     </div>
   );
