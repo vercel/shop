@@ -67,14 +67,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const url = new URL(`/${code}/${target}${pathname}`, request.url);
   url.search = search;
-  const res = NextResponse.rewrite(url);
-  // TEMP debug: surface what proxy actually saw/computed (DevTools > Network > Headers).
-  res.headers.set("x-flag-debug", JSON.stringify({
-    overrideCookie: request.cookies.has("vercel-flag-overrides"),
-    ctaValue: values[0],
-    code,
-  }));
-  return res;
+  return NextResponse.rewrite(url);
 }
 
 export const config = {
