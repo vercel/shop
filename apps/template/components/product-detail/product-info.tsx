@@ -133,7 +133,7 @@ interface ProductInfoTextAccordionProps {
 function ProductInfoTextAccordion({ body, title }: ProductInfoTextAccordionProps) {
   return (
     <AccordionSection title={title}>
-      <p className="pb-2.5 text-sm text-foreground/80">{body}</p>
+      <p className="text-sm text-foreground/80">{body}</p>
     </AccordionSection>
   );
 }
