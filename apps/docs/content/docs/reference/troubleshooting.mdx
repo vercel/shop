@@ -60,25 +60,24 @@ To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/s
 
 ## Locale or currency not changing
 
-Multi-locale commerce requires Shopify Markets to be enabled. The template ships as single-locale by default. Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) to add regional locale routing and propagate Shopify's localized country, language, and currency context. The skill supports locale-prefixed, invisible cookie-based, and per-domain routing.
+Multi-locale commerce requires Shopify Markets to be enabled. The template ships as single-locale by default. Run the [`enable-shopify-markets` skill](/docs/skills/enable-shopify-markets) to add regional locale routing and propagate Shopify's localized country, language, and currency context. The skill supports locale-prefixed, invisible cookie-based, and per-domain routing.
 
 ## Agent can't find context files
 
-Coding agents rely on `AGENTS.md` in the project root plus the expected project-scoped plugins. If an agent is missing context or commands:
+Coding agents rely on `AGENTS.md` in the project root plus the inlined storefront skills. If an agent is missing context or skills:
 
 - Verify you cloned from the correct template (`vercel/shop`, `apps/template` path)
 - The `AGENTS.md` file should be at the project root, not nested in a subdirectory
-- Check that `.claude/settings.json` exists and that the project plugins are enabled
-- Rerun the project plugin setup from the project root if needed:
+- Check that `.agents/skills/` exists and that `.claude/skills/` links to it (Claude Code also reads slash commands from `.claude/commands/`)
+- Restore the inlined skills from the project root if needed:
 
 ```bash
 npx create-vercel-shop@latest --no-template
 ```
 
-If that still fails, rerun the plugin installs individually:
+For the optional companion plugins, install them individually:
 
 ```bash
-npx plugins add vercel/shop --scope project --yes
 npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```

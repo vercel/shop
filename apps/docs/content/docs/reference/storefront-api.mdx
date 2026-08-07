@@ -72,7 +72,7 @@ Output lands in `lib/shopify/types/generated/`, which is **gitignored**. Nothing
 
 Because codegen resolves interpolations of other `#graphql` consts by name, every fragment in `lib/shopify/fragments.ts` is also tagged `#graphql ... as const`. A raw selection snippet that isn't a valid standalone document (it can't be `#graphql`-tagged) must be inlined into each operation rather than interpolated.
 
-Always use Shopify AI Toolkit to search current Shopify documentation and validate the final operation. Then use [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) for Vercel Shop integration conventions. The Vercel Shop skill is not a schema source.
+Always use Shopify AI Toolkit to search current Shopify documentation and validate the final operation. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for Vercel Shop integration conventions. The Vercel Shop skill is not a schema source.
 
 ## Fragments
 
