@@ -15,16 +15,12 @@ export function AccordionSection({ children, defaultOpen = false, title }: Accor
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div data-slot="accordion-section" className="group pb-5 last:pb-0">
+    <div data-slot="accordion-section" className="group pt-5 pb-5 first:pt-0 last:pb-0">
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "flex w-full cursor-pointer items-center justify-between gap-2.5 pt-5 text-left",
-          "group-first:pt-0",
-          open && "pb-2.5",
-        )}
+        className="flex w-full cursor-pointer items-center justify-between gap-2.5 text-left"
       >
         <span className="text-sm font-medium">{title}</span>
         {open ? (
@@ -33,7 +29,7 @@ export function AccordionSection({ children, defaultOpen = false, title }: Accor
           <PlusIcon className="size-4 shrink-0" aria-hidden />
         )}
       </button>
-      <div className={cn(!open && "hidden")}>{children}</div>
+      <div className={cn("pt-2.5", !open && "hidden")}>{children}</div>
     </div>
   );
 }
