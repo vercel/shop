@@ -21,7 +21,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/[locale]/pages/[handle]">): Promise<Metadata> {
+}: PageProps<"/[flags]/[locale]/pages/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) return {};
 
@@ -42,7 +42,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function ShopifyPage({ params }: PageProps<"/[locale]/pages/[handle]">) {
+export default async function ShopifyPage({
+  params,
+}: PageProps<"/[flags]/[locale]/pages/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 

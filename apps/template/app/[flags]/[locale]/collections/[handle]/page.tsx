@@ -23,7 +23,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/[locale]/collections/[handle]">): Promise<Metadata> {
+}: PageProps<"/[flags]/[locale]/collections/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === PLACEHOLDER_HANDLE) {
@@ -87,7 +87,7 @@ export async function generateMetadata({
 export default async function CollectionPage({
   params,
   searchParams,
-}: PageProps<"/[locale]/collections/[handle]">) {
+}: PageProps<"/[flags]/[locale]/collections/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 

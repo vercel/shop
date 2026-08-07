@@ -31,7 +31,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/[locale]/blogs/[blogHandle]/[postHandle]">): Promise<Metadata> {
+}: PageProps<"/[flags]/[locale]/blogs/[blogHandle]/[postHandle]">): Promise<Metadata> {
   const [{ blogHandle, postHandle }, locale] = await Promise.all([params, getLocale()]);
   if (blogHandle === PLACEHOLDER_HANDLE || postHandle === PLACEHOLDER_HANDLE) return {};
 
@@ -72,7 +72,7 @@ export async function generateMetadata({
 
 export default async function BlogArticlePage({
   params,
-}: PageProps<"/[locale]/blogs/[blogHandle]/[postHandle]">) {
+}: PageProps<"/[flags]/[locale]/blogs/[blogHandle]/[postHandle]">) {
   const [{ blogHandle, postHandle }, locale] = await Promise.all([params, getLocale()]);
   if (blogHandle === PLACEHOLDER_HANDLE || postHandle === PLACEHOLDER_HANDLE) notFound();
 

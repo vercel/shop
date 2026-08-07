@@ -29,7 +29,7 @@ import { parseFiltersFromSearchParams } from "@/lib/utils";
 
 export async function generateMetadata({
   searchParams,
-}: PageProps<"/[locale]/search">): Promise<Metadata> {
+}: PageProps<"/[flags]/[locale]/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations("seo");
   const q = Array.isArray(resolvedSearchParams.q)
@@ -66,7 +66,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function SearchPage({ searchParams }: PageProps<"/[locale]/search">) {
+export default async function SearchPage({ searchParams }: PageProps<"/[flags]/[locale]/search">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
 
   // Don't await searchParams here — it would force the route fully dynamic.

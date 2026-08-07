@@ -21,7 +21,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/[locale]/policies/[handle]">): Promise<Metadata> {
+}: PageProps<"/[flags]/[locale]/policies/[handle]">): Promise<Metadata> {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) return {};
 
@@ -36,7 +36,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function PolicyPage({ params }: PageProps<"/[locale]/policies/[handle]">) {
+export default async function PolicyPage({
+  params,
+}: PageProps<"/[flags]/[locale]/policies/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 

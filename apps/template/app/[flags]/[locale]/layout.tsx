@@ -1,4 +1,5 @@
-import "../globals.css";
+import "../../globals.css";
+import { generatePermutations } from "flags/next";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -18,6 +19,7 @@ import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
+import { precomputedFlags } from "@/lib/flags";
 import { enabledLocales } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
@@ -32,9 +34,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
-export const generateStaticParams = async () => enabledLocales.map((locale) => ({ locale }));
+export const generateStaticParams = async () => {
+  const codes = await generatePermutations(precomputedFlags);
+  return enabledLocales.flatMap((locale) => codes.map((code) => ({ flags: code, locale })));
+};
 
-export default async function RootLayout({ children }: LayoutProps<"/[locale]">) {
+export default async function RootLayout({ children }: LayoutProps<"/[flags]/[locale]">) {
   const [locale, messages, t] = await Promise.all([
     getLocale(),
     getMessages(),

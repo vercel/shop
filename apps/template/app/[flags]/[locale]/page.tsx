@@ -47,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HomePage({ searchParams }: PageProps<"/[locale]">) {
+export default async function HomePage({ searchParams }: PageProps<"/[flags]/[locale]">) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("home")]);
 
   return (
