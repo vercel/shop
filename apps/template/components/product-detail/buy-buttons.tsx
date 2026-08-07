@@ -27,6 +27,7 @@ export interface BuyButtonVariant {
 export function BuyButtons({
   availableForSale = true,
   buyWithShop = true,
+  ctaColored = false,
   featuredImage,
   handle,
   quantityPicker = true,
@@ -35,6 +36,7 @@ export function BuyButtons({
 }: {
   availableForSale?: boolean;
   buyWithShop?: boolean;
+  ctaColored?: boolean;
   featuredImage: Image | null;
   handle: string;
   quantityPicker?: boolean;
@@ -145,7 +147,10 @@ export function BuyButtons({
           type="button"
           disabled={isOutOfStock || requiresBundleConfiguration}
           onClick={handleAddToCart}
-          className="h-12 min-w-0 flex-1 justify-center"
+          className={cn(
+            "h-12 min-w-0 flex-1 justify-center",
+            ctaColored && "bg-[#ff7900] text-white hover:bg-[#ff7900]/90",
+          )}
         >
           {getButtonText()}
         </Button>
