@@ -18,6 +18,7 @@ import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
 export const NO_TEMPLATE_FLAG = '--no-template';
+export const FORCE_FLAG = '--force';
 export const DEFAULT_PROJECT_NAME = 'my-shop';
 export const TEMPLATE_TARBALL_URL =
   'https://codeload.github.com/vercel/shop/tar.gz/refs/heads/main';
@@ -31,7 +32,11 @@ const PACKAGE_MANAGER_FLAGS = {
   '--use-pnpm': 'pnpm',
   '--use-yarn': 'yarn',
 };
-const INTERNAL_FLAGS = new Set([NO_TEMPLATE_FLAG, ...Object.keys(PACKAGE_MANAGER_FLAGS)]);
+const INTERNAL_FLAGS = new Set([
+  FORCE_FLAG,
+  NO_TEMPLATE_FLAG,
+  ...Object.keys(PACKAGE_MANAGER_FLAGS),
+]);
 
 export function explicitPackageManager(args) {
   for (const arg of args) {
@@ -75,12 +80,30 @@ export async function promptProjectName({
   }
 }
 
+export async function promptOverwrite({
+  entries = [],
+  input = process.stdin,
+  output = process.stdout,
+  projectDir,
+} = {}) {
+  const rl = createInterface({ input, output });
+  try {
+    const answer = await rl.question(
+      `${projectDir} already contains ${describeEntries(entries)}. Scaffolding may overwrite existing files. Continue? (y/N) `,
+    );
+    return /^y(es)?$/i.test(answer.trim());
+  } finally {
+    rl.close();
+  }
+}
+
 export function createExecutionPlan({
   cliArgs,
   cwd = process.cwd(),
   execPath = process.env.npm_execpath ?? '',
   userAgent = process.env.npm_config_user_agent ?? '',
 } = {}) {
+  const force = cliArgs.includes(FORCE_FLAG);
   const noTemplate = cliArgs.includes(NO_TEMPLATE_FLAG);
   const packageManager =
     explicitPackageManager(cliArgs) ??
@@ -90,7 +113,7 @@ export function createExecutionPlan({
     cliArgs.filter((arg) => !INTERNAL_FLAGS.has(arg)),
   );
 
-  return { cwd, noTemplate, packageManager, positionalName };
+  return { cwd, force, noTemplate, packageManager, positionalName };
 }
 
 export async function readTemplateVersion(importMetaUrl = import.meta.url) {
@@ -220,6 +243,25 @@ export async function fetchTemplate(
   }
 }
 
+// Missing target is the happy path — it becomes an empty directory below.
+// Anything else (a file at that path, EACCES, …) is surfaced to the caller so
+// the CLI stops instead of copying the template on top of it.
+export async function readTargetEntries(projectDir) {
+  try {
+    return await readdir(projectDir);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+function describeEntries(entries) {
+  const shown = [...entries].sort().slice(0, 5);
+  const remaining = entries.length - shown.length;
+  const listed = shown.join(', ');
+  return remaining > 0 ? `${listed}, and ${remaining} more` : listed;
+}
+
 export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
@@ -259,6 +301,7 @@ export function printAgentSetupSummary() {
 
 export async function main({
   cliArgs = process.argv.slice(2),
+  confirmOverwrite = promptOverwrite,
   cwd = process.cwd(),
   execPath = process.env.npm_execpath ?? '',
   importMetaUrl = import.meta.url,
@@ -282,6 +325,41 @@ export async function main({
   }
 
   const projectDir = projectName ? resolve(plan.cwd, projectName) : plan.cwd;
+
+  // A full scaffold copies the template over whatever is already there, so it
+  // has to run against an empty (or newly created) directory. `--no-template`
+  // is exempt: it only adds agent assets, and existing projects are its whole
+  // point.
+  if (!plan.noTemplate) {
+    let entries;
+    try {
+      entries = await readTargetEntries(projectDir);
+    } catch (error) {
+      console.error(`\nCannot scaffold into ${projectDir}.`);
+      console.error(error instanceof Error ? error.message : String(error));
+      return 1;
+    }
+
+    if (entries.length > 0) {
+      if (plan.force) {
+        console.warn(
+          `\nScaffolding into non-empty ${projectDir} because ${FORCE_FLAG} was passed. Existing files may be overwritten.`,
+        );
+      } else if (!isTTY) {
+        console.error(`\n${projectDir} is not empty (${describeEntries(entries)}).`);
+        console.error(
+          `Scaffolding would overwrite files that are already there. Pick an empty target directory, or pass ${FORCE_FLAG} to scaffold into this one anyway.`,
+        );
+        return 1;
+      } else {
+        const proceed = await confirmOverwrite({ entries, projectDir });
+        if (!proceed) {
+          console.error('\nAborted. No files were written.');
+          return 1;
+        }
+      }
+    }
+  }
 
   await ensureProjectDir(projectDir);
 
