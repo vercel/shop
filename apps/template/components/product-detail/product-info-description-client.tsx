@@ -15,7 +15,7 @@ export function AccordionSection({ children, defaultOpen = false, title }: Accor
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div data-slot="accordion-section" className="group">
+    <div data-slot="accordion-section" className="group pb-5 last:pb-0">
       <button
         type="button"
         aria-expanded={open}
@@ -32,7 +32,7 @@ export function AccordionSection({ children, defaultOpen = false, title }: Accor
           <PlusIcon className="size-4 shrink-0" aria-hidden />
         )}
       </button>
-      <div className={cn("pb-5 group-last:pb-0", !open && "hidden")}>{children}</div>
+      <div className={cn(!open && "hidden")}>{children}</div>
     </div>
   );
 }
