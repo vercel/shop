@@ -26,7 +26,9 @@ import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
+import { ctaColor, precomputedFlags } from "@/lib/flags";
 import type { Locale } from "@/lib/i18n";
+import { getFlagsCode } from "@/lib/params";
 import {
   defaultSelectedOptions,
   getSelectedColorImage,
@@ -195,6 +197,9 @@ async function ProductInfoArea({
     ? { selectedOptions: defaultSelectedOptions(product), selectedVariant: product.defaultVariant }
     : null;
   const t = await getTranslations("product");
+  // Read the precomputed value so the button color varies per [flags] cache entry
+  // instead of re-deciding (and splitting the cache) at render time.
+  const ctaColored = await ctaColor(await getFlagsCode(), precomputedFlags);
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
   const reviewSummary = product.rating;
@@ -270,6 +275,7 @@ async function ProductInfoArea({
         </Suspense>
       ) : eagerSelection ? (
         <BuyButtons
+          ctaColored={ctaColored}
           selectedVariant={toBuyButtonVariant(eagerSelection.selectedVariant)}
           title={title}
           handle={handle}
@@ -279,8 +285,13 @@ async function ProductInfoArea({
           quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
         />
       ) : (
-        <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
+        <Suspense
+          fallback={
+            <BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} ctaColored={ctaColored} />
+          }
+        >
           <ResolvedBuyButtons
+            ctaColored={ctaColored}
             title={title}
             handle={handle}
             featuredImage={featuredImage}
@@ -384,6 +395,7 @@ function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVaria
 async function ResolvedBuyButtons({
   availableForSale,
   buyWithShop,
+  ctaColored,
   featuredImage,
   handle,
   quantityPicker,
@@ -392,6 +404,7 @@ async function ResolvedBuyButtons({
 }: {
   availableForSale: boolean;
   buyWithShop: boolean;
+  ctaColored: boolean;
   featuredImage: ProductDetails["featuredImage"];
   handle: string;
   quantityPicker: boolean;
@@ -401,6 +414,7 @@ async function ResolvedBuyButtons({
   const selectedVariant = await variantPromise;
   return (
     <BuyButtons
+      ctaColored={ctaColored}
       selectedVariant={toBuyButtonVariant(selectedVariant)}
       title={title}
       handle={handle}
@@ -489,16 +503,23 @@ function QuantityPickerFallback() {
 
 function BuyButtonsFallback({
   allInStock,
+  ctaColored,
   t,
 }: {
   allInStock: boolean;
+  ctaColored: boolean;
   t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
 }) {
   return (
     <div className="grid gap-2.5">
       <div className="flex gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
-        <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
+        <div
+          className={cn(
+            "flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg text-sm font-medium",
+            ctaColored ? "bg-[#ff7900] text-white" : "bg-primary text-primary-foreground",
+          )}
+        >
           {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
         </div>
       </div>
