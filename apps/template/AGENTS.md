@@ -2,17 +2,21 @@
 
 This file provides guidance for agents working in the template.
 
-## Recommended Project Plugins
+## Agent Skills & Recommended Plugins
+
+Storefront skills ship inlined with the project in `.agents/skills/` (Claude Code discovers them via `.claude/skills/`, with commands in `.claude/commands/`). They are versioned with your repo — no plugin install is required for them. If they are missing (e.g. the project was cloned instead of scaffolded), restore them from the project root with:
+
+```bash
+npx create-vercel-shop@latest --no-template
+```
 
 These project-scoped plugins are not required to run the template, but they make agent work in this codebase substantially better. If you're working with an agent that supports them, install with:
 
 ```bash
-npx plugins add vercel/shop --scope project --yes
 npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-- `vercel-shop` provides storefront-specific skills and commands such as `/vercel-shop:enable-shopify-markets`.
 - `vercel-plugin` provides generic Vercel and Next.js skills.
 - `shopify-ai-toolkit` is authoritative for current Shopify documentation, API schemas, operation validation, and store execution.
 
@@ -32,7 +36,7 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 
 1. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
 2. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
-3. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
+3. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use the `shopify-graphql-reference` skill afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 4. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
 ## Storefront Architecture Contract
@@ -46,7 +50,7 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 - Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
 - Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
 
-Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
+Use the `build-shop` skill for the full route-specific workflow and audit guidance.
 
 <!-- BEGIN:vercel-shop-style -->
 
@@ -182,17 +186,17 @@ pnpm format
 Request → Page → Operation → storefront.request → Shopify API → Transform → Domain type → Component
 ```
 
-## Storefront Skills (Optional Plugin)
+## Storefront Skills (Inlined)
 
-If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" above), agents have access to slash commands that walk through common storefront extensions:
+The skills in `.agents/skills/` walk through common storefront extensions:
 
-- Integrating Shopify-validated GraphQL into the template: `/vercel-shop:shopify-graphql-reference`
-- Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
-- Locale-prefixed routing + i18n (no Markets): `/vercel-shop:enable-i18n`
-- Navigation menus: `/vercel-shop:enable-shopify-menus`
-- Analytics: `/vercel-shop:enable-analytics`
-- Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-shop`
-- Keeping the storefront current with template changes: `/vercel-shop:update-shop`
+- Integrating Shopify-validated GraphQL into the template: `shopify-graphql-reference`
+- Shopify Markets and multi-locale support: `enable-shopify-markets`
+- Locale-prefixed routing + i18n (no Markets): `enable-i18n`
+- Navigation menus: `enable-shopify-menus`
+- Analytics: `enable-analytics`
+- Storefront architecture, commerce behavior, and rendering performance: `build-shop`
+- Keeping the storefront current with template changes: `update-shop`
 
 These are agent-side conveniences. The template runs and deploys without them.
 
@@ -216,14 +220,14 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 
 - Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog/cart/public storefront operations, Customer for authenticated customer data, and custom-data first for metafields or metaobjects.
 - Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
-- Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
+- Use the `shopify-graphql-reference` skill afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns
 
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - `getLocale()` resolves the active deployment locale; the template defaults to `en-US`.
-- Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
+- Multi-locale URL routing is documented in the `enable-i18n` skill and is intentionally not enabled by default.
 - Components import domain types from `@/lib/types`, not Shopify response types.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.

@@ -16,16 +16,17 @@ Vercel prompts for the two required Shopify credentials before the first deploym
 npx create-vercel-shop@latest my-store
 ```
 
-The scaffold also installs these project-scoped agent plugins:
-
-- `vercel-shop`
-- `vercel-plugin`
-- `shopify-ai-toolkit`
-
-To install only the agent plugins into an existing project, run this from that project's root:
+The scaffold also inlines the Vercel Shop agent skills into `.agents/skills/` (with Claude Code links in `.claude/skills/` and commands in `.claude/commands/`), so they are versioned with your project. To add only the agent skills to an existing project, run this from that project's root:
 
 ```sh
 npx create-vercel-shop@latest --no-template
+```
+
+Two optional companion plugins are recommended for agents that support them:
+
+```sh
+npx plugins add vercel/vercel-plugin --scope project --yes
+npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
 2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
@@ -63,7 +64,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 ## Skills
 
-Vercel Shop includes a `vercel-shop` plugin with skills for extending the storefront with common commerce patterns. In Claude Code, these are exposed as `/vercel-shop:<skill>` commands:
+Vercel Shop inlines agent skills for extending the storefront with common commerce patterns. They live in `.agents/skills/` and are picked up automatically by agents that support skills (Claude Code reads them via `.claude/skills/`):
 
 | Skill                    | Description                                                                |
 | ------------------------ | -------------------------------------------------------------------------- |
