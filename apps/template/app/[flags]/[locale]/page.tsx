@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
 import { CollectionSlider } from "@/components/product/collection-slider";
+import { PickedForYou } from "@/components/product/picked-for-you";
 import { ProductsGrid } from "@/components/product/products-grid";
 import { BannerSection } from "@/components/sections/banner-section";
 import { CategoryRail } from "@/components/sections/category-rail";
@@ -143,7 +144,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[flags]/[lo
         </Container>
 
         <Container>
-          <ProductsGrid
+          <PickedForYou
             campaignCollections={CAMPAIGN_COLLECTIONS}
             columns={4}
             fallbackSortKey="price-high-to-low"

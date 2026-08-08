@@ -1,7 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
 import Link from "next/link";
-import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
@@ -10,7 +8,7 @@ import {
   getFilteredCatalogProducts,
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
-import type { SearchParamsPromise } from "@/lib/types";
+import type { ProductCard as ProductCardData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type ProductsGridColumns = 4 | 5;
@@ -37,16 +35,33 @@ export function ProductsGridSkeleton({ className, columns, count }: ProductsGrid
   );
 }
 
-// A ?utm_campaign= value selects a collection only when it's in the caller's allowlist;
-// anything else (missing, unknown, multi-valued) falls through to the regular resolution.
-function resolveCampaignCollection(
-  params: Record<string, string | string[] | undefined> | undefined,
-  allowed: readonly string[] | undefined,
-): string | undefined {
-  if (!params || !allowed?.length) return undefined;
-  const value = params.utm_campaign;
-  const campaign = Array.isArray(value) ? value[0] : value;
-  return campaign && allowed.includes(campaign) ? campaign : undefined;
+interface ProductsGridSectionProps {
+  columns?: ProductsGridColumns;
+  locale: Locale;
+  outOfStockText: string;
+  products: ProductCardData[];
+}
+
+// Presentational grid shared by the static ProductsGrid and dynamic wrappers like
+// picked-for-you, which resolve their own product list and render this directly.
+export function ProductsGridSection({
+  columns,
+  locale,
+  outOfStockText,
+  products,
+}: ProductsGridSectionProps) {
+  return (
+    <div className={productsGridColumnsClass(columns)}>
+      {products.map((product) => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          locale={locale}
+          outOfStockText={outOfStockText}
+        />
+      ))}
+    </div>
+  );
 }
 
 // No campaign or collection: pull the fallback vector. A catalog sort key (e.g. best-selling)
@@ -66,31 +81,34 @@ function fetchFallbackProducts({
 }
 
 interface ProductsGridProps {
-  campaignCollections?: readonly string[];
   collection?: string;
   collectionUrl?: string;
   columns?: ProductsGridColumns;
   fallbackSortKey?: string;
   limit: number;
   locale: Locale;
-  rememberedCollectionCookie?: string;
-  searchParams?: SearchParamsPromise;
   title: string;
 }
 
+// Static grid: resolves a fixed collection or fallback vector at prerender time.
+// Request-time variants (campaign params, remembered-collection cookies) belong in
+// a dedicated wrapper like picked-for-you.tsx, not here.
 export async function ProductsGrid({
-  campaignCollections,
   collection,
   collectionUrl,
   columns,
   fallbackSortKey,
   limit,
   locale,
-  rememberedCollectionCookie,
-  searchParams,
   title,
 }: ProductsGridProps) {
   const t = await getTranslations("product");
+
+  const { products } = collection
+    ? await getCollectionProducts({ collection, limit, locale })
+    : await fetchFallbackProducts({ fallbackSortKey, limit, locale });
+
+  if (products.length === 0) return null;
 
   return (
     <div className="grid gap-4">
@@ -105,76 +123,12 @@ export async function ProductsGrid({
           </Link>
         )}
       </div>
-      <Suspense fallback={<ProductsGridSkeleton columns={columns} count={limit} />}>
-        <ProductsGridContent
-          campaignCollections={campaignCollections}
-          collection={collection}
-          columns={columns}
-          fallbackSortKey={fallbackSortKey}
-          limit={limit}
-          locale={locale}
-          outOfStockText={t("outOfStock")}
-          rememberedCollectionCookie={rememberedCollectionCookie}
-          searchParams={searchParams}
-        />
-      </Suspense>
-    </div>
-  );
-}
-
-async function ProductsGridContent({
-  campaignCollections,
-  collection,
-  columns,
-  fallbackSortKey,
-  limit,
-  locale,
-  outOfStockText,
-  rememberedCollectionCookie,
-  searchParams,
-}: {
-  campaignCollections?: readonly string[];
-  collection?: string;
-  columns?: ProductsGridColumns;
-  fallbackSortKey?: string;
-  limit: number;
-  locale: Locale;
-  outOfStockText: string;
-  rememberedCollectionCookie?: string;
-  searchParams?: SearchParamsPromise;
-}) {
-  // Reading searchParams (when passed) opts this grid into PPR's dynamic hole so it
-  // streams in behind the skeleton.
-  const params = searchParams ? await searchParams : undefined;
-
-  // A remembered collection (from a cookie set on a prior collection page) follows the
-  // campaign override but takes precedence over the configured collection/fallback.
-  const rememberedCollection = rememberedCollectionCookie
-    ? (await cookies()).get(rememberedCollectionCookie)?.value
-    : undefined;
-
-  // A ?utm_campaign= match swaps in that collection; otherwise the remembered
-  // collection, the configured collection, or the fallback vector (catalog sort key,
-  // else the relevance search index).
-  const collectionHandle =
-    resolveCampaignCollection(params, campaignCollections) ?? rememberedCollection ?? collection;
-
-  const { products } = collectionHandle
-    ? await getCollectionProducts({ collection: collectionHandle, limit, locale })
-    : await fetchFallbackProducts({ fallbackSortKey, limit, locale });
-
-  if (products.length === 0) return null;
-
-  return (
-    <div className={productsGridColumnsClass(columns)}>
-      {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          locale={locale}
-          outOfStockText={outOfStockText}
-        />
-      ))}
+      <ProductsGridSection
+        columns={columns}
+        locale={locale}
+        outOfStockText={t("outOfStock")}
+        products={products}
+      />
     </div>
   );
 }

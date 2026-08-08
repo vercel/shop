@@ -1,8 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Suspense } from "react";
 
-import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
+import { ProductCard } from "@/components/product-card/product-card";
 import {
   Slider,
   SliderContent,
@@ -30,6 +29,9 @@ export async function CollectionSlider({
   title,
 }: CollectionSliderProps) {
   const t = await getTranslations("product");
+  const { products } = await getCollectionProducts({ collection, limit, locale });
+
+  if (products.length === 0) return null;
 
   return (
     <Slider>
@@ -47,51 +49,13 @@ export async function CollectionSlider({
           <SliderNav />
         </div>
       </SliderHeader>
-      <Suspense fallback={<CollectionSliderSkeleton count={limit} />}>
-        <CollectionSliderContent
-          collection={collection}
-          limit={limit}
-          locale={locale}
-          outOfStockText={t("outOfStock")}
-        />
-      </Suspense>
+      <SliderContent>
+        {products.map((product) => (
+          <SliderItem key={product.id}>
+            <ProductCard product={product} locale={locale} outOfStockText={t("outOfStock")} />
+          </SliderItem>
+        ))}
+      </SliderContent>
     </Slider>
-  );
-}
-
-async function CollectionSliderContent({
-  collection,
-  limit,
-  locale,
-  outOfStockText,
-}: {
-  collection: string;
-  limit: number;
-  locale: Locale;
-  outOfStockText: string;
-}) {
-  const { products } = await getCollectionProducts({ collection, limit, locale });
-  if (products.length === 0) return null;
-
-  return (
-    <SliderContent>
-      {products.map((product) => (
-        <SliderItem key={product.id}>
-          <ProductCard product={product} locale={locale} outOfStockText={outOfStockText} />
-        </SliderItem>
-      ))}
-    </SliderContent>
-  );
-}
-
-function CollectionSliderSkeleton({ count }: { count: number }) {
-  return (
-    <SliderContent>
-      {Array.from({ length: count }, (_, index) => (
-        <SliderItem key={index}>
-          <ProductCardSkeleton />
-        </SliderItem>
-      ))}
-    </SliderContent>
   );
 }
