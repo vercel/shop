@@ -61,6 +61,8 @@ interface ProductCardImageProps {
   src?: string | null;
   hoverSrc?: string | null;
   alt: string;
+  fetchPriority?: "high" | "low" | "auto";
+  loading?: "eager" | "lazy";
   sizes?: string;
   outOfStock?: boolean;
   outOfStockText?: string;
@@ -71,6 +73,8 @@ function ProductCardImage({
   src,
   hoverSrc,
   alt,
+  fetchPriority,
+  loading,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw",
   outOfStock = false,
   outOfStockText,
@@ -82,7 +86,15 @@ function ProductCardImage({
       className={cn("relative aspect-square overflow-hidden", className)}
     >
       {src ? (
-        <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className="object-cover"
+          fetchPriority={fetchPriority}
+          loading={loading}
+          sizes={sizes}
+        />
       ) : (
         <ImagePlaceholder className="size-full" />
       )}
@@ -92,6 +104,8 @@ function ProductCardImage({
           alt=""
           aria-hidden
           fill
+          fetchPriority="low"
+          loading="lazy"
           sizes={sizes}
           className="object-cover opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100"
         />

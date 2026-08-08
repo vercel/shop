@@ -18,6 +18,8 @@ import {
 export interface ProductCardProps {
   product: ProductCardType;
   locale: Locale;
+  imageFetchPriority?: "high" | "low" | "auto";
+  imageLoading?: "eager" | "lazy";
   variant?: "default" | "featured";
   outOfStockText?: string;
   className?: string;
@@ -26,6 +28,8 @@ export interface ProductCardProps {
 export async function ProductCard({
   product,
   locale,
+  imageFetchPriority,
+  imageLoading,
   variant = "default",
   outOfStockText,
   className,
@@ -48,6 +52,8 @@ export async function ProductCard({
             src={product.featuredImage?.url}
             hoverSrc={product.secondaryImage?.url}
             alt={product.featuredImage?.altText || product.title}
+            fetchPriority={imageFetchPriority}
+            loading={imageLoading}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
           />

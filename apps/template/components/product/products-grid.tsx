@@ -37,6 +37,8 @@ export function ProductsGridSkeleton({ className, columns, count }: ProductsGrid
 
 interface ProductsGridSectionProps {
   columns?: ProductsGridColumns;
+  imageFetchPriority?: "high" | "low" | "auto";
+  imageLoading?: "eager" | "lazy";
   locale: Locale;
   outOfStockText: string;
   products: ProductCardData[];
@@ -46,6 +48,8 @@ interface ProductsGridSectionProps {
 // picked-for-you, which resolve their own product list and render this directly.
 export function ProductsGridSection({
   columns,
+  imageFetchPriority,
+  imageLoading,
   locale,
   outOfStockText,
   products,
@@ -56,6 +60,8 @@ export function ProductsGridSection({
         <ProductCard
           key={product.id}
           product={product}
+          imageFetchPriority={imageFetchPriority}
+          imageLoading={imageLoading}
           locale={locale}
           outOfStockText={outOfStockText}
         />
@@ -85,6 +91,8 @@ interface ProductsGridProps {
   collectionUrl?: string;
   columns?: ProductsGridColumns;
   fallbackSortKey?: string;
+  imageFetchPriority?: "high" | "low" | "auto";
+  imageLoading?: "eager" | "lazy";
   limit: number;
   locale: Locale;
   title: string;
@@ -98,6 +106,8 @@ export async function ProductsGrid({
   collectionUrl,
   columns,
   fallbackSortKey,
+  imageFetchPriority,
+  imageLoading,
   limit,
   locale,
   title,
@@ -125,6 +135,8 @@ export async function ProductsGrid({
       </div>
       <ProductsGridSection
         columns={columns}
+        imageFetchPriority={imageFetchPriority}
+        imageLoading={imageLoading}
         locale={locale}
         outOfStockText={t("outOfStock")}
         products={products}

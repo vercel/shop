@@ -68,6 +68,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[flags]/[lo
           <ProductsGrid
             collectionUrl="/collections/all"
             columns={5}
+            imageLoading="eager"
             limit={5}
             locale={locale}
             title={t("newArrivalsTitle")}
