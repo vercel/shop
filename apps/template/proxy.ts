@@ -83,7 +83,25 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const { pathname, search } = request.nextUrl;
   const handle = isPrefetch(request) ? undefined : matchCollectionHandle(pathname);
   const first = pathname.split("/")[1];
-  if (isLocale(first)) return rememberCollection(NextResponse.next(), handle);
+
+  const finish = (response: NextResponse) => {
+    if (pathname.startsWith("/collections/")) {
+      response.headers.set(
+        "x-proxy-debug",
+        [
+          `prefetch=${request.headers.get("next-router-prefetch") ?? "-"}`,
+          `segpref=${request.headers.get("next-router-segment-prefetch") ?? "-"}`,
+          `rsc=${request.headers.get("rsc") ?? "-"}`,
+          `purpose=${request.headers.get("purpose") ?? "-"}`,
+          `secpurpose=${request.headers.get("sec-purpose") ?? "-"}`,
+          `rscq=${request.nextUrl.searchParams.has("_rsc") ? "1" : "0"}`,
+        ].join("|"),
+      );
+    }
+    return rememberCollection(response, handle);
+  };
+
+  if (isLocale(first)) return finish(NextResponse.next());
 
   // evaluate(request) honors the toolbar override cookie; precompute() has no request in proxy.
   const values = await evaluate(precomputedFlags, request);
@@ -96,7 +114,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const url = new URL(`/${code}/${target}${pathname}`, request.url);
   url.search = search;
-  return rememberCollection(NextResponse.rewrite(url), handle);
+  return finish(NextResponse.rewrite(url));
 }
 
 export const config = {
