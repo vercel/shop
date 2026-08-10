@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => (
-  <div className="container mx-auto max-w-[1448px]">
+  <div className="mx-auto w-full max-w-[1448px] px-4 sm:px-6">
     <Hero description={homeSubtitle} title={homeTitle}>
       <CommandPromptRoot defaultValue="humans">
         <CommandPromptList>
@@ -81,7 +81,7 @@ const HomePage = () => (
         </CommandPromptSurface>
       </CommandPromptRoot>
     </Hero>
-    <div className="mx-auto grid max-w-[1080px] px-6 xl:px-0">
+    <div className="grid">
       <CenteredSection
         aside={
           <div className="flex flex-wrap items-center gap-3">
@@ -128,7 +128,7 @@ const HomePage = () => (
       </OneTwoSection>
       <LogosMarquee />
       <CTA
-        description="Fully customizable with AI agents. Built on Next.js."
+        description="Fully customizable with AI agents. Built on Next.js"
         primary={{
           href: "https://vercel.com/contact/sales",
           label: "Talk to an expert",
@@ -139,7 +139,7 @@ const HomePage = () => (
           label: "Go to Demo",
           target: "_blank",
         }}
-        title="Start your shop today."
+        title="Start your shop today"
         className="mt-12 sm:mt-32"
       />
     </div>

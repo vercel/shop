@@ -17,6 +17,7 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { WebMCPTools } from "@/components/webmcp-tools";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { precomputedFlags } from "@/lib/flags";
@@ -39,6 +40,8 @@ export const generateStaticParams = async () => {
   return enabledLocales.flatMap((locale) => codes.map((code) => ({ flags: code, locale })));
 };
 
+const webMCPOriginTrialToken = process.env.WEBMCP_ORIGIN_TRIAL_TOKEN;
+
 export default async function RootLayout({ children }: LayoutProps<"/[flags]/[locale]">) {
   const [locale, messages, t] = await Promise.all([
     getLocale(),
@@ -51,7 +54,11 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
 
   return (
     <html lang={locale}>
-      <head />
+      <head>
+        {webMCPOriginTrialToken ? (
+          <meta content={webMCPOriginTrialToken} httpEquiv="origin-trial" />
+        ) : null}
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >
@@ -72,6 +79,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
             <Footer locale={locale} />
             <CartNotifications />
             <CartOverlayBridge />
+            <WebMCPTools />
             <Suspense>
               <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
             </Suspense>

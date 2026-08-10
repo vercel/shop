@@ -484,5 +484,11 @@
     "searchDescriptionQuery": "Find products matching \"{query}\"",
     "searchTitle": "Search",
     "searchTitleQuery": "Search results for \"{query}\""
+  },
+  "webmcp": {
+    "addToCartTitle": "Add to cart",
+    "getCartTitle": "Get cart",
+    "getProductOptionsTitle": "Get product options",
+    "searchProductsTitle": "Search products"
   }
 }

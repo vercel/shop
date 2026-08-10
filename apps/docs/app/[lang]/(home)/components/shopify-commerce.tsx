@@ -22,10 +22,10 @@ const columns: Column[] = [
 export const ShopifyCommerce = () => (
   <div className="grid gap-12 py-12 lg:grid-cols-3 lg:gap-16">
     <div className="flex flex-col gap-4">
-      <h2 className="font-sans font-semibold text-2xl tracking-tight text-foreground sm:text-3xl">
+      <h2 className="text-heading-24 text-foreground sm:text-heading-32">
         Shopify as the commerce engine
       </h2>
-      <p className="text-lg text-muted-foreground">
+      <p className="text-copy-18 text-gray-900">
         Run checkout, payments, and your product catalog on Shopify.
       </p>
     </div>
@@ -33,8 +33,8 @@ export const ShopifyCommerce = () => (
     {/* Feature columns */}
     {columns.map((column) => (
       <div className="flex flex-col gap-4" key={column.title}>
-        <h3 className="font-sans font-semibold text-[20px] text-foreground">{column.title}</h3>
-        <ul className="flex list-disc flex-col gap-3 pl-5 text-muted-foreground marker:text-gray-900">
+        <h3 className="text-heading-20 text-foreground">{column.title}</h3>
+        <ul className="flex list-disc flex-col gap-3 pl-5 text-copy-18 text-gray-900 marker:text-gray-900">
           {column.items.map((item) => (
             <li className="text-[18px]" key={item}>
               {item}
