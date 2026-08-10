@@ -27,6 +27,28 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
+const REMEMBERED_COLLECTION_COOKIE = "state_v0";
+const REMEMBERED_COLLECTION_MAX_AGE = 2592000; // 30 days
+
+function matchCollectionHandle(pathname: string): string | undefined {
+  const match = pathname.match(/^\/collections\/([^/]+)\/?$/);
+  return match?.[1];
+}
+
+// Records the viewed collection server-side so the home page's "Picked for You" picks it up
+// on the next navigation. Set here (not in a client effect) so the cookie is written on both
+// hard loads and client-side navigations, and so a fresh router-cache read always sees it.
+function rememberCollection(response: NextResponse, handle: string | undefined): NextResponse {
+  if (handle) {
+    response.cookies.set(REMEMBERED_COLLECTION_COOKIE, handle, {
+      maxAge: REMEMBERED_COLLECTION_MAX_AGE,
+      path: "/",
+      sameSite: "lax",
+    });
+  }
+  return response;
+}
+
 // Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
@@ -51,18 +73,22 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   const { pathname, search } = request.nextUrl;
+  const handle = matchCollectionHandle(pathname);
   const first = pathname.split("/")[1];
-  if (isLocale(first)) return NextResponse.next();
+  if (isLocale(first)) return rememberCollection(NextResponse.next(), handle);
 
   // evaluate(request) honors the toolbar override cookie; precompute() has no request in proxy.
   const values = await evaluate(precomputedFlags, request);
-  const code = await serialize(precomputedFlags, precomputedFlags.map((_, i) => values[i]));
+  const code = await serialize(
+    precomputedFlags,
+    precomputedFlags.map((_, i) => values[i]),
+  );
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
   const target = cookieLocale && isEnabledLocale(cookieLocale) ? cookieLocale : defaultLocale;
 
   const url = new URL(`/${code}/${target}${pathname}`, request.url);
   url.search = search;
-  return NextResponse.rewrite(url);
+  return rememberCollection(NextResponse.rewrite(url), handle);
 }
 
 export const config = {
