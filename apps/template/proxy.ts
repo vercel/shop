@@ -90,11 +90,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
         "x-proxy-debug",
         [
           `prefetch=${request.headers.get("next-router-prefetch") ?? "-"}`,
-          `segpref=${request.headers.get("next-router-segment-prefetch") ?? "-"}`,
-          `rsc=${request.headers.get("rsc") ?? "-"}`,
-          `purpose=${request.headers.get("purpose") ?? "-"}`,
-          `secpurpose=${request.headers.get("sec-purpose") ?? "-"}`,
-          `rscq=${request.nextUrl.searchParams.has("_rsc") ? "1" : "0"}`,
+          `url=${request.nextUrl.search || "none"}`,
+          `search=${request.nextUrl.searchParams.toString() || "-"}`,
         ].join("|"),
       );
     }
