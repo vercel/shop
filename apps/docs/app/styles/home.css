@@ -68,19 +68,6 @@
   --ring: oklch(0.556 0 0);
 }
 
-/* Homepage heading scale */
-@utility text-heading-40 {
-  @apply font-sans font-semibold text-[40px] leading-[48px] tracking-[-2.4px];
-}
-
-@utility text-heading-48 {
-  @apply font-sans font-semibold text-[48px] leading-[56px] tracking-[-2.88px];
-}
-
-@utility text-heading-56 {
-  @apply font-sans font-semibold text-[56px] leading-[56px] tracking-[-3.36px];
-}
-
 /* Logos marquee animation */
 @keyframes marquee {
   from {

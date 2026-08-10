@@ -14,12 +14,12 @@ interface TemplatesProps {
 }
 
 export const Templates = ({ title, description, data }: TemplatesProps) => (
-  <div className="grid gap-12 p-8 px-4 py-8 sm:p-12 sm:px-12 sm:py-12">
+  <div className="grid gap-12 py-8 sm:py-12">
     <div className="grid max-w-3xl gap-2 text-balance">
-      <h2 className="font-semibold text-xl tracking-tight sm:text-2xl md:text-3xl lg:text-[40px]">
+      <h2 className="text-heading-20 sm:text-heading-24 md:text-heading-32 lg:text-heading-40">
         {title}
       </h2>
-      <p className="text-balance text-lg text-muted-foreground">{description}</p>
+      <p className="text-balance text-copy-18 text-gray-900">{description}</p>
     </div>
     <div className="grid gap-8 md:grid-cols-3">
       {data.map((item) => (
@@ -28,8 +28,8 @@ export const Templates = ({ title, description, data }: TemplatesProps) => (
           href={item.link}
           key={item.title}
         >
-          <h3 className="font-medium tracking-tight">{item.title}</h3>
-          <p className="line-clamp-2 text-muted-foreground text-sm">{item.description}</p>
+          <h3 className="text-heading-16">{item.title}</h3>
+          <p className="line-clamp-2 text-copy-18 text-gray-900">{item.description}</p>
           <Image
             alt={item.title}
             className={cn(
