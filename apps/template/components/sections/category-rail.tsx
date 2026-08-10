@@ -23,6 +23,7 @@ export function CategoryRail({ items, title }: CategoryRailProps) {
           <li key={item.href} className="w-24 shrink-0 snap-start lg:w-auto">
             <Link
               href={item.href}
+              prefetch={true}
               className="group grid cursor-pointer justify-items-center gap-2.5"
             >
               <div className="relative aspect-square w-full">
