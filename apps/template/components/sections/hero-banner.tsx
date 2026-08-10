@@ -36,7 +36,9 @@ export function HeroBanner({ backgroundImage, ctaLink, ctaText, headline }: Hero
               asChild
               className="h-11 px-5 bg-white text-black hover:bg-white hover:opacity-90"
             >
-              <Link href={ctaLink}>{ctaText}</Link>
+              <Link href={ctaLink} prefetch={true}>
+                {ctaText}
+              </Link>
             </Button>
           </div>
         </Container>

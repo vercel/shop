@@ -9,6 +9,7 @@ export async function Empty() {
       <h2 className="text-2xl sm:text-3xl">{t("empty")}</h2>
       <Link
         href="/"
+        prefetch={true}
         className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         {t("continueShopping")}

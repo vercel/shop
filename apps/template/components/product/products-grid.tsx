@@ -127,6 +127,7 @@ export async function ProductsGrid({
         {collectionUrl && (
           <Link
             href={collectionUrl}
+            prefetch={true}
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             {t("viewAll")}

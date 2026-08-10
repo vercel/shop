@@ -15,6 +15,7 @@ export default async function NotFoundError() {
           <p className="text-sm md:text-base text-muted-foreground max-w-xl">{t("notFoundDesc")}</p>
           <Link
             href="/search"
+            prefetch={true}
             className="inline-flex items-center justify-center h-12 px-8 rounded-lg text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             {t("continueShopping")}

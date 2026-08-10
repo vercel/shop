@@ -24,7 +24,7 @@ export async function Nav({ locale }: { locale: string }) {
           <QuickLinks items={items} />
         </div>
 
-        <Link className="flex items-center shrink-0" href="/">
+        <Link className="flex items-center shrink-0" href="/" prefetch={true}>
           <span className="text-xl leading-4">{shopConfig.site.name}</span>
         </Link>
 

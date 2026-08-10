@@ -41,6 +41,7 @@ export async function CollectionSlider({
           {collectionUrl && (
             <Link
               href={collectionUrl}
+              prefetch={true}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("viewAll")}
