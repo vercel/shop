@@ -148,6 +148,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[flags]/[lo
           <PickedForYou
             campaignCollections={CAMPAIGN_COLLECTIONS}
             columns={4}
+            defaultCollection="jackets"
             fallbackSortKey="price-high-to-low"
             limit={8}
             locale={locale}

@@ -29,6 +29,7 @@ function resolveCampaignCollection(
 interface PickedForYouProps {
   campaignCollections: readonly string[];
   columns?: ProductsGridColumns;
+  defaultCollection?: string;
   fallbackSortKey: string;
   limit: number;
   locale: Locale;
@@ -40,6 +41,7 @@ interface PickedForYouProps {
 export async function PickedForYou({
   campaignCollections,
   columns,
+  defaultCollection,
   fallbackSortKey,
   limit,
   locale,
@@ -56,6 +58,7 @@ export async function PickedForYou({
         <PickedForYouContent
           campaignCollections={campaignCollections}
           columns={columns}
+          defaultCollection={defaultCollection}
           fallbackSortKey={fallbackSortKey}
           limit={limit}
           locale={locale}
@@ -71,6 +74,7 @@ export async function PickedForYou({
 async function PickedForYouContent({
   campaignCollections,
   columns,
+  defaultCollection,
   fallbackSortKey,
   limit,
   locale,
@@ -80,6 +84,7 @@ async function PickedForYouContent({
 }: {
   campaignCollections: readonly string[];
   columns?: ProductsGridColumns;
+  defaultCollection?: string;
   fallbackSortKey: string;
   limit: number;
   locale: Locale;
@@ -92,13 +97,15 @@ async function PickedForYouContent({
   const [params, cookieStore] = await Promise.all([searchParams, cookies()]);
 
   // A remembered collection (from a cookie set on a prior collection page) follows the
-  // campaign override but takes precedence over the fallback vector.
+  // campaign override but takes precedence over the default collection.
   const rememberedCollection = cookieStore.get(rememberedCollectionCookie)?.value;
 
-  // A ?utm_campaign= match swaps in that collection; otherwise the remembered
-  // collection, or the fallback vector (catalog sort key).
+  // Priority: ?utm_campaign= match, remembered collection, default collection, or the
+  // fallback vector (catalog sort key).
   const collectionHandle =
-    resolveCampaignCollection(params, campaignCollections) ?? rememberedCollection;
+    resolveCampaignCollection(params, campaignCollections) ??
+    rememberedCollection ??
+    defaultCollection;
 
   const { products } = collectionHandle
     ? await getCollectionProducts({ collection: collectionHandle, limit, locale })
