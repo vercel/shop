@@ -27,36 +27,6 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-const REMEMBERED_COLLECTION_COOKIE = "state_v0";
-const REMEMBERED_COLLECTION_MAX_AGE = 2592000; // 30 days
-
-function matchCollectionHandle(pathname: string): string | undefined {
-  const match = pathname.match(/^\/collections\/([^/]+)\/?$/);
-  return match?.[1];
-}
-
-// Records the viewed collection server-side so the home page's "Picked for You" picks it up
-// on the next navigation. Set here (not in a client effect) so the cookie is written on both
-// hard loads and client-side navigations, and so a fresh router-cache read always sees it.
-function rememberCollection(response: NextResponse, handle: string | undefined): NextResponse {
-  if (handle) {
-    response.cookies.set(REMEMBERED_COLLECTION_COOKIE, handle, {
-      maxAge: REMEMBERED_COLLECTION_MAX_AGE,
-      path: "/",
-      sameSite: "lax",
-    });
-  }
-  return response;
-}
-
-// Prefetches (Next-Router-Prefetch) must not count as views: with prefetch on the home
-// collection links, hovering/scrolling them would otherwise overwrite the remembered
-// collection before the user actually visits one. The header value varies ('1', '2', '3')
-// by prefetch kind, so check presence rather than a specific value.
-function isPrefetch(request: NextRequest): boolean {
-  return request.headers.has("next-router-prefetch");
-}
-
 // Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
@@ -81,24 +51,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   const { pathname, search } = request.nextUrl;
-  const handle = isPrefetch(request) ? undefined : matchCollectionHandle(pathname);
   const first = pathname.split("/")[1];
-
-  const finish = (response: NextResponse) => {
-    if (pathname.startsWith("/collections/")) {
-      response.headers.set(
-        "x-proxy-debug",
-        [
-          `prefetch=${request.headers.get("next-router-prefetch") ?? "-"}`,
-          `url=${request.nextUrl.search || "none"}`,
-          `search=${request.nextUrl.searchParams.toString() || "-"}`,
-        ].join("|"),
-      );
-    }
-    return rememberCollection(response, handle);
-  };
-
-  if (isLocale(first)) return finish(NextResponse.next());
+  if (isLocale(first)) return NextResponse.next();
 
   // evaluate(request) honors the toolbar override cookie; precompute() has no request in proxy.
   const values = await evaluate(precomputedFlags, request);
@@ -111,7 +65,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const url = new URL(`/${code}/${target}${pathname}`, request.url);
   url.search = search;
-  return finish(NextResponse.rewrite(url));
+  return NextResponse.rewrite(url);
 }
 
 export const config = {
