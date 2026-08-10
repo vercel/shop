@@ -15,6 +15,7 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { WebMCPTools } from "@/components/webmcp-tools";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
@@ -30,6 +31,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const webMCPOriginTrialToken = process.env.WEBMCP_ORIGIN_TRIAL_TOKEN;
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const [locale, messages, t] = await Promise.all([
     getLocale(),
@@ -42,7 +45,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
 
   return (
     <html lang={locale}>
-      <head />
+      <head>
+        {webMCPOriginTrialToken ? (
+          <meta content={webMCPOriginTrialToken} httpEquiv="origin-trial" />
+        ) : null}
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >
@@ -62,6 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             <Footer locale={locale} />
             <CartNotifications />
             <CartOverlayBridge />
+            <WebMCPTools />
             <Suspense>
               <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
             </Suspense>
