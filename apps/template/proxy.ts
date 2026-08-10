@@ -49,6 +49,14 @@ function rememberCollection(response: NextResponse, handle: string | undefined):
   return response;
 }
 
+// Prefetches (Next-Router-Prefetch) must not count as views: with prefetch on the home
+// collection links, hovering/scrolling them would otherwise overwrite the remembered
+// collection before the user actually visits one. The header value varies ('1', '2', '3')
+// by prefetch kind, so check presence rather than a specific value.
+function isPrefetch(request: NextRequest): boolean {
+  return request.headers.has("next-router-prefetch");
+}
+
 // Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
@@ -73,7 +81,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   }
 
   const { pathname, search } = request.nextUrl;
-  const handle = matchCollectionHandle(pathname);
+  const handle = isPrefetch(request) ? undefined : matchCollectionHandle(pathname);
   const first = pathname.split("/")[1];
   if (isLocale(first)) return rememberCollection(NextResponse.next(), handle);
 
