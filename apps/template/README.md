@@ -73,7 +73,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 | `shop.get_cart`            | Read a reduced view of the browser's guest cart |
 | `shop.add_to_cart`         | Add one product variant and open the cart       |
 
-The example keeps the integration explicit: `components/webmcp-tools.tsx` contains the JSON Schemas, direct `registerTool()` calls, and `AbortSignal` cleanup. `lib/webmcp/action.ts` validates every input again on the server. Cart writes reuse the existing `/api/cart` path, including BotID checks when enabled, and tool results omit cart IDs, checkout URLs, payment data, and customer data.
+`components/webmcp-tools.tsx` holds the JSON Schemas and registers each tool through [`use-webmcp-tool`](https://github.com/GoogleChromeLabs/use-webmcp-tool), Chrome's React hook for `document.modelContext`. The hook ties each registration to the component lifecycle, keeps a changing `execute` closure from re-registering the tool, and normalizes whatever an action returns into an MCP tool result. `lib/webmcp/action.ts` validates every input again on the server. Cart writes reuse the existing `/api/cart` path, including BotID checks when enabled, and tool results omit cart IDs, checkout URLs, payment data, and customer data.
 
 ### Test locally in Chrome
 
@@ -94,13 +94,16 @@ codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest --auto-connec
 
 Remote debugging gives the connected agent access to the browser. Use a dedicated Chrome profile without sensitive tabs or personal data.
 
-For a public deployment during Chrome's origin trial, create a token for that exact origin and set the optional server environment variable:
+### Enable on a deployment
 
-```sh
-WEBMCP_ORIGIN_TRIAL_TOKEN=your-origin-bound-token
-```
+The Chrome flag above covers local testing only. A deployed origin also needs an origin-trial token, because WebMCP ships as a Chrome origin trial through Chrome 156.
 
-Origin-trial tokens are origin-bound and expire. A token from the canonical demo does not enable WebMCP on cloned deployments.
+1. Register the exact deployment origin — scheme, host, and port — for the WebMCP trial on [Chrome's origin trials site](https://developer.chrome.com/origintrials).
+2. Set the issued token as `WEBMCP_ORIGIN_TRIAL_TOKEN` in each environment that should expose the tools.
+
+`app/layout.tsx` emits `<meta http-equiv="origin-trial">` only when that variable is set, so leaving it unset is a clean no-op.
+
+Origin-trial tokens are origin-bound and expire, so a token issued for the canonical demo does not enable WebMCP on a cloned deployment, and each preview domain needs its own token. **No token is provisioned for this template's deployments yet**, so the tools currently register only in a flag-enabled browser.
 
 ## Skills
 

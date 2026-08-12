@@ -31,6 +31,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// TODO(gaojude): no origin-trial token is provisioned for the deployed origins yet, so WebMCP stays flag-only outside local testing.
 const webMCPOriginTrialToken = process.env.WEBMCP_ORIGIN_TRIAL_TOKEN;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

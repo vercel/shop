@@ -1,7 +1,7 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import { useWebMCP } from "use-webmcp-tool";
 
 import { useCart } from "@/components/cart/context";
 import { addToCart } from "@/lib/cart/client";
@@ -12,19 +12,8 @@ import {
   searchWebMCPProductsAction,
 } from "@/lib/webmcp/action";
 
-// WebMCP is not in TypeScript's DOM library yet, so type only the capability used here.
-interface WebMCPTool {
-  annotations?: { readOnlyHint?: boolean; untrustedContentHint?: boolean };
-  description: string;
-  execute(input: object): Promise<unknown>;
-  inputSchema?: object;
-  name: string;
-  title?: string;
-}
-
-interface WebMCPModelContext {
-  registerTool(tool: WebMCPTool, options?: { signal?: AbortSignal }): Promise<void>;
-}
+const MUTATING_ANNOTATIONS = { readOnlyHint: false, untrustedContentHint: false } as const;
+const READ_ONLY_ANNOTATIONS = { readOnlyHint: true, untrustedContentHint: true } as const;
 
 const searchProductsInputSchema = {
   type: "object",
@@ -116,83 +105,69 @@ const addToCartInputSchema = {
   additionalProperties: false,
 } as const;
 
-export function WebMCPTools() {
-  const { openOverlay } = useCart();
-  const t = useTranslations("webmcp");
+// Tool actions report failures as `{ error }` payloads, which the hook would otherwise serialize as a successful result.
+function markToolErrors(result: unknown) {
+  if (result !== null && typeof result === "object" && "error" in result) {
+    return { content: [{ text: JSON.stringify(result.error), type: "text" }], isError: true };
+  }
+  return result;
+}
+
+type StorefrontToolOptions = Omit<Parameters<typeof useWebMCP>[0], "formatOutput">;
+
+function useStorefrontTool(options: StorefrontToolOptions) {
+  const { error } = useWebMCP({ ...options, formatOutput: markToolErrors });
 
   useEffect(() => {
-    const { modelContext } = document as unknown as {
-      readonly modelContext?: WebMCPModelContext;
-    };
-    if (typeof modelContext?.registerTool !== "function") return;
+    if (error) console.error(`WebMCP tool ${options.name} failed to register`, error);
+  }, [error, options.name]);
+}
 
-    // Aborting this signal unregisters every tool when the component unmounts.
-    const controller = new AbortController();
-    const options = { signal: controller.signal };
+export function WebMCPTools() {
+  const { openOverlay } = useCart();
 
-    void Promise.all([
-      modelContext.registerTool(
-        {
-          name: "shop.search_products",
-          title: t("searchProductsTitle"),
-          description:
-            "Search this store's catalog. Use a returned handle with shop.get_product_options.",
-          inputSchema: searchProductsInputSchema,
-          annotations: { readOnlyHint: true, untrustedContentHint: true },
-          execute: searchWebMCPProductsAction,
-        },
-        options,
-      ),
-      modelContext.registerTool(
-        {
-          name: "shop.get_product_options",
-          title: t("getProductOptionsTitle"),
-          description:
-            "List option name and value pairs for a product. Use nextOptionOffset to continue.",
-          inputSchema: getProductOptionsInputSchema,
-          annotations: { readOnlyHint: true, untrustedContentHint: true },
-          execute: getWebMCPProductOptionsAction,
-        },
-        options,
-      ),
-      modelContext.registerTool(
-        {
-          name: "shop.get_cart",
-          title: t("getCartTitle"),
-          description:
-            "Read a redacted page of the guest cart. Use variantId to verify an uncertain add.",
-          inputSchema: getCartInputSchema,
-          annotations: { readOnlyHint: true, untrustedContentHint: true },
-          execute: getWebMCPCartAction,
-        },
-        options,
-      ),
-      modelContext.registerTool(
-        {
-          name: "shop.add_to_cart",
-          title: t("addToCartTitle"),
-          description: "Add one available variant to the guest cart and open the cart for review.",
-          inputSchema: addToCartInputSchema,
-          annotations: { readOnlyHint: false, untrustedContentHint: false },
-          execute: async (input) => {
-            const prepared = await prepareWebMCPAddToCartAction(input);
-            if ("error" in prepared) return prepared;
+  // TODO(gaojude): pass localized `title` again once use-webmcp-tool forwards it to registerTool.
+  useStorefrontTool({
+    annotations: READ_ONLY_ANNOTATIONS,
+    description:
+      "Search this store's catalog. Use a returned handle with shop.get_product_options.",
+    execute: searchWebMCPProductsAction,
+    inputSchema: searchProductsInputSchema,
+    name: "shop.search_products",
+  });
 
-            const result = await addToCart(prepared.variantId, prepared.quantity);
-            if (result.applied === true) openOverlay();
-            return result.applied === false ? result : { ...result, variantId: prepared.variantId };
-          },
-        },
-        options,
-      ),
-    ]).catch((error: unknown) => {
-      if (controller.signal.aborted) return;
-      controller.abort();
-      console.error("WebMCP tool registration failed", error);
-    });
+  useStorefrontTool({
+    annotations: READ_ONLY_ANNOTATIONS,
+    description:
+      "List option name and value pairs for a product. Use nextOptionOffset to continue.",
+    execute: getWebMCPProductOptionsAction,
+    inputSchema: getProductOptionsInputSchema,
+    name: "shop.get_product_options",
+  });
 
-    return () => controller.abort();
-  }, [openOverlay, t]);
+  useStorefrontTool({
+    annotations: READ_ONLY_ANNOTATIONS,
+    description:
+      "Read a redacted page of the guest cart. Use variantId to verify an uncertain add.",
+    execute: getWebMCPCartAction,
+    inputSchema: getCartInputSchema,
+    name: "shop.get_cart",
+  });
+
+  useStorefrontTool({
+    annotations: MUTATING_ANNOTATIONS,
+    description: "Add one available variant to the guest cart and open the cart for review.",
+    execute: async (input) => {
+      const prepared = await prepareWebMCPAddToCartAction(input);
+      if ("error" in prepared) return prepared;
+
+      const result = await addToCart(prepared.variantId, prepared.quantity);
+      if (result.applied === true) openOverlay();
+      return result.applied === false ? result : { ...result, variantId: prepared.variantId };
+    },
+    inputSchema: addToCartInputSchema,
+    name: "shop.add_to_cart",
+  });
 
   return null;
 }
