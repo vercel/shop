@@ -14,8 +14,7 @@
     "VERCEL_BRANCH_URL",
     "VERCEL_ENV",
     "VERCEL_PROJECT_PRODUCTION_URL",
-    "VERCEL_URL",
-    "WEBMCP_ORIGIN_TRIAL_TOKEN"
+    "VERCEL_URL"
   ],
   "tasks": {
     "build": {
