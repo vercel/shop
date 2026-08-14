@@ -49,6 +49,8 @@ export function ShopifyAnalyticsTracker({ shop }: ShopifyAnalyticsTrackerProps) 
           // Storefront API does not expose one, so perf-kit is not loaded here.
           storefrontId: "",
         }}
+        shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
+        webMcp={shopConfig.webmcp.isEnabled}
       />
       <script
         // The hydrogen bootstrap hardcodes consentDomain to window.location.host, which

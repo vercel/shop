@@ -58,6 +58,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 - **Tailwind CSS 4** and shadcn/ui components
 - **Internationalization-ready** with next-intl
 - **AI-ready** with Vercel AI SDK integration
+- **WebMCP-ready** with Hydrogen's storefront tools for browser agents — opt-in via `lib/config.ts`
 - **Optimized cart** with server actions and instant cache invalidation
 - **SEO** with structured data and dynamic metadata
 

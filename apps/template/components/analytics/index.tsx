@@ -7,11 +7,14 @@ import { getShopAnalytics } from "@/lib/shopify/operations/shop";
 import { ShopifyAnalyticsTracker } from "./shopify-client";
 
 export async function AnalyticsComponents({ locale }: { locale: string }) {
+  const shopifyScriptsEnabled =
+    shopConfig.analytics.shopify.isEnabled || shopConfig.webmcp.isEnabled;
+
   return (
     <>
       {shopConfig.analytics.vercel.isEnabled && <Analytics />}
       {shopConfig.analytics.speedInsights.isEnabled && <SpeedInsights />}
-      {shopConfig.analytics.shopify.isEnabled && (
+      {shopifyScriptsEnabled && (
         <ShopifyAnalyticsTracker shop={await getShopAnalytics({ locale })} />
       )}
     </>
