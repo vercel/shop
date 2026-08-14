@@ -107,6 +107,6 @@ export const shopConfig = {
     url: defaultUrl,
   },
   webmcp: {
-    isEnabled: true,
+    isEnabled: false,
   },
 } satisfies ShopConfig;
