@@ -38,6 +38,9 @@ export const shopConfig = {
     name: "Vercel Shop",
     url: defaultUrl,
   },
+  webmcp: {
+    isEnabled: false,
+  },
 } satisfies ShopConfig;
 ```
 
@@ -99,3 +102,9 @@ Sections with no applicable Shopify data render nothing. Set an individual flag 
 ## What does not belong here
 
 Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `lib/config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.
+
+## WebMCP
+
+`webmcp.isEnabled` controls the experimental WebMCP integration. It defaults to `false`. WebMCP is an in-progress browser API available only behind a Chrome flag, not a finalized standard, so this feature is experimental and its behavior may change as the spec and Shopify's implementation evolve.
+
+When enabled, Hydrogen's Shopify scripts mount loads Shopify's hosted `webmcp.js` in browsers that expose the model-context API; other browsers skip the script entirely. Shopify's script defines and registers the storefront tools, not the template. Enabling WebMCP does not enable Shopify analytics — the two are gated independently. See [WebMCP](/docs/anatomy/webmcp) for testing instructions.
