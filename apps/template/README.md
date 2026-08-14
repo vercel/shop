@@ -4,9 +4,7 @@ A Next.js storefront template and reference architecture for Shopify, built with
 
 See [vercel.shop](https://vercel.shop) for full documentation.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps%2Ftemplate&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app&env=NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN%2CNEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN&envDescription=Required%20Shopify%20Storefront%20API%20credentials&envLink=https%3A%2F%2Fvercel.shop%2Fdocs%2Freference%2Fenv-vars)
-
-Vercel prompts for the two required Shopify credentials before the first deployment.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop&project-name=shop&repository-name=shop&root-directory=apps%2Ftemplate&demo-title=Vercel+Shop&demo-url=https%3A%2F%2Fshop-template.vercel.app)
 
 ## Getting Started
 
@@ -28,18 +26,7 @@ To install only the agent plugins into an existing project, run this from that p
 npx create-vercel-shop@latest --no-template
 ```
 
-2. In Shopify admin, create a storefront token in **Settings → Apps and sales channels → Headless**, enable the required Storefront API permissions, then add your Shopify credentials:
-
-```sh
-cp .env.example .env.local
-```
-
-```
-NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN=your-store.myshopify.com
-NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN=your-token
-```
-
-3. Start the development server with the same package manager you used to scaffold the project:
+2. Start the development server with the same package manager you used to scaffold the project:
 
 ```sh
 pnpm dev
@@ -94,13 +81,7 @@ codex mcp add chrome-devtools -- npx -y chrome-devtools-mcp@latest --auto-connec
 
 Remote debugging gives the connected agent access to the browser. Use a dedicated Chrome profile without sensitive tabs or personal data.
 
-For a public deployment during Chrome's origin trial, create a token for that exact origin and set the optional server environment variable:
-
-```sh
-WEBMCP_ORIGIN_TRIAL_TOKEN=your-origin-bound-token
-```
-
-Origin-trial tokens are origin-bound and expire. A token from the canonical demo does not enable WebMCP on cloned deployments.
+For a public deployment during Chrome's origin trial, create a token for that exact origin. Origin-trial tokens are origin-bound and expire. A token from the canonical demo does not enable WebMCP on cloned deployments.
 
 ## Skills
 
