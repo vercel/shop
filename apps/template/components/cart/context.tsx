@@ -263,7 +263,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setIsAddingToCart(true);
         setOverlayOpen(true);
       }
-      void addToCart(variantId, quantity, productInfo);
+      addToCart(variantId, quantity, productInfo);
     },
     [],
   );
