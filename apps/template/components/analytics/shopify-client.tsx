@@ -8,11 +8,11 @@ import { useEffect, useRef } from "react";
 import { shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
 
-interface ShopifyAnalyticsTrackerProps {
+interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
 }
 
-export function ShopifyAnalyticsTracker({ shop }: ShopifyAnalyticsTrackerProps) {
+export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
