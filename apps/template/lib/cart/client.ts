@@ -47,36 +47,15 @@ interface CartMutationResponse {
   warnings?: { code: string; message: string }[];
 }
 
-class CartRequestError extends Error {
-  readonly status: number;
-
-  constructor(status: number) {
-    super(`Cart request failed: ${status}`);
-    this.status = status;
-  }
-}
-
-let cartMutationQueue: Promise<void> = Promise.resolve();
-
-async function sendCartRequest(payload: Record<string, unknown>): Promise<CartMutationResponse> {
+async function postCart(payload: Record<string, unknown>): Promise<CartMutationResponse> {
   const response = await fetch(ENDPOINT, {
     body: JSON.stringify(payload),
     headers: { "content-type": "application/json" },
     method: "POST",
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
-  if (!response.ok) throw new CartRequestError(response.status);
+  if (!response.ok) throw new Error(`Cart request failed: ${response.status}`);
   return response.json() as Promise<CartMutationResponse>;
-}
-
-// Serialize browser cart writes so the cart cookie and visible state cannot resolve out of order.
-function postCart(payload: Record<string, unknown>): Promise<CartMutationResponse> {
-  const request = cartMutationQueue.then(() => sendCartRequest(payload));
-  cartMutationQueue = request.then(
-    () => undefined,
-    () => undefined,
-  );
-  return request;
 }
 
 // The standard event flattens cart.lines.nodes into cart.lines for the store.
@@ -132,58 +111,6 @@ function dispatchLinesUpdate(
   document.dispatchEvent(event);
 }
 
-// A lost response makes a non-idempotent cart write unsafe to retry blindly.
-export type CartMutationResult =
-  | { applied: true; warning?: string }
-  | {
-      applied: false;
-      error: { code: "MUTATION_FAILED" | "NOT_ALLOWED"; message: string };
-    }
-  | {
-      applied: "unknown";
-      error: { code: "OUTCOME_UNKNOWN"; message: string };
-      retrySafe: false;
-    };
-
-async function toCartMutationResult(
-  request: Promise<CartMutationResponse>,
-): Promise<CartMutationResult> {
-  try {
-    const result = await request;
-    if (!result.cart || result.userErrors?.length) {
-      return {
-        applied: false,
-        error: { code: "MUTATION_FAILED", message: "The store rejected this cart change." },
-      };
-    }
-
-    return result.warnings?.length
-      ? { applied: true, warning: "The cart was updated with a store warning." }
-      : { applied: true };
-  } catch (error) {
-    if (error instanceof CartRequestError && error.status === 403) {
-      return {
-        applied: false,
-        error: { code: "NOT_ALLOWED", message: "The store blocked this cart change." },
-      };
-    }
-    if (error instanceof CartRequestError && error.status >= 400 && error.status < 500) {
-      return {
-        applied: false,
-        error: { code: "MUTATION_FAILED", message: "The store rejected this cart change." },
-      };
-    }
-    return {
-      applied: "unknown",
-      error: {
-        code: "OUTCOME_UNKNOWN",
-        message: "The store may have applied this change. Read the cart before retrying.",
-      },
-      retrySafe: false,
-    };
-  }
-}
-
 // Bypasses the preview's broken standard-actions updateCart handler: POST to our
 // route and feed the standard lines-update event the store listens for.
 export function addToCart(
@@ -191,25 +118,19 @@ export function addToCart(
   quantity: number,
   productInfo?: OptimisticProductInfo,
   attributes?: { key: string; value: string }[],
-): Promise<CartMutationResult> {
+): void {
   const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
-  const request = postCart({ lines: [line] });
-  const eventPromise = request.then((result) => ({
+  const promise = postCart({ lines: [line] }).then((result) => ({
     cart: result.cart ? toStandardCart(result.cart) : null,
   }));
-  dispatchLinesAdd([line], productInfo, eventPromise);
-  return toCartMutationResult(request);
+  dispatchLinesAdd([line], productInfo, promise);
 }
 
 export function updateCartLine(lineId: string, quantity: number): void {
-  const eventPromise = postCart({ lines: [{ id: lineId, quantity }] }).then((result) => ({
+  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then((result) => ({
     cart: result.cart ? toStandardCart(result.cart) : null,
   }));
-  dispatchLinesUpdate(
-    quantity === 0 ? "remove" : "update",
-    [{ id: lineId, quantity }],
-    eventPromise,
-  );
+  dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
 }
 
 export interface ServerCartLine {

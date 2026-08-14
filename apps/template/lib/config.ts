@@ -46,6 +46,9 @@ export interface ShopConfig {
     name: string;
     url: string;
   };
+  webmcp: {
+    isEnabled: boolean;
+  };
 }
 
 function trimTrailingSlash(value: string): string {
@@ -102,5 +105,8 @@ export const shopConfig = {
   site: {
     name: "Vercel Shop",
     url: defaultUrl,
+  },
+  webmcp: {
+    isEnabled: false,
   },
 } satisfies ShopConfig;

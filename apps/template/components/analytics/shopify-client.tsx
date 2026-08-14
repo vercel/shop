@@ -8,11 +8,11 @@ import { useEffect, useRef } from "react";
 import { shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
 
-interface ShopifyAnalyticsTrackerProps {
+interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
 }
 
-export function ShopifyAnalyticsTracker({ shop }: ShopifyAnalyticsTrackerProps) {
+export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,6 +49,8 @@ export function ShopifyAnalyticsTracker({ shop }: ShopifyAnalyticsTrackerProps) 
           // Storefront API does not expose one, so perf-kit is not loaded here.
           storefrontId: "",
         }}
+        shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
+        webMcp={shopConfig.webmcp.isEnabled}
       />
       <script
         // The hydrogen bootstrap hardcodes consentDomain to window.location.host, which
