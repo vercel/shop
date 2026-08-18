@@ -31,16 +31,12 @@ export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
 
   return (
     <>
-      <script
-        // Shopify's hosted privacy banner still reads the Liquid token fallback in headless stores.
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            accessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
-          }).replaceAll("<", "\\u003c"),
-        }}
-        id="shopify-features"
-        type="application/json"
-      />
+      {/* Shopify's hosted privacy banner still reads the Liquid token fallback in headless stores. */}
+      <script id="shopify-features" type="application/json">
+        {JSON.stringify({
+          accessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+        })}
+      </script>
       <ShopifyScripts
         analytics={{ channel: "headless" }}
         consent={{ mode: shopConfig.analytics.shopify.consentMode }}
