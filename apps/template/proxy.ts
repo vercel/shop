@@ -24,7 +24,7 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-const SFAPI_PATH = "/api/unstable/graphql.json";
+const SFAPI_PATH = /^\/api\/(?:unstable|2\d{3}-\d{2})\/graphql\.json$/;
 
 const NOOP_SESSION_MANAGER = {
   getSessionItem: () => undefined,
@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // request (BotID gate + response shaping). Passing cartHandlers to handleShopifyRoutes
   // would short-circuit the proxy and the route handler would never run.
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
-  const isSfapiPath = pathname === SFAPI_PATH;
+  const isSfapiPath = SFAPI_PATH.test(pathname);
 
   if (isAuthPath || isSfapiPath) {
     const handlers = isAuthPath
@@ -74,7 +74,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     "/api/cart",
-    "/api/unstable/graphql.json",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
     "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
