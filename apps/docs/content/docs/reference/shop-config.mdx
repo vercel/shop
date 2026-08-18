@@ -56,9 +56,9 @@ Consumers import `shopConfig` directly from `@/lib/config`. Feature flags are li
 - `speedInsights.isEnabled` controls Vercel Speed Insights.
 - `shopify.isEnabled` controls Shopify storefront analytics.
 
-The Vercel integrations are disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled provider components. Additional storefront-wide analytics integrations can be added alongside them.
+The Vercel integrations are disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled Vercel providers. Additional storefront-wide analytics integrations can be added alongside them.
 
-`shopify.isEnabled` sends storefront page views to Shopify analytics through Hydrogen's analytics bus, so they appear in Shopify admin alongside the rest of the store's reporting. It is disabled by default and needs no credentials beyond the Storefront API variables the storefront already requires. Set it to `true` to turn it on.
+Hydrogen's Shopify scripts mount by default to initialize Shopify's storefront runtime and consent flow. `shopify.isEnabled` independently controls whether those scripts send storefront page views to Shopify analytics, so they appear in Shopify admin alongside the rest of the store's reporting. It is disabled by default and needs no credentials beyond the Storefront API variables the storefront already requires. Set it to `true` to turn analytics on.
 
 `shopify.consentMode` selects how visitors grant tracking consent and defaults to `default-banner`, where Shopify's hosted privacy banner is rendered for visitors in regions that require consent. Use `custom-banner` when the storefront provides its own consent UI. Choosing `no-banner` means visitors in those regions have no way to grant consent and their events are never delivered. Hydrogen sends consent requests through the storefront's local Storefront API proxy so the privacy flow remains first-party.
 
