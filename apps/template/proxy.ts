@@ -24,6 +24,15 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
+const SFAPI_PATH = "/api/unstable/graphql.json";
+
+const NOOP_SESSION_MANAGER = {
+  getSessionItem: () => undefined,
+  getSessionOrigin: () => "",
+  removeSessionItem: () => {},
+  setSessionItem: () => {},
+};
+
 export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
@@ -32,20 +41,24 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   // request (BotID gate + response shaping). Passing cartHandlers to handleShopifyRoutes
   // would short-circuit the proxy and the route handler would never run.
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
+  const isSfapiPath = pathname === SFAPI_PATH;
 
-  if (isAuthPath) {
+  if (isAuthPath || isSfapiPath) {
+    const handlers = isAuthPath
+      ? [
+          createCustomerAccountServerHandlers({
+            customerSession: await getHydrogenCustomerSession(),
+            defaultPostLoginRedirectPathname: "/account",
+            origin: getCustomerRequestOrigin,
+            postLogoutRedirectUri: "/",
+          }),
+        ]
+      : [];
     const shopifyRoute = await handleShopifyRoutes({
-      handlers: [
-        createCustomerAccountServerHandlers({
-          customerSession: await getHydrogenCustomerSession(),
-          defaultPostLoginRedirectPathname: "/account",
-          origin: getCustomerRequestOrigin,
-          postLogoutRedirectUri: "/",
-        }),
-      ],
+      handlers,
       request,
       requestContext,
-      sessionManager: createCustomerSessionManager(request),
+      sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
       storefrontClient: createRequestStorefrontClient(requestContext),
     });
     if (shopifyRoute) return shopifyRoute as NextResponse;
@@ -61,6 +74,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     "/api/cart",
+    "/api/unstable/graphql.json",
     "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
