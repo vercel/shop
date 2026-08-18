@@ -36,6 +36,8 @@ export async function generateMetadata({
   };
 }
 
+export const instant = false;
+
 export default async function PolicyPage({ params }: PageProps<"/policies/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();

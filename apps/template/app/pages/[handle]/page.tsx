@@ -42,6 +42,8 @@ export async function generateMetadata({
   };
 }
 
+export const instant = false;
+
 export default async function ShopifyPage({ params }: PageProps<"/pages/[handle]">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
