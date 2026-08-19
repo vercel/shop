@@ -25,8 +25,6 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-const SFAPI_PATH = /^\/api\/(?:unstable|2\d{3}-\d{2})\/graphql\.json$/;
-
 const NOOP_SESSION_MANAGER = {
   getSessionItem: () => undefined,
   getSessionOrigin: () => "",
@@ -34,37 +32,27 @@ const NOOP_SESSION_MANAGER = {
   setSessionItem: () => {},
 };
 
-export async function proxy(request: NextRequest): Promise<NextResponse> {
+export async function proxy(request: NextRequest): Promise<Response> {
   const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
 
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
-  const isCartPath = pathname === "/api/cart";
-  const isSfapiPath = SFAPI_PATH.test(pathname);
-
-  if (isAuthPath || isCartPath || isSfapiPath) {
-    const handlers = [
-      ...(isAuthPath
-        ? [
-            createCustomerAccountServerHandlers({
-              customerSession: await getHydrogenCustomerSession(),
-              defaultPostLoginRedirectPathname: "/account",
-              origin: getCustomerRequestOrigin,
-              postLogoutRedirectUri: "/",
-            }),
-          ]
-        : []),
-      ...(isCartPath ? [cartHandlers] : []),
-    ];
-    const shopifyRoute = await handleShopifyRoutes({
-      handlers,
-      request,
-      requestContext,
-      sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
-      storefrontClient: createRequestStorefrontClient(requestContext),
-    });
-    if (shopifyRoute) return shopifyRoute as NextResponse;
-  }
+  const authHandlers = isAuthPath
+    ? createCustomerAccountServerHandlers({
+        customerSession: await getHydrogenCustomerSession(),
+        defaultPostLoginRedirectPathname: "/account",
+        origin: getCustomerRequestOrigin,
+        postLogoutRedirectUri: "/",
+      })
+    : undefined;
+  const shopifyRoute = handleShopifyRoutes({
+    handlers: authHandlers ? [authHandlers, cartHandlers] : [cartHandlers],
+    request,
+    requestContext,
+    sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+    storefrontClient: createRequestStorefrontClient(requestContext),
+  });
+  if (shopifyRoute) return shopifyRoute;
 
   const response = NextResponse.next({
     request: { headers: requestContext.getForwardedRequestHeaders() },
@@ -75,8 +63,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 export const config = {
   matcher: [
-    "/api/cart",
-    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/api/:path*",
     "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
