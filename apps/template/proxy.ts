@@ -63,7 +63,13 @@ export async function proxy(request: NextRequest): Promise<Response> {
 
 export const config = {
   matcher: [
-    "/api/:path*",
+    "/api/cart",
+    "/api/mcp",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/__shopify/:path*",
+    "/agent/:action(handoff|buyer-claims).:format",
+    "/cart.:format(js|json)",
+    "/cart/:operation(add|update|change|clear).:format(js|json)",
     "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
