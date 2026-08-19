@@ -14,6 +14,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { cartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -37,23 +38,24 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
 
-  // /api/cart is deliberately NOT registered here: its App Router route handler owns the
-  // request (BotID gate + response shaping). Passing cartHandlers to handleShopifyRoutes
-  // would short-circuit the proxy and the route handler would never run.
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
+  const isCartPath = pathname === "/api/cart";
   const isSfapiPath = SFAPI_PATH.test(pathname);
 
-  if (isAuthPath || isSfapiPath) {
-    const handlers = isAuthPath
-      ? [
-          createCustomerAccountServerHandlers({
-            customerSession: await getHydrogenCustomerSession(),
-            defaultPostLoginRedirectPathname: "/account",
-            origin: getCustomerRequestOrigin,
-            postLogoutRedirectUri: "/",
-          }),
-        ]
-      : [];
+  if (isAuthPath || isCartPath || isSfapiPath) {
+    const handlers = [
+      ...(isAuthPath
+        ? [
+            createCustomerAccountServerHandlers({
+              customerSession: await getHydrogenCustomerSession(),
+              defaultPostLoginRedirectPathname: "/account",
+              origin: getCustomerRequestOrigin,
+              postLogoutRedirectUri: "/",
+            }),
+          ]
+        : []),
+      ...(isCartPath ? [cartHandlers] : []),
+    ];
     const shopifyRoute = await handleShopifyRoutes({
       handlers,
       request,
