@@ -131,8 +131,8 @@ importers:
         specifier: 2.0.1
         version: 2.0.1(@types/node@26.1.2)(supports-color@7.2.0)(typescript@7.0.2)
       '@shopify/hydrogen':
-        specifier: 0.0.0-preview-116d5d7-20260730141607
-        version: 0.0.0-preview-116d5d7-20260730141607(graphql@16.14.2)(react@19.2.8)(typescript@7.0.2)
+        specifier: 2026.10.0-preview.1
+        version: 2026.10.0-preview.1(graphql@16.14.2)(react@19.2.8)(typescript@7.0.2)
       '@tailwindcss/turbopack':
         specifier: 4.3.3
         version: 4.3.3
@@ -3651,14 +3651,17 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0
 
-  '@shopify/hydrogen@0.0.0-preview-116d5d7-20260730141607':
-    resolution: {integrity: sha512-hQ5c/rTNbbu4W8TsgWrM8BjzbUNObUMeLiaqHCTKTTeoExFNkHcgqKh2raD7K0gxRGOa4cy3PRQCl5buW+XdGg==}
+  '@shopify/hydrogen@2026.10.0-preview.1':
+    resolution: {integrity: sha512-wiE5j/NdoriojKRNAcysCl2geLdC2eI+B4nJTH0YAN1aQCsrWCJok8Wti6GuzGPs0fem5mADypnLitvTbICcVg==}
     hasBin: true
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
+      vite: ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
       vue: ^3.5.0
     peerDependenciesMeta:
       react:
+        optional: true
+      vite:
         optional: true
       vue:
         optional: true
@@ -4438,11 +4441,6 @@ packages:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
 
-  baseline-browser-mapping@2.11.12:
-    resolution: {integrity: sha512-r7WnVImvVCeFpf2DOXfy41aPWzeNg3H/A2X4dKmy1QL0MSyyk/e7z8ihJ3N6Nn2PsdhkVlqnEfnUE4a05P2aTA==}
-    engines: {node: '>=6.0.0'}
-    hasBin: true
-
   baseline-browser-mapping@2.11.14:
     resolution: {integrity: sha512-JyJ954WzuIR8/FFzX0o5krdSTrBAkcCSRfWSleRsIHSWV+cZe2FI1PKggVkFke1hBldRs+LRxUczzE9iPmgZww==}
     engines: {node: '>=6.0.0'}
@@ -4485,9 +4483,6 @@ packages:
 
   camel-case@4.1.2:
     resolution: {integrity: sha512-gxGWBrTT1JuMx6R+o5PTXMmUnhnVzLQ9SNutD4YqKtI6ap897t3tKECYla6gCWEkplXnlNybEkZg9GEGxKFCgw==}
-
-  caniuse-lite@1.0.30001806:
-    resolution: {integrity: sha512-72Cuvd95zbSYPKq6Fhg8eDJRlzgWDf7/mtoZv6Qe/DYNCEBdNxoA3+rZAU2ZhGCpZlns3EssFavaZomckT5Uuw==}
 
   caniuse-lite@1.0.30001809:
     resolution: {integrity: sha512-xxWVywk6a6Arlk+hymeycyn/VgqEfLDxupvhH/xiY5SJ/18kmi9o6MiO320DCUzypORHLtvh0I4i04tUhCNHNQ==}
@@ -10754,7 +10749,7 @@ snapshots:
     transitivePeerDependencies:
       - graphql-sock
 
-  '@shopify/hydrogen@0.0.0-preview-116d5d7-20260730141607(graphql@16.14.2)(react@19.2.8)(typescript@7.0.2)':
+  '@shopify/hydrogen@2026.10.0-preview.1(graphql@16.14.2)(react@19.2.8)(typescript@7.0.2)':
     dependencies:
       gql.tada: 1.9.2(graphql@16.14.2)(typescript@7.0.2)
     optionalDependencies:
@@ -11413,8 +11408,6 @@ snapshots:
 
   balanced-match@4.0.4: {}
 
-  baseline-browser-mapping@2.11.12: {}
-
   baseline-browser-mapping@2.11.14: {}
 
   bcp-47-match@2.0.3: {}
@@ -11438,8 +11431,8 @@ snapshots:
 
   browserslist@4.28.7:
     dependencies:
-      baseline-browser-mapping: 2.11.12
-      caniuse-lite: 1.0.30001806
+      baseline-browser-mapping: 2.11.14
+      caniuse-lite: 1.0.30001809
       electron-to-chromium: 1.5.399
       node-releases: 2.0.51
       update-browserslist-db: 1.2.3(browserslist@4.28.7)
@@ -11450,8 +11443,6 @@ snapshots:
     dependencies:
       pascal-case: 3.1.2
       tslib: 2.8.1
-
-  caniuse-lite@1.0.30001806: {}
 
   caniuse-lite@1.0.30001809: {}
 

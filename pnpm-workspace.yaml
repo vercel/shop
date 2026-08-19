@@ -6,6 +6,7 @@ allowBuilds:
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  - "@shopify/hydrogen"
   - "@vercel/geistdocs"
 
 packages:
