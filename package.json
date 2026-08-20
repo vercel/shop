@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "@changesets/changelog-github": "0.7.0",
-    "@changesets/cli": "2.31.0",
-    "turbo": "2.10.7"
+    "@changesets/changelog-github": "1.0.0",
+    "@changesets/cli": "3.0.0",
+    "turbo": "2.10.11"
   },
   "name": "@vercel/shop",
   "packageManager": "pnpm@11.16.0",

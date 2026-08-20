@@ -14,7 +14,7 @@
   "dependencies": {
     "@tailwindcss/turbopack": "4.3.3",
     "@types/mdx": "2.0.14",
-    "@types/node": "26.1.2",
+    "@types/node": "26.2.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "@vercel/agent-readability": "0.5.1",
@@ -32,7 +32,7 @@
     "next": "16.3.1",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
-    "radix-ui": "1.6.0",
+    "radix-ui": "1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "streamdown": "2.5.0",
