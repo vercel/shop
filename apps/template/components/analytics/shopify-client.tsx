@@ -31,6 +31,12 @@ export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
 
   return (
     <>
+      {/* Shopify's hosted privacy banner still reads the Liquid token fallback in headless stores. */}
+      <script id="shopify-features" type="application/json">
+        {JSON.stringify({
+          accessToken: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
+        })}
+      </script>
       <ShopifyScripts
         analytics={{ channel: "headless" }}
         consent={{ mode: shopConfig.analytics.shopify.consentMode }}
@@ -51,14 +57,6 @@ export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
         }}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.webmcp.isEnabled}
-      />
-      <script
-        // The hydrogen bootstrap hardcodes consentDomain to window.location.host, which
-        // 404s on the deployment origin. Point the consent API at the shop domain instead.
-        dangerouslySetInnerHTML={{
-          __html: `if (window.Shopify?.customerPrivacy) { window.Shopify.customerPrivacy.config.consentDomain = ${JSON.stringify(shop.storeDomain)}; }`,
-        }}
-        id="shopify-consent-domain-override"
       />
     </>
   );

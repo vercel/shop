@@ -14,7 +14,7 @@ Because the API is experimental, this feature is **disabled by default** and may
 
 **Shopify owns the tools, not the template.** The registered tools come from Shopify's hosted script rather than template code, so their schemas and behavior track Shopify's implementation instead of a hand-rolled copy. They operate on the same storefront context as the page: catalog reads go through the public Storefront surface, and cart writes reuse the standard cart actions, so an agent-driven add-to-cart lands in the same cart the shopper sees.
 
-**Independent of Shopify analytics.** Enabling WebMCP mounts the shared Shopify scripts bootstrap (`window.Shopify`, standard actions) that the CDN script depends on, but it does not turn on Shopify storefront analytics. The two are gated separately, so you can run WebMCP without sending page views to Shopify and vice versa.
+**Independent of Shopify analytics.** The shared Shopify scripts bootstrap (`window.Shopify`, standard actions) mounts by default, while WebMCP and Shopify analytics are enabled independently. Turning on WebMCP loads its CDN script without sending page views to Shopify unless storefront analytics is also enabled.
 
 ## Out of the box
 

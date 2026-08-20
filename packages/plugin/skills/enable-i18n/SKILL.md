@@ -219,18 +219,26 @@ export default getRequestConfig(async () => {
 
 ### Step 5: Extend `proxy.ts`
 
-Update the existing root proxy to run next-intl for matched requests:
+Compose next-intl after the existing Shopify route dispatch. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so check that result before locale routing without awaiting it:
 
 ```ts
-import createMiddleware from "next-intl/middleware";
-import { type NextRequest, NextResponse } from "next/server";
-
-import { routing } from "@/lib/i18n/routing";
-
 const handleI18n = createMiddleware(routing);
 
-export function proxy(request: NextRequest): NextResponse {
-  const response = handleI18n(request);
+// Keep the existing imports and add NextRequest as a runtime import.
+export async function proxy(request: NextRequest): Promise<Response> {
+  const requestContext = createCustomerRequestContext(request);
+  const shopifyRoute = handleShopifyRoutes({
+    // Preserve the template's handlers, session manager, and storefront client.
+    request,
+    requestContext,
+  });
+  if (shopifyRoute) return shopifyRoute;
+
+  const i18nRequest = new NextRequest(request, {
+    headers: requestContext.getForwardedRequestHeaders(),
+  });
+  const response = handleI18n(i18nRequest);
+  requestContext.applyResponseHeaders(response.headers);
   if (!response.ok) return response;
 
   const rewriteHeader = response.headers.get("x-middleware-rewrite");
@@ -242,16 +250,24 @@ export function proxy(request: NextRequest): NextResponse {
   normalized.search = rewriteTarget.search;
   return NextResponse.rewrite(normalized, { headers: response.headers });
 }
+```
 
+Preserve the template's Shopify-owned API and protocol matchers, then add locale-prefixed Shopify endpoints now that locale routing is enabled:
+
+```ts
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
-    "/.well-known/:path*",
+    // Keep every matcher already present in the template.
+    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/agent/:action(handoff|buyer-claims).:format",
+    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart.:format(js|json)",
+    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart/:operation(add|update|change|clear).:format(js|json)",
   ],
 };
 ```
 
-Preserve any other request handling already composed in `proxy()`. The matcher excludes framework internals and public files while keeping application routes and `/.well-known/*` in proxy processing. The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
+Do not replace the explicit entries with `/api/:path*`: downstream applications must be able to add Route Handlers such as `/api/webhooks` or `/api/custom` without sending them through Shopify dispatch or locale middleware. If a new Hydrogen feature claims another reserved route, add that exact route family.
+
+The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
 
 ### Step 6: Internal hrefs — keep `next/link`
 

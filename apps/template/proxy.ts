@@ -14,6 +14,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { cartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -24,32 +25,34 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-export async function proxy(request: NextRequest): Promise<NextResponse> {
+const NOOP_SESSION_MANAGER = {
+  getSessionItem: () => undefined,
+  getSessionOrigin: () => "",
+  removeSessionItem: () => {},
+  setSessionItem: () => {},
+};
+
+export async function proxy(request: NextRequest): Promise<Response> {
   const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
 
-  // /api/cart is deliberately NOT registered here: its App Router route handler owns the
-  // request (BotID gate + response shaping). Passing cartHandlers to handleShopifyRoutes
-  // would short-circuit the proxy and the route handler would never run.
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
-
-  if (isAuthPath) {
-    const shopifyRoute = await handleShopifyRoutes({
-      handlers: [
-        createCustomerAccountServerHandlers({
-          customerSession: await getHydrogenCustomerSession(),
-          defaultPostLoginRedirectPathname: "/account",
-          origin: getCustomerRequestOrigin,
-          postLogoutRedirectUri: "/",
-        }),
-      ],
-      request,
-      requestContext,
-      sessionManager: createCustomerSessionManager(request),
-      storefrontClient: createRequestStorefrontClient(requestContext),
-    });
-    if (shopifyRoute) return shopifyRoute as NextResponse;
-  }
+  const authHandlers = isAuthPath
+    ? createCustomerAccountServerHandlers({
+        customerSession: await getHydrogenCustomerSession(),
+        defaultPostLoginRedirectPathname: "/account",
+        origin: getCustomerRequestOrigin,
+        postLogoutRedirectUri: "/",
+      })
+    : undefined;
+  const shopifyRoute = handleShopifyRoutes({
+    handlers: authHandlers ? [authHandlers, cartHandlers] : [cartHandlers],
+    request,
+    requestContext,
+    sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+    storefrontClient: createRequestStorefrontClient(requestContext),
+  });
+  if (shopifyRoute) return shopifyRoute;
 
   const response = NextResponse.next({
     request: { headers: requestContext.getForwardedRequestHeaders() },
@@ -61,6 +64,12 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     "/api/cart",
+    "/api/mcp",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/__shopify/:path*",
+    "/agent/:action(handoff|buyer-claims).:format",
+    "/cart.:format(js|json)",
+    "/cart/:operation(add|update|change|clear).:format(js|json)",
     "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
