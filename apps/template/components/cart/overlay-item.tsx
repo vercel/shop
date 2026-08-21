@@ -1,6 +1,6 @@
 "use client";
 
-import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { MinusIcon, PlusIcon, TagIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -25,23 +25,21 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const quantity = currentLine?.quantity ?? item.quantity;
 
   const currencyCode = item.cost.totalAmount.currencyCode;
-  const unitPrice = item.merchandise.price
+  const finalUnitPrice = parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const sellingUnitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
-    : parseFloat(item.cost.totalAmount.amount) / item.quantity;
-  const compareAtUnitPrice =
-    item.merchandise.compareAtPrice != null
-      ? parseFloat(item.merchandise.compareAtPrice.amount)
-      : null;
-  // Strike only a genuine compare-at on the unit price — never from stepping quantity.
-  const hasCompareAt = compareAtUnitPrice != null && compareAtUnitPrice > unitPrice;
-  const discountedTotal = item.discountAllocations.length
-    ? parseFloat(item.discountAllocations[0].discountedAmount.amount)
+    : finalUnitPrice;
+  const compareAtUnitPrice = item.merchandise.compareAtPrice
+    ? parseFloat(item.merchandise.compareAtPrice.amount)
     : null;
+  const hasCartDiscount = item.discountAllocations.length > 0 && finalUnitPrice < sellingUnitPrice;
+  const hasCompareAt =
+    !hasCartDiscount && compareAtUnitPrice != null && compareAtUnitPrice > sellingUnitPrice;
 
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatPrice(discountedTotal ?? unitPrice * quantity, currencyCode, locale)}`}
+      aria-label={`${item.merchandise.product.title} - ${formatPrice(finalUnitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
@@ -82,6 +80,24 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
               {item.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
             </p>
           )}
+
+          {item.discountAllocations.length > 0 ? (
+            <ul className="mt-1 grid gap-0.5">
+              {item.discountAllocations.map((allocation, index) => {
+                const label = allocation.kind === "code" ? allocation.code : allocation.title;
+                if (!label) return null;
+                return (
+                  <li
+                    key={`${allocation.kind}-${label}-${index}`}
+                    className="flex items-center gap-1 text-xs text-muted-foreground"
+                  >
+                    <TagIcon className="size-3 shrink-0" aria-hidden="true" />
+                    <span>{label}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
 
           {item.components.length > 0 && (
             <div className="mt-2 grid gap-1">
@@ -151,9 +167,13 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       <div className="self-start py-0.5 text-sm text-right">
         <div className="grid gap-0.5">
           <span className="font-medium text-foreground">
-            {formatPrice(unitPrice, currencyCode, locale)}
+            {formatPrice(hasCartDiscount ? finalUnitPrice : sellingUnitPrice, currencyCode, locale)}
           </span>
-          {hasCompareAt ? (
+          {hasCartDiscount ? (
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(sellingUnitPrice, currencyCode, locale)}
+            </span>
+          ) : hasCompareAt ? (
             <span className="text-xs text-muted-foreground line-through">
               {formatPrice(compareAtUnitPrice, currencyCode, locale)}
             </span>

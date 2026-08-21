@@ -18,7 +18,7 @@ import {
 
 import { addToCart, updateCartLine } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
-import type { Cart, CartLine, CartWarning } from "@/lib/types";
+import type { Cart, CartLine, CartWarning, DiscountAllocation } from "@/lib/types";
 
 export type CartMutationError = "add" | "remove" | "update";
 
@@ -90,6 +90,15 @@ type LegacyLine = {
     amountPerQuantity?: { amount: string; currencyCode: string } | null;
     totalAmount: { amount: string; currencyCode: string };
   };
+  discountAllocations?: Array<{
+    __typename:
+      | "CartAutomaticDiscountAllocation"
+      | "CartCodeDiscountAllocation"
+      | "CartCustomDiscountAllocation";
+    code?: string | null;
+    discountedAmount: { amount: string; currencyCode: string };
+    title?: string | null;
+  }>;
   id: string;
   instructions?: { canRemove: boolean; canUpdateQuantity: boolean } | null;
   lineComponents?: LegacyLine[] | null;
@@ -137,39 +146,36 @@ function toLegacyImage(image: LegacyMerchandise["image"]) {
 function toLegacyLine(line: LegacyLine): CartLine {
   const merchandise = line.merchandise;
   const image = merchandise?.image;
-  const totalAmount = line.cost.totalAmount;
-  const quantity = line.quantity;
-  // The catalog unit price is the true pre-discount price. Fall back to amountPerQuantity
-  // (pre-discount for order/item discounts, already-reduced for line-price discounts).
-  const catalogPrice = merchandise?.price;
-  const catalogUnit = catalogPrice ? Number.parseFloat(catalogPrice.amount) : null;
-  const perQuantityUnit = line.cost.amountPerQuantity
-    ? Number.parseFloat(line.cost.amountPerQuantity.amount)
-    : null;
-  const originalUnit =
-    catalogUnit != null && (perQuantityUnit == null || catalogUnit > perQuantityUnit)
-      ? catalogUnit
-      : perQuantityUnit;
-  const originalTotal = originalUnit != null ? originalUnit * quantity : null;
-  const discountedPerUnit =
-    originalTotal != null &&
-    originalTotal > 0 &&
-    Number.parseFloat(totalAmount.amount) < originalTotal
-      ? {
-          amount: (Number.parseFloat(totalAmount.amount) / quantity).toFixed(2),
-          currencyCode: totalAmount.currencyCode,
-        }
-      : undefined;
   return {
     canRemove: line.instructions?.canRemove ?? true,
     canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
     components: (line.lineComponents ?? []).map((c) => toLegacyLine(c)),
     cost: {
-      totalAmount,
+      totalAmount: line.cost.totalAmount,
     },
-    discountAllocations: discountedPerUnit
-      ? [{ discountedAmount: totalAmount, kind: "custom" as const, title: "Discount" }]
-      : [],
+    discountAllocations: (line.discountAllocations ?? []).flatMap<DiscountAllocation>(
+      (allocation) => {
+        if (allocation.__typename === "CartCodeDiscountAllocation") {
+          return allocation.code
+            ? [
+                {
+                  code: allocation.code,
+                  discountedAmount: allocation.discountedAmount,
+                  kind: "code",
+                },
+              ]
+            : [];
+        }
+        return [
+          {
+            discountedAmount: allocation.discountedAmount,
+            kind:
+              allocation.__typename === "CartAutomaticDiscountAllocation" ? "automatic" : "custom",
+            title: allocation.title ?? "",
+          },
+        ];
+      },
+    ),
     id: line.id,
     merchandise: {
       ...(merchandise?.compareAtPrice ? { compareAtPrice: merchandise.compareAtPrice } : {}),
