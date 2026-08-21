@@ -13,7 +13,7 @@ export async function AnalyticsComponents({ locale }: { locale: string }) {
       {shopConfig.analytics.speedInsights.isEnabled && <SpeedInsights />}
       <ShopifyScriptsTracker
         shop={await getShopAnalytics({ locale })}
-        storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? "0"}
+        storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? ""}
       />
     </>
   );
