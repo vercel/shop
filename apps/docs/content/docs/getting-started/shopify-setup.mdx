@@ -10,7 +10,7 @@ Vercel Shop works with a standard Shopify catalog, but a few free Shopify apps u
 
 ## Headless
 
-Install Shopify's **Headless** sales channel and create a storefront. This gives you the Storefront API access token used by Vercel Shop and controls which products are available to it.
+Install Shopify's **Headless** sales channel and create a storefront. This gives you the Storefront API access token used by Vercel Shop and controls which products are available to it. Copy that storefront's numeric ID to `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` if you want Shopify to attribute server-side cart activity to this storefront.
 
 Enable the template's required [Storefront API permissions](/docs/reference/storefront-api-permissions), then publish your products and collections to the **Headless** channel. Content published only to **Online Store** will not appear in Vercel Shop.
 

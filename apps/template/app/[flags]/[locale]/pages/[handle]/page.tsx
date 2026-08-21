@@ -42,6 +42,8 @@ export async function generateMetadata({
   };
 }
 
+export const instant = false;
+
 export default async function ShopifyPage({
   params,
 }: PageProps<"/[flags]/[locale]/pages/[handle]">) {

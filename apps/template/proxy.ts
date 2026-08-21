@@ -15,6 +15,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { precomputedFlags } from "@/lib/flags";
 import { defaultLocale, isEnabledLocale, isLocale } from "@/lib/i18n";
@@ -27,32 +28,55 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-// Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
-export async function proxy(request: NextRequest): Promise<NextResponse> {
-  const requestContext = createCustomerRequestContext(request);
+const NOOP_SESSION_MANAGER = {
+  getSessionItem: () => undefined,
+  getSessionOrigin: () => "",
+  removeSessionItem: () => {},
+  setSessionItem: () => {},
+};
 
-  // Only pay for Hydrogen session/route work on the customer-account OAuth paths.
-  if (shopConfig.auth.isEnabled && AUTH_PATHS.has(request.nextUrl.pathname)) {
-    const shopifyRoute = await handleShopifyRoutes({
-      handlers: [
-        createCustomerAccountServerHandlers({
-          customerSession: await getHydrogenCustomerSession(),
+// Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
+export async function proxy(request: NextRequest): Promise<Response> {
+  const requestContext = createCustomerRequestContext(request);
+  const { pathname, search } = request.nextUrl;
+
+  const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
+  const usesCustomerCart = shopConfig.auth.isEnabled && (isAuthPath || pathname === "/api/cart");
+  const customerSession = usesCustomerCart ? await getHydrogenCustomerSession() : undefined;
+  const customerCartHandlers = customerSession
+    ? createCustomerCartHandlers(customerSession)
+    : undefined;
+  const authHandlers =
+    isAuthPath && customerSession && customerCartHandlers
+      ? createCustomerAccountServerHandlers({
+          cartServerHandlers: customerCartHandlers,
+          customerSession,
           defaultPostLoginRedirectPathname: "/account",
           origin: getCustomerRequestOrigin,
           postLogoutRedirectUri: "/",
-        }),
-      ],
-      request,
-      requestContext,
-      sessionManager: createCustomerSessionManager(request),
-      storefrontClient: createRequestStorefrontClient(requestContext),
-    });
-    if (shopifyRoute) return shopifyRoute as NextResponse;
-  }
+        })
+      : undefined;
+  const handlers =
+    authHandlers && customerCartHandlers
+      ? [authHandlers, customerCartHandlers]
+      : [customerCartHandlers ?? cartHandlers];
+  const shopifyRoute = handleShopifyRoutes({
+    handlers,
+    request,
+    requestContext,
+    sessionManager: usesCustomerCart ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+    storefrontClient: createRequestStorefrontClient(requestContext),
+  });
+  if (shopifyRoute) return shopifyRoute;
 
-  const { pathname, search } = request.nextUrl;
   const first = pathname.split("/")[1];
-  if (isLocale(first)) return NextResponse.next();
+  if (isLocale(first)) {
+    const response = NextResponse.next({
+      request: { headers: requestContext.getForwardedRequestHeaders() },
+    });
+    requestContext.applyResponseHeaders(response.headers);
+    return response;
+  }
 
   // evaluate(request) honors the toolbar override cookie; precompute() has no request in proxy.
   const values = await evaluate(precomputedFlags, request);
@@ -65,11 +89,23 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
   const url = new URL(`/${code}/${target}${pathname}`, request.url);
   url.search = search;
-  return NextResponse.rewrite(url);
+  const response = NextResponse.rewrite(url, {
+    request: { headers: requestContext.getForwardedRequestHeaders() },
+  });
+  requestContext.applyResponseHeaders(response.headers);
+  return response;
 }
 
 export const config = {
   matcher: [
-    "/((?!account/(?:authorize|login|logout|refresh)$|api|md|_next|_vercel|sitemap|robots.txt|llms.txt|.*\\..*).*)",
+    "/api/cart",
+    "/api/mcp",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/__shopify/:path*",
+    "/agent/:action(handoff|buyer-claims).:format",
+    "/cart.:format(js|json)",
+    "/cart/:operation(add|update|change|clear).:format(js|json)",
+    "/((?!api|md|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\..*).*)",
+    "/.well-known/:path*",
   ],
 };

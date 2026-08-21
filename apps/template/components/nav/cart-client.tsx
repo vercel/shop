@@ -2,7 +2,7 @@
 
 import { HandbagIcon } from "lucide-react";
 
-import { useCart, useSeedCart } from "@/components/cart/context";
+import { useCart } from "@/components/cart/context";
 import type { Cart } from "@/lib/types";
 
 export function CartIconClient({
@@ -13,9 +13,6 @@ export function CartIconClient({
   initialCart: Cart | null;
 }) {
   const { cartWithPending, openOverlay } = useCart();
-
-  useSeedCart(initialCart);
-
   const displayCart = cartWithPending ?? initialCart;
   const quantity = displayCart?.totalQuantity ?? 0;
 

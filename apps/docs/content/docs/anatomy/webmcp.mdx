@@ -1,0 +1,37 @@
+---
+title: WebMCP
+description: Experimental browser agent tools - expose the storefront's catalog and cart to AI agents through the proposed WebMCP browser API.
+type: guide
+---
+
+WebMCP is an **experimental**, in-progress browser API that lets a web page register structured tools for AI agents running in or alongside the browser. It is not a finalized standard, and it only exists today behind a Chrome flag. The storefront ships an opt-in integration that exposes Shopify's own storefront tools (search, cart read, add to cart) through this API when a supporting browser is present.
+
+Because the API is experimental, this feature is **disabled by default** and may change shape or be removed as the spec evolves.
+
+## How it works
+
+**Feature-flagged and progressively enhanced.** The integration is gated by `webmcp.isEnabled` in `lib/config.ts`, which defaults to `false`. When enabled, the existing Shopify scripts component passes `webMcp: true` to Hydrogen's initialization. That loads Shopify's `webmcp.js` from the Shopify CDN — but only when the browser actually exposes `document.modelContext` or `navigator.modelContext`. Browsers without WebMCP support never fetch the script and see no behavioral change; there is no polyfill and no fallback UI.
+
+**Shopify owns the tools, not the template.** The registered tools come from Shopify's hosted script rather than template code, so their schemas and behavior track Shopify's implementation instead of a hand-rolled copy. They operate on the same storefront context as the page: catalog reads go through the public Storefront surface, and cart writes reuse the standard cart actions, so an agent-driven add-to-cart lands in the same cart the shopper sees.
+
+**Independent of Shopify analytics.** The shared Shopify scripts bootstrap (`window.Shopify`, standard actions) mounts by default, while WebMCP and Shopify analytics are enabled independently. Turning on WebMCP loads its CDN script without sending page views to Shopify unless storefront analytics is also enabled.
+
+## Out of the box
+
+When enabled and viewed in a supporting browser, Shopify's script registers storefront tools with the page's model context — catalog search and cart operations among them. A connected agent (browser assistant, extension, or MCP client) can discover these tools and invoke them with typed inputs, receiving structured JSON rather than scraping markup.
+
+## Testing locally
+
+WebMCP is experimental and only available behind a Chrome flag:
+
+1. Use Chrome 150 or newer.
+2. Open `chrome://flags/#enable-webmcp-testing`, enable **WebMCP for testing**, and relaunch Chrome.
+3. Set `webmcp.isEnabled` to `true` in `lib/config.ts` and load the storefront.
+4. Inspect the registered tools directly in the console (`navigator.modelContext` / `document.modelContext`), or install the WebMCP – Model Context Tool Inspector extension to list and manually execute tools, or connect Chrome DevTools MCP to drive them with natural language.
+
+Public deployments during Chrome's origin trial additionally require an origin-bound trial token for that exact origin.
+
+## Common customizations
+
+- **Turning it on or off** — toggle `webmcp.isEnabled` in `lib/config.ts`. Leave it off unless you are actively testing, since the underlying API is not stable.
+- **Changing which tools exist** — not supported. The tool set is defined by Shopify's hosted `webmcp.js`, not by the template; Shopify updates it independently.
