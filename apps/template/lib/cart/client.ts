@@ -4,6 +4,7 @@ import type { OptimisticProductInfo } from "@/lib/product";
 
 const ENDPOINT = "/api/cart";
 const TIMEOUT_MS = 10_000;
+const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
 
 interface CartMutationLine {
@@ -58,10 +59,12 @@ async function postCart(payload: Record<string, unknown>): Promise<CartMutationR
   return response.json() as Promise<CartMutationResponse>;
 }
 
-// The standard event flattens cart.lines.nodes into cart.lines for the store.
-function toStandardCart(cart: GraphqlCart) {
-  const { lines, ...rest } = cart;
-  return { ...rest, lines: lines.nodes };
+// Standard events flatten cart.lines.nodes while preserving mutation errors and warnings.
+function toStandardResult(result: CartMutationResponse) {
+  const { cart, ...rest } = result;
+  if (!cart) return { ...rest, cart: null };
+  const { lines, ...cartData } = cart;
+  return { ...rest, cart: { ...cartData, lines: lines.nodes } };
 }
 
 function productDetail(info: OptimisticProductInfo, merchandiseId: string) {
@@ -78,7 +81,7 @@ function productDetail(info: OptimisticProductInfo, merchandiseId: string) {
 function dispatchLinesAdd(
   lines: CartMutationLine[],
   productInfo: OptimisticProductInfo | undefined,
-  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
+  promise: Promise<ReturnType<typeof toStandardResult>>,
 ) {
   const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
     action: string;
@@ -98,7 +101,7 @@ function dispatchLinesAdd(
 function dispatchLinesUpdate(
   action: "remove" | "update",
   lines: { id: string; quantity: number }[],
-  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
+  promise: Promise<ReturnType<typeof toStandardResult>>,
 ) {
   const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
     action: string;
@@ -120,17 +123,27 @@ export function addToCart(
   attributes?: { key: string; value: string }[],
 ): void {
   const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
-  const promise = postCart({ lines: [line] }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
+  const promise = postCart({ lines: [line] }).then(toStandardResult);
   dispatchLinesAdd([line], productInfo, promise);
 }
 
 export function updateCartLine(lineId: string, quantity: number): void {
-  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
+  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then(toStandardResult);
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
+}
+
+export function updateDiscountCodes(discountCodes: string[]): void {
+  const promise = postCart({ discountCodes }).then(toStandardResult);
+  const event = new Event(DISCOUNT_UPDATE_EVENT, {
+    bubbles: true,
+    cancelable: true,
+  }) as Event & {
+    discountCodes: { code: string }[];
+    promise: typeof promise;
+  };
+  event.discountCodes = discountCodes.map((code) => ({ code }));
+  event.promise = promise;
+  document.dispatchEvent(event);
 }
 
 export interface ServerCartLine {
@@ -193,90 +206,3 @@ export function applyServerCart(
   event.promise = resolved;
   document.dispatchEvent(event);
 }
-
-// Discounts bypass the Hydrogen discount-update event: its handler renders new codes as
-// `applicable: false` until the server resolves, which flashes an "invalid" pill. We await
-// the mutation and hand the resolved cart to the overlay through this local event instead.
-const DISCOUNT_RESOLVED_EVENT = "shop:cart:discount-resolved";
-
-export interface DiscountResolution {
-  cart: {
-    discountCodes: { applicable: boolean; code: string }[];
-    id?: string | null;
-    lines?: {
-      catalogPrice: GraphqlMoney | null;
-      id: string;
-      originalAmount: GraphqlMoney;
-      quantity: number;
-      totalAmount: GraphqlMoney;
-    }[];
-  } | null;
-  error: string | null;
-}
-
-// The discount mutation replaces the whole code set, so apply/remove recompute the full list.
-async function setDiscountCodes(discountCodes: string[]): Promise<DiscountResolution> {
-  try {
-    const result = await postCart({ discountCodes });
-    if (!result.cart) {
-      const message =
-        result.userErrors?.[0]?.message ??
-        result.warnings?.[0]?.message ??
-        "Failed to update discount";
-      return { cart: null, error: message };
-    }
-    const cart = result.cart;
-    return {
-      cart: {
-        discountCodes: cart.discountCodes ?? [],
-        id: cart.id,
-        // The mutation response carries the post-discount line costs; forward them so the
-        // overlay can reprice immediately instead of waiting on a store refetch.
-        lines: cart.lines.nodes
-          .filter((l) => l.cost?.totalAmount && l.cost?.amountPerQuantity)
-          .map((l) => ({
-            catalogPrice: l.merchandise.price ?? null,
-            id: l.id,
-            originalAmount: l.cost?.amountPerQuantity as GraphqlMoney,
-            quantity: l.quantity,
-            totalAmount: l.cost?.totalAmount as GraphqlMoney,
-          })),
-      },
-      error: null,
-    };
-  } catch (error) {
-    return { cart: null, error: error instanceof Error ? error.message : "Network error" };
-  }
-}
-
-export async function applyDiscount(
-  code: string,
-  existingCodes: string[],
-): Promise<DiscountResolution> {
-  const normalized = code.trim().toUpperCase();
-  if (!normalized) return { cart: null, error: "Empty discount code" };
-  if (existingCodes.some((c) => c.toUpperCase() === normalized)) {
-    return { cart: null, error: null };
-  }
-  const resolution = await setDiscountCodes([...existingCodes, normalized]);
-  document.dispatchEvent(
-    new CustomEvent<DiscountResolution>(DISCOUNT_RESOLVED_EVENT, { detail: resolution }),
-  );
-  return resolution;
-}
-
-export async function removeDiscount(
-  code: string,
-  existingCodes: string[],
-): Promise<DiscountResolution> {
-  const normalized = code.trim().toUpperCase();
-  const resolution = await setDiscountCodes(
-    existingCodes.filter((c) => c.toUpperCase() !== normalized),
-  );
-  document.dispatchEvent(
-    new CustomEvent<DiscountResolution>(DISCOUNT_RESOLVED_EVENT, { detail: resolution }),
-  );
-  return resolution;
-}
-
-export { DISCOUNT_RESOLVED_EVENT };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCart as useHydrogenCart } from "@shopify/hydrogen/react";
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { type SubmitEvent, useState } from "react";
@@ -7,7 +8,7 @@ import { type SubmitEvent, useState } from "react";
 import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { applyDiscount, removeDiscount } from "@/lib/cart/client";
+import { updateDiscountCodes } from "@/lib/cart/client";
 import type { Cart } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -18,42 +19,38 @@ interface DiscountFormProps {
 export function DiscountForm({ cart }: DiscountFormProps) {
   const t = useTranslations("cart");
   const { setWarnings } = useCart();
+  const discountErrors = useHydrogenCart((state) => state.errors.discountCodes);
+  const networkErrors = useHydrogenCart((state) => state.errors.network);
+  const pendingDiscountCodes = useHydrogenCart((state) => state.pending.discountCodes);
   const [code, setCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-
-  const existingCodes = cart.discountCodes.map((d) => d.code);
+  const [localError, setLocalError] = useState<string | null>(null);
+  const isPending = pendingDiscountCodes.size > 0;
+  const error =
+    localError ??
+    Array.from(discountErrors.values()).flatMap((group) => group.userErrors)[0]?.message ??
+    networkErrors.at(-1)?.message ??
+    null;
 
   const handleApply = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmed = code.trim();
-    if (!trimmed) {
-      setError(t("discountInvalidCode"));
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) {
+      setLocalError(t("discountInvalidCode"));
       return;
     }
-    setError(null);
+    if (cart.discountCodes.some((discount) => discount.code.toUpperCase() === normalized)) return;
+    setLocalError(null);
     setWarnings([]);
-    setIsPending(true);
-    applyDiscount(trimmed, existingCodes)
-      .then((result) => {
-        if (result.error) {
-          setError(result.error);
-          return;
-        }
-        setCode("");
-      })
-      .finally(() => setIsPending(false));
+    setCode("");
+    updateDiscountCodes([...cart.discountCodes.map((discount) => discount.code), normalized]);
   };
 
-  const handleRemove = (target: string) => {
-    setError(null);
+  const handleRemove = (targetCode: string) => {
+    setLocalError(null);
     setWarnings([]);
-    setIsPending(true);
-    removeDiscount(target, existingCodes)
-      .then((result) => {
-        if (result.error) setError(result.error);
-      })
-      .finally(() => setIsPending(false));
+    updateDiscountCodes(
+      cart.discountCodes.filter((discount) => discount.code !== targetCode).map((d) => d.code),
+    );
   };
 
   return (
@@ -63,9 +60,9 @@ export function DiscountForm({ cart }: DiscountFormProps) {
           type="text"
           name="discountCode"
           value={code}
-          onChange={(e) => {
-            setCode(e.target.value);
-            if (error) setError(null);
+          onChange={(event) => {
+            setCode(event.target.value);
+            if (localError) setLocalError(null);
           }}
           placeholder={t("discountCode")}
           aria-label={t("discountCode")}
@@ -92,37 +89,44 @@ export function DiscountForm({ cart }: DiscountFormProps) {
 
       {cart.discountCodes.length > 0 ? (
         <ul className="flex flex-wrap gap-1.5" aria-label={t("discount")}>
-          {cart.discountCodes.map((d) => (
-            <li key={d.code}>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
-                  d.applicable
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground border border-input",
-                )}
-              >
-                <span className={cn(!d.applicable && "line-through")}>{d.code}</span>
-                {!d.applicable ? (
-                  <span className="text-xs uppercase tracking-wide">
-                    {t("discountNotApplicable")}
-                  </span>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => handleRemove(d.code)}
-                  aria-label={`${t("removeDiscount")}: ${d.code}`}
-                  disabled={isPending}
+          {cart.discountCodes.map((discount) => {
+            const isCodePending = pendingDiscountCodes.has(discount.code);
+            const isInvalid = !discount.applicable && !isCodePending;
+
+            return (
+              <li key={discount.code}>
+                <span
                   className={cn(
-                    "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
-                    d.applicable ? "hover:bg-primary-foreground/15" : "hover:bg-foreground/10",
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
+                    discount.applicable || isCodePending
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground border border-input",
                   )}
                 >
-                  <X className="size-3" aria-hidden="true" />
-                </button>
-              </span>
-            </li>
-          ))}
+                  <span className={cn(isInvalid && "line-through")}>{discount.code}</span>
+                  {isInvalid ? (
+                    <span className="text-xs uppercase tracking-wide">
+                      {t("discountNotApplicable")}
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(discount.code)}
+                    aria-label={`${t("removeDiscount")}: ${discount.code}`}
+                    disabled={isPending}
+                    className={cn(
+                      "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
+                      discount.applicable || isCodePending
+                        ? "hover:bg-primary-foreground/15"
+                        : "hover:bg-foreground/10",
+                    )}
+                  >
+                    <X className="size-3" aria-hidden="true" />
+                  </button>
+                </span>
+              </li>
+            );
+          })}
         </ul>
       ) : null}
     </div>
