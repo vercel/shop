@@ -13,9 +13,10 @@ import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
-// The default Hydrogen fragment omits catalog prices and line discount allocations.
+// The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
 const CART_FRAGMENT = gql(/* GraphQL */ `
   fragment CartFragment on Cart {
+    updatedAt
     lines(first: 250) {
       nodes {
         discountAllocations {
