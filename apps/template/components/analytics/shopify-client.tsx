@@ -10,9 +10,10 @@ import type { ShopAnalyticsData } from "@/lib/types";
 
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
+  storefrontId: string;
 }
 
-export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
+export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,9 +52,7 @@ export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
         shop={{
           shopId: shop.shopId,
           myshopifyDomain: shop.storeDomain,
-          // Headless channel omits storefrontId from the analytics config; the
-          // Storefront API does not expose one, so perf-kit is not loaded here.
-          storefrontId: "",
+          storefrontId,
         }}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.webmcp.isEnabled}
