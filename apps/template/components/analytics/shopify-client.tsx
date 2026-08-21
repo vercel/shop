@@ -2,32 +2,18 @@
 
 import type { I18nConfig } from "@shopify/hydrogen";
 import { ShopifyScripts } from "@shopify/hydrogen/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
 
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
+  storefrontId: string;
 }
 
-export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
-  const pathname = usePathname();
+export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const pageKey = `${pathname}?${searchParams.toString()}`;
-
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    // The CDN script tracks the initial page view on load; only publish SPA navigations.
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    window.Shopify?.analytics?.publish("page_viewed", { url: window.location.href });
-  }, [pageKey]);
 
   return (
     <>
@@ -51,9 +37,7 @@ export function ShopifyScriptsTracker({ shop }: ShopifyScriptsTrackerProps) {
         shop={{
           shopId: shop.shopId,
           myshopifyDomain: shop.storeDomain,
-          // Headless channel omits storefrontId from the analytics config; the
-          // Storefront API does not expose one, so perf-kit is not loaded here.
-          storefrontId: "",
+          storefrontId,
         }}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.webmcp.isEnabled}

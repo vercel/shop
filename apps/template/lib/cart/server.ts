@@ -8,6 +8,8 @@ import {
 import { io } from "next/cache";
 import { cookies, headers } from "next/headers";
 
+import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
+import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -36,6 +38,15 @@ const CART_FRAGMENT = gql(/* GraphQL */ `
 `);
 
 export const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
+
+export function createCustomerCartHandlers(
+  customerSession: Awaited<ReturnType<typeof getHydrogenCustomerSession>>,
+) {
+  return createCartServerHandlers({
+    customerSession,
+    fragment: CART_FRAGMENT,
+  });
+}
 
 // Shared with the Hydrogen cart handlers, RSC cart reads, and the AI agent.
 const CART_ID_COOKIE = "cart";
@@ -82,8 +93,21 @@ export function seedCartData() {
       i18n,
       request: { headers: await headers() },
     });
-    const { data } = await cartHandlers.get({
-      storefrontClient: createRequestStorefrontClient(requestContext),
+    const storefrontClient = createRequestStorefrontClient(requestContext);
+    if (!shopConfig.auth.isEnabled) {
+      const { data } = await cartHandlers.get({ storefrontClient });
+      return data;
+    }
+
+    const [customerSession, sessionManager] = await Promise.all([
+      getHydrogenCustomerSession(),
+      getReadonlyCustomerSessionManager(),
+    ]);
+    const customerCartHandlers = createCustomerCartHandlers(customerSession);
+    const { data } = await customerCartHandlers.get({
+      requestContext,
+      sessionManager,
+      storefrontClient,
     });
     return data;
   })();

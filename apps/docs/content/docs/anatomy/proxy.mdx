@@ -14,16 +14,17 @@ The storefront ships a [proxy](https://nextjs.org/docs/app/getting-started/proxy
 
 **Every fallthrough request carries Shopify request context.** The proxy forwards Hydrogen's request-context headers to the application and applies its response headers on the way out. This supports Storefront API calls, analytics, and personalized-response cache safety without per-route setup.
 
-**Authentication setup stays lazy.** Customer account handlers and the writable session manager are created only on the four authentication paths. Ordinary storefront and API requests do not pay for customer-session discovery.
+**Authentication setup stays scoped.** When authentication is enabled, the proxy creates session-aware cart handlers only for `/api/cart` and the four Customer Account paths. The auth handlers receive that same cart handler set so login, refresh, and logout can synchronize buyer identity. Ordinary storefront and unrelated API requests keep the guest cart handlers and do not pay for customer-session discovery.
 
 ## Out of the box
 
-| Request | What the proxy does |
-| --- | --- |
-| Shopify-owned API or protocol route | Returns Hydrogen's response before App Router routing |
-| Customer account auth route | Lazily installs and runs Hydrogen's auth handler when authentication is enabled |
-| Matched storefront route | Lets Hydrogen decline it, forwards request-context headers, and continues to Next.js |
-| Other application `/api/*` route | Skips proxy and runs its App Router Route Handler directly |
+| Request                             | What the proxy does                                                                                   |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Shopify-owned API or protocol route | Returns Hydrogen's response before App Router routing                                                 |
+| Cart API route                      | Uses session-aware cart handlers when authentication is enabled, otherwise the guest handlers         |
+| Customer account auth route         | Runs Hydrogen's auth handler with the same session-aware cart handlers when authentication is enabled |
+| Matched storefront route            | Lets Hydrogen decline it, forwards request-context headers, and continues to Next.js                  |
+| Other application `/api/*` route    | Skips proxy and runs its App Router Route Handler directly                                            |
 
 No environment variables configure the proxy itself. Authentication behavior follows the feature flag described in [Environment Variables](/docs/reference/env-vars).
 

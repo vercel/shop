@@ -83,11 +83,11 @@ function dispatchLinesAdd(
   const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
     action: string;
     detail: { products: ReturnType<typeof productDetail>[] };
-    lines: { merchandiseId: string; quantity: number }[];
+    lines: CartMutationLine[];
     promise: typeof promise;
   };
   event.action = "add";
-  event.lines = lines.map((l) => ({ merchandiseId: l.merchandiseId, quantity: l.quantity }));
+  event.lines = lines;
   event.detail = {
     products: productInfo ? lines.map((l) => productDetail(productInfo, l.merchandiseId)) : [],
   };

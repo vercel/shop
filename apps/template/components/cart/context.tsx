@@ -242,8 +242,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [lineCostOverrides, setLineCostOverrides] = useState<Map<string, LineCostOverride> | null>(
     null,
   );
-  const cart = toLegacyCart(cartState.data, appliedDiscountCodes, lineCostOverrides);
-  const isUpdatingCart = cartState.pending.lines.size > 0 || cartState.pending.note;
+  const cartWithPending = toLegacyCart(cartState.data, appliedDiscountCodes, lineCostOverrides);
+  const isCostSettling = Boolean(cartState.pending.cost || cartState.revalidating);
+  const settledCartRef = useRef(cartWithPending);
+  if (!isCostSettling) settledCartRef.current = cartWithPending;
+  const cart = settledCartRef.current;
+  const isUpdatingCart = Boolean(
+    cartState.pending.attributes ||
+    cartState.pending.cost ||
+    cartState.pending.discountCodes.size > 0 ||
+    cartState.pending.lines.size > 0 ||
+    cartState.pending.note ||
+    cartState.revalidating,
+  );
 
   const isOverlayOpenRef = useRef(isOverlayOpen);
   useEffect(() => {
@@ -271,11 +282,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateItemOptimistic = useCallback(
     (lineId: string, quantity: number) => {
       if (quantity < 0 || quantity > 99) return;
-      const line = findLine(cart?.lines ?? [], lineId);
+      const line = findLine(cartWithPending?.lines ?? [], lineId);
       if (!line) return;
       updateCartLine(lineId, quantity);
     },
-    [cart?.lines],
+    [cartWithPending?.lines],
   );
 
   useEffect(() => {
@@ -320,7 +331,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         addToCartOptimistic,
         cart,
-        cartWithPending: cart,
+        cartWithPending,
         clearError,
         clearWarnings,
         isAddingToCart,
@@ -377,12 +388,14 @@ interface CartContextSyncProps {
 }
 
 export function CartContextSync({ cart, children }: CartContextSyncProps) {
-  const { cart: currentCart } = useCart();
+  const { cartWithPending } = useCart();
   useSeedCart(cart);
 
   // Fall back to the server-fetched cart until the provider is seeded — avoids a hydration flash.
   return (
-    <CartRenderContext.Provider value={currentCart ?? cart}>{children}</CartRenderContext.Provider>
+    <CartRenderContext.Provider value={cartWithPending ?? cart}>
+      {children}
+    </CartRenderContext.Provider>
   );
 }
 
