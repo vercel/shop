@@ -1,6 +1,6 @@
 "use client";
 
-import { MinusIcon, PlusIcon, TagIcon, Trash2Icon } from "lucide-react";
+import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative size-18 self-end overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-18 self-start overflow-hidden hover:opacity-80 transition-opacity"
       >
         {(() => {
           const imageUrl =
@@ -80,24 +80,6 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
               {item.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
             </p>
           )}
-
-          {item.discountAllocations.length > 0 ? (
-            <ul className="mt-1 grid gap-0.5">
-              {item.discountAllocations.map((allocation, index) => {
-                const label = allocation.kind === "code" ? allocation.code : allocation.title;
-                if (!label) return null;
-                return (
-                  <li
-                    key={`${allocation.kind}-${label}-${index}`}
-                    className="flex items-center gap-1 text-xs text-muted-foreground"
-                  >
-                    <TagIcon className="size-3 shrink-0" aria-hidden="true" />
-                    <span>{label}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          ) : null}
 
           {item.components.length > 0 && (
             <div className="mt-2 grid gap-1">
