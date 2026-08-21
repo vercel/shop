@@ -4,6 +4,7 @@ import type { OptimisticProductInfo } from "@/lib/product";
 
 const ENDPOINT = "/api/cart";
 const TIMEOUT_MS = 10_000;
+const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
 
 interface CartMutationLine {
@@ -131,6 +132,22 @@ export function updateCartLine(lineId: string, quantity: number): void {
     cart: result.cart ? toStandardCart(result.cart) : null,
   }));
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
+}
+
+export function updateDiscountCodes(discountCodes: string[]): void {
+  const promise = postCart({ discountCodes }).then((result) => ({
+    cart: result.cart ? toStandardCart(result.cart) : null,
+  }));
+  const event = new Event(DISCOUNT_UPDATE_EVENT, {
+    bubbles: true,
+    cancelable: true,
+  }) as Event & {
+    discountCodes: { code: string }[];
+    promise: typeof promise;
+  };
+  event.discountCodes = discountCodes.map((code) => ({ code }));
+  event.promise = promise;
+  document.dispatchEvent(event);
 }
 
 export interface ServerCartLine {
