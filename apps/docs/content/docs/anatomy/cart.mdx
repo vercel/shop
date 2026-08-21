@@ -34,5 +34,6 @@ The cart system spans the entire storefront, not just the cart page. It is built
 ## Common customizations
 
 - **Custom cart fields** — pass a `fragment` named `CartFragment` to `createCartServerHandlers({ fragment })` in `lib/cart/server.ts` to add fields the default Hydrogen fragment omits (for example `quantityAvailable` for inventory clamping, or extra merchandise fields). The template already extends it this way to select the catalog unit price and `compareAtPrice` for the overlay's strikethrough. The React bindings in `lib/cart/index.ts` stay typed from the handlers.
+- **Cart attributes** — Hydrogen supports optimistic cart-level attribute updates, but the template does not expose a generic editor. Add one with a concrete use case such as order-level personalization; the existing gift card flow uses line attributes instead.
 - **Cart lifetime** — the 14-day cookie expiry is a constant in `lib/cart/server.ts` and in Hydrogen's own cookie; extending or shortening session length means aligning both.
 - **Custom bundle flows** — `addToCart()` in `lib/shopify/operations/cart.ts` accepts Shopify's optional `CartLineInput.parent` relationship, available as a foundation for app-specific customized-bundle UX beyond the fixed and transformed bundles rendered out of the box.
