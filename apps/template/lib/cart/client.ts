@@ -59,10 +59,12 @@ async function postCart(payload: Record<string, unknown>): Promise<CartMutationR
   return response.json() as Promise<CartMutationResponse>;
 }
 
-// The standard event flattens cart.lines.nodes into cart.lines for the store.
-function toStandardCart(cart: GraphqlCart) {
-  const { lines, ...rest } = cart;
-  return { ...rest, lines: lines.nodes };
+// Standard events flatten cart.lines.nodes while preserving mutation errors and warnings.
+function toStandardResult(result: CartMutationResponse) {
+  const { cart, ...rest } = result;
+  if (!cart) return { ...rest, cart: null };
+  const { lines, ...cartData } = cart;
+  return { ...rest, cart: { ...cartData, lines: lines.nodes } };
 }
 
 function productDetail(info: OptimisticProductInfo, merchandiseId: string) {
@@ -79,7 +81,7 @@ function productDetail(info: OptimisticProductInfo, merchandiseId: string) {
 function dispatchLinesAdd(
   lines: CartMutationLine[],
   productInfo: OptimisticProductInfo | undefined,
-  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
+  promise: Promise<ReturnType<typeof toStandardResult>>,
 ) {
   const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
     action: string;
@@ -99,7 +101,7 @@ function dispatchLinesAdd(
 function dispatchLinesUpdate(
   action: "remove" | "update",
   lines: { id: string; quantity: number }[],
-  promise: Promise<{ cart: ReturnType<typeof toStandardCart> | null }>,
+  promise: Promise<ReturnType<typeof toStandardResult>>,
 ) {
   const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
     action: string;
@@ -121,23 +123,17 @@ export function addToCart(
   attributes?: { key: string; value: string }[],
 ): void {
   const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
-  const promise = postCart({ lines: [line] }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
+  const promise = postCart({ lines: [line] }).then(toStandardResult);
   dispatchLinesAdd([line], productInfo, promise);
 }
 
 export function updateCartLine(lineId: string, quantity: number): void {
-  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
+  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then(toStandardResult);
   dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
 }
 
 export function updateDiscountCodes(discountCodes: string[]): void {
-  const promise = postCart({ discountCodes }).then((result) => ({
-    cart: result.cart ? toStandardCart(result.cart) : null,
-  }));
+  const promise = postCart({ discountCodes }).then(toStandardResult);
   const event = new Event(DISCOUNT_UPDATE_EVENT, {
     bubbles: true,
     cancelable: true,
