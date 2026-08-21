@@ -2,8 +2,7 @@
 
 import type { I18nConfig } from "@shopify/hydrogen";
 import { ShopifyScripts } from "@shopify/hydrogen/react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
@@ -14,21 +13,7 @@ interface ShopifyScriptsTrackerProps {
 }
 
 export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
-  const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const pageKey = `${pathname}?${searchParams.toString()}`;
-
-  const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    // The CDN script tracks the initial page view on load; only publish SPA navigations.
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    window.Shopify?.analytics?.publish("page_viewed", { url: window.location.href });
-  }, [pageKey]);
 
   return (
     <>
