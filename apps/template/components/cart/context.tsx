@@ -282,11 +282,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateItemOptimistic = useCallback(
     (lineId: string, quantity: number) => {
       if (quantity < 0 || quantity > 99) return;
-      const line = findLine(cart?.lines ?? [], lineId);
+      const line = findLine(cartWithPending?.lines ?? [], lineId);
       if (!line) return;
       updateCartLine(lineId, quantity);
     },
-    [cart?.lines],
+    [cartWithPending?.lines],
   );
 
   useEffect(() => {
