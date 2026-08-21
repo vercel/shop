@@ -14,7 +14,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
-import { cartHandlers } from "@/lib/cart/server";
+import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -37,19 +37,30 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const pathname = request.nextUrl.pathname;
 
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
-  const authHandlers = isAuthPath
-    ? createCustomerAccountServerHandlers({
-        customerSession: await getHydrogenCustomerSession(),
-        defaultPostLoginRedirectPathname: "/account",
-        origin: getCustomerRequestOrigin,
-        postLogoutRedirectUri: "/",
-      })
+  const usesCustomerCart = shopConfig.auth.isEnabled && (isAuthPath || pathname === "/api/cart");
+  const customerSession = usesCustomerCart ? await getHydrogenCustomerSession() : undefined;
+  const customerCartHandlers = customerSession
+    ? createCustomerCartHandlers(customerSession)
     : undefined;
+  const authHandlers =
+    isAuthPath && customerSession && customerCartHandlers
+      ? createCustomerAccountServerHandlers({
+          cartServerHandlers: customerCartHandlers,
+          customerSession,
+          defaultPostLoginRedirectPathname: "/account",
+          origin: getCustomerRequestOrigin,
+          postLogoutRedirectUri: "/",
+        })
+      : undefined;
+  const handlers =
+    authHandlers && customerCartHandlers
+      ? [authHandlers, customerCartHandlers]
+      : [customerCartHandlers ?? cartHandlers];
   const shopifyRoute = handleShopifyRoutes({
-    handlers: authHandlers ? [authHandlers, cartHandlers] : [cartHandlers],
+    handlers,
     request,
     requestContext,
-    sessionManager: isAuthPath ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+    sessionManager: usesCustomerCart ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
     storefrontClient: createRequestStorefrontClient(requestContext),
   });
   if (shopifyRoute) return shopifyRoute;

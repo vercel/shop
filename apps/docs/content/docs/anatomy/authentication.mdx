@@ -59,6 +59,8 @@ Shopify does not support wildcard callback or logout URIs — register each prod
 
 **Token refresh happens out-of-band, not inline.** `isCustomerLoggedIn()` treats a refreshable session as logged in, so the nav doesn't flicker to signed-out when the access token expires. `requireCustomerAccessToken()` redirects through `/account/refresh` when only a refresh token remains, where Hydrogen rotates tokens and commits the updated cookie before returning to the account page. Logout mirrors this: the sign-out button POSTs to `/account/logout`, which clears the local session and redirects through Shopify's logout endpoint with `id_token_hint`, ending both the storefront session and the Shopify SSO session.
 
+**The cart follows the customer session.** When authentication is enabled, the cart and Customer Account handlers share the same Hydrogen customer session. New carts include the signed-in customer's buyer identity, login and token refresh attach an existing browser cart, and logout detaches it. Authenticated cart reads also mark the checkout URL so Shopify can carry the customer into checkout with their saved details instead of starting a guest flow. Cart synchronization is best-effort and never blocks an auth redirect; if Hydrogen cannot safely detach a cart during logout, it expires the cart cookie.
+
 ```ts
 import {
   isCustomerLoggedIn,
@@ -84,6 +86,7 @@ Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` fo
 ## Out of the box
 
 - **Auth routes** — `/account/login` (GET, starts PKCE and redirects to Shopify), `/account/authorize` (GET, validates the OAuth callback), `/account/refresh` (GET, rotates an expired access token), and `/account/logout` (POST, clears the session). All four are installed via Hydrogen's standard handlers through `handleShopifyRoutes` in the [proxy](/docs/anatomy/proxy), which intercepts the customer-account OAuth paths before routing.
+- **Cart session attribution** — the same Hydrogen customer session is passed to the cart and auth handlers, so buyer identity stays synchronized across cart creation, login, refresh, checkout, and logout.
 - **Account pages** — `/account` (redirects to profile), `/account/profile` (edit name, read-only email), `/account/orders` (paginated order history), `/account/orders/[id]` (order detail), and `/account/addresses` (address book with create, edit, delete, and default selection). The `(authenticated)` route group gates these without claiming the auth-handler paths.
 - **Customer Account API data** — profile, orders, and addresses come from the Customer Account API, which has its own GraphQL endpoint and schema, separate from the Storefront API. Every call resolves a usable access token first, routing through the refresh step when only a refresh token remains, so no operation runs with an expired token. Customer responses are personalized and never publicly cached.
 - **Rendering and mutations** — order and profile pages are Server Components wrapped in Suspense. Address and profile editing use client forms backed by server actions that validate input, surface Shopify `userErrors`, and revalidate the affected pages.
