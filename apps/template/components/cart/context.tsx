@@ -363,8 +363,6 @@ export function useCart() {
   return context;
 }
 
-export function useSeedCart(_initialCart: Cart | null) {}
-
 type CartInitialData = ComponentProps<typeof HydrogenCartProvider>["initialData"];
 
 interface CartProviderWrapperProps {
@@ -389,7 +387,6 @@ interface CartContextSyncProps {
 
 export function CartContextSync({ cart, children }: CartContextSyncProps) {
   const { cartWithPending } = useCart();
-  useSeedCart(cart);
 
   // Fall back to the server-fetched cart until the provider is seeded — avoids a hydration flash.
   return (
