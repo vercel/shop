@@ -1,7 +1,7 @@
 "use client";
 
 import type { I18nConfig } from "@shopify/hydrogen";
-import { ShopifyScripts } from "@shopify/hydrogen/react";
+import { ShopifyScripts, useCartAnalytics } from "@shopify/hydrogen/react";
 import { useRouter } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
@@ -10,6 +10,11 @@ import type { ShopAnalyticsData } from "@/lib/types";
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
   storefrontId: string;
+}
+
+function CartAnalyticsTracker() {
+  useCartAnalytics();
+  return null;
 }
 
 export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
@@ -42,6 +47,7 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.webmcp.isEnabled}
       />
+      <CartAnalyticsTracker />
     </>
   );
 }

@@ -13,13 +13,28 @@ import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
-// The default Hydrogen fragment omits merchandise.price, so the cart line only carries
-// discount-adjusted costs. This adds the catalog unit price (and compare-at) so the
-// storefront can show a truthful pre-discount strikethrough regardless of discount type.
+// The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
 const CART_FRAGMENT = gql(/* GraphQL */ `
   fragment CartFragment on Cart {
+    updatedAt
     lines(first: 250) {
       nodes {
+        discountAllocations {
+          __typename
+          discountedAmount {
+            amount
+            currencyCode
+          }
+          ... on CartCodeDiscountAllocation {
+            code
+          }
+          ... on CartAutomaticDiscountAllocation {
+            title
+          }
+          ... on CartCustomDiscountAllocation {
+            title
+          }
+        }
         merchandise {
           ... on ProductVariant {
             price {

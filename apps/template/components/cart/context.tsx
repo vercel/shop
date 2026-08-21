@@ -16,14 +16,9 @@ import {
   useState,
 } from "react";
 
-import {
-  addToCart,
-  DISCOUNT_RESOLVED_EVENT,
-  type DiscountResolution,
-  updateCartLine,
-} from "@/lib/cart/client";
+import { addToCart, updateCartLine } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
-import type { Cart, CartLine, CartWarning } from "@/lib/types";
+import type { Cart, CartLine, CartWarning, DiscountAllocation } from "@/lib/types";
 
 export type CartMutationError = "add" | "remove" | "update";
 
@@ -95,6 +90,15 @@ type LegacyLine = {
     amountPerQuantity?: { amount: string; currencyCode: string } | null;
     totalAmount: { amount: string; currencyCode: string };
   };
+  discountAllocations?: Array<{
+    __typename:
+      | "CartAutomaticDiscountAllocation"
+      | "CartCodeDiscountAllocation"
+      | "CartCustomDiscountAllocation";
+    code?: string | null;
+    discountedAmount: { amount: string; currencyCode: string };
+    title?: string | null;
+  }>;
   id: string;
   instructions?: { canRemove: boolean; canUpdateQuantity: boolean } | null;
   lineComponents?: LegacyLine[] | null;
@@ -102,21 +106,7 @@ type LegacyLine = {
   quantity: number;
 };
 
-// Line costs from a just-resolved discount mutation, keyed by line id. The Hydrogen
-// store refetch can lag behind the mutation response, so these keep prices truthful
-// in the meantime.
-type LineCostOverride = {
-  catalogPrice: { amount: string; currencyCode: string } | null;
-  originalAmount: { amount: string; currencyCode: string };
-  quantity: number;
-  totalAmount: { amount: string; currencyCode: string };
-};
-
-function toLegacyCart(
-  data: CartState["data"],
-  discountOverride?: { applicable: boolean; code: string }[] | null,
-  lineOverrides?: Map<string, LineCostOverride> | null,
-): Cart | null {
+function toLegacyCart(data: CartState["data"]): Cart | null {
   if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
   return {
     appliedGiftCards: [],
@@ -126,18 +116,13 @@ function toLegacyCart(
       totalAmount: data.cost.totalAmount,
     },
     discountAllocations: [],
-    discountCodes: (discountOverride ?? data.discountCodes ?? []).map(
-      (d: { applicable: boolean; code: string }) => ({
-        applicable: d.applicable,
-        code: d.code,
-      }),
-    ),
+    discountCodes: data.discountCodes.map((d) => ({
+      applicable: d.applicable,
+      code: d.code,
+    })),
     id: data.id ?? undefined,
     lines: data.lines.nodes
-      .map((l) => {
-        const legacy = l as unknown as LegacyLine;
-        return toLegacyLine(legacy, lineOverrides?.get(legacy.id) ?? undefined);
-      })
+      .map((l) => toLegacyLine(l as unknown as LegacyLine))
       .sort(
         (a, b) =>
           Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -
@@ -158,43 +143,39 @@ function toLegacyImage(image: LegacyMerchandise["image"]) {
   };
 }
 
-function toLegacyLine(line: LegacyLine, override?: LineCostOverride): CartLine {
+function toLegacyLine(line: LegacyLine): CartLine {
   const merchandise = line.merchandise;
   const image = merchandise?.image;
-  const totalAmount = override?.totalAmount ?? line.cost.totalAmount;
-  const quantity = override?.quantity ?? line.quantity;
-  // The catalog unit price is the true pre-discount price. Fall back to amountPerQuantity
-  // (pre-discount for order/item discounts, already-reduced for line-price discounts).
-  const catalogPrice = override?.catalogPrice ?? merchandise?.price;
-  const catalogUnit = catalogPrice ? Number.parseFloat(catalogPrice.amount) : null;
-  const perQuantityUnit =
-    (override?.originalAmount ?? line.cost.amountPerQuantity) != null
-      ? Number.parseFloat((override?.originalAmount ?? line.cost.amountPerQuantity)!.amount)
-      : null;
-  const originalUnit =
-    catalogUnit != null && (perQuantityUnit == null || catalogUnit > perQuantityUnit)
-      ? catalogUnit
-      : perQuantityUnit;
-  const originalTotal = originalUnit != null ? originalUnit * quantity : null;
-  const discountedPerUnit =
-    originalTotal != null &&
-    originalTotal > 0 &&
-    Number.parseFloat(totalAmount.amount) < originalTotal
-      ? {
-          amount: (Number.parseFloat(totalAmount.amount) / quantity).toFixed(2),
-          currencyCode: totalAmount.currencyCode,
-        }
-      : undefined;
   return {
     canRemove: line.instructions?.canRemove ?? true,
     canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
     components: (line.lineComponents ?? []).map((c) => toLegacyLine(c)),
     cost: {
-      totalAmount,
+      totalAmount: line.cost.totalAmount,
     },
-    discountAllocations: discountedPerUnit
-      ? [{ discountedAmount: totalAmount, kind: "custom" as const, title: "Discount" }]
-      : [],
+    discountAllocations: (line.discountAllocations ?? []).flatMap<DiscountAllocation>(
+      (allocation) => {
+        if (allocation.__typename === "CartCodeDiscountAllocation") {
+          return allocation.code
+            ? [
+                {
+                  code: allocation.code,
+                  discountedAmount: allocation.discountedAmount,
+                  kind: "code",
+                },
+              ]
+            : [];
+        }
+        return [
+          {
+            discountedAmount: allocation.discountedAmount,
+            kind:
+              allocation.__typename === "CartAutomaticDiscountAllocation" ? "automatic" : "custom",
+            title: allocation.title ?? "",
+          },
+        ];
+      },
+    ),
     id: line.id,
     merchandise: {
       ...(merchandise?.compareAtPrice ? { compareAtPrice: merchandise.compareAtPrice } : {}),
@@ -236,13 +217,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearWarnings = useCallback(() => setLocalWarnings([]), []);
 
   const cartState = useHydrogenCart((state) => state);
-  const [appliedDiscountCodes, setAppliedDiscountCodes] = useState<
-    { applicable: boolean; code: string }[] | null
-  >(null);
-  const [lineCostOverrides, setLineCostOverrides] = useState<Map<string, LineCostOverride> | null>(
-    null,
-  );
-  const cartWithPending = toLegacyCart(cartState.data, appliedDiscountCodes, lineCostOverrides);
+  const cartWithPending = toLegacyCart(cartState.data);
   const isCostSettling = Boolean(cartState.pending.cost || cartState.revalidating);
   const settledCartRef = useRef(cartWithPending);
   if (!isCostSettling) settledCartRef.current = cartWithPending;
@@ -299,32 +274,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setLocalWarnings(toLegacyWarnings(cartState.errors.cart));
     }
   }, [cartState.errors]);
-
-  // Discount codes bypass the Hydrogen event flow (see lib/cart/client) and land here resolved.
-  useEffect(() => {
-    function onResolved(event: Event) {
-      const detail = (event as CustomEvent<DiscountResolution>).detail;
-      setAppliedDiscountCodes(detail.cart?.discountCodes ?? null);
-      setLineCostOverrides(
-        detail.cart?.lines?.length ? new Map(detail.cart.lines.map((l) => [l.id, l])) : null,
-      );
-    }
-    document.addEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
-    return () => document.removeEventListener(DISCOUNT_RESOLVED_EVENT, onResolved);
-  }, []);
-
-  // Clear the local overrides once the Hydrogen store catches up (e.g. after a refetch).
-  useEffect(() => {
-    if (!appliedDiscountCodes) return;
-    const storeCodes = cartState.data.discountCodes ?? [];
-    if (
-      storeCodes.length === appliedDiscountCodes.length &&
-      storeCodes.every((c, i) => c.code === appliedDiscountCodes[i]?.code)
-    ) {
-      setAppliedDiscountCodes(null);
-      setLineCostOverrides(null);
-    }
-  }, [cartState.data.discountCodes, appliedDiscountCodes]);
 
   return (
     <CartContext.Provider
