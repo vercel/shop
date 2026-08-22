@@ -1,7 +1,6 @@
 "use client";
 
 import { createProductComponents } from "@shopify/hydrogen/react";
-import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -12,6 +11,7 @@ import type { SelectedOptions } from "@/lib/product";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { BuyButtons } from "./buy-buttons";
+import type { ProductOptionLabels } from "./color-picker";
 
 interface ProductFormProduct {
   adjacentVariants: ProductVariant[];
@@ -35,6 +35,7 @@ const { ProductProvider, useProduct } = createProductComponents<ProductFormProdu
 
 interface ProductPurchaseControlsProps {
   buyWithShop: boolean;
+  labels: ProductOptionLabels;
   locale: Locale;
   product: ProductDetails;
   quantityPicker: boolean;
@@ -43,6 +44,7 @@ interface ProductPurchaseControlsProps {
 
 export function ProductPurchaseControls({
   buyWithShop,
+  labels,
   locale,
   product,
   quantityPicker,
@@ -88,6 +90,7 @@ export function ProductPurchaseControls({
     >
       <ProductPurchaseControlsContent
         buyWithShop={buyWithShop}
+        labels={labels}
         locale={locale}
         product={product}
         quantityPicker={quantityPicker}
@@ -98,12 +101,12 @@ export function ProductPurchaseControls({
 
 function ProductPurchaseControlsContent({
   buyWithShop,
+  labels,
   locale,
   product,
   quantityPicker,
 }: Omit<ProductPurchaseControlsProps, "selectedVariant">) {
   const { options, selectedVariant, selectOption } = useProduct();
-  const t = useTranslations("product");
   const selectedOptions: SelectedOptions = Object.fromEntries(
     options.flatMap((option) =>
       option.values.filter((value) => value.selected).map((value) => [option.name, value.name]),
@@ -141,10 +144,10 @@ function ProductPurchaseControlsContent({
         availableValues={availableValues}
         existingValues={existingValues}
         handle={product.handle}
+        labels={labels}
         onOptionSelect={selectOption}
         options={product.options}
         selectedOptions={selectedOptions}
-        t={t}
       />
       <BuyButtons
         selectedVariant={

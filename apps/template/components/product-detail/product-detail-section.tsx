@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
+import type { ProductOptionLabels } from "@/components/product-detail/color-picker";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
@@ -179,6 +180,7 @@ async function ProductInfoArea({
     ? { selectedOptions: defaultSelectedOptions(product), selectedVariant: product.defaultVariant }
     : null;
   const t = await getTranslations("product");
+  const optionLabels = buildProductOptionLabels(options, t);
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
@@ -205,20 +207,20 @@ async function ProductInfoArea({
       {eagerSelection ? (
         <ProductInfoOptions
           availableValues={availableValues}
+          labels={optionLabels}
           options={options}
           selectedOptions={eagerSelection.selectedOptions}
           handle={handle}
-          t={t}
         />
       ) : product.isGiftCard ? (
         <Suspense
           fallback={
             <ProductInfoOptions
               availableValues={availableValues}
+              labels={optionLabels}
               options={options}
               selectedOptions={{}}
               handle={handle}
-              t={t}
               hideImages
             />
           }
@@ -227,8 +229,8 @@ async function ProductInfoArea({
             availableValues={availableValues}
             options={options}
             handle={handle}
+            labels={optionLabels}
             selectedOptionsPromise={selectedOptionsPromise}
-            t={t}
           />
         </Suspense>
       ) : null}
@@ -252,8 +254,13 @@ async function ProductInfoArea({
           quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
         />
       ) : (
-        <Suspense fallback={<ProductPurchaseControlsFallback product={product} t={t} />}>
+        <Suspense
+          fallback={
+            <ProductPurchaseControlsFallback labels={optionLabels} product={product} t={t} />
+          }
+        >
           <ResolvedProductPurchaseControls
+            labels={optionLabels}
             locale={locale}
             product={product}
             variantPromise={variantPromise}
@@ -313,25 +320,25 @@ async function ResolvedProductPrice({
 
 async function ResolvedProductInfoOptions({
   availableValues,
-  options,
   handle,
+  labels,
+  options,
   selectedOptionsPromise,
-  t,
 }: {
   availableValues: Map<string, Set<string>>;
-  options: ProductDetails["options"];
   handle: string;
+  labels: ProductOptionLabels;
+  options: ProductDetails["options"];
   selectedOptionsPromise: Promise<SelectedOptions>;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
   const selectedOptions = await selectedOptionsPromise;
   return (
     <ProductInfoOptions
       availableValues={availableValues}
+      labels={labels}
       options={options}
       selectedOptions={selectedOptions}
       handle={handle}
-      t={t}
     />
   );
 }
@@ -351,10 +358,12 @@ function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVaria
 }
 
 async function ResolvedProductPurchaseControls({
+  labels,
   locale,
   product,
   variantPromise,
 }: {
+  labels: ProductOptionLabels;
   locale: Locale;
   product: ProductDetails;
   variantPromise: Promise<ProductVariant | undefined>;
@@ -362,6 +371,7 @@ async function ResolvedProductPurchaseControls({
   return (
     <ProductPurchaseControls
       buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+      labels={labels}
       locale={locale}
       product={product}
       quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
@@ -370,10 +380,42 @@ async function ResolvedProductPurchaseControls({
   );
 }
 
+function buildProductOptionLabels(
+  options: ProductDetails["options"],
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>,
+): ProductOptionLabels {
+  return {
+    selectVariant: Object.fromEntries(
+      options.map((option) => [
+        option.name,
+        Object.fromEntries(
+          option.values.map((value) => [
+            value.name,
+            t("selectVariantLabel", { name: option.name, value: value.name }),
+          ]),
+        ),
+      ]),
+    ),
+    unavailableVariant: Object.fromEntries(
+      options.map((option) => [
+        option.name,
+        Object.fromEntries(
+          option.values.map((value) => [
+            value.name,
+            t("unavailableVariantLabel", { name: option.name, value: value.name }),
+          ]),
+        ),
+      ]),
+    ),
+  };
+}
+
 function ProductPurchaseControlsFallback({
+  labels,
   product,
   t,
 }: {
+  labels: ProductOptionLabels;
   product: ProductDetails;
   t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
@@ -390,9 +432,9 @@ function ProductPurchaseControlsFallback({
         )}
         handle={product.handle}
         hideImages
+        labels={labels}
         options={product.options}
         selectedOptions={{}}
-        t={t}
       />
       <BuyButtonsFallback
         allInStock={product.defaultVariant?.availableForSale ?? product.availableForSale}
