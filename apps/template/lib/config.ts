@@ -69,6 +69,9 @@ export interface ShopConfig {
     socialLinks: SocialLink[];
     url: string;
   };
+  webmcp: {
+    isEnabled: boolean;
+  };
 }
 
 function trimTrailingSlash(value: string): string {
@@ -130,5 +133,8 @@ export const shopConfig = {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Ship Shop",
     socialLinks,
     url: defaultUrl,
+  },
+  webmcp: {
+    isEnabled: false,
   },
 } satisfies ShopConfig;

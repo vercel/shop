@@ -36,6 +36,8 @@ export async function generateMetadata({
   };
 }
 
+export const instant = false;
+
 export default async function PolicyPage({
   params,
 }: PageProps<"/[flags]/[locale]/policies/[handle]">) {

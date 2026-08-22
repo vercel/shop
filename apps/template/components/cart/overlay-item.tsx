@@ -25,27 +25,25 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   const quantity = currentLine?.quantity ?? item.quantity;
 
   const currencyCode = item.cost.totalAmount.currencyCode;
-  const unitPrice = item.merchandise.price
+  const finalUnitPrice = parseFloat(item.cost.totalAmount.amount) / item.quantity;
+  const sellingUnitPrice = item.merchandise.price
     ? parseFloat(item.merchandise.price.amount)
-    : parseFloat(item.cost.totalAmount.amount) / item.quantity;
-  const compareAtUnitPrice =
-    item.merchandise.compareAtPrice != null
-      ? parseFloat(item.merchandise.compareAtPrice.amount)
-      : null;
-  // Strike only a genuine compare-at on the unit price — never from stepping quantity.
-  const hasCompareAt = compareAtUnitPrice != null && compareAtUnitPrice > unitPrice;
-  const discountedTotal = item.discountAllocations.length
-    ? parseFloat(item.discountAllocations[0].discountedAmount.amount)
+    : finalUnitPrice;
+  const compareAtUnitPrice = item.merchandise.compareAtPrice
+    ? parseFloat(item.merchandise.compareAtPrice.amount)
     : null;
+  const hasCartDiscount = item.discountAllocations.length > 0 && finalUnitPrice < sellingUnitPrice;
+  const hasCompareAt =
+    !hasCartDiscount && compareAtUnitPrice != null && compareAtUnitPrice > sellingUnitPrice;
 
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatPrice(discountedTotal ?? unitPrice * quantity, currencyCode, locale)}`}
+      aria-label={`${item.merchandise.product.title} - ${formatPrice(finalUnitPrice * quantity, currencyCode, locale)}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
-        className="shrink-0 relative size-18 self-end overflow-hidden hover:opacity-80 transition-opacity"
+        className="shrink-0 relative size-18 self-start overflow-hidden hover:opacity-80 transition-opacity"
       >
         {(() => {
           const imageUrl =
@@ -151,9 +149,13 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       <div className="self-start py-0.5 text-sm text-right">
         <div className="grid gap-0.5">
           <span className="font-medium text-foreground">
-            {formatPrice(unitPrice, currencyCode, locale)}
+            {formatPrice(hasCartDiscount ? finalUnitPrice : sellingUnitPrice, currencyCode, locale)}
           </span>
-          {hasCompareAt ? (
+          {hasCartDiscount ? (
+            <span className="text-xs text-muted-foreground line-through">
+              {formatPrice(sellingUnitPrice, currencyCode, locale)}
+            </span>
+          ) : hasCompareAt ? (
             <span className="text-xs text-muted-foreground line-through">
               {formatPrice(compareAtUnitPrice, currencyCode, locale)}
             </span>

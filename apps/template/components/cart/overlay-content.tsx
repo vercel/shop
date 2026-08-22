@@ -44,7 +44,7 @@ function CheckoutButtonContent({
 export function OverlayContent() {
   const router = useRouter();
   const locale = useLocale();
-  const { cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
+  const { cart, cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const t = useTranslations("cart");
 
@@ -96,7 +96,7 @@ export function OverlayContent() {
       </div>
 
       <footer className="px-5 py-5 space-y-5">
-        <OverlaySummary cart={displayCart} locale={locale} />
+        <OverlaySummary cart={cart ?? displayCart} locale={locale} />
 
         <Button
           onClick={handleCheckout}
