@@ -45,8 +45,7 @@ Compare the scaffold metadata against the current recommended template version a
 
 - missing `.vercel-shop/bootstrap.json`
 - missing `AGENTS.md`
-- missing project-scoped plugin config in `.claude/settings.json`
-- legacy local skill files such as `.agents/skills/` or a legacy `.claude/skills` symlink
+- missing inlined agent skills in `.agents/skills/` (current scaffolds inline them there, with Claude Code links in `.claude/skills/`; older scaffolds used the `vercel-shop` plugin via `.claude/settings.json` instead — either layout counts as present)
 - obvious divergence from the expected Vercel Shop structure such as missing `lib/shopify/` or `components/`
 
 Report the original scaffold version, the scaffold timestamp, the current recommended template version, and a short note on overall drift. If the scaffold version matches the current version, say so explicitly. In audit mode, stop here.
