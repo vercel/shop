@@ -256,7 +256,6 @@ async function ProductInfoArea({
           <ResolvedProductPurchaseControls
             locale={locale}
             product={product}
-            t={t}
             variantPromise={variantPromise}
           />
         </Suspense>
@@ -354,12 +353,10 @@ function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVaria
 async function ResolvedProductPurchaseControls({
   locale,
   product,
-  t,
   variantPromise,
 }: {
   locale: Locale;
   product: ProductDetails;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   return (
@@ -369,7 +366,6 @@ async function ResolvedProductPurchaseControls({
       product={product}
       quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
       selectedVariant={await variantPromise}
-      t={t}
     />
   );
 }

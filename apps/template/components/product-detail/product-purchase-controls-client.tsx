@@ -1,6 +1,7 @@
 "use client";
 
 import { createProductComponents } from "@shopify/hydrogen/react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -11,7 +12,6 @@ import type { SelectedOptions } from "@/lib/product";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 import { BuyButtons } from "./buy-buttons";
-import type { ProductTranslator } from "./color-picker";
 
 interface ProductFormProduct {
   adjacentVariants: ProductVariant[];
@@ -39,7 +39,6 @@ interface ProductPurchaseControlsProps {
   product: ProductDetails;
   quantityPicker: boolean;
   selectedVariant: ProductVariant | undefined;
-  t: ProductTranslator;
 }
 
 export function ProductPurchaseControls({
@@ -48,7 +47,6 @@ export function ProductPurchaseControls({
   product,
   quantityPicker,
   selectedVariant,
-  t,
 }: ProductPurchaseControlsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,7 +91,6 @@ export function ProductPurchaseControls({
         locale={locale}
         product={product}
         quantityPicker={quantityPicker}
-        t={t}
       />
     </ProductProvider>
   );
@@ -104,9 +101,9 @@ function ProductPurchaseControlsContent({
   locale,
   product,
   quantityPicker,
-  t,
 }: Omit<ProductPurchaseControlsProps, "selectedVariant">) {
   const { options, selectedVariant, selectOption } = useProduct();
+  const t = useTranslations("product");
   const selectedOptions: SelectedOptions = Object.fromEntries(
     options.flatMap((option) =>
       option.values.filter((value) => value.selected).map((value) => [option.name, value.name]),
