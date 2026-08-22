@@ -74,7 +74,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
     }
 
     setWarnings([]);
-    void addToCart(
+    addToCart(
       merchandiseId,
       1,
       productInfo,

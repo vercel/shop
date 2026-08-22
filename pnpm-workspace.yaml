@@ -6,6 +6,7 @@ allowBuilds:
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  - "@vercel/agent-readability"
   - "@vercel/geistdocs"
 
 packages:

@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { useCartRender } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
@@ -76,8 +75,7 @@ export function Summary({
   taxesAndShippingNote,
   updatingCartLabel,
 }: SummaryProps) {
-  const { isUpdatingCart } = useCart();
-  const cart = useCartRender();
+  const { cart, isUpdatingCart } = useCart();
 
   if (!cart) return null;
 

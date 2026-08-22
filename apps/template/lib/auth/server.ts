@@ -4,7 +4,6 @@ import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:
 import { createShopifyRequestContext, type ShopifyRequestContext } from "@shopify/hydrogen";
 import {
   createCustomerSession,
-  type CustomerSession as HydrogenCustomerSession,
   type ReadonlyCustomerSessionManager,
   type WritableCustomerSessionManager,
 } from "@shopify/hydrogen/customer-account";
@@ -167,9 +166,9 @@ function createSessionManager(
   };
 }
 
-let customerSessionPromise: Promise<HydrogenCustomerSession> | undefined;
+let customerSessionPromise: Promise<ReturnType<typeof createCustomerSession>> | undefined;
 
-export function getHydrogenCustomerSession(): Promise<HydrogenCustomerSession> {
+export function getHydrogenCustomerSession() {
   if (!shopConfig.auth.isEnabled) notFound();
 
   if (!customerSessionPromise) {
@@ -222,10 +221,12 @@ export function createCustomerRequestContext(request: Request): ShopifyRequestCo
   });
 }
 
-const getReadonlySessionManager = cache(async (): Promise<ReadonlyCustomerSessionManager> => {
-  const requestHeaders = await headers();
-  return createSessionManager(requestHeaders.get("cookie"), shopConfig.site.url, false);
-});
+export const getReadonlyCustomerSessionManager = cache(
+  async (): Promise<ReadonlyCustomerSessionManager> => {
+    const requestHeaders = await headers();
+    return createSessionManager(requestHeaders.get("cookie"), shopConfig.site.url, false);
+  },
+);
 
 const getReadonlyRequestContext = cache(async (): Promise<ShopifyRequestContext> => {
   await io();
@@ -242,7 +243,7 @@ export const isCustomerLoggedIn = cache(async (): Promise<boolean> => {
 
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
-    getReadonlySessionManager(),
+    getReadonlyCustomerSessionManager(),
     getReadonlyRequestContext(),
   ]);
   return customerSession.isLoggedIn(sessionManager, requestContext);
@@ -253,7 +254,7 @@ export const getCustomerAccessToken = cache(async (): Promise<string | undefined
 
   const [customerSession, sessionManager, requestContext] = await Promise.all([
     getHydrogenCustomerSession(),
-    getReadonlySessionManager(),
+    getReadonlyCustomerSessionManager(),
     getReadonlyRequestContext(),
   ]);
   return customerSession.getAccessToken(sessionManager, requestContext);
