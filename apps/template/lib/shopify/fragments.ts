@@ -354,6 +354,9 @@ export const PRODUCT_FRAGMENT = `#graphql
     selectedOrFirstAvailableVariant {
       ...ProductVariantFields
     }
+    adjacentVariants {
+      ...ProductVariantFields
+    }
     options {
       id
       name
@@ -370,9 +373,7 @@ export const PRODUCT_FRAGMENT = `#graphql
           }
         }
         firstSelectableVariant {
-          image {
-            ...ImageFields
-          }
+          ...ProductVariantFields
         }
       }
     }

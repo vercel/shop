@@ -10,23 +10,27 @@ import { cn } from "@/lib/utils";
 export type ProductTranslator = Awaited<ReturnType<typeof getTranslations<"product">>>;
 
 interface ColorPickerProps extends React.ComponentProps<"div"> {
-  option: ProductOption;
-  selectedValue: string;
   available: Set<string> | undefined;
+  existing?: Set<string>;
   handle: string;
-  selectedOptions: SelectedOptions;
-  t: ProductTranslator;
   hideImages?: boolean;
+  onOptionSelect?: (name: string, value: string) => void;
+  option: ProductOption;
+  selectedOptions: SelectedOptions;
+  selectedValue: string;
+  t: ProductTranslator;
 }
 
 export function ColorPicker({
-  option,
-  selectedValue,
   available,
+  existing,
   handle,
-  selectedOptions,
-  t,
   hideImages,
+  onOptionSelect,
+  option,
+  selectedOptions,
+  selectedValue,
+  t,
   className,
   ...props
 }: ColorPickerProps) {
@@ -38,6 +42,7 @@ export function ColorPicker({
       <div className="flex flex-wrap gap-2.5">
         {option.values.map((value) => {
           const isSelected = selectedValue === value.name;
+          const exists = !existing || existing.has(value.name);
           const isAvailable = !available || available.has(value.name);
           const imageUrl = hideImages
             ? undefined
@@ -53,7 +58,7 @@ export function ColorPicker({
             />
           );
 
-          if (!isAvailable) {
+          if (!exists) {
             return (
               <span
                 key={value.id}
@@ -69,9 +74,11 @@ export function ColorPicker({
             <Link
               key={value.id}
               href={href}
+              replace
               scroll={false}
-              className="block cursor-pointer"
+              className={cn("block cursor-pointer", !isAvailable && "opacity-40")}
               aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
+              onClick={onOptionSelect ? () => onOptionSelect(option.name, value.name) : undefined}
             >
               {swatch}
             </Link>

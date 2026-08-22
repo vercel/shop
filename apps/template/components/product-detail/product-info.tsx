@@ -40,20 +40,24 @@ function ProductInfoHeader({
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
   availableValues: Map<string, Set<string>>;
+  existingValues?: Map<string, Set<string>>;
+  handle: string;
+  hideImages?: boolean;
+  onOptionSelect?: (name: string, value: string) => void;
   options: ProductOption[];
   selectedOptions: SelectedOptions;
-  handle: string;
   t: ProductTranslator;
-  hideImages?: boolean;
 }
 
 function ProductInfoOptions({
   availableValues,
+  existingValues,
+  handle,
+  hideImages,
+  onOptionSelect,
   options,
   selectedOptions,
-  handle,
   t,
-  hideImages,
   className,
   ...props
 }: ProductInfoOptionsProps) {
@@ -88,7 +92,9 @@ function ProductInfoOptions({
             option={colorOption}
             selectedValue={selectedOptions[colorOption.name] ?? ""}
             available={availableValues.get(colorOption.name)}
+            existing={existingValues?.get(colorOption.name)}
             handle={handle}
+            onOptionSelect={onOptionSelect}
             selectedOptions={selectedOptions}
             t={t}
             hideImages={hideImages}
@@ -101,7 +107,9 @@ function ProductInfoOptions({
             option={option}
             selectedValue={selectedOptions[option.name] ?? ""}
             available={availableValues.get(option.name)}
+            existing={existingValues?.get(option.name)}
             handle={handle}
+            onOptionSelect={onOptionSelect}
             selectedOptions={selectedOptions}
           />
         ))}

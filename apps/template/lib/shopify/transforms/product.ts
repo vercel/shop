@@ -59,10 +59,10 @@ interface ShopifyOptionValueSwatch {
 }
 
 interface ShopifyOptionValue {
+  firstSelectableVariant?: ShopifyVariant | null;
   id: string;
   name: string;
   swatch: ShopifyOptionValueSwatch | null;
-  firstSelectableVariant?: { image: ShopifyImage | null } | null;
 }
 
 interface ShopifyOption {
@@ -125,6 +125,7 @@ export interface ShopifyProduct {
     minVariantPrice: ShopifyMoney;
     maxVariantPrice: ShopifyMoney;
   } | null;
+  adjacentVariants?: ShopifyVariant[];
   encodedVariantAvailability?: string | null;
   encodedVariantExistence?: string | null;
   variantsCount: { count: number };
@@ -279,26 +280,23 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSw
 }
 
 function transformOption(option: ShopifyOption): ProductOption {
-  const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
-  const imageLookup = new Map<string, string | undefined>();
-  if (option.optionValues) {
-    for (const ov of option.optionValues) {
-      swatchLookup.set(ov.name, transformSwatch(ov.swatch));
-      imageLookup.set(ov.name, ov.firstSelectableVariant?.image?.url);
-    }
-  }
+  const optionValueLookup = new Map(option.optionValues?.map((value) => [value.name, value]));
 
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map(
-      (value): OptionValue => ({
+    values: option.values.map((value): OptionValue => {
+      const optionValue = optionValueLookup.get(value);
+      return {
+        firstSelectableVariant: optionValue?.firstSelectableVariant
+          ? transformVariant(optionValue.firstSelectableVariant)
+          : undefined,
         id: value,
-        image: imageLookup.get(value),
+        image: optionValue?.firstSelectableVariant?.image?.url,
         name: value,
-        swatch: swatchLookup.get(value),
-      }),
-    ),
+        swatch: transformSwatch(optionValue?.swatch ?? null),
+      };
+    }),
   };
 }
 
@@ -351,6 +349,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
+    adjacentVariants: product.adjacentVariants?.map(transformVariant) ?? [],
     allVariantsInStock:
       !product.encodedVariantExistence ||
       product.encodedVariantExistence === product.encodedVariantAvailability,
