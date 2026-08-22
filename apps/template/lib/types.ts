@@ -53,6 +53,7 @@ export interface ProductCard {
 }
 
 export interface ProductDetails extends ProductCard {
+  adjacentVariants: ProductVariant[];
   allVariantsInStock: boolean;
   category?: Category | null;
   categoryId?: string;
@@ -126,6 +127,7 @@ export interface OptionValueSwatch {
 }
 
 export interface OptionValue {
+  firstSelectableVariant?: ProductVariant;
   id: string;
   image?: string;
   name: string;

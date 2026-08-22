@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
 import { BuyButtons, type BuyButtonVariant } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
+import type { ProductOptionLabels } from "@/components/product-detail/color-picker";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
@@ -18,6 +19,7 @@ import {
   ProductMedia,
 } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
+import { ProductPurchaseControls } from "@/components/product-detail/product-purchase-controls-client";
 import { ProductSchema } from "@/components/product-detail/schema";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Input } from "@/components/ui/input";
@@ -172,53 +174,53 @@ async function ProductInfoArea({
   locale: Locale;
 }) {
   const { options, handle, title, featuredImage, descriptionHtml, availableForSale } = product;
-  const uniformPrice = product.hasUniformPricing;
-  const uniformStock = product.allVariantsInStock;
   const singleVariant = product.variantsCount === 1;
   const availableValues = getAvailableOptionValues(options, product.encodedVariantAvailability);
   const eagerSelection = singleVariant
     ? { selectedOptions: defaultSelectedOptions(product), selectedVariant: product.defaultVariant }
     : null;
   const t = await getTranslations("product");
-  const buyFallbackT = uniformStock && !singleVariant ? t : null;
-  const allInStock = product.defaultVariant?.availableForSale ?? availableForSale;
+  const optionLabels = buildProductOptionLabels(options, t);
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      <div data-slot="product-info-header">
-        <h1 className="text-foreground text-3xl">{title}</h1>
-        {uniformPrice ? (
-          <ProductPrice
-            amount={product.priceRange.minVariantPrice.amount}
-            currencyCode={product.priceRange.minVariantPrice.currencyCode}
-            compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
-            locale={locale}
-          />
-        ) : (
-          // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
-          <Suspense fallback={<div className="h-7" aria-hidden />}>
-            <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
-          </Suspense>
-        )}
-      </div>
+      {eagerSelection || product.isGiftCard ? (
+        <div data-slot="product-info-header">
+          <h1 className="text-foreground text-3xl">{title}</h1>
+          {eagerSelection ? (
+            <ProductPrice
+              amount={eagerSelection.selectedVariant?.price.amount ?? product.price.amount}
+              currencyCode={
+                eagerSelection.selectedVariant?.price.currencyCode ?? product.price.currencyCode
+              }
+              compareAtAmount={eagerSelection.selectedVariant?.compareAtPrice?.amount}
+              locale={locale}
+            />
+          ) : (
+            <Suspense fallback={<div className="h-7" aria-hidden />}>
+              <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
+            </Suspense>
+          )}
+        </div>
+      ) : null}
 
       {eagerSelection ? (
         <ProductInfoOptions
           availableValues={availableValues}
+          labels={optionLabels}
           options={options}
           selectedOptions={eagerSelection.selectedOptions}
           handle={handle}
-          t={t}
         />
-      ) : (
+      ) : product.isGiftCard ? (
         <Suspense
           fallback={
             <ProductInfoOptions
               availableValues={availableValues}
+              labels={optionLabels}
               options={options}
               selectedOptions={{}}
               handle={handle}
-              t={t}
               hideImages
             />
           }
@@ -227,11 +229,11 @@ async function ProductInfoArea({
             availableValues={availableValues}
             options={options}
             handle={handle}
+            labels={optionLabels}
             selectedOptionsPromise={selectedOptionsPromise}
-            t={t}
           />
         </Suspense>
-      )}
+      ) : null}
 
       {product.isGiftCard ? (
         <Suspense fallback={<GiftCardPurchaseFormFallback t={t} />}>
@@ -252,14 +254,15 @@ async function ProductInfoArea({
           quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
         />
       ) : (
-        <Suspense fallback={<BuyButtonsFallback t={buyFallbackT} allInStock={allInStock} />}>
-          <ResolvedBuyButtons
-            title={title}
-            handle={handle}
-            featuredImage={featuredImage}
-            availableForSale={availableForSale}
-            buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
-            quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
+        <Suspense
+          fallback={
+            <ProductPurchaseControlsFallback labels={optionLabels} product={product} t={t} />
+          }
+        >
+          <ResolvedProductPurchaseControls
+            labels={optionLabels}
+            locale={locale}
+            product={product}
             variantPromise={variantPromise}
           />
         </Suspense>
@@ -297,11 +300,11 @@ function BundleRelationships({
 }
 
 async function ResolvedProductPrice({
-  variantPromise,
   locale,
+  variantPromise,
 }: {
-  variantPromise: Promise<ProductVariant | undefined>;
   locale: Locale;
+  variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const selectedVariant = await variantPromise;
   if (!selectedVariant) return null;
@@ -317,25 +320,25 @@ async function ResolvedProductPrice({
 
 async function ResolvedProductInfoOptions({
   availableValues,
-  options,
   handle,
+  labels,
+  options,
   selectedOptionsPromise,
-  t,
 }: {
   availableValues: Map<string, Set<string>>;
-  options: ProductDetails["options"];
   handle: string;
+  labels: ProductOptionLabels;
+  options: ProductDetails["options"];
   selectedOptionsPromise: Promise<SelectedOptions>;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
 }) {
   const selectedOptions = await selectedOptionsPromise;
   return (
     <ProductInfoOptions
       availableValues={availableValues}
+      labels={labels}
       options={options}
       selectedOptions={selectedOptions}
       handle={handle}
-      t={t}
     />
   );
 }
@@ -354,34 +357,90 @@ function toBuyButtonVariant(variant: ProductVariant | undefined): BuyButtonVaria
   };
 }
 
-async function ResolvedBuyButtons({
-  availableForSale,
-  buyWithShop,
-  featuredImage,
-  handle,
-  quantityPicker,
-  title,
+async function ResolvedProductPurchaseControls({
+  labels,
+  locale,
+  product,
   variantPromise,
 }: {
-  availableForSale: boolean;
-  buyWithShop: boolean;
-  featuredImage: ProductDetails["featuredImage"];
-  handle: string;
-  quantityPicker: boolean;
-  title: string;
+  labels: ProductOptionLabels;
+  locale: Locale;
+  product: ProductDetails;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
-  const selectedVariant = await variantPromise;
   return (
-    <BuyButtons
-      selectedVariant={toBuyButtonVariant(selectedVariant)}
-      title={title}
-      handle={handle}
-      featuredImage={featuredImage}
-      availableForSale={availableForSale}
-      buyWithShop={buyWithShop}
-      quantityPicker={quantityPicker}
+    <ProductPurchaseControls
+      buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+      labels={labels}
+      locale={locale}
+      product={product}
+      quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
+      selectedVariant={await variantPromise}
     />
+  );
+}
+
+function buildProductOptionLabels(
+  options: ProductDetails["options"],
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>,
+): ProductOptionLabels {
+  return {
+    selectVariant: Object.fromEntries(
+      options.map((option) => [
+        option.name,
+        Object.fromEntries(
+          option.values.map((value) => [
+            value.name,
+            t("selectVariantLabel", { name: option.name, value: value.name }),
+          ]),
+        ),
+      ]),
+    ),
+    unavailableVariant: Object.fromEntries(
+      options.map((option) => [
+        option.name,
+        Object.fromEntries(
+          option.values.map((value) => [
+            value.name,
+            t("unavailableVariantLabel", { name: option.name, value: value.name }),
+          ]),
+        ),
+      ]),
+    ),
+  };
+}
+
+function ProductPurchaseControlsFallback({
+  labels,
+  product,
+  t,
+}: {
+  labels: ProductOptionLabels;
+  product: ProductDetails;
+  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
+}) {
+  return (
+    <>
+      <div data-slot="product-info-header">
+        <h1 className="text-foreground text-3xl">{product.title}</h1>
+        <div className="h-7" aria-hidden />
+      </div>
+      <ProductInfoOptions
+        availableValues={getAvailableOptionValues(
+          product.options,
+          product.encodedVariantAvailability,
+        )}
+        handle={product.handle}
+        hideImages
+        labels={labels}
+        options={product.options}
+        selectedOptions={{}}
+      />
+      <BuyButtonsFallback
+        allInStock={product.defaultVariant?.availableForSale ?? product.availableForSale}
+        t={product.allVariantsInStock ? t : null}
+      />
+    </>
   );
 }
 

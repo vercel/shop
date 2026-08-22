@@ -87,6 +87,16 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = `#graphql
   query getProductByHandleWithBundles($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductFields
+      adjacentVariants {
+        ...BundleRelationshipFields
+      }
+      options {
+        optionValues {
+          firstSelectableVariant {
+            ...BundleRelationshipFields
+          }
+        }
+      }
       selectedOrFirstAvailableVariant {
         ...BundleRelationshipFields
       }
