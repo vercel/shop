@@ -21,6 +21,7 @@ export interface Money {
 
 export interface Image {
   altText: string;
+  blurDataURL?: string;
   height: number;
   url: string;
   width: number;

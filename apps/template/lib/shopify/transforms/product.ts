@@ -1,5 +1,5 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
-import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
+import { parseImagePlaceholders } from "@/lib/shopify/transforms/image-placeholders";
+import { flattenEdges, getNumericShopifyId, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
   Image,
@@ -87,8 +87,9 @@ interface ShopifyVideoSource {
 }
 
 interface ShopifyMediaImageNode {
-  mediaContentType: "IMAGE";
+  id: string;
   image: ShopifyImage | null;
+  mediaContentType: "IMAGE";
 }
 
 interface ShopifyVideoNode {
@@ -129,6 +130,7 @@ export interface ShopifyProduct {
   encodedVariantAvailability?: string | null;
   encodedVariantExistence?: string | null;
   variantsCount: { count: number };
+  imagePlaceholders?: { jsonValue: unknown } | null;
   reviewsRating?: { value: string } | null;
   reviewsRatingCount?: { value: string } | null;
   selectedOrFirstAvailableVariant?: ShopifyVariant | null;
@@ -166,13 +168,14 @@ export interface ShopifyProductCard {
   } | null;
 }
 
-function transformImage(image: ShopifyImage | null): Image | null {
+function transformImage(image: ShopifyImage | null, blurDataURL?: string): Image | null {
   if (!image) return null;
   return {
-    url: image.url,
     altText: image.altText ?? "",
-    width: image.width,
+    ...(blurDataURL ? { blurDataURL } : {}),
     height: image.height,
+    url: image.url,
+    width: image.width,
   };
 }
 
@@ -195,11 +198,12 @@ function extractMediaFromProduct(product: ShopifyProduct): {
   }
 
   const images: Image[] = [];
+  const placeholders = parseImagePlaceholders(product.imagePlaceholders?.jsonValue);
   const videos: Video[] = [];
 
   for (const node of flattenEdges(product.media)) {
     if (node.mediaContentType === "IMAGE") {
-      const img = transformImage(node.image);
+      const img = transformImage(node.image, placeholders.get(node.id)?.blurDataURL);
       if (img) images.push(img);
     } else if (node.mediaContentType === "VIDEO") {
       const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));

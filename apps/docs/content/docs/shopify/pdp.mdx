@@ -20,7 +20,7 @@ This page covers the Shopify admin configuration the PDP expects. For how the pa
 
 ## Out of the box
 
-- **Basic fields** — title, `descriptionHtml`, variants, featured image, and up to 10 media items (images or videos). Products must belong to at least one collection to appear on collection listing pages.
+- **Basic fields** — title, `descriptionHtml`, variants, featured image, and up to 10 media items (images or videos). Product gallery images use optional blur placeholders from the Storefront-public `custom.image_placeholders` JSON metafield when present. Define it as a product metafield with JSON type and Storefront access, using MediaImage GIDs as keys and `{ blurDataURL, width, height }` as values. Products must belong to at least one collection to appear on collection listing pages.
 - **Color swatches** — configure in Shopify admin: edit a product → open an option like "Color" → assign a swatch color or image to each value.
 - **SEO fields** — `seo.title` and `seo.description`, editable per product.
 - **Related products** — Shopify's automatic recommendation API. On by default; disable with `pdp.relatedProducts.isEnabled: false` in `lib/config.ts`.

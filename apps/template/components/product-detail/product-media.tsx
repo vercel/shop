@@ -37,6 +37,10 @@ function MediaImage({
   fetchPriority: "auto" | "high";
   className?: string;
 }) {
+  const blurProps = item.image.blurDataURL
+    ? { blurDataURL: item.image.blurDataURL, placeholder: "blur" as const }
+    : {};
+
   return (
     <Image
       src={item.image.url}
@@ -47,6 +51,7 @@ function MediaImage({
       fetchPriority={fetchPriority}
       loading="lazy"
       draggable={false}
+      {...blurProps}
     />
   );
 }
@@ -303,24 +308,31 @@ export function ColorImageCarouselItems({
   overlay?: React.ReactNode;
   title: string;
 }) {
-  return images.map((image, idx) => (
-    <div
-      key={image.url}
-      className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
-    >
-      <Image
-        src={image.url}
-        alt={image.altText || `${title} image ${idx + 1}`}
-        fill
-        className="object-cover"
-        sizes="100vw"
-        fetchPriority={idx === 0 ? "high" : "auto"}
-        loading="lazy"
-        draggable={false}
-      />
-      {idx === 0 ? overlay : null}
-    </div>
-  ));
+  return images.map((image, idx) => {
+    const blurProps = image.blurDataURL
+      ? { blurDataURL: image.blurDataURL, placeholder: "blur" as const }
+      : {};
+
+    return (
+      <div
+        key={image.url}
+        className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
+      >
+        <Image
+          src={image.url}
+          alt={image.altText || `${title} image ${idx + 1}`}
+          fill
+          className="object-cover"
+          sizes="100vw"
+          fetchPriority={idx === 0 ? "high" : "auto"}
+          loading="lazy"
+          draggable={false}
+          {...blurProps}
+        />
+        {idx === 0 ? overlay : null}
+      </div>
+    );
+  });
 }
 
 export function ProductMedia({

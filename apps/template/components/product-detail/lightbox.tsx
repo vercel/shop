@@ -44,20 +44,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
             </DialogPrimitive.Close>
 
             {activeItem?.type === "image" && (
-              <div
-                className="pointer-events-none relative h-full max-w-full"
-                style={{ aspectRatio: `${activeItem.image.width} / ${activeItem.image.height}` }}
-              >
-                <Image
-                  src={activeItem.image.url}
-                  alt={activeItem.image.altText || `${label} enlarged`}
-                  fill
-                  className="object-contain"
-                  sizes="90vw"
-                  fetchPriority="high"
-                  loading="eager"
-                />
-              </div>
+              <LightboxImage image={activeItem.image} label={label} />
             )}
 
             {activeItem?.type === "video" && (
@@ -83,6 +70,30 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
     </LightboxContext.Provider>
+  );
+}
+
+function LightboxImage({ image, label }: { image: ImageType; label: string }) {
+  const blurProps = image.blurDataURL
+    ? { blurDataURL: image.blurDataURL, placeholder: "blur" as const }
+    : {};
+
+  return (
+    <div
+      className="pointer-events-none relative h-full max-w-full"
+      style={{ aspectRatio: `${image.width} / ${image.height}` }}
+    >
+      <Image
+        src={image.url}
+        alt={image.altText || `${label} enlarged`}
+        fill
+        className="object-contain"
+        sizes="90vw"
+        fetchPriority="high"
+        loading="eager"
+        {...blurProps}
+      />
+    </div>
   );
 }
 

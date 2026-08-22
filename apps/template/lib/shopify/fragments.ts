@@ -312,6 +312,7 @@ export const PRODUCT_FRAGMENT = `#graphql
         node {
           mediaContentType
           ... on MediaImage {
+            id
             image {
               ...ImageFields
             }
@@ -385,6 +386,9 @@ export const PRODUCT_FRAGMENT = `#graphql
     }
     reviewsRatingCount: metafield(namespace: "reviews", key: "rating_count") {
       value
+    }
+    imagePlaceholders: metafield(namespace: "custom", key: "image_placeholders") {
+      jsonValue: value
     }
     category {
       ...TaxonomyCategoryFields
