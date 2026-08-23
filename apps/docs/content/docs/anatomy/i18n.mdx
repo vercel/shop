@@ -1,22 +1,24 @@
 ---
 title: Translations
-description: How the storefront keeps translation catalogs on the server and scopes client messages to interactive islands.
+description: How the storefront keeps translation catalogs on the server and sends the browser only the messages needed for interactive UI.
 ---
 
-The storefront uses next-intl for translated copy and locale-aware formatting. Message catalogs load on the server. Server Components call `getTranslations()` and render translated text directly whenever the browser does not need to choose or format that text later.
+The storefront uses next-intl for translated copy and locale-aware formatting. Translation catalogs stay on the server by default, which keeps unnecessary messages out of browser JavaScript.
 
-## Client message boundaries
+## Add translated copy
 
-Interactive components sometimes need translations after hydration—for example, cart mutation errors, search results, collection filters, and product purchase controls. Give each cohesive interactive island a `NextIntlClientProvider` containing only the namespaces it uses. Do not pass the complete catalog from the root layout.
+Add every new shopper-facing message to every locale catalog. Keep the same message structure across locales.
 
-Prefer a translated primitive prop when a client leaf needs only a few fixed labels. Keep `useTranslations()` when several related client components share a namespace or need dynamic messages, plurals, or interpolation. Place that provider in the nearest Server Component so unrelated routes and islands do not receive its messages.
+Render fixed text on the server whenever possible. If an interactive area needs translations after the page loads, provide only the messages used by that area. Examples include cart errors, search results, collection filters, and product purchase controls.
 
-The root provider contains only shared error-boundary copy. Next.js route error boundaries are Client Components and cannot load request translations on the server, so this small namespace must remain available across the application. The active locale is also set there and is inherited by narrower providers.
+A small set of shared error messages must remain available throughout the application because route error screens run in the browser.
 
-## Adding translated UI
+## Keep browser messages small
 
-Add new user-visible copy to every locale catalog. In a Server Component, use `getTranslations()` and render the result or pass the required labels to a client leaf. If an interactive subtree needs a translator, select only its namespaces from `getMessages()` and pass those to a provider around that subtree.
+Pass a few translated labels directly when an interactive element needs only fixed text. Provide a translation namespace when related controls need dynamic messages, plurals, or interpolation.
 
-Avoid importing message JSON into Client Components. That bundles the catalog into client JavaScript instead of sending only the messages required by the rendered island.
+Do not import complete translation catalogs into browser code. This increases the JavaScript sent to every shopper and can expose messages that the current page never uses.
 
-When adding a locale, preserve the same message shape across catalogs. The request configuration chooses the catalog for the active locale; the rendering boundaries determine which messages cross into the browser.
+## What’s next
+
+Common additions include a locale selector, Shopify Markets for localized catalogs and currencies, and a translation workflow for larger teams. Add a locale to storefront navigation only after its fixed copy, interactive states, plurals, formatting, and error messages are complete.
