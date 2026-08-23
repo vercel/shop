@@ -6,209 +6,66 @@ prerequisites:
   - /docs/getting-started
 ---
 
-All Storefront API data flows through a shared client built with [`@shopify/hydrogen`](https://www.npmjs.com/package/@shopify/hydrogen)'s `createStorefrontClient`, exported as `storefront` from `lib/shopify/storefront.ts`. The Hydrogen client injects `$country`/`$language` from the `i18n` on its request context on every request, so the wrapper creates the client with the country/language pair taken from the request variables (client creation is plain config allocation — there's nothing stateful worth caching). Queries are tagged `#graphql` and validated against the live schema by [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) (see [Codegen](#codegen)).
+The template uses [Shopify Hydrogen](https://www.npmjs.com/package/@shopify/hydrogen) for Storefront GraphQL API queries and mutations. Configure its domain, public token, and API version with the variables in [Environment Variables](/docs/reference/env-vars). Grant the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-For Shopify admin setup and required token scopes, see [Storefront API Permissions](/docs/reference/storefront-api-permissions).
+The Customer Account API uses a separate endpoint, schema, client ID, and session secret. Storefront API codegen does not validate Customer Account API operations.
 
-> The Customer Account API is a separate endpoint and schema. `customerAccountFetch` in `lib/shopify/customer-account.ts` wraps `@shopify/hydrogen/customer-account`'s `createCustomerAccountClient` — a distinct client from the Storefront one, with its own schema and not covered by the storefront codegen.
+## Write and validate operations
 
-## storefront.request
+Define each operation as a static `#graphql` document and pass dynamic values as GraphQL variables. Do not interpolate runtime values or conditional fields into the document.
 
-```ts
-import { assertStorefrontOk } from "@/lib/shopify/errors";
-import { storefront } from "@/lib/shopify/storefront";
-
-const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-  GET_PRODUCT_BY_HANDLE_QUERY,
-  { variables: { handle, country, language } },
-);
-assertStorefrontOk(response, "getProductByHandle");
-const { data } = response;
-```
-
-- **query** (first argument) - the full `#graphql`-tagged query or mutation, including any fragment interpolations.
-- **variables** - passed in the options object as JSON in the request body. Never interpolate values into the query string directly.
-- The generic is the expected shape of `data`. Codegen validates the query against the schema; this type describes the response for transforms and is narrowed to non-null by `assertStorefrontOk`.
-
-## Request details
-
-The client `POST`s to `https://{NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three intentionally app-specific behaviors: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and operation timing. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
-
-## Writing a query
-
-Define the query as a template string. Start it with the `#graphql` tag (so codegen parses it) and end the declaration with `as const` (so its literal type propagates through fragment interpolation). Interpolate shared fragments at the top:
+Include Shopify's `@inContext` directive when localized pricing or content depends on country and language:
 
 ```ts
-import { PRODUCT_FRAGMENT } from "@/lib/shopify/fragments";
-
-const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
-  ${PRODUCT_FRAGMENT}
-  query getProductByHandle(
+const GET_PRODUCT_QUERY = `#graphql
+  query getProduct(
     $handle: String!
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
-      ...ProductFields
+      id
+      title
     }
   }
 ` as const;
 ```
 
-The `@inContext` directive passes country and language for localized pricing and content. Use `getCountryCode(locale)` and `getLanguageCode(locale)` from `lib/i18n` to extract these from a locale string.
-
-Keep documents static so codegen can parse them. Don't build a query with runtime string interpolation (a ternary that swaps in a field, a computed selection set) — pass the variable part as a GraphQL variable instead, or split it into two static `#graphql` documents and pick one at the call site. For example, the opt-in product-metafields query passes its identifiers through a `$metafieldIdentifiers: [HasMetafieldsIdentifier!]!` variable rather than interpolating them, and `getProduct` selects between the plain and with-metafields documents based on config.
+Validate current field names, arguments, and types with Shopify AI Toolkit. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for template integration conventions. The skill is not a schema source.
 
 ## Codegen
 
-`pnpm --filter template codegen` runs `graphql-codegen` (configured in `.graphqlrc.ts`). It pulls the Storefront schema from Shopify's direct-proxy endpoint for the configured `SHOPIFY_API_VERSION`, parses every `#graphql`-tagged query, and **fails if any field, argument, or type is invalid** — automating the "never guess field names" rule.
+Use this [codegen](#codegen) contract while editing an operation. The template runs [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset):
 
-Codegen runs automatically at dev and build time, so type generation is not a manual step:
-
-- `pnpm dev` regenerates types on start. It is **non-fatal** there (the app never imports the generated files, so a stale or missing output doesn't break local dev when you're offline).
-- `pnpm build` runs codegen as a **hard gate** — the build fails if a query no longer matches the live schema.
-
-Output lands in `lib/shopify/types/generated/`, which is **gitignored**. Nothing in the app imports it; it is purely the validation artifact. Run `pnpm --filter template codegen` (or `codegen:watch`) manually while iterating on a query.
-
-Because codegen resolves interpolations of other `#graphql` consts by name, every fragment in `lib/shopify/fragments.ts` is also tagged `#graphql ... as const`. A raw selection snippet that isn't a valid standalone document (it can't be `#graphql`-tagged) must be inlined into each operation rather than interpolated.
-
-Always use Shopify AI Toolkit to search current Shopify documentation and validate the final operation. Then use [`/vercel-shop:shopify-graphql-reference`](/docs/skills/shopify-graphql-reference) for Vercel Shop integration conventions. The Vercel Shop skill is not a schema source.
-
-## Fragments
-
-Shared fragments in `lib/shopify/fragments.ts` avoid repeating field selections:
-
-| Fragment                   | Covers                                                                                          |
-| -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `MONEY_FRAGMENT`           | `amount` and `currencyCode` on `MoneyV2`                                                        |
-| `IMAGE_FRAGMENT`           | `url`, `altText`, `width`, `height` on `Image`                                                  |
-| `PRODUCT_VARIANT_FRAGMENT` | Variant price, options, image, availability                                                     |
-| `PRODUCT_FRAGMENT`         | Full product: media, variants (up to 250), options with swatches, metafields, price ranges, SEO |
-| `PRODUCT_CARD_FRAGMENT`    | Lightweight product for listing pages (fewer fields)                                            |
-
-Each fragment is declared as `` `#graphql ...` as const `` and embedded in a query with template literal interpolation: `` `#graphql ${PRODUCT_FRAGMENT} query ...` as const ``.
-
-## Writing an operation function
-
-Operation functions live in `lib/shopify/operations/` and follow a consistent pattern:
-
-```ts
-import { cacheLife, cacheTag } from "next/cache";
-import { assertStorefrontOk } from "../errors";
-import { storefront } from "../storefront";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
-import type { ProductDetails } from "@/lib/types";
-
-export async function getProduct({
-  handle,
-  locale = defaultLocale,
-}: {
-  handle: string;
-  locale?: string;
-}): Promise<ProductDetails | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product-${handle}`);
-
-  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-    GET_PRODUCT_BY_HANDLE_QUERY,
-    {
-      variables: {
-        handle,
-        country: getCountryCode(locale),
-        language: getLanguageCode(locale),
-      },
-    },
-  );
-  assertStorefrontOk(response, "getProductByHandle");
-  const { data } = response;
-
-  if (!data.productByHandle) return undefined;
-
-  return transformShopifyProductDetails(data.productByHandle);
-}
+```bash
+pnpm --filter template codegen
 ```
 
-Key elements:
-
-1. **`"use cache"`** - includes the stable product body coherently in the PDP's prerendered shell
-2. **`cacheLife("max")`** - caches indefinitely until manually revalidated
-3. **`cacheTag(...)`** - assigns tags for granular invalidation via `revalidateTag()`
-4. **Transform** - convert the Shopify response to a domain type before returning. Components never import Shopify types directly.
+Codegen reads `SHOPIFY_API_VERSION` and fails when an operation does not match Shopify's live schema. Development runs codegen without blocking startup, while the production build treats failure as a hard error. Generated validation files are gitignored.
 
 ## Caching
 
-Read operations choose cache behavior from their render role:
+Choose caching by data sensitivity and behavior:
 
-| Render role                                                                     | Treatment                                                        |
-| ------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| Public identity/body that belongs coherently in the prerendered shell           | Plain `"use cache"`                                              |
-| Public results resolved after request inputs such as filters, search, or cursor | `"use cache: remote"` when shared Runtime Cache is justified     |
-| Cart, session, authorization, or Customer Account data                          | Request-scoped or private; never public remote cache             |
-| Mutation                                                                        | No read-cache directive; invalidate affected state after success |
+| Data or operation                                          | Cache contract                                                |
+| ---------------------------------------------------------- | ------------------------------------------------------------- |
+| Public product, collection, menu, or content data          | Cache and invalidate when Shopify changes                     |
+| Public results that vary by filters, search, or pagination | Share only when the cache key includes every varying input    |
+| Cart, session, authorization, or customer data             | Keep request-scoped or private; never place in a public cache |
+| Mutations                                                  | Do not cache                                                  |
 
-Cached public operations use the established `cacheLife` and tags. Combined with webhook-driven invalidation, those tags refresh the intended shell or runtime entry when Shopify changes. Tags follow a hierarchy:
-
-| Tag pattern                | Scope                                |
-| -------------------------- | ------------------------------------ |
-| `products`                 | All product queries                  |
-| `product-{handle}`         | Single product by handle             |
-| `product-{numericId}`      | Single product by Shopify numeric ID |
-| `recommendations-{handle}` | Product recommendations              |
-| `collections`              | All collection queries               |
-| `collection-{handle}`      | Single collection                    |
-| `menus`                    | Navigation menus                     |
-
-Invalidate with `revalidateTag("product-blue-tee")` in server actions. Carts are never placed in the Next.js data cache — cart reads are memoized per request via `getCart`, so cart mutations don't need any cache invalidation step.
+Webhook-driven invalidation keeps cached Shopify content current. Configure `POST /api/webhooks/shopify` as described in [Webhooks](/docs/anatomy/webhooks).
 
 ## Mutations
 
-Cart mutations use the same `storefront.request` client but are not cached. They call Shopify `cartLinesAdd`, `cartLinesUpdate`, and `cartLinesRemove` mutations:
+Cart mutations are uncached and return the updated cart. Use the returned cart instead of issuing a follow-up read.
 
-```ts
-export async function addToCart(lines: CartLineInput[], cartId: string, locale: string) {
-  const response = await storefront.request<{ cartLinesAdd: { cart: ShopifyCart } }>(
-    ADD_TO_CART_MUTATION,
-    { variables: { cartId, lines, country: getCountryCode(locale) } },
-  );
-  assertStorefrontOk(response, "addToCart");
+Never cache cart IDs, customer data, session data, or authenticated responses in a shared public cache.
 
-  return transformShopifyCart(response.data.cartLinesAdd.cart);
-}
-```
+## Errors and missing resources
 
-Shopify returns the full updated cart in every mutation response, so there's no need for a follow-up query.
+Storefront requests throw on transport failures, timeouts, and GraphQL failures without usable data. A response with both data and GraphQL errors logs a warning and allows the operation to use the partial data.
 
-## Error handling
+A missing resource is not an API failure. Read operations return `undefined`, `null`, or an empty list when the requested resource does not exist.
 
-The Hydrogen client resolves to `{ data, errors? }` for GraphQL-level errors, but **throws** on transport failures — `StorefrontApiError` for non-OK HTTP responses and malformed payloads, `StorefrontTimeoutError` when the default 30s timeout elapses. The template applies its contract through `assertStorefrontOk(response, operation)` in `lib/shopify/errors.ts`:
-
-**GraphQL failure** - if `errors` is present and there's no `data`, it throws Hydrogen's `StorefrontApiError` with the operation name plus Shopify's locations, path, extensions, and any additional errors.
-
-**Partial success** - if there are `errors` but `data` is also present, it sends a structured warning through the configured Hydrogen logger and lets the operation use the partial data.
-
-**Narrowing** - on success it narrows `response.data` to non-null, so the operation can read it without optional chaining on the top level.
-
-Individual operations follow a consistent contract on top of this: they **throw** on transport or GraphQL failure, and **return** `undefined`/`null`/`[]` when a resource is simply missing. For example, `getProduct()` returns `undefined` when the product isn't found (rather than throwing), and `getCart()` returns `undefined` when there's no cart. For render paths that should degrade gracefully instead of crashing on a transport error, wrap the call in the `withFallback(promise, fallback)` helper — e.g. `withFallback(getCart(), undefined)` in the nav and cart page.
-
-## Debug logging
-
-Hydrogen logging is configured once when the Next.js server starts. Set `DEBUG_SHOPIFY=true` to include structured Storefront and Customer Account API timings alongside Hydrogen's own runtime logs:
-
-```
-[shopify:debug:storefront] Storefront API request { durationMs: 45, operation: "getProductByHandle" }
-[shopify:debug:customer-account] Customer Account API request { durationMs: 120, operation: "getCustomerProfile" }
-```
-
-Warnings and errors remain enabled without the debug flag. Customer Account API failures retain that client's error contract; `StorefrontApiError` and `StorefrontTimeoutError` apply specifically to Storefront API requests.
-
-## Transforms
-
-Every operation converts the Shopify response to a domain type before returning. Transforms live in `lib/shopify/transforms/`:
-
-| Transform                        | Input → Output                      |
-| -------------------------------- | ----------------------------------- |
-| `transformShopifyProductDetails` | `ShopifyProduct` → `ProductDetails` |
-| `transformShopifyCart`           | `ShopifyCart` → `Cart`              |
-
-Domain types are defined in `lib/types.ts` and are provider-agnostic. Components import these types, never the Shopify-specific response shapes. This keeps the UI decoupled from the API layer.
+Set `DEBUG_SHOPIFY=true` to include structured Storefront and Customer Account API operation timings in server logs. Warnings and errors remain enabled when debug logging is off.

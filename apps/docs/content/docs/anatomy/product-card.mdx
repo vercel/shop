@@ -1,30 +1,25 @@
 ---
 title: Product Card
-description: The shared tile that displays a product's image, title, and price in grids and sliders.
+description: The shared tile that displays a product's image, title, price, and availability across the storefront.
 type: guide
 ---
 
-Used in the home featured grid, collection (PLP) and search grids, the related-products slider on the PDP, and the AI agent's results. It's the same component everywhere a product is shown as a tile, so a change to the card is a change everywhere at once.
+Product cards give shoppers a consistent way to recognize and compare products. They appear on the home page, collection and search pages, related-product sections, and agent results. A visual change affects every use.
 
-## How it works
+## Information shoppers see
 
-**Compound component with stable styling hooks.** `ProductCard` is a server component that wraps the product in a `Link` to `/products/[handle]` — the bare product URL, which renders the first-available (default) variant. Each part — image container, image, content, title, price, optional badge — exposes a `data-slot` attribute (`product-card`, `product-card-image`, etc.), so the pieces can be composed or restyled independently without touching the underlying markup.
+Each card links to the product and shows its image, title, and price. Products with a price range show both bounds. A single discounted price can show the original price and a discount badge; ranges do not show a discount because discounts may differ by variant.
 
-**Loading, empty, and out-of-stock states share one footprint.** The skeleton, the no-image placeholder, and the loaded image all render inside the same square box using the same `ImagePlaceholder` element, so grids never shift as cards move between states. An out-of-stock overlay draws on top of the image rather than replacing it, keeping that same footprint.
+Unavailable products keep their image visible under an out-of-stock label. Products without an image show a placeholder instead of a broken image. Loading, empty, and loaded states reserve the same square space so grids remain stable.
 
-## Out of the box
+The featured style adds a Featured badge and stronger image treatment. Standard grids use the default style.
 
-- **Two variants** — `default` for standard grids and sliders, and `featured`, which adds a "Featured" badge and a top-down gradient behind the image for highlighting hero products.
-- **Price ranges** — when a product's variants span a price range, the card shows both bounds (_$48.00 – $96.00_) instead of a single price; compare-at strike-through and the discount badge only appear for a single price, since per-variant discounts differ across a range.
-- **Square media** — loaded images, no-image placeholders, and skeletons use the same square footprint by default.
-- **Image fallback** — products with no featured image render a placeholder icon instead of a broken image, so grids stay visually aligned.
-- **Out-of-stock overlay** — a darkened image with a localized "out of stock" label when the product is unavailable.
+## Decide whether cards should support purchasing
 
-## Common customizations
+The default card is for discovery. Shoppers open the product page to choose variants and add an item to the cart.
 
-The card doesn't ship these, but they're common additions teams layer on top.
+Common additions include alternate image proportions, a second image on hover, variant swatches, and quick add. Add purchasing controls only when shoppers can make a safe choice from the information on the card. Products with required options usually need the full product page.
 
-- **Image aspect ratio** — change the aspect ratio of product images to fit your storefront.
-- **Hover image carousel** — reveal additional product images on desktop hover instead of showing only the featured image.
-- **Variant selection from the grid** — swatches on the card itself (usually color) so shoppers can preview or add a specific variant without opening the PDP.
-- **Quick add** — an add-to-cart action on the card that skips the PDP for simple, single-variant products.
+## Verify product cards
+
+Review cards with one price, a price range, a discount, no image, and no available inventory. Confirm that every card opens the correct product and that grid spacing remains stable while images load.

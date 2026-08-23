@@ -6,36 +6,40 @@ type: guide
 
 <CartBrowser />
 
-> **Note:** The cart ID is stored in a `cart` cookie (the same cookie Hydrogen's cart handlers use) with a 14-day expiry. Sessions longer than that start a fresh cart.
+The storefront ships with a shared Shopify cart across product pages, the cart overlay, the full cart page, checkout, and the optional shopping assistant. Shoppers see changes immediately while Shopify confirms prices, discounts, and availability.
 
-The cart system spans the entire storefront, not just the cart page. It is built on `@shopify/hydrogen`'s first-party cart stack rather than a hand-rolled one: a server handler owns the `/api/cart` endpoint and cart cookie, a client cart store holds optimistic state, and a provider in `layout.tsx` gives every component access to cart state.
+No additional setup is required for the standard cart. The cart ID is stored in an HttpOnly `cart` cookie for 14 days. After that cookie expires, the shopper starts a new cart.
 
-## How it works
+## Shopper experience
 
-**Hydrogen's cart server handlers own `/api/cart` and the cart cookie.** `lib/cart/server.ts` creates them with `createCartServerHandlers()` and `proxy.ts` registers them through `handleShopifyRoutes`, so `GET`/`POST /api/cart` is answered by Hydrogen before app routing. The handler reads and writes the `cart` cookie and returns the full cart envelope (`{ cart, errors }`). The template's RSC cart reads and AI-agent mutations use the same `cart` cookie (see `lib/cart/server.ts`), so server components, the agent, and the endpoint all operate on one cart id. When `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, Hydrogen sends it as a trusted Storefront API header so Shopify attributes server-side cart activity to the correct Headless storefront.
+Shoppers can add products, change quantities, remove lines, apply discount codes, and proceed to checkout. The cart overlay is available throughout the storefront, and `/cart` provides the full cart with product recommendations.
 
-**The cart streams into the app as a promise.** The root layout is a static shell. An async `AppShell` inside `<Suspense>` calls `await connection()`, starts the full-cart read via `seedCartData()` in `lib/cart/server.ts`, and passes the unresolved promise to a client `CartProvider` as `initialData`. The store tracks the in-flight load, so the shell stays CDN-cacheable while cart content can suspend behind its own fallback with `useSuspenseCart`.
+Updates are optimistic: quantities and badges change immediately, then reconcile with Shopify. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Checkout remains unavailable while totals are still being confirmed.
 
-**Optimistic state lives in Hydrogen's cart store.** The store applies an optimistic update on each mutation, tracks in-flight entities in `pending` (per line, discount code, note, attributes, and cost), reconciles with the server response, and rolls back to a baseline on failure. One transaction per mutation makes rapid overlapping changes safe — a superseded response cannot leave stale totals behind. The template's `components/cart/context.tsx` adapter exposes `cartWithPending` for immediate quantities and badges while `cart` keeps the last cost-settled snapshot during `pending.cost` or background `revalidating`. Summaries therefore hold steady and checkout remains disabled until the authoritative cart cost settles.
+The cart displays confirmed discounts and sale pricing. Shopify bundles remain grouped so shoppers can understand which products belong together. Quantity and remove controls follow Shopify's rules for each line, so some bundle lines may not be editable individually.
 
-**Confirmed cart changes publish Shopify analytics events.** `useCartAnalytics()` subscribes once to the Hydrogen cart store and emits cart-updated, product-added, and product-removed events only after pending work settles. The custom cart fragment includes Shopify's `updatedAt` timestamp so repeated renders and concurrent responses do not duplicate events.
+When customer authentication is enabled, sign-in can attach the existing browser cart to the customer. Checkout can then use the customer's saved details. See [Authentication](/docs/anatomy/authentication).
 
-**Mutations reconcile through Hydrogen's cart store.** Quantity, remove, and discount controls use Hydrogen's typed `useCartForm()` registrations, so native form intents own optimistic state, pending work, reconciliation, scoped errors, quantity sanitization, and editable quantity-input attachment. Add-to-cart keeps a narrow compatibility bridge because this Hydrogen preview's form parser cannot carry gift-card line attributes or the product detail used to render a complete optimistic line. Discount forms read loading state from `pending.discountCodes` and errors from `errors.discountCodes`; newly submitted codes remain visually pending until Shopify confirms whether they apply, so the optimistic placeholder does not flash as invalid.
+The optional shopping assistant uses the same cart, so changes made in chat appear in the cart overlay and on `/cart`.
 
-**Bundles nest as domain cart lines, not flattened rows.** The cart store preserves each bundle parent's `lineComponents` as nested lines (`CartLine.components`), so fixed and transformed bundles render as one parent line listing its included products. The controls in `overlay-item.tsx` honor Shopify's `canUpdateQuantity` and `canRemove` instructions rather than assuming every line is editable.
+If `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, server-side cart activity is attributed to the corresponding Headless storefront. See [Environment Variables](/docs/reference/env-vars).
 
-**The cart cookie's `SameSite` attribute adapts to the deployment.** It's derived from `VERCEL_ENV`: `Strict` in production, `Lax` on preview and every other environment. Preview deployments sit behind Vercel Authentication, whose SSO flow bounces the browser cross-site and redirects back — a `Strict` cookie would be withheld on that return navigation, dropping the cart id. `Lax` still rides top-level GET navigations back into the site (the SSO return, and the return from Shopify's checkout domain) while staying off cross-site subrequests, which is the right level for a cart identifier. The production custom domain is public, so it keeps `Strict`.
+## Important limits
 
-## Out of the box
+- The cart lasts only as long as its 14-day cookie.
+- Shopify remains authoritative for inventory, prices, discounts, and line-editing rules.
+- Cart updates can fail because of availability, quantity, discount, or checkout restrictions.
+- Gift cards and bundles can carry information that ordinary product lines do not; preserve that data when extending cart behavior.
 
-- **Server actions** (`lib/cart/action.ts`, `"use server"`) — handle the checkout-URL flows: `buyNowAction()` (checkout URL for a new item) and `prepareCheckoutAction()` (checkout URL for an existing cart). Cart forms submit line and discount mutations through `/api/cart`; add flows use the compatibility bridge described above. Locale and currency are set at cart creation through the `I18nConfig` (country/language) that `seedCartData()` passes to `createShopifyRequestContext()`; Hydrogen applies it via `@inContext`.
-- **Cart overlay** — a right-side `Sheet` on every viewport (`w-[calc(100%-2.5rem)] max-w-md`, the same width rule as the mobile menu and collection filter sidebar). `overlay-content.tsx` composes an empty state, a scrollable line-item list, and a summary with subtotal, checkout button, and a link to the full cart page. Each line item (`overlay-item.tsx`) top-aligns its image and renders the title, variant options, bundle components, quantity controls, a remove button, and the unit price. The price cell follows Dawn's model: a line with a Shopify discount allocation shows the final unit price first and strikes the regular selling price without repeating the discount code on every item. Otherwise it strikes only a genuine `compareAtPrice` sale price. Quantity still feeds the cart subtotal rather than changing the displayed unit-price basis.
-- **Cart page** (`/cart`) — a 12-column grid on large screens (9 for items, 3 for a sticky summary), wrapped in `Suspense` with a skeleton fallback. Components live in `components/cart-page/`: `Header`, `CartItemsList` (reuses `OverlayItem`), `Summary`, and `Empty`. A `RelatedProductsSection` shows recommendations based on the first cart item; `Empty` replaces the whole grid when the cart has none.
-- **AI agent cart tools** — the agent's add/update/remove/note tools still run through `lib/shopify/operations/cart.ts` server-side and share the `cart` cookie, so agent-driven changes and storefront interactions target the same cart.
+## Verify the cart
 
-## Common customizations
+1. Add an available variant and confirm the cart badge and overlay update.
+2. Change its quantity, then reload `/cart` and confirm the quantity and totals persist.
+3. Apply one valid and one invalid discount code and confirm each result is clear.
+4. Remove the line and confirm the empty-cart state appears.
+5. If authentication or the assistant is enabled, change the cart through that experience and confirm every cart surface agrees.
+6. Start checkout and confirm the products, quantities, discounts, currency, and customer state are correct.
 
-- **Custom cart fields** — pass a `fragment` named `CartFragment` to `createCartServerHandlers({ fragment })` in `lib/cart/server.ts` to add fields the default Hydrogen fragment omits (for example `quantityAvailable` for inventory clamping, or extra merchandise fields). The template already extends it this way to select the catalog unit price and `compareAtPrice` for the overlay's strikethrough. The React bindings in `lib/cart/client.ts` stay typed from the handlers.
-- **Cart attributes** — Hydrogen supports optimistic cart-level attribute updates, but the template does not expose a generic editor. Add one with a concrete use case such as order-level personalization; the existing gift card flow uses line attributes instead.
-- **Cart lifetime** — the 14-day cookie expiry is a constant in `lib/cart/server.ts` and in Hydrogen's own cookie; extending or shortening session length means aligning both.
-- **Custom bundle flows** — `addToCart()` in `lib/shopify/operations/cart.ts` accepts Shopify's optional `CartLineInput.parent` relationship, available as a foundation for app-specific customized-bundle UX beyond the fixed and transformed bundles rendered out of the box.
+## Customize the cart
+
+You can adjust the cart lifetime, expose order-level attributes, support personalized products, or add custom bundle purchase flows. Keep the cookie lifetime aligned with Shopify's cart handling, preserve all line attributes needed at checkout, and continue treating Shopify's confirmed cart as the source of truth.

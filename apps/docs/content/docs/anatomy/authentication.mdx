@@ -4,13 +4,13 @@ description: Built-in customer authentication with Hydrogen and Shopify Customer
 type: guide
 ---
 
-The template includes opt-in customer authentication using the framework-neutral session and OAuth helpers from `@shopify/hydrogen/customer-account`. Customers can sign in through Shopify, view their profile, order history, and address book, refresh expired access tokens, and sign out of both the storefront and Shopify identity provider.
+The template includes opt-in customer authentication through Shopify Customer Accounts. Signed-in customers can manage their profile and addresses, review orders, and continue to checkout with their customer identity.
 
-Authentication is disabled by default. The canonical default lives in `lib/config.ts` as `auth.isEnabled`. When disabled, the storefront works as a guest-only experience and no auth UI is rendered.
+Authentication is disabled by default. The storefront remains guest-only until you enable `auth.isEnabled` in `lib/config.ts` and complete the Shopify setup below.
 
-## Configuration
+## Configure customer accounts
 
-Enable the feature in `lib/config.ts`:
+Enable authentication:
 
 ```ts
 export const shopConfig = {
@@ -22,76 +22,66 @@ export const shopConfig = {
 };
 ```
 
-Then set the Customer Account API client ID, session secret, and public base URL:
+Set these environment variables:
 
 ```bash
-CUSTOMER_ACCOUNT_SESSION_SECRET="[redacted]"
-SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="your-customer-account-client-id"
+CUSTOMER_ACCOUNT_SESSION_SECRET="your-session-secret-here"
+SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 NEXT_PUBLIC_BASE_URL="your-domain.com"
 ```
 
-Shopify provides `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. It does not provide `CUSTOMER_ACCOUNT_SESSION_SECRET` — that one is app-owned, so generate it yourself:
+Shopify provides the client ID. Generate the session secret yourself:
 
 ```bash
 openssl rand -base64 32
 ```
 
-The template derives its cookie encryption key from that secret. Keep it server-only and identical across every instance of a deployment, and treat rotation as deliberate: it invalidates every existing customer session. Enabling auth without both values fails the build.
+Keep the session secret server-only and identical across every instance of a deployment. Rotating it signs out all customers. A build with authentication enabled fails when the session secret or client ID is missing.
 
-Customer Account OAuth requires a public HTTPS origin. Use a tunnel for local OAuth testing and set `NEXT_PUBLIC_BASE_URL` to that tunnel's bare domain (no protocol).
+Customer Account OAuth requires a public HTTPS origin. For local testing, use a tunnel and set `NEXT_PUBLIC_BASE_URL` to its domain without the protocol.
 
-To enable it in Shopify Admin:
+In Shopify Admin:
 
-1. Enable customer accounts: **Settings → Customer accounts → Edit**, choose **Customer accounts**, and Save
-2. Install the **Headless** sales channel from the Shopify App Store
-3. Go to **Sales channels → Headless → (your storefront) → Customer Account API**
-4. Use a public Customer Account API client; Hydrogen performs authorization code + PKCE without a client secret
-5. Set the callback URI to `{YOUR_DOMAIN}/account/authorize` and the logout URI to `{YOUR_DOMAIN}/`
-6. Copy the client ID to `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and confirm the store domain matches `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`
+1. Go to **Settings → Customer accounts → Edit**.
+2. Choose **Customer accounts**, then save.
+3. Install the **Headless** sales channel.
+4. Go to **Sales channels → Headless → your storefront → Customer Account API**.
+5. Use a public Customer Account API client.
+6. Add `https://YOUR_DOMAIN/account/authorize` as the callback URI.
+7. Add `https://YOUR_DOMAIN/` as the logout URI.
+8. Copy the client ID into `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`.
+9. Confirm `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` identifies the same store.
 
-Shopify does not support wildcard callback or logout URIs — register each production, preview, or tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
+Shopify does not support wildcard callback or logout URIs. Register every production, preview, and tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
-## How it works
+## Customer experience
 
-**No client-side auth SDK.** Sign-in is a normal GET navigation to `/account/login`; sign-out is a same-origin POST form to `/account/logout`. The `shopConfig.auth.isEnabled` flag (`lib/config.ts`) gates every auth surface and is safe to read from server and client code alike. When it's false: the account icon disappears from the nav, the Hydrogen auth routes and protected account pages return `404`, and the shared session/access-token helpers in `lib/auth/server.ts` fail before initializing Hydrogen — no auth-related code runs at request time.
+Customers sign in at `/account/login` and sign out through `/account/logout`. The storefront provides:
 
-**The session lives in an encrypted cookie, not a server store.** `/account/login` asks Hydrogen to generate state, nonce, and PKCE values, which the app encrypts into chunked AES-256-GCM HttpOnly cookies. Shopify redirects to `/account/authorize`, where Hydrogen validates state, nonce, issuer, audience, and ID-token expiry before exchanging the authorization code — access, refresh, and ID tokens then replace the pending-login state in that same cookie. Server Components only perform read-only login and token checks; they never mutate cookies.
+- `/account/profile` for name and email details
+- `/account/orders` and `/account/orders/[id]` for order history and details
+- `/account/addresses` for creating, editing, deleting, and choosing a default address
 
-**Token refresh happens out-of-band, not inline.** `isCustomerLoggedIn()` treats a refreshable session as logged in, so the nav doesn't flicker to signed-out when the access token expires. `requireCustomerAccessToken()` redirects through `/account/refresh` when only a refresh token remains, where Hydrogen rotates tokens and commits the updated cookie before returning to the account page. Logout mirrors this: the sign-out button POSTs to `/account/logout`, which clears the local session and redirects through Shopify's logout endpoint with `id_token_hint`, ending both the storefront session and the Shopify SSO session.
+Sessions use encrypted, HttpOnly cookies rather than browser-readable storage. Expired access tokens refresh through `/account/refresh`. Logout ends both the storefront session and the Shopify sign-in session.
 
-**The cart follows the customer session.** When authentication is enabled, the cart and Customer Account handlers share the same Hydrogen customer session. New carts include the signed-in customer's buyer identity, login and token refresh attach an existing browser cart, and logout detaches it. Authenticated cart reads also mark the checkout URL so Shopify can carry the customer into checkout with their saved details instead of starting a guest flow. Cart synchronization is best-effort and never blocks an auth redirect; if Hydrogen cannot safely detach a cart during logout, it expires the cart cookie.
+When authentication is enabled, the cart follows the customer session. Signing in attaches the browser cart when possible, and checkout can carry the customer's saved details. Cart synchronization is best-effort; an authentication redirect still completes if cart synchronization fails.
 
-```ts
-import {
-  isCustomerLoggedIn,
-  requireCustomerAccessToken,
-  requireCustomerSession,
-} from "@/lib/auth/server";
+Customer Account API data is personalized and is not publicly cached.
 
-const loggedIn = await isCustomerLoggedIn();
-await requireCustomerSession();
-const accessToken = await requireCustomerAccessToken("/account/orders");
-```
+> **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
 
-Use `isCustomerLoggedIn()` for read-only UI state, `requireCustomerSession()` for account-page gates, and `requireCustomerAccessToken()` immediately before private Customer Account API work.
+## Verify the setup
 
-> **Guardrails.**
->
-> - Never expose access, refresh, or ID tokens to Client Components or browser-readable storage.
-> - Keep Server Components on the read-only session path. Token refresh belongs in `/account/refresh`.
-> - Keep login as GET and logout as same-origin POST, and register the callback and logout URIs in Shopify exactly.
-> - Rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` deliberately — rotation invalidates every existing session.
-> - `auth.isEnabled` lives in `lib/config.ts` (not an env var), so the server and client feature gates read one shared value and stay in agreement under cache components.
+1. Open `/account/login` from the public HTTPS origin.
+2. Sign in through Shopify and confirm the storefront returns to an account page.
+3. Check profile, order, and address data against the same customer in Shopify Admin.
+4. Add an item before signing in and confirm it remains in the cart afterward.
+5. Sign out and confirm protected account pages require a new sign-in.
 
-## Out of the box
+If the redirect fails, first compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character.
 
-- **Auth routes** — `/account/login` (GET, starts PKCE and redirects to Shopify), `/account/authorize` (GET, validates the OAuth callback), `/account/refresh` (GET, rotates an expired access token), and `/account/logout` (POST, clears the session). All four are installed via Hydrogen's standard handlers through `handleShopifyRoutes` in the [proxy](/docs/anatomy/proxy), which intercepts the customer-account OAuth paths before routing.
-- **Cart session attribution** — the same Hydrogen customer session is passed to the cart and auth handlers, so buyer identity stays synchronized across cart creation, login, refresh, checkout, and logout.
-- **Account pages** — `/account` (redirects to profile), `/account/profile` (edit name, read-only email), `/account/orders` (paginated order history), `/account/orders/[id]` (order detail), and `/account/addresses` (address book with create, edit, delete, and default selection). The `(authenticated)` route group gates these without claiming the auth-handler paths.
-- **Customer Account API data** — profile, orders, and addresses come from the Customer Account API, which has its own GraphQL endpoint and schema, separate from the Storefront API. Every call resolves a usable access token first, routing through the refresh step when only a refresh token remains, so no operation runs with an expired token. Customer responses are personalized and never publicly cached.
-- **Rendering and mutations** — order and profile pages are Server Components wrapped in Suspense. Address and profile editing use client forms backed by server actions that validate input, surface Shopify `userErrors`, and revalidate the affected pages.
+## Customize customer accounts
 
-## Common customizations
+You can change the account navigation, add a dashboard, or expose more Customer Account API data such as store credit or subscriptions. Validate additions against the Customer Account API schema, which differs from the Storefront API, and keep private customer data behind authentication.
 
-- **Additional account data** — store credit, subscriptions, draft orders, or richer order fields all follow the same path as the shipped account data: a Customer Account API operation, a transform to a domain type, and a server action for anything that mutates. Validate new fields against the live Customer Account API schema, since it differs from the Storefront API.
-- **Account page composition** — the shipped profile, orders, and addresses pages are a starting point. Reordering them, adding a landing dashboard, or splitting order history into its own section is presentation work that leaves the auth flow untouched.
+See [Proxy](/docs/anatomy/proxy) for the storefront's request-routing role in customer account URLs.

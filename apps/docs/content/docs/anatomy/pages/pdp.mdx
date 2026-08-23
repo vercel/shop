@@ -1,39 +1,39 @@
 ---
 title: Product Detail Page (PDP)
-description: A single product page with variants, media, and add-to-cart.
+description: A single product page with variants, media, purchase controls, and product recommendations.
 type: guide
 ---
 
 <PDPBrowser />
 
-The Product Detail Page (PDP) is a single product page — title, price, media, variant selection, and add-to-cart. It's the smallest unit of commerce in the storefront.
+The Product Detail Page (PDP) gives shoppers the information and controls needed to choose a product variant and purchase it.
 
-## How it works
+## Help shoppers choose the right variant
 
-**Static-first rendering.** Product data is awaited at the top of the page and baked into the static shell, so the title, price, gallery, and description ship as one coherent copy. Freshness comes from cache invalidation — a Shopify webhook calling `revalidateTag`, plus the `cacheLife` window — not a per-request fetch, so the body never re-renders at request time.
+Product pages show the title, price, media, description, and available options. Option choices update the page URL, so shoppers can share a selected color, size, or other variant and use browser back and forward controls.
 
-**Variant selection through URL searchParams.** Each option change is a navigation (`/products/tee?color=Blue&size=XS`), not client state. That gives you shareable URLs, working browser back/forward, and a fully server-rendered page with zero layout shift. The selected variant resolves from a second, per-selection Shopify query kept off the critical path, so the picker highlights at URL speed rather than waiting on the network.
+When colors have distinct media, the gallery leads with the selected color's image. Desktop shoppers get a grid and lightbox; mobile shoppers get a swipeable gallery.
 
-## Out of the box
+Product updates are cached and refreshed by Shopify webhooks. See [Webhooks](/docs/anatomy/webhooks).
 
-- **Variant picker** — color, size, and other options rendered as links, with swatch availability decoded from Shopify's encoded variant data.
-- **Color-aware image gallery** — a desktop grid with lightbox and a mobile snap carousel, leading with the selected color's image when color options have distinct media.
-- **Add to cart** — optimistic add of the selected variant.
-- **Gift cards** — a recipient form replaces the buy buttons for gift card products. Recipient details are sent as Shopify line attributes, so gift cards for the same variant remain distinct when their recipients or messages differ.
-- **Quantity picker** — a 1–99 picker beside the cart action.
-- **Buy with Shop** — Shopify's official lock-up that creates a checkout and redirects to it.
-- **Bundles** — "includes" and "available in" bundle relationships below the buy buttons.
-- **Complementary products** — merchant-curated "Pairs Well With" add-ons.
-- **Related products** — algorithmic "you might also like" set below the product details.
-- **Structured data** — Product and Breadcrumb JSON-LD for search and social.
+## Included purchase features
 
-The quantity picker, Buy with Shop, bundles, complementary products, and related products are on by default and toggled under `pdp` in `lib/config.ts`.
+- **Variant picker** — shows available colors, sizes, and other options.
+- **Add to cart** — adds the selected variant without waiting for the full cart response.
+- **Quantity** — accepts values from 1 through 99.
+- **Gift cards** — collects recipient details and keeps gifts for different recipients separate in the cart.
+- **Buy with Shop** — starts Shopify checkout.
+- **Bundles** — shows included items and other bundles containing the product.
+- **Complementary products** — presents merchant-curated add-ons.
+- **Related products** — presents algorithmic recommendations.
+- **Structured data** — describes the product and breadcrumbs to search engines.
 
-## Common customizations
+Quantity, Buy with Shop, bundles, complementary products, and related products are enabled by default. Disable sections that do not fit the catalog or purchase journey.
 
-The PDP doesn't ship these, but they're common additions teams layer on top. Each is your own data source and component, wired in alongside the other sections in `product-detail-section.tsx`.
+## Common additions
 
-- **Reviews** — a ratings summary near the price and a review list below the details, usually backed by a reviews app or Shopify metafields.
-- **Virtual try-on** — an AR or camera overlay launched from the gallery, typically a modal wrapping a partner SDK.
-- **Metafield accordion** — an accordion below the description surfacing metafields (materials, care, sizing) that aren't part of the default fields.
-- **Waitlist** — a restock signup that replaces Add to Cart when the selected variant is unavailable.
+Reviews, detailed material or care information, virtual try-on, and restock waitlists require another data source or service. Add them only when they help shoppers make a purchase decision that the default product data cannot support.
+
+## Verify a product page
+
+Test products with multiple options, unavailable variants, distinct color images, gift-card recipients, bundles, and recommendations. Confirm that the URL preserves the chosen variant and that the cart receives the correct variant, quantity, and gift-card details.

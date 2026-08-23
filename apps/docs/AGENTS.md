@@ -60,7 +60,13 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 - Use MDX frontmatter with at least `title` and `description`; the schema (from `@vercel/geistdocs/source-config`) also supports `type`, `prerequisites`, `related`, `summary`, `tags`, and `excludeFrom`.
 - Add each new page to the relevant `meta.json` so it appears in the sidebar.
 - Plain markdown copied into MDX must have `{`, `}`, and bare `<` escaped outside code blocks.
-- Do not add `Key files`, file inventory, or file-to-purpose table sections. Mention a path inline only when it directly supports the surrounding instruction or explanation.
+- Give each page one audience and one purpose. Lead with the outcome, then state the default, required action, important limits, and a way to verify the result when the page is procedural.
+- Apply an essentiality test to implementation detail. Keep a technical detail only when the reader needs it to complete a task, make a decision, avoid a security or data problem, understand a real limitation, or verify the result.
+- Prefer observable behavior and merchant or shopper language. Treat function names, component names, internal fields, file paths, request choreography, and cache mechanics as warning signs in reader-facing guides.
+- Use short sentences, active voice, consistent terms, one instruction per step, and one main idea per paragraph. Define uncommon abbreviations before using them.
+- Exact commands, settings, environment variables, Admin paths, callback URLs, permissions, and security requirements are appropriate when the reader must act on them.
+- Generated skill pages are procedural instructions for coding agents and may remain technical. Never hand-edit their embedded skill content.
+- Do not add `Key files`, file inventory, or file-to-purpose table sections. Mention a path inline only when it directly supports a required action.
 - Keep customization suggestions concise and user-facing: say what can be changed and why someone might change it. Avoid implementation steps, code symbols, and file paths unless they are necessary to complete the customization or the reader asks for them.
 - Keep slugs stable unless the task explicitly includes redirects or link updates.
 

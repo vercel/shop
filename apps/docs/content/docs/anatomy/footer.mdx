@@ -4,32 +4,22 @@ description: The storefront footer - copyright, Shopify policy links, social lin
 type: guide
 ---
 
-The footer renders at the bottom of every page. By default it displays a copyright notice, every configured Shopify store policy, and optional social media links.
+The footer appears on every page. By default, it shows your store name and links to every policy configured in Shopify. Social links and menu columns are optional.
 
-## How it works
+## Publish store policies
 
-**Policy links come from Shopify, not a hardcoded list.** The footer links to every policy configured in Shopify Admin, using the active locale, and each link disappears individually when that policy isn't configured — there's no separate allowlist to maintain. They render at `/policies/[handle]` and share the `policies` cache tag with the policy pages and static sitemap shard, so a policy edit in Shopify invalidates all three surfaces together.
+Add and maintain policies in Shopify Admin. The footer automatically links each configured policy in the shopper's active locale. Policies without content do not appear, so there is no separate list to maintain.
 
-**Social links are hidden by default.** The `socialLinks` array in `components/footer/index.tsx` takes `{ platform, url }` entries — `platform` is one of `facebook`, `instagram`, `x`, `youtube`, `tiktok`, `pinterest`, `linkedin`, or `github`. The default is an empty array, which hides the section entirely; a non-empty array renders icons on the right side of the footer opposite the copyright.
+Supported policy pages include contact information, legal notice, privacy, refunds, shipping, terms of sale, and terms of service.
 
-```ts
-// components/footer/index.tsx
-const socialLinks: SocialLink[] = [
-  { platform: "x", url: "https://x.com/mystore" },
-  { platform: "instagram", url: "https://instagram.com/mystore" },
-];
-```
+## Choose what else to show
 
-**The copyright line has no year by design.** It uses the `footer.copyright` i18n key with `shopConfig.site.name` interpolated in (edited in `lib/config.ts`, defaulting to `"Vercel Shop"`). Reading `new Date()` for a year would force every page dynamic under Next.js 16 Cache Components, so the template omits it rather than trading that away by default.
+- **Copyright** — uses the configured store name and omits the year by default.
+- **Social profiles** — hidden until you add profile URLs. Supported services are Facebook, Instagram, X, YouTube, TikTok, Pinterest, LinkedIn, and GitHub.
+- **Menu columns** — use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to add links from a Shopify footer menu.
 
-## Out of the box
+A dynamic year is not included because reading the current date can change how pages are cached. Add one only if that tradeoff is acceptable for your storefront.
 
-- **Copyright** — "© \{shopConfig.site.name\}. All rights reserved.", editable via `footer.copyright` in `lib/i18n/messages/en.json`.
-- **Policy links** — one link per Shopify-configured store policy, locale-aware.
-- **Social links** — icons for any configured `socialLinks` entry, hidden when the array is empty.
+## Verify the footer
 
-## Common customizations
-
-- **Shopify menu columns** — the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill adds link columns sourced from a Shopify `"footer"` menu above the copyright.
-- **Branding** — edit `site.name` in `lib/config.ts` to change the name; edit `lib/i18n/messages/en.json` to change the copyright wording itself.
-- **A dynamic year** — add one only inside a `Suspense` boundary, since an unwrapped `new Date()` read would force the whole page dynamic under Cache Components.
+Preview the storefront in each supported locale. Confirm that configured policies open successfully, unconfigured policies are absent, and each social link points to the intended profile.

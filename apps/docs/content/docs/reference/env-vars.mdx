@@ -6,30 +6,30 @@ type: reference
 
 ## Required
 
-| Variable                                      | Description                                                                                                        |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`            | Your Shopify store domain, e.g. `your-store.myshopify.com`. Found in **Settings → Domains** in your Shopify admin. |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public Storefront API access token (browser-safe). Found in **Settings → Apps and sales channels → Headless**.     |
+| Variable                                      | Description                                                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`            | Shopify store domain, such as `your-store.myshopify.com`. Find it in **Settings → Domains** in Shopify admin. |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public, browser-safe Storefront API token. Find it in **Settings → Apps and sales channels → Headless**.      |
 
-## Customer Authentication
+## Customer authentication
 
-Required when `auth.isEnabled` is set to `true` in [`lib/config.ts`](/docs/reference/shop-config). These variables have different owners: Shopify provides the Customer Account API client ID, while you generate the session secret for this application.
+These variables are required when `auth.isEnabled` is `true` in [`lib/config.ts`](/docs/reference/shop-config).
 
-The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies. `CUSTOMER_ACCOUNT_SESSION_SECRET` is the private application key used to derive the AES-256-GCM encryption key for those cookies; it is not a Shopify credential. Generate it with `openssl rand -base64 32`, keep one stable value across all instances of a deployment, and store it only in server-side environment variables. Rotating it invalidates all existing customer sessions. The variable is required by the template's encrypted-cookie implementation, but an application that replaces it with protected server-side session storage can use that storage system's key management instead.
+| Variable                                 | Description                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `CUSTOMER_ACCOUNT_SESSION_SECRET`        | App-generated secret that encrypts customer session cookies. Shopify does not provide this value. |
+| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` | Public client ID from **Sales channels → Headless → Customer Account API** in Shopify admin.      |
 
-| Variable                                 | Description                                                                                             |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `CUSTOMER_ACCOUNT_SESSION_SECRET`        | App-generated private secret that protects encrypted customer session cookies. Not supplied by Shopify. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` | Public Customer Account API client ID. Found in **Sales channels → Headless → Customer Account API**.   |
+Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Store one stable value in server-side environment variables across all deployment instances. Rotating it invalidates existing customer sessions.
 
 ## Optional
 
-| Variable                            | Description                                                                                                                                                                  |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEBUG_SHOPIFY`                     | Set to `true` to include structured Storefront and Customer Account API operation timings in Hydrogen's server logs.                                                         |
-| `NEXT_PUBLIC_BASE_URL`              | Bare domain (no protocol) used to build the canonical base URL for sitemap entries, OG tags, and auth callbacks. Defaults to `VERCEL_PROJECT_PRODUCTION_URL` on Vercel.      |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel. Hydrogen sends it as a trusted Storefront API header for cart attribution and includes it in Shopify runtime configuration. |
-| `SHOPIFY_API_VERSION`               | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.                                                |
-| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures on incoming Shopify webhooks at `/api/webhooks/shopify`.                                                                        |
+| Variable                            | Description                                                                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                                  |
+| `NEXT_PUBLIC_BASE_URL`              | Canonical domain without a protocol, such as `shop.example.com`. Defaults to `VERCEL_PROJECT_PRODUCTION_URL` on Vercel. |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration.           |
+| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.             |
+| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                          |
 
-System variables auto-injected on Vercel that the build reads (`VERCEL_PROJECT_PRODUCTION_URL`, `V0_CALLBACK_URL`) are listed in `turbo.json` `globalEnv` so Turbo's strict-mode build sees them. You don't set these yourself.
+Vercel supplies `VERCEL_PROJECT_PRODUCTION_URL` and `V0_CALLBACK_URL` automatically. Do not set them yourself.

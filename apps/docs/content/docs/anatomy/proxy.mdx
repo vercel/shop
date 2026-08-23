@@ -1,42 +1,34 @@
 ---
 title: Proxy
-description: How the root proxy composes Shopify-owned routes, request context, and application routing.
+description: How the storefront assigns Shopify-owned routes while leaving application routes available to Next.js.
 type: guide
 ---
 
-The storefront ships a [proxy](https://nextjs.org/docs/app/getting-started/proxy) — frequently called middleware — that runs before filesystem routing. It gives Shopify's reserved routes to Hydrogen, adds Shopify request context to storefront requests, and lets everything else continue to the Next.js application.
+The storefront uses a [Next.js proxy](https://nextjs.org/docs/app/getting-started/proxy), often called middleware, to direct requests before page routing. It protects Shopify-owned endpoints while leaving ordinary storefront and application routes available to Next.js.
 
-## How it works
+## Route ownership
 
-**The matcher defines route ownership.** Shopify-owned API and protocol routes are listed explicitly, including `/api/cart`, the Storefront API proxy, Shopify MCP, Ajax cart endpoints, and agent or customer-account handoff routes. The general storefront matcher excludes `/api`, so application Route Handlers such as `/api/chat`, `/api/webhooks`, or a custom `/api/search` remain owned by Next.js unless they are intentionally added to the matcher.
+Shopify handles its cart, Storefront API, Model Context Protocol (MCP), Ajax cart, agent, and customer-account endpoints. Storefront pages continue to Next.js with the Shopify request context needed for Storefront API calls, analytics, and safe caching.
 
-**Hydrogen gets the first opportunity to handle matched requests.** `handleShopifyRoutes()` checks its standard interceptors and registered handlers. It returns `null` synchronously when no Shopify route matches, or a response promise when Hydrogen owns the request. The proxy returns that promise directly instead of awaiting it; a `null` result falls through to later proxy behavior and then Next.js routing.
+Other application API routes bypass the proxy unless you explicitly assign them to an integration. This avoids collisions between Shopify endpoints and your own APIs.
 
-**Every fallthrough request carries Shopify request context.** The proxy forwards Hydrogen's request-context headers to the application and applies its response headers on the way out. This supports Storefront API calls, analytics, and personalized-response cache safety without per-route setup.
+Authentication changes only cart and customer-account handling. When authentication is enabled, those requests can synchronize the shopper's identity with the cart. Other requests keep the guest-cart behavior. See [Environment Variables](/docs/reference/env-vars) for the authentication setting.
 
-**Authentication setup stays scoped.** When authentication is enabled, the proxy creates session-aware cart handlers only for `/api/cart` and the four Customer Account paths. The auth handlers receive that same cart handler set so login, refresh, and logout can synchronize buyer identity. Ordinary storefront and unrelated API requests keep the guest cart handlers and do not pay for customer-session discovery.
+## Add routing without creating conflicts
 
-## Out of the box
+Assign only the exact route families an integration owns. Do not claim every API route for Shopify or locale handling, because that can intercept unrelated application APIs.
 
-| Request                             | What the proxy does                                                                                   |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Shopify-owned API or protocol route | Returns Hydrogen's response before App Router routing                                                 |
-| Cart API route                      | Uses session-aware cart handlers when authentication is enabled, otherwise the guest handlers         |
-| Customer account auth route         | Runs Hydrogen's auth handler with the same session-aware cart handlers when authentication is enabled |
-| Matched storefront route            | Lets Hydrogen decline it, forwards request-context headers, and continues to Next.js                  |
-| Other application `/api/*` route    | Skips proxy and runs its App Router Route Handler directly                                            |
+Run Shopify routing before locale negotiation, experiments, or request-dependent redirects. This keeps Shopify protocol endpoints locale-neutral while allowing storefront pages to use those features.
 
-No environment variables configure the proxy itself. Authentication behavior follows the feature flag described in [Environment Variables](/docs/reference/env-vars).
+Use static redirects for fixed URL changes. Use the proxy only when a decision depends on the incoming request.
 
-## Composing additional routing
+## Common extensions
 
-Run ownership-specific dispatch before cross-cutting routing. For example, the i18n and Shopify Markets integrations call Hydrogen first, then run next-intl only when `handleShopifyRoutes()` returns `null`. This keeps Shopify's reserved endpoints locale-neutral while allowing locale negotiation on storefront pages.
+- **Locale routing** — [Enable Shopify Markets](/docs/skills/enable-shopify-markets) and [Enable i18n](/docs/skills/enable-i18n) add locale handling after Shopify routing.
+- **Custom APIs** — application APIs remain outside the proxy unless explicitly claimed.
+- **Experiments and redirects** — request-dependent choices can run after Shopify declines the request.
+- **Location and bot signals** — coarse request signals are available here. Verified bot detection for assistant chat uses [Vercel BotID](https://vercel.com/docs/botid).
 
-Keep `export const config` static because Next.js analyzes matchers at build time. Add exact route families when a new integration owns a path; do not replace the Shopify entries with a blanket `/api/:path*` matcher. Broad API matching makes unrelated Route Handlers unexpectedly pass through Shopify or locale logic and creates collisions as an application grows.
+## Verify a routing change
 
-## Common customizations
-
-- **Multi-locale routing** — both [Enable Shopify Markets](/docs/skills/enable-shopify-markets) and [Enable i18n](/docs/skills/enable-i18n) compose locale negotiation after Shopify dispatch and add locale-prefixed Shopify matchers. The single-locale template does not reserve those paths.
-- **Custom APIs** — add Route Handlers under `/api` normally. They remain outside proxy unless the matcher explicitly claims them.
-- **Redirects and experiments** — request-dependent redirects or A/B bucketing can run after Shopify declines the request. Static redirects belong in `next.config.ts`.
-- **Geo and coarse bot handling** — request geo and user-agent data is available before routing. Verified bot detection on the assistant's chat endpoint is handled by [Vercel BotID](https://vercel.com/docs/botid) rather than proxy.
+Test the affected Shopify endpoint, an ordinary storefront page, and an unrelated application API. Confirm that each reaches the expected owner and that locale handling does not alter Shopify protocol routes.
