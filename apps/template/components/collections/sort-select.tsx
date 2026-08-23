@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { getCollectionSortByValue, getLegacySortFromCollectionState } from "@/lib/collections";
+import { getCollectionSortByValue, getCollectionSortFromState } from "@/lib/collections";
 
 const SORT_OPTIONS = [
   { value: "best-matches", key: "bestMatches" },
@@ -44,7 +44,7 @@ function HydrogenCollectionSortSelect({ exclude }: { exclude?: string[] }) {
 
   return (
     <SortSelect
-      currentSort={getLegacySortFromCollectionState(sortKey, reverse)}
+      currentSort={getCollectionSortFromState(sortKey, reverse)}
       disabled={status === "loading"}
       onChange={(value) => {
         const sortBy = getCollectionSortByValue(value);

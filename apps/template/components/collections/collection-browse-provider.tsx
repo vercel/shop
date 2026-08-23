@@ -4,7 +4,6 @@ import { CollectionProvider, useCollection } from "@shopify/hydrogen/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, type ReactNode } from "react";
 
-import { normalizeCollectionBrowseParams } from "@/lib/collections";
 import type { CollectionSearchState } from "@/lib/collections/server";
 
 import { FilterTransitionProvider, useFilterTransition } from "./filter-pending-context";
@@ -39,9 +38,6 @@ function CollectionBrowseProviderInner({
   searchStatePromise,
 }: CollectionBrowseProviderProps) {
   const { dataSearch } = use(searchStatePromise);
-  const normalizedDataSearch = normalizeCollectionBrowseParams(
-    new URLSearchParams(dataSearch),
-  ).toString();
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,8 +45,8 @@ function CollectionBrowseProviderInner({
 
   return (
     <CollectionProvider
-      data={{ dataSearch: normalizedDataSearch, handle }}
-      urlSearch={normalizeCollectionBrowseParams(searchParams).toString()}
+      data={{ dataSearch, handle }}
+      urlSearch={searchParams.toString()}
       onChange={(search) => {
         startTransition(() => {
           router.push(`${pathname}${search}`, { scroll: false });

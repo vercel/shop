@@ -1,6 +1,6 @@
+import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 
-import { getLegacyCollectionSort, normalizeCollectionBrowseParams } from "@/lib/collections";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
@@ -33,14 +33,42 @@ export interface CollectionResultsData {
 export async function getCollectionSearchState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<CollectionSearchState> {
-  const searchParams = await searchParamsPromise;
-  const normalized = normalizeCollectionBrowseParams(searchParams);
+  const searchParams = recordToSearchParams(await searchParamsPromise);
+  const state = parseCollectionParams(searchParams);
+  const dataSearch = serializeCollectionParams(state).toString();
 
   return {
-    activeFilters: parseFiltersFromSearchParams(searchParamsToRecord(normalized)),
-    dataSearch: normalized.toString(),
-    sort: getLegacyCollectionSort(normalized),
+    activeFilters: parseFiltersFromSearchParams(
+      searchParamsToRecord(new URLSearchParams(dataSearch)),
+    ),
+    dataSearch,
+    sort: getCollectionSort(state.sortKey, state.reverse),
   };
+}
+
+function getCollectionSort(sortKey: string | undefined, reverse: boolean): string | undefined {
+  if (!sortKey || sortKey === "COLLECTION_DEFAULT" || sortKey === "MANUAL") return undefined;
+  if (sortKey === "BEST_SELLING") return "best-selling";
+  if (sortKey === "CREATED") return reverse ? "date-new-to-old" : "date-old-to-new";
+  if (sortKey === "PRICE") return reverse ? "price-high-to-low" : "price-low-to-high";
+  if (sortKey === "TITLE") {
+    return reverse ? "product-name-descending" : "product-name-ascending";
+  }
+  return undefined;
+}
+
+function recordToSearchParams(
+  record: Record<string, string | string[] | undefined>,
+): URLSearchParams {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(record)) {
+    if (Array.isArray(value)) {
+      for (const item of value) params.append(key, item);
+    } else if (value !== undefined) {
+      params.set(key, value);
+    }
+  }
+  return params;
 }
 
 export async function getCollectionResultsData({
