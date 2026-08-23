@@ -38,7 +38,7 @@ export function usePredictiveSearch() {
   const state = useHydrogenPredictiveSearch<HydrogenPredictiveSearchData>();
   const [activeIndex, setActiveIndex] = useState(-1);
   const results: PredictiveSearchResult | null =
-    state.status === "idle"
+    state.status !== "success"
       ? null
       : {
           collections: state.result.items.collections,
