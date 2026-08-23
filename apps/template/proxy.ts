@@ -16,6 +16,7 @@ import {
 } from "@/lib/auth/server";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
+import { predictiveSearchHandlers } from "@/lib/search/server";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
 const AUTH_PATHS = new Set<string>([
@@ -54,8 +55,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
       : undefined;
   const handlers =
     authHandlers && customerCartHandlers
-      ? [authHandlers, customerCartHandlers]
-      : [customerCartHandlers ?? cartHandlers];
+      ? [authHandlers, customerCartHandlers, predictiveSearchHandlers]
+      : [customerCartHandlers ?? cartHandlers, predictiveSearchHandlers];
   const shopifyRoute = handleShopifyRoutes({
     handlers,
     request,
@@ -75,6 +76,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
 export const config = {
   matcher: [
     "/api/cart",
+    "/api/predictive-search",
     "/api/mcp",
     "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
     "/__shopify/:path*",

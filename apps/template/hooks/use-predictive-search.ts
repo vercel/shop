@@ -1,78 +1,91 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import type { PredictiveSearchData } from "@shopify/hydrogen";
+import {
+  usePredictiveSearch as useHydrogenPredictiveSearch,
+  usePredictiveSearchActions,
+} from "@shopify/hydrogen/react";
+import { useCallback, useState } from "react";
 
-import { predictiveSearchAction } from "@/lib/search/action";
 import type { PredictiveSearchResult } from "@/lib/types";
 
-const DEBOUNCE_MS = 300;
+type HydrogenProduct = PredictiveSearchData["items"]["products"][number] & {
+  availableForSale: boolean;
+  compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } } | null;
+  featuredImage: {
+    altText?: string | null;
+    height: number;
+    url: string;
+    width: number;
+  } | null;
+  priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
+  vendor?: string | null;
+};
 
-export function usePredictiveSearch(locale: string) {
-  const [query, setQueryRaw] = useState("");
-  const [results, setResults] = useState<PredictiveSearchResult | null>(null);
-  const [isPending, startTransition] = useTransition();
+type HydrogenQuery = PredictiveSearchData["items"]["queries"][number] & {
+  styledText: string;
+};
+
+interface HydrogenPredictiveSearchData extends PredictiveSearchData {
+  items: Omit<PredictiveSearchData["items"], "products" | "queries"> & {
+    products: HydrogenProduct[];
+    queries: HydrogenQuery[];
+  };
+}
+
+export function usePredictiveSearch() {
+  const { clear, search } = usePredictiveSearchActions();
+  const state = useHydrogenPredictiveSearch<HydrogenPredictiveSearchData>();
   const [activeIndex, setActiveIndex] = useState(-1);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
-  const generationRef = useRef(0);
+  const results: PredictiveSearchResult | null =
+    state.status === "idle"
+      ? null
+      : {
+          collections: state.result.items.collections,
+          products: state.result.items.products.map((product) => ({
+            availableForSale: product.availableForSale,
+            compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
+            featuredImage: product.featuredImage
+              ? {
+                  altText: product.featuredImage.altText ?? "",
+                  height: product.featuredImage.height,
+                  url: product.featuredImage.url,
+                  width: product.featuredImage.width,
+                }
+              : null,
+            handle: product.handle,
+            id: product.id,
+            price: product.priceRange.minVariantPrice,
+            title: product.title,
+            vendor: product.vendor || undefined,
+          })),
+          queries: state.result.items.queries,
+        };
 
-  const setQuery = useCallback((q: string) => {
-    setQueryRaw(q);
-    setActiveIndex(-1);
-  }, []);
-
-  useEffect(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setResults(null);
-      return;
-    }
-
-    const generation = ++generationRef.current;
-
-    timerRef.current = setTimeout(() => {
-      startTransition(async () => {
-        try {
-          const data = await predictiveSearchAction(trimmed, locale);
-          if (generationRef.current === generation) {
-            setResults(data);
-          }
-        } catch {
-          // Predictive failure must not block full search submission.
-        }
-      });
-    }, DEBOUNCE_MS);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [query, locale]);
-
-  const totalItems =
-    (results?.queries.length ?? 0) +
-    (results?.products.length ?? 0) +
-    (results?.collections.length ?? 0);
+  const setQuery = useCallback(
+    (query: string) => {
+      setActiveIndex(-1);
+      void search(query);
+    },
+    [search],
+  );
 
   const reset = useCallback(() => {
-    setQueryRaw("");
-    setResults(null);
+    clear();
     setActiveIndex(-1);
-    generationRef.current++;
-  }, []);
+  }, [clear]);
 
   return {
-    query,
-    setQuery,
-    results,
-    isLoading: isPending,
-    totalItems,
     activeIndex,
-    setActiveIndex,
+    isLoading: state.status === "loading",
+    query: state.term,
     reset,
+    results,
+    setActiveIndex,
+    setQuery,
+    totalItems:
+      (results?.collections.length ?? 0) +
+      (results?.products.length ?? 0) +
+      (results?.queries.length ?? 0),
   };
 }
