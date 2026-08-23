@@ -9,6 +9,7 @@ import { CollectionResultsGrid } from "@/components/collections/results-grid";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
 import { CollectionToolbar } from "@/components/collections/toolbar";
+import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -18,7 +19,11 @@ import type { CollectionResultsData, CollectionSearchState } from "@/lib/collect
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
-import { FilterPendingScope, FilterTransitionProvider } from "./filter-pending-context";
+import {
+  CollectionActiveFilterCountBadge,
+  CollectionBrowseProvider,
+} from "./collection-browse-provider";
+import { FilterPendingScope } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
   collection,
@@ -43,54 +48,77 @@ export async function CollectionDetailPage({
   const sortByLabel = tSearch("sortBy");
 
   return (
-    <FilterTransitionProvider>
-      <Page className="pt-2.5 md:pt-10">
-        <Container>
-          <Sections className="gap-5">
-            <CollectionHeader
-              collection={collection}
-              handle={handle}
-              homeLabel={tBreadcrumb("home")}
-            />
+    <Page className="pt-2.5 md:pt-10">
+      <Container>
+        <Sections className="gap-5">
+          <CollectionHeader
+            collection={collection}
+            handle={handle}
+            homeLabel={tBreadcrumb("home")}
+          />
 
-            <CollectionToolbar
-              filterSheet={
-                <FilterSidebarSheet
-                  label={filtersLabel}
-                  trigger={
-                    <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                      <SlidersHorizontalIcon className="size-4" />
-                      <span>{filtersLabel}</span>
-                      <Suspense fallback={null}>
-                        <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
-                      </Suspense>
-                    </button>
-                  }
-                >
-                  <FilterPendingScope>
-                    <CollectionFilters
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </FilterSidebarSheet>
-              }
-              sortSelect={
-                <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
-                  <CollectionsSortSelect exclude={sortExclude} />
-                </Suspense>
-              }
-            />
-
-            <FilterPendingScope>
-              <CollectionResultsGrid
-                locale={locale}
-                collectionResultsDataPromise={collectionResultsDataPromise}
+          <Suspense
+            fallback={
+              <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
+            }
+          >
+            <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+              <CollectionToolbar
+                filterSheet={
+                  <FilterSidebarSheet
+                    label={filtersLabel}
+                    trigger={
+                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                        <SlidersHorizontalIcon className="size-4" />
+                        <span>{filtersLabel}</span>
+                        <CollectionActiveFilterCountBadge />
+                      </button>
+                    }
+                  >
+                    <FilterPendingScope>
+                      <CollectionFilters
+                        collectionResultsDataPromise={collectionResultsDataPromise}
+                      />
+                    </FilterPendingScope>
+                  </FilterSidebarSheet>
+                }
+                sortSelect={<CollectionsSortSelect collection exclude={sortExclude} />}
               />
-            </FilterPendingScope>
-          </Sections>
-        </Container>
-      </Page>
-    </FilterTransitionProvider>
+
+              <FilterPendingScope>
+                <CollectionResultsGrid
+                  locale={locale}
+                  collectionResultsDataPromise={collectionResultsDataPromise}
+                />
+              </FilterPendingScope>
+            </CollectionBrowseProvider>
+          </Suspense>
+        </Sections>
+      </Container>
+    </Page>
+  );
+}
+
+function CollectionBrowseFallback({
+  filtersLabel,
+  sortByLabel,
+}: {
+  filtersLabel: string;
+  sortByLabel: string;
+}) {
+  return (
+    <>
+      <CollectionToolbar
+        filterSheet={
+          <button type="button" className="flex items-center gap-2 text-sm font-medium">
+            <SlidersHorizontalIcon className="size-4" />
+            <span>{filtersLabel}</span>
+          </button>
+        }
+        sortSelect={<SortSelectFallback label={sortByLabel} />}
+      />
+      <ProductsGridSkeleton count={40} className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" />
+    </>
   );
 }
 
@@ -121,23 +149,5 @@ function CollectionHeader({
         {description && <p className="mt-1 leading-6 text-muted-foreground">{description}</p>}
       </div>
     </>
-  );
-}
-
-async function CollectionFilterCountBadge({
-  searchStatePromise,
-}: {
-  searchStatePromise: Promise<CollectionSearchState>;
-}) {
-  const { activeFilters } = await searchStatePromise;
-  const activeCount = Object.values(activeFilters).reduce((count, v) => {
-    if (!v) return count;
-    return count + (Array.isArray(v) ? v.length : 1);
-  }, 0);
-  if (activeCount === 0) return null;
-  return (
-    <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-      {activeCount}
-    </span>
   );
 }
