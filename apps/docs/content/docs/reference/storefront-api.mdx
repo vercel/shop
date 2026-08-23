@@ -32,7 +32,7 @@ const { data } = response;
 
 ## Request details
 
-The client `POST`s to `https://{NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three behaviors the SDK doesn't provide on its own: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and `DEBUG_SHOPIFY` timing logs. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
+The client `POST`s to `https://{NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/{SHOPIFY_API_VERSION}/graphql.json` with the `X-Shopify-Storefront-Access-Token` header (mapped from the `publicAccessToken` passed at init). A `customFetchApi` wrapper in `lib/shopify/storefront.ts` preserves three intentionally app-specific behaviors: the `?operation=<name>` URL annotation for network logs, `Accept-Encoding: gzip, br`, and operation timing. Cache isolation between different variables comes from the `"use cache"` wrappers in `lib/shopify/operations/`, which key on function arguments.
 
 ## Writing a query
 
@@ -183,9 +183,9 @@ Shopify returns the full updated cart in every mutation response, so there's no 
 
 The Hydrogen client resolves to `{ data, errors? }` for GraphQL-level errors, but **throws** on transport failures — `StorefrontApiError` for non-OK HTTP responses and malformed payloads, `StorefrontTimeoutError` when the default 30s timeout elapses. The template applies its contract through `assertStorefrontOk(response, operation)` in `lib/shopify/errors.ts`:
 
-**GraphQL failure** - if `errors` is present and there's no `data`, it throws with the operation name and error detail.
+**GraphQL failure** - if `errors` is present and there's no `data`, it throws Hydrogen's `StorefrontApiError` with the operation name plus Shopify's locations, path, extensions, and any additional errors.
 
-**Partial success** - if there are `errors` but `data` is also present, it logs a warning and lets the operation use the partial data.
+**Partial success** - if there are `errors` but `data` is also present, it sends a structured warning through the configured Hydrogen logger and lets the operation use the partial data.
 
 **Narrowing** - on success it narrows `response.data` to non-null, so the operation can read it without optional chaining on the top level.
 
@@ -193,12 +193,14 @@ Individual operations follow a consistent contract on top of this: they **throw*
 
 ## Debug logging
 
-Set `DEBUG_SHOPIFY=true` to log every request with its operation name and timing (emitted from the `customFetchApi` wrapper):
+Hydrogen logging is configured once when the Next.js server starts. Set `DEBUG_SHOPIFY=true` to include structured Storefront and Customer Account API timings alongside Hydrogen's own runtime logs:
 
 ```
-[shopify] getProductByHandle 45ms
-[shopify] searchProducts 120ms
+[shopify:debug:storefront] Storefront API request { durationMs: 45, operation: "getProductByHandle" }
+[shopify:debug:customer-account] Customer Account API request { durationMs: 120, operation: "getCustomerProfile" }
 ```
+
+Warnings and errors remain enabled without the debug flag. Customer Account API failures retain that client's error contract; `StorefrontApiError` and `StorefrontTimeoutError` apply specifically to Storefront API requests.
 
 ## Transforms
 
