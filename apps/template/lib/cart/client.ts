@@ -1,10 +1,19 @@
 "use client";
 
+import { createCartComponents } from "@shopify/hydrogen/react";
+
 import type { OptimisticProductInfo } from "@/lib/product";
+
+import type { cartHandlers } from "./server";
+
+export const {
+  CartProvider: HydrogenCartProvider,
+  useCart: useHydrogenCart,
+  useCartForm,
+} = createCartComponents<typeof cartHandlers>();
 
 const ENDPOINT = "/api/cart";
 const TIMEOUT_MS = 10_000;
-const DISCOUNT_UPDATE_EVENT = "shopify:cart:discount-update";
 const LINES_UPDATE_EVENT = "shopify:cart:lines-update";
 
 interface CartMutationLine {
@@ -98,24 +107,7 @@ function dispatchLinesAdd(
   document.dispatchEvent(event);
 }
 
-function dispatchLinesUpdate(
-  action: "remove" | "update",
-  lines: { id: string; quantity: number }[],
-  promise: Promise<ReturnType<typeof toStandardResult>>,
-) {
-  const event = new Event(LINES_UPDATE_EVENT, { bubbles: true, cancelable: true }) as Event & {
-    action: string;
-    lines: { id: string; quantity: number }[];
-    promise: typeof promise;
-  };
-  event.action = action;
-  event.lines = lines;
-  event.promise = promise;
-  document.dispatchEvent(event);
-}
-
-// Bypasses the preview's broken standard-actions updateCart handler: POST to our
-// route and feed the standard lines-update event the store listens for.
+// This preview's add form drops line attributes and cannot attach optimistic product detail.
 export function addToCart(
   merchandiseId: string,
   quantity: number,
@@ -125,25 +117,6 @@ export function addToCart(
   const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
   const promise = postCart({ lines: [line] }).then(toStandardResult);
   dispatchLinesAdd([line], productInfo, promise);
-}
-
-export function updateCartLine(lineId: string, quantity: number): void {
-  const promise = postCart({ lines: [{ id: lineId, quantity }] }).then(toStandardResult);
-  dispatchLinesUpdate(quantity === 0 ? "remove" : "update", [{ id: lineId, quantity }], promise);
-}
-
-export function updateDiscountCodes(discountCodes: string[]): void {
-  const promise = postCart({ discountCodes }).then(toStandardResult);
-  const event = new Event(DISCOUNT_UPDATE_EVENT, {
-    bubbles: true,
-    cancelable: true,
-  }) as Event & {
-    discountCodes: { code: string }[];
-    promise: typeof promise;
-  };
-  event.discountCodes = discountCodes.map((code) => ({ code }));
-  event.promise = promise;
-  document.dispatchEvent(event);
 }
 
 export interface ServerCartLine {

@@ -2,10 +2,6 @@
 
 import type { CartState } from "@shopify/hydrogen";
 import {
-  CartProvider as HydrogenCartProvider,
-  useCart as useHydrogenCart,
-} from "@shopify/hydrogen/react";
-import {
   type ComponentProps,
   createContext,
   type ReactNode,
@@ -16,7 +12,7 @@ import {
   useState,
 } from "react";
 
-import { addToCart, updateCartLine } from "@/lib/cart/client";
+import { addToCart, HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
 import type { Cart, CartLine, CartWarning, DiscountAllocation } from "@/lib/types";
 
@@ -45,8 +41,6 @@ type CartContextType = {
   setCart: (cart: Cart | null) => void;
   setOverlayOpen: (open: boolean) => void;
   setWarnings: (warnings: CartWarning[]) => void;
-  /** quantity=0 removes the item. */
-  updateItemOptimistic: (lineId: string, quantity: number) => void;
 };
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -67,7 +61,6 @@ const serverFallbackCartContext: CartContextType = {
   setCart: () => {},
   setOverlayOpen: () => {},
   setWarnings: () => {},
-  updateItemOptimistic: () => {},
 };
 
 type LegacyMerchandise = {
@@ -195,15 +188,6 @@ function toLegacyLine(line: LegacyLine): CartLine {
   };
 }
 
-function findLine(lines: CartLine[], id: string): CartLine | undefined {
-  for (const line of lines) {
-    if (line.id === id) return line;
-    const inChildren = findLine(line.components, id);
-    if (inChildren) return inChildren;
-  }
-  return undefined;
-}
-
 function toLegacyWarnings(group: { warnings: { code: string; message: string }[] }): CartWarning[] {
   return group.warnings.map((w) => ({ code: w.code, message: w.message, target: "" }));
 }
@@ -254,16 +238,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const updateItemOptimistic = useCallback(
-    (lineId: string, quantity: number) => {
-      if (quantity < 0 || quantity > 99) return;
-      const line = findLine(cartWithPending?.lines ?? [], lineId);
-      if (!line) return;
-      updateCartLine(lineId, quantity);
-    },
-    [cartWithPending?.lines],
-  );
-
   useEffect(() => {
     const hasFailure =
       cartState.errors.network.length > 0 ||
@@ -293,7 +267,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCart: () => {},
         setOverlayOpen,
         setWarnings: setLocalWarnings,
-        updateItemOptimistic,
       }}
     >
       {children}

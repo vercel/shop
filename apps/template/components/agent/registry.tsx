@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { CartLineForm } from "@/components/cart/line-form";
 import {
   ProductCard,
   ProductCardContent,
@@ -39,7 +40,7 @@ export const { registry } = defineRegistry(catalog, {
       const locale = useLocale();
       const t = useTranslations("cart");
       const tAgent = useTranslations("agent");
-      const { cart, updateItemOptimistic } = useCart();
+      const { cart } = useCart();
 
       if (!cart || cart.lines.length === 0) return <MissingData>{t("empty")}</MissingData>;
 
@@ -76,46 +77,59 @@ export const { registry } = defineRegistry(catalog, {
                       {line.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
                     </span>
                   )}
-                  <div className="flex items-center gap-1.5">
-                    <div
-                      aria-label={t("itemQuantity")}
-                      className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
-                      role="group"
-                    >
-                      <button
-                        aria-label={t("decreaseQuantity")}
-                        className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={!line.canUpdateQuantity || line.quantity === 1}
-                        onClick={() => updateItemOptimistic(line.id ?? "", line.quantity - 1)}
-                        type="button"
-                      >
-                        <MinusIcon className="size-3 shrink-0" />
-                      </button>
-                      <span className="flex h-6 items-center justify-center font-medium text-xs tabular-nums">
-                        {line.quantity}
-                      </span>
-                      <button
-                        aria-label={t("increaseQuantity")}
-                        className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                        disabled={!line.canUpdateQuantity || line.quantity === 99}
-                        onClick={() => updateItemOptimistic(line.id ?? "", line.quantity + 1)}
-                        type="button"
-                      >
-                        <PlusIcon className="size-3 shrink-0" />
-                      </button>
-                    </div>
-                    <Button
-                      aria-label={t("removeItem")}
-                      className="size-7 text-muted-foreground hover:text-foreground"
-                      disabled={!line.canRemove}
-                      onClick={() => updateItemOptimistic(line.id ?? "", 0)}
-                      size="icon"
-                      type="button"
-                      variant="ghost"
-                    >
-                      <Trash2Icon className="size-4" />
-                    </Button>
-                  </div>
+                  <CartLineForm className="flex items-center gap-1.5" lineId={line.id ?? ""}>
+                    {(register) => (
+                      <>
+                        <div
+                          aria-label={t("itemQuantity")}
+                          className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
+                          role="group"
+                        >
+                          <button
+                            {...register("decrease")}
+                            aria-label={t("decreaseQuantity")}
+                            className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={!line.canUpdateQuantity || line.quantity === 1}
+                            type="submit"
+                          >
+                            <MinusIcon className="size-3 shrink-0" />
+                          </button>
+                          <input
+                            key={line.quantity}
+                            {...register("quantity", {
+                              interactive: true,
+                              value: line.quantity,
+                            })}
+                            aria-label={t("itemQuantity")}
+                            className="h-6 w-6 bg-transparent text-center font-medium text-xs tabular-nums outline-none"
+                            disabled={!line.canUpdateQuantity}
+                            max={99}
+                            min={0}
+                          />
+                          <button
+                            {...register("increase")}
+                            aria-label={t("increaseQuantity")}
+                            className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={!line.canUpdateQuantity || line.quantity === 99}
+                            type="submit"
+                          >
+                            <PlusIcon className="size-3 shrink-0" />
+                          </button>
+                        </div>
+                        <Button
+                          {...register("remove")}
+                          aria-label={t("removeItem")}
+                          className="size-7 text-muted-foreground hover:text-foreground"
+                          disabled={!line.canRemove}
+                          size="icon"
+                          type="submit"
+                          variant="ghost"
+                        >
+                          <Trash2Icon className="size-4" />
+                        </Button>
+                      </>
+                    )}
+                  </CartLineForm>
                 </div>
                 <Price
                   amount={line.cost.totalAmount.amount}

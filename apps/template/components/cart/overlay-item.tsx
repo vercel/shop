@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import Link from "next/link";
 
+import { CartLineForm } from "@/components/cart/line-form";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/types";
@@ -18,7 +19,7 @@ interface OverlayItemProps {
 }
 
 export function OverlayItem({ item, locale }: OverlayItemProps) {
-  const { cartWithPending, updateItemOptimistic } = useCart();
+  const { cartWithPending } = useCart();
   const t = useTranslations("cart");
 
   const currentLine = cartWithPending?.lines.find((l) => l.id === item.id);
@@ -99,51 +100,57 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5 mt-auto">
-          <div
-            aria-label={t("itemQuantity")}
-            className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
-            role="group"
-          >
-            <button
-              type="button"
-              aria-label={t("decreaseQuantity")}
-              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={!item.canUpdateQuantity || quantity === 1}
-              onClick={() => updateItemOptimistic(item.id || "", quantity - 1)}
-            >
-              <MinusIcon className="size-3 shrink-0" />
-            </button>
-            <span
-              aria-live="polite"
-              className="flex h-6 w-6 items-center justify-center text-xs font-medium tabular-nums"
-              role="status"
-            >
-              {quantity}
-            </span>
-            <button
-              type="button"
-              aria-label={t("increaseQuantity")}
-              className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={!item.canUpdateQuantity || quantity === 99}
-              onClick={() => updateItemOptimistic(item.id || "", quantity + 1)}
-            >
-              <PlusIcon className="size-3 shrink-0" />
-            </button>
-          </div>
+        <CartLineForm className="flex items-center gap-1.5 mt-auto" lineId={item.id ?? ""}>
+          {(register) => (
+            <>
+              <div
+                aria-label={t("itemQuantity")}
+                className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
+                role="group"
+              >
+                <button
+                  {...register("decrease")}
+                  type="submit"
+                  aria-label={t("decreaseQuantity")}
+                  className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!item.canUpdateQuantity || quantity === 1}
+                >
+                  <MinusIcon className="size-3 shrink-0" />
+                </button>
+                <input
+                  key={quantity}
+                  {...register("quantity", { interactive: true, value: quantity })}
+                  aria-label={t("itemQuantity")}
+                  className="h-6 w-6 bg-transparent text-center text-xs font-medium tabular-nums outline-none"
+                  disabled={!item.canUpdateQuantity}
+                  max={99}
+                  min={0}
+                />
+                <button
+                  {...register("increase")}
+                  type="submit"
+                  aria-label={t("increaseQuantity")}
+                  className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={!item.canUpdateQuantity || quantity === 99}
+                >
+                  <PlusIcon className="size-3 shrink-0" />
+                </button>
+              </div>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-7 text-muted-foreground hover:text-foreground"
-            onClick={() => updateItemOptimistic(item.id || "", 0)}
-            disabled={!item.canRemove}
-            aria-label={t("removeItem")}
-          >
-            <Trash2Icon className="size-4" />
-          </Button>
-        </div>
+              <Button
+                {...register("remove")}
+                type="submit"
+                variant="ghost"
+                size="icon"
+                className="size-7 text-muted-foreground hover:text-foreground"
+                disabled={!item.canRemove}
+                aria-label={t("removeItem")}
+              >
+                <Trash2Icon className="size-4" />
+              </Button>
+            </>
+          )}
+        </CartLineForm>
       </div>
 
       <div className="self-start py-0.5 text-sm text-right">
