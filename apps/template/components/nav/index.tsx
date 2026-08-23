@@ -1,3 +1,4 @@
+import { PredictiveSearchProvider } from "@shopify/hydrogen/react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -31,7 +32,13 @@ export async function Nav({ locale }: { locale: string }) {
         <QuickLinks items={items} />
 
         <div className="flex items-center gap-5 ml-auto">
-          <SearchModal />
+          <PredictiveSearchProvider
+            debounceInMs={300}
+            limit={3}
+            types={["PRODUCT", "COLLECTION", "QUERY"]}
+          >
+            <SearchModal />
+          </PredictiveSearchProvider>
           {shopConfig.auth.isEnabled && (
             <Suspense fallback={<NavAccountFallback />}>
               <NavAccount />
