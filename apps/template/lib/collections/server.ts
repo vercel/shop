@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { getLegacyCollectionSort, normalizeCollectionBrowseParams } from "@/lib/collections";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
@@ -9,13 +10,14 @@ import {
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
-import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
+import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
 export interface CollectionSearchState {
   activeFilters: Record<string, string | string[] | undefined>;
+  dataSearch: string;
   sort?: string;
 }
 
@@ -32,10 +34,12 @@ export async function getCollectionSearchState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<CollectionSearchState> {
   const searchParams = await searchParamsPromise;
+  const normalized = normalizeCollectionBrowseParams(searchParams);
 
   return {
-    activeFilters: parseFiltersFromSearchParams(searchParams),
-    sort: getSingleSearchParam(searchParams.sort),
+    activeFilters: parseFiltersFromSearchParams(searchParamsToRecord(normalized)),
+    dataSearch: normalized.toString(),
+    sort: getLegacyCollectionSort(normalized),
   };
 }
 
@@ -79,10 +83,6 @@ export function getExactCollectionResultCount({
   }
 
   return result.products.length;
-}
-
-function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 export async function getAllProductsCollection(): Promise<Collection> {

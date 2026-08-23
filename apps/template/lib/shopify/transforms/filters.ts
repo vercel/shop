@@ -101,6 +101,7 @@ function transformFilterValue(value: ShopifyFilterValue): FilterValue | null {
   return {
     count: value.count,
     id: value.id,
+    input: value.input,
     label: value.label,
     ...(swatch ? { swatch } : {}),
     value: parsedValue,

@@ -261,6 +261,7 @@ export type FilterType = "boolean" | "list" | "price";
 export interface FilterValue {
   count: number;
   id: string;
+  input: string;
   label: string;
   swatch?: OptionValueSwatch;
   value: string;
