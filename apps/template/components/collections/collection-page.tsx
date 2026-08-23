@@ -57,14 +57,14 @@ export async function CollectionDetailPage({
         <CollectionViewedTracker collection={{ handle: collection.handle, id: collection.id }} />
       ) : null}
       <Page className={collection.image ? "pt-0" : "pt-2.5 md:pt-10"}>
-        <Container>
-          <Sections className="gap-5">
-            <CollectionHeader
-              collection={collection}
-              handle={handle}
-              homeLabel={tBreadcrumb("home")}
-            />
+        <Sections className="gap-5">
+          <CollectionHeader
+            collection={collection}
+            handle={handle}
+            homeLabel={tBreadcrumb("home")}
+          />
 
+          <Container>
             <Suspense
               fallback={
                 <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
@@ -108,8 +108,8 @@ export async function CollectionDetailPage({
                 </CollectionBrowseProvider>
               </NextIntlClientProvider>
             </Suspense>
-          </Sections>
-        </Container>
+          </Container>
+        </Sections>
       </Page>
     </>
   );
@@ -161,12 +161,14 @@ function CollectionHeader({
       {image ? (
         <CollectionHero image={image} title={title} />
       ) : (
-        <div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl">
-            <Link href={`/collections/${handle}`}>{title}</Link>
-          </h1>
-          {description && <p className="mt-1 leading-6 text-muted-foreground">{description}</p>}
-        </div>
+        <Container>
+          <div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl">
+              <Link href={`/collections/${handle}`}>{title}</Link>
+            </h1>
+            {description && <p className="mt-1 leading-6 text-muted-foreground">{description}</p>}
+          </div>
+        </Container>
       )}
     </>
   );
