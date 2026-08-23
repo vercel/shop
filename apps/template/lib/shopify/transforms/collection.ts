@@ -2,6 +2,7 @@ import type { Collection } from "@/lib/types";
 
 interface ShopifyCollection {
   handle: string;
+  id: string;
   title: string;
   description: string;
   image: {
@@ -20,6 +21,7 @@ interface ShopifyCollection {
 export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {
     handle: collection.handle,
+    id: collection.id,
     title: collection.title,
     description: collection.description,
     image: collection.image

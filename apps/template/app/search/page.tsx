@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { SearchViewedTracker } from "@/components/analytics/trackers";
 import {
   FilterPendingScope,
   FilterTransitionProvider,
@@ -86,6 +87,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
       <Container>
         <FilterTransitionProvider>
           <Sections className="gap-5">
+            <Suspense fallback={null}>
+              <SearchAnalyticsTracker searchParamsPromise={searchParams} />
+            </Suspense>
             <div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl">
                 <Link href="/search">{t("title")}</Link>
@@ -146,6 +150,16 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
       </Container>
     </Page>
   );
+}
+
+async function SearchAnalyticsTracker({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: PageProps<"/search">["searchParams"];
+}) {
+  const searchParams = await searchParamsPromise;
+  const query = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q;
+  return <SearchViewedTracker searchTerm={query ?? ""} />;
 }
 
 async function SearchQueryLabel({

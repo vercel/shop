@@ -139,11 +139,11 @@ The root component remains mounted as the extension point for current and future
 
 Only make changes here if the user asked about Shopify analytics.
 
-The storefront sends page views to Shopify analytics through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn it on, set `analytics.shopify.isEnabled` to `true` in `lib/config.ts`.
+The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn Shopify's built-in analytics destination on, set `analytics.shopify.isEnabled` to `true` in `lib/config.ts`.
 
 Consent mode is set by `analytics.shopify.consentMode` in `lib/config.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 
-This integration covers page views only. Commerce events such as product views and cart activity are not wired up.
+Third-party analytics can subscribe through the same destination API, so consent gating and buffered replay remain centralized. Register destinations with `addAnalyticsDestination()` from `lib/analytics/client.ts`; do not publish cart-change events manually.
 
 ## Guardrails
 
