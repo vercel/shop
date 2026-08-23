@@ -6,29 +6,20 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The template connects to Shopify through the Storefront API. This page is an orientation map from Shopify concepts to template routes — for the API client and query mechanics, see [Storefront API](/docs/reference/storefront-api). For token setup and scopes, see [Getting Started](/docs/getting-started) and [Storefront API Permissions](/docs/reference/storefront-api-permissions).
+Use this page to find where Shopify content appears in the storefront. For credentials and permissions, see [Getting Started](/docs/getting-started) and [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-## How it works
+| Shopify content | Storefront location      | Setup or behavior                                                                                    |
+| --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Products        | `/products/[handle]`     | [Product setup](/docs/shopify/pdp) and [PDP anatomy](/docs/anatomy/pages/pdp)                        |
+| Collections     | `/collections/[handle]`  | [PLP anatomy](/docs/anatomy/pages/plp)                                                               |
+| Pages           | `/pages/[handle]`        | [Content pages](/docs/anatomy/pages/content)                                                         |
+| Policies        | `/policies/[handle]`     | [Footer](/docs/anatomy/footer)                                                                       |
+| Search          | `/search`                | [PLP and search anatomy](/docs/anatomy/pages/plp)                                                    |
+| Cart            | `/cart` and cart overlay | [Cart](/docs/anatomy/cart)                                                                           |
+| Menus           | Navigation and footer    | [Navigation](/docs/anatomy/navigation) and [Enable Shopify menus](/docs/skills/enable-shopify-menus) |
 
-**Every Shopify concept maps to exactly one template route.** Products, collections, pages, policies, and search each render through a dedicated route backed by a cached Storefront API read; cart spans the whole app through a context provider instead of a single route.
+Navigation uses the template's configured links by default. To manage it from Shopify Admin, enable Shopify menus and configure `main-menu` and `footer` under **Online Store → Navigation**.
 
-**Navigation ships hardcoded, not fetched from Shopify.** The nav and footer render static links from `shopConfig.navigation` by default. [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) swaps in live menus fetched by handle from **Online Store → Navigation**.
+Configure [Shopify webhooks](/docs/anatomy/webhooks) so product and collection edits appear promptly. Without webhooks, cached content remains until its cache lifetime expires.
 
-**Cached reads need a webhook to invalidate promptly.** Public reads use `"use cache"` or `"use cache: remote"` with a long `cacheLife`, not a per-request fetch. Without webhooks configured, edits made in Shopify Admin surface only once the cache lifetime expires.
-
-## Out of the box
-
-| Shopify concept | Template route          | Docs                                                                                              |
-| --------------- | ----------------------- | ------------------------------------------------------------------------------------------------- |
-| Products        | `/products/[handle]`    | [PDP anatomy](/docs/anatomy/pages/pdp), [Product setup](/docs/shopify/pdp)                        |
-| Collections     | `/collections/[handle]` | [PLP anatomy](/docs/anatomy/pages/plp)                                                            |
-| Menus           | Navigation, footer      | [Navigation](/docs/anatomy/navigation), [Enable Shopify menus](/docs/skills/enable-shopify-menus) |
-| Pages           | `/pages/[handle]`       | [Content pages](/docs/anatomy/pages/content)                                                      |
-| Policies        | `/policies/[handle]`    | [Footer](/docs/anatomy/footer)                                                                    |
-| Search          | `/search`               | [PLP & Search anatomy](/docs/anatomy/pages/plp)                                                   |
-| Cart            | `/cart` + overlay       | [Cart](/docs/anatomy/cart)                                                                        |
-
-## Common customizations
-
-- **Shopify-powered menus** — run [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch `main-menu` and `footer` menus from Shopify instead of the hardcoded defaults.
-- **Near-instant cache invalidation** — configure Shopify webhooks pointed at `/api/webhooks/shopify` so Admin edits invalidate cache tags immediately. See [Webhooks](/docs/anatomy/webhooks) for the endpoint, supported topics, and setup steps.
+For Storefront API behavior, see [Storefront API](/docs/reference/storefront-api).

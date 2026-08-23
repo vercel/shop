@@ -6,32 +6,29 @@ type: reference
 
 ## Pages
 
-| Route                                 | Description                                                                                        |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `/`                                   | Home page with hero, products grid, info section                                                   |
-| `/products/[handle]`                  | Product detail page; `?color=…&size=…` option params select a variant                              |
-| `/collections`                        | All-collections index; each card links to a collection, image falls back to its first product      |
-| `/collections/[handle]`               | Collection listing with filters, sort, pagination                                                  |
-| `/collections/all`                    | Virtual "All Products" listing; synthesized since Shopify's Storefront API has no `all` collection |
-| `/search`                             | Search results (same grid as collections)                                                          |
-| `/cart`                               | Full cart page with related products                                                               |
-| `/blogs/[blogHandle]`                 | Shopify blog listing with latest articles                                                          |
-| `/blogs/[blogHandle]/[articleHandle]` | Shopify article with localized rich text and SEO metadata                                          |
-| `/pages/[handle]`                     | Shopify Page with localized rich text and SEO metadata                                             |
-| `/policies/[handle]`                  | Configured Shopify store policy                                                                    |
+| Route                                 | Description                                                   |
+| ------------------------------------- | ------------------------------------------------------------- |
+| `/`                                   | Home page                                                     |
+| `/products/[handle]`                  | Product detail page; option query parameters select a variant |
+| `/collections`                        | Collection index                                              |
+| `/collections/[handle]`               | Collection listing with filters, sorting, and pagination      |
+| `/collections/all`                    | All-products listing                                          |
+| `/search`                             | Product search results                                        |
+| `/cart`                               | Cart and related products                                     |
+| `/blogs/[blogHandle]`                 | Shopify blog listing                                          |
+| `/blogs/[blogHandle]/[articleHandle]` | Shopify article                                               |
+| `/pages/[handle]`                     | Shopify page                                                  |
+| `/policies/[handle]`                  | Shopify store policy                                          |
 
 ## API routes
 
 | Route                        | Description                                    |
 | ---------------------------- | ---------------------------------------------- |
 | `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation |
-| `POST /api/chat`             | Guarded AI SDK shopping-assistant stream       |
+| `POST /api/chat`             | Shopping-assistant stream                      |
 
 ## Variant URLs
 
-Product variant selection uses one query parameter per option, keyed by the lowercased option name:
+Product options use one query parameter per option. The key is the lowercased option name and the value is the selected option value.
 
-| URL                                    | Purpose                                                   |
-| -------------------------------------- | --------------------------------------------------------- |
-| `/products/:handle?color=Blue&size=XS` | Opens the product page with the matching variant selected |
-| `/products/:handle`                    | No options selected — renders the first available variant |
+For example, `/products/your-product?color=Blue&size=XS` selects the blue, extra-small variant. Without option parameters, the page selects the first available variant.

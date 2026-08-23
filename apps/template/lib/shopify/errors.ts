@@ -1,6 +1,8 @@
-import type { GraphQLFormattedError } from "@shopify/hydrogen";
+import { StorefrontApiError, type GraphQLFormattedError } from "@shopify/hydrogen";
 
 import type { CartWarning } from "@/lib/types";
+
+import { shopifyLogger } from "./logging";
 
 interface StorefrontResponse<T> {
   data?: T | null;
@@ -12,15 +14,28 @@ export function assertStorefrontOk<T>(
   operation: string,
 ): asserts response is { data: T; errors?: GraphQLFormattedError[] } {
   if (response.errors?.length && !response.data) {
-    const detail = response.errors.map((error) => error.message).join("; ");
-    throw new Error(`Shopify ${operation} failed: ${detail}`);
+    const [firstError, ...additionalErrors] = response.errors;
+    throw new StorefrontApiError(`Shopify ${operation} failed: ${firstError.message}`, {
+      extensions: {
+        ...firstError.extensions,
+        additionalErrors,
+        operation,
+      },
+      locations: firstError.locations,
+      path: firstError.path,
+    });
   }
   if (response.errors?.length) {
-    const detail = JSON.stringify(response.errors);
-    console.warn(`[shopify] ${operation} returned partial errors: ${detail}`);
+    shopifyLogger.warn("Storefront API returned partial errors", {
+      errors: response.errors,
+      operation,
+      scope: "storefront",
+    });
   }
   if (!response.data) {
-    throw new Error(`Shopify ${operation}: no data returned`);
+    throw new StorefrontApiError(`Shopify ${operation}: no data returned`, {
+      extensions: { operation },
+    });
   }
 }
 

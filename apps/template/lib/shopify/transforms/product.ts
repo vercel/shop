@@ -299,14 +299,12 @@ function transformOption(option: ShopifyOption): ProductOption {
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map(
-      (value): OptionValue => ({
-        id: value,
-        image: imageLookup.get(value),
-        name: value,
-        swatch: swatchLookup.get(value),
-      }),
-    ),
+    values: option.values.map((value): OptionValue => ({
+      id: value,
+      image: imageLookup.get(value),
+      name: value,
+      swatch: swatchLookup.get(value),
+    })),
   };
 }
 

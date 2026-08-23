@@ -10,12 +10,12 @@ import { io } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
+import { logShopifyDebug } from "./logging";
+
 const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string;
 const SHOPIFY_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const SHOPIFY_STOREFRONT_ID = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID;
-const DEBUG = process.env.DEBUG_SHOPIFY === "1";
-
 function operationName(body: RequestInit["body"]): string {
   if (typeof body !== "string") return "anonymous";
   try {
@@ -34,12 +34,16 @@ const customFetchApi: typeof fetch = async (input, init) => {
   const headers = new Headers(init?.headers);
   headers.set("Accept-Encoding", "gzip, br");
 
-  const start = DEBUG ? performance.now() : 0;
-  const response = await fetch(annotated, { ...init, headers });
-  if (DEBUG) {
-    console.log(`[shopify] ${operation} ${(performance.now() - start).toFixed(0)}ms`);
+  const start = performance.now();
+  try {
+    return await fetch(annotated, { ...init, headers });
+  } finally {
+    logShopifyDebug("Storefront API request", {
+      durationMs: Math.round(performance.now() - start),
+      operation,
+      scope: "storefront",
+    });
   }
-  return response;
 };
 
 // Hydrogen overrides locale variables from client config, requiring a client per locale pair.

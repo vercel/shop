@@ -1,0 +1,24 @@
+---
+title: Translations
+description: How the storefront keeps translation catalogs on the server and sends the browser only the messages needed for interactive UI.
+---
+
+The storefront uses next-intl for translated copy and locale-aware formatting. Translation catalogs stay on the server by default, which keeps unnecessary messages out of browser JavaScript.
+
+## Add translated copy
+
+Add every new shopper-facing message to every locale catalog. Keep the same message structure across locales.
+
+Render fixed text on the server whenever possible. If an interactive area needs translations after the page loads, provide only the messages used by that area. Examples include cart errors, search results, collection filters, and product purchase controls.
+
+A small set of shared error messages must remain available throughout the application because route error screens run in the browser.
+
+## Keep browser messages small
+
+Pass a few translated labels directly when an interactive element needs only fixed text. Provide a translation namespace when related controls need dynamic messages, plurals, or interpolation.
+
+Do not import complete translation catalogs into browser code. This increases the JavaScript sent to every shopper and can expose messages that the current page never uses.
+
+## What’s next
+
+Common additions include a locale selector, Shopify Markets for localized catalogs and currencies, and a translation workflow for larger teams. Add a locale to storefront navigation only after its fixed copy, interactive states, plurals, formatting, and error messages are complete.

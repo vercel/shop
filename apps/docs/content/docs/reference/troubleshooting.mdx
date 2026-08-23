@@ -4,81 +4,122 @@ description: Solutions to common setup and runtime issues.
 type: troubleshooting
 ---
 
-## Products not showing up
+## Products do not appear
 
-The most common cause is missing Storefront API permissions. In your Shopify admin, go to **Settings → Apps and sales channels → Headless → your storefront** and compare your token scopes against [Storefront API Permissions](/docs/reference/storefront-api-permissions).
+**Symptom:** Product pages or listings are empty.
 
-Also check that your products are set to the **Online Store** and **Headless** sales channels in Shopify admin.
+**Check:** In Shopify admin, confirm the Storefront token has the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions). Confirm each product is published to both the **Online Store** and **Headless** sales channels.
 
-## Bundles not appearing (404 on the storefront)
+**Fix:** Grant the missing scopes and publish the products to both channels.
 
-A bundle that is **ACTIVE** in Shopify admin but 404s on the storefront is almost always missing from your **Headless** sales channel. The free Shopify Bundles app publishes a new bundle to the **Online Store** channel only, while the template's Storefront token reads from Headless — so `getProduct()` returns nothing and the route renders `notFound()`.
+**Expected result:** Published products appear in listings and product routes resolve.
 
-Fix it in admin: open the bundle product → **Publishing** → add your Headless channel. Then, because product reads are cached with `cacheLife("max")`, redeploy (or fire a product webhook) so the cached "not found" clears. The bundle's component products must be on Headless too, or their relationships won't resolve.
+## A bundle returns 404
 
-## Cart not persisting across page loads
+**Symptom:** A bundle is active in Shopify admin but its storefront route returns `404`.
 
-The cart ID is stored in a `shopify_cartId` HTTP-only cookie with a 7-day expiry. Common causes:
+**Check:** Open the bundle product's **Publishing** settings. Confirm the bundle and its component products are published to the **Headless** sales channel.
 
-- **Cookie domain mismatch** - if you're running on a different domain than expected, the cookie may not be sent. Check your browser dev tools → Application → Cookies.
+**Fix:** Publish all required products to Headless. Then trigger a product webhook or redeploy to clear the cached not-found response.
 
-## Variant selection not working
+**Expected result:** The bundle route loads and its component relationships appear.
 
-Variant selection uses one option param per axis (`?color=Blue&size=XS`). If option links change the URL but the price/buy buttons do not update, check that `app/products/[handle]/page.tsx` parses the params with `parseSelectedOptions()` and resolves the variant with `getProductVariant()` inside the streamed `selectionPromise`.
+## The cart does not persist
 
-Also confirm option links are generated with `buildOptionUrl()` from `lib/product.ts` (a pure merge of the current selection with the changed option), and that swatch availability comes from `getAvailableOptionValues()` in `lib/shopify/encoded-variants.ts` — if every value shows as available, the product's `encodedVariantAvailability` may be missing from the query.
+**Symptom:** The cart becomes empty after navigation or reload.
 
-## Images not loading
+**Check:** In browser developer tools, open **Application → Cookies** and confirm the HttpOnly `cart` cookie exists for the current domain. It should have a 14-day expiry.
 
-Shopify serves images from its CDN. The template's `next.config.ts` must include Shopify's image domain in `images.remotePatterns`. Verify that `cdn.shopify.com` is listed:
+**Fix:** Use one consistent storefront domain and remove any deployment or proxy setting that rewrites the cookie domain.
+
+**Expected result:** The same cart remains available across page loads for up to 14 days.
+
+## Variant selection does not update the product
+
+**Symptom:** Selecting an option changes the URL but not the price or purchase controls.
+
+**Check:** Confirm the URL contains one query parameter per option, such as `?color=Blue&size=XS`. Option names are lowercase. Confirm the selected combination exists in Shopify.
+
+**Fix:** Correct links to preserve all selected option parameters. If a valid combination still fails, validate the product and variant queries against the Storefront API schema.
+
+**Expected result:** The URL, selected variant, price, availability, and purchase controls update together.
+
+## Images do not load
+
+**Symptom:** Shopify product images are broken or rejected by Next.js Image.
+
+**Check:** Confirm `next.config.ts` allows `cdn.shopify.com` in `images.remotePatterns`.
+
+**Fix:** Add the Shopify CDN hostname:
 
 ```ts
 images: {
-  remotePatterns: [
-    { hostname: "cdn.shopify.com" },
-  ],
+  remotePatterns: [{ hostname: "cdn.shopify.com" }],
 },
 ```
 
-## Build fails with GraphQL errors
+**Expected result:** Shopify CDN images render through Next.js Image.
 
-This usually means the query references a field, argument, or enum value that doesn't exist on the live Shopify API version your store is using.
+## The build fails with GraphQL errors
 
-Re-check and validate the operation with Shopify AI Toolkit first. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for the template integration and cache role.
+**Symptom:** Codegen or the production build reports an invalid GraphQL field, argument, type, or enum value.
 
-If the Shopify plugin is missing, reinstall it:
+**Check:** Validate the operation against the live Storefront API schema for the configured `SHOPIFY_API_VERSION` using Shopify AI Toolkit.
+
+**Fix:** Correct the operation, then run:
+
+```bash
+pnpm --filter template codegen
+```
+
+If Shopify AI Toolkit is unavailable, install the project plugin:
 
 ```bash
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-## Changes in Shopify not appearing on the site
+Use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) only for template integration conventions.
 
-All product and collection data is cached with `cacheLife("max")`. Without webhooks configured, changes only appear when the cache expires.
+**Expected result:** Codegen exits successfully and the production build passes its GraphQL validation gate.
 
-To get near-instant updates, set up Shopify webhooks pointed at `/api/webhooks/shopify`. See [Webhooks](/docs/anatomy/webhooks) for the full setup guide.
+## Shopify changes do not appear
 
-## Locale or currency not changing
+**Symptom:** Updated products or collections still show old content.
 
-Multi-locale commerce requires Shopify Markets to be enabled. The template ships as single-locale by default. Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) to add regional locale routing and propagate Shopify's localized country, language, and currency context. The skill supports locale-prefixed, invisible cookie-based, and per-domain routing.
+**Check:** Confirm Shopify webhooks are configured and signed with `SHOPIFY_WEBHOOK_SECRET`.
 
-## Agent can't find context files
+**Fix:** Point the required Shopify webhooks to `POST /api/webhooks/shopify`. Follow [Webhooks](/docs/anatomy/webhooks) for setup. Redeploy once if you need to clear existing stale entries.
 
-Coding agents rely on `AGENTS.md` in the project root plus the expected project-scoped plugins. If an agent is missing context or commands:
+**Expected result:** Shopify changes invalidate the affected cached content and appear without a redeploy.
 
-- Verify you cloned from the correct template (`vercel/shop`, `apps/template` path)
-- The `AGENTS.md` file should be at the project root, not nested in a subdirectory
-- Check that `.claude/settings.json` exists and that the project plugins are enabled
-- Rerun the project plugin setup from the project root if needed:
+## Locale or currency does not change
+
+**Symptom:** The storefront keeps one language or currency after a regional selection.
+
+**Check:** Confirm Shopify Markets is enabled. The template is single-locale by default.
+
+**Fix:** Run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) and choose locale-prefixed, cookie-based, or per-domain routing.
+
+**Expected result:** Requests carry the selected country and language context, and Shopify returns localized content and currency.
+
+## A coding agent cannot find project context
+
+**Symptom:** A coding agent misses project commands or shop-specific guidance.
+
+**Check:** Confirm the project root contains `AGENTS.md` and `.claude/settings.json`, and that the expected project plugins are enabled.
+
+**Fix:** From the project root, run:
 
 ```bash
 npx create-vercel-shop@latest --no-template
 ```
 
-If that still fails, rerun the plugin installs individually:
+If needed, install the plugins individually:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes
 npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
+
+**Expected result:** The agent loads the project guidance and the Vercel Shop, Vercel, and Shopify tools.

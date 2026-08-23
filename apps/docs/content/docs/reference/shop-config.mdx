@@ -4,107 +4,51 @@ description: Configure storefront identity, analytics, and cross-cutting feature
 type: reference
 ---
 
-`lib/config.ts` contains secret-free values that describe the storefront across multiple parts of the application: site identity, analytics integrations, and installation-level feature availability.
+Edit `lib/config.ts` to set storefront-wide, secret-free options. Keep credentials in environment variables and merchandising data in Shopify.
 
-Environment variables still own credentials and deployment-specific overrides. Component composition, Shopify query behavior, result counts, and agent runtime policy stay with the code that implements them rather than becoming a configuration API.
+## Settings
 
-## Default configuration
+| Setting                               | Default          | Behavior                                                                                        |
+| ------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------- |
+| `agent.isEnabled`                     | `true`           | Shows the shopping assistant and enables `POST /api/chat`. The disabled endpoint returns `404`. |
+| `analytics.vercel.isEnabled`          | `false`          | Enables Vercel Web Analytics.                                                                   |
+| `analytics.speedInsights.isEnabled`   | `false`          | Enables Vercel Speed Insights.                                                                  |
+| `analytics.shopify.isEnabled`         | `false`          | Sends storefront page views to Shopify analytics.                                               |
+| `analytics.shopify.consentMode`       | `default-banner` | Selects the Shopify consent experience described below.                                         |
+| `auth.isEnabled`                      | `true`           | Enables customer authentication.                                                                |
+| `botid.isEnabled`                     | `true`           | Protects `POST /api/chat` with [Vercel BotID](https://vercel.com/docs/botid).                   |
+| `botid.checkLevel`                    | `basic`          | Selects `basic` or `deepAnalysis` detection.                                                    |
+| `navigation.footer`                   | Enterprise menu  | Supplies the static enterprise footer links.                                                    |
+| `navigation.nav`                      | Enterprise menu  | Supplies the static enterprise mega-menu links.                                                 |
+| `pdp.bundles.isEnabled`               | `true`           | Shows product bundle relationships when Shopify provides them.                                  |
+| `pdp.buyWithShop.isEnabled`           | `true`           | Shows Buy with Shop.                                                                            |
+| `pdp.complementaryProducts.isEnabled` | `true`           | Shows complementary products when Shopify provides them.                                        |
+| `pdp.quantityPicker.isEnabled`        | `true`           | Shows the quantity picker.                                                                      |
+| `pdp.relatedProducts.isEnabled`       | `true`           | Shows related products when Shopify provides them.                                              |
+| `site.name`                           | `"Ship Shop"`    | Sets the name used in navigation, metadata, structured data, the footer, and the assistant.     |
+| `site.url`                            | `defaultUrl`     | Sets the canonical base URL for sitemaps, structured data, and absolute links.                  |
+| `webmcp.isEnabled`                    | `false`          | Enables the experimental WebMCP integration in supported browsers.                              |
 
-```ts
-export const shopConfig = {
-  agent: {
-    isEnabled: false,
-  },
-  analytics: {
-    shopify: { consentMode: "default-banner", isEnabled: false },
-    speedInsights: { isEnabled: false },
-    vercel: { isEnabled: false },
-  },
-  auth: {
-    isEnabled: false,
-  },
-  botid: {
-    checkLevel: "basic",
-    isEnabled: false,
-  },
-  pdp: {
-    bundles: { isEnabled: true },
-    buyWithShop: { isEnabled: true },
-    complementaryProducts: { isEnabled: true },
-    quantityPicker: { isEnabled: true },
-    relatedProducts: { isEnabled: true },
-  },
-  site: {
-    name: "Vercel Shop",
-    url: defaultUrl,
-  },
-  webmcp: {
-    isEnabled: false,
-  },
-} satisfies ShopConfig;
-```
+## Required constraints
 
-Consumers import `shopConfig` directly from `@/lib/config`. Feature flags are literal booleans edited in this file; `site.url` is the only environment-backed value.
+Because `auth.isEnabled` is enabled on this branch, set `CUSTOMER_ACCOUNT_SESSION_SECRET` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` as described in [Environment Variables](/docs/reference/env-vars). The build fails if either variable is missing. Set the flag to `false` for a guest-only storefront.
 
-## Agent
+This branch enables `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so disable BotID when self-hosting. The `deepAnalysis` level is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
 
-`agent.isEnabled` controls whether the shopping assistant is available. It defaults to `false`. When disabled, the assistant button is hidden and the chat endpoint returns `404`. The model, tools, prompts, and loop limits are implementation details in the agent module, not shop configuration.
+`site.url` resolves from `NEXT_PUBLIC_BASE_URL` or the Vercel production URL. `NEXT_PUBLIC_BASE_URL` must be a bare domain without a protocol, such as `shop.example.com`.
 
-## Analytics
+## Shopify consent modes
 
-- `vercel.isEnabled` controls Vercel Web Analytics.
-- `speedInsights.isEnabled` controls Vercel Speed Insights.
-- `shopify.isEnabled` controls Shopify storefront analytics.
+| Value            | Behavior                                                                                     |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| `default-banner` | Uses Shopify's hosted privacy banner where consent is required.                              |
+| `custom-banner`  | Uses the storefront's own consent interface.                                                 |
+| `no-banner`      | Shows no consent interface. Where consent is required, analytics events cannot be delivered. |
 
-The Vercel integrations are disabled by default. Set an individual integration to `true` to render it. The root analytics component owns these gates and does not mount disabled Vercel providers. Additional storefront-wide analytics integrations can be added alongside them.
+Only expose the public Storefront API token to the browser. Never use a private token for Shopify analytics or consent requests.
 
-Hydrogen's Shopify scripts mount by default to initialize Shopify's storefront runtime and consent flow. `shopify.isEnabled` independently controls whether those scripts send storefront page views to Shopify analytics, so they appear in Shopify admin alongside the rest of the store's reporting. It is disabled by default and needs no credentials beyond the Storefront API variables the storefront already requires. Set it to `true` to turn analytics on.
+## Related configuration
 
-`shopify.consentMode` selects how visitors grant tracking consent and defaults to `default-banner`, where Shopify's hosted privacy banner is rendered for visitors in regions that require consent. Use `custom-banner` when the storefront provides its own consent UI. Choosing `no-banner` means visitors in those regions have no way to grant consent and their events are never delivered. Hydrogen sends consent requests through the storefront's local Storefront API proxy so the privacy flow remains first-party; the public Storefront token is included in the request, while private tokens must never be exposed to the browser.
+This enterprise branch supplies its static mega-menu, footer columns, and social links through `navigation` in `shopConfig`. Use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill if you want Shopify-managed menus instead.
 
-## Authentication
-
-`auth.isEnabled` controls whether customer authentication is active. It defaults to `false`.
-
-Enabling auth still requires the Hydrogen session secret and Shopify Customer Account API client ID documented in [Environment Variables](/docs/reference/env-vars). The build validates those variables when auth is enabled.
-
-## BotID
-
-`botid.isEnabled` controls [Vercel BotID](https://vercel.com/docs/botid) protection on the assistant's chat endpoint. It defaults to `false`; enable it alongside `agent.isEnabled` to protect the assistant.
-
-`botid.checkLevel` selects the detection level. It defaults to `basic`, which is free on all plans. Setting it to `deepAnalysis` enables Vercel's machine-learning detection, which is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
-
-Verification only runs on Vercel; elsewhere every request is treated as human. Leave the flag off when self-hosting so the storefront doesn't ship a challenge it can't verify.
-
-## Navigation and footer
-
-The primary navigation and footer menus are not part of `shopConfig`. Each is an inline `MenuItem[]` literal in its own component: the nav default (a single Shop link) in `components/nav/index.tsx`, and the footer menu columns plus social links in `components/footer/index.tsx`. The [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill swaps these static defaults for menus managed in Shopify.
-
-## PDP capabilities
-
-The PDP capability flags are enabled by default so storefronts render Shopify's merchandising features whenever the catalog provides data:
-
-- `bundles.isEnabled` adds Shopify's `components`, `groupedBy`, and `requiresComponents` fields to the existing product and selected-variant requests, then renders bundle relationships and purchase restrictions.
-- `buyWithShop.isEnabled` renders the full-width Buy with Shop accelerated checkout action below Add to Cart.
-- `complementaryProducts.isEnabled` adds one cached `COMPLEMENTARY` recommendation request per product and renders merchant-curated cross-sells near the buy section.
-- `quantityPicker.isEnabled` renders a 1–99 quantity control beside Add to Cart and applies the selected quantity to both purchase actions.
-- `relatedProducts.isEnabled` adds one cached `RELATED` recommendation request per product and renders algorithmic recommendations on PDP and cart pages.
-
-Sections with no applicable Shopify data render nothing. Set an individual flag to `false` to skip its fields or recommendation request. Display counts and component composition remain implementation details rather than configuration.
-
-## Site
-
-`site` carries storefront identity shared by metadata, structured data, sitemaps, and the footer.
-
-- `name` is the storefront display name, used in the nav logo, footer copyright, page titles, SEO metadata, and the agent's system prompt. Defaults to `"Vercel Shop"`.
-- `url` is the canonical base URL, resolved from `NEXT_PUBLIC_BASE_URL` (a bare domain, no protocol) or the Vercel production URL, used for sitemaps, schema, and absolute links.
-
-## What does not belong here
-
-Do not put secrets, access tokens, store-specific product data, arbitrary Shopify query fields, display counts, component-level presentation switches, or AI runtime wiring in `lib/config.ts`. Keep credentials in environment variables, merchandising data in Shopify, and implementation policy beside the code that owns it.
-
-## WebMCP
-
-`webmcp.isEnabled` controls the experimental WebMCP integration. It defaults to `false`. WebMCP is an in-progress browser API available only behind a Chrome flag, not a finalized standard, so this feature is experimental and its behavior may change as the spec and Shopify's implementation evolve.
-
-When enabled, Hydrogen's Shopify scripts mount loads Shopify's hosted `webmcp.js` in browsers that expose the model-context API; other browsers skip the script entirely. Shopify's script defines and registers the storefront tools, not the template. Enabling WebMCP does not enable Shopify analytics — the two are gated independently. See [WebMCP](/docs/anatomy/webmcp) for testing instructions.
+WebMCP does not enable Shopify analytics. See [WebMCP](/docs/anatomy/webmcp) for testing instructions.

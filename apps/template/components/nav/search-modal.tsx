@@ -57,11 +57,10 @@ function SearchTrigger() {
 function SearchDialogContent({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("nav");
 
   const { query, setQuery, results, isLoading, activeIndex, setActiveIndex, reset } =
-    usePredictiveSearch(locale);
+    usePredictiveSearch();
 
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.focus());

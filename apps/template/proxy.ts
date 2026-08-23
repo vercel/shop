@@ -19,6 +19,9 @@ import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { precomputedFlags } from "@/lib/flags";
 import { defaultLocale, isEnabledLocale, isLocale } from "@/lib/i18n";
+import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/negotiation";
+import { getMarkdownPath } from "@/lib/markdown/routing";
+import { predictiveSearchHandlers } from "@/lib/search/server";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
 const AUTH_PATHS = new Set<string>([
@@ -58,8 +61,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
       : undefined;
   const handlers =
     authHandlers && customerCartHandlers
-      ? [authHandlers, customerCartHandlers]
-      : [customerCartHandlers ?? cartHandlers];
+      ? [authHandlers, customerCartHandlers, predictiveSearchHandlers]
+      : [customerCartHandlers ?? cartHandlers, predictiveSearchHandlers];
   const shopifyRoute = handleShopifyRoutes({
     handlers,
     request,
@@ -78,6 +81,32 @@ export async function proxy(request: NextRequest): Promise<Response> {
     return response;
   }
 
+  const markdownPath = getMarkdownPath(pathname);
+  if (markdownPath) {
+    const representation = negotiateRepresentation(request.headers.get("Accept"));
+
+    if (!representation) {
+      return new Response(
+        "Not Acceptable\n\nAvailable representations: text/html, text/markdown\n",
+        {
+          status: 406,
+          headers: { "Content-Type": "text/plain; charset=utf-8", Vary: "Accept" },
+        },
+      );
+    }
+
+    if (representation === "text/markdown") {
+      const url = request.nextUrl.clone();
+      url.pathname = markdownPath;
+      const response = NextResponse.rewrite(url, {
+        request: { headers: requestContext.getForwardedRequestHeaders() },
+      });
+      appendVaryAccept(response.headers);
+      requestContext.applyResponseHeaders(response.headers);
+      return response;
+    }
+  }
+
   // evaluate(request) honors the toolbar override cookie; precompute() has no request in proxy.
   const values = await evaluate(precomputedFlags, request);
   const code = await serialize(
@@ -92,6 +121,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const response = NextResponse.rewrite(url, {
     request: { headers: requestContext.getForwardedRequestHeaders() },
   });
+  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
 }
@@ -99,6 +129,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
 export const config = {
   matcher: [
     "/api/cart",
+    "/api/predictive-search",
     "/api/mcp",
     "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
     "/__shopify/:path*",

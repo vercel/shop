@@ -4,52 +4,47 @@ title: Setup
 type: guide
 ---
 
-Vercel Shop needs a Shopify storefront token and two environment variables. You can scaffold it locally or deploy it directly to Vercel.
+Connect a Shopify store and run Vercel Shop locally in a few minutes.
 
-## Connect Shopify
+## 1. Get Shopify credentials
 
-Install Shopify's **Headless** sales channel, create a storefront, and copy its **Storefront API access token**. Enable the permissions used by the template; see [Storefront API Permissions](/docs/reference/storefront-api-permissions) for the exact scopes.
+Install Shopify's **Headless** sales channel, create a storefront, and copy its **Storefront API access token**. Enable the required [Storefront API permissions](/docs/reference/storefront-api-permissions).
 
-## Create your project
-
-Scaffold a local project:
+## 2. Create your project
 
 ```bash
 npx create-vercel-shop@latest my-store
+cd my-store
 ```
 
-Or deploy the template directly to Vercel:
+To deploy instead, use the Vercel flow:
 
 <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fshop%2Ftree%2Fmain%2Fapps%2Ftemplate&products=%5B%7B%22type%22%3A%22integration%22%2C%22integrationSlug%22%3A%22shopify%22%2C%22productSlug%22%3A%22shopify%22%2C%22protocol%22%3A%22other%22%7D%5D">
   <img src="https://vercel.com/button" alt="Deploy with Vercel" />
 </a>
 
-The deploy flow installs the Shopify integration, which connects a new or existing store and configures the required Shopify credentials on the project.
+The deploy flow connects your Shopify store and configures the required credentials.
 
-## Add your credentials
+## 3. Add your credentials
 
 Create `.env.local` in the project root:
 
 ```bash
 NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN="your-store.myshopify.com"
-NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN="[redacted]"
+NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN="shpat_1234567890abcdefghijklmnopqrstuvwxyz"
 ```
 
-The storefront display name is the `site.name` literal in `lib/config.ts` (defaults to `"Vercel Shop"`), not an environment variable.
+See [Environment Variables](/docs/reference/env-vars) for optional settings.
 
-See [Environment Variables](/docs/reference/env-vars) for optional features and deployment settings.
-
-## Run locally
-
-Start the development server with your package manager:
+## 4. Run the storefront
 
 ```bash
 npm run dev
 ```
 
-Open [localhost:3000](http://localhost:3000).
+Open [localhost:3000](http://localhost:3000) and confirm that your Shopify products appear.
 
-> **Local HTTPS:** Install [Portless](https://portless.sh) with `npm install -g portless`, then run `npm run dev:portless` to serve the storefront at [shop.localhost](https://shop.localhost). This is useful for testing OAuth callbacks and secure cookies.
+For local HTTPS, install [Portless](https://portless.sh) with `npm install -g portless`, then run `npm run dev:portless`. Use HTTPS when testing OAuth callbacks or secure cookies.
 
 ## Next steps
 
