@@ -22,13 +22,9 @@ Run Shopify routing before locale negotiation, experiments, or request-dependent
 
 Use static redirects for fixed URL changes. Use the proxy only when a decision depends on the incoming request.
 
-## Common extensions
+## What’s next
 
 - **Locale routing** — [Enable Shopify Markets](/docs/skills/enable-shopify-markets) and [Enable i18n](/docs/skills/enable-i18n) add locale handling after Shopify routing.
 - **Custom APIs** — application APIs remain outside the proxy unless explicitly claimed.
 - **Experiments and redirects** — request-dependent choices can run after Shopify declines the request.
 - **Location and bot signals** — coarse request signals are available here. Verified bot detection for assistant chat uses [Vercel BotID](https://vercel.com/docs/botid).
-
-## Verify a routing change
-
-Test the affected Shopify endpoint, an ordinary storefront page, and an unrelated application API. Confirm that each reaches the expected owner and that locale handling does not alter Shopify protocol routes.

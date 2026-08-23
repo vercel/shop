@@ -50,18 +50,8 @@ Navigation menu edits are also outside this handler.
 
 Malformed product or collection update payloads cannot identify a specific resource, so they do not refresh the full catalog. Valid Shopify deliveries include the expected identifiers.
 
-## Verify the setup
+After registering a topic, use **Send test notification** in Shopify Admin and confirm the delivery succeeds before relying on it for storefront freshness.
 
-With the secret unset, confirm the endpoint is disabled:
-
-```bash
-curl -i -X POST http://localhost:3000/api/webhooks/shopify
-```
-
-The response should be `404`. After setting the secret, the same unsigned request should return `401`.
-
-Then use **Send test notification** for each registered webhook in Shopify Admin. Confirm the request succeeds in your function logs. Finally, edit a product or collection and verify the corresponding storefront content changes without a redeploy.
-
-## Customize webhook coverage
+## What’s next
 
 Add a topic only when Shopify offers a webhook for the resource and the storefront has a safe way to refresh the affected data. Prefer targeted refreshes for frequently changing catalog data. Use broader refreshes only when an event cannot be scoped or after an intentional bulk change.

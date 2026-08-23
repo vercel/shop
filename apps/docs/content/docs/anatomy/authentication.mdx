@@ -70,17 +70,9 @@ Customer Account API data is personalized and is not publicly cached.
 
 > **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
 
-## Verify the setup
+If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character.
 
-1. Open `/account/login` from the public HTTPS origin.
-2. Sign in through Shopify and confirm the storefront returns to an account page.
-3. Check profile, order, and address data against the same customer in Shopify Admin.
-4. Add an item before signing in and confirm it remains in the cart afterward.
-5. Sign out and confirm protected account pages require a new sign-in.
-
-If the redirect fails, first compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character.
-
-## Customize customer accounts
+## What’s next
 
 You can change the account navigation, add a dashboard, or expose more Customer Account API data such as store credit or subscriptions. Validate additions against the Customer Account API schema, which differs from the Storefront API, and keep private customer data behind authentication.
 

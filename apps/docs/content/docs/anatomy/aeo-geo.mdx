@@ -31,20 +31,6 @@ Markdown responses include the facts needed to interpret each page:
 - **Collections** — description, active and available filters, products, pagination, image, and SEO metadata.
 - **Search** — query, collection scope, filters, products, and pagination.
 
-## Verify the responses
+## What’s next
 
-```bash
-# Structured Markdown
-curl -H "Accept: text/markdown" http://localhost:3000/products/speaker
-curl -H "Accept: text/markdown" http://localhost:3000/collections/speakers
-curl -H "Accept: text/markdown" "http://localhost:3000/search?q=speaker&sort=price-low-to-high"
-
-# Normal HTML
-curl http://localhost:3000/products/speaker
-```
-
-Check that the Markdown contains accurate catalog data and that the final command still returns the shopper-facing page.
-
-## Important choices
-
-Keep `/llms.txt` concise. Use the sitemap for exhaustive discovery. If you add Markdown support to another page type, include only facts an agent needs to identify, compare, or link to that content.
+Keep `/llms.txt` concise and use the sitemap for exhaustive discovery. Common extensions include Markdown responses for additional page types, localized discovery content, and public metaobject content. Include only facts an agent needs to identify, compare, or link to that content.

@@ -31,15 +31,6 @@ If `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, server-side cart activity is attr
 - Cart updates can fail because of availability, quantity, discount, or checkout restrictions.
 - Gift cards and bundles can carry information that ordinary product lines do not; preserve that data when extending cart behavior.
 
-## Verify the cart
-
-1. Add an available variant and confirm the cart badge and overlay update.
-2. Change its quantity, then reload `/cart` and confirm the quantity and totals persist.
-3. Apply one valid and one invalid discount code and confirm each result is clear.
-4. Remove the line and confirm the empty-cart state appears.
-5. If authentication or the assistant is enabled, change the cart through that experience and confirm every cart surface agrees.
-6. Start checkout and confirm the products, quantities, discounts, currency, and customer state are correct.
-
-## Customize the cart
+## What’s next
 
 You can adjust the cart lifetime, expose order-level attributes, support personalized products, or add custom bundle purchase flows. Keep the cookie lifetime aligned with Shopify's cart handling, preserve all line attributes needed at checkout, and continue treating Shopify's confirmed cart as the source of truth.

@@ -26,8 +26,6 @@ Product and collection webhooks refresh affected sitemap entries. Creating or de
 
 Shopify does not provide webhook topics for Pages, blogs, or articles. Changes to those resources, and to policies, may remain cached until you manually purge the relevant cache or redeploy.
 
-## Verify discovery
+## What’s next
 
-Open `/sitemap.xml` and confirm that every listed child sitemap responds successfully. Check representative product, collection, content, and policy URLs. After a product or collection change, confirm that its URL and modification date update after webhook processing.
-
-Shopify's sitemap API also supports metaobjects, but the template does not include them. Add that resource type only if metaobjects have public storefront URLs that search engines should discover.
+Shopify's sitemap API also supports metaobjects, but the template does not include them. Add that resource type only when metaobjects have public storefront URLs that search engines should discover. Stores with rich media may also add image or video sitemap data for content that search engines cannot discover reliably from the page itself.
