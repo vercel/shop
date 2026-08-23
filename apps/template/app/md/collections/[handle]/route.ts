@@ -6,6 +6,8 @@ import {
 } from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
+import { markdownHeaders } from "@/lib/markdown/headers";
+import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import {
   buildProductFiltersFromParams,
@@ -13,19 +15,11 @@ import {
 } from "@/lib/shopify/operations/products";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
-function markdownHeaders(cacheControl: string): HeadersInit {
-  return {
-    "Content-Type": "text/markdown; charset=utf-8",
-    "Cache-Control": cacheControl,
-    Vary: "Accept",
-    "X-Robots-Tag": "noindex",
-  };
-}
-
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
   const url = new URL(request.url);
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
+  const pathname = `/collections/${handle}`;
   const searchParams = searchParamsToRecord(url.searchParams);
 
   try {
@@ -49,7 +43,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       });
 
       return new Response(markdown, {
-        headers: markdownHeaders("public, max-age=86400, stale-while-revalidate=604800"),
+        headers: markdownHeaders({
+          cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
+          pathname,
+        }),
       });
     }
 
@@ -72,13 +69,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
     ]);
 
     if (!collection) {
-      return new Response(
-        `# Collection Not Found\n\nThe collection with handle \`${handle}\` could not be found.`,
-        {
-          status: 404,
-          headers: markdownHeaders("public, max-age=3600, stale-while-revalidate=604800"),
-        },
-      );
+      return new Response(notFoundMarkdown({ kind: "Collection", value: handle }), {
+        status: 404,
+        headers: markdownHeaders({
+          cacheControl: "public, max-age=3600, stale-while-revalidate=604800",
+          pathname,
+        }),
+      });
     }
 
     const markdown = collectionToMarkdown({
@@ -93,14 +90,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
     });
 
     return new Response(markdown, {
-      headers: markdownHeaders("public, max-age=86400, stale-while-revalidate=604800"),
+      headers: markdownHeaders({
+        cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
+        pathname,
+      }),
     });
   } catch {
     return new Response(
       "# Server Error\n\nAn error occurred while retrieving the collection. Please try again later.",
       {
         status: 500,
-        headers: markdownHeaders("no-cache, no-store, must-revalidate"),
+        headers: markdownHeaders({
+          cacheControl: "no-cache, no-store, must-revalidate",
+          pathname,
+        }),
       },
     );
   }

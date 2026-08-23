@@ -62,29 +62,6 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: "/collections/:handle",
-          destination: "/md/collections/:handle",
-          has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
-        },
-        {
-          source: "/products/:handle",
-          destination: "/md/products/:handle",
-          has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
-        },
-        {
-          source: "/search",
-          destination: "/md/search",
-          has: [{ type: "header", key: "accept", value: "(.*)text/markdown(.*)" }],
-        },
-      ],
-      afterFiles: [],
-      fallback: [],
-    };
-  },
 };
 
 const withNextIntl = createNextIntlPlugin({

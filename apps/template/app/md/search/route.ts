@@ -1,4 +1,5 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
+import { markdownHeaders } from "@/lib/markdown/headers";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
 import {
   buildProductFiltersFromParams,
@@ -6,15 +7,6 @@ import {
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
-
-function markdownHeaders(cacheControl: string): HeadersInit {
-  return {
-    "Content-Type": "text/markdown; charset=utf-8",
-    "Cache-Control": cacheControl,
-    Vary: "Accept",
-    "X-Robots-Tag": "noindex",
-  };
-}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -55,14 +47,20 @@ export async function GET(request: Request) {
     });
 
     return new Response(markdown, {
-      headers: markdownHeaders("public, max-age=86400, stale-while-revalidate=604800"),
+      headers: markdownHeaders({
+        cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
+        pathname: "/search",
+      }),
     });
   } catch {
     return new Response(
       "# Server Error\n\nAn error occurred while retrieving the search results. Please try again later.",
       {
         status: 500,
-        headers: markdownHeaders("no-cache, no-store, must-revalidate"),
+        headers: markdownHeaders({
+          cacheControl: "no-cache, no-store, must-revalidate",
+          pathname: "/search",
+        }),
       },
     );
   }
