@@ -1,5 +1,6 @@
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
@@ -37,7 +38,7 @@ import { getAvailableOptionValues } from "@/lib/shopify/encoded-variants";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export function ProductDetailSection({
+export async function ProductDetailSection({
   product,
   selectedOptionsPromise,
   variantPromise,
@@ -48,8 +49,10 @@ export function ProductDetailSection({
   variantPromise: Promise<ProductVariant | undefined>;
   locale: Locale;
 }) {
+  const messages = await getMessages();
+
   return (
-    <>
+    <NextIntlClientProvider messages={{ cart: messages.cart, product: messages.product }}>
       <ProductSchema
         product={{
           id: product.id,
@@ -83,7 +86,7 @@ export function ProductDetailSection({
           locale={locale}
         />
       </div>
-    </>
+    </NextIntlClientProvider>
   );
 }
 

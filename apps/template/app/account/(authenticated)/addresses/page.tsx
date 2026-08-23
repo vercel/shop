@@ -1,4 +1,5 @@
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { AddressBook } from "@/components/account/address-book";
@@ -20,8 +21,12 @@ export default async function AddressesPage() {
 }
 
 async function AddressesContent() {
-  const addresses = await getCustomerAddresses();
-  return <AddressBook addresses={addresses} />;
+  const [addresses, messages] = await Promise.all([getCustomerAddresses(), getMessages()]);
+  return (
+    <NextIntlClientProvider messages={{ account: messages.account }}>
+      <AddressBook addresses={addresses} />
+    </NextIntlClientProvider>
+  );
 }
 
 function AddressesSkeleton() {

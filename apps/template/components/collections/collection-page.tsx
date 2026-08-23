@@ -1,5 +1,6 @@
 import { SlidersHorizontalIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -41,7 +42,8 @@ export async function CollectionDetailPage({
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
-  const [tSearch, tBreadcrumb] = await Promise.all([
+  const [messages, tSearch, tBreadcrumb] = await Promise.all([
+    getMessages(),
     getTranslations("search"),
     getTranslations("collections.breadcrumb"),
   ]);
@@ -67,39 +69,43 @@ export async function CollectionDetailPage({
                 <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
               }
             >
-              <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-                <CollectionToolbar
-                  filterSheet={
-                    <FilterSidebarSheet
-                      label={filtersLabel}
-                      trigger={
-                        <button
-                          type="button"
-                          className="flex items-center gap-2 text-sm font-medium"
-                        >
-                          <SlidersHorizontalIcon className="size-4" />
-                          <span>{filtersLabel}</span>
-                          <CollectionActiveFilterCountBadge />
-                        </button>
-                      }
-                    >
-                      <FilterPendingScope>
-                        <CollectionFilters
-                          collectionResultsDataPromise={collectionResultsDataPromise}
-                        />
-                      </FilterPendingScope>
-                    </FilterSidebarSheet>
-                  }
-                  sortSelect={<CollectionsSortSelect collection exclude={sortExclude} />}
-                />
-
-                <FilterPendingScope>
-                  <CollectionResultsGrid
-                    locale={locale}
-                    collectionResultsDataPromise={collectionResultsDataPromise}
+              <NextIntlClientProvider
+                messages={{ category: messages.category, search: messages.search }}
+              >
+                <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+                  <CollectionToolbar
+                    filterSheet={
+                      <FilterSidebarSheet
+                        label={filtersLabel}
+                        trigger={
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 text-sm font-medium"
+                          >
+                            <SlidersHorizontalIcon className="size-4" />
+                            <span>{filtersLabel}</span>
+                            <CollectionActiveFilterCountBadge />
+                          </button>
+                        }
+                      >
+                        <FilterPendingScope>
+                          <CollectionFilters
+                            collectionResultsDataPromise={collectionResultsDataPromise}
+                          />
+                        </FilterPendingScope>
+                      </FilterSidebarSheet>
+                    }
+                    sortSelect={<CollectionsSortSelect collection exclude={sortExclude} />}
                   />
-                </FilterPendingScope>
-              </CollectionBrowseProvider>
+
+                  <FilterPendingScope>
+                    <CollectionResultsGrid
+                      locale={locale}
+                      collectionResultsDataPromise={collectionResultsDataPromise}
+                    />
+                  </FilterPendingScope>
+                </CollectionBrowseProvider>
+              </NextIntlClientProvider>
             </Suspense>
           </Sections>
         </Container>
