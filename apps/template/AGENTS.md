@@ -31,9 +31,10 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 ## Critical Rules (Always Apply)
 
 1. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
-2. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
-3. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
-4. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
+2. **Keep translations server-first.** Server Components use `getTranslations()` and pass primitive labels to client leaves. When an interactive island needs `useTranslations()`, wrap it in the nearest Server Component with a `NextIntlClientProvider` containing only the namespaces it uses; never pass the full catalog from the root layout.
+3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
+4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
+5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
 ## Storefront Architecture Contract
 
