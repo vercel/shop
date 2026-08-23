@@ -26,7 +26,7 @@ The template stores Hydrogen's OAuth session data in encrypted HttpOnly cookies.
 
 | Variable                            | Description                                                                                                                                                                  |
 | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DEBUG_SHOPIFY`                     | Set to `true` to include structured Storefront and Customer Account API operation timings in Hydrogen's server logs.                                                        |
+| `DEBUG_SHOPIFY`                     | Set to `true` to include structured Storefront and Customer Account API operation timings in Hydrogen's server logs.                                                         |
 | `NEXT_PUBLIC_BASE_URL`              | Bare domain (no protocol) used to build the canonical base URL for sitemap entries, OG tags, and auth callbacks. Defaults to `VERCEL_PROJECT_PRODUCTION_URL` on Vercel.      |
 | `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel. Hydrogen sends it as a trusted Storefront API header for cart attribution and includes it in Shopify runtime configuration. |
 | `SHOPIFY_API_VERSION`               | Override the Shopify Storefront API version. Defaults to `unstable`; Hydrogen selects its dated Customer Account API version.                                                |
