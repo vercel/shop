@@ -37,6 +37,23 @@ export function getParamKeyFromShopifyId(filterId: string): string {
   return filterId.toLowerCase();
 }
 
+function normalizeShopifyFilterInput(inputJson: string): string {
+  try {
+    const input = JSON.parse(inputJson) as ProductFilter;
+    if (input.taxonomyMetafield) {
+      return JSON.stringify({
+        taxonomyMetafield: {
+          key: `${input.taxonomyMetafield.namespace}.${input.taxonomyMetafield.key}`,
+          value: input.taxonomyMetafield.value,
+        },
+      });
+    }
+    return inputJson;
+  } catch {
+    return inputJson;
+  }
+}
+
 function parseShopifyFilterValue(inputJson: string): string | null {
   try {
     const input = JSON.parse(inputJson) as ProductFilter;
@@ -101,7 +118,7 @@ function transformFilterValue(value: ShopifyFilterValue): FilterValue | null {
   return {
     count: value.count,
     id: value.id,
-    input: value.input,
+    input: normalizeShopifyFilterInput(value.input),
     label: value.label,
     ...(swatch ? { swatch } : {}),
     value: parsedValue,
