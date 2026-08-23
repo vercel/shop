@@ -1,7 +1,7 @@
 "use client";
 
 import { SearchIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { startTransition, useRef, useState } from "react";
 
@@ -11,14 +11,13 @@ import { PredictiveSearchPanel } from "../action-bar/predictive-search-results";
 
 export function SearchClient() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations("nav");
   const inputRef = useRef<HTMLInputElement>(null);
   const [showPanel, setShowPanel] = useState(false);
   const blurTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const { query, setQuery, results, isLoading, totalItems, activeIndex, setActiveIndex, reset } =
-    usePredictiveSearch(locale);
+    usePredictiveSearch();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

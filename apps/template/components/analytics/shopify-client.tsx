@@ -1,15 +1,23 @@
 "use client";
 
-import type { I18nConfig } from "@shopify/hydrogen";
+import type { ShopifyScriptsI18n, ShopifyScriptsShop } from "@shopify/hydrogen";
 import { ShopifyScripts, useCartAnalytics } from "@shopify/hydrogen/react";
 import { useRouter } from "next/navigation";
+import { type ReactNode, useEffect, useState } from "react";
 
+import { PageViewedTracker } from "@/components/analytics/trackers";
 import { shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
 
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
   storefrontId: string;
+}
+
+function AnalyticsReady({ children }: { children: ReactNode }) {
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => setIsReady(true), []);
+  return isReady ? children : null;
 }
 
 function CartAnalyticsTracker() {
@@ -19,6 +27,16 @@ function CartAnalyticsTracker() {
 
 export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
   const router = useRouter();
+  const i18n: ShopifyScriptsI18n = {
+    country: shop.country,
+    currency: shop.currency,
+    language: shop.acceptedLanguage,
+  };
+  const shopifyShop: ShopifyScriptsShop = {
+    myshopifyDomain: shop.storeDomain,
+    shopId: shop.shopId,
+    storefrontId,
+  };
 
   return (
     <>
@@ -31,23 +49,16 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
       <ShopifyScripts
         analytics={{ channel: "headless" }}
         consent={{ mode: shopConfig.analytics.shopify.consentMode }}
-        i18n={
-          {
-            country: shop.country,
-            currency: shop.currency,
-            language: shop.acceptedLanguage,
-          } as I18nConfig & { currency: string }
-        }
+        i18n={i18n}
         navigate={(url) => router.push(url)}
-        shop={{
-          shopId: shop.shopId,
-          myshopifyDomain: shop.storeDomain,
-          storefrontId,
-        }}
+        shop={shopifyShop}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.webmcp.isEnabled}
       />
-      <CartAnalyticsTracker />
+      <AnalyticsReady>
+        <PageViewedTracker />
+        <CartAnalyticsTracker />
+      </AnalyticsReady>
     </>
   );
 }

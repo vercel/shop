@@ -1,3 +1,4 @@
+import type { I18nConfig } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
@@ -49,8 +50,8 @@ export async function getShopAnalytics({
   assertStorefrontOk(response, "getShopAnalytics");
 
   return {
-    acceptedLanguage: language,
-    country,
+    acceptedLanguage: language as I18nConfig["language"],
+    country: country as I18nConfig["country"],
     currency: response.data.localization.country.currency.isoCode,
     shopId: response.data.shop.id,
     storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,

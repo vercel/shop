@@ -1,9 +1,17 @@
 "use client";
 
+import {
+  filterEquals,
+  isFilterInputActive,
+  serializeCollectionParams,
+  type CollectionState,
+  type ProductFilter,
+} from "@shopify/hydrogen";
+import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useOptimistic, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   useFilterPending,
@@ -12,6 +20,7 @@ import {
 import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
+import { parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 import {
   FilterBadge,
@@ -30,11 +39,275 @@ import {
 
 interface CollectionFilterSidebarClientProps {
   activeFilters: Record<string, string | string[] | undefined>;
+  collection?: boolean;
   filters: Filter[];
   priceRange?: PriceRange;
 }
 
-type FilterState = Record<string, string | string[] | undefined>;
+export function CollectionFilterSidebarClient(props: CollectionFilterSidebarClientProps) {
+  return props.collection ? (
+    <HydrogenCollectionFilterSidebar {...props} />
+  ) : (
+    <SearchFilterSidebar {...props} />
+  );
+}
+
+function HydrogenCollectionFilterSidebar(props: CollectionFilterSidebarClientProps) {
+  const state = useCollection();
+  const actions = useCollectionActions();
+  const params = serializeCollectionParams(state);
+  const activeFilters = parseFiltersFromSearchParams(searchParamsToRecord(params));
+
+  return (
+    <FilterSidebarContent
+      {...props}
+      activeFilters={activeFilters}
+      buildFilterHref={(input) => buildHydrogenFilterHref(state, input)}
+      isPending={state.status === "loading"}
+      onApplyPrice={(min, max) => {
+        const filters = state.filters.filter((filter) => !filter.price);
+        if (min !== null || max !== null) {
+          filters.push({
+            price: {
+              ...(max !== null ? { max } : {}),
+              ...(min !== null ? { min } : {}),
+            },
+          });
+        }
+        actions.setFilters(filters);
+      }}
+      onClear={actions.reset}
+      onToggle={(input) => actions.toggleFilterInput(input)}
+      selected={(input) => isFilterInputActive(state.filters, input)}
+    />
+  );
+}
+
+function SearchFilterSidebar(props: CollectionFilterSidebarClientProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isPending = useFilterPending();
+  const startTransition = useFilterTransition();
+
+  const navigate = (params: URLSearchParams) => {
+    startTransition(() => router.push(buildHref(pathname, params)));
+  };
+
+  return (
+    <FilterSidebarContent
+      {...props}
+      buildFilterHref={(_, key, value) => {
+        const params = new URLSearchParams(searchParams.toString());
+        toggleFilterParam(params, key, value);
+        return buildHref(pathname, params);
+      }}
+      isPending={isPending}
+      onApplyPrice={(min, max) => {
+        const params = new URLSearchParams(searchParams.toString());
+        applyPriceParams(params, min, max);
+        navigate(params);
+      }}
+      onClear={() => {
+        const params = new URLSearchParams(searchParams.toString());
+        for (const key of [...params.keys()]) if (key.startsWith("filter.")) params.delete(key);
+        navigate(params);
+      }}
+      onToggle={(_, key, value) => {
+        const params = new URLSearchParams(searchParams.toString());
+        toggleFilterParam(params, key, value);
+        navigate(params);
+      }}
+      selected={(_, key, value) => getFilterValues(props.activeFilters[key]).includes(value)}
+    />
+  );
+}
+
+function FilterSidebarContent({
+  activeFilters,
+  buildFilterHref,
+  filters,
+  isPending,
+  onApplyPrice,
+  onClear,
+  onToggle,
+  priceRange,
+  selected,
+}: CollectionFilterSidebarClientProps & {
+  buildFilterHref: (input: string, key: string, value: string) => string;
+  isPending: boolean;
+  onApplyPrice: (min: number | null, max: number | null) => void;
+  onClear: () => void;
+  onToggle: (input: string, key: string, value: string) => void;
+  selected: (input: string, key: string, value: string) => boolean;
+}) {
+  const locale = useLocale();
+  const tSearch = useTranslations("search");
+  const tCategory = useTranslations("category");
+  const priceFilter = getPriceFilter(activeFilters);
+  const [minInput, setMinInput] = useState(priceFilter.min?.toString() ?? "");
+  const [maxInput, setMaxInput] = useState(priceFilter.max?.toString() ?? "");
+
+  useEffect(() => {
+    setMinInput(priceFilter.min?.toString() ?? "");
+    setMaxInput(priceFilter.max?.toString() ?? "");
+  }, [priceFilter.max, priceFilter.min]);
+
+  const activeBadges = getActiveFilterBadges(filters, activeFilters);
+  const hasPriceFilter = priceFilter.min !== null || priceFilter.max !== null;
+  const totalActiveCount = activeBadges.length + (hasPriceFilter ? 1 : 0);
+
+  return (
+    <FilterSidebar>
+      <div className="flex flex-col gap-5 pb-41.5">
+        <FilterSidebarHeader
+          activeCount={totalActiveCount > 0 ? totalActiveCount : undefined}
+          onReset={totalActiveCount > 0 ? onClear : undefined}
+          resetLabel={tSearch("reset")}
+          title={tSearch("filters")}
+        />
+
+        {(activeBadges.length > 0 || hasPriceFilter) && (
+          <FilterSidebarActiveFilters>
+            {activeBadges.map((badge) => {
+              const input = findFilterInput(filters, badge.paramKey, badge.value);
+              return (
+                <FilterBadge
+                  key={`${badge.paramKey}-${badge.value}`}
+                  onRemove={() => input && onToggle(input, badge.paramKey, badge.value)}
+                  variant="primary"
+                >
+                  {badge.label}
+                </FilterBadge>
+              );
+            })}
+            {hasPriceFilter && (
+              <FilterBadge variant="primary" onRemove={() => onApplyPrice(null, null)}>
+                {formatPriceRangeLabel({
+                  currencyCode: priceRange?.currencyCode,
+                  locale,
+                  max: priceFilter.max,
+                  min: priceFilter.min,
+                })}
+              </FilterBadge>
+            )}
+          </FilterSidebarActiveFilters>
+        )}
+
+        {priceRange && (
+          <FilterSection>
+            <FilterSectionHeader title={tCategory("price")} />
+            <FilterSectionContent>
+              <FilterPriceRange
+                fromPlaceholder={tCategory("priceFrom")}
+                maxValue={maxInput}
+                minValue={minInput}
+                onApply={(min, max) => onApplyPrice(parsePriceValue(min), parsePriceValue(max))}
+                onMaxChange={setMaxInput}
+                onMinChange={setMinInput}
+                toPlaceholder={tCategory("priceTo")}
+              />
+            </FilterSectionContent>
+          </FilterSection>
+        )}
+
+        {filters.map((filter) =>
+          filter.values.length === 0 ? null : (
+            <FilterSection key={filter.id}>
+              <FilterSectionHeader title={filter.label} />
+              <FilterSectionContent>
+                {filter.presentation === "swatch" ? (
+                  <FilterSwatchGrid>
+                    {filter.values.map((value) => {
+                      const isSelected = selected(value.input, filter.paramKey, value.value);
+                      return (
+                        <Link
+                          key={value.id}
+                          aria-label={tSearch("selectFilterValue", {
+                            name: filter.label,
+                            value: value.label,
+                          })}
+                          aria-pressed={isSelected}
+                          className="block cursor-pointer"
+                          href={buildFilterHref(value.input, filter.paramKey, value.value)}
+                          scroll={false}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            onToggle(value.input, filter.paramKey, value.value);
+                          }}
+                        >
+                          <Swatch
+                            color={value.swatch?.color}
+                            image={value.swatch?.image}
+                            label={value.label}
+                            selected={isSelected}
+                          />
+                        </Link>
+                      );
+                    })}
+                  </FilterSwatchGrid>
+                ) : (
+                  <FilterOptionList>
+                    {filter.values.map((value) => (
+                      <FilterOption
+                        key={value.id}
+                        count={value.count}
+                        href={buildFilterHref(value.input, filter.paramKey, value.value)}
+                        label={value.label}
+                        pending={isPending && selected(value.input, filter.paramKey, value.value)}
+                        selected={selected(value.input, filter.paramKey, value.value)}
+                        onClick={(event) => {
+                          event.preventDefault();
+                          onToggle(value.input, filter.paramKey, value.value);
+                        }}
+                      />
+                    ))}
+                  </FilterOptionList>
+                )}
+              </FilterSectionContent>
+            </FilterSection>
+          ),
+        )}
+      </div>
+      <FilterSidebarScrollFade />
+    </FilterSidebar>
+  );
+}
+
+function buildHydrogenFilterHref(
+  state: Pick<CollectionState, "filters" | "reverse" | "sortKey">,
+  input: string,
+): string {
+  try {
+    const filter = JSON.parse(input) as ProductFilter;
+    const next = state.filters.some((current) => filterEquals(current, filter))
+      ? state.filters.filter((current) => !filterEquals(current, filter))
+      : [...state.filters, filter];
+    const params = serializeCollectionParams({ ...state, filters: next });
+    const query = params.toString();
+    return query ? `?${query}` : "?";
+  } catch {
+    return "?";
+  }
+}
+
+function applyPriceParams(params: URLSearchParams, min: number | null, max: number | null) {
+  if (min === null) params.delete("filter.v.price.gte");
+  else params.set("filter.v.price.gte", min.toString());
+  if (max === null) params.delete("filter.v.price.lte");
+  else params.set("filter.v.price.lte", max.toString());
+}
+
+function buildHref(pathname: string, params: URLSearchParams): string {
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
+function findFilterInput(filters: Filter[], key: string, value: string): string | undefined {
+  return filters
+    .find((filter) => filter.paramKey === key)
+    ?.values.find((item) => item.value === value)?.input;
+}
 
 function formatPriceRangeLabel({
   currencyCode,
@@ -51,7 +324,6 @@ function formatPriceRangeLabel({
     currencyCode
       ? new Intl.NumberFormat(locale, { currency: currencyCode, style: "currency" }).format(value)
       : new Intl.NumberFormat(locale).format(value);
-
   if (min !== null && max !== null) return `${format(min)} - ${format(max)}`;
   if (min !== null) return `From ${format(min)}`;
   return `Up to ${format(max ?? 0)}`;
@@ -62,269 +334,24 @@ function getFilterValues(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function toFilterStateValue(values: string[]): string | string[] | undefined {
-  if (values.length === 0) return undefined;
-  if (values.length === 1) return values[0];
-  return values;
-}
-
-function toggleFilterStateValue(current: FilterState, key: string, value: string): FilterState {
-  const values = getFilterValues(current[key]);
-  const nextValues = values.includes(value)
-    ? values.filter((currentValue) => currentValue !== value)
-    : [...values, value];
-
+function getPriceFilter(activeFilters: Record<string, string | string[] | undefined>) {
   return {
-    ...current,
-    [key]: toFilterStateValue(nextValues),
+    max: parsePriceValue(getFilterValues(activeFilters["filter.v.price.lte"])[0] ?? ""),
+    min: parsePriceValue(getFilterValues(activeFilters["filter.v.price.gte"])[0] ?? ""),
   };
 }
 
-function buildHref(pathname: string, params: URLSearchParams): string {
-  const query = params.toString();
-  return query ? `${pathname}?${query}` : pathname;
-}
-
-function readFilterValues(params: URLSearchParams, key: string): string[] {
-  return params
-    .getAll(key)
-    .flatMap((v) => v.split(","))
-    .map((v) => v.trim())
-    .filter(Boolean);
-}
-
-function toggleFilterParam(params: URLSearchParams, key: string, value: string): void {
-  const current = readFilterValues(params, key);
-  const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-  params.delete(key);
-  if (next.length > 0) params.set(key, next.join(","));
-}
-
-function parsePriceValue(value: string | null): number | null {
+function parsePriceValue(value: string): number | null {
   if (!value) return null;
   const parsed = Number.parseFloat(value);
   return Number.isNaN(parsed) || parsed < 0 ? null : parsed;
 }
 
-function applyPriceParams(params: URLSearchParams, min: number | null, max: number | null): void {
-  if (min === null) {
-    params.delete("filter.v.price.gte");
-  } else {
-    params.set("filter.v.price.gte", min.toString());
-  }
-
-  if (max === null) {
-    params.delete("filter.v.price.lte");
-  } else {
-    params.set("filter.v.price.lte", max.toString());
-  }
-}
-
-export function CollectionFilterSidebarClient({
-  filters,
-  priceRange,
-  activeFilters,
-}: CollectionFilterSidebarClientProps) {
-  const locale = useLocale();
-  const pathname = usePathname();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const isPending = useFilterPending();
-  const startFilterTransition = useFilterTransition();
-  const tSearch = useTranslations("search");
-  const tCategory = useTranslations("category");
-
-  const [optimisticFilters, setOptimisticFilters] = useOptimistic(
-    activeFilters,
-    (current, update: { key: string; value: string }) =>
-      toggleFilterStateValue(current, update.key, update.value),
-  );
-
-  const pendingFilterRef = useRef<string | null>(null);
-  const urlPriceMin = parsePriceValue(searchParams.get("filter.v.price.gte"));
-  const urlPriceMax = parsePriceValue(searchParams.get("filter.v.price.lte"));
-  const hasPriceFilter = urlPriceMin !== null || urlPriceMax !== null;
-
-  const computeFilterHref = (key: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    toggleFilterParam(params, key, value);
-
-    return buildHref(pathname, params);
-  };
-
-  const toggleFilter = (key: string, value: string) => {
-    const href = computeFilterHref(key, value);
-    pendingFilterRef.current = `${key}:${value}`;
-
-    startFilterTransition(() => {
-      setOptimisticFilters({ key, value });
-      router.push(href);
-    });
-  };
-
-  const [minInput, setMinInput] = useState(urlPriceMin?.toString() ?? "");
-  const [maxInput, setMaxInput] = useState(urlPriceMax?.toString() ?? "");
-
-  useEffect(() => {
-    setMinInput(urlPriceMin?.toString() ?? "");
-    setMaxInput(urlPriceMax?.toString() ?? "");
-  }, [urlPriceMin, urlPriceMax]);
-
-  const applyPriceRange = (min: string, max: string) => {
-    const minNum = min ? Number.parseFloat(min) : null;
-    const maxNum = max ? Number.parseFloat(max) : null;
-
-    const validMin = minNum !== null && !Number.isNaN(minNum) && minNum >= 0 ? minNum : null;
-    const validMax = maxNum !== null && !Number.isNaN(maxNum) && maxNum >= 0 ? maxNum : null;
-
-    const params = new URLSearchParams(searchParams.toString());
-    applyPriceParams(params, validMin, validMax);
-
-    startFilterTransition(() => {
-      router.push(buildHref(pathname, params));
-    });
-  };
-
-  const removePriceRange = () => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("filter.v.price.gte");
-    params.delete("filter.v.price.lte");
-
-    startFilterTransition(() => {
-      router.push(buildHref(pathname, params));
-    });
-  };
-
-  const clearAllFilters = () => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    for (const key of [...params.keys()]) {
-      if (key.startsWith("filter.")) params.delete(key);
-    }
-
-    startFilterTransition(() => {
-      router.push(buildHref(pathname, params));
-    });
-  };
-
-  const activeBadges = getActiveFilterBadges(filters, activeFilters);
-  const totalActiveCount = activeBadges.length + (hasPriceFilter ? 1 : 0);
-
-  return (
-    <FilterSidebar>
-      <div className="flex flex-col gap-5 pb-41.5">
-        <FilterSidebarHeader
-          title={tSearch("filters")}
-          resetLabel={tSearch("reset")}
-          activeCount={totalActiveCount > 0 ? totalActiveCount : undefined}
-          onReset={totalActiveCount > 0 ? clearAllFilters : undefined}
-        />
-
-        {(activeBadges.length > 0 || hasPriceFilter) && (
-          <FilterSidebarActiveFilters>
-            {activeBadges.map((badge) => (
-              <FilterBadge
-                key={`${badge.paramKey}-${badge.value}`}
-                variant="primary"
-                onRemove={() => toggleFilter(badge.paramKey, badge.value)}
-              >
-                {badge.label}
-              </FilterBadge>
-            ))}
-            {hasPriceFilter && (
-              <FilterBadge variant="primary" onRemove={removePriceRange}>
-                {formatPriceRangeLabel({
-                  currencyCode: priceRange?.currencyCode,
-                  locale,
-                  max: urlPriceMax,
-                  min: urlPriceMin,
-                })}
-              </FilterBadge>
-            )}
-          </FilterSidebarActiveFilters>
-        )}
-
-        {priceRange && (
-          <FilterSection>
-            <FilterSectionHeader title={tCategory("price")} />
-            <FilterSectionContent>
-              <FilterPriceRange
-                minValue={minInput}
-                maxValue={maxInput}
-                onMinChange={setMinInput}
-                onMaxChange={setMaxInput}
-                onApply={applyPriceRange}
-                fromPlaceholder={tCategory("priceFrom")}
-                toPlaceholder={tCategory("priceTo")}
-              />
-            </FilterSectionContent>
-          </FilterSection>
-        )}
-
-        {filters.map((filter) => {
-          if (filter.values.length === 0) return null;
-
-          const currentValues = getFilterValues(optimisticFilters[filter.paramKey]);
-
-          return (
-            <FilterSection key={filter.id}>
-              <FilterSectionHeader title={filter.label} />
-              <FilterSectionContent>
-                {filter.presentation === "swatch" ? (
-                  <FilterSwatchGrid>
-                    {filter.values.map((value) => (
-                      <Link
-                        key={value.id}
-                        href={computeFilterHref(filter.paramKey, value.value)}
-                        scroll={false}
-                        aria-label={tSearch("selectFilterValue", {
-                          name: filter.label,
-                          value: value.label,
-                        })}
-                        aria-pressed={currentValues.includes(value.value)}
-                        className="block cursor-pointer"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleFilter(filter.paramKey, value.value);
-                        }}
-                      >
-                        <Swatch
-                          color={value.swatch?.color}
-                          image={value.swatch?.image}
-                          label={value.label}
-                          selected={currentValues.includes(value.value)}
-                        />
-                      </Link>
-                    ))}
-                  </FilterSwatchGrid>
-                ) : (
-                  <FilterOptionList>
-                    {filter.values.map((value) => (
-                      <FilterOption
-                        key={value.id}
-                        label={value.label}
-                        count={value.count}
-                        selected={currentValues.includes(value.value)}
-                        href={computeFilterHref(filter.paramKey, value.value)}
-                        pending={
-                          isPending &&
-                          pendingFilterRef.current === `${filter.paramKey}:${value.value}`
-                        }
-                        onClick={(e) => {
-                          e.preventDefault();
-                          toggleFilter(filter.paramKey, value.value);
-                        }}
-                      />
-                    ))}
-                  </FilterOptionList>
-                )}
-              </FilterSectionContent>
-            </FilterSection>
-          );
-        })}
-      </div>
-
-      <FilterSidebarScrollFade />
-    </FilterSidebar>
-  );
+function toggleFilterParam(params: URLSearchParams, key: string, value: string) {
+  const current = params.getAll(key).flatMap((item) => item.split(","));
+  const next = current.includes(value)
+    ? current.filter((item) => item !== value)
+    : [...current, value];
+  params.delete(key);
+  for (const item of next) params.append(key, item);
 }

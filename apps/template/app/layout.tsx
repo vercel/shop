@@ -8,9 +8,8 @@ import { Suspense } from "react";
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
+import { CartUI } from "@/components/cart/cart-ui";
 import { CartProviderWrapper } from "@/components/cart/context";
-import { CartNotifications } from "@/components/cart/notifications";
-import { CartOverlayBridge } from "@/components/cart/overlay-bridge";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
@@ -36,6 +35,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     getMessages(),
     getTranslations("accessibility"),
   ]);
+  const agentMessages = {
+    agent: messages.agent,
+    cart: messages.cart,
+    product: messages.product,
+  };
 
   // Un-awaited: the promise streams to the client provider; never block the shell on it.
   const cartData = seedCartData();
@@ -53,17 +57,22 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {t("skipToContent")}
         </a>
         <SiteSchema locale={locale} />
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={{ common: messages.common }}>
           <CartProviderWrapper cartData={cartData}>
             <Nav locale={locale} />
             <main id="main-content" className="flex flex-1 flex-col min-w-0">
               {children}
             </main>
             <Footer locale={locale} />
-            <CartNotifications />
-            <CartOverlayBridge />
+            <CartUI />
             <Suspense>
-              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
+              <ActionBar>
+                {shopConfig.agent.isEnabled && (
+                  <NextIntlClientProvider messages={agentMessages}>
+                    <AgentButton />
+                  </NextIntlClientProvider>
+                )}
+              </ActionBar>
             </Suspense>
             <Suspense>
               <AnalyticsComponents locale={locale} />

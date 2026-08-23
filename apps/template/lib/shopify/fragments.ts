@@ -275,6 +275,7 @@ export const CART_FRAGMENT = `#graphql
 export const COLLECTION_FIELDS_FRAGMENT = `#graphql
   ${IMAGE_FRAGMENT}
   fragment CollectionFields on Collection {
+    id
     handle
     title
     description

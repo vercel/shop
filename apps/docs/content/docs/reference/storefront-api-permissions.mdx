@@ -6,36 +6,24 @@ prerequisites:
   - /docs/getting-started
 ---
 
-After you create a storefront in Shopify Headless, open **Settings → Apps and sales channels → Headless → your storefront** and review the **Storefront API permissions** for that token.
+After [Getting Started](/docs/getting-started), open **Settings → Apps and sales channels → Headless → your storefront** in Shopify admin and grant these Storefront API permissions to the token.
 
-## Required for the default storefront
+## Required
 
-| Scope                                      | Purpose                                                   |
-| ------------------------------------------ | --------------------------------------------------------- |
-| `unauthenticated_read_product_listings`    | Product pages, search, and recommendations                |
-| `unauthenticated_read_product_inventory`   | Stock availability on product and collection pages        |
-| `unauthenticated_read_collection_listings` | Collection pages and navigation                           |
-| `unauthenticated_write_checkouts`          | Cart operations and checkout                              |
-| `unauthenticated_read_content`             | Shopify Pages, policies, blogs, articles, and metaobjects |
+| Scope                                      | Enables                                           |
+| ------------------------------------------ | ------------------------------------------------- |
+| `unauthenticated_read_product_listings`    | Product pages, search, and recommendations        |
+| `unauthenticated_read_product_inventory`   | Product and collection availability               |
+| `unauthenticated_read_collection_listings` | Collection pages and navigation                   |
+| `unauthenticated_write_checkouts`          | Cart operations and checkout                      |
+| `unauthenticated_read_content`             | Pages, policies, blogs, articles, and metaobjects |
 
-## Optional skills
+## Optional
 
-Enable these only when you add the corresponding feature:
+Grant optional scopes only when you enable the related feature.
 
 | Scope                                | Required by                                    |
 | ------------------------------------ | ---------------------------------------------- |
 | `unauthenticated_read_customer_tags` | [Authentication](/docs/anatomy/authentication) |
 
-## Related docs
-
-<Cards>
-  <Card title="Getting Started" href="/docs/getting-started">
-    The shortest path from Shopify token to a local storefront.
-  </Card>
-  <Card title="Environment Variables" href="/docs/reference/env-vars">
-    Required and optional environment variables for local development and deploys.
-  </Card>
-  <Card title="Storefront API" href="/docs/reference/storefront-api">
-    Query patterns, caching, and the shared Shopify client used by the template.
-  </Card>
-</Cards>
+See [Environment Variables](/docs/reference/env-vars) for token configuration and [Storefront API](/docs/reference/storefront-api) for query validation and runtime behavior.

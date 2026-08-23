@@ -1,9 +1,11 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { SearchViewedTracker } from "@/components/analytics/trackers";
 import {
   FilterPendingScope,
   FilterTransitionProvider,
@@ -65,7 +67,11 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
 }
 
 export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const [locale, t] = await Promise.all([getLocale(), getTranslations("search")]);
+  const [locale, messages, t] = await Promise.all([
+    getLocale(),
+    getMessages(),
+    getTranslations("search"),
+  ]);
 
   // Don't await searchParams here — it would force the route fully dynamic.
   const searchResultsDataPromise = (async () => {
@@ -84,68 +90,83 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
-        <FilterTransitionProvider>
-          <Sections className="gap-5">
-            <div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl">
-                <Link href="/search">{t("title")}</Link>
-                <Suspense fallback={null}>
-                  <SearchQueryLabel searchParamsPromise={searchParams} />
-                </Suspense>
-              </h1>
-            </div>
-            <CollectionToolbar
-              resultCount={
-                <Suspense fallback={<Skeleton className="h-4 w-20" />}>
-                  <SearchResultCount dataPromise={searchResultsDataPromise} />
-                </Suspense>
-              }
-              filterSheet={
-                <FilterSidebarSheet
-                  label={filtersLabel}
-                  trigger={
-                    <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                      <SlidersHorizontalIcon className="size-4" />
-                      <span>{filtersLabel}</span>
-                      <Suspense fallback={null}>
-                        <SearchFilterCountBadge searchParamsPromise={searchParams} />
+        <NextIntlClientProvider messages={{ category: messages.category, search: messages.search }}>
+          <FilterTransitionProvider>
+            <Sections className="gap-5">
+              <Suspense fallback={null}>
+                <SearchAnalyticsTracker searchParamsPromise={searchParams} />
+              </Suspense>
+              <div>
+                <h1 className="text-3xl sm:text-4xl md:text-5xl">
+                  <Link href="/search">{t("title")}</Link>
+                  <Suspense fallback={null}>
+                    <SearchQueryLabel searchParamsPromise={searchParams} />
+                  </Suspense>
+                </h1>
+              </div>
+              <CollectionToolbar
+                resultCount={
+                  <Suspense fallback={<Skeleton className="h-4 w-20" />}>
+                    <SearchResultCount dataPromise={searchResultsDataPromise} />
+                  </Suspense>
+                }
+                filterSheet={
+                  <FilterSidebarSheet
+                    label={filtersLabel}
+                    trigger={
+                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                        <SlidersHorizontalIcon className="size-4" />
+                        <span>{filtersLabel}</span>
+                        <Suspense fallback={null}>
+                          <SearchFilterCountBadge searchParamsPromise={searchParams} />
+                        </Suspense>
+                      </button>
+                    }
+                  >
+                    <FilterPendingScope>
+                      <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
+                        <SearchFilterSidebarContent
+                          dataPromise={searchResultsDataPromise}
+                          searchParamsPromise={searchParams}
+                        />
                       </Suspense>
-                    </button>
-                  }
-                >
-                  <FilterPendingScope>
-                    <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
-                      <SearchFilterSidebarContent
-                        dataPromise={searchResultsDataPromise}
-                        searchParamsPromise={searchParams}
-                      />
-                    </Suspense>
-                  </FilterPendingScope>
-                </FilterSidebarSheet>
-              }
-              sortSelect={
-                <Suspense fallback={<SortSelectFallback label={t("sortBy")} />}>
-                  <CollectionsSortSelect
-                    exclude={[
-                      "product-name-ascending",
-                      "product-name-descending",
-                      "best-selling",
-                      "date-old-to-new",
-                      "date-new-to-old",
-                    ]}
-                  />
-                </Suspense>
-              }
-            />
-            <SearchResultsGrid
-              locale={locale}
-              searchResultsDataPromise={searchResultsDataPromise}
-            />
-          </Sections>
-        </FilterTransitionProvider>
+                    </FilterPendingScope>
+                  </FilterSidebarSheet>
+                }
+                sortSelect={
+                  <Suspense fallback={<SortSelectFallback label={t("sortBy")} />}>
+                    <CollectionsSortSelect
+                      exclude={[
+                        "product-name-ascending",
+                        "product-name-descending",
+                        "best-selling",
+                        "date-old-to-new",
+                        "date-new-to-old",
+                      ]}
+                    />
+                  </Suspense>
+                }
+              />
+              <SearchResultsGrid
+                locale={locale}
+                searchResultsDataPromise={searchResultsDataPromise}
+              />
+            </Sections>
+          </FilterTransitionProvider>
+        </NextIntlClientProvider>
       </Container>
     </Page>
   );
+}
+
+async function SearchAnalyticsTracker({
+  searchParamsPromise,
+}: {
+  searchParamsPromise: PageProps<"/search">["searchParams"];
+}) {
+  const searchParams = await searchParamsPromise;
+  const query = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q;
+  return <SearchViewedTracker searchTerm={query ?? ""} />;
 }
 
 async function SearchQueryLabel({
