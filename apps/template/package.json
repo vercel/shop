@@ -10,7 +10,8 @@
     "dev:portless": "graphql-codegen || true && portless shop next dev",
     "format": "oxfmt",
     "lint": "oxlint . && oxfmt --check",
-    "start": "next start"
+    "start": "next start",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test 'lib/**/*.test.ts'"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.54",

@@ -16,6 +16,8 @@ import {
 } from "@/lib/auth/server";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
+import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/negotiation";
+import { getMarkdownPath } from "@/lib/markdown/routing";
 import { predictiveSearchHandlers } from "@/lib/search/server";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -66,9 +68,36 @@ export async function proxy(request: NextRequest): Promise<Response> {
   });
   if (shopifyRoute) return shopifyRoute;
 
+  const markdownPath = getMarkdownPath(pathname);
+  if (markdownPath) {
+    const representation = negotiateRepresentation(request.headers.get("Accept"));
+
+    if (!representation) {
+      return new Response(
+        "Not Acceptable\n\nAvailable representations: text/html, text/markdown\n",
+        {
+          status: 406,
+          headers: { "Content-Type": "text/plain; charset=utf-8", Vary: "Accept" },
+        },
+      );
+    }
+
+    if (representation === "text/markdown") {
+      const url = request.nextUrl.clone();
+      url.pathname = markdownPath;
+      const response = NextResponse.rewrite(url, {
+        request: { headers: requestContext.getForwardedRequestHeaders() },
+      });
+      appendVaryAccept(response.headers);
+      requestContext.applyResponseHeaders(response.headers);
+      return response;
+    }
+  }
+
   const response = NextResponse.next({
     request: { headers: requestContext.getForwardedRequestHeaders() },
   });
+  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
 }
