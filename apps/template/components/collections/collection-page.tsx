@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CollectionViewedTracker } from "@/components/analytics/trackers";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilters } from "@/components/collections/filters";
 import { CollectionResultsGrid } from "@/components/collections/results-grid";
@@ -43,54 +44,59 @@ export async function CollectionDetailPage({
   const sortByLabel = tSearch("sortBy");
 
   return (
-    <FilterTransitionProvider>
-      <Page className="pt-2.5 md:pt-10">
-        <Container>
-          <Sections className="gap-5">
-            <CollectionHeader
-              collection={collection}
-              handle={handle}
-              homeLabel={tBreadcrumb("home")}
-            />
-
-            <CollectionToolbar
-              filterSheet={
-                <FilterSidebarSheet
-                  label={filtersLabel}
-                  trigger={
-                    <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                      <SlidersHorizontalIcon className="size-4" />
-                      <span>{filtersLabel}</span>
-                      <Suspense fallback={null}>
-                        <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
-                      </Suspense>
-                    </button>
-                  }
-                >
-                  <FilterPendingScope>
-                    <CollectionFilters
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </FilterSidebarSheet>
-              }
-              sortSelect={
-                <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
-                  <CollectionsSortSelect exclude={sortExclude} />
-                </Suspense>
-              }
-            />
-
-            <FilterPendingScope>
-              <CollectionResultsGrid
-                locale={locale}
-                collectionResultsDataPromise={collectionResultsDataPromise}
+    <>
+      {collection.id ? (
+        <CollectionViewedTracker collection={{ handle: collection.handle, id: collection.id }} />
+      ) : null}
+      <FilterTransitionProvider>
+        <Page className="pt-2.5 md:pt-10">
+          <Container>
+            <Sections className="gap-5">
+              <CollectionHeader
+                collection={collection}
+                handle={handle}
+                homeLabel={tBreadcrumb("home")}
               />
-            </FilterPendingScope>
-          </Sections>
-        </Container>
-      </Page>
-    </FilterTransitionProvider>
+
+              <CollectionToolbar
+                filterSheet={
+                  <FilterSidebarSheet
+                    label={filtersLabel}
+                    trigger={
+                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                        <SlidersHorizontalIcon className="size-4" />
+                        <span>{filtersLabel}</span>
+                        <Suspense fallback={null}>
+                          <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
+                        </Suspense>
+                      </button>
+                    }
+                  >
+                    <FilterPendingScope>
+                      <CollectionFilters
+                        collectionResultsDataPromise={collectionResultsDataPromise}
+                      />
+                    </FilterPendingScope>
+                  </FilterSidebarSheet>
+                }
+                sortSelect={
+                  <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
+                    <CollectionsSortSelect exclude={sortExclude} />
+                  </Suspense>
+                }
+              />
+
+              <FilterPendingScope>
+                <CollectionResultsGrid
+                  locale={locale}
+                  collectionResultsDataPromise={collectionResultsDataPromise}
+                />
+              </FilterPendingScope>
+            </Sections>
+          </Container>
+        </Page>
+      </FilterTransitionProvider>
+    </>
   );
 }
 
