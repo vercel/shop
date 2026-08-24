@@ -138,6 +138,5 @@ export const config = {
     "/cart.:format(js|json)",
     "/cart/:operation(add|update|change|clear).:format(js|json)",
     "/((?!api|md|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\..*).*)",
-    "/.well-known/:path*",
   ],
 };
