@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { useCart } from "@/components/cart/context";
+import { useVariantSelection } from "@/components/product-detail/variant-selection-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,7 @@ function giftCardAttributes(recipient: {
 export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
   const t = useTranslations("product.giftCard");
   const { setOverlayOpen, setWarnings } = useCart();
+  const { isPending } = useVariantSelection();
   const [error, setError] = useState<string | null>(null);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
 
@@ -155,6 +157,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
 
       <Button
         type="submit"
+        disabled={isPending}
         className={cn(
           "h-12 w-full justify-center",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",

@@ -1,7 +1,10 @@
-import { getTranslations } from "next-intl/server";
+"use client";
+
+import type { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type * as React from "react";
 
+import { useVariantSelection } from "@/components/product-detail/variant-selection-client";
 import { Swatch } from "@/components/ui/swatch";
 import { buildOptionUrl, type SelectedOptions } from "@/lib/product";
 import type { ProductOption } from "@/lib/types";
@@ -30,14 +33,18 @@ export function ColorPicker({
   className,
   ...props
 }: ColorPickerProps) {
+  const optimisticSelection = useVariantSelection();
+  const currentOptions = optimisticSelection.optimisticOptions ?? selectedOptions;
+  const currentValue = currentOptions[option.name] ?? selectedValue;
+
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">
-        {option.name}: <span className="text-foreground">{selectedValue}</span>
+        {option.name}: <span className="text-foreground">{currentValue}</span>
       </p>
       <div className="flex flex-wrap gap-2.5">
         {option.values.map((value) => {
-          const isSelected = selectedValue === value.name;
+          const isSelected = currentValue === value.name;
           const isAvailable = !available || available.has(value.name);
           const imageUrl = hideImages
             ? undefined
@@ -72,6 +79,10 @@ export function ColorPicker({
               scroll={false}
               className="block cursor-pointer"
               aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
+              onNavigate={(event) => {
+                event.preventDefault();
+                optimisticSelection.selectOption(selectedOptions, option.name, value.name);
+              }}
             >
               {swatch}
             </Link>

@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import type * as React from "react";
 
+import { useVariantSelection } from "@/components/product-detail/variant-selection-client";
 import { buildOptionUrl, type SelectedOptions } from "@/lib/product";
 import type { ProductOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -22,12 +25,15 @@ export function OptionPicker({
   className,
   ...props
 }: OptionPickerProps) {
+  const optimisticSelection = useVariantSelection();
+  const currentOptions = optimisticSelection.optimisticOptions ?? selectedOptions;
+
   return (
     <div className={cn("grid gap-2.5", className)} {...props}>
       <p className="text-sm font-medium text-foreground/70">{option.name}</p>
       <div className="flex flex-wrap gap-2">
         {option.values.map((value) => {
-          const isSelected = selectedValue === value.name;
+          const isSelected = (currentOptions[option.name] ?? selectedValue) === value.name;
 
           const isAvailable = !available || available.has(value.name);
 
@@ -61,7 +67,16 @@ export function OptionPicker({
           }
 
           return (
-            <Link key={value.id} href={href} scroll={false} className={classes}>
+            <Link
+              key={value.id}
+              href={href}
+              scroll={false}
+              className={classes}
+              onNavigate={(event) => {
+                event.preventDefault();
+                optimisticSelection.selectOption(selectedOptions, option.name, value.name);
+              }}
+            >
               {label}
             </Link>
           );

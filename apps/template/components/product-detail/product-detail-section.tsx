@@ -9,17 +9,15 @@ import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo"
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
+import { OptimisticColorImage } from "@/components/product-detail/optimistic-color-image-client";
 import {
   ProductInfoDescription,
   ProductInfoOptions,
 } from "@/components/product-detail/product-info";
-import {
-  ColorImageCarouselItems,
-  ColorImageGrid,
-  ProductMedia,
-} from "@/components/product-detail/product-media";
+import { ProductMedia } from "@/components/product-detail/product-media";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { ProductSchema } from "@/components/product-detail/schema";
+import { VariantSelectionProvider } from "@/components/product-detail/variant-selection-client";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,7 +26,6 @@ import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import {
   defaultSelectedOptions,
-  getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
   type SelectedOptions,
@@ -77,15 +74,20 @@ export async function ProductDetailSection({
           { name: product.title, path: `/products/${product.handle}` },
         ]}
       />
-      <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
-        <ProductInfoArea
-          product={product}
-          selectedOptionsPromise={selectedOptionsPromise}
-          variantPromise={variantPromise}
-          locale={locale}
-        />
-      </div>
+      <VariantSelectionProvider
+        handle={product.handle}
+        selectedOptionsPromise={selectedOptionsPromise}
+      >
+        <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
+          <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
+          <ProductInfoArea
+            product={product}
+            selectedOptionsPromise={selectedOptionsPromise}
+            variantPromise={variantPromise}
+            locale={locale}
+          />
+        </div>
+      </VariantSelectionProvider>
     </NextIntlClientProvider>
   );
 }
@@ -146,9 +148,8 @@ async function ResolvedColorImageGrid({
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
 }) {
-  const image = getSelectedColorImage(product, await selectedOptionsPromise);
-  if (!image) return null;
-  return <ColorImageGrid images={[image]} title={product.title} />;
+  const selectedOptions = await selectedOptionsPromise;
+  return <OptimisticColorImage layout="grid" product={product} selectedOptions={selectedOptions} />;
 }
 
 async function ResolvedColorImageCarousel({
@@ -158,9 +159,10 @@ async function ResolvedColorImageCarousel({
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
 }) {
-  const image = getSelectedColorImage(product, await selectedOptionsPromise);
-  if (!image) return null;
-  return <ColorImageCarouselItems images={[image]} title={product.title} />;
+  const selectedOptions = await selectedOptionsPromise;
+  return (
+    <OptimisticColorImage layout="carousel" product={product} selectedOptions={selectedOptions} />
+  );
 }
 
 async function ProductInfoArea({

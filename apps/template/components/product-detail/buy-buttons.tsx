@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 
 import { useCart } from "@/components/cart/context";
+import { useVariantSelection } from "@/components/product-detail/variant-selection-client";
 import { Button } from "@/components/ui/button";
 import { buyNowAction } from "@/lib/cart/action";
 import { variantToOptimisticInfo } from "@/lib/product";
@@ -42,6 +43,7 @@ export function BuyButtons({
   title: string;
 }) {
   const selectedVariantId = selectedVariant?.id;
+  const { isPending } = useVariantSelection();
 
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
@@ -143,7 +145,7 @@ export function BuyButtons({
         ) : null}
         <Button
           type="button"
-          disabled={isOutOfStock || requiresBundleConfiguration}
+          disabled={isPending || isOutOfStock || requiresBundleConfiguration}
           onClick={handleAddToCart}
           className="h-12 min-w-0 flex-1 justify-center"
         >
@@ -157,7 +159,7 @@ export function BuyButtons({
             "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
             !availableForSale && "invisible",
           )}
-          disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
+          disabled={isPending || isOutOfStock || isBuyingNow || requiresBundleConfiguration}
           onClick={handleBuyNow}
         >
           {isBuyingNow ? (
