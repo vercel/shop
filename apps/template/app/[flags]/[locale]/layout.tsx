@@ -10,9 +10,8 @@ import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
 import { AnnouncementBar } from "@/components/announcement-bar";
+import { CartUI } from "@/components/cart/cart-ui";
 import { CartProviderWrapper } from "@/components/cart/context";
-import { CartNotifications } from "@/components/cart/notifications";
-import { CartOverlayBridge } from "@/components/cart/overlay-bridge";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
@@ -25,13 +24,13 @@ import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
 const geistSans = Geist({
-  subsets: ["latin"],
   variable: "--font-geist-sans",
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  subsets: ["latin"],
   variable: "--font-geist-mono",
+  subsets: ["latin"],
 });
 
 export const generateStaticParams = async () => {
@@ -45,6 +44,11 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
     getMessages(),
     getTranslations("accessibility"),
   ]);
+  const agentMessages = {
+    agent: messages.agent,
+    cart: messages.cart,
+    product: messages.product,
+  };
 
   // Un-awaited: the promise streams to the client provider; never block the shell on it.
   const cartData = seedCartData();
@@ -62,7 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
           {t("skipToContent")}
         </a>
         <SiteSchema locale={locale} />
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={{ common: messages.common }}>
           <CartProviderWrapper cartData={cartData}>
             <AnnouncementBar />
             <Nav locale={locale} />
@@ -70,10 +74,15 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
               {children}
             </main>
             <Footer locale={locale} />
-            <CartNotifications />
-            <CartOverlayBridge />
+            <CartUI />
             <Suspense>
-              <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
+              <ActionBar>
+                {shopConfig.agent.isEnabled && (
+                  <NextIntlClientProvider messages={agentMessages}>
+                    <AgentButton />
+                  </NextIntlClientProvider>
+                )}
+              </ActionBar>
             </Suspense>
             <Suspense>
               <AnalyticsComponents locale={locale} />
@@ -95,7 +104,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),
     openGraph: {
-      images: [{ height: 630, url: "/og-default.png", width: 1200 }],
+      images: [{ url: "/og-default.png", width: 1200, height: 630 }],
     },
     title: {
       default: shopConfig.site.name,

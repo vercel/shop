@@ -21,7 +21,21 @@ export function llmsTxt({
   sections.push(`# ${escapeMarkdown(name)}`);
   sections.push("");
   sections.push(
-    `> Online store. Product, collection, and search pages additionally serve clean Markdown when fetched with an \`Accept: text/markdown\` header — use it to read structured catalog data instead of HTML.`,
+    `> Online store. The homepage, product, collection, and search pages serve clean Markdown when fetched with an \`Accept: text/markdown\` header.`,
+  );
+  sections.push("");
+
+  sections.push("## When to use this storefront");
+  sections.push("");
+  sections.push("Use this storefront to discover, compare, and purchase its products.");
+  sections.push("");
+  sections.push("- Search when a shopper describes what they need.");
+  sections.push(
+    "- Fetch product and collection URLs as Markdown to compare prices, variants, availability, and product details.",
+  );
+  sections.push("- Use a browser-capable flow for cart and checkout actions.");
+  sections.push(
+    "- Do not treat this storefront as developer documentation or a general-purpose public API.",
   );
   sections.push("");
 

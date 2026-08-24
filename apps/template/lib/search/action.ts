@@ -1,21 +1,9 @@
 "use server";
 
 import { fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
-import { predictiveSearch } from "@/lib/shopify/operations/search";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type { PageInfo, PredictiveSearchResult, ProductCard } from "@/lib/types";
+import type { PageInfo, ProductCard } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
-
-export async function predictiveSearchAction(
-  query: string,
-  locale: string,
-): Promise<PredictiveSearchResult> {
-  if (!query.trim()) {
-    return { products: [], collections: [], queries: [] };
-  }
-
-  return predictiveSearch({ query: query.trim(), locale, limit: 3 });
-}
 
 export async function loadMoreSearchProducts(params: {
   query?: string;

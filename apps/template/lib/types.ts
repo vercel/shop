@@ -1,3 +1,4 @@
+import type { I18nConfig } from "@shopify/hydrogen";
 import type { StaticImageData } from "next/image";
 
 import type { Locale } from "@/lib/i18n";
@@ -228,6 +229,7 @@ export interface CartProduct {
 export interface Collection {
   description: string;
   handle: string;
+  id?: string;
   image?: Image | null;
   path: string;
   seo: SEO;
@@ -275,6 +277,7 @@ export type FilterType = "boolean" | "list" | "price";
 export interface FilterValue {
   count: number;
   id: string;
+  input: string;
   label: string;
   swatch?: OptionValueSwatch;
   value: string;
@@ -336,8 +339,8 @@ export interface SearchSuggestion {
 }
 
 export interface ShopAnalyticsData {
-  acceptedLanguage: string;
-  country: string;
+  acceptedLanguage: I18nConfig["language"];
+  country: I18nConfig["country"];
   currency: string;
   shopId: string;
   storeDomain: string;

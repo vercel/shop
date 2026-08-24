@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
+import { ProductViewedTracker } from "@/components/analytics/trackers";
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
 import { ProductReviewsSection } from "@/components/product-detail/product-reviews-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
@@ -122,21 +124,26 @@ export default async function ProductPage({
   );
 
   return (
-    <Page className="pt-0">
-      <Container className="bg-background">
-        <Sections>
-          <ProductDetailSection
-            product={product}
-            selectedOptionsPromise={selectedOptionsPromise}
-            variantPromise={variantPromise}
-            locale={locale}
-          />
-          <ProductReviewsSection />
-          {shopConfig.pdp.relatedProducts.isEnabled ? (
-            <RelatedProductsSection handle={handle} limit={4} locale={locale} />
-          ) : null}
-        </Sections>
-      </Container>
-    </Page>
+    <>
+      <Suspense fallback={null}>
+        <ProductViewedTracker product={product} variantPromise={variantPromise} />
+      </Suspense>
+      <Page className="pt-0">
+        <Container className="bg-background">
+          <Sections>
+            <ProductDetailSection
+              product={product}
+              selectedOptionsPromise={selectedOptionsPromise}
+              variantPromise={variantPromise}
+              locale={locale}
+            />
+            <ProductReviewsSection />
+            {shopConfig.pdp.relatedProducts.isEnabled ? (
+              <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+            ) : null}
+          </Sections>
+        </Container>
+      </Page>
+    </>
   );
 }

@@ -1,32 +1,27 @@
 ---
 title: Navigation
-description: The storefront navigation system - navbar, quick links, mobile bottom bar, and responsive layout.
+description: The storefront navigation system - desktop and mobile menus, search, cart access, and optional Shopify-managed links.
 type: guide
 ---
 
-The navigation system is split into a sticky top navbar for desktop and a fixed bottom bar for mobile. By default, navigation links are hardcoded. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) to fetch menus from Shopify.
+The storefront provides desktop and mobile navigation, predictive search, and cart access. Links are static by default. Use [`/vercel-shop:enable-shopify-menus`](/docs/skills/enable-shopify-menus) when merchants need to manage them in Shopify.
 
-## How it works
+## Help shoppers move through the store
 
-**Desktop and mobile split at the `md` breakpoint, not just visually.** Desktop gets a full sticky navbar (`z-30`) with the logo, quick links, and cart icon. Below `md`, quick links hide and a hamburger to the left of the logo opens a left-sliding `Sheet` with the same links, rendered as padded touch targets with breathing room below the close button; the cart and search icons stay in the top bar, and an optional agent button lives in a separate fixed bottom bar that only renders when it has children.
+On desktop, a sticky header shows the logo, primary links, search, and cart. On mobile, primary links move into a menu while search and cart remain in the header. The mobile menu closes after a shopper selects a link.
 
-**Links are hardcoded but already Shopify-shaped.** The quick-links component accepts a Shopify-shaped `MenuItem[]` and renders up to three levels via an inline hover panel, even though the default data is a single hardcoded `Shop` link. The mobile sheet reuses the same link data. Because the shape already matches Shopify Navigation, the `enable-shopify-menus` skill only needs to swap the data source — desktop, mobile, and footer links all switch over together.
+Search opens as a dialog. It shows suggestions and matching products as the shopper types, links directly to products, and offers a full results page. It closes after navigation, Escape, or an outside click.
 
-**Search is a self-contained modal, not a page.** A search icon opens a centered dialog with predictive results from Shopify's `predictiveSearch` API — suggestion chips and matching products appear as the user types. Clicking a product navigates directly to its page; "View all" goes to the full search results page. The modal closes on navigation, Escape, or an outside click.
+The cart badge shows the current item count and opens the cart.
 
-**The cart icon is a server/client pair.** The server half reads the `shopify_cartId` cookie and fetches the initial cart so the count is correct on first paint; the client half renders the quantity badge, animates pending additions, and opens the cart overlay on click.
+## Choose how links are managed
 
-## Out of the box
+The default storefront includes a single Shop link. This is suitable for a small catalog or a navigation structure managed in code.
 
-- **Navbar** — sticky header composing the logo, quick links, and cart icon.
-- **Quick links** — horizontal link bar, hidden on mobile (`md:flex`).
-- **Mobile menu** — hamburger-triggered `Sheet` with the same links as quick links; closes automatically on tap.
-- **Search modal** — predictive search dialog, described above.
-- **Cart icon** — server-rendered initial count, client-rendered badge and overlay trigger.
-- **Footer** — renders a copyright notice by default; see [Footer](/docs/anatomy/footer) for its full composition, including the `enable-shopify-menus` menu columns.
-- **Mobile bottom bar** — fixed bar reserved for optional children such as the agent button.
+Use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to let merchants manage desktop links, mobile links, and footer columns through Shopify Navigation. Menus can contain up to three levels.
 
-## Common customizations
+An optional mobile bottom bar appears only when you add an action, such as an agent button.
 
-- **Shopify-powered menus** — the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill replaces the hardcoded quick links, mobile menu links, and footer columns with a Shopify Navigation menu in one pass.
-- **Additional bottom-bar actions** — the mobile bottom bar only renders when it has children, so adding another mobile-only action (beyond the agent button) is a matter of passing it another child rather than restructuring the bar.
+## What’s next
+
+Common additions include Shopify-managed menus, a customer-account link, promotional bars, and richer desktop navigation for large catalogs. Keep search and cart access easy to reach on every screen size.

@@ -6,28 +6,28 @@ prerequisites:
   - /docs/anatomy/pages/pdp
 ---
 
-This page covers the Shopify admin configuration the PDP expects. For how the page renders and how variant selection works, see [Anatomy → PDP](/docs/anatomy/pages/pdp).
+Configure a Shopify product so shoppers can find it, choose a variant, and add it to the cart. For storefront behavior, see [Anatomy → PDP](/docs/anatomy/pages/pdp).
 
-## How it works
+## Publish the product
 
-**A product needs a title, description, one variant, and a featured image.** `descriptionHtml` renders as the body copy; even single-option products get a default variant. The PDP shell fetches product options and Shopify's encoded variant-availability data rather than the full variant list, resolving the selected variant per request from its options — the AI agent and markdown routes fetch the full variant list (up to 250) via `getProductWithVariants` instead.
+Add a title, description, featured image, and at least one variant. Assign the product to a collection if it should appear on a collection page, then publish it to the **Headless** sales channel.
 
-**Swatches, SEO, and taxonomy fall back gracefully when unset.** A product option with swatch data (a hex color or swatch image, read from `optionValues.swatch`) renders as color swatches; without it, the option renders as a standard text picker. `seo.title`/`seo.description` populate the page title and Open Graph tags when set, falling back to the product title and description otherwise. Product Taxonomy category (up to 3 levels) feeds structured data when configured under a product's **Category** field.
+Open its storefront URL and confirm that the product loads and an available variant can be added to the cart.
 
-**Related and complementary products come from two different Shopify systems.** Related products use Shopify's automatic recommendation API (purchase history and similarity) — nothing to configure. Complementary products ("Pairs Well With") are **configured by hand** per product in the free [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) app's **Product recommendations** settings; a product with none configured renders nothing.
+## Add option swatches
 
-**Bundles publish to a separate sales channel from the storefront.** The Shopify Bundles app publishes to **Online Store** only, but the template reads from the **Headless** channel — a bundle that 404s on the storefront while showing fine in admin is almost always missing from Headless.
+In Shopify Admin, edit the product and open an option such as **Color**. Assign a color or image swatch to each value. Options without swatch data use a text picker.
 
-## Out of the box
+## Configure recommendations
 
-- **Basic fields** — title, `descriptionHtml`, variants, featured image, and up to 10 media items (images or videos). Product gallery images use optional blur placeholders from the Storefront-public `custom.image_placeholders` JSON metafield when present. Define it as a product metafield with JSON type and Storefront access, using MediaImage GIDs as keys and `{ blurDataURL, width, height }` as values. Products must belong to at least one collection to appear on collection listing pages.
-- **Color swatches** — configure in Shopify admin: edit a product → open an option like "Color" → assign a swatch color or image to each value.
-- **SEO fields** — `seo.title` and `seo.description`, editable per product.
-- **Related products** — Shopify's automatic recommendation API. On by default; disable with `pdp.relatedProducts.isEnabled: false` in `lib/config.ts`.
-- **Complementary products** — hand-curated in the Search & Discovery app. On by default; disable with `pdp.complementaryProducts.isEnabled: false`.
-- **Bundles** — fixed bundles (e.g. from the free **Shopify Bundles** app) render contents and add to cart normally via `components` (a bundle's items and quantities) and `groupedBy` (up to 10 bundles containing the current product). Disable with `pdp.bundles.isEnabled: false`.
+Shopify provides related products automatically. To show complementary products as “Pairs Well With,” install [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) and assign recommendations under **Product recommendations**. The section stays hidden when no complementary products are assigned.
 
-## Common customizations
+## Publish a fixed bundle
 
-- **Customized bundles** — a bundle whose parent sets `requiresComponents` but has no fixed `components` stays disabled in the buy buttons until you build a component picker that sends shopper selections through `CartLineInput.parent`.
-- **Bundles not appearing** — publish the bundle to the **Headless** channel under the product's **Publishing** section. See [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
+Create the bundle with [Shopify Bundles](https://apps.shopify.com/shopify-bundles), then publish it to **Headless**. A bundle available only on **Online Store** does not appear in Vercel Shop.
+
+If a published bundle still does not appear, see [Troubleshooting → Bundles not appearing](/docs/reference/troubleshooting).
+
+## Set search and sharing details
+
+Set the product's search engine title and description in Shopify Admin when the defaults are not suitable. Otherwise, the storefront uses the product title and description. Assign a product category to improve structured product data.

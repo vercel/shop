@@ -11,8 +11,7 @@ import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 
 import { resolveShopId } from "./discovery";
-
-const DEBUG = process.env.DEBUG_SHOPIFY === "1";
+import { logShopifyDebug, shopifyLogger } from "./logging";
 
 export async function customerAccountFetch<T>({
   accessToken,
@@ -37,24 +36,29 @@ export async function customerAccountFetch<T>({
     }),
   });
 
-  const start = DEBUG ? performance.now() : 0;
+  const start = performance.now();
   // Brand runtime strings so Hydrogen does not infer `never` variables.
   const doc = gql(query) as CustomerAccountDocument<T, Record<string, unknown>>;
-  const { data, errors } = await client.graphql(doc, { accessToken, variables });
+  try {
+    const { data, errors } = await client.graphql(doc, { accessToken, variables });
 
-  if (DEBUG) {
-    const duration = performance.now() - start;
-    console.log(`[shopify:customer] ${operation} ${duration.toFixed(0)}ms`);
-  }
-
-  if (errors) {
-    if (!data) {
-      throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`);
+    if (errors) {
+      if (!data) {
+        throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`);
+      }
+      shopifyLogger.warn("Customer Account API returned partial errors", {
+        errors,
+        operation,
+        scope: "customer-account",
+      });
     }
-    console.warn(
-      `[shopify:customer] ${operation} returned partial errors: ${JSON.stringify(errors)}`,
-    );
-  }
 
-  return data as T;
+    return data as T;
+  } finally {
+    logShopifyDebug("Customer Account API request", {
+      durationMs: Math.round(performance.now() - start),
+      operation,
+      scope: "customer-account",
+    });
+  }
 }

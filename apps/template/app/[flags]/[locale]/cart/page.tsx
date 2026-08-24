@@ -3,6 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
+import { CartViewedTracker } from "@/components/analytics/trackers";
 import { CartItemsList } from "@/components/cart-page/cart-items-list";
 import { Empty } from "@/components/cart-page/empty-cart";
 import { Header } from "@/components/cart-page/header";
@@ -36,6 +37,7 @@ export default async function CartPage() {
 
   return (
     <main>
+      <CartViewedTracker />
       <Suspense fallback={<PageSkeleton />}>
         <CartContent locale={locale} />
       </Suspense>

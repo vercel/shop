@@ -1,3 +1,4 @@
+import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n";
@@ -9,13 +10,14 @@ import {
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
-import { RESULTS_PER_PAGE, parseFiltersFromSearchParams } from "@/lib/utils";
+import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
 export interface CollectionSearchState {
   activeFilters: Record<string, string | string[] | undefined>;
+  dataSearch: string;
   sort?: string;
 }
 
@@ -31,12 +33,42 @@ export interface CollectionResultsData {
 export async function getCollectionSearchState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<CollectionSearchState> {
-  const searchParams = await searchParamsPromise;
+  const searchParams = recordToSearchParams(await searchParamsPromise);
+  const state = parseCollectionParams(searchParams);
+  const dataSearch = serializeCollectionParams(state).toString();
 
   return {
-    activeFilters: parseFiltersFromSearchParams(searchParams),
-    sort: getSingleSearchParam(searchParams.sort),
+    activeFilters: parseFiltersFromSearchParams(
+      searchParamsToRecord(new URLSearchParams(dataSearch)),
+    ),
+    dataSearch,
+    sort: getCollectionSort(state.sortKey, state.reverse),
   };
+}
+
+function getCollectionSort(sortKey: string | undefined, reverse: boolean): string | undefined {
+  if (!sortKey || sortKey === "COLLECTION_DEFAULT" || sortKey === "MANUAL") return undefined;
+  if (sortKey === "BEST_SELLING") return "best-selling";
+  if (sortKey === "CREATED") return reverse ? "date-new-to-old" : "date-old-to-new";
+  if (sortKey === "PRICE") return reverse ? "price-high-to-low" : "price-low-to-high";
+  if (sortKey === "TITLE") {
+    return reverse ? "product-name-descending" : "product-name-ascending";
+  }
+  return undefined;
+}
+
+function recordToSearchParams(
+  record: Record<string, string | string[] | undefined>,
+): URLSearchParams {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(record)) {
+    if (Array.isArray(value)) {
+      for (const item of value) params.append(key, item);
+    } else if (value !== undefined) {
+      params.set(key, value);
+    }
+  }
+  return params;
 }
 
 export async function getCollectionResultsData({
@@ -79,10 +111,6 @@ export function getExactCollectionResultCount({
   }
 
   return result.products.length;
-}
-
-function getSingleSearchParam(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
 }
 
 export async function getAllProductsCollection(): Promise<Collection> {

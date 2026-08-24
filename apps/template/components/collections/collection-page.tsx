@@ -1,8 +1,10 @@
 import { SlidersHorizontalIcon } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
+import { CollectionViewedTracker } from "@/components/analytics/trackers";
 import { CollectionHero } from "@/components/collections/collection-hero";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
 import { CollectionFilters } from "@/components/collections/filters";
@@ -10,6 +12,7 @@ import { CollectionResultsGrid } from "@/components/collections/results-grid";
 import { CollectionsSortSelect } from "@/components/collections/sort-select";
 import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
 import { CollectionToolbar } from "@/components/collections/toolbar";
+import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -19,7 +22,11 @@ import type { CollectionResultsData, CollectionSearchState } from "@/lib/collect
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
-import { FilterPendingScope, FilterTransitionProvider } from "./filter-pending-context";
+import {
+  CollectionActiveFilterCountBadge,
+  CollectionBrowseProvider,
+} from "./collection-browse-provider";
+import { FilterPendingScope } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
   collection,
@@ -36,7 +43,8 @@ export async function CollectionDetailPage({
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
-  const [tSearch, tBreadcrumb] = await Promise.all([
+  const [messages, tSearch, tBreadcrumb] = await Promise.all([
+    getMessages(),
     getTranslations("search"),
     getTranslations("collections.breadcrumb"),
   ]);
@@ -44,7 +52,10 @@ export async function CollectionDetailPage({
   const sortByLabel = tSearch("sortBy");
 
   return (
-    <FilterTransitionProvider>
+    <>
+      {collection.id ? (
+        <CollectionViewedTracker collection={{ handle: collection.handle, id: collection.id }} />
+      ) : null}
       <Page className={collection.image ? "pt-0" : "pt-2.5 md:pt-10"}>
         <Sections className="gap-5">
           <CollectionHeader
@@ -54,46 +65,76 @@ export async function CollectionDetailPage({
           />
 
           <Container>
-            <Sections className="gap-5">
-              <CollectionToolbar
-                filterSheet={
-                  <FilterSidebarSheet
-                    label={filtersLabel}
-                    trigger={
-                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                        <SlidersHorizontalIcon className="size-4" />
-                        <span>{filtersLabel}</span>
-                        <Suspense fallback={null}>
-                          <CollectionFilterCountBadge searchStatePromise={searchStatePromise} />
-                        </Suspense>
-                      </button>
+            <Suspense
+              fallback={
+                <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
+              }
+            >
+              <NextIntlClientProvider
+                messages={{ category: messages.category, search: messages.search }}
+              >
+                <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+                  <CollectionToolbar
+                    filterSheet={
+                      <FilterSidebarSheet
+                        label={filtersLabel}
+                        trigger={
+                          <button
+                            type="button"
+                            className="flex items-center gap-2 text-sm font-medium"
+                          >
+                            <SlidersHorizontalIcon className="size-4" />
+                            <span>{filtersLabel}</span>
+                            <CollectionActiveFilterCountBadge />
+                          </button>
+                        }
+                      >
+                        <FilterPendingScope>
+                          <CollectionFilters
+                            collectionResultsDataPromise={collectionResultsDataPromise}
+                          />
+                        </FilterPendingScope>
+                      </FilterSidebarSheet>
                     }
-                  >
-                    <FilterPendingScope>
-                      <CollectionFilters
-                        collectionResultsDataPromise={collectionResultsDataPromise}
-                      />
-                    </FilterPendingScope>
-                  </FilterSidebarSheet>
-                }
-                sortSelect={
-                  <Suspense fallback={<SortSelectFallback label={sortByLabel} />}>
-                    <CollectionsSortSelect exclude={sortExclude} />
-                  </Suspense>
-                }
-              />
+                    sortSelect={<CollectionsSortSelect collection exclude={sortExclude} />}
+                  />
 
-              <FilterPendingScope>
-                <CollectionResultsGrid
-                  locale={locale}
-                  collectionResultsDataPromise={collectionResultsDataPromise}
-                />
-              </FilterPendingScope>
-            </Sections>
+                  <FilterPendingScope>
+                    <CollectionResultsGrid
+                      locale={locale}
+                      collectionResultsDataPromise={collectionResultsDataPromise}
+                    />
+                  </FilterPendingScope>
+                </CollectionBrowseProvider>
+              </NextIntlClientProvider>
+            </Suspense>
           </Container>
         </Sections>
       </Page>
-    </FilterTransitionProvider>
+    </>
+  );
+}
+
+function CollectionBrowseFallback({
+  filtersLabel,
+  sortByLabel,
+}: {
+  filtersLabel: string;
+  sortByLabel: string;
+}) {
+  return (
+    <>
+      <CollectionToolbar
+        filterSheet={
+          <button type="button" className="flex items-center gap-2 text-sm font-medium">
+            <SlidersHorizontalIcon className="size-4" />
+            <span>{filtersLabel}</span>
+          </button>
+        }
+        sortSelect={<SortSelectFallback label={sortByLabel} />}
+      />
+      <ProductsGridSkeleton count={40} className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" />
+    </>
   );
 }
 
@@ -130,23 +171,5 @@ function CollectionHeader({
         </Container>
       )}
     </>
-  );
-}
-
-async function CollectionFilterCountBadge({
-  searchStatePromise,
-}: {
-  searchStatePromise: Promise<CollectionSearchState>;
-}) {
-  const { activeFilters } = await searchStatePromise;
-  const activeCount = Object.values(activeFilters).reduce((count, v) => {
-    if (!v) return count;
-    return count + (Array.isArray(v) ? v.length : 1);
-  }, 0);
-  if (activeCount === 0) return null;
-  return (
-    <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-      {activeCount}
-    </span>
   );
 }
