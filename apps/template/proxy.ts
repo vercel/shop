@@ -81,7 +81,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
     return response;
   }
 
-  const markdownPath = getMarkdownPath(pathname);
+  const isDocumentRequest = request.method === "GET" || request.method === "HEAD";
+  const markdownPath = isDocumentRequest ? getMarkdownPath(pathname) : null;
   if (markdownPath) {
     const representation = negotiateRepresentation(request.headers.get("Accept"));
 
