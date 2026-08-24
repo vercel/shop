@@ -47,6 +47,7 @@ export async function getSearchResultsData({
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const [results, facets] = await Promise.all([
     fetchSearchIndexProducts({
+      activeFilters,
       query,
       collection,
       sortKey: sort,
@@ -130,6 +131,7 @@ async function SearchResultsGridRender({
           outOfStockText={tProduct("outOfStock")}
           loadMore={loadMoreSearchProducts}
           loadMoreParams={{
+            activeFilters: data.activeFilters,
             query: data.query,
             collection: data.collection,
             sortKey: data.sort,

@@ -442,11 +442,41 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
       id
       availableForSale
       image {
-        url
+        ...ImageFields
       }
       selectedOptions {
         name
         value
+      }
+    }
+  }
+` as const;
+
+export const FILTERABLE_PRODUCT_CARD_FRAGMENT = `#graphql
+  ${PRODUCT_CARD_FRAGMENT}
+  fragment FilterableProductCardFields on Product {
+    ...ProductCardFields
+    options {
+      name
+      optionValues {
+        name
+        swatch {
+          color
+          image {
+            previewImage {
+              url
+            }
+          }
+        }
+        firstSelectableVariant {
+          image {
+            ...ImageFields
+          }
+          selectedOptions {
+            name
+            value
+          }
+        }
       }
     }
   }

@@ -139,6 +139,7 @@ export async function getAllProductsResultsData({
   const shopifyFilters = buildProductFiltersFromParams(activeFilters);
   const [products, facets] = await Promise.all([
     fetchSearchIndexProducts({
+      activeFilters,
       sortKey: sort,
       limit: RESULTS_PER_PAGE,
       filters: shopifyFilters,

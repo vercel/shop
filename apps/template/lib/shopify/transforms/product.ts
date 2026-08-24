@@ -61,7 +61,10 @@ interface ShopifyOptionValue {
   id: string;
   name: string;
   swatch: ShopifyOptionValueSwatch | null;
-  firstSelectableVariant?: { image: ShopifyImage | null } | null;
+  firstSelectableVariant?: {
+    image: ShopifyImage | null;
+    selectedOptions?: Array<{ name: string; value: string }>;
+  } | null;
 }
 
 interface ShopifyOption {
@@ -156,9 +159,10 @@ export interface ShopifyProductCard {
   selectedOrFirstAvailableVariant?: {
     id: string;
     availableForSale: boolean;
-    image?: { url: string } | null;
+    image?: ShopifyImage | null;
     selectedOptions: Array<{ name: string; value: string }>;
   } | null;
+  options?: Array<Pick<ShopifyOption, "name" | "optionValues">>;
 }
 
 function transformImage(image: ShopifyImage | null): Image | null {
@@ -299,21 +303,45 @@ function transformOption(option: ShopifyOption): ProductOption {
   };
 }
 
-export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
+function transformProductCard(
+  product: ShopifyProductCard,
+  selectedOptionValue?: string,
+): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
+  const colorOption = product.options?.find(
+    (option) =>
+      option.name.toLowerCase().includes("colo") ||
+      option.optionValues?.some((value) => value.swatch?.color || value.swatch?.image),
+  );
+  const matchedVariant = colorOption?.optionValues?.find(
+    (value) => value.name.toLowerCase() === selectedOptionValue?.toLowerCase(),
+  )?.firstSelectableVariant;
+  const cardVariant = matchedVariant ?? defaultVariant;
+
   return {
     id: product.id,
     handle: product.handle,
     title: product.title,
-    featuredImage: transformImage(product.featuredImage),
+    featuredImage: transformImage(matchedVariant?.image ?? product.featuredImage),
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
-    defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
+    defaultVariantSelectedOptions: cardVariant?.selectedOptions ?? [],
   };
+}
+
+export function transformFilteredShopifyProductCard(
+  product: ShopifyProductCard,
+  selectedOptionValue?: string,
+): ProductCard {
+  return transformProductCard(product, selectedOptionValue);
+}
+
+export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
+  return transformProductCard(product);
 }
 
 function hasUniformPriceRange(product: ShopifyProduct): boolean {
