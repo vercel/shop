@@ -1,4 +1,3 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -291,14 +290,12 @@ function transformOption(option: ShopifyOption): ProductOption {
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map(
-      (value): OptionValue => ({
-        id: value,
-        image: imageLookup.get(value),
-        name: value,
-        swatch: swatchLookup.get(value),
-      }),
-    ),
+    values: option.values.map((value): OptionValue => ({
+      id: value,
+      image: imageLookup.get(value),
+      name: value,
+      swatch: swatchLookup.get(value),
+    })),
   };
 }
 
@@ -315,10 +312,6 @@ export function transformShopifyProductCard(product: ShopifyProductCard): Produc
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
-    defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
   };
 }
@@ -357,10 +350,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     hasUniformPricing: hasUniformPriceRange(product),
     variantsCount: product.variantsCount.count,
     defaultVariant,
-    defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,

@@ -31,6 +31,13 @@ export function toSelectedOptionList(selectedOptions: SelectedOptions): Selected
   return Object.entries(selectedOptions).map(([name, value]) => ({ name, value }));
 }
 
+export function buildProductUrl(handle: string, selectedOptions: SelectedOption[]): string {
+  const parts = selectedOptions.map(
+    ({ name, value }) => `${encodeURIComponent(name.toLowerCase())}=${encodeURIComponent(value)}`,
+  );
+  return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
+}
+
 export function buildOptionUrl(
   handle: string,
   currentOptions: SelectedOptions,
@@ -38,10 +45,7 @@ export function buildOptionUrl(
   optionValue: string,
 ): string {
   const next = { ...currentOptions, [optionName]: optionValue };
-  const parts = Object.entries(next).map(
-    ([name, value]) => `${encodeURIComponent(name.toLowerCase())}=${encodeURIComponent(value)}`,
-  );
-  return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
+  return buildProductUrl(handle, toSelectedOptionList(next));
 }
 
 function findColorOption(options: ProductOption[]): ProductOption | undefined {
