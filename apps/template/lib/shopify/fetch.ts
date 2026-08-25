@@ -14,16 +14,18 @@ import { assertStorefrontOk, type CartMutationPayload, unwrapCartMutation } from
 import {
   CART_FRAGMENT,
   COLLECTION_FIELDS_FRAGMENT,
+  FILTERABLE_PRODUCT_CARD_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
 } from "./fragments";
 import { storefront } from "./storefront";
 import { type ShopifyCart, transformShopifyCart } from "./transforms/cart";
 import { type ShopifyCollection, transformShopifyCollections } from "./transforms/collection";
-import { transformShopifyFilters } from "./transforms/filters";
+import { getSelectedColorFilterLabel, transformShopifyFilters } from "./transforms/filters";
 import {
   type ShopifyProduct,
   type ShopifyProductCard,
+  transformFilteredShopifyProductCard,
   transformShopifyProductCard,
   transformShopifyProductDetails,
 } from "./transforms/product";
@@ -63,7 +65,7 @@ const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolea
 };
 
 const PRODUCTS_SEARCH_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+  ${FILTERABLE_PRODUCT_CARD_FRAGMENT}
   query searchProducts($query: String!, $first: Int!, $after: String, $productFilters: [ProductFilter!], $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
@@ -79,7 +81,7 @@ const PRODUCTS_SEARCH_QUERY = `#graphql
         cursor
         node {
           ... on Product {
-            ...ProductCardFields
+            ...FilterableProductCardFields
           }
         }
       }
@@ -89,12 +91,18 @@ const PRODUCTS_SEARCH_QUERY = `#graphql
         startCursor
         endCursor
       }
+      productFilters {
+        values {
+          label
+          input
+        }
+      }
     }
   }
 ` as const;
 
 const COLLECTION_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+  ${FILTERABLE_PRODUCT_CARD_FRAGMENT}
   query collectionProducts($handle: String!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean, $filters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, filters: $filters) {
@@ -121,7 +129,7 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
         edges {
           cursor
           node {
-            ...ProductCardFields
+            ...FilterableProductCardFields
           }
         }
         pageInfo {
@@ -240,6 +248,7 @@ const CART_NOTE_UPDATE_MUTATION = `#graphql
 ` as const;
 
 export type SearchIndexProductsParams = {
+  activeFilters?: ActiveFilters;
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -294,6 +303,7 @@ export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
 ): Promise<SearchIndexProductsResult> {
   const {
+    activeFilters = {},
     collection,
     cursor,
     filters = [],
@@ -318,6 +328,9 @@ export async function fetchSearchIndexProducts(
       totalCount: number;
       edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
       pageInfo: PageInfo;
+      productFilters: Array<{
+        values: Array<Pick<ShopifyFilter["values"][number], "input" | "label">>;
+      }>;
     };
   }>(PRODUCTS_SEARCH_QUERY, {
     variables: {
@@ -338,9 +351,17 @@ export async function fetchSearchIndexProducts(
     .map((edge) => edge.node)
     .filter((node): node is ShopifyProductCard => node !== null);
 
+  const selectedColor = getSelectedColorFilterLabel(
+    activeFilters,
+    filters,
+    data.search.productFilters,
+  );
+
   return {
     pageInfo: data.search.pageInfo,
-    products: shopifyProducts.map(transformShopifyProductCard),
+    products: shopifyProducts.map((product) =>
+      transformFilteredShopifyProductCard(product, selectedColor),
+    ),
     total: data.search.totalCount,
   };
 }
@@ -394,7 +415,14 @@ export async function fetchCollectionProducts(
   }
 
   const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
-  const products = shopifyProducts.map(transformShopifyProductCard);
+  const selectedColor = getSelectedColorFilterLabel(
+    activeFilters,
+    filters,
+    data.collection.products.filters,
+  );
+  const products = shopifyProducts.map((product) =>
+    transformFilteredShopifyProductCard(product, selectedColor),
+  );
   const transformed = transformShopifyFilters(data.collection.products.filters, {
     activeFilters,
     currencyCode: products[0]?.price.currencyCode,

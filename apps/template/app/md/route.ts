@@ -11,7 +11,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const [result, t] = await Promise.all([
       searchIndexProducts({ limit: 8, locale }),
-      getTranslations("home"),
+      getTranslations({ locale, namespace: "home" }),
     ]);
 
     return new Response(
