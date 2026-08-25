@@ -1,4 +1,3 @@
-import { getNumericShopifyId } from "@/lib/shopify/utils";
 import { flattenEdges, type ShopifyEdges } from "@/lib/shopify/utils";
 import type {
   Category,
@@ -62,7 +61,10 @@ interface ShopifyOptionValue {
   id: string;
   name: string;
   swatch: ShopifyOptionValueSwatch | null;
-  firstSelectableVariant?: { image: ShopifyImage | null } | null;
+  firstSelectableVariant?: {
+    image: ShopifyImage | null;
+    selectedOptions?: Array<{ name: string; value: string }>;
+  } | null;
 }
 
 interface ShopifyOption {
@@ -157,9 +159,10 @@ export interface ShopifyProductCard {
   selectedOrFirstAvailableVariant?: {
     id: string;
     availableForSale: boolean;
-    image?: { url: string } | null;
+    image?: ShopifyImage | null;
     selectedOptions: Array<{ name: string; value: string }>;
   } | null;
+  options?: Array<Pick<ShopifyOption, "name" | "optionValues">>;
 }
 
 function transformImage(image: ShopifyImage | null): Image | null {
@@ -291,36 +294,54 @@ function transformOption(option: ShopifyOption): ProductOption {
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map(
-      (value): OptionValue => ({
-        id: value,
-        image: imageLookup.get(value),
-        name: value,
-        swatch: swatchLookup.get(value),
-      }),
-    ),
+    values: option.values.map((value): OptionValue => ({
+      id: value,
+      image: imageLookup.get(value),
+      name: value,
+      swatch: swatchLookup.get(value),
+    })),
   };
 }
 
-export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
+function transformProductCard(
+  product: ShopifyProductCard,
+  selectedOptionValue?: string,
+): ProductCard {
   const defaultVariant = product.selectedOrFirstAvailableVariant;
+  const colorOption = product.options?.find(
+    (option) =>
+      option.name.toLowerCase().includes("colo") ||
+      option.optionValues?.some((value) => value.swatch?.color || value.swatch?.image),
+  );
+  const matchedVariant = colorOption?.optionValues?.find(
+    (value) => value.name.toLowerCase() === selectedOptionValue?.toLowerCase(),
+  )?.firstSelectableVariant;
+  const cardVariant = matchedVariant ?? defaultVariant;
+
   return {
     id: product.id,
     handle: product.handle,
     title: product.title,
-    featuredImage: transformImage(product.featuredImage),
+    featuredImage: transformImage(matchedVariant?.image ?? product.featuredImage),
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,
     compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
-    defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
-    defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
+    defaultVariantSelectedOptions: cardVariant?.selectedOptions ?? [],
   };
+}
+
+export function transformFilteredShopifyProductCard(
+  product: ShopifyProductCard,
+  selectedOptionValue?: string,
+): ProductCard {
+  return transformProductCard(product, selectedOptionValue);
+}
+
+export function transformShopifyProductCard(product: ShopifyProductCard): ProductCard {
+  return transformProductCard(product);
 }
 
 function hasUniformPriceRange(product: ShopifyProduct): boolean {
@@ -357,10 +378,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     hasUniformPricing: hasUniformPriceRange(product),
     variantsCount: product.variantsCount.count,
     defaultVariant,
-    defaultVariantId: defaultVariant?.id,
-    defaultVariantNumericId: defaultVariant
-      ? (getNumericShopifyId(defaultVariant.id) ?? undefined)
-      : undefined,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     description: product.description,
     descriptionHtml: product.descriptionHtml,

@@ -27,7 +27,7 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ result, filters, collection, sort }, t, tProduct] = await Promise.all([
+  const [{ activeFilters, result, filters, collection, sort }, t, tProduct] = await Promise.all([
     collectionResultsDataPromise,
     getTranslations("search"),
     getTranslations("product"),
@@ -61,7 +61,7 @@ async function Render({
         locale={locale}
         outOfStockText={tProduct("outOfStock")}
         loadMore={loadMoreSearchProducts}
-        loadMoreParams={{ sortKey: sort, filters, locale }}
+        loadMoreParams={{ activeFilters, sortKey: sort, filters, locale }}
       >
         {cards}
       </InfiniteProductGrid>
@@ -75,7 +75,7 @@ async function Render({
       locale={locale}
       outOfStockText={tProduct("outOfStock")}
       loadMore={loadMoreCollectionProducts}
-      loadMoreParams={{ collection, sortKey: sort, filters, locale }}
+      loadMoreParams={{ activeFilters, collection, sortKey: sort, filters, locale }}
     >
       {cards}
     </InfiniteProductGrid>

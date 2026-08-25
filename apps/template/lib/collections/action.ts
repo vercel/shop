@@ -5,6 +5,7 @@ import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
 export async function loadMoreCollectionProducts(params: {
+  activeFilters?: Record<string, string | string[] | undefined>;
   collection: string;
   cursor: string;
   sortKey?: string;
@@ -12,6 +13,7 @@ export async function loadMoreCollectionProducts(params: {
   locale: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
   const result = await fetchCollectionProducts({
+    activeFilters: params.activeFilters,
     collection: params.collection,
     cursor: params.cursor,
     sortKey: params.sortKey,

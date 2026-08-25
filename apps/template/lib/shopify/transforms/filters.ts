@@ -33,6 +33,48 @@ export interface ActiveFilterBadge {
   filterLabel: string;
 }
 
+function isColorKey(value: string): boolean {
+  return value.toLowerCase().includes("colo");
+}
+
+export function getSelectedColorFilterLabel(
+  activeFilters: Record<string, string | string[] | undefined>,
+  filters: ProductFilter[],
+  shopifyFilters: Array<{
+    values: Array<Pick<ShopifyFilterValue, "input" | "label">>;
+  }>,
+): string | undefined {
+  const selectedValues = new Set(
+    filters.flatMap((filter) => {
+      if (filter.variantOption && isColorKey(filter.variantOption.name)) {
+        return [filter.variantOption.value];
+      }
+      if (filter.taxonomyMetafield && isColorKey(filter.taxonomyMetafield.key)) {
+        return [filter.taxonomyMetafield.value];
+      }
+      return [];
+    }),
+  );
+
+  if (selectedValues.size !== 1) return undefined;
+  const selectedValue = selectedValues.values().next().value;
+  if (!selectedValue) return undefined;
+
+  const hasExactlyOneSelectedColor = Object.entries(activeFilters).some(([key, value]) => {
+    if (!key.startsWith("filter.") || !isColorKey(key)) return false;
+    return Array.isArray(value) ? value.length === 1 : Boolean(value);
+  });
+  if (!hasExactlyOneSelectedColor) return undefined;
+
+  for (const filter of shopifyFilters) {
+    for (const value of filter.values) {
+      if (parseShopifyFilterValue(value.input) === selectedValue) return value.label;
+    }
+  }
+
+  return selectedValue;
+}
+
 export function getParamKeyFromShopifyId(filterId: string): string {
   return filterId.toLowerCase();
 }

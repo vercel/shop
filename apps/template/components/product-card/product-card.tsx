@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import type { Locale } from "@/lib/i18n";
+import { buildProductUrl } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 import {
@@ -32,9 +33,10 @@ export async function ProductCard({
 }: ProductCardProps) {
   const isFeatured = variant === "featured";
   const t = isFeatured ? await getTranslations("product") : null;
+  const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
 
   return (
-    <Link href={`/products/${product.handle}`} className={className}>
+    <Link href={href} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>
