@@ -326,16 +326,22 @@ function transformProductCard(
     (value) => value.name.toLowerCase() === selectedOptionValue?.toLowerCase(),
   )?.firstSelectableVariant;
   const cardVariant = matchedVariant ?? defaultVariant;
-  // First image that isn't the featured one — used for the hover-reveal on the card.
-  const altImage = (product.images ? flattenEdges(product.images) : []).find(
-    (image) => image.url !== (matchedVariant?.image ?? product.featuredImage)?.url,
-  );
+  const primaryImage = matchedVariant?.image ?? product.featuredImage;
+  const altImage = matchedVariant
+    ? product.featuredImage?.url !== primaryImage?.url
+      ? product.featuredImage
+      : (product.images ? flattenEdges(product.images) : []).find(
+          (image) => image.url !== primaryImage?.url,
+        )
+    : (product.images ? flattenEdges(product.images) : []).find(
+        (image) => image.url !== primaryImage?.url,
+      );
 
   return {
     id: product.id,
     handle: product.handle,
     title: product.title,
-    featuredImage: transformImage(matchedVariant?.image ?? product.featuredImage),
+    featuredImage: transformImage(primaryImage),
     secondaryImage: altImage ? transformImage(altImage) : undefined,
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,

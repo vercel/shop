@@ -83,7 +83,11 @@ export async function ProductDetailSection({
         ]}
       />
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
-        <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
+        <ProductMediaArea
+          product={product}
+          selectedOptionsPromise={selectedOptionsPromise}
+          variantPromise={variantPromise}
+        />
         <ProductInfoArea
           product={product}
           selectedOptionsPromise={selectedOptionsPromise}
@@ -98,14 +102,18 @@ export async function ProductDetailSection({
 function ProductMediaArea({
   product,
   selectedOptionsPromise,
+  variantPromise,
 }: {
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
+  variantPromise: Promise<ProductVariant | undefined>;
 }) {
-  const productImageUrl = product.featuredImage?.url ?? product.images[0]?.url;
-  const tryOnOverlay = productImageUrl ? (
-    <VirtualTryOn productImageUrl={productImageUrl} />
-  ) : undefined;
+  const fallbackImageUrl = product.featuredImage?.url ?? product.images[0]?.url;
+  const tryOnOverlay = (
+    <Suspense fallback={null}>
+      <ResolvedVirtualTryOn fallbackImageUrl={fallbackImageUrl} variantPromise={variantPromise} />
+    </Suspense>
+  );
 
   if (!hasColorImagePartitioning(product.options)) {
     return (
@@ -151,6 +159,18 @@ function ProductMediaArea({
       }
     />
   );
+}
+
+async function ResolvedVirtualTryOn({
+  fallbackImageUrl,
+  variantPromise,
+}: {
+  fallbackImageUrl: string | undefined;
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
+  const variant = await variantPromise;
+  const productImageUrl = variant?.image?.url ?? fallbackImageUrl;
+  return productImageUrl ? <VirtualTryOn productImageUrl={productImageUrl} /> : null;
 }
 
 async function ResolvedColorImageGrid({
