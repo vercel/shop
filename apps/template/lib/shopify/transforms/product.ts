@@ -327,15 +327,15 @@ function transformProductCard(
   )?.firstSelectableVariant;
   const cardVariant = matchedVariant ?? defaultVariant;
   const primaryImage = matchedVariant?.image ?? product.featuredImage;
+  const images = product.images ? flattenEdges(product.images) : [];
+  const colorVariantImageUrls = new Set(
+    colorOption?.optionValues
+      ?.map((value) => value.firstSelectableVariant?.image?.url)
+      .filter((url): url is string => !!url),
+  );
   const altImage = matchedVariant
-    ? product.featuredImage?.url !== primaryImage?.url
-      ? product.featuredImage
-      : (product.images ? flattenEdges(product.images) : []).find(
-          (image) => image.url !== primaryImage?.url,
-        )
-    : (product.images ? flattenEdges(product.images) : []).find(
-        (image) => image.url !== primaryImage?.url,
-      );
+    ? images.find((image) => !colorVariantImageUrls.has(image.url))
+    : images.find((image) => image.url !== primaryImage?.url);
 
   return {
     id: product.id,

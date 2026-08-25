@@ -435,7 +435,7 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
     featuredImage {
       ...ImageFields
     }
-    images(first: 2) {
+    images(first: 10) {
       edges {
         node {
           ...ImageFields
