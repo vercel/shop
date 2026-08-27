@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ProductViewedTracker } from "@/components/analytics/trackers";
@@ -9,6 +8,7 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { CACHEABLE_PRODUCT_HANDLES } from "@/lib/cacheable-product-handles";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@/lib/product";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
-  getCatalogProducts,
   getProduct,
   getProductUncached,
   getProductVariant,
@@ -35,8 +34,9 @@ async function buildProductMetadata(
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const getProductForRequest = cacheable ? getProduct : getProductUncached;
-  const product = await getProductForRequest({ handle, locale });
+  const product = cacheable
+    ? await getProduct({ handle, locale })
+    : await getProductUncached({ handle, locale });
   if (!product) notFound();
   const images = product.featuredImage
     ? [
@@ -70,20 +70,13 @@ async function buildProductMetadata(
   };
 }
 
-export async function generateStaticParams() {
-  try {
-    const { products } = await getCatalogProducts({ limit: 1 });
-    const first = products[0];
-    return [{ cacheable: "1", handle: first ? first.handle : PLACEHOLDER_HANDLE }];
-  } catch {
-    return [{ cacheable: "1", handle: PLACEHOLDER_HANDLE }];
-  }
+export function generateStaticParams() {
+  return CACHEABLE_PRODUCT_HANDLES.map((handle) => ({ cacheable: "1", handle }));
 }
 
 export async function generateMetadata({
   params,
 }: PageProps<"/[cacheable]/products/[handle]">): Promise<Metadata> {
-  await connection();
   const [{ cacheable, handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === PLACEHOLDER_HANDLE) return {};
@@ -98,14 +91,13 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/[cacheable]/products/[handle]">) {
-  await connection();
   const [{ cacheable, handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
   const isCacheable = cacheable === "1";
-  const getProductForRequest = isCacheable ? getProduct : getProductUncached;
-  const getProductVariantForRequest = isCacheable ? getProductVariant : getProductVariantUncached;
-  const product = await getProductForRequest({ handle, locale });
+  const product = isCacheable
+    ? await getProduct({ handle, locale })
+    : await getProductUncached({ handle, locale });
   if (!product) notFound();
 
   // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
@@ -122,14 +114,17 @@ export default async function ProductPage({
       ) {
         return product.defaultVariant;
       }
-      return getProductVariantForRequest({
+      const variantParams = {
         handle,
         locale,
         selectedOptions: toSelectedOptionList({
           ...defaultSelectedOptions(product),
           ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
         }),
-      });
+      };
+      return isCacheable
+        ? getProductVariant(variantParams)
+        : getProductVariantUncached(variantParams);
     },
   );
 

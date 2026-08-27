@@ -1,4 +1,5 @@
 import { cacheLife, cacheTag } from "next/cache";
+import { connection } from "next/server";
 
 import { shopConfig } from "@/lib/config";
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
@@ -144,6 +145,7 @@ export async function getProductUncached(params: {
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
+  await connection();
   const result = await fetchProduct(params);
   return result?.product;
 }
@@ -216,6 +218,7 @@ export async function getProductVariant(
 export async function getProductVariantUncached(
   params: ProductVariantParams,
 ): Promise<ProductVariant | undefined> {
+  await connection();
   return fetchProductVariant(params);
 }
 
@@ -670,6 +673,7 @@ export async function getRelatedProductsUncached(params: {
   handle: string;
   locale?: string;
 }): Promise<ProductCard[]> {
+  await connection();
   return fetchRelatedProducts(params);
 }
 

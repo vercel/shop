@@ -41,10 +41,10 @@ async function Render({
   locale: Locale;
 }) {
   const resolvedHandle = await handle;
-  const getProducts = cacheable ? getRelatedProducts : getRelatedProductsUncached;
+  const params = { handle: resolvedHandle, locale };
   const [t, related] = await Promise.all([
     getTranslations("product"),
-    getProducts({ handle: resolvedHandle, locale }),
+    cacheable ? getRelatedProducts(params) : getRelatedProductsUncached(params),
   ]);
 
   if (related.length === 0) return null;

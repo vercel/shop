@@ -14,6 +14,7 @@ import {
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
+import { CACHEABLE_PRODUCT_HANDLES } from "@/lib/cacheable-product-handles";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/negotiation";
@@ -28,16 +29,7 @@ const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_REFRESH_PATH,
 ]);
 
-const CACHEABLE_PRODUCT_HANDLES = new Set([
-  "arcgauge-jacket-mens-0811c3",
-  "briskrun-jacket-unisex-88b464",
-  "cadenceshift-sweatshirt-unisex-244263",
-  "climbbeam-hoodie-mens-fc66e1",
-  "framepoint-tank-unisex-237435",
-  "orbitproof-sweatshirt-youth-2226d1",
-  "vistamesh-tee-womens-684491",
-  "voltcurrent-tank-mens-d86de7",
-]);
+const CACHEABLE_PRODUCT_HANDLE_SET = new Set<string>(CACHEABLE_PRODUCT_HANDLES);
 
 const NOOP_SESSION_MANAGER = {
   getSessionItem: () => undefined,
@@ -109,7 +101,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const productMatch = pathname.match(/^\/products\/([^/]+)$/);
   if (productMatch) {
     const handle = decodeURIComponent(productMatch[1]);
-    const cacheable = CACHEABLE_PRODUCT_HANDLES.has(handle) ? "1" : "0";
+    const cacheable = CACHEABLE_PRODUCT_HANDLE_SET.has(handle) ? "1" : "0";
     const url = request.nextUrl.clone();
     url.pathname = `/${cacheable}${pathname}`;
     const response = NextResponse.rewrite(url, {
