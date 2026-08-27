@@ -13,6 +13,8 @@ import {
   translations,
 } from "@/geistdocs";
 
+import { isSiteUrlConfigured, siteUrl } from "./site-url";
+
 export const config = defineConfig({
   title,
   agent,
@@ -22,6 +24,7 @@ export const config = defineConfig({
   nav,
   basePath,
   siteId,
+  siteUrl: isSiteUrlConfigured ? siteUrl.toString() : undefined,
   translations,
   content: [{ id: "docs", label: "Docs", dir: "content/docs", route: "/docs" }],
   language: {

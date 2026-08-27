@@ -1,3 +1,4 @@
+import type { GeistdocsAgentReadinessConfig } from "@vercel/geistdocs/config";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -14,7 +15,9 @@ import {
   CommandPromptTriggerDivider,
   CommandPromptViewport,
 } from "@/components/ui/command-prompt";
-import { getBaseUrl, homeDescription, homeSubtitle, homeTitle, siteName } from "@/lib/site";
+import { config } from "@/lib/geistdocs/config";
+import { getLocalizedPath } from "@/lib/geistdocs/public-path";
+import { homeDescription, homeSubtitle, homeTitle, siteName } from "@/lib/site";
 
 import { AgentDemo } from "./components/agent-demo";
 import { AssistantDemo } from "./components/assistant-demo";
@@ -30,30 +33,48 @@ import { ShopifyCommerce } from "./components/shopify-commerce";
 const title = siteName;
 const description = homeDescription;
 
-export const metadata: Metadata = {
-  metadataBase: getBaseUrl(),
-  title,
-  description,
-  openGraph: {
+export const generateMetadata = async ({ params }: PageProps<"/[lang]">): Promise<Metadata> => {
+  const { lang } = await params;
+  const agentConfig = config.agent as GeistdocsAgentReadinessConfig | undefined;
+
+  return {
     title,
     description,
-    type: "website",
-    url: "/",
-    siteName,
-    images: [
-      {
-        url: "/opengraph-image.jpg",
-        width: 1200,
-        height: 628,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title,
-    description,
-    images: ["/opengraph-image.jpg"],
-  },
+    alternates: {
+      ...(config.siteUrl
+        ? {
+            canonical: getLocalizedPath(lang, "/"),
+            ...(agentConfig && agentConfig.enabled !== false
+              ? {
+                  types: {
+                    "text/markdown": getLocalizedPath(lang, "/agents.md"),
+                  },
+                }
+              : {}),
+          }
+        : {}),
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      ...(config.siteUrl ? { url: getLocalizedPath(lang, "/") } : {}),
+      siteName,
+      images: [
+        {
+          url: "/opengraph-image.jpg",
+          width: 1200,
+          height: 628,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/opengraph-image.jpg"],
+    },
+  };
 };
 
 const HomePage = () => (
@@ -91,7 +112,9 @@ const HomePage = () => (
               </Link>
             </Button>
             <Button asChild className="h-12 w-fit rounded-full px-5" variant="secondary">
-              <Link href="/docs">View Documentation</Link>
+              <Link href="/docs" prefetch={true}>
+                View Documentation
+              </Link>
             </Button>
           </div>
         }
