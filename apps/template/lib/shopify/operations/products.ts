@@ -94,16 +94,13 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = `#graphql
   }
 ` as const;
 
-export async function getProduct({
+async function fetchProduct({
   handle,
   locale = defaultLocale,
 }: {
   handle: string;
   locale?: string;
-}): Promise<ProductDetails | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product-${handle}`);
+}): Promise<{ product: ProductDetails; productId: string } | undefined> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -122,9 +119,33 @@ export async function getProduct({
     return undefined;
   }
 
-  tagProducts([data.productByHandle]);
+  return {
+    product: transformShopifyProductDetails(data.productByHandle),
+    productId: data.productByHandle.id,
+  };
+}
 
-  return transformShopifyProductDetails(data.productByHandle);
+export async function getProduct(params: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("products", `product-${params.handle}`);
+
+  const result = await fetchProduct(params);
+  if (!result) return undefined;
+
+  tagProducts([{ id: result.productId }]);
+  return result.product;
+}
+
+export async function getProductUncached(params: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductDetails | undefined> {
+  const result = await fetchProduct(params);
+  return result?.product;
 }
 
 const GET_PRODUCT_VARIANT_QUERY = `#graphql
@@ -151,19 +172,18 @@ const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = `#graphql
   }
 ` as const;
 
-// Empty selections intentionally resolve Shopify's first available variant.
-export async function getProductVariant({
-  handle,
-  locale = defaultLocale,
-  selectedOptions,
-}: {
+interface ProductVariantParams {
   handle: string;
   locale?: string;
   selectedOptions: SelectedOption[];
-}): Promise<ProductVariant | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product-${handle}`);
+}
+
+// Empty selections intentionally resolve Shopify's first available variant.
+async function fetchProductVariant({
+  handle,
+  locale = defaultLocale,
+  selectedOptions,
+}: ProductVariantParams): Promise<ProductVariant | undefined> {
   const country = getCountryCode(locale);
   const language = getLanguageCode(locale);
 
@@ -182,6 +202,21 @@ export async function getProductVariant({
 
   const variant = data.productByHandle?.selectedOrFirstAvailableVariant;
   return variant ? transformVariant(variant) : undefined;
+}
+
+export async function getProductVariant(
+  params: ProductVariantParams,
+): Promise<ProductVariant | undefined> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("products", `product-${params.handle}`);
+  return fetchProductVariant(params);
+}
+
+export async function getProductVariantUncached(
+  params: ProductVariantParams,
+): Promise<ProductVariant | undefined> {
+  return fetchProductVariant(params);
 }
 
 export async function getProductWithVariants(params: {
@@ -629,6 +664,13 @@ export async function getRelatedProducts(params: {
   const products = await fetchRelatedProducts(params);
   tagProducts(products);
   return products;
+}
+
+export async function getRelatedProductsUncached(params: {
+  handle: string;
+  locale?: string;
+}): Promise<ProductCard[]> {
+  return fetchRelatedProducts(params);
 }
 
 const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql

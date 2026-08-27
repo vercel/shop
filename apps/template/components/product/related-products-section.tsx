@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getRelatedProducts } from "@/lib/shopify/operations/products";
+import { getRelatedProducts, getRelatedProductsUncached } from "@/lib/shopify/operations/products";
 
 export function RelatedProductsSectionSkeleton({
   limit,
@@ -30,18 +30,21 @@ export function RelatedProductsSectionSkeleton({
 }
 
 async function Render({
+  cacheable = true,
   handle,
   limit,
   locale,
 }: {
+  cacheable?: boolean;
   handle: string | Promise<string>;
   limit: number;
   locale: Locale;
 }) {
   const resolvedHandle = await handle;
+  const getProducts = cacheable ? getRelatedProducts : getRelatedProductsUncached;
   const [t, related] = await Promise.all([
     getTranslations("product"),
-    getRelatedProducts({ handle: resolvedHandle, locale }),
+    getProducts({ handle: resolvedHandle, locale }),
   ]);
 
   if (related.length === 0) return null;
@@ -64,10 +67,12 @@ async function Render({
 }
 
 export async function RelatedProductsSection({
+  cacheable = true,
   handle,
   limit,
   locale,
 }: {
+  cacheable?: boolean;
   handle: string | Promise<string>;
   limit: number;
   locale: Locale;
@@ -77,7 +82,7 @@ export async function RelatedProductsSection({
     <Suspense
       fallback={<RelatedProductsSectionSkeleton limit={limit} title={t("recommendations")} />}
     >
-      <Render handle={handle} limit={limit} locale={locale} />
+      <Render cacheable={cacheable} handle={handle} limit={limit} locale={locale} />
     </Suspense>
   );
 }

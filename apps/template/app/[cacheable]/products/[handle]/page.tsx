@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { ProductViewedTracker } from "@/components/analytics/trackers";
@@ -20,18 +21,22 @@ import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   getCatalogProducts,
   getProduct,
+  getProductUncached,
   getProductVariant,
+  getProductVariantUncached,
 } from "@/lib/shopify/operations/products";
 import type { ProductVariant } from "@/lib/types";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
 async function buildProductMetadata(
+  cacheable: boolean,
   handle: string,
   locale: string,
   canonicalPath: string,
 ): Promise<Metadata> {
-  const product = await getProduct({ handle, locale });
+  const getProductForRequest = cacheable ? getProduct : getProductUncached;
+  const product = await getProductForRequest({ handle, locale });
   if (!product) notFound();
   const images = product.featuredImage
     ? [
@@ -69,20 +74,22 @@ export async function generateStaticParams() {
   try {
     const { products } = await getCatalogProducts({ limit: 1 });
     const first = products[0];
-    return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
+    return [{ cacheable: "1", handle: first ? first.handle : PLACEHOLDER_HANDLE }];
   } catch {
-    return [{ handle: PLACEHOLDER_HANDLE }];
+    return [{ cacheable: "1", handle: PLACEHOLDER_HANDLE }];
   }
 }
 
 export async function generateMetadata({
   params,
-}: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+}: PageProps<"/[cacheable]/products/[handle]">): Promise<Metadata> {
+  await connection();
+  const [{ cacheable, handle }, locale] = await Promise.all([params, getLocale()]);
 
   if (handle === PLACEHOLDER_HANDLE) return {};
 
-  return buildProductMetadata(handle, locale, `/products/${handle}`);
+  const isCacheable = cacheable === "1";
+  return buildProductMetadata(isCacheable, handle, locale, `/products/${handle}`);
 }
 
 export const instant = false;
@@ -90,11 +97,15 @@ export const instant = false;
 export default async function ProductPage({
   params,
   searchParams,
-}: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+}: PageProps<"/[cacheable]/products/[handle]">) {
+  await connection();
+  const [{ cacheable, handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
-  const product = await getProduct({ handle, locale });
+  const isCacheable = cacheable === "1";
+  const getProductForRequest = isCacheable ? getProduct : getProductUncached;
+  const getProductVariantForRequest = isCacheable ? getProductVariant : getProductVariantUncached;
+  const product = await getProductForRequest({ handle, locale });
   if (!product) notFound();
 
   // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
@@ -111,7 +122,7 @@ export default async function ProductPage({
       ) {
         return product.defaultVariant;
       }
-      return getProductVariant({
+      return getProductVariantForRequest({
         handle,
         locale,
         selectedOptions: toSelectedOptionList({
@@ -137,7 +148,12 @@ export default async function ProductPage({
               locale={locale}
             />
             {shopConfig.pdp.relatedProducts.isEnabled ? (
-              <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+              <RelatedProductsSection
+                cacheable={isCacheable}
+                handle={handle}
+                limit={4}
+                locale={locale}
+              />
             ) : null}
           </Sections>
         </Container>
