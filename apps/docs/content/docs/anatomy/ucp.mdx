@@ -14,7 +14,7 @@ The integration is disabled by default. When disabled, `GET /.well-known/ucp` re
 
 Set `ucp.isEnabled` to `true` in `lib/config.ts`, then deploy the storefront. The route fetches Shopify’s generated business profile for `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` and serves it from the storefront domain.
 
-The route preserves Shopify’s response status and forwards its validation headers (`etag`, `last-modified`, `vary`), but it applies its own caching: successful responses are cached for 60 seconds and error responses are not cached. If Shopify returns `404`, browser requests render the storefront’s not-found page while agent requests keep Shopify’s machine response. The route does not redirect agents to Shopify or maintain a separate profile.
+The route preserves Shopify’s response status and forwards its validation headers (`etag`, `last-modified`, `vary`). It applies edge-first caching: a successful profile is cached on Vercel’s CDN for 60 seconds, served stale for up to 5 minutes while it revalidates in the background, and served stale for up to 24 hours if Shopify is unreachable. Errors and the not-published `404` are never cached. If Shopify returns `404`, browser requests render the storefront’s not-found page while agent requests receive Shopify’s machine response. The route does not redirect agents to Shopify or maintain a separate profile.
 
 Shopify controls which capabilities appear in the profile. Enable and configure supported agentic commerce features in Shopify admin rather than editing the route response.
 
