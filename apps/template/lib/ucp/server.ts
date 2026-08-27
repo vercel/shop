@@ -37,6 +37,10 @@ export async function getUcpProfile(request: Request): Promise<Response> {
     );
   }
 
+  if (profileResponse.status === 404 && request.headers.get("accept")?.includes("text/html")) {
+    notFound();
+  }
+
   const isCacheable = profileResponse.ok || profileResponse.status === 304;
   const headers = new Headers({
     "Cache-Control": isCacheable ? UCP_CACHE_CONTROL : UCP_NO_CACHE_CONTROL,
