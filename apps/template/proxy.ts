@@ -107,6 +107,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
     const response = NextResponse.rewrite(url, {
       request: { headers: requestContext.getForwardedRequestHeaders() },
     });
+    if (markdownPath) appendVaryAccept(response.headers);
     requestContext.applyResponseHeaders(response.headers);
     return response;
   }
