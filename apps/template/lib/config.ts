@@ -51,16 +51,9 @@ export interface ShopConfig {
   };
 }
 
-function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
-}
-
-// Vercel injects bare domains (no protocol); NEXT_PUBLIC_BASE_URL follows the same convention.
-const bareHost =
-  trimTrailingSlash(process.env.NEXT_PUBLIC_BASE_URL || "") ||
-  process.env.VERCEL_PROJECT_PRODUCTION_URL;
-
-const defaultUrl = bareHost ? `https://${bareHost}` : "http://localhost:3000";
+const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
 
 export const shopConfig = {
   agent: {

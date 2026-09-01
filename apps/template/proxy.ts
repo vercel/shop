@@ -51,6 +51,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
           cartServerHandlers: customerCartHandlers,
           customerSession,
           defaultPostLoginRedirectPathname: "/account",
+          loginFailedRedirectPath: "/?auth_error=oauth_callback",
           origin: getCustomerRequestOrigin,
           postLogoutRedirectUri: "/",
         })
