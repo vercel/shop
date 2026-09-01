@@ -27,15 +27,16 @@ Set these environment variables:
 ```bash
 CUSTOMER_ACCOUNT_SESSION_SECRET="your-session-secret-here"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET="your-customer-account-client-secret-here"
 ```
 
-Shopify provides the client ID. If it provides a confidential client, also set `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` to the client secret. Leave that variable unset for a public client. Generate the session secret yourself:
+Shopify provides the confidential client ID and client secret. Generate the session secret yourself:
 
 ```bash
 openssl rand -base64 32
 ```
 
-Keep the session secret server-only and identical across every instance of a deployment. Rotating it signs out all customers. A build with authentication enabled fails when the session secret or client ID is missing.
+Keep both secrets server-only and identical across every instance of a deployment. Rotating the session secret signs out all customers. A build with authentication enabled fails when the session secret, client ID, or client secret is missing.
 
 Customer Account OAuth requires a public HTTPS origin. The storefront derives callback and logout URLs from each incoming request, including forwarded host and protocol headers. This lets production, preview, and tunnel deployments use their own registered origin. For local testing, open the storefront through a public HTTPS tunnel.
 
@@ -45,10 +46,10 @@ In Shopify Admin:
 2. Choose **Customer accounts**, then save.
 3. Install the **Headless** sales channel.
 4. Go to **Sales channels → Headless → your storefront → Customer Account API**.
-5. Use a public Customer Account API client when available. If Shopify provides a confidential client, copy both its client ID and client secret.
+5. Copy the confidential client ID and client secret.
 6. Add `https://YOUR_DOMAIN/account/authorize` as the callback URI.
 7. Add `https://YOUR_DOMAIN/` as the logout URI.
-8. Copy the client ID into `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`.
+8. Set `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` to the copied values.
 9. Confirm `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` identifies the same store.
 
 Shopify does not support wildcard callback or logout URIs. Register every production, preview, and tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
@@ -69,7 +70,7 @@ Customer Account API data is personalized and is not publicly cached.
 
 > **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
 
-If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character. Also confirm that a confidential client has its matching client secret; failed callbacks return to the storefront instead of restarting sign-in.
+If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, client ID, and client secret character for character. Failed callbacks return to the storefront instead of restarting sign-in.
 
 ## What’s next
 

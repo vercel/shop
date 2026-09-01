@@ -15,21 +15,21 @@ type: reference
 
 These variables are required when `auth.isEnabled` is `true` in [`lib/config.ts`](/docs/reference/shop-config).
 
-| Variable                                 | Description                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `CUSTOMER_ACCOUNT_SESSION_SECRET`        | App-generated secret that encrypts customer session cookies. Shopify does not provide this value. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` | Client ID from **Sales channels → Headless → Customer Account API** in Shopify admin.             |
+| Variable                                     | Description                                                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `CUSTOMER_ACCOUNT_SESSION_SECRET`            | App-generated secret that encrypts customer session cookies. Shopify does not provide this value. |
+| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`     | Client ID from **Sales channels → Headless → Customer Account API** in Shopify admin.             |
+| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` | Server-only client secret for the confidential Customer Account API client.                       |
 
 Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Store one stable value in server-side environment variables across all deployment instances. Rotating it invalidates existing customer sessions.
 
 ## Optional
 
-| Variable                                     | Description                                                                                                   |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `DEBUG_SHOPIFY`                              | Set to `true` to log structured Storefront and Customer Account API operation timings.                        |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID`          | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration. |
-| `SHOPIFY_API_VERSION`                        | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.   |
-| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` | Server-only client secret for a confidential Customer Account API client. Leave unset for a public client.    |
-| `SHOPIFY_WEBHOOK_SECRET`                     | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                |
+| Variable                            | Description                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                        |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration. |
+| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.   |
+| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                |
 
 Vercel supplies `VERCEL_PROJECT_PRODUCTION_URL` and `V0_CALLBACK_URL` automatically. Do not set them yourself.
