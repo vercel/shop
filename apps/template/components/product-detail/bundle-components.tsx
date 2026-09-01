@@ -19,15 +19,13 @@ interface BundleComponentsProps {
 
 export function BundleComponents({ components, title }: BundleComponentsProps) {
   if (components.length === 0) return null;
-  const items = components.map(
-    ({ quantity, variant }): BundleListItem => ({
-      href: `/products/${variant.product.handle}`,
-      image: variant.image ?? variant.product.featuredImage,
-      key: variant.id,
-      quantity,
-      title: variant.product.title,
-    }),
-  );
+  const items = components.map(({ quantity, variant }): BundleListItem => ({
+    href: `/products/${variant.product.handle}`,
+    image: variant.image ?? variant.product.featuredImage,
+    key: variant.id,
+    quantity,
+    title: variant.product.title,
+  }));
   return <BundleProductList items={items} title={title} />;
 }
 
@@ -43,14 +41,12 @@ export function BundleParents({ title, variants }: BundleParentsProps) {
     if (!byProduct.has(variant.product.handle)) byProduct.set(variant.product.handle, variant);
   }
   if (byProduct.size === 0) return null;
-  const items = [...byProduct.values()].map(
-    (variant): BundleListItem => ({
-      href: `/products/${variant.product.handle}`,
-      image: variant.product.featuredImage ?? variant.image,
-      key: variant.product.handle,
-      title: variant.product.title,
-    }),
-  );
+  const items = [...byProduct.values()].map((variant): BundleListItem => ({
+    href: `/products/${variant.product.handle}`,
+    image: variant.product.featuredImage ?? variant.image,
+    key: variant.product.handle,
+    title: variant.product.title,
+  }));
   return <BundleProductList items={items} title={title} />;
 }
 
