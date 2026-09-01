@@ -1,7 +1,8 @@
+import { getPublicPath } from "@vercel/geistdocs/config";
 import type { MetadataRoute } from "next";
 
-const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-const baseUrl = `${protocol}://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+import { config } from "@/lib/geistdocs/config";
+import { absoluteUrl } from "@/lib/geistdocs/site-url";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -9,6 +10,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: absoluteUrl(getPublicPath("/sitemap.xml", config.basePath)),
   };
 }
