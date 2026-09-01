@@ -25,6 +25,7 @@ function assertRequiredEnv() {
     const missing = [
       "CUSTOMER_ACCOUNT_SESSION_SECRET",
       "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
+      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET",
     ].filter((key) => !process.env[key]);
 
     if (missing.length > 0) {
