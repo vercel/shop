@@ -69,7 +69,7 @@ Customer Account API data is personalized and is not publicly cached.
 
 > **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
 
-If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character. Also confirm that a confidential client has its matching client secret; failed callbacks return to the account page instead of restarting sign-in.
+If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, and client ID character for character. Also confirm that a confidential client has its matching client secret; failed callbacks return to the storefront instead of restarting sign-in.
 
 ## What’s next
 
