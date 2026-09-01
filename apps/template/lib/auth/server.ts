@@ -172,12 +172,29 @@ export function getHydrogenCustomerSession() {
   if (!shopConfig.auth.isEnabled) notFound();
 
   if (!customerSessionPromise) {
-    customerSessionPromise = resolveShopId().then((shopId) =>
-      createCustomerSession({
-        customerAccountApiClientId: process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string,
+    customerSessionPromise = resolveShopId().then((shopId) => {
+      const clientId = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string;
+      const clientSecret = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET;
+      const tokenUrl = `https://shopify.com/authentication/${shopId}/oauth/token`;
+      const authenticatedFetch: typeof fetch = (input, init) => {
+        const requestUrl = input instanceof Request ? input.url : String(input);
+        if (!clientSecret || requestUrl !== tokenUrl) return fetch(input, init);
+
+        const requestHeaders = new Headers(input instanceof Request ? input.headers : undefined);
+        new Headers(init?.headers).forEach((value, name) => requestHeaders.set(name, value));
+        requestHeaders.set(
+          "Authorization",
+          `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+        );
+        return fetch(input, { ...init, headers: requestHeaders });
+      };
+
+      return createCustomerSession({
+        customerAccountApiClientId: clientId,
+        fetch: authenticatedFetch,
         shopId,
-      }),
-    );
+      });
+    });
   }
 
   return customerSessionPromise;
