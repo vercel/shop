@@ -27,7 +27,6 @@ Set these environment variables:
 ```bash
 CUSTOMER_ACCOUNT_SESSION_SECRET="your-session-secret-here"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-NEXT_PUBLIC_BASE_URL="your-domain.com"
 ```
 
 Shopify provides the client ID. Generate the session secret yourself:
@@ -38,7 +37,7 @@ openssl rand -base64 32
 
 Keep the session secret server-only and identical across every instance of a deployment. Rotating it signs out all customers. A build with authentication enabled fails when the session secret or client ID is missing.
 
-Customer Account OAuth requires a public HTTPS origin. For local testing, use a tunnel and set `NEXT_PUBLIC_BASE_URL` to its domain without the protocol.
+Customer Account OAuth requires a public HTTPS origin. The storefront derives callback and logout URLs from each incoming request, including forwarded host and protocol headers. This lets production, preview, and tunnel deployments use their own registered origin. For local testing, open the storefront through a public HTTPS tunnel.
 
 In Shopify Admin:
 

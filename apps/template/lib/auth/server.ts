@@ -183,24 +183,17 @@ export function getHydrogenCustomerSession() {
   return customerSessionPromise;
 }
 
-function getAllowedOrigins(): Set<string> {
-  return new Set(
-    [
-      shopConfig.site.url,
-      process.env.VERCEL_PROJECT_PRODUCTION_URL
-        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-        : undefined,
-      process.env.VERCEL_BRANCH_URL ? `https://${process.env.VERCEL_BRANCH_URL}` : undefined,
-      process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
-    ].filter((origin): origin is string => Boolean(origin)),
-  );
-}
-
 export function getCustomerRequestOrigin(request: Request): string {
-  const origin = new URL(request.url).origin;
-  if (!getAllowedOrigins().has(origin))
-    throw new Error("Untrusted Customer Account request origin");
-  return origin;
+  const requestUrl = new URL(request.url);
+  const host =
+    request.headers.get("x-forwarded-host")?.split(",")[0]?.trim() ||
+    request.headers.get("host") ||
+    requestUrl.host;
+  const protocol =
+    request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim() ||
+    requestUrl.protocol.slice(0, -1);
+
+  return new URL(`${protocol}://${host}`).origin;
 }
 
 export function createCustomerSessionManager(request: Request): WritableCustomerSessionManager {
