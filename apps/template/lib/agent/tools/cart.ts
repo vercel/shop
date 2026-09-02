@@ -58,15 +58,11 @@ export const addToCartTool = tool({
     variantId: z.string(),
   }),
   execute: async ({ quantity, variantId }) => {
-    const { cart: cartId, user } = getAgentContext();
+    const { cart: cartId } = getAgentContext();
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
 
     try {
-      const { cart } = await addToCart(
-        [{ merchandiseId: variantId, quantity }],
-        cartId,
-        user.locale,
-      );
+      const { cart } = await addToCart([{ merchandiseId: variantId, quantity }], cartId);
       return { added: true, ...cartSummary(cart) };
     } catch (error) {
       console.error("Failed to add to cart:", error);

@@ -91,56 +91,54 @@ export function DiscountForm({ cart }: DiscountFormProps) {
       ) : null}
 
       {cart.discountCodes.length > 0 ? (
-        <form {...formProps()}>
-          <ul className="flex flex-wrap gap-1.5" aria-label={t("discount")}>
-            {cart.discountCodes.map((discount) => {
-              const isCodePending = pendingDiscountCodes.has(discount.code);
-              const isInvalid = !discount.applicable && !isCodePending;
+        <ul className="flex flex-wrap gap-1.5" aria-label={t("discount")}>
+          {cart.discountCodes.map((discount) => {
+            const isCodePending = pendingDiscountCodes.has(discount.code);
+            const isInvalid = !discount.applicable && !isCodePending;
 
-              return (
-                <li key={discount.code}>
-                  <span
+            return (
+              <li key={discount.code}>
+                {/* Hydrogen reads FormData from the native submit event, before a React onClick could populate a shared input. */}
+                <form
+                  {...formProps({
+                    beforeSubmit: () => {
+                      setLocalError(null);
+                      setWarnings([]);
+                    },
+                  })}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
+                    discount.applicable || isCodePending
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground border border-input",
+                  )}
+                >
+                  <input type="hidden" {...register("discountCode", { value: discount.code })} />
+                  <span className={cn(isInvalid && "line-through")}>{discount.code}</span>
+                  {isInvalid ? (
+                    <span className="text-xs uppercase tracking-wide">
+                      {t("discountNotApplicable")}
+                    </span>
+                  ) : null}
+                  <button
+                    {...register("discount-remove")}
+                    type="submit"
+                    aria-label={`${t("removeDiscount")}: ${discount.code}`}
+                    disabled={isPending}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs",
+                      "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
                       discount.applicable || isCodePending
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground border border-input",
+                        ? "hover:bg-primary-foreground/15"
+                        : "hover:bg-foreground/10",
                     )}
                   >
-                    <span className={cn(isInvalid && "line-through")}>{discount.code}</span>
-                    {isInvalid ? (
-                      <span className="text-xs uppercase tracking-wide">
-                        {t("discountNotApplicable")}
-                      </span>
-                    ) : null}
-                    <button
-                      {...register("discount-remove")}
-                      type="submit"
-                      aria-label={`${t("removeDiscount")}: ${discount.code}`}
-                      disabled={isPending}
-                      onClick={(event) => {
-                        const form = event.currentTarget.form;
-                        const input = form?.elements.namedItem("discountCode");
-                        if (input instanceof HTMLInputElement) input.value = discount.code;
-                        setLocalError(null);
-                        setWarnings([]);
-                      }}
-                      className={cn(
-                        "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",
-                        discount.applicable || isCodePending
-                          ? "hover:bg-primary-foreground/15"
-                          : "hover:bg-foreground/10",
-                      )}
-                    >
-                      <X className="size-3" aria-hidden="true" />
-                    </button>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-          <input type="hidden" {...register("discountCode", { defaultValue: "" })} />
-        </form>
+                    <X className="size-3" aria-hidden="true" />
+                  </button>
+                </form>
+              </li>
+            );
+          })}
+        </ul>
       ) : null}
     </div>
   );
