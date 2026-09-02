@@ -71,7 +71,6 @@ export interface ProductDetails extends ProductCard {
   encodedVariantExistence?: string;
   hasUniformPricing: boolean;
   images: Image[];
-  manufacturerName: string;
   options: ProductOption[];
   priceRange: {
     maxVariantPrice: Money;

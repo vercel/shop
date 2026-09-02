@@ -65,7 +65,7 @@ export async function ProductDetailSection({
           title: product.title,
           description: product.description,
           images: product.images,
-          manufacturerName: product.manufacturerName,
+          vendor: product.vendor,
           currencyCode: product.currencyCode,
           priceRange: product.priceRange,
           offerCount: product.variantsCount,

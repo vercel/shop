@@ -272,7 +272,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     priceRange: product.priceRange,
     compareAtPriceRange: product.compareAtPriceRange,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
-    manufacturerName: product.vendor,
     categoryId: product.category?.id,
     collectionHandles: flattenConnection(product.collections).map((c) => c.handle),
   };

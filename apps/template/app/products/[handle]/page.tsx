@@ -129,8 +129,8 @@ export default async function ProductPage({
           product={{
             handle: product.handle,
             id: product.id,
-            manufacturerName: product.manufacturerName,
             title: product.title,
+            vendor: product.vendor,
           }}
           variantPromise={variantPromise}
         />

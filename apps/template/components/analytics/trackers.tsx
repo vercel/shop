@@ -48,7 +48,7 @@ export function ProductViewedTracker({
   product,
   variantPromise,
 }: {
-  product: Pick<ProductDetails, "handle" | "id" | "manufacturerName" | "title">;
+  product: Pick<ProductDetails, "handle" | "id" | "title" | "vendor">;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const variant = use(variantPromise);
@@ -63,7 +63,7 @@ export function ProductViewedTracker({
       title: product.title,
       variantId: variant.id,
       variantTitle: variant.title,
-      vendor: product.manufacturerName,
+      vendor: product.vendor ?? "",
     };
     getAnalytics()?.publish(AnalyticsEvent.PRODUCT_VIEWED, { products: [payload] });
     trackedHandleRef.current = product.handle;
