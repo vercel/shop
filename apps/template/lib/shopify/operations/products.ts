@@ -90,6 +90,17 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
       selectedOrFirstAvailableVariant {
         ...BundleRelationshipFields
       }
+      # Sparse variants resolve client-side, so they need the bundle gate too.
+      adjacentVariants {
+        ...BundleRelationshipFields
+      }
+      options {
+        optionValues {
+          firstSelectableVariant {
+            ...BundleRelationshipFields
+          }
+        }
+      }
     }
   }
 `,
