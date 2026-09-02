@@ -306,13 +306,15 @@ Keep the mutation in a server action, validate both inputs, and update the cart'
 ```ts
 "use server";
 
+import { gql } from "@shopify/hydrogen";
+import type { CountryCode } from "@shopify/hydrogen/storefront-api-types";
 import { cookies } from "next/headers";
 
 import { getCartIdFromCookie } from "@/lib/cart/server";
 import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 import { storefront } from "@/lib/shopify/storefront";
 
-const BUYER_IDENTITY_MUTATION = /* GraphQL */ `
+const BUYER_IDENTITY_MUTATION = gql(`#graphql
   mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
     cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
       cart {
@@ -320,7 +322,7 @@ const BUYER_IDENTITY_MUTATION = /* GraphQL */ `
       }
     }
   }
-`;
+`);
 
 export async function switchLocaleAction(currentValue: string, nextValue: string) {
   if (!isEnabledLocale(currentValue) || !isEnabledLocale(nextValue)) {
@@ -332,7 +334,7 @@ export async function switchLocaleAction(currentValue: string, nextValue: string
     if (cartId) {
       await storefront.request(BUYER_IDENTITY_MUTATION, {
         variables: {
-          buyerIdentity: { countryCode: getCountryCode(nextValue) },
+          buyerIdentity: { countryCode: getCountryCode(nextValue) as CountryCode },
           cartId,
         },
       });

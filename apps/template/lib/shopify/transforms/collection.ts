@@ -1,22 +1,8 @@
+import type { COLLECTION_FIELDS_FRAGMENT } from "@/lib/shopify/fragments";
+import type { ResultOf } from "@/lib/shopify/storefront";
 import type { Collection } from "@/lib/types";
 
-interface ShopifyCollection {
-  handle: string;
-  id: string;
-  title: string;
-  description: string;
-  image: {
-    url: string;
-    altText: string | null;
-    width: number;
-    height: number;
-  } | null;
-  updatedAt: string;
-  seo: {
-    title: string | null;
-    description: string | null;
-  };
-}
+export type ShopifyCollection = ResultOf<typeof COLLECTION_FIELDS_FRAGMENT>;
 
 export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {
@@ -28,8 +14,8 @@ export function transformShopifyCollection(collection: ShopifyCollection): Colle
       ? {
           url: collection.image.url,
           altText: collection.image.altText ?? collection.title,
-          width: collection.image.width,
-          height: collection.image.height,
+          width: collection.image.width ?? 0,
+          height: collection.image.height ?? 0,
         }
       : null,
     path: `/collections/${collection.handle}`,
@@ -44,5 +30,3 @@ export function transformShopifyCollection(collection: ShopifyCollection): Colle
 export function transformShopifyCollections(collections: ShopifyCollection[]): Collection[] {
   return collections.map(transformShopifyCollection);
 }
-
-export type { ShopifyCollection };

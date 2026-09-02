@@ -1,24 +1,13 @@
+import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { defaultLocale } from "@/lib/i18n";
 import type { ContentPage } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
 import { storefront } from "../storefront";
 
-interface ShopifyPage {
-  body: string;
-  bodySummary: string;
-  handle: string;
-  seo: {
-    description: string | null;
-    title: string | null;
-  } | null;
-  title: string;
-  updatedAt: string;
-}
-
-const GET_PAGE_QUERY = `#graphql
+const GET_PAGE_QUERY = gql(`#graphql
   query getPage($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     page(handle: $handle) {
       body
@@ -32,7 +21,7 @@ const GET_PAGE_QUERY = `#graphql
       updatedAt
     }
   }
-` as const;
+`);
 
 export async function getPage({
   handle,
@@ -45,11 +34,7 @@ export async function getPage({
   cacheLife("max");
   cacheTag("pages", `page-${handle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-  const response = await storefront.request<{ page: ShopifyPage | null }>(GET_PAGE_QUERY, {
-    variables: { country, handle, language },
-  });
+  const response = await storefront.request(GET_PAGE_QUERY, { locale, variables: { handle } });
   assertStorefrontOk(response, "getPage");
 
   const page = response.data.page;

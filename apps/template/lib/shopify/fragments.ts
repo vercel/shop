@@ -1,63 +1,61 @@
-export const MONEY_FRAGMENT = `#graphql
-  fragment MoneyFields on MoneyV2 {
-    amount
-    currencyCode
-  }
-` as const;
+import { gql } from "@shopify/hydrogen";
 
-export const IMAGE_FRAGMENT = `#graphql
-  fragment ImageFields on Image {
-    url
-    altText
-    width
-    height
-  }
-` as const;
+// Money and Image selections are inlined so diamond-shaped fragment composition never emits one leaf fragment twice.
 
-// Parent documents must include IMAGE_FRAGMENT.
-export const PRODUCT_VARIANT_FRAGMENT = `#graphql
-  ${MONEY_FRAGMENT}
+export const PRODUCT_VARIANT_FRAGMENT = gql(
+  `#graphql
   fragment ProductVariantFields on ProductVariant {
     id
     title
     availableForSale
     price {
-      ...MoneyFields
+      amount
+        currencyCode
     }
     compareAtPrice {
-      ...MoneyFields
+      amount
+        currencyCode
     }
     selectedOptions {
       name
       value
     }
     image {
-      ...ImageFields
+      url
+        altText
+        width
+        height
     }
   }
-` as const;
+`,
+);
 
-export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = `#graphql
+export const BUNDLE_COMPONENT_VARIANT_FRAGMENT = gql(`#graphql
   fragment BundleComponentVariantFields on ProductVariant {
     id
     title
     image {
-      ...ImageFields
+      url
+        altText
+        width
+        height
     }
     product {
       id
       title
       handle
       featuredImage {
-        ...ImageFields
+        url
+        altText
+        width
+        height
       }
     }
   }
-` as const;
+`);
 
-// Parent documents must include IMAGE_FRAGMENT.
-export const BUNDLE_RELATIONSHIPS_FRAGMENT = `#graphql
-  ${BUNDLE_COMPONENT_VARIANT_FRAGMENT}
+export const BUNDLE_RELATIONSHIPS_FRAGMENT = gql(
+  `#graphql
   fragment BundleRelationshipFields on ProductVariant {
     requiresComponents
     groupedBy(first: 10) {
@@ -75,19 +73,21 @@ export const BUNDLE_RELATIONSHIPS_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+`,
+  [BUNDLE_COMPONENT_VARIANT_FRAGMENT],
+);
 
-// Parent documents must include IMAGE_FRAGMENT.
-export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = `#graphql
-  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
-  ${PRODUCT_VARIANT_FRAGMENT}
+export const PURCHASABLE_PRODUCT_VARIANT_FRAGMENT = gql(
+  `#graphql
   fragment PurchasableProductVariantFields on ProductVariant {
     ...BundleRelationshipFields
     ...ProductVariantFields
   }
-` as const;
+`,
+  [BUNDLE_RELATIONSHIPS_FRAGMENT, PRODUCT_VARIANT_FRAGMENT],
+);
 
-export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
+export const TAXONOMY_CATEGORY_FRAGMENT = gql(`#graphql
   fragment TaxonomyCategoryFields on TaxonomyCategory {
     id
     name
@@ -96,12 +96,32 @@ export const TAXONOMY_CATEGORY_FRAGMENT = `#graphql
       name
     }
   }
-` as const;
+`);
 
-// Fixed bundle components carry Shopify edit restrictions on nested CartLines.
-export const CART_FRAGMENT = `#graphql
-  ${IMAGE_FRAGMENT}
-  ${MONEY_FRAGMENT}
+export const FILTER_FRAGMENT = gql(`#graphql
+  fragment FilterFields on Filter {
+    id
+    label
+    type
+    presentation
+    values {
+      id
+      label
+      count
+      input
+      swatch {
+        color
+        image {
+          previewImage {
+            url
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const CART_LINE_FRAGMENT = gql(`#graphql
   fragment CartLineFields on CartLine {
     id
     quantity
@@ -111,13 +131,15 @@ export const CART_FRAGMENT = `#graphql
     }
     cost {
       totalAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     discountAllocations {
       __typename
       discountedAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       ... on CartCodeDiscountAllocation {
         code
@@ -138,37 +160,52 @@ export const CART_FRAGMENT = `#graphql
           value
         }
         image {
-          ...ImageFields
+          url
+        altText
+        width
+        height
         }
         price {
-          ...MoneyFields
+          amount
+        currencyCode
         }
         compareAtPrice {
-          ...MoneyFields
+          amount
+        currencyCode
         }
         product {
           id
           title
           handle
           featuredImage {
-            ...ImageFields
+            url
+        altText
+        width
+        height
           }
         }
       }
     }
   }
+`);
+
+// Fixed bundle components carry Shopify edit restrictions on nested CartLines.
+export const COMPONENTIZABLE_CART_LINE_FRAGMENT = gql(
+  `#graphql
   fragment ComponentizableCartLineFields on ComponentizableCartLine {
     id
     quantity
     cost {
       totalAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     discountAllocations {
       __typename
       discountedAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       ... on CartCodeDiscountAllocation {
         code
@@ -189,20 +226,28 @@ export const CART_FRAGMENT = `#graphql
           value
         }
         image {
-          ...ImageFields
+          url
+        altText
+        width
+        height
         }
         price {
-          ...MoneyFields
+          amount
+        currencyCode
         }
         compareAtPrice {
-          ...MoneyFields
+          amount
+        currencyCode
         }
         product {
           id
           title
           handle
           featuredImage {
-            ...ImageFields
+            url
+        altText
+        width
+        height
           }
         }
       }
@@ -211,6 +256,12 @@ export const CART_FRAGMENT = `#graphql
       ...CartLineFields
     }
   }
+`,
+  [CART_LINE_FRAGMENT],
+);
+
+export const CART_FRAGMENT = gql(
+  `#graphql
   fragment CartFields on Cart {
     id
     checkoutUrl
@@ -224,10 +275,12 @@ export const CART_FRAGMENT = `#graphql
     }
     cost {
       totalAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       subtotalAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     discountCodes {
@@ -237,7 +290,8 @@ export const CART_FRAGMENT = `#graphql
     discountAllocations {
       __typename
       discountedAmount {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       ... on CartCodeDiscountAllocation {
         code
@@ -253,10 +307,12 @@ export const CART_FRAGMENT = `#graphql
       id
       lastCharacters
       amountUsed {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       balance {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     deliveryGroups(first: 5) {
@@ -264,23 +320,29 @@ export const CART_FRAGMENT = `#graphql
         selectedDeliveryOption {
           title
           estimatedCost {
-            ...MoneyFields
+            amount
+        currencyCode
           }
         }
       }
     }
   }
-` as const;
+`,
+  [COMPONENTIZABLE_CART_LINE_FRAGMENT],
+);
 
-export const COLLECTION_FIELDS_FRAGMENT = `#graphql
-  ${IMAGE_FRAGMENT}
+export const COLLECTION_FIELDS_FRAGMENT = gql(
+  `#graphql
   fragment CollectionFields on Collection {
     id
     handle
     title
     description
     image {
-      ...ImageFields
+      url
+        altText
+        width
+        height
     }
     updatedAt
     seo {
@@ -288,12 +350,11 @@ export const COLLECTION_FIELDS_FRAGMENT = `#graphql
       description
     }
   }
-` as const;
+`,
+);
 
-export const PRODUCT_FRAGMENT = `#graphql
-  ${IMAGE_FRAGMENT}
-  ${PRODUCT_VARIANT_FRAGMENT}
-  ${TAXONOMY_CATEGORY_FRAGMENT}
+export const PRODUCT_FRAGMENT = gql(
+  `#graphql
   fragment ProductFields on Product {
     id
     title
@@ -306,20 +367,30 @@ export const PRODUCT_FRAGMENT = `#graphql
     availableForSale
     isGiftCard
     featuredImage {
-      ...ImageFields
+      url
+        altText
+        width
+        height
     }
     media(first: 10) {
       edges {
         node {
+          __typename
           mediaContentType
           ... on MediaImage {
             image {
-              ...ImageFields
+              url
+        altText
+        width
+        height
             }
           }
           ... on Video {
             previewImage {
-              ...ImageFields
+              url
+        altText
+        width
+        height
             }
             sources {
               url
@@ -333,18 +404,22 @@ export const PRODUCT_FRAGMENT = `#graphql
     }
     priceRange {
       minVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       maxVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     compareAtPriceRange {
       minVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       maxVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     encodedVariantExistence
@@ -372,7 +447,10 @@ export const PRODUCT_FRAGMENT = `#graphql
         }
         firstSelectableVariant {
           image {
-            ...ImageFields
+            url
+        altText
+        width
+        height
           }
         }
       }
@@ -392,11 +470,12 @@ export const PRODUCT_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_VARIANT_FRAGMENT, TAXONOMY_CATEGORY_FRAGMENT],
+);
 
-export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
-  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
-  ${PRODUCT_FRAGMENT}
+export const PRODUCT_WITH_VARIANTS_FRAGMENT = gql(
+  `#graphql
   fragment ProductWithVariantsFields on Product {
     ...ProductFields
     selectedOrFirstAvailableVariant {
@@ -410,11 +489,12 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+`,
+  [BUNDLE_RELATIONSHIPS_FRAGMENT, PRODUCT_FRAGMENT],
+);
 
-export const PRODUCT_CARD_FRAGMENT = `#graphql
-  ${IMAGE_FRAGMENT}
-  ${MONEY_FRAGMENT}
+export const PRODUCT_CARD_FRAGMENT = gql(
+  `#graphql
   fragment ProductCardFields on Product {
     id
     title
@@ -423,26 +503,35 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
     availableForSale
     isGiftCard
     featuredImage {
-      ...ImageFields
+      url
+        altText
+        width
+        height
     }
     priceRange {
       minVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
       maxVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     compareAtPriceRange {
       minVariantPrice {
-        ...MoneyFields
+        amount
+        currencyCode
       }
     }
     selectedOrFirstAvailableVariant {
       id
       availableForSale
       image {
-        ...ImageFields
+        url
+        altText
+        width
+        height
       }
       selectedOptions {
         name
@@ -450,10 +539,11 @@ export const PRODUCT_CARD_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+`,
+);
 
-export const FILTERABLE_PRODUCT_CARD_FRAGMENT = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+export const FILTERABLE_PRODUCT_CARD_FRAGMENT = gql(
+  `#graphql
   fragment FilterableProductCardFields on Product {
     ...ProductCardFields
     options {
@@ -470,7 +560,10 @@ export const FILTERABLE_PRODUCT_CARD_FRAGMENT = `#graphql
         }
         firstSelectableVariant {
           image {
-            ...ImageFields
+            url
+        altText
+        width
+        height
           }
           selectedOptions {
             name
@@ -480,4 +573,6 @@ export const FILTERABLE_PRODUCT_CARD_FRAGMENT = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);

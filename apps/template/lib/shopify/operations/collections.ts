@@ -1,18 +1,15 @@
+import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { defaultLocale } from "@/lib/i18n";
 import type { Collection, CollectionWithThumbnail } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
 import { fetchCollections } from "../fetch";
 import { COLLECTION_FIELDS_FRAGMENT } from "../fragments";
 import { storefront } from "../storefront";
-import { type ShopifyCollection, transformShopifyCollection } from "../transforms/collection";
+import { transformShopifyCollection } from "../transforms/collection";
 import { getNumericShopifyId } from "../utils";
-
-type CollectionResponse = {
-  collection: ShopifyCollection | null;
-};
 
 function tagCollections(collections: Array<{ handle: string }>): void {
   for (const collection of collections) {
@@ -20,29 +17,19 @@ function tagCollections(collections: Array<{ handle: string }>): void {
   }
 }
 
-const GET_COLLECTION_QUERY = `#graphql
-  ${COLLECTION_FIELDS_FRAGMENT}
+const GET_COLLECTION_QUERY = gql(
+  `#graphql
   query getCollection($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       ...CollectionFields
     }
   }
-` as const;
+`,
+  [COLLECTION_FIELDS_FRAGMENT],
+);
 
-type ListingImage = { altText: string | null; height: number; url: string; width: number };
-
-type CollectionsListingResponse = {
-  collections: {
-    edges: Array<{
-      node: ShopifyCollection & {
-        products: { edges: Array<{ node: { featuredImage: ListingImage | null; id: string } }> };
-      };
-    }>;
-  };
-};
-
-const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = `#graphql
-  ${COLLECTION_FIELDS_FRAGMENT}
+const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = gql(
+  `#graphql
   query getCollectionsWithFeaturedImage($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collections(first: $first) {
       edges {
@@ -53,7 +40,10 @@ const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = `#graphql
               node {
                 id
                 featuredImage {
-                  ...ImageFields
+                  url
+                  altText
+                  width
+                  height
                 }
               }
             }
@@ -62,7 +52,9 @@ const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [COLLECTION_FIELDS_FRAGMENT],
+);
 
 export async function getCollections(
   params: { limit?: number; locale?: string } = {},
@@ -88,11 +80,9 @@ export async function getCollection({
   cacheLife("max");
   cacheTag("collections", `collection-${handle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<CollectionResponse>(GET_COLLECTION_QUERY, {
-    variables: { handle, country, language },
+  const response = await storefront.request(GET_COLLECTION_QUERY, {
+    locale,
+    variables: { handle },
   });
   assertStorefrontOk(response, "getCollection");
   const { data } = response;
@@ -110,15 +100,10 @@ export async function getCollectionsListing({
   cacheLife("max");
   cacheTag("collections", "collections-index");
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<CollectionsListingResponse>(
-    GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY,
-    {
-      variables: { country, first: limit, language },
-    },
-  );
+  const response = await storefront.request(GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY, {
+    locale,
+    variables: { first: limit },
+  });
   assertStorefrontOk(response, "getCollectionsListing");
   const { data } = response;
 
@@ -139,7 +124,12 @@ export async function getCollectionsListing({
     return {
       ...transformShopifyCollection(node),
       thumbnail: raw
-        ? { altText: raw.altText ?? node.title, height: raw.height, url: raw.url, width: raw.width }
+        ? {
+            altText: raw.altText ?? node.title,
+            height: raw.height ?? 0,
+            url: raw.url,
+            width: raw.width ?? 0,
+          }
         : null,
     };
   });
