@@ -1,4 +1,4 @@
-import { gql } from "@shopify/hydrogen";
+import { flattenConnection, gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { defaultLocale } from "@/lib/i18n";
@@ -107,7 +107,7 @@ export async function getCollectionsListing({
   assertStorefrontOk(response, "getCollectionsListing");
   const { data } = response;
 
-  const nodes = data.collections.edges.map((edge) => edge.node);
+  const nodes = flattenConnection(data.collections);
 
   // The first product tag covers collection thumbnails that fall back to product imagery.
   tagCollections(nodes);
