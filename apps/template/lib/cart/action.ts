@@ -1,7 +1,7 @@
 "use server";
 
+import { getCart } from "@/lib/cart/server";
 import { withFallback } from "@/lib/shopify/errors";
-import { getCart } from "@/lib/shopify/operations/cart";
 
 /** Uses Shopify's cart permalink format (`/cart/{numericId}:{qty}`) — no API cart is created. */
 export async function buyNowAction(

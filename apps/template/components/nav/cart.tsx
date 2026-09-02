@@ -1,8 +1,8 @@
 import { HandbagIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { getCart } from "@/lib/cart/server";
 import { withFallback } from "@/lib/shopify/errors";
-import { getCart } from "@/lib/shopify/operations/cart";
 
 import { CartIconClient } from "./cart-client";
 

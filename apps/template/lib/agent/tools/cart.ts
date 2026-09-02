@@ -1,13 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 
-import {
-  addToCart,
-  getCartById,
-  removeFromCart,
-  updateCart,
-  updateCartNote,
-} from "@/lib/shopify/operations/cart";
+import { getCartById, runCartMutation } from "@/lib/cart/server";
 import type { Cart } from "@/lib/types";
 
 import { getAgentContext } from "../server";
@@ -62,7 +56,10 @@ export const addToCartTool = tool({
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
 
     try {
-      const { cart } = await addToCart([{ merchandiseId: variantId, quantity }], cartId);
+      const { cart } = await runCartMutation(
+        { lines: [{ merchandiseId: variantId, quantity }] },
+        cartId,
+      );
       return { added: true, ...cartSummary(cart) };
     } catch (error) {
       console.error("Failed to add to cart:", error);
@@ -83,10 +80,7 @@ export const updateCartItemTool = tool({
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
 
     try {
-      const { cart } =
-        quantity === 0
-          ? await removeFromCart([lineId], cartId)
-          : await updateCart([{ id: lineId, quantity }], cartId);
+      const { cart } = await runCartMutation({ lines: [{ id: lineId, quantity }] }, cartId);
       return { removed: quantity === 0, updated: true, ...cartSummary(cart) };
     } catch (error) {
       console.error("Failed to update cart line:", error);
@@ -103,9 +97,8 @@ export const addCartNoteTool = tool({
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
 
     try {
-      const result = await updateCartNote(note, cartId);
-      if (!result) return { error: "Could not update the cart note." };
-      return { noteUpdated: true, ...cartSummary(result.cart) };
+      const { cart } = await runCartMutation({ note }, cartId);
+      return { noteUpdated: true, ...cartSummary(cart) };
     } catch (error) {
       console.error("Failed to update cart note:", error);
       return { error: "Could not update the cart note." };
