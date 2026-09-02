@@ -17,6 +17,7 @@ import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {
   collection?: string;
+  dataSearch: string;
   pageInfo: PageInfo;
   products: ProductCardType[];
   query?: string;
@@ -35,7 +36,7 @@ export async function getSearchResultsData({
   query?: string;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<SearchResultsData> {
-  const { activeFilters, filters, sort } = await searchStatePromise;
+  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
   const [results, facets] = await Promise.all([
     fetchSearchIndexProducts({
       activeFilters,
@@ -51,6 +52,7 @@ export async function getSearchResultsData({
 
   return {
     collection,
+    dataSearch,
     pageInfo: results.pageInfo,
     products: results.products,
     query,
@@ -96,7 +98,7 @@ async function SearchResultsGridRender({
     getTranslations("product"),
   ]);
 
-  const { collection, products, query } = data;
+  const { collection, dataSearch, products, query } = data;
 
   if (products.length === 0) {
     return (
@@ -113,6 +115,7 @@ async function SearchResultsGridRender({
     <FilterPendingScope>
       <ProductGridPendingOverlay>
         <InfiniteProductGrid
+          key={`${query ?? ""}|${collection ?? ""}|${dataSearch}`}
           initialProducts={products}
           initialPageInfo={data.pageInfo}
           locale={locale}

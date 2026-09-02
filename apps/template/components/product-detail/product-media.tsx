@@ -94,19 +94,10 @@ function Carousel({
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [itemCount, setItemCount] = useState(mediaItems.length);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const prevMediaRef = useRef<string>("");
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const t = useTranslations("product");
 
-  const joinedKey = mediaItems.map(mediaKey).join(",");
-  if (prevMediaRef.current && prevMediaRef.current !== joinedKey) {
-    scrollContainerRef.current?.scrollTo({ left: 0 });
-    setSelectedIndex(0);
-  }
-  prevMediaRef.current = joinedKey;
-
   const scrollToImage = (index: number) => {
-    const container = scrollContainerRef.current;
     if (!container) return;
     container.scrollTo({
       left: index * container.offsetWidth,
@@ -116,7 +107,6 @@ function Carousel({
   };
 
   useEffect(() => {
-    const container = scrollContainerRef.current;
     if (!container) return;
 
     // Variant/video items arrive via slot children, so count the rendered DOM, not just mediaItems.
@@ -124,11 +114,12 @@ function Carousel({
       const width = container.offsetWidth;
       if (width === 0) return;
       const total = Math.max(1, container.children.length);
-      const newIndex = Math.min(Math.max(0, Math.round(container.scrollLeft / width)), total - 1);
       setItemCount(total);
-      setSelectedIndex(newIndex);
+      setSelectedIndex(Math.min(Math.max(0, Math.round(container.scrollLeft / width)), total - 1));
     };
 
+    // New media set: snap back to the first slide before observers take over.
+    container.scrollTo({ left: 0 });
     sync();
 
     container.addEventListener("scroll", sync, { passive: true });
@@ -142,12 +133,12 @@ function Carousel({
       resizeObserver.disconnect();
       mutationObserver.disconnect();
     };
-  }, []);
+  }, [container]);
 
   return (
     <div className="grid gap-5">
       <div
-        ref={scrollContainerRef}
+        ref={setContainer}
         className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-5 w-[calc(100%+2.5rem)]"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
@@ -327,7 +318,12 @@ export function ProductMedia({
   return (
     <div className={className}>
       <div className="lg:hidden">
-        <Carousel mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot}>
+        <Carousel
+          key={mediaItems.map(mediaKey).join(",")}
+          mediaItems={mediaItems}
+          title={title}
+          hasColorSlot={hasColorSlot}
+        >
           {mobileSlot}
         </Carousel>
       </div>

@@ -10,7 +10,7 @@ import {
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilters, parseFilterInput } from "@/lib/collections";
@@ -52,13 +52,24 @@ export function CollectionFilterSidebarClient({
   const priceFilter = state.filters.find((filter) => filter.price)?.price;
   const priceMin = priceFilter?.min ?? null;
   const priceMax = priceFilter?.max ?? null;
-  const [minInput, setMinInput] = useState(priceMin?.toString() ?? "");
-  const [maxInput, setMaxInput] = useState(priceMax?.toString() ?? "");
-
-  useEffect(() => {
-    setMinInput(priceMin?.toString() ?? "");
-    setMaxInput(priceMax?.toString() ?? "");
-  }, [priceMax, priceMin]);
+  const priceKey = `${priceMin ?? ""}:${priceMax ?? ""}`;
+  const [priceInputs, setPriceInputs] = useState({
+    key: priceKey,
+    max: priceMax?.toString() ?? "",
+    min: priceMin?.toString() ?? "",
+  });
+  // Applied price changed (URL/back-forward), so discard unsubmitted input.
+  if (priceInputs.key !== priceKey) {
+    setPriceInputs({
+      key: priceKey,
+      max: priceMax?.toString() ?? "",
+      min: priceMin?.toString() ?? "",
+    });
+  }
+  const minInput = priceInputs.key === priceKey ? priceInputs.min : (priceMin?.toString() ?? "");
+  const maxInput = priceInputs.key === priceKey ? priceInputs.max : (priceMax?.toString() ?? "");
+  const setMinInput = (min: string) => setPriceInputs((prev) => ({ ...prev, min }));
+  const setMaxInput = (max: string) => setPriceInputs((prev) => ({ ...prev, max }));
 
   const currentParams = serializeCollectionParams(state);
   const isPending = state.status === "loading";

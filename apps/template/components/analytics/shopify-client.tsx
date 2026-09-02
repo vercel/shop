@@ -3,7 +3,7 @@
 import type { ShopifyScriptsI18n, ShopifyScriptsShop } from "@shopify/hydrogen";
 import { ShopifyScripts, useCartAnalytics } from "@shopify/hydrogen/react";
 import { useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useSyncExternalStore } from "react";
 
 import { PageViewedTracker } from "@/components/analytics/trackers";
 import { shopConfig } from "@/lib/config";
@@ -14,10 +14,16 @@ interface ShopifyScriptsTrackerProps {
   storefrontId: string;
 }
 
+const subscribeNoop = () => () => {};
+
+// Trackers must mount after hydration so the analytics bus script has run.
 function AnalyticsReady({ children }: { children: ReactNode }) {
-  const [isReady, setIsReady] = useState(false);
-  useEffect(() => setIsReady(true), []);
-  return isReady ? children : null;
+  const isHydrated = useSyncExternalStore(
+    subscribeNoop,
+    () => true,
+    () => false,
+  );
+  return isHydrated ? children : null;
 }
 
 function CartAnalyticsTracker() {
