@@ -1,5 +1,6 @@
 "use client";
 
+import { getSearchResultUrl } from "@shopify/hydrogen";
 import { Search, Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -115,7 +116,7 @@ export function PredictiveSearchPanel({
 
               {query.trim() && (
                 <Link
-                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  href={getSearchResultUrl({ baseUrl: "/search", term: query.trim() })}
                   onClick={onNavigate}
                   className="block px-5 py-2.5 text-sm font-medium text-primary hover:bg-accent/50 border-t border-border/30 transition-colors"
                 >

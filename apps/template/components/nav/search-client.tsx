@@ -1,5 +1,6 @@
 "use client";
 
+import { getSearchResultUrl } from "@shopify/hydrogen";
 import { SearchIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,7 @@ export function SearchClient() {
     reset();
     setShowPanel(false);
     startTransition(() => {
-      router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+      router.push(getSearchResultUrl({ baseUrl: "/search", term: q.trim() }));
     });
   }
 
