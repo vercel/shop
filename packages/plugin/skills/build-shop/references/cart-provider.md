@@ -8,7 +8,7 @@ Use this contract when creating or changing global cart context, server bootstra
 - Provider and bootstrap bridge: `apps/template/components/cart/context.tsx`, `apps/template/components/cart/context-sync.tsx`
 - Nav badge and overlay: `apps/template/components/nav/cart.tsx`, `apps/template/components/nav/cart-client.tsx`, `apps/template/components/cart/overlay.tsx`, `apps/template/components/cart/overlay-content.tsx`
 - Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`
-- Server state and mutations: `apps/template/lib/cart/server.ts`, `apps/template/lib/cart/action.ts`, `apps/template/lib/cart/index.ts`, `apps/template/lib/shopify/operations/cart.ts`
+- Server state and mutations: `apps/template/lib/cart/server.ts` (Hydrogen `createCartServerHandlers` reads and mutations), `apps/template/lib/cart/action.ts`, `apps/template/lib/cart/index.ts` (Hydrogen cart to domain `Cart` mapping)
 - Public source fallback: [cart provider source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [cart data source](https://github.com/vercel/shop/tree/main/apps/template/lib/cart), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## State ownership

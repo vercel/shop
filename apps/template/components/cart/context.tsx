@@ -1,6 +1,5 @@
 "use client";
 
-import type { CartState } from "@shopify/hydrogen";
 import {
   type ComponentProps,
   createContext,
@@ -12,14 +11,12 @@ import {
   useState,
 } from "react";
 
+import { toDomainCart } from "@/lib/cart";
 import { addToCart, HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
-import type { Cart, CartLine, CartWarning, DiscountAllocation } from "@/lib/types";
+import type { Cart, CartWarning } from "@/lib/types";
 
 export type CartMutationError = "add" | "remove" | "update";
-
-// Matches Hydrogen's OPTIMISTIC_LINE_ID_PREFIX; server cart returns new lines first, so optimistic lines sort to the front.
-const OPTIMISTIC_LINE_ID_PREFIX = "optimistic:";
 
 type CartContextType = {
   addToCartOptimistic: (
@@ -63,131 +60,6 @@ const serverFallbackCartContext: CartContextType = {
   setWarnings: () => {},
 };
 
-type LegacyMerchandise = {
-  compareAtPrice?: { amount: string; currencyCode: string } | null;
-  id?: string;
-  image?: {
-    altText?: string | null;
-    height?: number | null;
-    url: string;
-    width?: number | null;
-  } | null;
-  price?: { amount: string; currencyCode: string } | null;
-  product?: { handle?: string; id?: string; title?: string };
-  selectedOptions?: { name: string; value: string }[];
-  title?: string;
-};
-
-type LegacyLine = {
-  cost: {
-    amountPerQuantity?: { amount: string; currencyCode: string } | null;
-    totalAmount: { amount: string; currencyCode: string };
-  };
-  discountAllocations?: Array<{
-    __typename:
-      | "CartAutomaticDiscountAllocation"
-      | "CartCodeDiscountAllocation"
-      | "CartCustomDiscountAllocation";
-    code?: string | null;
-    discountedAmount: { amount: string; currencyCode: string };
-    title?: string | null;
-  }>;
-  id: string;
-  instructions?: { canRemove: boolean; canUpdateQuantity: boolean } | null;
-  lineComponents?: LegacyLine[] | null;
-  merchandise?: LegacyMerchandise | null;
-  quantity: number;
-};
-
-function toLegacyCart(data: CartState["data"]): Cart | null {
-  if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
-  return {
-    appliedGiftCards: [],
-    checkoutUrl: data.checkoutUrl ?? "",
-    cost: {
-      subtotalAmount: data.cost.subtotalAmount,
-      totalAmount: data.cost.totalAmount,
-    },
-    discountAllocations: [],
-    discountCodes: data.discountCodes.map((d) => ({
-      applicable: d.applicable,
-      code: d.code,
-    })),
-    id: data.id ?? undefined,
-    lines: data.lines.nodes
-      .map((l) => toLegacyLine(l as unknown as LegacyLine))
-      .sort(
-        (a, b) =>
-          Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -
-          Number(a.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false),
-      ),
-    note: data.note ?? null,
-    shippingCost: null,
-    totalQuantity: data.totalQuantity,
-  };
-}
-
-function toLegacyImage(image: LegacyMerchandise["image"]) {
-  return {
-    altText: image?.altText ?? "",
-    height: image?.height ?? 0,
-    url: image?.url ?? "",
-    width: image?.width ?? 0,
-  };
-}
-
-function toLegacyLine(line: LegacyLine): CartLine {
-  const merchandise = line.merchandise;
-  const image = merchandise?.image;
-  return {
-    canRemove: line.instructions?.canRemove ?? true,
-    canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
-    components: (line.lineComponents ?? []).map((c) => toLegacyLine(c)),
-    cost: {
-      totalAmount: line.cost.totalAmount,
-    },
-    discountAllocations: (line.discountAllocations ?? []).flatMap<DiscountAllocation>(
-      (allocation) => {
-        if (allocation.__typename === "CartCodeDiscountAllocation") {
-          return allocation.code
-            ? [
-                {
-                  code: allocation.code,
-                  discountedAmount: allocation.discountedAmount,
-                  kind: "code",
-                },
-              ]
-            : [];
-        }
-        return [
-          {
-            discountedAmount: allocation.discountedAmount,
-            kind:
-              allocation.__typename === "CartAutomaticDiscountAllocation" ? "automatic" : "custom",
-            title: allocation.title ?? "",
-          },
-        ];
-      },
-    ),
-    id: line.id,
-    merchandise: {
-      ...(merchandise?.compareAtPrice ? { compareAtPrice: merchandise.compareAtPrice } : {}),
-      id: merchandise?.id ?? "",
-      ...(image ? { image: toLegacyImage(image) } : {}),
-      ...(merchandise?.price ? { price: merchandise.price } : {}),
-      product: {
-        featuredImage: toLegacyImage(image),
-        handle: merchandise?.product?.handle ?? "",
-        id: merchandise?.product?.id ?? "",
-        title: merchandise?.product?.title ?? "",
-      },
-      selectedOptions: merchandise?.selectedOptions ?? [],
-      title: merchandise?.title ?? "",
-    },
-    quantity: line.quantity,
-  };
-}
-
 function toLegacyWarnings(group: { warnings: { code: string; message: string }[] }): CartWarning[] {
   return group.warnings.map((w) => ({ code: w.code, message: w.message, target: "" }));
 }
@@ -201,7 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearWarnings = useCallback(() => setLocalWarnings([]), []);
 
   const cartState = useHydrogenCart((state) => state);
-  const cartWithPending = toLegacyCart(cartState.data);
+  const cartWithPending = toDomainCart(cartState.data);
   const isCostSettling = Boolean(cartState.pending.cost || cartState.revalidating);
   const settledCartRef = useRef(cartWithPending);
   if (!isCostSettling) settledCartRef.current = cartWithPending;
