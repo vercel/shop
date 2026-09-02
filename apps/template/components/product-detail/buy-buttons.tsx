@@ -1,12 +1,12 @@
 "use client";
 
+import { getShopPayButtonUrl } from "@shopify/hydrogen";
 import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
-import { buyNowAction } from "@/lib/cart/action";
 import { variantToOptimisticInfo } from "@/lib/product";
 import type { Image, Money, SelectedOption } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -45,7 +45,6 @@ export function BuyButtons({
 
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
-  const [, startBuyNowTransition] = useTransition();
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
@@ -73,29 +72,17 @@ export function BuyButtons({
     }
   };
 
-  const handleBuyNow = () => {
-    if (!selectedVariantId) return;
-    setIsBuyingNow(true);
-    startBuyNowTransition(async () => {
-      try {
-        const { checkoutUrl } = await buyNowAction(selectedVariantId, quantity);
-        if (checkoutUrl) {
-          window.location.href = checkoutUrl;
-        } else {
-          setIsBuyingNow(false);
-        }
-      } catch {
-        setIsBuyingNow(false);
-      }
-    });
-  };
-
   if (!selectedVariant) {
     return null;
   }
 
   const requiresBundleConfiguration = selectedVariant.requiresBundleConfiguration;
   const isOutOfStock = !selectedVariant.availableForSale;
+  // Same-origin permalink; handleShopifyRoutes in proxy.ts 302s it to the store's checkout with attribution.
+  const buyNowUrl = getShopPayButtonUrl({
+    disabled: isOutOfStock || isBuyingNow || requiresBundleConfiguration,
+    variants: [{ id: selectedVariant.id, quantity }],
+  });
 
   const getButtonText = () => {
     if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
@@ -151,14 +138,15 @@ export function BuyButtons({
         </Button>
       </div>
       {buyWithShop ? (
-        <button
-          type="button"
+        <a
+          aria-disabled={buyNowUrl ? undefined : true}
           className={cn(
-            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-disabled:pointer-events-none aria-disabled:opacity-50",
             !availableForSale && "invisible",
           )}
-          disabled={isOutOfStock || isBuyingNow || requiresBundleConfiguration}
-          onClick={handleBuyNow}
+          href={buyNowUrl ?? undefined}
+          onClick={() => setIsBuyingNow(true)}
+          rel="nofollow"
         >
           {isBuyingNow ? (
             <Loader2 className="size-4 animate-spin" />
@@ -168,7 +156,7 @@ export function BuyButtons({
               <BuyWithShopLogo aria-hidden="true" className="h-auto w-24.5" />
             </>
           )}
-        </button>
+        </a>
       ) : null}
     </div>
   );
