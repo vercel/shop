@@ -1,7 +1,7 @@
 import { io } from "next/cache";
 import { cache } from "react";
 
-import { getCartIdFromCookie, setCartIdCookie } from "@/lib/cart/server";
+import { getCartIdFromCookie } from "@/lib/cart/server";
 import { defaultLocale } from "@/lib/i18n";
 import type { Cart } from "@/lib/types";
 
@@ -31,35 +31,19 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   return fetchCart(cartId);
 }
 
-// Streaming callers must emit the cart cookie through response headers.
-export async function createCartWithoutCookie(
-  locale: string = defaultLocale,
-): Promise<CartMutationResult> {
-  return createCartCore(locale);
-}
-
+// Callers persist the id with Hydrogen's createCartCookie on their own response.
 export async function createCart(locale: string = defaultLocale): Promise<CartMutationResult> {
-  const result = await createCartWithoutCookie(locale);
-
-  if (result.cart.id) {
-    await setCartIdCookie(result.cart.id);
-  }
-
-  return result;
+  return createCartCore(locale);
 }
 
 export async function addToCart(
   lines: CartLineInput[],
-  cartId?: string,
-  locale: string = defaultLocale,
+  cartIdOverride?: string,
 ): Promise<CartMutationResult> {
-  let resolvedCartId = cartId ?? (await getCartIdFromCookie());
-  if (!resolvedCartId) {
-    resolvedCartId = (await createCart(locale)).cart.id;
-  }
-  if (!resolvedCartId) throw new Error("Cart ID not found");
+  const cartId = cartIdOverride || (await getCartIdFromCookie());
+  if (!cartId) throw new Error("Cart ID not found");
 
-  return addToCartCore(lines, resolvedCartId);
+  return addToCartCore(lines, cartId);
 }
 
 export async function updateCart(
