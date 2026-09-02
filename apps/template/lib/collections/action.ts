@@ -1,23 +1,24 @@
 "use server";
 
+import { resolveBrowseParams } from "@/lib/collections/server";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
-import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard } from "@/lib/types";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
-export async function loadMoreCollectionProducts(params: {
-  activeFilters?: Record<string, string | string[] | undefined>;
+export async function loadMoreCollectionProductsAction(params: {
   collection: string;
   cursor: string;
-  sortKey?: string;
-  filters?: ProductFilter[];
   locale: string;
+  search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
+  const { activeFilters, filters, sort } = resolveBrowseParams(params.search);
   const result = await fetchCollectionProducts({
-    activeFilters: params.activeFilters,
+    activeFilters,
     collection: params.collection,
     cursor: params.cursor,
-    sortKey: params.sortKey,
-    filters: params.filters,
+    sortKey: sort,
+    limit: RESULTS_PER_PAGE,
+    filters,
     locale: params.locale,
   });
 

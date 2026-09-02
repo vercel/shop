@@ -6,7 +6,8 @@
 - Collection routes: `apps/template/app/collections/page.tsx`, `apps/template/app/collections/all/page.tsx`, `apps/template/app/collections/[handle]/page.tsx`
 - Search route: `apps/template/app/search/page.tsx`
 - Components: `apps/template/components/collections/`, `apps/template/components/search/results.tsx`, `apps/template/components/product-card/product-card.tsx`
-- Operations and transforms: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/search.ts`, `apps/template/lib/shopify/transforms/collection.ts`, `apps/template/lib/shopify/transforms/search.ts`, `apps/template/lib/search/action.ts`
+- Browse state: `apps/template/lib/collections/{index,server,action}.ts`, `apps/template/lib/search/action.ts`
+- Operations and transforms: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/products.ts`, `apps/template/lib/shopify/fetch.ts`, `apps/template/lib/shopify/transforms/collection.ts`, `apps/template/lib/shopify/transforms/filters.ts`
 - Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/apps/template/app/collections), [search route source](https://github.com/vercel/shop/blob/main/apps/template/app/search/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## Preserve the static header
@@ -16,6 +17,16 @@ Collection identity, title, description, and other cacheable header content belo
 Do not move the collection header into the results boundary. Do not change `getCollection` from plain `"use cache"` to remote caching without re-evaluating shell coherence.
 
 Search is different: its query and results are request inputs. The search route may use runtime prefetching because a prefetched query can materially improve the destination. Preserve its `instant` and `prefetch` pairing unless production request volume or navigation evidence justifies a change.
+
+## One browse store for collections and search
+
+Collections and `/search` share the same Hydrogen collection store. `CollectionBrowseProvider` wraps `CollectionProvider` from `@shopify/hydrogen/react`; filters, sort, badges, and load-more all read from `useCollection()` and mutate through `useCollectionActions()`. Do not reintroduce a parallel `URLSearchParams`-driven path for search.
+
+- URL vocabulary is Hydrogen's Liquid-compatible `filter.*` and `sort_by` (`price-descending`, `best-selling`). `resolveBrowseParams` in `lib/collections/server.ts` is the only place that turns a search string into Storefront `ProductFilter[]` and the template's sort label; routes, `/md` handlers, and load-more server actions all call it.
+- Search mounts the store with `handle={\`search:${q}\`}` so a new term rebuilds state and drops stale filters. `q` and `collection` are not store-owned, so the reconciler preserves them across filter and sort changes.
+- Search only sorts by relevance and price. Pass `SEARCH_SORT_EXCLUDE` to `CollectionsSortSelect`; no `sort_by` means `RELEVANCE`.
+- Filter links and active-filter badges render real `href`s built with `serializeCollectionParams` and `getFilterRemovalUrl`, then `preventDefault` into the store action so no-JS navigation still works.
+- `InfiniteProductGrid` serializes the current store state into `search` on every load-more call. Server actions accept `{ cursor, search, ...identity }` rather than a frozen filter snapshot.
 
 ## Results and controls
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,6 +13,7 @@ import {
   ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
+import { getBrowseSearch } from "@/lib/collections";
 import { buildProductUrl } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
@@ -22,7 +24,7 @@ interface InfiniteProductGridProps<TParams> {
   outOfStockText: string;
   // Top-level "use server" action; passed by reference, no closure encryption.
   loadMore: (
-    params: TParams & { cursor: string },
+    params: TParams & { cursor: string; search: string },
   ) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
   loadMoreParams: TParams;
   children: React.ReactNode;
@@ -37,6 +39,8 @@ export function InfiniteProductGrid<TParams>({
   loadMoreParams,
   children,
 }: InfiniteProductGridProps<TParams>) {
+  // The store, not a server snapshot, is the single source of truth for filters and sort mid-scroll.
+  const search = useCollection(getBrowseSearch);
   const [additionalProducts, setAdditionalProducts] = useState<ProductCard[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,7 +63,7 @@ export function InfiniteProductGrid<TParams>({
     setIsLoading(true);
 
     try {
-      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor });
+      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor, search });
       const fresh = result.products.filter((product) => !seenIdsRef.current.has(product.id));
       for (const product of fresh) seenIdsRef.current.add(product.id);
       setAdditionalProducts((prev) => [...prev, ...fresh]);
@@ -68,7 +72,7 @@ export function InfiniteProductGrid<TParams>({
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [pageInfo, loadMore, loadMoreParams]);
+  }, [pageInfo, loadMore, loadMoreParams, search]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;

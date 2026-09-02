@@ -106,28 +106,51 @@ function FilterSidebarActiveFilters({
 }
 
 interface FilterBadgeProps extends React.ComponentProps<"button"> {
+  href?: string;
   variant?: "default" | "primary";
   onRemove?: () => void;
 }
 
 function FilterBadge({
   variant = "default",
+  href,
   onRemove,
   className,
   children,
   ...props
 }: FilterBadgeProps) {
+  const badgeClassName = cn(
+    "inline-flex cursor-pointer items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
+    variant === "default" && "bg-foreground/60 text-background hover:bg-foreground/70",
+    variant === "primary" && "bg-primary/15 text-primary hover:bg-primary/25",
+    className,
+  );
+
+  if (href && onRemove) {
+    return (
+      <Link
+        data-slot="filter-badge"
+        data-variant={variant}
+        className={badgeClassName}
+        href={href}
+        scroll={false}
+        onClick={(event) => {
+          event.preventDefault();
+          onRemove();
+        }}
+      >
+        {children}
+        <XIcon className="size-3" />
+      </Link>
+    );
+  }
+
   return (
     <button
       type="button"
       data-slot="filter-badge"
       data-variant={variant}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors",
-        variant === "default" && "bg-foreground/60 text-background hover:bg-foreground/70",
-        variant === "primary" && "bg-primary/15 text-primary hover:bg-primary/25",
-        className,
-      )}
+      className={badgeClassName}
       onClick={onRemove ?? props.onClick}
       {...props}
     >

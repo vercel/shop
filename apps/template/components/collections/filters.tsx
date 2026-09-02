@@ -2,37 +2,25 @@ import { Suspense } from "react";
 
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
-import type { CollectionResultsData } from "@/lib/collections/server";
-
-function Fallback() {
-  return <CollectionFilterSidebarSkeleton />;
-}
+import type { Filter, PriceRange } from "@/lib/types";
 
 async function Render({
-  collectionResultsDataPromise,
+  facetsPromise,
 }: {
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
+  facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
 }) {
-  const { activeFilters, collection, transformedFilters } = await collectionResultsDataPromise;
-
-  return (
-    <CollectionFilterSidebarClient
-      collection
-      filters={transformedFilters.filters}
-      priceRange={transformedFilters.priceRange}
-      activeFilters={activeFilters}
-    />
-  );
+  const { filters, priceRange } = await facetsPromise;
+  return <CollectionFilterSidebarClient filters={filters} priceRange={priceRange} />;
 }
 
 export function CollectionFilters({
-  collectionResultsDataPromise,
+  facetsPromise,
 }: {
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
+  facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
 }) {
   return (
-    <Suspense fallback={<Fallback />}>
-      <Render collectionResultsDataPromise={collectionResultsDataPromise} />
+    <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
+      <Render facetsPromise={facetsPromise} />
     </Suspense>
   );
 }
