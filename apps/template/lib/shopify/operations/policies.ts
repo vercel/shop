@@ -1,66 +1,50 @@
+import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { defaultLocale } from "@/lib/i18n";
 import type { ShopPolicy } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
 import { storefront } from "../storefront";
 
-const GET_SHOP_POLICIES_QUERY = `#graphql
+const SHOP_POLICY_FRAGMENT = gql(`#graphql
+  fragment ShopPolicyFields on ShopPolicy {
+    body
+    handle
+    title
+  }
+`);
+
+const GET_SHOP_POLICIES_QUERY = gql(
+  `#graphql
   query getShopPolicies($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     shop {
       contactInformation {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       legalNotice {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       privacyPolicy {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       refundPolicy {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       shippingPolicy {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       termsOfSale {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
       termsOfService {
-        body
-        handle
-        title
+        ...ShopPolicyFields
       }
     }
   }
-` as const;
-
-type ShopifyPolicy = ShopPolicy | null | undefined;
-
-interface ShopPoliciesResponse {
-  shop: {
-    contactInformation: ShopifyPolicy;
-    legalNotice: ShopifyPolicy;
-    privacyPolicy: ShopifyPolicy;
-    refundPolicy: ShopifyPolicy;
-    shippingPolicy: ShopifyPolicy;
-    termsOfSale: ShopifyPolicy;
-    termsOfService: ShopifyPolicy;
-  };
-}
+`,
+  [SHOP_POLICY_FRAGMENT],
+);
 
 export async function getShopPolicies({
   locale = defaultLocale,
@@ -69,11 +53,7 @@ export async function getShopPolicies({
   cacheLife("max");
   cacheTag("policies");
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-  const response = await storefront.request<ShopPoliciesResponse>(GET_SHOP_POLICIES_QUERY, {
-    variables: { country, language },
-  });
+  const response = await storefront.request(GET_SHOP_POLICIES_QUERY, { locale });
   assertStorefrontOk(response, "getShopPolicies");
 
   return Object.values(response.data.shop).filter(

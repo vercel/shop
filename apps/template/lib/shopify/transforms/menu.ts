@@ -1,38 +1,33 @@
 import type { Menu, MenuItem, MenuItemType } from "../types/menu";
 import { transformShopifyMenuItemUrl } from "../utils";
 
-export type ShopifyMenuItem = {
+// Structural shape shared by every nesting level of the menu query.
+export interface ShopifyMenuItem {
   id: string;
+  items?: ShopifyMenuItem[];
   title: string;
-  url: string | null;
   type: MenuItemType;
-  tags: string[];
-  resource: {
-    handle?: string;
-  } | null;
-  items: ShopifyMenuItem[];
-};
+  url?: string | null;
+}
 
-export type ShopifyMenuResponse = {
-  menu: {
-    id: string;
-    handle: string;
-    title: string;
-    items: ShopifyMenuItem[];
-  } | null;
-};
+export interface ShopifyMenu {
+  handle: string;
+  id: string;
+  items: ShopifyMenuItem[];
+  title: string;
+}
 
 function transformMenuItem(item: ShopifyMenuItem): MenuItem {
   return {
     id: item.id,
     title: item.title,
-    url: transformShopifyMenuItemUrl(item.url, item.type),
+    url: transformShopifyMenuItemUrl(item.url ?? null, item.type),
     type: item.type,
     items: (item.items ?? []).map(transformMenuItem),
   };
 }
 
-export function transformShopifyMenu(menu: ShopifyMenuResponse["menu"]): Menu | null {
+export function transformShopifyMenu(menu: ShopifyMenu | null | undefined): Menu | null {
   if (!menu) return null;
 
   return {
