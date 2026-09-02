@@ -1,10 +1,10 @@
 import "server-only";
 import { createShopifyRequestContext } from "@shopify/hydrogen";
 import {
+  type AnyCustomerAccountDocument,
   type CustomerAccountClient,
   type CustomerAccountDocument,
   createCustomerAccountClient,
-  gql,
 } from "@shopify/hydrogen/customer-account";
 
 import { shopConfig } from "@/lib/config";
@@ -13,17 +13,29 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { resolveShopId } from "./discovery";
 import { logShopifyDebug, shopifyLogger } from "./logging";
 
-export async function customerAccountFetch<T>({
-  accessToken,
-  operation,
-  query,
-  variables,
-}: {
+export type CustomerAccountResultOf<Doc> =
+  Doc extends CustomerAccountDocument<infer Result, never, string> ? Result : never;
+
+// Hydrogen auto-injects `$language`; the app owns `country` in the request context.
+type CustomerAccountVariables<Doc extends AnyCustomerAccountDocument> = Omit<
+  Doc extends CustomerAccountDocument<unknown, infer Variables, string> ? Variables : never,
+  "language"
+>;
+
+type CustomerAccountFetchOptions<Doc extends AnyCustomerAccountDocument> = {
   accessToken: string;
+  document: Doc;
   operation: string;
-  query: string;
-  variables?: Record<string, unknown>;
-}): Promise<T> {
+} & (Record<string, never> extends CustomerAccountVariables<Doc>
+  ? { variables?: CustomerAccountVariables<Doc> }
+  : { variables: CustomerAccountVariables<Doc> });
+
+export async function customerAccountFetch<const Doc extends AnyCustomerAccountDocument>({
+  accessToken,
+  document,
+  operation,
+  variables,
+}: CustomerAccountFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
   const shopId = await resolveShopId();
   const client: CustomerAccountClient = createCustomerAccountClient({
     shopId,
@@ -37,10 +49,8 @@ export async function customerAccountFetch<T>({
   });
 
   const start = performance.now();
-  // Brand runtime strings so Hydrogen does not infer `never` variables.
-  const doc = gql(query) as CustomerAccountDocument<T, Record<string, unknown>>;
   try {
-    const { data, errors } = await client.graphql(doc, { accessToken, variables });
+    const { data, errors } = await client.graphql(document, { accessToken, variables } as never);
 
     if (errors) {
       if (!data) {
@@ -53,7 +63,7 @@ export async function customerAccountFetch<T>({
       });
     }
 
-    return data as T;
+    return data as CustomerAccountResultOf<Doc>;
   } finally {
     logShopifyDebug("Customer Account API request", {
       durationMs: Math.round(performance.now() - start),

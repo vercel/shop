@@ -36,10 +36,10 @@ Read `references/REFERENCE.md` before editing.
 
 1. Inspect the consuming route before choosing cache behavior. Classify the read as static-shell content, request-time shared content, or private/request-scoped data.
 2. Add the operation to the closest file in `lib/shopify/operations/`; create a file only for a genuinely new domain.
-3. Keep `#graphql` documents static, end them with `as const`, and use variables for dynamic values so codegen can validate them.
-4. Reuse the smallest existing fragment that fits. Extend a shared fragment only when multiple operations need the same selection.
-5. Pass locale context through existing country and language helpers when Shopify localizes the result.
-6. Keep raw Shopify response types under `lib/shopify/**`; transform them into provider-independent domain types before presentation.
+3. Wrap documents in Hydrogen's `gql()` with a leading `#graphql` comment, keep them static, and use variables for dynamic values so inference and codegen can both validate them.
+4. Reuse the smallest existing fragment that fits by passing it in the `gql(source, [FRAGMENT])` list. Extend a shared fragment only when multiple operations need the same selection.
+5. Pass `locale` to `storefront.request` when Shopify localizes the result; never add `country` or `language` to `variables`.
+6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform them into provider-independent domain types before presentation.
 7. Preserve cache tags and the existing webhook invalidation hierarchy. Do not cache mutations.
 8. Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
 

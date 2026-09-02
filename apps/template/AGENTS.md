@@ -180,7 +180,7 @@ pnpm format
 ## Data Flow
 
 ```text
-Request → Page → Operation → storefront.request → Shopify API → Transform → Domain type → Component
+Request → Page → Operation → storefront.request(gql doc) → Shopify API → Transform → Domain type → Component
 ```
 
 ## Storefront Skills (Optional Plugin)
@@ -218,6 +218,8 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog/cart/public storefront operations, Customer for authenticated customer data, and custom-data first for metafields or metaobjects.
 - Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
 - Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
+- Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>` instead of hand-writing interfaces. `storefront.request` injects `$country`/`$language` from its `locale` option.
+- Keep the `#graphql` comment at the top of every Storefront document; `pnpm codegen` still validates them against the live schema because type inference alone does not reject unknown fields.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns

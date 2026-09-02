@@ -8,16 +8,18 @@ prerequisites:
 
 The template uses [Shopify Hydrogen](https://www.npmjs.com/package/@shopify/hydrogen) for Storefront GraphQL API queries and mutations. Configure its domain, public token, and API version with the variables in [Environment Variables](/docs/reference/env-vars). Grant the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-The Customer Account API uses a separate endpoint, schema, client ID, and session secret. Storefront API codegen does not validate Customer Account API operations.
+The Customer Account API uses a separate endpoint, schema, client ID, and session secret. Its documents use `gql` from `@shopify/hydrogen/customer-account` and are typed by Hydrogen; Storefront API codegen does not validate them.
 
 ## Write and validate operations
 
-Define each operation as a static `#graphql` document and pass dynamic values as GraphQL variables. Do not interpolate runtime values or conditional fields into the document.
+Define each operation with Hydrogen's `gql()` tag and pass dynamic values as GraphQL variables. Do not interpolate runtime values or conditional fields into the document. Compose shared selections by passing fragment documents as the second argument.
 
-Include Shopify's `@inContext` directive when localized pricing or content depends on country and language:
+Result and variable types are inferred from the document, so the request wrapper returns typed data without a hand-written response type. Include Shopify's `@inContext` directive when localized pricing or content depends on country and language; the wrapper fills `$country` and `$language` from the `locale` option:
 
 ```ts
-const GET_PRODUCT_QUERY = `#graphql
+import { gql } from "@shopify/hydrogen";
+
+const GET_PRODUCT_QUERY = gql(`#graphql
   query getProduct(
     $handle: String!
     $country: CountryCode
@@ -28,14 +30,19 @@ const GET_PRODUCT_QUERY = `#graphql
       title
     }
   }
-` as const;
+`);
+
+const response = await storefront.request(GET_PRODUCT_QUERY, {
+  locale,
+  variables: { handle },
+});
 ```
 
 Validate current field names, arguments, and types with Shopify AI Toolkit. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for template integration conventions. The skill is not a schema source.
 
 ## Codegen
 
-Use this [codegen](#codegen) contract while editing an operation. The template runs [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset):
+Type inference does not reject unknown fields, so the template keeps a schema check. It runs [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) over every Storefront `#graphql` document:
 
 ```bash
 pnpm --filter template codegen

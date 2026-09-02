@@ -1,7 +1,9 @@
+import { gql } from "@shopify/hydrogen";
+import type { ProductSortKeys } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { shopConfig } from "@/lib/config";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { defaultLocale } from "@/lib/i18n";
 import type {
   Filter,
   PageInfo,
@@ -30,7 +32,7 @@ import {
 } from "../fetch";
 import {
   BUNDLE_RELATIONSHIPS_FRAGMENT,
-  IMAGE_FRAGMENT,
+  FILTER_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_FRAGMENT,
   PRODUCT_VARIANT_FRAGMENT,
@@ -40,14 +42,11 @@ import {
 import { storefront } from "../storefront";
 import { transformShopifyFilters } from "../transforms/filters";
 import {
-  type ShopifyProduct,
-  type ShopifyProductCard,
-  type ShopifyVariant,
   transformShopifyProductCard,
   transformShopifyProductDetails,
   transformVariant,
 } from "../transforms/product";
-import type { ProductFilter, ShopifyFilter } from "../types/filters";
+import type { ProductFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
 export {
@@ -72,18 +71,19 @@ function tagProducts(products: Array<{ id: string }>): void {
   }
 }
 
-const GET_PRODUCT_BY_HANDLE_QUERY = `#graphql
-  ${PRODUCT_FRAGMENT}
+const GET_PRODUCT_BY_HANDLE_QUERY = gql(
+  `#graphql
   query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductFields
     }
   }
-` as const;
+`,
+  [PRODUCT_FRAGMENT],
+);
 
-const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = `#graphql
-  ${BUNDLE_RELATIONSHIPS_FRAGMENT}
-  ${PRODUCT_FRAGMENT}
+const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
+  `#graphql
   query getProductByHandleWithBundles($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductFields
@@ -92,7 +92,9 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [BUNDLE_RELATIONSHIPS_FRAGMENT, PRODUCT_FRAGMENT],
+);
 
 export async function getProduct({
   handle,
@@ -104,17 +106,13 @@ export async function getProduct({
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
 
-  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-    shopConfig.pdp.bundles.isEnabled
-      ? GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY
-      : GET_PRODUCT_BY_HANDLE_QUERY,
-    {
-      variables: { handle, country, language },
-    },
-  );
+  const response = shopConfig.pdp.bundles.isEnabled
+    ? await storefront.request(GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY, {
+        locale,
+        variables: { handle },
+      })
+    : await storefront.request(GET_PRODUCT_BY_HANDLE_QUERY, { locale, variables: { handle } });
   assertStorefrontOk(response, "getProductByHandle");
   const { data } = response;
 
@@ -127,9 +125,8 @@ export async function getProduct({
   return transformShopifyProductDetails(data.productByHandle);
 }
 
-const GET_PRODUCT_VARIANT_QUERY = `#graphql
-  ${IMAGE_FRAGMENT}
-  ${PRODUCT_VARIANT_FRAGMENT}
+const GET_PRODUCT_VARIANT_QUERY = gql(
+  `#graphql
   query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
@@ -137,11 +134,12 @@ const GET_PRODUCT_VARIANT_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_VARIANT_FRAGMENT],
+);
 
-const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = `#graphql
-  ${IMAGE_FRAGMENT}
-  ${PURCHASABLE_PRODUCT_VARIANT_FRAGMENT}
+const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = gql(
+  `#graphql
   query getProductVariantWithBundles($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
@@ -149,7 +147,9 @@ const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PURCHASABLE_PRODUCT_VARIANT_FRAGMENT],
+);
 
 // Empty selections intentionally resolve Shopify's first available variant.
 export async function getProductVariant({
@@ -164,19 +164,16 @@ export async function getProductVariant({
   "use cache";
   cacheLife("max");
   cacheTag("products", `product-${handle}`);
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
 
-  const response = await storefront.request<{
-    productByHandle: { selectedOrFirstAvailableVariant: ShopifyVariant | null } | null;
-  }>(
-    shopConfig.pdp.bundles.isEnabled
-      ? GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY
-      : GET_PRODUCT_VARIANT_QUERY,
-    {
-      variables: { handle, selectedOptions, country, language },
-    },
-  );
+  const response = shopConfig.pdp.bundles.isEnabled
+    ? await storefront.request(GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY, {
+        locale,
+        variables: { handle, selectedOptions },
+      })
+    : await storefront.request(GET_PRODUCT_VARIANT_QUERY, {
+        locale,
+        variables: { handle, selectedOptions },
+      });
   assertStorefrontOk(response, "getProductVariant");
   const { data } = response;
 
@@ -197,8 +194,8 @@ export async function getProductWithVariants(params: {
   return product;
 }
 
-const CATALOG_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+const CATALOG_PRODUCTS_QUERY = gql(
+  `#graphql
   query catalogProducts($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     products(
       first: $first
@@ -221,9 +218,12 @@ const CATALOG_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);
 
-const SEARCH_FACETS_QUERY = `#graphql
+const SEARCH_FACETS_QUERY = gql(
+  `#graphql
   query searchFacets($query: String!, $productFilters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
@@ -233,6 +233,7 @@ const SEARCH_FACETS_QUERY = `#graphql
     ) {
       totalCount
       nodes {
+        __typename
         ... on Product {
           priceRange {
             minVariantPrice {
@@ -242,30 +243,15 @@ const SEARCH_FACETS_QUERY = `#graphql
         }
       }
       productFilters {
-        id
-        label
-        type
-        presentation
-        values {
-          id
-          label
-          count
-          input
-          swatch {
-            color
-            image {
-              previewImage {
-                url
-              }
-            }
-          }
-        }
+        ...FilterFields
       }
     }
   }
-` as const;
+`,
+  [FILTER_FRAGMENT],
+);
 
-const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
+const CATALOG_SORT_KEY_MAP: Record<string, { sortKey: ProductSortKeys; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
   "best-selling": { sortKey: "BEST_SELLING", reverse: false },
   "date-new-to-old": { sortKey: "CREATED_AT", reverse: true },
@@ -450,36 +436,26 @@ async function fetchCatalogProducts({
   sortKey: rawSortKey = "best-matches",
 }: FilteredCatalogProductsParams): Promise<CatalogProductsResult> {
   const sortConfig = CATALOG_SORT_KEY_MAP[rawSortKey] ?? CATALOG_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
   const catalogQuery = buildCatalogQuery({ query, collection, filters });
 
   // RELEVANCE is meaningless without a query; fall back to BEST_SELLING for plain browse.
   const sortKey =
     sortConfig.sortKey === "RELEVANCE" && !catalogQuery ? "BEST_SELLING" : sortConfig.sortKey;
 
-  const response = await storefront.request<{
-    products: {
-      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
-      pageInfo: PageInfo;
-    };
-  }>(CATALOG_PRODUCTS_QUERY, {
+  const response = await storefront.request(CATALOG_PRODUCTS_QUERY, {
+    locale,
     variables: {
       first: limit,
       after: cursor,
       query: catalogQuery || undefined,
       sortKey,
       reverse: sortConfig.reverse,
-      country,
-      language,
     },
   });
   assertStorefrontOk(response, "catalogProducts");
   const { data } = response;
 
-  const shopifyProducts = data.products.edges
-    .map((edge) => edge.node)
-    .filter((node): node is ShopifyProductCard => node !== null);
+  const shopifyProducts = data.products.edges.map((edge) => edge.node);
 
   tagProducts(shopifyProducts);
 
@@ -522,35 +498,25 @@ type SearchFacetsResult = { filters: Filter[]; priceRange?: PriceRange; total: n
 // Browse facets stay uncached so Search & Discovery changes appear immediately.
 export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
   const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
 
   const queryParts: string[] = [];
   if (query?.trim()) queryParts.push(query.trim());
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
 
-  const response = await storefront.request<{
-    search: {
-      nodes: Array<{
-        priceRange: { minVariantPrice: { currencyCode: string } };
-      } | null>;
-      productFilters: ShopifyFilter[];
-      totalCount: number;
-    };
-  }>(SEARCH_FACETS_QUERY, {
+  const response = await storefront.request(SEARCH_FACETS_QUERY, {
+    locale,
     variables: {
       query: searchQuery,
       productFilters: filters.length > 0 ? filters : undefined,
-      country,
-      language,
     },
   });
   assertStorefrontOk(response, "searchFacets");
   const { data } = response;
 
-  const currencyCode = data.search.nodes.find((node) => node !== null)?.priceRange.minVariantPrice
-    .currencyCode;
+  const currencyCode = data.search.nodes.flatMap((node) =>
+    node.__typename === "Product" ? [node.priceRange.minVariantPrice.currencyCode] : [],
+  )[0];
   const transformed = transformShopifyFilters(data.search.productFilters, {
     activeFilters,
     currencyCode,
@@ -631,8 +597,8 @@ export async function getRelatedProducts(params: {
   return products;
 }
 
-const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+const GET_PRODUCTS_BY_HANDLES_QUERY = gql(
+  `#graphql
   query getProductsByHandles($query: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     products(first: $first, query: $query) {
       edges {
@@ -642,29 +608,37 @@ const GET_PRODUCTS_BY_HANDLES_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);
 
-const GET_PRODUCT_BY_ID_QUERY = `#graphql
-  ${PRODUCT_WITH_VARIANTS_FRAGMENT}
+const GET_PRODUCT_BY_ID_QUERY = gql(
+  `#graphql
   query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     node(id: $id) {
+      __typename
       ... on Product {
         ...ProductWithVariantsFields
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_WITH_VARIANTS_FRAGMENT],
+);
 
-const GET_PRODUCTS_BY_IDS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+const GET_PRODUCTS_BY_IDS_QUERY = gql(
+  `#graphql
   query getProductsByIds($ids: [ID!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     nodes(ids: $ids) {
+      __typename
       ... on Product {
         ...ProductCardFields
       }
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);
 
 function decodeShopifyId(id: string): string {
   if (id.startsWith("gid://")) {
@@ -684,20 +658,16 @@ export async function getProductById({
   cacheLife("max");
   cacheTag("products");
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
   const gid = decodeShopifyId(id);
 
-  const response = await storefront.request<{ node: ShopifyProduct | null }>(
-    GET_PRODUCT_BY_ID_QUERY,
-    {
-      variables: { id: gid, country, language },
-    },
-  );
+  const response = await storefront.request(GET_PRODUCT_BY_ID_QUERY, {
+    locale,
+    variables: { id: gid },
+  });
   assertStorefrontOk(response, "getProductById");
   const { data } = response;
 
-  const product = data.node;
+  const product = data.node?.__typename === "Product" ? data.node : null;
   if (!product) {
     return undefined;
   }
@@ -723,20 +693,18 @@ export async function getProductsByIds({
     return [];
   }
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
   const gids = ids.map(decodeShopifyId);
 
-  const response = await storefront.request<{ nodes: (ShopifyProductCard | null)[] }>(
-    GET_PRODUCTS_BY_IDS_QUERY,
-    {
-      variables: { ids: gids, country, language },
-    },
-  );
+  const response = await storefront.request(GET_PRODUCTS_BY_IDS_QUERY, {
+    locale,
+    variables: { ids: gids },
+  });
   assertStorefrontOk(response, "getProductsByIds");
   const { data } = response;
 
-  const shopifyProducts = data.nodes.filter((node): node is ShopifyProductCard => node !== null);
+  const shopifyProducts = data.nodes.flatMap((node) =>
+    node?.__typename === "Product" ? [node] : [],
+  );
 
   tagProducts(shopifyProducts);
 
@@ -758,27 +726,21 @@ export async function getProductsByHandles({
     return [];
   }
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
   const searchQuery = handles.map((h) => `handle:${h}`).join(" OR ");
 
-  const response = await storefront.request<{
-    products: { edges: Array<{ node: ShopifyProductCard }> };
-  }>(GET_PRODUCTS_BY_HANDLES_QUERY, {
-    variables: { query: searchQuery, first: handles.length, country, language },
+  const response = await storefront.request(GET_PRODUCTS_BY_HANDLES_QUERY, {
+    locale,
+    variables: { query: searchQuery, first: handles.length },
   });
   assertStorefrontOk(response, "getProductsByHandles");
   const { data } = response;
 
-  const productMap = new Map<string, ShopifyProductCard>();
-  for (const edge of data.products.edges) {
-    productMap.set(edge.node.handle, edge.node);
-  }
+  const productMap = new Map(data.products.edges.map((edge) => [edge.node.handle, edge.node]));
 
-  const shopifyProducts = handles
-    .map((handle) => productMap.get(handle))
-    .filter((product): product is ShopifyProductCard => product !== undefined);
+  const shopifyProducts = handles.flatMap((handle) => {
+    const product = productMap.get(handle);
+    return product ? [product] : [];
+  });
 
   tagProducts(shopifyProducts);
 

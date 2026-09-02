@@ -1,3 +1,10 @@
+import type { CustomerAccountResultOf } from "@/lib/shopify/customer-account";
+import type {
+  ADDRESS_FRAGMENT,
+  CUSTOMER_PROFILE_FRAGMENT,
+  ORDER_FRAGMENT,
+  ORDER_SUMMARY_FRAGMENT,
+} from "@/lib/shopify/customer-account-fragments";
 import type {
   CustomerAddress,
   CustomerOrder,
@@ -8,71 +15,19 @@ import type {
   OrderLineItem,
 } from "@/lib/types";
 
-interface ShopifyMoney {
-  amount: string;
-  currencyCode: string;
-}
-
-interface ShopifyImage {
-  altText: string | null;
-  height: number | null;
-  url: string;
-  width: number | null;
-}
-
-export interface ShopifyCustomerAddress {
-  address1: string | null;
-  address2: string | null;
-  city: string | null;
-  company: string | null;
-  firstName: string | null;
-  formatted: string[];
-  id: string;
-  lastName: string | null;
-  phoneNumber: string | null;
-  territoryCode: string | null;
-  zip: string | null;
-  zoneCode: string | null;
-}
-
-interface ShopifyLineItem {
-  image: ShopifyImage | null;
-  quantity: number;
-  title: string;
-  totalPrice: ShopifyMoney | null;
-  variantTitle: string | null;
-}
-
-export interface ShopifyOrderSummary {
-  financialStatus: string | null;
-  fulfillmentStatus: string;
-  id: string;
-  name: string;
-  number: number;
-  processedAt: string;
-  totalPrice: ShopifyMoney;
-}
-
-export interface ShopifyOrder extends ShopifyOrderSummary {
-  lineItems: { nodes: ShopifyLineItem[] };
-  shippingAddress: ShopifyCustomerAddress | null;
-  statusPageUrl: string;
-  subtotal: ShopifyMoney | null;
-  totalShipping: ShopifyMoney | null;
-  totalTax: ShopifyMoney | null;
-}
-
-export interface ShopifyCustomerProfile {
-  emailAddress: { emailAddress: string } | null;
-  firstName: string | null;
-  lastName: string | null;
-}
+export type ShopifyCustomerAddress = CustomerAccountResultOf<typeof ADDRESS_FRAGMENT>;
+export type ShopifyOrderSummary = CustomerAccountResultOf<typeof ORDER_SUMMARY_FRAGMENT>;
+export type ShopifyOrder = CustomerAccountResultOf<typeof ORDER_FRAGMENT>;
+export type ShopifyCustomerProfile = CustomerAccountResultOf<typeof CUSTOMER_PROFILE_FRAGMENT>;
+type ShopifyLineItem = ShopifyOrder["lineItems"]["nodes"][number];
+type ShopifyImage = NonNullable<ShopifyLineItem["image"]>;
+type ShopifyMoney = ShopifyOrderSummary["totalPrice"];
 
 function transformMoney(money: ShopifyMoney): Money {
   return { amount: money.amount, currencyCode: money.currencyCode };
 }
 
-function transformImage(image: ShopifyImage | null): Image | null {
+function transformImage(image: ShopifyImage | null | undefined): Image | null {
   if (!image) return null;
   return {
     altText: image.altText ?? "",
@@ -87,25 +42,25 @@ export function transformCustomerAddress(
   defaultAddressId?: string | null,
 ): CustomerAddress {
   return {
-    address1: address.address1,
-    address2: address.address2,
-    city: address.city,
-    company: address.company,
-    firstName: address.firstName,
+    address1: address.address1 ?? null,
+    address2: address.address2 ?? null,
+    city: address.city ?? null,
+    company: address.company ?? null,
+    firstName: address.firstName ?? null,
     formatted: address.formatted,
     id: address.id,
     isDefault: defaultAddressId != null && address.id === defaultAddressId,
-    lastName: address.lastName,
-    phoneNumber: address.phoneNumber,
-    territoryCode: address.territoryCode,
-    zip: address.zip,
-    zoneCode: address.zoneCode,
+    lastName: address.lastName ?? null,
+    phoneNumber: address.phoneNumber ?? null,
+    territoryCode: address.territoryCode ?? null,
+    zip: address.zip ?? null,
+    zoneCode: address.zoneCode ?? null,
   };
 }
 
 export function transformOrderSummary(order: ShopifyOrderSummary): CustomerOrderSummary {
   return {
-    financialStatus: order.financialStatus,
+    financialStatus: order.financialStatus ?? null,
     fulfillmentStatus: order.fulfillmentStatus,
     id: order.id,
     name: order.name,
@@ -121,7 +76,7 @@ function transformLineItem(item: ShopifyLineItem): OrderLineItem {
     quantity: item.quantity,
     title: item.title,
     totalPrice: item.totalPrice ? transformMoney(item.totalPrice) : null,
-    variantTitle: item.variantTitle,
+    variantTitle: item.variantTitle ?? null,
   };
 }
 
@@ -140,7 +95,7 @@ export function transformOrder(order: ShopifyOrder): CustomerOrder {
 export function transformCustomerProfile(customer: ShopifyCustomerProfile): CustomerProfile {
   return {
     email: customer.emailAddress?.emailAddress ?? "",
-    firstName: customer.firstName,
-    lastName: customer.lastName,
+    firstName: customer.firstName ?? null,
+    lastName: customer.lastName ?? null,
   };
 }

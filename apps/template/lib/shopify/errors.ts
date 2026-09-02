@@ -69,9 +69,12 @@ export class ShopifyUserError extends Error {
 }
 
 export function unwrapCartMutation<T>(
-  payload: CartMutationPayload<T>,
+  payload: CartMutationPayload<T> | null | undefined,
   operation: string,
 ): { cart: T; warnings: CartWarning[] } {
+  if (!payload) {
+    throw new Error(`Shopify ${operation}: mutation returned no payload`);
+  }
   if (payload.userErrors && payload.userErrors.length > 0) {
     throw new ShopifyUserError(payload.userErrors, operation);
   }
