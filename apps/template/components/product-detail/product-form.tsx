@@ -3,7 +3,7 @@
 import { createProductComponents } from "@shopify/hydrogen/react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
@@ -22,6 +22,22 @@ const { ProductProvider, useProduct } = createProductComponents<ProductFormInput
 
 const ProductHandleContext = createContext<string | null>(null);
 
+// The header price sits in the static shell above the form's Suspense boundary, so the
+// resolved form publishes its selection up through this bridge instead of owning the header.
+const SelectedVariantContext = createContext<{
+  publish: (variant: ProductFormVariant | null) => void;
+  variant: ProductFormVariant | null;
+} | null>(null);
+
+export function ProductInfoShell({ children }: { children: ReactNode }) {
+  const [variant, publish] = useState<ProductFormVariant | null>(null);
+  return (
+    <SelectedVariantContext.Provider value={{ publish, variant }}>
+      {children}
+    </SelectedVariantContext.Provider>
+  );
+}
+
 export function ProductForm({
   children,
   product,
@@ -39,10 +55,20 @@ export function ProductForm({
           router.replace(buildProductUrl(handle, result.selectedOptions), { scroll: false });
         }}
       >
+        <SelectedVariantPublisher />
         {children}
       </ProductProvider>
     </ProductHandleContext.Provider>
   );
+}
+
+function SelectedVariantPublisher() {
+  const bridge = useContext(SelectedVariantContext);
+  const { selectedVariant } = useProduct();
+  useEffect(() => {
+    bridge?.publish(selectedVariant);
+  }, [bridge, selectedVariant]);
+  return null;
 }
 
 export function useProductFormState(): {
@@ -80,7 +106,7 @@ export function ProductFormOptions() {
   return <ProductInfoOptions options={options} onSelectValue={selectOption} t={t} />;
 }
 
-// Complete selections missing from the sparse variant cache resolve to null until the server round trip lands.
+// Renders inside ProductInfoShell, not ProductForm; the server-resolved variant wins until the form publishes.
 export function ProductFormPrice({
   fallbackVariant,
   locale,
@@ -88,7 +114,7 @@ export function ProductFormPrice({
   fallbackVariant: ProductFormVariant | undefined;
   locale: string;
 }) {
-  const variant = useProductFormState().selectedVariant ?? fallbackVariant;
+  const variant = useContext(SelectedVariantContext)?.variant ?? fallbackVariant;
   if (!variant) return null;
   return (
     <ProductPrice

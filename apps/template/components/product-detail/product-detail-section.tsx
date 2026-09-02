@@ -13,6 +13,7 @@ import {
   ProductFormGiftCard,
   ProductFormOptions,
   ProductFormPrice,
+  ProductInfoShell,
 } from "@/components/product-detail/product-form";
 import {
   ProductInfoDescription,
@@ -182,28 +183,42 @@ async function ProductInfoArea({
 
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      {singleVariant ? (
-        <ProductInfoContent
-          product={product}
-          selectedVariant={product.defaultVariant}
-          locale={locale}
-        />
-      ) : (
-        <Suspense
-          fallback={
-            <ProductInfoFallback
-              allInStock={allInStock}
-              hasOptions={hasOptions}
+      <ProductInfoShell>
+        <div data-slot="product-info-header">
+          <h1 className="text-foreground text-3xl">{product.title}</h1>
+          {product.hasUniformPricing ? (
+            <ProductPrice
+              amount={product.priceRange.minVariantPrice.amount}
+              currencyCode={product.priceRange.minVariantPrice.currencyCode}
+              compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
               locale={locale}
-              product={product}
-              t={buyFallbackT}
-              optionsT={t}
             />
-          }
-        >
-          <ResolvedProductInfo product={product} variantPromise={variantPromise} locale={locale} />
-        </Suspense>
-      )}
+          ) : (
+            // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
+            <Suspense fallback={<div className="h-7" aria-hidden />}>
+              <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
+            </Suspense>
+          )}
+        </div>
+
+        {singleVariant ? (
+          <ProductInfoContent product={product} selectedVariant={product.defaultVariant} />
+        ) : (
+          <Suspense
+            fallback={
+              <ProductInfoFallback
+                allInStock={allInStock}
+                hasOptions={hasOptions}
+                product={product}
+                t={buyFallbackT}
+                optionsT={t}
+              />
+            }
+          >
+            <ResolvedProductInfo product={product} variantPromise={variantPromise} />
+          </Suspense>
+        )}
+      </ProductInfoShell>
 
       {!product.isGiftCard && shopConfig.pdp.bundles.isEnabled ? (
         <BundleRelationships variant={product.defaultVariant} t={t} />
@@ -218,38 +233,45 @@ async function ProductInfoArea({
   );
 }
 
-async function ResolvedProductInfo({
-  product,
+async function ResolvedProductPrice({
   variantPromise,
   locale,
 }: {
-  product: ProductDetails;
   variantPromise: Promise<ProductVariant | undefined>;
   locale: Locale;
 }) {
+  const variant = await variantPromise;
   return (
-    <ProductInfoContent product={product} selectedVariant={await variantPromise} locale={locale} />
+    <ProductFormPrice
+      fallbackVariant={variant ? toProductFormVariant(variant) : undefined}
+      locale={locale}
+    />
   );
+}
+
+async function ResolvedProductInfo({
+  product,
+  variantPromise,
+}: {
+  product: ProductDetails;
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
+  return <ProductInfoContent product={product} selectedVariant={await variantPromise} />;
 }
 
 // The store is seeded from the URL-resolved variant so server HTML and client state agree on first paint.
 function ProductInfoContent({
   product,
   selectedVariant,
-  locale,
 }: {
   product: ProductDetails;
   selectedVariant: ProductVariant | undefined;
-  locale: Locale;
 }) {
   const fallbackVariant = selectedVariant ? toProductFormVariant(selectedVariant) : undefined;
   const hasOptions = product.options.some((option) => option.values.length > 1);
 
   return (
     <ProductForm product={toProductFormInput(product, selectedVariant)}>
-      <ProductInfoHeader locale={locale} product={product}>
-        <ProductFormPrice fallbackVariant={fallbackVariant} locale={locale} />
-      </ProductInfoHeader>
       {hasOptions ? <ProductFormOptions /> : null}
       {product.isGiftCard ? (
         <ProductFormGiftCard
@@ -273,53 +295,21 @@ function ProductInfoContent({
   );
 }
 
-function ProductInfoHeader({
-  children,
-  locale,
-  product,
-}: {
-  children: React.ReactNode;
-  locale: Locale;
-  product: ProductDetails;
-}) {
-  return (
-    <div data-slot="product-info-header">
-      <h1 className="text-foreground text-3xl">{product.title}</h1>
-      {product.hasUniformPricing ? (
-        <ProductPrice
-          amount={product.priceRange.minVariantPrice.amount}
-          currencyCode={product.priceRange.minVariantPrice.currencyCode}
-          compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
-          locale={locale}
-        />
-      ) : (
-        children
-      )}
-    </div>
-  );
-}
-
 function ProductInfoFallback({
   allInStock,
   hasOptions,
-  locale,
   optionsT,
   product,
   t,
 }: {
   allInStock: boolean;
   hasOptions: boolean;
-  locale: Locale;
   optionsT: Awaited<ReturnType<typeof getTranslations<"product">>>;
   product: ProductDetails;
   t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
 }) {
   return (
     <>
-      <ProductInfoHeader locale={locale} product={product}>
-        {/* h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS */}
-        <div className="h-7" aria-hidden />
-      </ProductInfoHeader>
       {hasOptions ? (
         <ProductInfoOptions options={toStaticOptionGroups(product)} t={optionsT} hideImages />
       ) : null}
