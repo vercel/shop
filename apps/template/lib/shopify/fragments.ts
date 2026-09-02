@@ -26,6 +26,9 @@ export const PRODUCT_VARIANT_FRAGMENT = gql(
         width
         height
     }
+    product {
+      handle
+    }
   }
 `,
 );
@@ -236,14 +239,12 @@ export const PRODUCT_FRAGMENT = gql(
           }
         }
         firstSelectableVariant {
-          image {
-            url
-        altText
-        width
-        height
-          }
+          ...ProductVariantFields
         }
       }
+    }
+    adjacentVariants {
+      ...ProductVariantFields
     }
     seo {
       title

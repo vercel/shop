@@ -1,20 +1,136 @@
-import type { Image, Money, ProductDetails, ProductOption, SelectedOption } from "@/lib/types";
+import { getSelectedProductOptions, type ProductInput } from "@shopify/hydrogen";
+
+import type {
+  Image,
+  Money,
+  OptionValueSwatch,
+  ProductDetails,
+  ProductOption,
+  ProductVariant,
+  SelectedOption,
+} from "@/lib/types";
 
 export type SelectedOptions = Record<string, string>;
 
+// URLs carry lowercased option names and values; canonicalize both against the product before Shopify sees them.
 export function parseSelectedOptions(
   options: ProductOption[],
   searchParams: Record<string, string | string[] | undefined>,
 ): SelectedOptions {
-  const selected: SelectedOptions = {};
-  for (const option of options) {
-    const raw = searchParams[option.name.toLowerCase()];
+  const params = new URLSearchParams();
+  for (const [key, raw] of Object.entries(searchParams)) {
     const value = Array.isArray(raw) ? raw[0] : raw;
-    if (value === undefined) continue;
+    if (value !== undefined) params.set(key, value);
+  }
+  const optionsByLowerName = new Map(options.map((option) => [option.name.toLowerCase(), option]));
+  const selected: SelectedOptions = {};
+  for (const { name, value } of getSelectedProductOptions({ searchParams: params })) {
+    const option = optionsByLowerName.get(name.toLowerCase());
+    if (!option) continue;
     const match = option.values.find((v) => v.name.toLowerCase() === value.toLowerCase());
     selected[option.name] = match?.name ?? value;
   }
   return selected;
+}
+
+export type ProductFormVariant = Pick<
+  ProductVariant,
+  "availableForSale" | "compareAtPrice" | "id" | "image" | "price" | "selectedOptions" | "title"
+> & {
+  product: { handle: string };
+  requiresBundleConfiguration: boolean;
+};
+
+// The store only forwards `swatch` per value, so the variant thumbnail rides along with it.
+export interface ProductFormSwatch extends OptionValueSwatch {
+  variantImage?: string;
+}
+
+export type ProductFormInput = ProductInput<ProductFormVariant> & {
+  options: Array<{
+    name: string;
+    optionValues: Array<{
+      firstSelectableVariant: ProductFormVariant | null;
+      name: string;
+      swatch?: ProductFormSwatch;
+    }>;
+  }>;
+};
+
+export interface OptionValueState {
+  available: boolean;
+  crossProduct: boolean;
+  exists: boolean;
+  href: string;
+  image?: string;
+  name: string;
+  selected: boolean;
+  swatch?: OptionValueSwatch;
+}
+
+export interface OptionGroupState {
+  name: string;
+  values: OptionValueState[];
+}
+
+export function toStaticOptionGroups(product: ProductDetails): OptionGroupState[] {
+  return product.options.map((option) => ({
+    name: option.name,
+    values: option.values.map((value) => ({
+      available: true,
+      crossProduct: false,
+      exists: true,
+      href: buildProductUrl(product.handle, [{ name: option.name, value: value.name }]),
+      image: value.image,
+      name: value.name,
+      selected: false,
+      swatch: value.swatch,
+    })),
+  }));
+}
+
+// Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
+export function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
+  return {
+    availableForSale: variant.availableForSale,
+    compareAtPrice: variant.compareAtPrice,
+    id: variant.id,
+    image: variant.image,
+    price: variant.price,
+    product: { handle: variant.productHandle },
+    requiresBundleConfiguration: variant.requiresComponents && variant.components.length === 0,
+    selectedOptions: variant.selectedOptions,
+    title: variant.title,
+  };
+}
+
+// The store seeds its selection from selectedOrFirstAvailableVariant, so the URL-resolved variant goes there.
+export function toProductFormInput(
+  product: ProductDetails,
+  selectedVariant: ProductVariant | undefined,
+): ProductFormInput {
+  return {
+    adjacentVariants: product.adjacentVariants.map(toProductFormVariant),
+    encodedVariantAvailability: product.encodedVariantAvailability ?? null,
+    encodedVariantExistence: product.encodedVariantExistence ?? null,
+    handle: product.handle,
+    id: product.id,
+    options: product.options.map((option) => ({
+      name: option.name,
+      optionValues: option.values.map((value) => ({
+        firstSelectableVariant: value.firstSelectableVariant
+          ? toProductFormVariant(value.firstSelectableVariant)
+          : null,
+        name: value.name,
+        swatch:
+          value.swatch || value.image ? { ...value.swatch, variantImage: value.image } : undefined,
+      })),
+    })),
+    priceRange: product.priceRange,
+    selectedOrFirstAvailableVariant: selectedVariant ? toProductFormVariant(selectedVariant) : null,
+    title: product.title,
+    vendor: product.vendor ?? null,
+  };
 }
 
 export function defaultSelectedOptions(product: ProductDetails): SelectedOptions {
@@ -36,16 +152,6 @@ export function buildProductUrl(handle: string, selectedOptions: SelectedOption[
     ({ name, value }) => `${encodeURIComponent(name.toLowerCase())}=${encodeURIComponent(value)}`,
   );
   return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
-}
-
-export function buildOptionUrl(
-  handle: string,
-  currentOptions: SelectedOptions,
-  optionName: string,
-  optionValue: string,
-): string {
-  const next = { ...currentOptions, [optionName]: optionValue };
-  return buildProductUrl(handle, toSelectedOptionList(next));
 }
 
 function findColorOption(options: ProductOption[]): ProductOption | undefined {
