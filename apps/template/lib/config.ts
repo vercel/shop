@@ -57,7 +57,8 @@ const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 
 export const shopConfig = {
   agent: {
-    isEnabled: false,
+    // TEMP: enabled for testing on hydrogen-agent-cart; revert to false before merge.
+    isEnabled: true,
   },
   analytics: {
     shopify: {
