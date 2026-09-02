@@ -1,3 +1,5 @@
+import { getSearchResultUrl } from "@shopify/hydrogen";
+
 import type { Locale } from "../i18n";
 import { defaultLocale } from "../i18n";
 
@@ -37,7 +39,7 @@ export function buildAgentPath(destination: AgentDestination, identifier?: strin
     case "product":
       return identifier ? `/products/${identifier}` : "/";
     case "search":
-      return identifier ? `/search?q=${encodeURIComponent(identifier)}` : "/search";
+      return identifier ? getSearchResultUrl({ baseUrl: "/search", term: identifier }) : "/search";
     default:
       return "/";
   }
