@@ -166,6 +166,8 @@
     "pages": "pages",
     "price": "Price",
     "priceFrom": "From",
+    "priceRangeFrom": "From",
+    "priceRangeUpTo": "Up to",
     "priceTo": "To",
     "productCount": "{count, plural, one {# product} other {# products}}",
     "size": "Size",

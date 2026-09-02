@@ -20,7 +20,7 @@ import {
 import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
-import { parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
+import { formatPrice, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
 
 import {
   FilterBadge,
@@ -185,6 +185,10 @@ function FilterSidebarContent({
               <FilterBadge variant="primary" onRemove={() => onApplyPrice(null, null)}>
                 {formatPriceRangeLabel({
                   currencyCode: priceRange?.currencyCode,
+                  labels: {
+                    from: tCategory("priceRangeFrom"),
+                    upTo: tCategory("priceRangeUpTo"),
+                  },
                   locale,
                   max: priceFilter.max,
                   min: priceFilter.min,
@@ -311,22 +315,24 @@ function findFilterInput(filters: Filter[], key: string, value: string): string 
 
 function formatPriceRangeLabel({
   currencyCode,
+  labels,
   locale,
   max,
   min,
 }: {
   currencyCode?: string;
+  labels: { from: string; upTo: string };
   locale: string;
   max: number | null;
   min: number | null;
 }): string {
   const format = (value: number) =>
     currencyCode
-      ? new Intl.NumberFormat(locale, { currency: currencyCode, style: "currency" }).format(value)
+      ? formatPrice({ amount: value, currencyCode }, locale)
       : new Intl.NumberFormat(locale).format(value);
   if (min !== null && max !== null) return `${format(min)} - ${format(max)}`;
-  if (min !== null) return `From ${format(min)}`;
-  return `Up to ${format(max ?? 0)}`;
+  if (min !== null) return `${labels.from} ${format(min)}`;
+  return `${labels.upTo} ${format(max ?? 0)}`;
 }
 
 function getFilterValues(value: string | string[] | undefined): string[] {
