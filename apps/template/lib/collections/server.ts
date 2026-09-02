@@ -1,6 +1,11 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 
+import {
+  type ActiveFilters,
+  getActiveFilters,
+  getCollectionSortFromState,
+} from "@/lib/collections";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
@@ -10,54 +15,48 @@ import {
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
-import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
-export interface CollectionSearchState {
-  activeFilters: Record<string, string | string[] | undefined>;
-  dataSearch: string;
+export interface BrowseParams {
+  activeFilters: ActiveFilters;
+  filters: ProductFilter[];
   sort?: string;
 }
 
-export interface CollectionResultsData {
-  activeFilters: Record<string, string | string[] | undefined>;
+export interface CollectionSearchState extends BrowseParams {
+  dataSearch: string;
+}
+
+export interface CollectionResultsData extends BrowseParams {
   collection: string;
-  sort?: string;
-  filters: ProductFilter[];
   result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
   transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
+}
+
+export function resolveBrowseParams(search: string | URLSearchParams): CollectionSearchState {
+  const state = parseCollectionParams(
+    typeof search === "string" ? new URLSearchParams(search) : search,
+  );
+  const activeFilters = getActiveFilters(state.filters);
+  const sort = getCollectionSortFromState(state.sortKey, state.reverse);
+  return {
+    activeFilters,
+    dataSearch: serializeCollectionParams(state).toString(),
+    filters: buildProductFiltersFromParams(activeFilters),
+    sort: sort === "best-matches" ? undefined : sort,
+  };
 }
 
 export async function getCollectionSearchState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<CollectionSearchState> {
-  const searchParams = recordToSearchParams(await searchParamsPromise);
-  const state = parseCollectionParams(searchParams);
-  const dataSearch = serializeCollectionParams(state).toString();
-
-  return {
-    activeFilters: parseFiltersFromSearchParams(
-      searchParamsToRecord(new URLSearchParams(dataSearch)),
-    ),
-    dataSearch,
-    sort: getCollectionSort(state.sortKey, state.reverse),
-  };
+  return resolveBrowseParams(recordToSearchParams(await searchParamsPromise));
 }
 
-function getCollectionSort(sortKey: string | undefined, reverse: boolean): string | undefined {
-  if (!sortKey || sortKey === "COLLECTION_DEFAULT" || sortKey === "MANUAL") return undefined;
-  if (sortKey === "BEST_SELLING") return "best-selling";
-  if (sortKey === "CREATED") return reverse ? "date-new-to-old" : "date-old-to-new";
-  if (sortKey === "PRICE") return reverse ? "price-high-to-low" : "price-low-to-high";
-  if (sortKey === "TITLE") {
-    return reverse ? "product-name-descending" : "product-name-ascending";
-  }
-  return undefined;
-}
-
-function recordToSearchParams(
+export function recordToSearchParams(
   record: Record<string, string | string[] | undefined>,
 ): URLSearchParams {
   const params = new URLSearchParams();
@@ -80,14 +79,13 @@ export async function getCollectionResultsData({
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, sort } = await searchStatePromise;
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+  const { activeFilters, filters, sort } = await searchStatePromise;
   const result = await fetchCollectionProducts({
     activeFilters,
     collection: handle,
     sortKey: sort,
     limit: RESULTS_PER_PAGE,
-    filters: shopifyFilters,
+    filters,
     locale,
   });
 
@@ -95,22 +93,10 @@ export async function getCollectionResultsData({
     activeFilters,
     collection: handle,
     sort,
-    filters: shopifyFilters,
+    filters,
     result,
     transformedFilters: { filters: result.filters, priceRange: result.priceRange },
   };
-}
-
-export function getExactCollectionResultCount({
-  result,
-}: {
-  result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
-}): number | undefined {
-  if (result.pageInfo.hasNextPage) {
-    return undefined;
-  }
-
-  return result.products.length;
 }
 
 export async function getAllProductsCollection(): Promise<Collection> {
@@ -135,24 +121,23 @@ export async function getAllProductsResultsData({
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, sort } = await searchStatePromise;
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+  const { activeFilters, filters, sort } = await searchStatePromise;
   const [products, facets] = await Promise.all([
     fetchSearchIndexProducts({
       activeFilters,
       sortKey: sort,
       limit: RESULTS_PER_PAGE,
-      filters: shopifyFilters,
+      filters,
       locale,
     }),
-    fetchSearchFacets({ activeFilters, filters: shopifyFilters, locale }),
+    fetchSearchFacets({ activeFilters, filters, locale }),
   ]);
 
   return {
     activeFilters,
     collection: ALL_PRODUCTS_HANDLE,
     sort,
-    filters: shopifyFilters,
+    filters,
     result: {
       products: products.products,
       pageInfo: products.pageInfo,

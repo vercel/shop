@@ -1,27 +1,26 @@
 "use server";
 
+import { resolveBrowseParams } from "@/lib/collections/server";
 import { fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
-import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { PageInfo, ProductCard } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
-export async function loadMoreSearchProducts(params: {
-  activeFilters?: Record<string, string | string[] | undefined>;
+export async function loadMoreSearchProductsAction(params: {
   collection?: string;
   cursor: string;
-  query?: string;
-  sortKey?: string;
-  filters?: ProductFilter[];
   locale: string;
+  query?: string;
+  search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
+  const { activeFilters, filters, sort } = resolveBrowseParams(params.search);
   // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
   const result = await fetchSearchIndexProducts({
-    activeFilters: params.activeFilters,
+    activeFilters,
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,
-    sortKey: params.sortKey,
-    filters: params.filters,
+    sortKey: sort,
+    filters,
     limit: RESULTS_PER_PAGE,
     locale: params.locale,
   });
