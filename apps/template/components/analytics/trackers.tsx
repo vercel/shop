@@ -48,7 +48,7 @@ export function ProductViewedTracker({
   product,
   variantPromise,
 }: {
-  product: ProductDetails;
+  product: Pick<ProductDetails, "handle" | "id" | "manufacturerName" | "title">;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const variant = use(variantPromise);

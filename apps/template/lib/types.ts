@@ -53,6 +53,8 @@ export interface ProductCard {
 }
 
 export interface ProductDetails extends ProductCard {
+  /** Sparse variant cache around the default variant; feeds Hydrogen's product form store. */
+  adjacentVariants: ProductVariant[];
   allVariantsInStock: boolean;
   category?: Category | null;
   categoryId?: string;
@@ -92,6 +94,8 @@ export interface ProductVariant {
   id: string;
   image: Image | null;
   price: Money;
+  /** Differs from the page's handle for combined-listing option values. */
+  productHandle: string;
   requiresComponents: boolean;
   selectedOptions: SelectedOption[];
   title: string;
@@ -126,6 +130,7 @@ export interface OptionValueSwatch {
 }
 
 export interface OptionValue {
+  firstSelectableVariant?: ProductVariant;
   id: string;
   image?: string;
   name: string;

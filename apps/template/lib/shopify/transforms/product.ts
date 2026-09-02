@@ -134,6 +134,7 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     availableForSale: variant.availableForSale,
     price: variant.price,
     compareAtPrice: variant.compareAtPrice ?? undefined,
+    productHandle: variant.product.handle,
     selectedOptions: variant.selectedOptions,
     image: transformImage(variant.image),
     bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
@@ -153,21 +154,28 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch): OptionValueSwatch | 
 
 function transformOption(option: ShopifyOption): ProductOption {
   const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
-  const imageLookup = new Map<string, string | undefined>();
+  const variantLookup = new Map<string, ProductVariant | undefined>();
   for (const ov of option.optionValues) {
     swatchLookup.set(ov.name, transformSwatch(ov.swatch));
-    imageLookup.set(ov.name, ov.firstSelectableVariant?.image?.url);
+    variantLookup.set(
+      ov.name,
+      ov.firstSelectableVariant ? transformVariant(ov.firstSelectableVariant) : undefined,
+    );
   }
 
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map((value): OptionValue => ({
-      id: value,
-      image: imageLookup.get(value),
-      name: value,
-      swatch: swatchLookup.get(value),
-    })),
+    values: option.values.map((value): OptionValue => {
+      const firstSelectableVariant = variantLookup.get(value);
+      return {
+        firstSelectableVariant,
+        id: value,
+        image: firstSelectableVariant?.image?.url,
+        name: value,
+        swatch: swatchLookup.get(value),
+      };
+    }),
   };
 }
 
@@ -239,6 +247,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
+    adjacentVariants: product.adjacentVariants.map(transformVariant),
     allVariantsInStock:
       !product.encodedVariantExistence ||
       product.encodedVariantExistence === product.encodedVariantAvailability,

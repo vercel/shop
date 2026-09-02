@@ -6,41 +6,32 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
+import { useProductFormState } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
-import { variantToOptimisticInfo } from "@/lib/product";
-import type { Image, Money, SelectedOption } from "@/lib/types";
+import { type ProductFormVariant, variantToOptimisticInfo } from "@/lib/product";
+import type { Image } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
 
-// Keep bundle relationship arrays server-side; the client only needs their gating boolean.
-export interface BuyButtonVariant {
-  availableForSale: boolean;
-  id: string;
-  image: Image | null;
-  price: Money;
-  requiresBundleConfiguration: boolean;
-  selectedOptions: SelectedOption[];
-  title: string;
-}
-
 export function BuyButtons({
   availableForSale = true,
   buyWithShop = true,
+  fallbackVariant,
   featuredImage,
   handle,
   quantityPicker = true,
-  selectedVariant,
   title,
 }: {
   availableForSale?: boolean;
   buyWithShop?: boolean;
+  fallbackVariant: ProductFormVariant | undefined;
   featuredImage: Image | null;
   handle: string;
   quantityPicker?: boolean;
-  selectedVariant: BuyButtonVariant | undefined;
   title: string;
 }) {
+  const selectedVariant = useProductFormState().selectedVariant ?? fallbackVariant;
   const selectedVariantId = selectedVariant?.id;
 
   const t = useTranslations("product");
