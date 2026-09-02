@@ -79,8 +79,10 @@ export function BuyButtons({
   const requiresBundleConfiguration = selectedVariant.requiresBundleConfiguration;
   const isOutOfStock = !selectedVariant.availableForSale;
   // Same-origin permalink; handleShopifyRoutes in proxy.ts 302s it to the store's checkout with attribution.
+  // isBuyingNow must not feed `disabled`: React flushes the click's setState before the anchor's activation
+  // behavior runs, so removing href here would cancel the navigation.
   const buyNowUrl = getShopPayButtonUrl({
-    disabled: isOutOfStock || isBuyingNow || requiresBundleConfiguration,
+    disabled: isOutOfStock || requiresBundleConfiguration,
     variants: [{ id: selectedVariant.id, quantity }],
   });
 
@@ -139,9 +141,10 @@ export function BuyButtons({
       </div>
       {buyWithShop ? (
         <a
+          aria-busy={isBuyingNow || undefined}
           aria-disabled={buyNowUrl ? undefined : true}
           className={cn(
-            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-disabled:pointer-events-none aria-disabled:opacity-50",
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-busy:pointer-events-none aria-disabled:pointer-events-none aria-disabled:opacity-50",
             !availableForSale && "invisible",
           )}
           href={buyNowUrl ?? undefined}
