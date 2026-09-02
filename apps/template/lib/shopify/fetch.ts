@@ -1,4 +1,4 @@
-import { gql } from "@shopify/hydrogen";
+import { flattenConnection, gql } from "@shopify/hydrogen";
 import type {
   ProductCollectionSortKeys,
   SearchSortKeys,
@@ -408,7 +408,7 @@ export async function fetchCollectionProducts(
     };
   }
 
-  const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
+  const shopifyProducts = flattenConnection(data.collection.products);
   const selectedColor = getSelectedColorFilterLabel(
     activeFilters,
     filters,
@@ -490,7 +490,7 @@ export async function fetchCollections({
   });
   assertStorefrontOk(response, "getCollections");
 
-  return transformShopifyCollections(response.data.collections.edges.map((edge) => edge.node));
+  return transformShopifyCollections(flattenConnection(response.data.collections));
 }
 
 export async function fetchCart(cartId: string): Promise<Cart | undefined> {

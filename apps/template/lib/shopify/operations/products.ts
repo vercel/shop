@@ -1,4 +1,4 @@
-import { gql } from "@shopify/hydrogen";
+import { flattenConnection, gql } from "@shopify/hydrogen";
 import type { ProductSortKeys } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
@@ -455,7 +455,7 @@ async function fetchCatalogProducts({
   assertStorefrontOk(response, "catalogProducts");
   const { data } = response;
 
-  const shopifyProducts = data.products.edges.map((edge) => edge.node);
+  const shopifyProducts = flattenConnection(data.products);
 
   tagProducts(shopifyProducts);
 
@@ -735,7 +735,7 @@ export async function getProductsByHandles({
   assertStorefrontOk(response, "getProductsByHandles");
   const { data } = response;
 
-  const productMap = new Map(data.products.edges.map((edge) => [edge.node.handle, edge.node]));
+  const productMap = new Map(flattenConnection(data.products).map((node) => [node.handle, node]));
 
   const shopifyProducts = handles.flatMap((handle) => {
     const product = productMap.get(handle);

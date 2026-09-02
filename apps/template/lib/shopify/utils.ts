@@ -1,9 +1,3 @@
-export type ShopifyEdges<T> = { edges: Array<{ node: T }> };
-
-export function flattenEdges<T>(connection: ShopifyEdges<T>): T[] {
-  return connection.edges.map((edge) => edge.node);
-}
-
 export function getNumericShopifyId(gid: string): string | null {
   let decoded = gid;
 

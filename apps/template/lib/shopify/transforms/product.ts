@@ -1,3 +1,5 @@
+import { flattenConnection } from "@shopify/hydrogen";
+
 import type {
   BUNDLE_COMPONENT_VARIANT_FRAGMENT,
   FILTERABLE_PRODUCT_CARD_FRAGMENT,
@@ -9,7 +11,6 @@ import type {
   TAXONOMY_CATEGORY_FRAGMENT,
 } from "@/lib/shopify/fragments";
 import type { ResultOf } from "@/lib/shopify/storefront";
-import { flattenEdges } from "@/lib/shopify/utils";
 import type {
   Category,
   Image,
@@ -65,7 +66,7 @@ function extractMediaFromProduct(product: ShopifyProduct): {
   const images: Image[] = [];
   const videos: Video[] = [];
 
-  for (const node of flattenEdges<ShopifyMediaNode>(product.media)) {
+  for (const node of flattenConnection<ShopifyMediaNode>(product.media)) {
     if (node.__typename === "MediaImage") {
       const img = transformImage(node.image);
       if (img) images.push(img);
@@ -222,7 +223,7 @@ function hasUniformPriceRange(product: ShopifyProduct): boolean {
 
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   const variants = product.variants
-    ? flattenEdges(product.variants).map(transformVariant)
+    ? flattenConnection(product.variants).map(transformVariant)
     : undefined;
   const defaultVariant = product.selectedOrFirstAvailableVariant
     ? transformVariant(product.selectedOrFirstAvailableVariant)
@@ -264,7 +265,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
     manufacturerName: product.vendor,
     categoryId: product.category?.id,
-    collectionHandles: flattenEdges(product.collections).map((c) => c.handle),
+    collectionHandles: flattenConnection(product.collections).map((c) => c.handle),
   };
 }
 
