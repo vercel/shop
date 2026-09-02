@@ -1,7 +1,8 @@
 import { shopConfig } from "@/lib/config";
 import type { ProductCard } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
-import { escapeMarkdown, formatPrice } from "./utils";
+import { escapeMarkdown } from "./utils";
 
 export function homeToMarkdown({
   description,

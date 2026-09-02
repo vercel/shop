@@ -93,7 +93,7 @@ export function Summary({
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
           <span className="text-xl font-medium text-foreground">
-            {formatPrice(estimatedTotal, currencyCode, locale)}
+            {formatPrice({ amount: estimatedTotal, currencyCode }, locale)}
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>

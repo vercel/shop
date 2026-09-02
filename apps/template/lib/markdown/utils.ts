@@ -1,11 +1,3 @@
-import { formatMoney } from "@shopify/hydrogen";
-
-import type { Money } from "@/lib/types";
-
-export function formatPrice(money: Money, locale: string): string {
-  return formatMoney(money, { currencyDisplay: "narrowSymbol", locale }).localizedString;
-}
-
 export function escapeMarkdown(text: string): string {
   return text
     .replace(/\|/g, "\\|")
