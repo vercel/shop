@@ -79,7 +79,7 @@ function createSystemPrompt(context: AgentContext): string {
       "The root value must exactly match a key you add under /elements, and every generated element must be reachable from it. Emit exactly one top-level element per turn.",
       "Include brief conversational text around generated UI.",
     ],
-    mode: "chat",
+    mode: "inline",
   })}`;
 }
 
