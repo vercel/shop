@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 
-export function ItemsSkeleton() {
+function ItemsSkeleton() {
   return (
     <div className="space-y-5">
       {[1, 2, 3].map((i) => (
@@ -27,7 +27,7 @@ export function ItemsSkeleton() {
   );
 }
 
-export function SummarySkeleton() {
+function SummarySkeleton() {
   return (
     <div className="border border-border p-5 animate-pulse sticky top-10">
       <div className="space-y-2.5 mb-6 pb-5 border-b border-border">

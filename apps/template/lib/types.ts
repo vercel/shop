@@ -2,18 +2,6 @@ import type { I18nConfig } from "@shopify/hydrogen";
 
 import type { Locale } from "@/lib/i18n";
 
-export type SearchParamsPromise = Promise<Record<string, string | string[] | undefined>>;
-
-export type NormalizedSearchParams = Record<string, string | undefined>;
-
-export function normalizeSearchParams(
-  params: Record<string, string | string[] | undefined>,
-): NormalizedSearchParams {
-  return Object.fromEntries(
-    Object.entries(params).map(([key, value]) => [key, Array.isArray(value) ? value[0] : value]),
-  );
-}
-
 export interface Money {
   amount: string;
   currencyCode: string;
@@ -176,7 +164,7 @@ export interface CartLine {
   quantity: number;
 }
 
-export interface DiscountCode {
+interface DiscountCode {
   applicable: boolean;
   code: string;
 }
@@ -185,7 +173,7 @@ export type DiscountAllocation =
   | { kind: "code"; code: string; discountedAmount: Money }
   | { kind: "automatic" | "custom"; title: string; discountedAmount: Money };
 
-export interface AppliedGiftCard {
+interface AppliedGiftCard {
   amountUsed: Money;
   balance: Money;
   id: string;
@@ -198,7 +186,7 @@ export interface CartWarning {
   target: string;
 }
 
-export interface CartMerchandise {
+interface CartMerchandise {
   compareAtPrice?: Money;
   id: string;
   image?: Image;
@@ -208,7 +196,7 @@ export interface CartMerchandise {
   title: string;
 }
 
-export interface CartProduct {
+interface CartProduct {
   featuredImage: Image;
   handle: string;
   id: string;
@@ -287,28 +275,11 @@ export interface PriceRange {
   min: number;
 }
 
-export interface CategoryNavItem {
-  count: number;
-  href: string;
-  id: string;
-  label: string;
-  slug: string;
-}
-
 export interface PageInfo {
   endCursor: string | null;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   startCursor: string | null;
-}
-
-export interface ProductListResult {
-  filters?: Filter[];
-  pageInfo: PageInfo;
-  priceRange?: PriceRange;
-  products: ProductCard[];
-  subcategories?: CategoryNavItem[];
-  totalCount: number;
 }
 
 export interface PredictiveSearchProduct {
@@ -341,7 +312,7 @@ export interface ShopPolicy {
   title: string;
 }
 
-export interface PredictiveSearchCollection {
+interface PredictiveSearchCollection {
   handle: string;
   title: string;
 }

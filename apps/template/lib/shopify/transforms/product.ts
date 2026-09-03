@@ -26,7 +26,7 @@ import type {
 } from "@/lib/types";
 
 type ShopifyBundleComponentVariant = ResultOf<typeof BUNDLE_COMPONENT_VARIANT_FRAGMENT>;
-export type ShopifyImage = NonNullable<ShopifyBundleComponentVariant["image"]>;
+type ShopifyImage = NonNullable<ShopifyBundleComponentVariant["image"]>;
 type ShopifyBaseVariant = ResultOf<typeof PRODUCT_VARIANT_FRAGMENT>;
 type ShopifyPurchasableVariant = ResultOf<typeof PURCHASABLE_PRODUCT_VARIANT_FRAGMENT>;
 // Bundle fields are only selected when `shopConfig.pdp.bundles.isEnabled`.
@@ -275,8 +275,4 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     categoryId: product.category?.id,
     collectionHandles: flattenConnection(product.collections).map((c) => c.handle),
   };
-}
-
-export function transformShopifyProductCards(products: ShopifyProductCard[]): ProductCard[] {
-  return products.map(transformShopifyProductCard);
 }

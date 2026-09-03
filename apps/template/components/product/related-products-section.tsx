@@ -6,13 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
 import { getRelatedProducts } from "@/lib/shopify/operations/products";
 
-export function RelatedProductsSectionSkeleton({
-  limit,
-  title,
-}: {
-  limit: number;
-  title?: string;
-}) {
+function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title?: string }) {
   return (
     <div className="grid gap-4">
       {title ? (

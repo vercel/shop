@@ -4,6 +4,7 @@ import type {
   SearchSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
 
+import type { ActiveFilters } from "@/lib/collections";
 import { defaultLocale } from "@/lib/i18n";
 import type {
   Collection,
@@ -31,8 +32,6 @@ import {
   transformShopifyProductDetails,
 } from "./transforms/product";
 import type { ProductFilter } from "./types/filters";
-
-export type ActiveFilters = Record<string, string | string[] | undefined>;
 
 export function escapeProductQuery(value: string): string {
   return value.replace(/'/g, "\\'");

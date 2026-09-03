@@ -25,7 +25,7 @@ import {
   transformOrderSummary,
 } from "../transforms/customer";
 
-export const ORDERS_PER_PAGE = 10;
+const ORDERS_PER_PAGE = 10;
 
 export interface CustomerUserError {
   code?: string;

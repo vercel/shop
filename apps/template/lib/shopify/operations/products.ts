@@ -2,6 +2,7 @@ import { flattenConnection, gql } from "@shopify/hydrogen";
 import type { ProductSortKeys } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
+import type { ActiveFilters } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";
 import { defaultLocale } from "@/lib/i18n";
 import type {
@@ -16,7 +17,6 @@ import type {
 
 import { assertStorefrontOk } from "../errors";
 import {
-  type ActiveFilters,
   type CollectionProductsParams,
   type CollectionProductsResult,
   escapeProductQuery,
@@ -49,13 +49,7 @@ import {
 import type { ProductFilter } from "../types/filters";
 import { getNumericShopifyId } from "../utils";
 
-export {
-  fetchCollectionProducts,
-  fetchComplementaryProducts,
-  fetchProductWithVariants,
-  fetchRelatedProducts,
-  fetchSearchIndexProducts,
-} from "../fetch";
+export { fetchCollectionProducts, fetchSearchIndexProducts } from "../fetch";
 
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);
@@ -486,16 +480,6 @@ export async function getCatalogProducts(
   return fetchCatalogProducts(params);
 }
 
-export async function getFilteredCatalogProducts(
-  params: FilteredCatalogProductsParams,
-): Promise<CatalogProductsResult> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  return fetchCatalogProducts(params);
-}
-
 type SearchFacetsParams = {
   activeFilters?: ActiveFilters;
   collection?: string;
@@ -600,35 +584,6 @@ export async function getRelatedProducts(params: {
   return products;
 }
 
-const GET_PRODUCTS_BY_HANDLES_QUERY = gql(
-  `#graphql
-  query getProductsByHandles($query: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    products(first: $first, query: $query) {
-      edges {
-        node {
-          ...ProductCardFields
-        }
-      }
-    }
-  }
-`,
-  [PRODUCT_CARD_FRAGMENT],
-);
-
-const GET_PRODUCT_BY_ID_QUERY = gql(
-  `#graphql
-  query getProductById($id: ID!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    node(id: $id) {
-      __typename
-      ... on Product {
-        ...ProductWithVariantsFields
-      }
-    }
-  }
-`,
-  [PRODUCT_WITH_VARIANTS_FRAGMENT],
-);
-
 const GET_PRODUCTS_BY_IDS_QUERY = gql(
   `#graphql
   query getProductsByIds($ids: [ID!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
@@ -648,37 +603,6 @@ function decodeShopifyId(id: string): string {
     return id;
   }
   return Buffer.from(id, "base64").toString("utf-8");
-}
-
-export async function getProductById({
-  id,
-  locale = defaultLocale,
-}: {
-  id: string;
-  locale?: string;
-}): Promise<ProductDetails | undefined> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  const gid = decodeShopifyId(id);
-
-  const response = await storefront.request(GET_PRODUCT_BY_ID_QUERY, {
-    locale,
-    variables: { id: gid },
-  });
-  assertStorefrontOk(response, "getProductById");
-  const { data } = response;
-
-  const product = data.node?.__typename === "Product" ? data.node : null;
-  if (!product) {
-    return undefined;
-  }
-
-  cacheTag(`product-${product.handle}`);
-  tagProducts([product]);
-
-  return transformShopifyProductDetails(product);
 }
 
 export async function getProductsByIds({
@@ -708,42 +632,6 @@ export async function getProductsByIds({
   const shopifyProducts = data.nodes.flatMap((node) =>
     node?.__typename === "Product" ? [node] : [],
   );
-
-  tagProducts(shopifyProducts);
-
-  return shopifyProducts.map(transformShopifyProductCard);
-}
-
-export async function getProductsByHandles({
-  handles,
-  locale = defaultLocale,
-}: {
-  handles: string[];
-  locale?: string;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  if (handles.length === 0) {
-    return [];
-  }
-
-  const searchQuery = handles.map((h) => `handle:${h}`).join(" OR ");
-
-  const response = await storefront.request(GET_PRODUCTS_BY_HANDLES_QUERY, {
-    locale,
-    variables: { query: searchQuery, first: handles.length },
-  });
-  assertStorefrontOk(response, "getProductsByHandles");
-  const { data } = response;
-
-  const productMap = new Map(flattenConnection(data.products).map((node) => [node.handle, node]));
-
-  const shopifyProducts = handles.flatMap((handle) => {
-    const product = productMap.get(handle);
-    return product ? [product] : [];
-  });
 
   tagProducts(shopifyProducts);
 

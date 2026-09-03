@@ -57,7 +57,7 @@ export type ProductFormInput = ProductInput<ProductFormVariant> & {
   }>;
 };
 
-export interface OptionValueState {
+interface OptionValueState {
   available: boolean;
   crossProduct: boolean;
   exists: boolean;

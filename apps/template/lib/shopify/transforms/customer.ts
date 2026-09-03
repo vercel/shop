@@ -5,12 +5,12 @@ import type {
   ORDER_FRAGMENT,
   ORDER_SUMMARY_FRAGMENT,
 } from "@/lib/shopify/customer-account-fragments";
+import { transformImage } from "@/lib/shopify/transforms/product";
 import type {
   CustomerAddress,
   CustomerOrder,
   CustomerOrderSummary,
   CustomerProfile,
-  Image,
   Money,
   OrderLineItem,
 } from "@/lib/types";
@@ -20,21 +20,10 @@ export type ShopifyOrderSummary = CustomerAccountResultOf<typeof ORDER_SUMMARY_F
 export type ShopifyOrder = CustomerAccountResultOf<typeof ORDER_FRAGMENT>;
 export type ShopifyCustomerProfile = CustomerAccountResultOf<typeof CUSTOMER_PROFILE_FRAGMENT>;
 type ShopifyLineItem = ShopifyOrder["lineItems"]["nodes"][number];
-type ShopifyImage = NonNullable<ShopifyLineItem["image"]>;
 type ShopifyMoney = ShopifyOrderSummary["totalPrice"];
 
 function transformMoney(money: ShopifyMoney): Money {
   return { amount: money.amount, currencyCode: money.currencyCode };
-}
-
-function transformImage(image: ShopifyImage | null | undefined): Image | null {
-  if (!image) return null;
-  return {
-    altText: image.altText ?? "",
-    height: image.height ?? 0,
-    url: image.url,
-    width: image.width ?? 0,
-  };
 }
 
 export function transformCustomerAddress(

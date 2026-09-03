@@ -15,7 +15,7 @@ import { addToCart, HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/cli
 import type { OptimisticProductInfo } from "@/lib/product";
 import type { Cart, CartWarning } from "@/lib/types";
 
-export type CartMutationError = "add" | "remove" | "update";
+type CartMutationError = "add" | "remove" | "update";
 
 type CartContextType = {
   addToCartOptimistic: (
@@ -34,7 +34,6 @@ type CartContextType = {
   lastWarnings: CartWarning[];
   openOverlay: () => void;
   pendingQuantity: number;
-  setCart: (cart: Cart | null) => void;
   setOverlayOpen: (open: boolean) => void;
   setWarnings: (warnings: CartWarning[]) => void;
 };
@@ -54,7 +53,6 @@ const serverFallbackCartContext: CartContextType = {
   lastWarnings: [],
   openOverlay: () => {},
   pendingQuantity: 0,
-  setCart: () => {},
   setOverlayOpen: () => {},
   setWarnings: () => {},
 };
@@ -147,7 +145,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         lastWarnings,
         openOverlay,
         pendingQuantity,
-        setCart: () => {},
         setOverlayOpen,
         setWarnings,
       }}

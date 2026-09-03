@@ -457,11 +457,7 @@ export {
   FilterSectionHeader,
   FilterSidebar,
   FilterSidebarActiveFilters,
-  FilterSidebarCategories,
-  FilterSidebarCategoryBack,
-  FilterSidebarCategoryItem,
   FilterSidebarHeader,
-  FilterSidebarResultsCount,
   FilterSidebarScrollFade,
   FilterSwatchGrid,
 };

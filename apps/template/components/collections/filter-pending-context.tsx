@@ -30,7 +30,7 @@ export function useFilterTransition() {
   return useContext(FilterTransitionContext);
 }
 
-export function useFilterPending() {
+function useFilterPending() {
   return useContext(FilterPendingContext);
 }
 
