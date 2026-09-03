@@ -11,29 +11,21 @@ import {
 } from "react";
 
 import { toDomainCart } from "@/lib/cart";
-import { addToCart, HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
-import type { OptimisticProductInfo } from "@/lib/product";
+import { HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
 import type { Cart, CartWarning } from "@/lib/types";
 
 type CartMutationError = "add" | "remove" | "update";
 
 type CartContextType = {
-  addToCartOptimistic: (
-    variantId: string,
-    quantity: number,
-    productInfo?: OptimisticProductInfo,
-  ) => void;
   cart: Cart | null;
   cartWithPending: Cart | null;
   clearError: () => void;
   clearWarnings: () => void;
-  isAddingToCart: boolean;
   isOverlayOpen: boolean;
   isUpdatingCart: boolean;
   lastError: CartMutationError | null;
   lastWarnings: CartWarning[];
   openOverlay: () => void;
-  pendingQuantity: number;
   setOverlayOpen: (open: boolean) => void;
   setWarnings: (warnings: CartWarning[]) => void;
 };
@@ -41,18 +33,15 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | null>(null);
 
 const serverFallbackCartContext: CartContextType = {
-  addToCartOptimistic: () => {},
   cart: null,
   cartWithPending: null,
   clearError: () => {},
   clearWarnings: () => {},
-  isAddingToCart: false,
   isOverlayOpen: false,
   isUpdatingCart: false,
   lastError: null,
   lastWarnings: [],
   openOverlay: () => {},
-  pendingQuantity: 0,
   setOverlayOpen: () => {},
   setWarnings: () => {},
 };
@@ -67,7 +56,6 @@ function hasCartFailure(errors: CartErrorState): boolean {
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isOverlayOpen, setOverlayOpen] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [dismissedError, setDismissedError] = useState<CartErrorState | null>(null);
   const [warningsOverride, setWarningsOverride] = useState<{
     errors: CartErrorState;
@@ -91,15 +79,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     cartState.revalidating,
   );
 
-  // The store registers the optimistic line one tick after the click; only clear once pending has actually drained.
-  const pendingQuantity = cartState.pending.lines.size;
-  const [sawPending, setSawPending] = useState(false);
-  if (isAddingToCart && pendingQuantity > 0 && !sawPending) setSawPending(true);
-  if (isAddingToCart && sawPending && pendingQuantity === 0) {
-    setIsAddingToCart(false);
-    setSawPending(false);
-  }
-
   const { errors } = cartState;
   const isErrorVisible = hasCartFailure(errors) && dismissedError !== errors;
   const lastError: CartMutationError | null = isErrorVisible ? "update" : null;
@@ -116,35 +95,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [errors],
   );
   const clearWarnings = useCallback(() => setWarnings([]), [setWarnings]);
-  const openOverlay = useCallback(() => setOverlayOpen(true), []);
-
-  const addToCartOptimistic = useCallback(
-    (variantId: string, quantity: number, productInfo?: OptimisticProductInfo) => {
-      setDismissedError(errors);
-      if (!isOverlayOpen) {
-        setIsAddingToCart(true);
-        setOverlayOpen(true);
-      }
-      addToCart(variantId, quantity, productInfo);
-    },
-    [errors, isOverlayOpen],
-  );
+  const openOverlay = useCallback(() => {
+    setDismissedError(errors);
+    setOverlayOpen(true);
+  }, [errors]);
 
   return (
     <CartContext.Provider
       value={{
-        addToCartOptimistic,
         cart,
         cartWithPending,
         clearError,
         clearWarnings,
-        isAddingToCart,
         isOverlayOpen,
         isUpdatingCart,
         lastError,
         lastWarnings,
         openOverlay,
-        pendingQuantity,
         setOverlayOpen,
         setWarnings,
       }}
@@ -187,10 +154,11 @@ interface CartContextSyncProps {
   children: ReactNode;
 }
 
+// The layout streams `initialData` as a promise, so the store has no lines during SSR; the page's
+// own server read fills the HTML until the store hydrates.
 export function CartContextSync({ cart, children }: CartContextSyncProps) {
   const { cartWithPending } = useCart();
 
-  // Fall back to the server-fetched cart until the provider is seeded — avoids a hydration flash.
   return (
     <CartRenderContext.Provider value={cartWithPending ?? cart}>
       {children}

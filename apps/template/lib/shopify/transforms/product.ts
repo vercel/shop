@@ -135,6 +135,7 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     price: variant.price,
     compareAtPrice: variant.compareAtPrice ?? undefined,
     productHandle: variant.product.handle,
+    productTitle: variant.product.title,
     selectedOptions: variant.selectedOptions,
     image: transformImage(variant.image),
     bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],

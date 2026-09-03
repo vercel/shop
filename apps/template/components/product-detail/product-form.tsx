@@ -18,7 +18,9 @@ import {
 } from "@/lib/product";
 import type { Image } from "@/lib/types";
 
-const { ProductProvider, useProduct } = createProductComponents<ProductFormInput>();
+const { ProductProvider, useProduct, useProductForm } = createProductComponents<ProductFormInput>();
+
+export { useProductForm };
 
 const ProductHandleContext = createContext<string | null>(null);
 

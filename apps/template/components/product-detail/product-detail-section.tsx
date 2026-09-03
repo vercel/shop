@@ -283,9 +283,6 @@ function ProductInfoContent({
       ) : (
         <BuyButtons
           fallbackVariant={fallbackVariant}
-          title={product.title}
-          handle={product.handle}
-          featuredImage={product.featuredImage}
           availableForSale={product.availableForSale}
           buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
           quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}

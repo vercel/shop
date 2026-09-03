@@ -6,10 +6,9 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useCart } from "@/components/cart/context";
-import { useProductFormState } from "@/components/product-detail/product-form";
+import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
-import { type ProductFormVariant, variantToOptimisticInfo } from "@/lib/product";
-import type { Image } from "@/lib/types";
+import type { ProductFormVariant } from "@/lib/product";
 import { cn } from "@/lib/utils";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
@@ -18,27 +17,21 @@ export function BuyButtons({
   availableForSale = true,
   buyWithShop = true,
   fallbackVariant,
-  featuredImage,
-  handle,
   quantityPicker = true,
-  title,
 }: {
   availableForSale?: boolean;
   buyWithShop?: boolean;
   fallbackVariant: ProductFormVariant | undefined;
-  featuredImage: Image | null;
-  handle: string;
   quantityPicker?: boolean;
-  title: string;
 }) {
-  const selectedVariant = useProductFormState().selectedVariant ?? fallbackVariant;
-  const selectedVariantId = selectedVariant?.id;
+  const { formProps, pending, register, selectedVariant: storeVariant } = useProductForm();
+  const selectedVariant = storeVariant ?? fallbackVariant;
 
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { addToCartOptimistic, pendingQuantity, isAddingToCart } = useCart();
+  const { openOverlay } = useCart();
 
   // Reset pending state when returning from checkout (bfcache / back navigation)
   useEffect(() => {
@@ -48,20 +41,6 @@ export function BuyButtons({
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
-
-  const handleAddToCart = () => {
-    if (selectedVariantId && selectedVariant) {
-      addToCartOptimistic(
-        selectedVariantId,
-        quantity,
-        variantToOptimisticInfo(selectedVariant, {
-          title,
-          handle,
-          featuredImage,
-        }),
-      );
-    }
-  };
 
   if (!selectedVariant) {
     return null;
@@ -78,15 +57,16 @@ export function BuyButtons({
   });
 
   const getButtonText = () => {
-    if (pendingQuantity > 0) return t("addingQuantity", { quantity: String(pendingQuantity) });
-    if (isAddingToCart) return t("addingToCart");
+    if (pending) return t("addingToCart");
     if (requiresBundleConfiguration) return t("bundleConfigurationRequired");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");
   };
 
   return (
-    <div className="grid gap-2.5">
+    <form {...formProps({ beforeSubmit: openOverlay })} className="grid gap-2.5">
+      <input type="hidden" {...register("merchandiseId", {})} />
+      <input type="hidden" {...register("quantity", { value: quantity })} />
       <div className="flex gap-2.5">
         {quantityPicker ? (
           <div
@@ -122,9 +102,8 @@ export function BuyButtons({
           </div>
         ) : null}
         <Button
-          type="button"
-          disabled={isOutOfStock || requiresBundleConfiguration}
-          onClick={handleAddToCart}
+          {...register("addToCart", {})}
+          disabled={isOutOfStock || requiresBundleConfiguration || pending}
           className="h-12 min-w-0 flex-1 justify-center"
         >
           {getButtonText()}
@@ -152,6 +131,6 @@ export function BuyButtons({
           )}
         </a>
       ) : null}
-    </div>
+    </form>
   );
 }
