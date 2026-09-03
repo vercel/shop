@@ -40,7 +40,9 @@ export async function ProductCard({
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
 
   return (
-    <Link href={href} className={className}>
+    // Viewport prefetch fetches only the shared PDP App Shell; hover/touch upgrades this link to a
+    // per-link runtime prefetch that resolves the product through the cache before the click.
+    <Link href={href} className={className} unstable_dynamicOnHover>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>
