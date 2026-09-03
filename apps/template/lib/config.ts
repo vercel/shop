@@ -1,6 +1,6 @@
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
-export type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
+type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
 
 export interface ShopConfig {
   agent: {

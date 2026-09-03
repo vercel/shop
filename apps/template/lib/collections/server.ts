@@ -20,7 +20,7 @@ import { RESULTS_PER_PAGE } from "@/lib/utils";
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
-export interface BrowseParams {
+interface BrowseParams {
   activeFilters: ActiveFilters;
   filters: ProductFilter[];
   sort?: string;
@@ -57,7 +57,7 @@ export async function getCollectionSearchState(
   return resolveBrowseParams(recordToSearchParams(await searchParamsPromise));
 }
 
-export function recordToSearchParams(
+function recordToSearchParams(
   record: Record<string, string | string[] | undefined>,
 ): URLSearchParams {
   const params = new URLSearchParams();

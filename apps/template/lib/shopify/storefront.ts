@@ -115,10 +115,7 @@ const UCP_AGENT_PROFILE_URL = process.env.UCP_AGENT_PROFILE_URL;
 
 let mcpRpcId = 0;
 
-export async function callStorefrontMcp<T>(
-  tool: string,
-  args: Record<string, unknown>,
-): Promise<T> {
+async function callStorefrontMcp<T>(tool: string, args: Record<string, unknown>): Promise<T> {
   const meta = UCP_AGENT_PROFILE_URL
     ? { "ucp-agent": { profile: UCP_AGENT_PROFILE_URL } }
     : undefined;
@@ -165,12 +162,12 @@ export async function callStorefrontMcp<T>(
   throw new Error(`Storefront MCP ${tool}: empty response`);
 }
 
-export interface McpMoney {
+interface McpMoney {
   amount: number;
   currency: string;
 }
 
-export interface McpCatalogProduct {
+interface McpCatalogProduct {
   categories?: Array<{ name?: string }>;
   description?: { html?: string };
   id: string;
@@ -213,39 +210,6 @@ export async function searchCatalog(params: {
 }
 
 // MCP details use major-unit strings while search uses minor-unit numbers.
-export interface McpProductDetails {
-  description?: string;
-  image_url?: string | null;
-  images?: Array<{ alt_text?: string; url?: string }>;
-  options?: Array<{ name?: string; values?: string[] }>;
-  price_range?: { currency?: string; max?: string; min?: string };
-  product_id: string;
-  selectedOrFirstAvailableVariant?: {
-    available?: boolean;
-    currency?: string;
-    price?: string;
-    title?: string;
-    variant_id?: string;
-  };
-  title: string;
-  total_variants?: number;
-}
-
-export async function getCatalogProduct(params: {
-  locale?: string;
-  options?: Record<string, string>;
-  productId: string;
-}): Promise<McpProductDetails | undefined> {
-  const { locale = defaultLocale, options, productId } = params;
-
-  const result = await callStorefrontMcp<{ product?: McpProductDetails }>("get_product_details", {
-    country: getCountryCode(locale),
-    language: getLanguageCode(locale),
-    product_id: productId,
-    ...(options ? { options } : {}),
-  });
-  return result.product;
-}
 
 export interface McpPolicyAnswer {
   answer?: string;

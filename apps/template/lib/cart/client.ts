@@ -119,7 +119,7 @@ export function addToCart(
   dispatchLinesAdd([line], productInfo, promise);
 }
 
-export interface ServerCartLine {
+interface ServerCartLine {
   components?: ServerCartLine[];
   cost: { totalAmount: GraphqlMoney };
   id?: string;

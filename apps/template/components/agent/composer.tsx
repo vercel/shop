@@ -7,7 +7,7 @@ import type { KeyboardEvent } from "react";
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
-export type AgentStatus = "error" | "ready" | "streaming" | "submitted";
+type AgentStatus = "error" | "ready" | "streaming" | "submitted";
 
 interface AgentComposerProps {
   value: string;

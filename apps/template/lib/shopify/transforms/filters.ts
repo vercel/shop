@@ -75,7 +75,7 @@ export function getSelectedColorFilterLabel(
   return selectedValue;
 }
 
-export function getParamKeyFromShopifyId(filterId: string): string {
+function getParamKeyFromShopifyId(filterId: string): string {
   return filterId.toLowerCase();
 }
 
