@@ -37,7 +37,7 @@ export type ProductFormVariant = Pick<
   ProductVariant,
   "availableForSale" | "compareAtPrice" | "id" | "image" | "price" | "selectedOptions" | "title"
 > & {
-  product: { handle: string };
+  product: { handle: string; title: string };
   requiresBundleConfiguration: boolean;
 };
 
@@ -97,7 +97,7 @@ export function toProductFormVariant(variant: ProductVariant): ProductFormVarian
     id: variant.id,
     image: variant.image,
     price: variant.price,
-    product: { handle: variant.productHandle },
+    product: { handle: variant.productHandle, title: variant.productTitle },
     requiresBundleConfiguration: variant.requiresComponents && variant.components.length === 0,
     selectedOptions: variant.selectedOptions,
     title: variant.title,

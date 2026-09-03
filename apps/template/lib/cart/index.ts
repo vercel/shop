@@ -104,15 +104,23 @@ function toDomainLine(line: HydrogenLine): CartLine {
   };
 }
 
+// A fresh optimistic cart has no cost currency until Shopify responds; the first line's price supplies it.
+function withLineCurrency(money: Money, lines: HydrogenLine[]): Money {
+  if (money.currencyCode) return money;
+  const currencyCode = lines[0]?.cost.totalAmount.currencyCode;
+  return currencyCode ? { ...money, currencyCode } : money;
+}
+
 export function toDomainCart(data: CartData | null | undefined): Cart | null {
   if (!data) return null;
   if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
+  const rawLines = data.lines.nodes as unknown as HydrogenLine[];
   return {
     appliedGiftCards: [],
     checkoutUrl: data.checkoutUrl ?? "",
     cost: {
-      subtotalAmount: data.cost.subtotalAmount,
-      totalAmount: data.cost.totalAmount,
+      subtotalAmount: withLineCurrency(data.cost.subtotalAmount, rawLines),
+      totalAmount: withLineCurrency(data.cost.totalAmount, rawLines),
     },
     discountAllocations: [],
     discountCodes: data.discountCodes.map((d) => ({
@@ -120,8 +128,8 @@ export function toDomainCart(data: CartData | null | undefined): Cart | null {
       code: d.code,
     })),
     id: data.id ?? undefined,
-    lines: data.lines.nodes
-      .map((l) => toDomainLine(l as unknown as HydrogenLine))
+    lines: rawLines
+      .map(toDomainLine)
       .sort(
         (a, b) =>
           Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -

@@ -83,6 +83,7 @@ export interface ProductVariant {
   price: Money;
   /** Differs from the page's handle for combined-listing option values. */
   productHandle: string;
+  productTitle: string;
   requiresComponents: boolean;
   selectedOptions: SelectedOption[];
   title: string;

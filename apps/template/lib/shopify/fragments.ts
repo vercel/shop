@@ -28,6 +28,7 @@ export const PRODUCT_VARIANT_FRAGMENT = gql(
     }
     product {
       handle
+      title
     }
   }
 `,
