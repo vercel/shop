@@ -1,4 +1,8 @@
-import { getSelectedProductOptions, type ProductInput } from "@shopify/hydrogen";
+import {
+  buildProductSelectionSearchParams,
+  getSelectedProductOptions,
+  type ProductInput,
+} from "@shopify/hydrogen";
 
 import type {
   Image,
@@ -147,11 +151,23 @@ export function toSelectedOptionList(selectedOptions: SelectedOptions): Selected
   return Object.entries(selectedOptions).map(([name, value]) => ({ name, value }));
 }
 
-export function buildProductUrl(handle: string, selectedOptions: SelectedOption[]): string {
-  const parts = selectedOptions.map(
-    ({ name, value }) => `${encodeURIComponent(name.toLowerCase())}=${encodeURIComponent(value)}`,
-  );
-  return parts.length > 0 ? `/products/${handle}?${parts.join("&")}` : `/products/${handle}`;
+export function buildProductUrl(
+  handle: string,
+  selectedOptions: readonly SelectedOption[],
+  base?: URLSearchParams,
+): string {
+  const searchParams = buildProductSelectionSearchParams({
+    base,
+    optionNames: base ? [...base.keys()].filter((key) => isOptionParam(key, selectedOptions)) : [],
+    selectedOptions,
+  });
+  return searchParams.size > 0 ? `/products/${handle}?${searchParams}` : `/products/${handle}`;
+}
+
+// Inbound URLs may carry lowercased option names; strip them case-insensitively so they don't linger next to the new selection.
+function isOptionParam(key: string, selectedOptions: readonly SelectedOption[]): boolean {
+  const lower = key.toLowerCase();
+  return selectedOptions.some((option) => option.name.toLowerCase() === lower);
 }
 
 function findColorOption(options: ProductOption[]): ProductOption | undefined {
