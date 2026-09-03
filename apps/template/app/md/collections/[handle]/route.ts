@@ -9,7 +9,7 @@ import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { getCollection } from "@/lib/shopify/operations/collections";
-import { getCollectionProducts } from "@/lib/shopify/operations/products";
+import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
@@ -50,9 +50,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
     const cursor = url.searchParams.get("cursor") ?? undefined;
     const { activeFilters, filters, sort } = searchState;
 
+    // Same live read as the HTML page so agents and shoppers see one result set per URL.
     const [collection, result] = await Promise.all([
       getCollection({ handle, locale }),
-      getCollectionProducts({
+      fetchCollectionProducts({
         activeFilters,
         collection: handle,
         sortKey: sort,
