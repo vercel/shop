@@ -2,7 +2,7 @@ import { resolveBrowseParams } from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
-import { getSearchFacets, searchIndexProducts } from "@/lib/shopify/operations/products";
+import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request) {
@@ -14,8 +14,9 @@ export async function GET(request: Request) {
   const { activeFilters, filters, sort } = resolveBrowseParams(url.searchParams);
 
   try {
+    // Same live reads as the HTML page so agents and shoppers see one result set per URL.
     const [results, facets] = await Promise.all([
-      searchIndexProducts({
+      fetchSearchIndexProducts({
         query,
         collection,
         sortKey: sort,
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
         filters,
         locale,
       }),
-      getSearchFacets({ activeFilters, query, collection, filters, locale }),
+      fetchSearchFacets({ activeFilters, query, collection, filters, locale }),
     ]);
 
     const markdown = searchResultsToMarkdown({

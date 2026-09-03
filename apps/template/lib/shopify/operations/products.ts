@@ -540,14 +540,6 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   };
 }
 
-export async function getSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  return fetchSearchFacets(params);
-}
-
 export async function getProductOptionValues(params: {
   ids: string[];
 }): Promise<ProductOptionValues> {
