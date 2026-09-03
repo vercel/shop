@@ -1,13 +1,12 @@
 "use client";
 
+import type { CartErrorState } from "@shopify/hydrogen";
 import {
   type ComponentProps,
   createContext,
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -64,20 +63,27 @@ function toLegacyWarnings(group: { warnings: { code: string; message: string }[]
   return group.warnings.map((w) => ({ code: w.code, message: w.message, target: "" }));
 }
 
+function hasCartFailure(errors: CartErrorState): boolean {
+  return errors.network.length > 0 || errors.lines.size > 0 || errors.cart.userErrors.length > 0;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isOverlayOpen, setOverlayOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [lastError, setLastError] = useState<CartMutationError | null>(null);
-  const [localWarnings, setLocalWarnings] = useState<CartWarning[]>([]);
-  const clearError = useCallback(() => setLastError(null), []);
-  const clearWarnings = useCallback(() => setLocalWarnings([]), []);
+  const [dismissedError, setDismissedError] = useState<CartErrorState | null>(null);
+  const [warningsOverride, setWarningsOverride] = useState<{
+    errors: CartErrorState;
+    warnings: CartWarning[];
+  } | null>(null);
 
   const cartState = useHydrogenCart((state) => state);
   const cartWithPending = toDomainCart(cartState.data);
   const isCostSettling = Boolean(cartState.pending.cost || cartState.revalidating);
-  const settledCartRef = useRef(cartWithPending);
-  if (!isCostSettling) settledCartRef.current = cartWithPending;
-  const cart = settledCartRef.current;
+  // Hold the last settled totals while Shopify recomputes cost so the drawer doesn't flash stale-to-new.
+  const [settledCart, setSettledCart] = useState(cartWithPending);
+  if (!isCostSettling && settledCart !== cartWithPending) setSettledCart(cartWithPending);
+  const cart = isCostSettling ? settledCart : cartWithPending;
+
   const isUpdatingCart = Boolean(
     cartState.pending.attributes ||
     cartState.pending.cost ||
@@ -87,39 +93,44 @@ export function CartProvider({ children }: { children: ReactNode }) {
     cartState.revalidating,
   );
 
-  const isOverlayOpenRef = useRef(isOverlayOpen);
-  useEffect(() => {
-    isOverlayOpenRef.current = isOverlayOpen;
-  }, [isOverlayOpen]);
+  // The store registers the optimistic line one tick after the click; only clear once pending has actually drained.
+  const pendingQuantity = cartState.pending.lines.size;
+  const [sawPending, setSawPending] = useState(false);
+  if (isAddingToCart && pendingQuantity > 0 && !sawPending) setSawPending(true);
+  if (isAddingToCart && sawPending && pendingQuantity === 0) {
+    setIsAddingToCart(false);
+    setSawPending(false);
+  }
 
+  const { errors } = cartState;
+  const isErrorVisible = hasCartFailure(errors) && dismissedError !== errors;
+  const lastError: CartMutationError | null = isErrorVisible ? "update" : null;
+  const lastWarnings =
+    warningsOverride?.errors === errors
+      ? warningsOverride.warnings
+      : isErrorVisible
+        ? toLegacyWarnings(errors.cart)
+        : [];
+
+  const clearError = useCallback(() => setDismissedError(errors), [errors]);
+  const setWarnings = useCallback(
+    (warnings: CartWarning[]) => setWarningsOverride({ errors, warnings }),
+    [errors],
+  );
+  const clearWarnings = useCallback(() => setWarnings([]), [setWarnings]);
   const openOverlay = useCallback(() => setOverlayOpen(true), []);
-
-  useEffect(() => {
-    if (cartState.pending.lines.size === 0) setIsAddingToCart(false);
-  }, [cartState.pending.lines]);
 
   const addToCartOptimistic = useCallback(
     (variantId: string, quantity: number, productInfo?: OptimisticProductInfo) => {
-      setLastError(null);
-      if (!isOverlayOpenRef.current) {
+      setDismissedError(errors);
+      if (!isOverlayOpen) {
         setIsAddingToCart(true);
         setOverlayOpen(true);
       }
       addToCart(variantId, quantity, productInfo);
     },
-    [],
+    [errors, isOverlayOpen],
   );
-
-  useEffect(() => {
-    const hasFailure =
-      cartState.errors.network.length > 0 ||
-      cartState.errors.lines.size > 0 ||
-      cartState.errors.cart.userErrors.length > 0;
-    if (hasFailure) {
-      setLastError("update");
-      setLocalWarnings(toLegacyWarnings(cartState.errors.cart));
-    }
-  }, [cartState.errors]);
 
   return (
     <CartContext.Provider
@@ -133,12 +144,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         isOverlayOpen,
         isUpdatingCart,
         lastError,
-        lastWarnings: localWarnings,
+        lastWarnings,
         openOverlay,
-        pendingQuantity: cartState.pending.lines.size,
+        pendingQuantity,
         setCart: () => {},
         setOverlayOpen,
-        setWarnings: setLocalWarnings,
+        setWarnings,
       }}
     >
       {children}

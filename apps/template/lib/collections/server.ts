@@ -32,6 +32,7 @@ export interface CollectionSearchState extends BrowseParams {
 
 export interface CollectionResultsData extends BrowseParams {
   collection: string;
+  dataSearch: string;
   result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
   transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
 }
@@ -79,7 +80,7 @@ export async function getCollectionResultsData({
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, filters, sort } = await searchStatePromise;
+  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
   const result = await fetchCollectionProducts({
     activeFilters,
     collection: handle,
@@ -92,6 +93,7 @@ export async function getCollectionResultsData({
   return {
     activeFilters,
     collection: handle,
+    dataSearch,
     sort,
     filters,
     result,
@@ -121,7 +123,7 @@ export async function getAllProductsResultsData({
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, filters, sort } = await searchStatePromise;
+  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
   const [products, facets] = await Promise.all([
     fetchSearchIndexProducts({
       activeFilters,
@@ -136,6 +138,7 @@ export async function getAllProductsResultsData({
   return {
     activeFilters,
     collection: ALL_PRODUCTS_HANDLE,
+    dataSearch,
     sort,
     filters,
     result: {

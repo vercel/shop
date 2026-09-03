@@ -27,7 +27,7 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ result, collection }, t, tProduct] = await Promise.all([
+  const [{ collection, dataSearch, result }, t, tProduct] = await Promise.all([
     collectionResultsDataPromise,
     getTranslations("search"),
     getTranslations("product"),
@@ -56,6 +56,7 @@ async function Render({
   if (collection === ALL_PRODUCTS_HANDLE) {
     return (
       <InfiniteProductGrid
+        key={dataSearch}
         initialProducts={products}
         initialPageInfo={result.pageInfo}
         locale={locale}
@@ -70,6 +71,7 @@ async function Render({
 
   return (
     <InfiniteProductGrid
+      key={dataSearch}
       initialProducts={products}
       initialPageInfo={result.pageInfo}
       locale={locale}
