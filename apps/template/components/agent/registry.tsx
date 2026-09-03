@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { catalog } from "@/lib/agent";
 import type { AgentVariant } from "@/lib/agent/products";
+import { useCartForm } from "@/lib/cart/client";
 import { cn } from "@/lib/utils";
 
 import { useCart } from "../cart/context";
@@ -211,7 +212,8 @@ export const { registry } = defineRegistry(catalog, {
       const locale = useLocale();
       const t = useTranslations("cart");
       const tAgent = useTranslations("agent");
-      const { addToCartOptimistic } = useCart();
+      const { openOverlay } = useCart();
+      const { formProps, register } = useCartForm();
       const product = useAgentProductDetails(props.handle);
       const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -278,29 +280,13 @@ export const { registry } = defineRegistry(catalog, {
               }
               locale={locale}
             />
-            <Button
-              disabled={!canAdd}
-              onClick={() => {
-                if (!selected) return;
-                addToCartOptimistic(selected.id, 1, {
-                  image: {
-                    altText: product.title,
-                    height: 0,
-                    url: product.image ?? "",
-                    width: 0,
-                  },
-                  price: selected.price,
-                  productHandle: product.handle,
-                  productTitle: product.title,
-                  selectedOptions: selected.options,
-                  variantTitle: selected.title,
-                });
-              }}
-              size="sm"
-              type="button"
-            >
-              {t("addToCart")}
-            </Button>
+            <form {...formProps({ beforeSubmit: openOverlay })}>
+              <input type="hidden" {...register("merchandiseId", { value: selected?.id ?? "" })} />
+              <input type="hidden" {...register("quantity", { value: 1 })} />
+              <Button {...register("add")} disabled={!canAdd} size="sm" type="submit">
+                {t("addToCart")}
+              </Button>
+            </form>
           </div>
         </div>
       );
