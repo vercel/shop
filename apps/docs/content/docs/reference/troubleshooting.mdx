@@ -28,7 +28,7 @@ type: troubleshooting
 
 **Symptom:** The cart becomes empty after navigation or reload.
 
-**Check:** In browser developer tools, open **Application → Cookies** and confirm the HttpOnly `cart` cookie exists for the current domain. It should have a 14-day expiry.
+**Check:** In browser developer tools, open **Application → Cookies** and confirm the `cart` cookie exists for the current domain. It should have a 14-day expiry.
 
 **Fix:** Use one consistent storefront domain and remove any deployment or proxy setting that rewrites the cookie domain.
 

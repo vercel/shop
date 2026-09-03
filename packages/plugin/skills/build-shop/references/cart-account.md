@@ -4,7 +4,7 @@
 
 - Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart), [authentication anatomy](https://vercel.shop/docs/anatomy/authentication)
 - Cart route and components: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`, `apps/template/components/cart/`
-- Cart data and mutations: `apps/template/lib/cart/`, `apps/template/lib/shopify/operations/cart.ts`, `apps/template/lib/shopify/transforms/cart.ts`
+- Cart data and mutations: `apps/template/lib/cart/` (all reads and mutations go through Hydrogen's `createCartServerHandlers`; there is no template-owned cart GraphQL)
 - Account routes and components: `apps/template/app/account/`, `apps/template/components/account/`
 - Auth and Customer Account API: `apps/template/lib/auth/`, `apps/template/lib/customer/action.ts`, `apps/template/lib/shopify/customer-account.ts`, `apps/template/lib/shopify/operations/customer.ts`
 - Public source fallback: [cart source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [account source](https://github.com/vercel/shop/tree/main/apps/template/app/account), [template source](https://github.com/vercel/shop/tree/main/apps/template)

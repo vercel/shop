@@ -43,7 +43,7 @@ export async function ComplementaryProducts({
               )}
               <span className="min-w-0 flex-1 truncate font-medium text-sm">{product.title}</span>
               <span className="shrink-0 text-foreground/50 text-sm">
-                {formatPrice(Number(product.price.amount), product.price.currencyCode, locale)}
+                {formatPrice(product.price, locale)}
               </span>
             </Link>
           </li>

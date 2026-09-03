@@ -1,7 +1,8 @@
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
-import { createTable, escapeMarkdown, formatPrice } from "./utils";
+import { createTable, escapeMarkdown } from "./utils";
 
 const SORT_LABELS: Record<string, string> = {
   "best-matches": "Best matches",

@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { getSearchResultUrl } from "@shopify/hydrogen";
 import { Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -78,7 +79,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     e.preventDefault();
     const q = inputRef.current?.value?.trim();
     if (!q) return;
-    navigate(`/search?q=${encodeURIComponent(q)}`);
+    navigate(getSearchResultUrl({ baseUrl: "/search", term: q }));
   }
 
   // Only queries and products are rendered — exclude collections from keyboard nav
@@ -231,7 +232,9 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                           <button
                             type="button"
                             onClick={() =>
-                              navigate(`/search?q=${encodeURIComponent(query.trim())}`)
+                              navigate(
+                                getSearchResultUrl({ baseUrl: "/search", term: query.trim() }),
+                              )
                             }
                             className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
                           >

@@ -1,4 +1,5 @@
 import "server-only";
+import { type AnyCustomerAccountDocument, gql } from "@shopify/hydrogen/customer-account";
 import { cache } from "react";
 
 import { requireCustomerAccessToken } from "@/lib/auth/server";
@@ -10,19 +11,21 @@ import type {
   CustomerProfile,
 } from "@/lib/types";
 
-import { customerAccountFetch } from "../customer-account";
+import { customerAccountFetch, type CustomerAccountResultOf } from "../customer-account";
 import {
-  type ShopifyCustomerAddress,
-  type ShopifyCustomerProfile,
-  type ShopifyOrder,
-  type ShopifyOrderSummary,
+  ADDRESS_FRAGMENT,
+  CUSTOMER_PROFILE_FRAGMENT,
+  ORDER_FRAGMENT,
+  ORDER_SUMMARY_FRAGMENT,
+} from "../customer-account-fragments";
+import {
   transformCustomerAddress,
   transformCustomerProfile,
   transformOrder,
   transformOrderSummary,
 } from "../transforms/customer";
 
-export const ORDERS_PER_PAGE = 10;
+const ORDERS_PER_PAGE = 10;
 
 export interface CustomerUserError {
   code?: string;
@@ -30,52 +33,19 @@ export interface CustomerUserError {
   message: string;
 }
 
-const ADDRESS_FRAGMENT = `
-  fragment AddressFields on CustomerAddress {
-    address1
-    address2
-    city
-    company
-    firstName
-    formatted
-    id
-    lastName
-    phoneNumber
-    territoryCode
-    zip
-    zoneCode
-  }
-`;
-
-const ORDER_SUMMARY_FRAGMENT = `
-  fragment OrderSummaryFields on Order {
-    financialStatus
-    fulfillmentStatus
-    id
-    name
-    number
-    processedAt
-    totalPrice {
-      amount
-      currencyCode
-    }
-  }
-`;
-
-const GET_CUSTOMER_PROFILE_QUERY = `
+const GET_CUSTOMER_PROFILE_QUERY = gql(
+  `#graphql
   query getCustomerProfile {
     customer {
-      emailAddress {
-        emailAddress
-      }
-      firstName
-      lastName
+      ...CustomerProfileFields
     }
   }
-`;
+`,
+  [CUSTOMER_PROFILE_FRAGMENT],
+);
 
-const GET_CUSTOMER_ORDERS_QUERY = `
-  ${ORDER_SUMMARY_FRAGMENT}
+const GET_CUSTOMER_ORDERS_QUERY = gql(
+  `#graphql
   query getCustomerOrders($after: String, $before: String, $first: Int, $last: Int) {
     customer {
       orders(after: $after, before: $before, first: $first, last: $last, reverse: true, sortKey: PROCESSED_AT) {
@@ -91,53 +61,23 @@ const GET_CUSTOMER_ORDERS_QUERY = `
       }
     }
   }
-`;
+`,
+  [ORDER_SUMMARY_FRAGMENT],
+);
 
-const GET_CUSTOMER_ORDER_QUERY = `
-  ${ADDRESS_FRAGMENT}
-  ${ORDER_SUMMARY_FRAGMENT}
+const GET_CUSTOMER_ORDER_QUERY = gql(
+  `#graphql
   query getCustomerOrder($id: ID!) {
     order(id: $id) {
-      ...OrderSummaryFields
-      lineItems(first: 50) {
-        nodes {
-          image {
-            altText
-            height
-            url
-            width
-          }
-          quantity
-          title
-          totalPrice {
-            amount
-            currencyCode
-          }
-          variantTitle
-        }
-      }
-      shippingAddress {
-        ...AddressFields
-      }
-      statusPageUrl
-      subtotal {
-        amount
-        currencyCode
-      }
-      totalShipping {
-        amount
-        currencyCode
-      }
-      totalTax {
-        amount
-        currencyCode
-      }
+      ...OrderFields
     }
   }
-`;
+`,
+  [ORDER_FRAGMENT],
+);
 
-const GET_CUSTOMER_ADDRESSES_QUERY = `
-  ${ADDRESS_FRAGMENT}
+const GET_CUSTOMER_ADDRESSES_QUERY = gql(
+  `#graphql
   query getCustomerAddresses {
     customer {
       addresses(first: 30) {
@@ -150,9 +90,11 @@ const GET_CUSTOMER_ADDRESSES_QUERY = `
       }
     }
   }
-`;
+`,
+  [ADDRESS_FRAGMENT],
+);
 
-const CUSTOMER_ADDRESS_CREATE_MUTATION = `
+const CUSTOMER_ADDRESS_CREATE_MUTATION = gql(`#graphql
   mutation customerAddressCreate($address: CustomerAddressInput!, $defaultAddress: Boolean) {
     customerAddressCreate(address: $address, defaultAddress: $defaultAddress) {
       customerAddress {
@@ -165,9 +107,9 @@ const CUSTOMER_ADDRESS_CREATE_MUTATION = `
       }
     }
   }
-`;
+`);
 
-const CUSTOMER_ADDRESS_UPDATE_MUTATION = `
+const CUSTOMER_ADDRESS_UPDATE_MUTATION = gql(`#graphql
   mutation customerAddressUpdate($address: CustomerAddressInput, $addressId: ID!, $defaultAddress: Boolean) {
     customerAddressUpdate(address: $address, addressId: $addressId, defaultAddress: $defaultAddress) {
       customerAddress {
@@ -180,9 +122,9 @@ const CUSTOMER_ADDRESS_UPDATE_MUTATION = `
       }
     }
   }
-`;
+`);
 
-const CUSTOMER_ADDRESS_DELETE_MUTATION = `
+const CUSTOMER_ADDRESS_DELETE_MUTATION = gql(`#graphql
   mutation customerAddressDelete($addressId: ID!) {
     customerAddressDelete(addressId: $addressId) {
       deletedAddressId
@@ -193,9 +135,9 @@ const CUSTOMER_ADDRESS_DELETE_MUTATION = `
       }
     }
   }
-`;
+`);
 
-const CUSTOMER_UPDATE_MUTATION = `
+const CUSTOMER_UPDATE_MUTATION = gql(`#graphql
   mutation customerUpdate($input: CustomerUpdateInput!) {
     customerUpdate(input: $input) {
       customer {
@@ -208,24 +150,37 @@ const CUSTOMER_UPDATE_MUTATION = `
       }
     }
   }
-`;
+`);
 
-async function customerFetch<T>(
-  operation: string,
-  query: string,
-  returnTo: string,
-  variables?: Record<string, unknown>,
-): Promise<T> {
+type CustomerFetchOptions<Doc extends AnyCustomerAccountDocument> = Omit<
+  Parameters<typeof customerAccountFetch<Doc>>[0],
+  "accessToken"
+> & { returnTo: string };
+
+async function customerFetch<const Doc extends AnyCustomerAccountDocument>({
+  returnTo,
+  ...options
+}: CustomerFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
   const accessToken = await requireCustomerAccessToken(returnTo);
-  return customerAccountFetch<T>({ accessToken, operation, query, variables });
+  return customerAccountFetch<Doc>({ accessToken, ...options } as never);
+}
+
+function toUserErrors(
+  errors: Array<{ code?: string | null; field?: string[] | null; message: string }>,
+): CustomerUserError[] {
+  return errors.map((error) => ({
+    code: error.code ?? undefined,
+    field: error.field,
+    message: error.message,
+  }));
 }
 
 export const getCustomerProfile = cache(async (): Promise<CustomerProfile | null> => {
-  const data = await customerFetch<{ customer: ShopifyCustomerProfile | null }>(
-    "getCustomerProfile",
-    GET_CUSTOMER_PROFILE_QUERY,
-    "/account/profile",
-  );
+  const data = await customerFetch({
+    document: GET_CUSTOMER_PROFILE_QUERY,
+    operation: "getCustomerProfile",
+    returnTo: "/account/profile",
+  });
 
   if (!data.customer) return null;
 
@@ -242,23 +197,16 @@ export async function getCustomerOrders(cursor?: {
   if (cursor?.before) orderParams.set("before", cursor.before);
   const returnTo = `/account/orders${orderParams.size > 0 ? `?${orderParams}` : ""}`;
 
-  const data = await customerFetch<{
-    customer: {
-      orders: {
-        nodes: ShopifyOrderSummary[];
-        pageInfo: {
-          endCursor: string | null;
-          hasNextPage: boolean;
-          hasPreviousPage: boolean;
-          startCursor: string | null;
-        };
-      };
-    } | null;
-  }>("getCustomerOrders", GET_CUSTOMER_ORDERS_QUERY, returnTo, {
-    after: cursor?.after,
-    before: cursor?.before,
-    first: paginateBackward ? undefined : ORDERS_PER_PAGE,
-    last: paginateBackward ? ORDERS_PER_PAGE : undefined,
+  const data = await customerFetch({
+    document: GET_CUSTOMER_ORDERS_QUERY,
+    operation: "getCustomerOrders",
+    returnTo,
+    variables: {
+      after: cursor?.after,
+      before: cursor?.before,
+      first: paginateBackward ? undefined : ORDERS_PER_PAGE,
+      last: paginateBackward ? ORDERS_PER_PAGE : undefined,
+    },
   });
 
   const orders = data.customer?.orders;
@@ -276,17 +224,22 @@ export async function getCustomerOrders(cursor?: {
 
   return {
     orders: orders.nodes.map(transformOrderSummary),
-    pageInfo: orders.pageInfo,
+    pageInfo: {
+      endCursor: orders.pageInfo.endCursor ?? null,
+      hasNextPage: orders.pageInfo.hasNextPage,
+      hasPreviousPage: orders.pageInfo.hasPreviousPage,
+      startCursor: orders.pageInfo.startCursor ?? null,
+    },
   };
 }
 
 export async function getCustomerOrder(id: string): Promise<CustomerOrder | null> {
-  const data = await customerFetch<{ order: ShopifyOrder | null }>(
-    "getCustomerOrder",
-    GET_CUSTOMER_ORDER_QUERY,
-    `/account/orders/${encodeURIComponent(id)}`,
-    { id },
-  );
+  const data = await customerFetch({
+    document: GET_CUSTOMER_ORDER_QUERY,
+    operation: "getCustomerOrder",
+    returnTo: `/account/orders/${encodeURIComponent(id)}`,
+    variables: { id },
+  });
 
   if (!data.order) return null;
 
@@ -294,12 +247,11 @@ export async function getCustomerOrder(id: string): Promise<CustomerOrder | null
 }
 
 export async function getCustomerAddresses(): Promise<CustomerAddress[]> {
-  const data = await customerFetch<{
-    customer: {
-      addresses: { nodes: ShopifyCustomerAddress[] };
-      defaultAddress: { id: string } | null;
-    } | null;
-  }>("getCustomerAddresses", GET_CUSTOMER_ADDRESSES_QUERY, "/account/addresses");
+  const data = await customerFetch({
+    document: GET_CUSTOMER_ADDRESSES_QUERY,
+    operation: "getCustomerAddresses",
+    returnTo: "/account/addresses",
+  });
 
   if (!data.customer) return [];
 
@@ -315,14 +267,14 @@ export async function createCustomerAddress(
   address: CustomerAddressInput,
   defaultAddress: boolean,
 ): Promise<CustomerUserError[]> {
-  const data = await customerFetch<{
-    customerAddressCreate: { userErrors: CustomerUserError[] };
-  }>("customerAddressCreate", CUSTOMER_ADDRESS_CREATE_MUTATION, "/account/addresses", {
-    address,
-    defaultAddress,
+  const data = await customerFetch({
+    document: CUSTOMER_ADDRESS_CREATE_MUTATION,
+    operation: "customerAddressCreate",
+    returnTo: "/account/addresses",
+    variables: { address, defaultAddress },
   });
 
-  return data.customerAddressCreate.userErrors;
+  return toUserErrors(data.customerAddressCreate?.userErrors ?? []);
 }
 
 export async function updateCustomerAddress(
@@ -330,34 +282,37 @@ export async function updateCustomerAddress(
   address: CustomerAddressInput,
   defaultAddress: boolean,
 ): Promise<CustomerUserError[]> {
-  const data = await customerFetch<{
-    customerAddressUpdate: { userErrors: CustomerUserError[] };
-  }>("customerAddressUpdate", CUSTOMER_ADDRESS_UPDATE_MUTATION, "/account/addresses", {
-    address,
-    addressId,
-    defaultAddress,
+  const data = await customerFetch({
+    document: CUSTOMER_ADDRESS_UPDATE_MUTATION,
+    operation: "customerAddressUpdate",
+    returnTo: "/account/addresses",
+    variables: { address, addressId, defaultAddress },
   });
 
-  return data.customerAddressUpdate.userErrors;
+  return toUserErrors(data.customerAddressUpdate?.userErrors ?? []);
 }
 
 export async function deleteCustomerAddress(addressId: string): Promise<CustomerUserError[]> {
-  const data = await customerFetch<{
-    customerAddressDelete: { userErrors: CustomerUserError[] };
-  }>("customerAddressDelete", CUSTOMER_ADDRESS_DELETE_MUTATION, "/account/addresses", {
-    addressId,
+  const data = await customerFetch({
+    document: CUSTOMER_ADDRESS_DELETE_MUTATION,
+    operation: "customerAddressDelete",
+    returnTo: "/account/addresses",
+    variables: { addressId },
   });
 
-  return data.customerAddressDelete.userErrors;
+  return toUserErrors(data.customerAddressDelete?.userErrors ?? []);
 }
 
 export async function updateCustomerProfile(input: {
   firstName: string;
   lastName: string;
 }): Promise<CustomerUserError[]> {
-  const data = await customerFetch<{
-    customerUpdate: { userErrors: CustomerUserError[] };
-  }>("customerUpdate", CUSTOMER_UPDATE_MUTATION, "/account/profile", { input });
+  const data = await customerFetch({
+    document: CUSTOMER_UPDATE_MUTATION,
+    operation: "customerUpdate",
+    returnTo: "/account/profile",
+    variables: { input },
+  });
 
-  return data.customerUpdate.userErrors;
+  return toUserErrors(data.customerUpdate?.userErrors ?? []);
 }

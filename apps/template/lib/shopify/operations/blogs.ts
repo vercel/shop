@@ -1,114 +1,84 @@
+import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { defaultLocale } from "@/lib/i18n";
 import type { Blog, BlogArticle } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
-import { storefront } from "../storefront";
+import { type ResultOf, storefront } from "../storefront";
 
-interface ShopifyArticle {
-  authorV2: { name: string } | null;
-  content: string;
-  contentHtml?: string;
-  excerpt: string | null;
-  handle: string;
-  image: {
-    altText: string | null;
-    height: number;
-    url: string;
-    width: number;
-  } | null;
-  publishedAt: string;
-  seo?: {
-    description: string | null;
-    title: string | null;
-  } | null;
-  tags?: string[];
-  title: string;
-}
+const ARTICLE_SUMMARY_FRAGMENT = gql(`#graphql
+  fragment ArticleSummaryFields on Article {
+    authorV2 {
+      name
+    }
+    content(truncateAt: 240)
+    excerpt
+    handle
+    image {
+      altText
+      height
+      url
+      width
+    }
+    publishedAt
+    title
+  }
+`);
 
-interface ShopifyBlog {
-  handle: string;
-  seo: {
-    description: string | null;
-    title: string | null;
-  } | null;
-  title: string;
-}
+const BLOG_FRAGMENT = gql(`#graphql
+  fragment BlogFields on Blog {
+    handle
+    seo {
+      description
+      title
+    }
+    title
+  }
+`);
 
-interface GetBlogResponse {
-  blog: (ShopifyBlog & { articles: { nodes: ShopifyArticle[] } }) | null;
-}
-
-interface GetBlogArticleResponse {
-  blog: (ShopifyBlog & { articleByHandle: ShopifyArticle | null }) | null;
-}
-
-const GET_BLOG_QUERY = `#graphql
+const GET_BLOG_QUERY = gql(
+  `#graphql
   query getBlog($handle: String!, $first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     blog(handle: $handle) {
-      handle
-      seo {
-        description
-        title
-      }
-      title
+      ...BlogFields
       articles(first: $first, sortKey: PUBLISHED_AT, reverse: true) {
         nodes {
-          authorV2 {
-            name
-          }
-          content(truncateAt: 240)
-          excerpt
-          handle
-          image {
-            altText
-            height
-            url
-            width
-          }
-          publishedAt
-          title
+          ...ArticleSummaryFields
         }
       }
     }
   }
-` as const;
+`,
+  [ARTICLE_SUMMARY_FRAGMENT, BLOG_FRAGMENT],
+);
 
-const GET_BLOG_ARTICLE_QUERY = `#graphql
+const GET_BLOG_ARTICLE_QUERY = gql(
+  `#graphql
   query getBlogArticle($blogHandle: String!, $articleHandle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     blog(handle: $blogHandle) {
-      handle
-      seo {
-        description
-        title
-      }
-      title
+      ...BlogFields
       articleByHandle(handle: $articleHandle) {
-        authorV2 {
-          name
-        }
-        content(truncateAt: 240)
+        ...ArticleSummaryFields
         contentHtml
-        excerpt
-        handle
-        image {
-          altText
-          height
-          url
-          width
-        }
-        publishedAt
         seo {
           description
           title
         }
         tags
-        title
       }
     }
   }
-` as const;
+`,
+  [ARTICLE_SUMMARY_FRAGMENT, BLOG_FRAGMENT],
+);
+
+type ShopifyBlog = ResultOf<typeof BLOG_FRAGMENT>;
+type ShopifyArticle = ResultOf<typeof ARTICLE_SUMMARY_FRAGMENT> & {
+  contentHtml?: string;
+  seo?: { description: string | null; title: string | null } | null;
+  tags?: string[];
+};
 
 function transformArticle(article: ShopifyArticle, blog: ShopifyBlog): BlogArticle {
   return {
@@ -121,9 +91,9 @@ function transformArticle(article: ShopifyArticle, blog: ShopifyBlog): BlogArtic
     image: article.image
       ? {
           altText: article.image.altText ?? article.title,
-          height: article.image.height,
+          height: article.image.height ?? 0,
           url: article.image.url,
-          width: article.image.width,
+          width: article.image.width ?? 0,
         }
       : null,
     publishedAt: article.publishedAt,
@@ -149,10 +119,9 @@ export async function getBlog({
   cacheLife("max");
   cacheTag("articles", "blogs", `blog-${handle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-  const response = await storefront.request<GetBlogResponse>(GET_BLOG_QUERY, {
-    variables: { country, first: limit, handle, language },
+  const response = await storefront.request(GET_BLOG_QUERY, {
+    locale,
+    variables: { first: limit, handle },
   });
   assertStorefrontOk(response, "getBlog");
 
@@ -183,10 +152,9 @@ export async function getBlogArticle({
   cacheLife("max");
   cacheTag("articles", "blogs", `article-${blogHandle}-${articleHandle}`, `blog-${blogHandle}`);
 
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-  const response = await storefront.request<GetBlogArticleResponse>(GET_BLOG_ARTICLE_QUERY, {
-    variables: { articleHandle, blogHandle, country, language },
+  const response = await storefront.request(GET_BLOG_ARTICLE_QUERY, {
+    locale,
+    variables: { articleHandle, blogHandle },
   });
   assertStorefrontOk(response, "getBlogArticle");
 

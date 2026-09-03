@@ -1,7 +1,12 @@
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { flattenConnection, gql } from "@shopify/hydrogen";
 import type {
-  Cart,
-  CartWarning,
+  ProductCollectionSortKeys,
+  SearchSortKeys,
+} from "@shopify/hydrogen/storefront-api-types";
+
+import type { ActiveFilters } from "@/lib/collections";
+import { defaultLocale } from "@/lib/i18n";
+import type {
   Collection,
   Filter,
   PageInfo,
@@ -10,35 +15,30 @@ import type {
   ProductDetails,
 } from "@/lib/types";
 
-import { assertStorefrontOk, type CartMutationPayload, unwrapCartMutation } from "./errors";
+import { assertStorefrontOk } from "./errors";
 import {
-  CART_FRAGMENT,
   COLLECTION_FIELDS_FRAGMENT,
+  FILTER_FRAGMENT,
   FILTERABLE_PRODUCT_CARD_FRAGMENT,
   PRODUCT_CARD_FRAGMENT,
   PRODUCT_WITH_VARIANTS_FRAGMENT,
 } from "./fragments";
 import { storefront } from "./storefront";
-import { type ShopifyCart, transformShopifyCart } from "./transforms/cart";
-import { type ShopifyCollection, transformShopifyCollections } from "./transforms/collection";
+import { transformShopifyCollections } from "./transforms/collection";
 import { getSelectedColorFilterLabel, transformShopifyFilters } from "./transforms/filters";
 import {
-  type ShopifyProduct,
-  type ShopifyProductCard,
   transformFilteredShopifyProductCard,
   transformShopifyProductCard,
   transformShopifyProductDetails,
 } from "./transforms/product";
-import type { ProductFilter, ShopifyFilter } from "./types/filters";
-
-export type ActiveFilters = Record<string, string | string[] | undefined>;
+import type { ProductFilter } from "./types/filters";
 
 export function escapeProductQuery(value: string): string {
   return value.replace(/'/g, "\\'");
 }
 
 // SearchSortKeys only supports PRICE and RELEVANCE — used by the AI agent text-search path.
-const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
+const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: SearchSortKeys; reverse: boolean }> = {
   "best-matches": { sortKey: "RELEVANCE", reverse: false },
   "price-high-to-low": { sortKey: "PRICE", reverse: true },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
@@ -46,7 +46,10 @@ const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }>
   RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
 };
 
-const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolean }> = {
+const COLLECTION_SORT_KEY_MAP: Record<
+  string,
+  { sortKey: ProductCollectionSortKeys; reverse: boolean }
+> = {
   "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
   "best-selling": { sortKey: "BEST_SELLING", reverse: false },
   "price-low-to-high": { sortKey: "PRICE", reverse: false },
@@ -64,8 +67,8 @@ const COLLECTION_SORT_KEY_MAP: Record<string, { sortKey: string; reverse: boolea
   COLLECTION_DEFAULT: { sortKey: "COLLECTION_DEFAULT", reverse: false },
 };
 
-const PRODUCTS_SEARCH_QUERY = `#graphql
-  ${FILTERABLE_PRODUCT_CARD_FRAGMENT}
+const PRODUCTS_SEARCH_QUERY = gql(
+  `#graphql
   query searchProducts($query: String!, $first: Int!, $after: String, $productFilters: [ProductFilter!], $sortKey: SearchSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     search(
       query: $query
@@ -80,6 +83,7 @@ const PRODUCTS_SEARCH_QUERY = `#graphql
       edges {
         cursor
         node {
+          __typename
           ... on Product {
             ...FilterableProductCardFields
           }
@@ -99,32 +103,17 @@ const PRODUCTS_SEARCH_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [FILTERABLE_PRODUCT_CARD_FRAGMENT],
+);
 
-const COLLECTION_PRODUCTS_QUERY = `#graphql
-  ${FILTERABLE_PRODUCT_CARD_FRAGMENT}
+const COLLECTION_PRODUCTS_QUERY = gql(
+  `#graphql
   query collectionProducts($handle: String!, $first: Int!, $after: String, $sortKey: ProductCollectionSortKeys, $reverse: Boolean, $filters: [ProductFilter!], $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collection(handle: $handle) {
       products(first: $first, after: $after, sortKey: $sortKey, reverse: $reverse, filters: $filters) {
         filters {
-          id
-          label
-          type
-          presentation
-          values {
-            id
-            label
-            count
-            input
-            swatch {
-              color
-              image {
-                previewImage {
-                  url
-                }
-              }
-            }
-          }
+          ...FilterFields
         }
         edges {
           cursor
@@ -141,37 +130,45 @@ const COLLECTION_PRODUCTS_QUERY = `#graphql
       }
     }
   }
-` as const;
+`,
+  [FILTER_FRAGMENT, FILTERABLE_PRODUCT_CARD_FRAGMENT],
+);
 
-const GET_PRODUCT_WITH_VARIANTS_QUERY = `#graphql
-  ${PRODUCT_WITH_VARIANTS_FRAGMENT}
+const GET_PRODUCT_WITH_VARIANTS_QUERY = gql(
+  `#graphql
   query getProductWithVariants($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productByHandle(handle: $handle) {
       ...ProductWithVariantsFields
     }
   }
-` as const;
+`,
+  [PRODUCT_WITH_VARIANTS_FRAGMENT],
+);
 
-const COMPLEMENTARY_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+const COMPLEMENTARY_PRODUCTS_QUERY = gql(
+  `#graphql
   query complementaryProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
       ...ProductCardFields
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);
 
-const RELATED_PRODUCTS_QUERY = `#graphql
-  ${PRODUCT_CARD_FRAGMENT}
+const RELATED_PRODUCTS_QUERY = gql(
+  `#graphql
   query relatedProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     productRecommendations(productHandle: $handle, intent: RELATED) {
       ...ProductCardFields
     }
   }
-` as const;
+`,
+  [PRODUCT_CARD_FRAGMENT],
+);
 
-const GET_COLLECTIONS_QUERY = `#graphql
-  ${COLLECTION_FIELDS_FRAGMENT}
+const GET_COLLECTIONS_QUERY = gql(
+  `#graphql
   query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     collections(first: $first) {
       edges {
@@ -181,71 +178,9 @@ const GET_COLLECTIONS_QUERY = `#graphql
       }
     }
   }
-` as const;
-
-const GET_CART_QUERY = `#graphql
-  ${CART_FRAGMENT}
-  query getCart($cartId: ID!) {
-    cart(id: $cartId) {
-      ...CartFields
-    }
-  }
-` as const;
-
-const CART_CREATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartCreate($input: CartInput, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    cartCreate(input: $input) {
-      cart { ...CartFields }
-      userErrors { field message }
-      warnings { code message target }
-    }
-  }
-` as const;
-
-const CART_LINES_ADD_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
-    cartLinesAdd(cartId: $cartId, lines: $lines) {
-      cart { ...CartFields }
-      userErrors { field message }
-      warnings { code message target }
-    }
-  }
-` as const;
-
-const CART_LINES_UPDATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
-    cartLinesUpdate(cartId: $cartId, lines: $lines) {
-      cart { ...CartFields }
-      userErrors { field message }
-      warnings { code message target }
-    }
-  }
-` as const;
-
-const CART_LINES_REMOVE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
-    cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
-      cart { ...CartFields }
-      userErrors { field message }
-      warnings { code message target }
-    }
-  }
-` as const;
-
-const CART_NOTE_UPDATE_MUTATION = `#graphql
-  ${CART_FRAGMENT}
-  mutation cartNoteUpdate($cartId: ID!, $note: String!) {
-    cartNoteUpdate(cartId: $cartId, note: $note) {
-      cart { ...CartFields }
-      userErrors { field message }
-      warnings { code message target }
-    }
-  }
-` as const;
+`,
+  [COLLECTION_FIELDS_FRAGMENT],
+);
 
 export type SearchIndexProductsParams = {
   activeFilters?: ActiveFilters;
@@ -281,23 +216,6 @@ export type CollectionProductsResult = {
   products: ProductCard[];
 };
 
-export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
-
-export interface CartLineInput {
-  attributes?: { key: string; value: string }[];
-  merchandiseId: string;
-  parent?: { lineId?: string; merchandiseId?: string };
-  quantity: number;
-}
-
-export function applyCartMutation(
-  payload: CartMutationPayload<ShopifyCart>,
-  operation: string,
-): CartMutationResult {
-  const { cart, warnings } = unwrapCartMutation(payload, operation);
-  return { cart: transformShopifyCart(cart), warnings };
-}
-
 // `products` drops variant/metafield filters, so /search must use the `search` field.
 export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
@@ -314,8 +232,6 @@ export async function fetchSearchIndexProducts(
   } = params;
 
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
 
   const trimmedQuery = query?.trim() ?? "";
   const queryParts: string[] = [];
@@ -323,16 +239,8 @@ export async function fetchSearchIndexProducts(
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
 
-  const response = await storefront.request<{
-    search: {
-      totalCount: number;
-      edges: Array<{ cursor: string; node: ShopifyProductCard | null }>;
-      pageInfo: PageInfo;
-      productFilters: Array<{
-        values: Array<Pick<ShopifyFilter["values"][number], "input" | "label">>;
-      }>;
-    };
-  }>(PRODUCTS_SEARCH_QUERY, {
+  const response = await storefront.request(PRODUCTS_SEARCH_QUERY, {
+    locale,
     variables: {
       query: searchQuery,
       first: limit,
@@ -340,16 +248,14 @@ export async function fetchSearchIndexProducts(
       productFilters: filters.length > 0 ? filters : undefined,
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
-      country,
-      language,
     },
   });
   assertStorefrontOk(response, "searchProducts");
   const { data } = response;
 
-  const shopifyProducts = data.search.edges
-    .map((edge) => edge.node)
-    .filter((node): node is ShopifyProductCard => node !== null);
+  const shopifyProducts = data.search.edges.flatMap((edge) =>
+    edge.node.__typename === "Product" ? [edge.node] : [],
+  );
 
   const selectedColor = getSelectedColorFilterLabel(
     activeFilters,
@@ -380,18 +286,9 @@ export async function fetchCollectionProducts(
   } = params;
 
   const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
 
-  const response = await storefront.request<{
-    collection: {
-      products: {
-        edges: Array<{ node: ShopifyProductCard }>;
-        pageInfo: PageInfo;
-        filters: ShopifyFilter[];
-      };
-    } | null;
-  }>(COLLECTION_PRODUCTS_QUERY, {
+  const response = await storefront.request(COLLECTION_PRODUCTS_QUERY, {
+    locale,
     variables: {
       handle: collection,
       first: limit,
@@ -399,8 +296,6 @@ export async function fetchCollectionProducts(
       sortKey: sortConfig.sortKey,
       reverse: sortConfig.reverse,
       filters: filters.length > 0 ? filters : undefined,
-      country,
-      language,
     },
   });
   assertStorefrontOk(response, "collectionProducts");
@@ -414,7 +309,7 @@ export async function fetchCollectionProducts(
     };
   }
 
-  const shopifyProducts = data.collection.products.edges.map((edge) => edge.node);
+  const shopifyProducts = flattenConnection(data.collection.products);
   const selectedColor = getSelectedColorFilterLabel(
     activeFilters,
     filters,
@@ -443,13 +338,10 @@ export async function fetchProductWithVariants({
   handle: string;
   locale?: string;
 }): Promise<ProductDetails | undefined> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{ productByHandle: ShopifyProduct }>(
-    GET_PRODUCT_WITH_VARIANTS_QUERY,
-    { variables: { handle, country, language } },
-  );
+  const response = await storefront.request(GET_PRODUCT_WITH_VARIANTS_QUERY, {
+    locale,
+    variables: { handle },
+  });
   assertStorefrontOk(response, "getProductWithVariants");
   const { data } = response;
 
@@ -464,12 +356,10 @@ export async function fetchComplementaryProducts({
   handle: string;
   locale?: string;
 }): Promise<ProductCard[]> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{
-    productRecommendations: ShopifyProductCard[] | null;
-  }>(COMPLEMENTARY_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  const response = await storefront.request(COMPLEMENTARY_PRODUCTS_QUERY, {
+    locale,
+    variables: { handle },
+  });
   assertStorefrontOk(response, "complementaryProducts");
 
   return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
@@ -482,12 +372,10 @@ export async function fetchRelatedProducts({
   handle: string;
   locale?: string;
 }): Promise<ProductCard[]> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{
-    productRecommendations: ShopifyProductCard[] | null;
-  }>(RELATED_PRODUCTS_QUERY, { variables: { country, handle, language } });
+  const response = await storefront.request(RELATED_PRODUCTS_QUERY, {
+    locale,
+    variables: { handle },
+  });
   assertStorefrontOk(response, "relatedProducts");
 
   return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
@@ -497,28 +385,19 @@ export async function fetchCollections({
   limit = 250,
   locale = defaultLocale,
 }: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{
-    collections: { edges: Array<{ node: ShopifyCollection }> };
-  }>(GET_COLLECTIONS_QUERY, { variables: { first: limit, country, language } });
+  const response = await storefront.request(GET_COLLECTIONS_QUERY, {
+    locale,
+    variables: { first: limit },
+  });
   assertStorefrontOk(response, "getCollections");
 
-  return transformShopifyCollections(response.data.collections.edges.map((edge) => edge.node));
+  return transformShopifyCollections(flattenConnection(response.data.collections));
 }
 
-export async function fetchCart(cartId: string): Promise<Cart | undefined> {
-  const response = await storefront.request<{ cart: ShopifyCart | null }>(GET_CART_QUERY, {
-    variables: { cartId },
-  });
-  assertStorefrontOk(response, "getCart");
-  return response.data.cart ? transformShopifyCart(response.data.cart) : undefined;
-}
-
-const PRODUCT_OPTION_VALUES_QUERY = `#graphql
+const PRODUCT_OPTION_VALUES_QUERY = gql(`#graphql
   query productOptionValues($ids: [ID!]!) {
     nodes(ids: $ids) {
+      __typename
       ... on Product {
         handle
         options {
@@ -530,7 +409,7 @@ const PRODUCT_OPTION_VALUES_QUERY = `#graphql
       }
     }
   }
-` as const;
+`);
 
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
 
@@ -542,84 +421,19 @@ export async function fetchProductOptionValues(ids: string[]): Promise<ProductOp
   const byHandle: ProductOptionValues = new Map();
   if (ids.length === 0) return byHandle;
 
-  const response = await storefront.request<{
-    nodes: Array<{
-      handle: string;
-      options: Array<{ name: string; optionValues: Array<{ name: string }> }>;
-    } | null>;
-  }>(PRODUCT_OPTION_VALUES_QUERY, { variables: { ids } });
+  const response = await storefront.request(PRODUCT_OPTION_VALUES_QUERY, { variables: { ids } });
   assertStorefrontOk(response, "productOptionValues");
 
   for (const node of response.data.nodes) {
-    if (!node?.handle) continue;
+    if (node?.__typename !== "Product") continue;
     const options = new Map<string, Set<string>>();
-    for (const option of node.options ?? []) {
+    for (const option of node.options) {
       options.set(
         option.name.toLowerCase(),
-        new Set((option.optionValues ?? []).map((value) => value.name.toLowerCase())),
+        new Set(option.optionValues.map((value) => value.name.toLowerCase())),
       );
     }
     byHandle.set(node.handle, options);
   }
   return byHandle;
-}
-
-export async function createCartCore(locale: string = defaultLocale): Promise<CartMutationResult> {
-  const country = getCountryCode(locale);
-  const language = getLanguageCode(locale);
-
-  const response = await storefront.request<{ cartCreate: CartMutationPayload<ShopifyCart> }>(
-    CART_CREATE_MUTATION,
-    { variables: { input: { buyerIdentity: { countryCode: country } }, country, language } },
-  );
-  assertStorefrontOk(response, "cartCreate");
-  return applyCartMutation(response.data.cartCreate, "cartCreate");
-}
-
-export async function addToCartCore(
-  lines: CartLineInput[],
-  cartId: string,
-): Promise<CartMutationResult> {
-  const response = await storefront.request<{ cartLinesAdd: CartMutationPayload<ShopifyCart> }>(
-    CART_LINES_ADD_MUTATION,
-    { variables: { cartId, lines } },
-  );
-  assertStorefrontOk(response, "cartLinesAdd");
-  return applyCartMutation(response.data.cartLinesAdd, "cartLinesAdd");
-}
-
-export async function updateCartCore(
-  lines: { id: string; quantity: number }[],
-  cartId: string,
-): Promise<CartMutationResult> {
-  const response = await storefront.request<{ cartLinesUpdate: CartMutationPayload<ShopifyCart> }>(
-    CART_LINES_UPDATE_MUTATION,
-    { variables: { cartId, lines } },
-  );
-  assertStorefrontOk(response, "cartLinesUpdate");
-  return applyCartMutation(response.data.cartLinesUpdate, "cartLinesUpdate");
-}
-
-export async function removeFromCartCore(
-  lineIds: string[],
-  cartId: string,
-): Promise<CartMutationResult> {
-  const response = await storefront.request<{ cartLinesRemove: CartMutationPayload<ShopifyCart> }>(
-    CART_LINES_REMOVE_MUTATION,
-    { variables: { cartId, lineIds } },
-  );
-  assertStorefrontOk(response, "cartLinesRemove");
-  return applyCartMutation(response.data.cartLinesRemove, "cartLinesRemove");
-}
-
-export async function updateCartNoteCore(
-  note: string,
-  cartId: string,
-): Promise<CartMutationResult> {
-  const response = await storefront.request<{ cartNoteUpdate: CartMutationPayload<ShopifyCart> }>(
-    CART_NOTE_UPDATE_MUTATION,
-    { variables: { cartId, note } },
-  );
-  assertStorefrontOk(response, "cartNoteUpdate");
-  return applyCartMutation(response.data.cartNoteUpdate, "cartNoteUpdate");
 }

@@ -7,7 +7,7 @@ interface ProductSchemaData {
   title: string;
   description: string;
   images: Image[];
-  manufacturerName: string;
+  vendor?: string;
   currencyCode: string;
   priceRange: {
     minVariantPrice: Money;
@@ -26,10 +26,10 @@ function generateProductSchema(product: ProductSchemaData) {
     name: product.title,
     description: product.description,
     image: product.images.map((img) => img.url),
-    brand: product.manufacturerName
+    brand: product.vendor
       ? {
           "@type": "Brand",
-          name: product.manufacturerName,
+          name: product.vendor,
         }
       : undefined,
     offers: {

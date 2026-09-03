@@ -35,7 +35,7 @@ Because `auth.isEnabled` is enabled on this branch, set `CUSTOMER_ACCOUNT_SESSIO
 
 This branch enables `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so disable BotID when self-hosting. The `deepAnalysis` level is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
 
-`site.url` resolves from `NEXT_PUBLIC_BASE_URL` or the Vercel production URL. `NEXT_PUBLIC_BASE_URL` must be a bare domain without a protocol, such as `shop.example.com`.
+`site.url` resolves from the Vercel production URL and falls back to `http://localhost:3000` during local development. Set `site.url` directly when deploying elsewhere.
 
 ## Shopify consent modes
 

@@ -8,43 +8,35 @@ import {
 import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
+import type { CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import { loadMoreSearchProducts } from "@/lib/search/action";
-import {
-  buildProductFiltersFromParams,
-  fetchSearchFacets,
-  fetchSearchIndexProducts,
-} from "@/lib/shopify/operations/products";
-import type { ProductFilter } from "@/lib/shopify/types/filters";
+import { loadMoreSearchProductsAction } from "@/lib/search/action";
+import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {
-  products: ProductCardType[];
-  total: number;
-  pageInfo: PageInfo;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
-  activeFilters: Record<string, string | string[] | undefined>;
-  filters: ProductFilter[];
-  query?: string;
   collection?: string;
-  sort?: string;
+  dataSearch: string;
+  pageInfo: PageInfo;
+  products: ProductCardType[];
+  query?: string;
+  total: number;
+  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
 }
 
 export async function getSearchResultsData({
-  query,
-  sort,
   collection,
   locale,
-  activeFilters,
+  query,
+  searchStatePromise,
 }: {
-  query?: string;
-  sort?: string;
   collection?: string;
   locale: Locale;
-  activeFilters: Record<string, string | string[] | undefined>;
+  query?: string;
+  searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<SearchResultsData> {
-  const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
   const [results, facets] = await Promise.all([
     fetchSearchIndexProducts({
       activeFilters,
@@ -52,26 +44,24 @@ export async function getSearchResultsData({
       collection,
       sortKey: sort,
       limit: RESULTS_PER_PAGE,
-      filters: shopifyFilters,
+      filters,
       locale,
     }),
-    fetchSearchFacets({ activeFilters, query, collection, filters: shopifyFilters, locale }),
+    fetchSearchFacets({ activeFilters, query, collection, filters, locale }),
   ]);
 
   return {
-    products: results.products,
-    total: facets.total,
-    pageInfo: results.pageInfo,
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
-    activeFilters,
-    filters: shopifyFilters,
-    query,
     collection,
-    sort,
+    dataSearch,
+    pageInfo: results.pageInfo,
+    products: results.products,
+    query,
+    total: facets.total,
+    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
   };
 }
 
-export async function SearchResultsGrid({
+export function SearchResultsGrid({
   locale,
   searchResultsDataPromise,
 }: {
@@ -108,7 +98,7 @@ async function SearchResultsGridRender({
     getTranslations("product"),
   ]);
 
-  const { products, query } = data;
+  const { collection, dataSearch, products, query } = data;
 
   if (products.length === 0) {
     return (
@@ -125,19 +115,13 @@ async function SearchResultsGridRender({
     <FilterPendingScope>
       <ProductGridPendingOverlay>
         <InfiniteProductGrid
+          key={`${query ?? ""}|${collection ?? ""}|${dataSearch}`}
           initialProducts={products}
           initialPageInfo={data.pageInfo}
           locale={locale}
           outOfStockText={tProduct("outOfStock")}
-          loadMore={loadMoreSearchProducts}
-          loadMoreParams={{
-            activeFilters: data.activeFilters,
-            query: data.query,
-            collection: data.collection,
-            sortKey: data.sort,
-            filters: data.filters,
-            locale,
-          }}
+          loadMore={loadMoreSearchProductsAction}
+          loadMoreParams={{ collection, locale, query }}
         >
           {products.map((product) => (
             <ProductCard

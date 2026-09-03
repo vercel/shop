@@ -58,12 +58,16 @@ export default async function ProductPage({ params, searchParams }: PageProps<"/
 }
 
 // 2. Composition is a SYNCHRONOUS component. It only places boundaries — never awaits.
+//    The h1 stays in the shell, outside every Suspense, so streamed HTML never carries two of them.
 function ProductInfoArea({ product, variantPromise }: ProductInfoAreaProps) {
   return (
     <>
       <ProductTitle title={product.title} /> {/* stable — no Suspense */}
       <Suspense fallback={<div className="h-7" aria-hidden />}> {/* fallback matches resolved height */}
         <ResolvedProductPrice variantPromise={variantPromise} />
+      </Suspense>
+      <Suspense fallback={<ProductInfoFallback product={product} />}> {/* static pickers + disabled buy */}
+        <ResolvedProductInfo product={product} variantPromise={variantPromise} />
       </Suspense>
     </>
   );
@@ -74,6 +78,19 @@ async function ResolvedProductPrice({ variantPromise }: { variantPromise: Promis
   const variant = await variantPromise;
   return <ProductPrice amount={variant?.price} />;
 }
+
+// 4. The interactive island is seeded from the resolved variant so server HTML and the
+//    client store agree on first paint. Later selections update the store, then
+//    router.replace() syncs the URL without a second server round-trip for the picker.
+async function ResolvedProductInfo({ product, variantPromise }: ResolvedProductInfoProps) {
+  const selectedVariant = await variantPromise;
+  return (
+    <ProductForm product={toProductFormInput(product, selectedVariant)}>
+      <ProductFormOptions />
+      <BuyButtons fallbackVariant={toProductFormVariant(selectedVariant)} />
+    </ProductForm>
+  );
+}
 ```
 
 Invariants the shape enforces:
@@ -82,6 +99,8 @@ Invariants the shape enforces:
 - Promises flow through synchronous composition untouched. Only a resolved leaf awaits, and it awaits one promise — so a slow read suspends only its own leaf, not its siblings.
 - Every resolved leaf has its own `Suspense` whose fallback matches the resolved geometry, so streaming does not shift the shell.
 - Split one request input into multiple promises when their costs differ, so cheap UI never waits on a network round-trip it does not need.
+- Headings and other content that must appear exactly once in the document live in the shell, never inside a fallback that is later replaced by the resolved leaf. Verify with a production build: dev mode resolves promises before the first flush and hides the duplicate.
+- Client stores that own interaction state (variant selection, quantity) are seeded from the server-resolved value inside the resolved leaf, not hydrated from the URL on the client, so there is no first-paint mismatch.
 
 ## Choose cache ownership deliberately
 

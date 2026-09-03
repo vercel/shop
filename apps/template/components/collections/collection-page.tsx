@@ -91,12 +91,14 @@ export async function CollectionDetailPage({
                       >
                         <FilterPendingScope>
                           <CollectionFilters
-                            collectionResultsDataPromise={collectionResultsDataPromise}
+                            facetsPromise={collectionResultsDataPromise.then(
+                              (data) => data.transformedFilters,
+                            )}
                           />
                         </FilterPendingScope>
                       </FilterSidebarSheet>
                     }
-                    sortSelect={<CollectionsSortSelect collection exclude={sortExclude} />}
+                    sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
                   />
 
                   <FilterPendingScope>

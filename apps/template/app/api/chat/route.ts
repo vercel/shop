@@ -1,4 +1,5 @@
 import { pipeJsonRender } from "@json-render/core";
+import { createCartCookie } from "@shopify/hydrogen";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -11,9 +12,8 @@ import { checkBotId } from "botid/server";
 import { parsePageContext } from "@/lib/agent/routes";
 import { createAgent, type User, withAgentContext } from "@/lib/agent/server";
 import { BOTID_DENIED_CODE, botIdCheckOptions } from "@/lib/botid";
-import { buildCartIdSetCookieHeader, getCartIdFromCookie } from "@/lib/cart/server";
+import { createEmptyCart, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
-import { createCartWithoutCookie } from "@/lib/shopify/operations/cart";
 
 export async function POST(request: Request) {
   if (!shopConfig.agent.isEnabled) return new Response(null, { status: 404 });
@@ -47,11 +47,8 @@ export async function POST(request: Request) {
   let cartId = await getCartIdFromCookie();
   let newCartCookie: string | undefined;
   if (!cartId) {
-    const { cart } = await createCartWithoutCookie(locale);
-    if (cart.id) {
-      cartId = cart.id;
-      newCartCookie = buildCartIdSetCookieHeader(cart.id);
-    }
+    cartId = await createEmptyCart(locale);
+    if (cartId) newCartCookie = createCartCookie(cartId);
   }
 
   return withAgentContext({ cart: cartId, page, user }, async () => {

@@ -1,70 +1,34 @@
 import type * as React from "react";
 
-import type { SelectedOptions } from "@/lib/product";
-import type { ProductOption, ProductVariant } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import type { OptionGroupState } from "@/lib/product";
 
 import { AboutItem } from "./about-item";
 import { ColorPicker, type ProductTranslator } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 import { AccordionSection } from "./product-info-description-client";
-import { ProductPrice } from "./product-price";
-
-interface ProductInfoHeaderProps extends React.ComponentProps<"div"> {
-  selectedVariant: ProductVariant | undefined;
-  title: string;
-  locale: string;
-}
-
-function ProductInfoHeader({
-  selectedVariant,
-  title,
-  locale,
-  className,
-  ...props
-}: ProductInfoHeaderProps) {
-  return (
-    <div data-slot="product-info-header" className={className} {...props}>
-      <h1 className={cn("text-foreground", "text-3xl")}>{title}</h1>
-
-      {selectedVariant && (
-        <ProductPrice
-          amount={selectedVariant.price.amount}
-          currencyCode={selectedVariant.price.currencyCode}
-          compareAtAmount={selectedVariant.compareAtPrice?.amount}
-          locale={locale}
-        />
-      )}
-    </div>
-  );
-}
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
-  availableValues: Map<string, Set<string>>;
-  options: ProductOption[];
-  selectedOptions: SelectedOptions;
-  handle: string;
-  t: ProductTranslator;
   hideImages?: boolean;
+  onSelectValue?: (optionName: string, value: string) => void;
+  options: OptionGroupState[];
+  t: ProductTranslator;
 }
 
 function ProductInfoOptions({
-  availableValues,
-  options,
-  selectedOptions,
-  handle,
-  t,
   hideImages,
+  onSelectValue,
+  options,
+  t,
   className,
   ...props
 }: ProductInfoOptionsProps) {
-  const isColorOption = (opt: ProductOption) =>
+  const isColorOption = (opt: OptionGroupState) =>
     opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
     opt.name.toLowerCase().includes("color");
   // Shopify emits a synthetic Title/Default Title option for products with no variant axes — hide it.
-  const isShopifyDefaultOption = (opt: ProductOption) =>
+  const isShopifyDefaultOption = (opt: OptionGroupState) =>
     opt.name === "Title" && opt.values.length === 1 && opt.values[0]?.name === "Default Title";
-  const isSingleValueOption = (opt: ProductOption) => opt.values.length === 1;
+  const isSingleValueOption = (opt: OptionGroupState) => opt.values.length === 1;
 
   const renderable = options.filter((opt) => !isShopifyDefaultOption(opt));
   const singleValueOptions = renderable.filter(isSingleValueOption);
@@ -78,33 +42,23 @@ function ProductInfoOptions({
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-5">
         {singleValueOptions.map((option) => (
-          <p key={option.id} className="text-sm font-medium text-foreground/70">
+          <p key={option.name} className="text-sm font-medium text-foreground/70">
             {option.name}: <span className="text-foreground">{option.values[0]?.name}</span>
           </p>
         ))}
 
-        {colorOptions.map((colorOption) => (
+        {colorOptions.map((option) => (
           <ColorPicker
-            key={colorOption.id}
-            option={colorOption}
-            selectedValue={selectedOptions[colorOption.name] ?? ""}
-            available={availableValues.get(colorOption.name)}
-            handle={handle}
-            selectedOptions={selectedOptions}
-            t={t}
+            key={option.name}
             hideImages={hideImages}
+            onSelectValue={onSelectValue}
+            option={option}
+            t={t}
           />
         ))}
 
         {otherOptions.map((option) => (
-          <OptionPicker
-            key={option.id}
-            option={option}
-            selectedValue={selectedOptions[option.name] ?? ""}
-            available={availableValues.get(option.name)}
-            handle={handle}
-            selectedOptions={selectedOptions}
-          />
+          <OptionPicker key={option.name} onSelectValue={onSelectValue} option={option} />
         ))}
       </div>
     </div>
@@ -138,4 +92,4 @@ function ProductInfoTextAccordion({ body, title }: ProductInfoTextAccordionProps
   );
 }
 
-export { ProductInfoDescription, ProductInfoHeader, ProductInfoOptions, ProductInfoTextAccordion };
+export { ProductInfoDescription, ProductInfoOptions, ProductInfoTextAccordion };

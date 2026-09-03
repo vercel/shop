@@ -126,7 +126,15 @@ export default async function ProductPage({
   return (
     <>
       <Suspense fallback={null}>
-        <ProductViewedTracker product={product} variantPromise={variantPromise} />
+        <ProductViewedTracker
+          product={{
+            handle: product.handle,
+            id: product.id,
+            title: product.title,
+            vendor: product.vendor,
+          }}
+          variantPromise={variantPromise}
+        />
       </Suspense>
       <Page className="pt-0">
         <Container className="bg-background">

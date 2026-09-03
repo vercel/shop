@@ -1,6 +1,7 @@
 import type { ProductDetails } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
-import { createTable, escapeMarkdown, formatPrice } from "./utils";
+import { createTable, escapeMarkdown } from "./utils";
 
 /** Output is consumed by agents/crawlers, so structure must stay parseable. */
 export function productToMarkdown(product: ProductDetails, locale: string): string {

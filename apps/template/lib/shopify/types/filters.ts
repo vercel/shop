@@ -1,28 +1,12 @@
-export type ShopifyFilterPresentation = "IMAGE" | "SWATCH" | "TEXT";
+import type { FILTER_FRAGMENT } from "@/lib/shopify/fragments";
+import type { ResultOf } from "@/lib/shopify/storefront";
 
-export type ShopifyFilterType = "LIST" | "PRICE_RANGE" | "BOOLEAN";
+export type ShopifyFilter = ResultOf<typeof FILTER_FRAGMENT>;
+export type ShopifyFilterValue = ShopifyFilter["values"][number];
+export type ShopifyFilterType = ShopifyFilter["type"];
+export type ShopifyFilterPresentation = NonNullable<ShopifyFilter["presentation"]>;
 
-export interface ShopifyFilterSwatch {
-  color: string | null;
-  image: { previewImage: { url: string } | null } | null;
-}
-
-export interface ShopifyFilterValue {
-  id: string;
-  label: string;
-  count: number;
-  input: string;
-  swatch?: ShopifyFilterSwatch | null;
-}
-
-export interface ShopifyFilter {
-  id: string;
-  label: string;
-  type: ShopifyFilterType;
-  presentation?: ShopifyFilterPresentation | null;
-  values: ShopifyFilterValue[];
-}
-
+// App-owned subset of Shopify's ProductFilter input; the gql() variables check enforces schema compatibility.
 export interface ProductFilter {
   available?: boolean;
   price?: {

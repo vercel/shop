@@ -7,15 +7,16 @@ import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
 import {
-  FilterPendingScope,
-  FilterTransitionProvider,
-} from "@/components/collections/filter-pending-context";
-import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
+  CollectionActiveFilterCountBadge,
+  CollectionBrowseProvider,
+} from "@/components/collections/collection-browse-provider";
+import { FilterPendingScope } from "@/components/collections/filter-pending-context";
 import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
-import { CollectionFilterSidebarSkeleton } from "@/components/collections/filter-sidebar-skeleton";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
+import { CollectionFilters } from "@/components/collections/filters";
+import { CollectionsSortSelect, SEARCH_SORT_EXCLUDE } from "@/components/collections/sort-select";
 import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
 import { CollectionToolbar } from "@/components/collections/toolbar";
+import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import {
   type SearchResultsData,
   SearchResultsGrid,
@@ -25,19 +26,24 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { parseFiltersFromSearchParams } from "@/lib/utils";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+function getParam(searchParams: SearchParams, key: string): string | undefined {
+  const value = searchParams[key];
+  return Array.isArray(value) ? value[0] : value;
+}
 
 export async function generateMetadata({
   searchParams,
 }: PageProps<"/[flags]/[locale]/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const t = await getTranslations("seo");
-  const q = Array.isArray(resolvedSearchParams.q)
-    ? resolvedSearchParams.q[0]
-    : resolvedSearchParams.q;
-  const query = q ?? "";
+  const query = getParam(resolvedSearchParams, "q") ?? "";
   const hasQuery = query.length > 0;
   const title = hasQuery ? t("searchTitleQuery", { query }) : t("searchTitle");
   const description = hasQuery ? t("searchDescriptionQuery", { query }) : t("searchDescription");
@@ -76,88 +82,131 @@ export default async function SearchPage({ searchParams }: PageProps<"/[flags]/[
   ]);
 
   // Don't await searchParams here — it would force the route fully dynamic.
+  const searchStatePromise = getCollectionSearchState(searchParams);
   const searchResultsDataPromise = (async () => {
     const resolved = await searchParams;
     return getSearchResultsData({
-      query: resolved.q as string | undefined,
-      sort: resolved.sort as string | undefined,
-      collection: resolved.collection as string | undefined,
+      collection: getParam(resolved, "collection"),
       locale,
-      activeFilters: parseFiltersFromSearchParams(resolved),
+      query: getParam(resolved, "q"),
+      searchStatePromise,
     });
   })();
 
   const filtersLabel = t("filters");
+  const sortByLabel = t("sortBy");
 
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
-        <NextIntlClientProvider messages={{ category: messages.category, search: messages.search }}>
-          <FilterTransitionProvider>
-            <Sections className="gap-5">
+        <Sections className="gap-5">
+          <Suspense fallback={null}>
+            <SearchAnalyticsTracker searchParamsPromise={searchParams} />
+          </Suspense>
+          <div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl">
+              <Link href="/search">{t("title")}</Link>
               <Suspense fallback={null}>
-                <SearchAnalyticsTracker searchParamsPromise={searchParams} />
+                <SearchQueryLabel searchParamsPromise={searchParams} />
               </Suspense>
-              <div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl">
-                  <Link href="/search">{t("title")}</Link>
-                  <Suspense fallback={null}>
-                    <SearchQueryLabel searchParamsPromise={searchParams} />
-                  </Suspense>
-                </h1>
-              </div>
-              <CollectionToolbar
-                resultCount={
-                  <Suspense fallback={<Skeleton className="h-4 w-20" />}>
-                    <SearchResultCount dataPromise={searchResultsDataPromise} />
-                  </Suspense>
-                }
-                filterSheet={
-                  <FilterSidebarSheet
-                    label={filtersLabel}
-                    trigger={
-                      <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                        <SlidersHorizontalIcon className="size-4" />
-                        <span>{filtersLabel}</span>
-                        <Suspense fallback={null}>
-                          <SearchFilterCountBadge searchParamsPromise={searchParams} />
-                        </Suspense>
-                      </button>
-                    }
-                  >
-                    <FilterPendingScope>
-                      <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
-                        <SearchFilterSidebarContent
-                          dataPromise={searchResultsDataPromise}
-                          searchParamsPromise={searchParams}
-                        />
-                      </Suspense>
-                    </FilterPendingScope>
-                  </FilterSidebarSheet>
-                }
-                sortSelect={
-                  <Suspense fallback={<SortSelectFallback label={t("sortBy")} />}>
-                    <CollectionsSortSelect
-                      exclude={[
-                        "product-name-ascending",
-                        "product-name-descending",
-                        "best-selling",
-                        "date-old-to-new",
-                        "date-new-to-old",
-                      ]}
-                    />
-                  </Suspense>
-                }
-              />
-              <SearchResultsGrid
+            </h1>
+          </div>
+          <Suspense
+            fallback={
+              <SearchBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
+            }
+          >
+            <NextIntlClientProvider
+              messages={{ category: messages.category, search: messages.search }}
+            >
+              <SearchBrowse
+                filtersLabel={filtersLabel}
                 locale={locale}
+                searchParamsPromise={searchParams}
                 searchResultsDataPromise={searchResultsDataPromise}
+                searchStatePromise={searchStatePromise}
               />
-            </Sections>
-          </FilterTransitionProvider>
-        </NextIntlClientProvider>
+            </NextIntlClientProvider>
+          </Suspense>
+        </Sections>
       </Container>
     </Page>
+  );
+}
+
+async function SearchBrowse({
+  filtersLabel,
+  locale,
+  searchParamsPromise,
+  searchResultsDataPromise,
+  searchStatePromise,
+}: {
+  filtersLabel: string;
+  locale: Awaited<ReturnType<typeof getLocale>>;
+  searchParamsPromise: PageProps<"/[flags]/[locale]/search">["searchParams"];
+  searchResultsDataPromise: Promise<SearchResultsData>;
+  searchStatePromise: Promise<Awaited<ReturnType<typeof getCollectionSearchState>>>;
+}) {
+  const query = getParam(await searchParamsPromise, "q") ?? "";
+
+  // A new term rebuilds the browse store so stale filters never carry across searches.
+  return (
+    <CollectionBrowseProvider handle={`search:${query}`} searchStatePromise={searchStatePromise}>
+      <CollectionToolbar
+        resultCount={
+          <Suspense fallback={<Skeleton className="h-4 w-20" />}>
+            <SearchResultCount dataPromise={searchResultsDataPromise} />
+          </Suspense>
+        }
+        filterSheet={
+          <FilterSidebarSheet
+            label={filtersLabel}
+            trigger={
+              <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                <SlidersHorizontalIcon className="size-4" />
+                <span>{filtersLabel}</span>
+                <CollectionActiveFilterCountBadge />
+              </button>
+            }
+          >
+            <FilterPendingScope>
+              <CollectionFilters
+                facetsPromise={searchResultsDataPromise.then((data) => data.transformedFilters)}
+              />
+            </FilterPendingScope>
+          </FilterSidebarSheet>
+        }
+        sortSelect={<CollectionsSortSelect exclude={SEARCH_SORT_EXCLUDE} />}
+      />
+      <SearchResultsGrid locale={locale} searchResultsDataPromise={searchResultsDataPromise} />
+    </CollectionBrowseProvider>
+  );
+}
+
+function SearchBrowseFallback({
+  filtersLabel,
+  sortByLabel,
+}: {
+  filtersLabel: string;
+  sortByLabel: string;
+}) {
+  return (
+    <>
+      <CollectionToolbar
+        resultCount={<Skeleton className="h-4 w-20" />}
+        filterSheet={
+          <button type="button" className="flex items-center gap-2 text-sm font-medium">
+            <SlidersHorizontalIcon className="size-4" />
+            <span>{filtersLabel}</span>
+          </button>
+        }
+        sortSelect={<SortSelectFallback label={sortByLabel} />}
+      />
+      <ProductsGridSkeleton
+        count={RESULTS_PER_PAGE}
+        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+      />
+    </>
   );
 }
 
@@ -166,22 +215,20 @@ async function SearchAnalyticsTracker({
 }: {
   searchParamsPromise: PageProps<"/[flags]/[locale]/search">["searchParams"];
 }) {
-  const searchParams = await searchParamsPromise;
-  const query = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q;
+  const query = getParam(await searchParamsPromise, "q");
   return <SearchViewedTracker searchTerm={query ?? ""} />;
 }
 
 async function SearchQueryLabel({
   searchParamsPromise,
 }: {
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
+  searchParamsPromise: PageProps<"/[flags]/[locale]/search">["searchParams"];
 }) {
   const [resolvedSearchParams, t] = await Promise.all([
     searchParamsPromise,
     getTranslations("search"),
   ]);
-  const raw = resolvedSearchParams.q;
-  const query = Array.isArray(raw) ? raw[0] : raw;
+  const query = getParam(resolvedSearchParams, "q");
   if (!query) return null;
   return t("forQuery", { query });
 }
@@ -190,41 +237,4 @@ async function SearchResultCount({ dataPromise }: { dataPromise: Promise<SearchR
   const [data, t] = await Promise.all([dataPromise, getTranslations("search")]);
   if (data.total === 0) return null;
   return t("resultCount", { count: data.total });
-}
-
-async function SearchFilterCountBadge({
-  searchParamsPromise,
-}: {
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const resolved = await searchParamsPromise;
-  const activeFilters = parseFiltersFromSearchParams(resolved);
-  const activeFilterCount = Object.values(activeFilters).reduce((count, v) => {
-    if (!v) return count;
-    return count + (Array.isArray(v) ? v.length : 1);
-  }, 0);
-  if (activeFilterCount === 0) return null;
-  return (
-    <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
-      {activeFilterCount}
-    </span>
-  );
-}
-
-async function SearchFilterSidebarContent({
-  dataPromise,
-  searchParamsPromise,
-}: {
-  dataPromise: Promise<SearchResultsData>;
-  searchParamsPromise: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const [data, resolved] = await Promise.all([dataPromise, searchParamsPromise]);
-  const activeFilters = parseFiltersFromSearchParams(resolved);
-  return (
-    <CollectionFilterSidebarClient
-      filters={data.transformedFilters.filters}
-      priceRange={data.transformedFilters.priceRange}
-      activeFilters={activeFilters}
-    />
-  );
 }

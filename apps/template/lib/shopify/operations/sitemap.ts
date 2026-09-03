@@ -1,10 +1,11 @@
-import type { GraphQLFormattedError } from "@shopify/hydrogen";
+import { gql } from "@shopify/hydrogen";
+import type { SitemapType } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { assertStorefrontOk } from "../errors";
-import { storefront } from "../storefront";
+import { type ResultOf, storefront, type StorefrontResponse } from "../storefront";
 
-export type ShopifySitemapType = "ARTICLE" | "BLOG" | "COLLECTION" | "PAGE" | "PRODUCT";
+export type ShopifySitemapType = SitemapType;
 
 export interface SitemapResource {
   handle: string;
@@ -12,26 +13,7 @@ export interface SitemapResource {
   updatedAt: string;
 }
 
-interface StorefrontResponse<T> {
-  data?: T | null;
-  errors?: GraphQLFormattedError[];
-}
-
-interface ArticleSitemapPageResponse {
-  articles: {
-    nodes: Array<{
-      blog: { handle: string };
-      handle: string;
-      publishedAt: string;
-    }>;
-    pageInfo: {
-      endCursor: string | null;
-      hasNextPage: boolean;
-    };
-  };
-}
-
-const GET_ARTICLE_SITEMAP_PAGE_QUERY = `#graphql
+const GET_ARTICLE_SITEMAP_PAGE_QUERY = gql(`#graphql
   query getArticleSitemapPage($first: Int!, $after: String) {
     articles(first: $first, after: $after, sortKey: UPDATED_AT) {
       nodes {
@@ -47,9 +29,9 @@ const GET_ARTICLE_SITEMAP_PAGE_QUERY = `#graphql
       }
     }
   }
-` as const;
+`);
 
-const GET_SITEMAP_PAGES_COUNT_QUERY = `#graphql
+const GET_SITEMAP_PAGES_COUNT_QUERY = gql(`#graphql
   query getSitemapPagesCount($type: SitemapType!) {
     sitemap(type: $type) {
       pagesCount {
@@ -57,9 +39,9 @@ const GET_SITEMAP_PAGES_COUNT_QUERY = `#graphql
       }
     }
   }
-` as const;
+`);
 
-const GET_SITEMAP_PAGE_QUERY = `#graphql
+const GET_SITEMAP_PAGE_QUERY = gql(`#graphql
   query getSitemapPage($type: SitemapType!, $page: Int!) {
     sitemap(type: $type) {
       resources(page: $page) {
@@ -71,7 +53,9 @@ const GET_SITEMAP_PAGE_QUERY = `#graphql
       }
     }
   }
-` as const;
+`);
+
+type ArticleSitemapPage = ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>["articles"];
 
 function cacheTagsFor(type: ShopifySitemapType): string[] {
   if (type === "ARTICLE") return ["articles", "articles-index"];
@@ -98,15 +82,12 @@ export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Pro
   }
   cacheTag(...cacheTagsFor(type));
 
-  const response = await storefront.request<{ sitemap: { pagesCount: { count: number } } }>(
-    GET_SITEMAP_PAGES_COUNT_QUERY,
-    {
-      variables: { type },
-    },
-  );
+  const response = await storefront.request(GET_SITEMAP_PAGES_COUNT_QUERY, {
+    variables: { type },
+  });
   assertStorefrontOk(response, "getSitemapPagesCount");
 
-  return response.data.sitemap.pagesCount.count;
+  return response.data.sitemap.pagesCount?.count ?? 0;
 }
 
 export async function getShopifySitemapPage(
@@ -123,16 +104,16 @@ export async function getShopifySitemapPage(
 
   if (type === "ARTICLE") {
     let after: string | null = null;
-    let articlePage: ArticleSitemapPageResponse["articles"] | undefined;
+    let articlePage: ArticleSitemapPage | undefined;
 
     for (let currentPage = 1; currentPage <= page; currentPage += 1) {
-      const response: StorefrontResponse<ArticleSitemapPageResponse> =
-        await storefront.request<ArticleSitemapPageResponse>(GET_ARTICLE_SITEMAP_PAGE_QUERY, {
+      const response: StorefrontResponse<ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>> =
+        await storefront.request(GET_ARTICLE_SITEMAP_PAGE_QUERY, {
           variables: { after, first: 250 },
         });
       assertStorefrontOk(response, "getArticleSitemapPage");
       articlePage = response.data.articles;
-      after = articlePage.pageInfo.endCursor;
+      after = articlePage.pageInfo.endCursor ?? null;
 
       if (!articlePage.pageInfo.hasNextPage && currentPage < page) {
         return { hasNextPage: false, items: [] };
@@ -153,14 +134,18 @@ export async function getShopifySitemapPage(
     };
   }
 
-  const response = await storefront.request<{
-    sitemap: { resources: { hasNextPage: boolean; items: SitemapResource[] } };
-  }>(GET_SITEMAP_PAGE_QUERY, {
+  const response = await storefront.request(GET_SITEMAP_PAGE_QUERY, {
     variables: { type, page },
   });
   assertStorefrontOk(response, "getSitemapPage");
 
   const resources = response.data.sitemap.resources;
-  tagSitemapResources(type, resources.items);
-  return resources;
+  if (!resources) return { hasNextPage: false, items: [] };
+
+  const items = resources.items.map((item) => ({
+    handle: item.handle,
+    updatedAt: item.updatedAt,
+  }));
+  tagSitemapResources(type, items);
+  return { hasNextPage: resources.hasNextPage, items };
 }

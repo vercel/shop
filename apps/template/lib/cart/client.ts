@@ -107,7 +107,7 @@ function dispatchLinesAdd(
   document.dispatchEvent(event);
 }
 
-// This preview's add form drops line attributes and cannot attach optimistic product detail.
+// Only for adds that need line attributes; this preview's add form drops them. Use useProductForm/useCartForm otherwise.
 export function addToCart(
   merchandiseId: string,
   quantity: number,
@@ -119,7 +119,7 @@ export function addToCart(
   dispatchLinesAdd([line], productInfo, promise);
 }
 
-export interface ServerCartLine {
+interface ServerCartLine {
   components?: ServerCartLine[];
   cost: { totalAmount: GraphqlMoney };
   id?: string;

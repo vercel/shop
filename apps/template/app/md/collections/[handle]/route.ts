@@ -2,30 +2,27 @@ import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
   getAllProductsResultsData,
-  getCollectionSearchState,
+  resolveBrowseParams,
 } from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { getCollection } from "@/lib/shopify/operations/collections";
-import {
-  buildProductFiltersFromParams,
-  getCollectionProducts,
-} from "@/lib/shopify/operations/products";
-import { RESULTS_PER_PAGE, parseFiltersFromSearchParams, searchParamsToRecord } from "@/lib/utils";
+import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
   const url = new URL(request.url);
   const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
   const pathname = `/collections/${handle}`;
-  const searchParams = searchParamsToRecord(url.searchParams);
+  const searchState = resolveBrowseParams(url.searchParams);
 
   try {
     // /collections/all is local-only, so markdown must mirror the HTML data path.
     if (handle === ALL_PRODUCTS_HANDLE) {
-      const searchStatePromise = getCollectionSearchState(Promise.resolve(searchParams));
+      const searchStatePromise = Promise.resolve(searchState);
       const [collection, data] = await Promise.all([
         getAllProductsCollection(),
         getAllProductsResultsData({ locale, searchStatePromise }),
@@ -50,20 +47,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       });
     }
 
-    const sort = url.searchParams.get("sort") ?? undefined;
     const cursor = url.searchParams.get("cursor") ?? undefined;
-    const activeFilters = parseFiltersFromSearchParams(searchParams);
-    const shopifyFilters = buildProductFiltersFromParams(activeFilters);
+    const { activeFilters, filters, sort } = searchState;
 
+    // Same live read as the HTML page so agents and shoppers see one result set per URL.
     const [collection, result] = await Promise.all([
       getCollection({ handle, locale }),
-      getCollectionProducts({
+      fetchCollectionProducts({
         activeFilters,
         collection: handle,
         sortKey: sort,
         limit: RESULTS_PER_PAGE,
         cursor,
-        filters: shopifyFilters,
+        filters,
         locale,
       }),
     ]);

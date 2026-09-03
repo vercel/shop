@@ -3,10 +3,10 @@ import { Suspense } from "react";
 
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
-import { loadMoreCollectionProducts } from "@/lib/collections/action";
+import { loadMoreCollectionProductsAction } from "@/lib/collections/action";
 import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import { loadMoreSearchProducts } from "@/lib/search/action";
+import { loadMoreSearchProductsAction } from "@/lib/search/action";
 import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
@@ -27,7 +27,7 @@ async function Render({
   locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ activeFilters, result, filters, collection, sort }, t, tProduct] = await Promise.all([
+  const [{ collection, dataSearch, result }, t, tProduct] = await Promise.all([
     collectionResultsDataPromise,
     getTranslations("search"),
     getTranslations("product"),
@@ -56,12 +56,13 @@ async function Render({
   if (collection === ALL_PRODUCTS_HANDLE) {
     return (
       <InfiniteProductGrid
+        key={dataSearch}
         initialProducts={products}
         initialPageInfo={result.pageInfo}
         locale={locale}
         outOfStockText={tProduct("outOfStock")}
-        loadMore={loadMoreSearchProducts}
-        loadMoreParams={{ activeFilters, sortKey: sort, filters, locale }}
+        loadMore={loadMoreSearchProductsAction}
+        loadMoreParams={{ locale }}
       >
         {cards}
       </InfiniteProductGrid>
@@ -70,12 +71,13 @@ async function Render({
 
   return (
     <InfiniteProductGrid
+      key={dataSearch}
       initialProducts={products}
       initialPageInfo={result.pageInfo}
       locale={locale}
       outOfStockText={tProduct("outOfStock")}
-      loadMore={loadMoreCollectionProducts}
-      loadMoreParams={{ activeFilters, collection, sortKey: sort, filters, locale }}
+      loadMore={loadMoreCollectionProductsAction}
+      loadMoreParams={{ collection, locale }}
     >
       {cards}
     </InfiniteProductGrid>

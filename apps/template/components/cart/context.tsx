@@ -1,44 +1,31 @@
 "use client";
 
-import type { CartState } from "@shopify/hydrogen";
+import type { CartErrorState } from "@shopify/hydrogen";
 import {
   type ComponentProps,
   createContext,
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
-  useRef,
   useState,
 } from "react";
 
-import { addToCart, HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
-import type { OptimisticProductInfo } from "@/lib/product";
-import type { Cart, CartLine, CartWarning, DiscountAllocation } from "@/lib/types";
+import { toDomainCart } from "@/lib/cart";
+import { HydrogenCartProvider, useHydrogenCart } from "@/lib/cart/client";
+import type { Cart, CartWarning } from "@/lib/types";
 
-export type CartMutationError = "add" | "remove" | "update";
-
-// Matches Hydrogen's OPTIMISTIC_LINE_ID_PREFIX; server cart returns new lines first, so optimistic lines sort to the front.
-const OPTIMISTIC_LINE_ID_PREFIX = "optimistic:";
+type CartMutationError = "add" | "remove" | "update";
 
 type CartContextType = {
-  addToCartOptimistic: (
-    variantId: string,
-    quantity: number,
-    productInfo?: OptimisticProductInfo,
-  ) => void;
   cart: Cart | null;
   cartWithPending: Cart | null;
   clearError: () => void;
   clearWarnings: () => void;
-  isAddingToCart: boolean;
   isOverlayOpen: boolean;
   isUpdatingCart: boolean;
   lastError: CartMutationError | null;
   lastWarnings: CartWarning[];
   openOverlay: () => void;
-  pendingQuantity: number;
-  setCart: (cart: Cart | null) => void;
   setOverlayOpen: (open: boolean) => void;
   setWarnings: (warnings: CartWarning[]) => void;
 };
@@ -46,166 +33,43 @@ type CartContextType = {
 const CartContext = createContext<CartContextType | null>(null);
 
 const serverFallbackCartContext: CartContextType = {
-  addToCartOptimistic: () => {},
   cart: null,
   cartWithPending: null,
   clearError: () => {},
   clearWarnings: () => {},
-  isAddingToCart: false,
   isOverlayOpen: false,
   isUpdatingCart: false,
   lastError: null,
   lastWarnings: [],
   openOverlay: () => {},
-  pendingQuantity: 0,
-  setCart: () => {},
   setOverlayOpen: () => {},
   setWarnings: () => {},
 };
-
-type LegacyMerchandise = {
-  compareAtPrice?: { amount: string; currencyCode: string } | null;
-  id?: string;
-  image?: {
-    altText?: string | null;
-    height?: number | null;
-    url: string;
-    width?: number | null;
-  } | null;
-  price?: { amount: string; currencyCode: string } | null;
-  product?: { handle?: string; id?: string; title?: string };
-  selectedOptions?: { name: string; value: string }[];
-  title?: string;
-};
-
-type LegacyLine = {
-  cost: {
-    amountPerQuantity?: { amount: string; currencyCode: string } | null;
-    totalAmount: { amount: string; currencyCode: string };
-  };
-  discountAllocations?: Array<{
-    __typename:
-      | "CartAutomaticDiscountAllocation"
-      | "CartCodeDiscountAllocation"
-      | "CartCustomDiscountAllocation";
-    code?: string | null;
-    discountedAmount: { amount: string; currencyCode: string };
-    title?: string | null;
-  }>;
-  id: string;
-  instructions?: { canRemove: boolean; canUpdateQuantity: boolean } | null;
-  lineComponents?: LegacyLine[] | null;
-  merchandise?: LegacyMerchandise | null;
-  quantity: number;
-};
-
-function toLegacyCart(data: CartState["data"]): Cart | null {
-  if (data.id === null && data.totalQuantity === 0 && data.lines.nodes.length === 0) return null;
-  return {
-    appliedGiftCards: [],
-    checkoutUrl: data.checkoutUrl ?? "",
-    cost: {
-      subtotalAmount: data.cost.subtotalAmount,
-      totalAmount: data.cost.totalAmount,
-    },
-    discountAllocations: [],
-    discountCodes: data.discountCodes.map((d) => ({
-      applicable: d.applicable,
-      code: d.code,
-    })),
-    id: data.id ?? undefined,
-    lines: data.lines.nodes
-      .map((l) => toLegacyLine(l as unknown as LegacyLine))
-      .sort(
-        (a, b) =>
-          Number(b.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false) -
-          Number(a.id?.startsWith(OPTIMISTIC_LINE_ID_PREFIX) ?? false),
-      ),
-    note: data.note ?? null,
-    shippingCost: null,
-    totalQuantity: data.totalQuantity,
-  };
-}
-
-function toLegacyImage(image: LegacyMerchandise["image"]) {
-  return {
-    altText: image?.altText ?? "",
-    height: image?.height ?? 0,
-    url: image?.url ?? "",
-    width: image?.width ?? 0,
-  };
-}
-
-function toLegacyLine(line: LegacyLine): CartLine {
-  const merchandise = line.merchandise;
-  const image = merchandise?.image;
-  return {
-    canRemove: line.instructions?.canRemove ?? true,
-    canUpdateQuantity: line.instructions?.canUpdateQuantity ?? true,
-    components: (line.lineComponents ?? []).map((c) => toLegacyLine(c)),
-    cost: {
-      totalAmount: line.cost.totalAmount,
-    },
-    discountAllocations: (line.discountAllocations ?? []).flatMap<DiscountAllocation>(
-      (allocation) => {
-        if (allocation.__typename === "CartCodeDiscountAllocation") {
-          return allocation.code
-            ? [
-                {
-                  code: allocation.code,
-                  discountedAmount: allocation.discountedAmount,
-                  kind: "code",
-                },
-              ]
-            : [];
-        }
-        return [
-          {
-            discountedAmount: allocation.discountedAmount,
-            kind:
-              allocation.__typename === "CartAutomaticDiscountAllocation" ? "automatic" : "custom",
-            title: allocation.title ?? "",
-          },
-        ];
-      },
-    ),
-    id: line.id,
-    merchandise: {
-      ...(merchandise?.compareAtPrice ? { compareAtPrice: merchandise.compareAtPrice } : {}),
-      id: merchandise?.id ?? "",
-      ...(image ? { image: toLegacyImage(image) } : {}),
-      ...(merchandise?.price ? { price: merchandise.price } : {}),
-      product: {
-        featuredImage: toLegacyImage(image),
-        handle: merchandise?.product?.handle ?? "",
-        id: merchandise?.product?.id ?? "",
-        title: merchandise?.product?.title ?? "",
-      },
-      selectedOptions: merchandise?.selectedOptions ?? [],
-      title: merchandise?.title ?? "",
-    },
-    quantity: line.quantity,
-  };
-}
 
 function toLegacyWarnings(group: { warnings: { code: string; message: string }[] }): CartWarning[] {
   return group.warnings.map((w) => ({ code: w.code, message: w.message, target: "" }));
 }
 
+function hasCartFailure(errors: CartErrorState): boolean {
+  return errors.network.length > 0 || errors.lines.size > 0 || errors.cart.userErrors.length > 0;
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [isOverlayOpen, setOverlayOpen] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [lastError, setLastError] = useState<CartMutationError | null>(null);
-  const [localWarnings, setLocalWarnings] = useState<CartWarning[]>([]);
-  const clearError = useCallback(() => setLastError(null), []);
-  const clearWarnings = useCallback(() => setLocalWarnings([]), []);
+  const [dismissedError, setDismissedError] = useState<CartErrorState | null>(null);
+  const [warningsOverride, setWarningsOverride] = useState<{
+    errors: CartErrorState;
+    warnings: CartWarning[];
+  } | null>(null);
 
   const cartState = useHydrogenCart((state) => state);
-  const cartWithPending = toLegacyCart(cartState.data);
+  const cartWithPending = toDomainCart(cartState.data);
   const isCostSettling = Boolean(cartState.pending.cost || cartState.revalidating);
-  const settledCartRef = useRef(cartWithPending);
-  if (!isCostSettling) settledCartRef.current = cartWithPending;
-  const cart = settledCartRef.current;
+  // Hold the last settled totals while Shopify recomputes cost so the drawer doesn't flash stale-to-new.
+  const [settledCart, setSettledCart] = useState(cartWithPending);
+  if (!isCostSettling && settledCart !== cartWithPending) setSettledCart(cartWithPending);
+  const cart = isCostSettling ? settledCart : cartWithPending;
+
   const isUpdatingCart = Boolean(
     cartState.pending.attributes ||
     cartState.pending.cost ||
@@ -215,58 +79,41 @@ export function CartProvider({ children }: { children: ReactNode }) {
     cartState.revalidating,
   );
 
-  const isOverlayOpenRef = useRef(isOverlayOpen);
-  useEffect(() => {
-    isOverlayOpenRef.current = isOverlayOpen;
-  }, [isOverlayOpen]);
+  const { errors } = cartState;
+  const isErrorVisible = hasCartFailure(errors) && dismissedError !== errors;
+  const lastError: CartMutationError | null = isErrorVisible ? "update" : null;
+  const lastWarnings =
+    warningsOverride?.errors === errors
+      ? warningsOverride.warnings
+      : isErrorVisible
+        ? toLegacyWarnings(errors.cart)
+        : [];
 
-  const openOverlay = useCallback(() => setOverlayOpen(true), []);
-
-  useEffect(() => {
-    if (cartState.pending.lines.size === 0) setIsAddingToCart(false);
-  }, [cartState.pending.lines]);
-
-  const addToCartOptimistic = useCallback(
-    (variantId: string, quantity: number, productInfo?: OptimisticProductInfo) => {
-      setLastError(null);
-      if (!isOverlayOpenRef.current) {
-        setIsAddingToCart(true);
-        setOverlayOpen(true);
-      }
-      addToCart(variantId, quantity, productInfo);
-    },
-    [],
+  const clearError = useCallback(() => setDismissedError(errors), [errors]);
+  const setWarnings = useCallback(
+    (warnings: CartWarning[]) => setWarningsOverride({ errors, warnings }),
+    [errors],
   );
-
-  useEffect(() => {
-    const hasFailure =
-      cartState.errors.network.length > 0 ||
-      cartState.errors.lines.size > 0 ||
-      cartState.errors.cart.userErrors.length > 0;
-    if (hasFailure) {
-      setLastError("update");
-      setLocalWarnings(toLegacyWarnings(cartState.errors.cart));
-    }
-  }, [cartState.errors]);
+  const clearWarnings = useCallback(() => setWarnings([]), [setWarnings]);
+  const openOverlay = useCallback(() => {
+    setDismissedError(errors);
+    setOverlayOpen(true);
+  }, [errors]);
 
   return (
     <CartContext.Provider
       value={{
-        addToCartOptimistic,
         cart,
         cartWithPending,
         clearError,
         clearWarnings,
-        isAddingToCart,
         isOverlayOpen,
         isUpdatingCart,
         lastError,
-        lastWarnings: localWarnings,
+        lastWarnings,
         openOverlay,
-        pendingQuantity: cartState.pending.lines.size,
-        setCart: () => {},
         setOverlayOpen,
-        setWarnings: setLocalWarnings,
+        setWarnings,
       }}
     >
       {children}
@@ -307,10 +154,11 @@ interface CartContextSyncProps {
   children: ReactNode;
 }
 
+// The layout streams `initialData` as a promise, so the store has no lines during SSR; the page's
+// own server read fills the HTML until the store hydrates.
 export function CartContextSync({ cart, children }: CartContextSyncProps) {
   const { cartWithPending } = useCart();
 
-  // Fall back to the server-fetched cart until the provider is seeded — avoids a hydration flash.
   return (
     <CartRenderContext.Provider value={cartWithPending ?? cart}>
       {children}

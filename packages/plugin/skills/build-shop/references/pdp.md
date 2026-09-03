@@ -6,7 +6,7 @@
 - Route: `apps/template/app/products/[handle]/page.tsx`
 - Product detail components: `apps/template/components/product-detail/`
 - Product card and recommendations: `apps/template/components/product-card/product-card.tsx`, `apps/template/components/product/related-products-section.tsx`
-- Operations and transforms: `apps/template/lib/shopify/operations/products.ts`, `apps/template/lib/shopify/transforms/product.ts`, `apps/template/lib/product.ts`, `apps/template/lib/shopify/encoded-variants.ts`
+- Operations and transforms: `apps/template/lib/shopify/operations/products.ts`, `apps/template/lib/shopify/transforms/product.ts`, `apps/template/lib/product.ts`
 - Public source fallback: [PDP route source](https://github.com/vercel/shop/blob/main/apps/template/app/products/%5Bhandle%5D/page.tsx), [product detail source](https://github.com/vercel/shop/tree/main/apps/template/components/product-detail), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## Preserve shell coherence

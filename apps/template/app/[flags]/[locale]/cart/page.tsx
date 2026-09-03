@@ -15,11 +15,11 @@ import { RelatedProductsSection } from "@/components/product/related-products-se
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { getCart } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { withFallback } from "@/lib/shopify/errors";
-import { getCart } from "@/lib/shopify/operations/cart";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("cart");

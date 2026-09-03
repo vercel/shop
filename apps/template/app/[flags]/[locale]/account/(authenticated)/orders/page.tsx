@@ -64,11 +64,7 @@ async function OrdersContent({
               <div className="flex items-center gap-3">
                 <OrderStatusBadge status={order.fulfillmentStatus} />
                 <span className="text-sm tabular-nums">
-                  {formatPrice(
-                    Number(order.totalPrice.amount),
-                    order.totalPrice.currencyCode,
-                    defaultLocale,
-                  )}
+                  {formatPrice(order.totalPrice, defaultLocale)}
                 </span>
               </div>
             </Link>

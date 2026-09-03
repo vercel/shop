@@ -1,8 +1,9 @@
 "use client";
 
+import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import {
   ProductCardContent,
@@ -12,6 +13,7 @@ import {
   ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
+import { getBrowseSearch } from "@/lib/collections";
 import { buildProductUrl } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
 
@@ -22,7 +24,7 @@ interface InfiniteProductGridProps<TParams> {
   outOfStockText: string;
   // Top-level "use server" action; passed by reference, no closure encryption.
   loadMore: (
-    params: TParams & { cursor: string },
+    params: TParams & { cursor: string; search: string },
   ) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
   loadMoreParams: TParams;
   children: React.ReactNode;
@@ -37,55 +39,49 @@ export function InfiniteProductGrid<TParams>({
   loadMoreParams,
   children,
 }: InfiniteProductGridProps<TParams>) {
+  // The store, not a server snapshot, is the single source of truth for filters and sort mid-scroll.
+  const search = useCollection(getBrowseSearch);
   const [additionalProducts, setAdditionalProducts] = useState<ProductCard[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
-  // Live cursor pages can re-emit a boundary product if the ranking shifts mid-scroll; skip ids already shown.
-  const seenIdsRef = useRef<Set<string>>(new Set(initialProducts.map((product) => product.id)));
 
-  useEffect(() => {
-    setAdditionalProducts([]);
-    setPageInfo(initialPageInfo);
-    setIsLoading(false);
-    loadingRef.current = false;
-    seenIdsRef.current = new Set(initialProducts.map((product) => product.id));
-  }, [initialProducts, initialPageInfo]);
-
-  const handleLoadMore = useCallback(async () => {
+  const loadMorePage = useEffectEvent(async () => {
     if (loadingRef.current || !pageInfo.hasNextPage || !pageInfo.endCursor) return;
     loadingRef.current = true;
     setIsLoading(true);
 
     try {
-      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor });
-      const fresh = result.products.filter((product) => !seenIdsRef.current.has(product.id));
-      for (const product of fresh) seenIdsRef.current.add(product.id);
-      setAdditionalProducts((prev) => [...prev, ...fresh]);
+      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor, search });
+      // Live cursor pages can re-emit a boundary product if the ranking shifts mid-scroll; skip ids already shown.
+      setAdditionalProducts((prev) => {
+        const seen = new Set([...initialProducts, ...prev].map((product) => product.id));
+        return [...prev, ...result.products.filter((product) => !seen.has(product.id))];
+      });
       setPageInfo(result.pageInfo);
     } finally {
       setIsLoading(false);
       loadingRef.current = false;
     }
-  }, [pageInfo, loadMore, loadMoreParams]);
+  });
 
+  // Re-arm the observer per cursor so a sentinel still in view after a page lands triggers the next load.
+  const { endCursor, hasNextPage } = pageInfo;
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinel || !hasNextPage || !endCursor) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          handleLoadMore();
-        }
+        if (entries[0]?.isIntersecting) void loadMorePage();
       },
       { rootMargin: "400px" },
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [handleLoadMore]);
+  }, [endCursor, hasNextPage]);
 
   return (
     <>

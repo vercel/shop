@@ -1,10 +1,11 @@
 import {
+  type AnyStorefrontQueryString,
   createShopifyRequestContext,
   createStorefrontClient,
   type GraphQLFormattedError,
   type I18nConfig,
+  type StorefrontApi,
   type StorefrontClient,
-  type StorefrontQueryString,
 } from "@shopify/hydrogen";
 
 import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
@@ -71,30 +72,41 @@ function getClient(country: string, language: string): StorefrontClient {
   );
 }
 
-interface StorefrontRequestOptions {
-  variables?: Record<string, unknown>;
-}
+// Hydrogen's StorefrontApi.ResultOf collapses on fragment documents (Variables = never), so read the gql.tada decoration directly.
+export type ResultOf<Doc> = Doc extends { __apiType?: (variables: never) => infer Result }
+  ? Result
+  : never;
 
-interface StorefrontResponse<T> {
+// Hydrogen injects `$country`/`$language` from the client's i18n, so callers pass a locale instead.
+type StorefrontVariables<Doc extends AnyStorefrontQueryString> = Omit<
+  StorefrontApi.VariablesOf<Doc>,
+  "country" | "language"
+>;
+
+type StorefrontRequestOptions<Doc extends AnyStorefrontQueryString> = {
+  locale?: string;
+} & (Record<string, never> extends StorefrontVariables<Doc>
+  ? { variables?: StorefrontVariables<Doc> }
+  : { variables: StorefrontVariables<Doc> });
+
+export interface StorefrontResponse<T> {
   data?: T | null;
   errors?: GraphQLFormattedError[];
 }
 
 export const storefront = {
-  async request<T>(
-    query: string,
-    options?: StorefrontRequestOptions,
-  ): Promise<StorefrontResponse<T>> {
-    const variables = options?.variables;
-    const country =
-      typeof variables?.country === "string" ? variables.country : getCountryCode(defaultLocale);
-    const language =
-      typeof variables?.language === "string" ? variables.language : getLanguageCode(defaultLocale);
-
-    // Brand runtime strings so Hydrogen does not infer `never` variables.
-    const doc = query as StorefrontQueryString<T, Record<string, unknown>>;
-    const { data, errors } = await getClient(country, language).graphql(doc, { variables });
-    return { data, errors };
+  async request<const Doc extends AnyStorefrontQueryString>(
+    doc: Doc,
+    ...[options]: Record<string, never> extends StorefrontVariables<Doc>
+      ? [options?: StorefrontRequestOptions<Doc>]
+      : [options: StorefrontRequestOptions<Doc>]
+  ): Promise<StorefrontResponse<ResultOf<Doc>>> {
+    const locale = options?.locale ?? defaultLocale;
+    const client = getClient(getCountryCode(locale), getLanguageCode(locale));
+    const { data, errors } = await client.graphql(doc, {
+      variables: options?.variables,
+    } as never);
+    return { data: data as ResultOf<Doc> | null, errors };
   },
 };
 
@@ -103,10 +115,7 @@ const UCP_AGENT_PROFILE_URL = process.env.UCP_AGENT_PROFILE_URL;
 
 let mcpRpcId = 0;
 
-export async function callStorefrontMcp<T>(
-  tool: string,
-  args: Record<string, unknown>,
-): Promise<T> {
+async function callStorefrontMcp<T>(tool: string, args: Record<string, unknown>): Promise<T> {
   const meta = UCP_AGENT_PROFILE_URL
     ? { "ucp-agent": { profile: UCP_AGENT_PROFILE_URL } }
     : undefined;
@@ -153,12 +162,12 @@ export async function callStorefrontMcp<T>(
   throw new Error(`Storefront MCP ${tool}: empty response`);
 }
 
-export interface McpMoney {
+interface McpMoney {
   amount: number;
   currency: string;
 }
 
-export interface McpCatalogProduct {
+interface McpCatalogProduct {
   categories?: Array<{ name?: string }>;
   description?: { html?: string };
   id: string;
@@ -201,39 +210,6 @@ export async function searchCatalog(params: {
 }
 
 // MCP details use major-unit strings while search uses minor-unit numbers.
-export interface McpProductDetails {
-  description?: string;
-  image_url?: string | null;
-  images?: Array<{ alt_text?: string; url?: string }>;
-  options?: Array<{ name?: string; values?: string[] }>;
-  price_range?: { currency?: string; max?: string; min?: string };
-  product_id: string;
-  selectedOrFirstAvailableVariant?: {
-    available?: boolean;
-    currency?: string;
-    price?: string;
-    title?: string;
-    variant_id?: string;
-  };
-  title: string;
-  total_variants?: number;
-}
-
-export async function getCatalogProduct(params: {
-  locale?: string;
-  options?: Record<string, string>;
-  productId: string;
-}): Promise<McpProductDetails | undefined> {
-  const { locale = defaultLocale, options, productId } = params;
-
-  const result = await callStorefrontMcp<{ product?: McpProductDetails }>("get_product_details", {
-    country: getCountryCode(locale),
-    language: getLanguageCode(locale),
-    product_id: productId,
-    ...(options ? { options } : {}),
-  });
-  return result.product;
-}
 
 export interface McpPolicyAnswer {
   answer?: string;

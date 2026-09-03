@@ -1,5 +1,18 @@
+import { flattenConnection } from "@shopify/hydrogen";
+
+import type {
+  BUNDLE_COMPONENT_VARIANT_FRAGMENT,
+  FILTERABLE_PRODUCT_CARD_FRAGMENT,
+  PRODUCT_CARD_FRAGMENT,
+  PRODUCT_FRAGMENT,
+  PRODUCT_VARIANT_FRAGMENT,
+  PRODUCT_WITH_VARIANTS_FRAGMENT,
+  PURCHASABLE_PRODUCT_VARIANT_FRAGMENT,
+  TAXONOMY_CATEGORY_FRAGMENT,
+} from "@/lib/shopify/fragments";
+import type { ResultOf } from "@/lib/shopify/storefront";
 import { parseImagePlaceholders } from "@/lib/shopify/transforms/image-placeholders";
-import { flattenEdges, getNumericShopifyId, type ShopifyEdges } from "@/lib/shopify/utils";
+import { getNumericShopifyId } from "@/lib/shopify/utils";
 import type {
   Category,
   Image,
@@ -15,171 +28,41 @@ import type {
   Video,
 } from "@/lib/types";
 
-interface ShopifyImage {
-  url: string;
-  altText: string | null;
-  width: number;
-  height: number;
-}
+type ShopifyBundleComponentVariant = ResultOf<typeof BUNDLE_COMPONENT_VARIANT_FRAGMENT>;
+type ShopifyImage = NonNullable<ShopifyBundleComponentVariant["image"]>;
+type ShopifyBaseVariant = ResultOf<typeof PRODUCT_VARIANT_FRAGMENT>;
+type ShopifyPurchasableVariant = ResultOf<typeof PURCHASABLE_PRODUCT_VARIANT_FRAGMENT>;
+// Bundle fields are only selected when `shopConfig.pdp.bundles.isEnabled`.
+export type ShopifyVariant = ShopifyBaseVariant & Partial<ShopifyPurchasableVariant>;
+type ShopifyCategory = ResultOf<typeof TAXONOMY_CATEGORY_FRAGMENT>;
 
-interface ShopifyMoney {
-  amount: string;
-  currencyCode: string;
-}
-
-interface ShopifyBundleComponentVariant {
-  id: string;
-  title: string;
-  image: ShopifyImage | null;
-  product: {
-    id: string;
-    title: string;
-    handle: string;
-    featuredImage: ShopifyImage | null;
+type ShopifyBaseProduct = ResultOf<typeof PRODUCT_FRAGMENT>;
+type ShopifyProductWithVariants = ResultOf<typeof PRODUCT_WITH_VARIANTS_FRAGMENT>;
+// Variants and bundle relationships are optional selections layered on ProductFields.
+export type ShopifyProduct = ShopifyBaseProduct &
+  Partial<Pick<ShopifyProductWithVariants, "variants">> & {
+    selectedOrFirstAvailableVariant?: ShopifyVariant | null;
   };
-}
+type ShopifyOption = ShopifyProduct["options"][number];
+type ShopifyOptionValueSwatch = ShopifyOption["optionValues"][number]["swatch"];
+type ShopifyMediaNode = ShopifyProduct["media"]["edges"][number]["node"];
 
-export interface ShopifyVariant {
-  id: string;
-  title: string;
-  availableForSale: boolean;
-  price: ShopifyMoney;
-  compareAtPrice: ShopifyMoney | null;
-  selectedOptions: Array<{ name: string; value: string }>;
-  image: ShopifyImage | null;
-  requiresComponents?: boolean;
-  groupedBy?: { nodes: ShopifyBundleComponentVariant[] };
-  components?: {
-    nodes: Array<{ quantity: number; productVariant: ShopifyBundleComponentVariant }>;
-  };
-}
+type ShopifyBaseProductCard = ResultOf<typeof PRODUCT_CARD_FRAGMENT>;
+type ShopifyFilterableProductCard = ResultOf<typeof FILTERABLE_PRODUCT_CARD_FRAGMENT>;
+export type ShopifyProductCard = ShopifyBaseProductCard &
+  Partial<Pick<ShopifyFilterableProductCard, "options">>;
 
-interface ShopifyOptionValueSwatch {
-  color: string | null;
-  image: { previewImage: { url: string } } | null;
-}
-
-interface ShopifyOptionValue {
-  id: string;
-  name: string;
-  swatch: ShopifyOptionValueSwatch | null;
-  firstSelectableVariant?: {
-    image: ShopifyImage | null;
-    selectedOptions?: Array<{ name: string; value: string }>;
-  } | null;
-}
-
-interface ShopifyOption {
-  id: string;
-  name: string;
-  values: string[];
-  optionValues?: ShopifyOptionValue[];
-}
-
-interface ShopifyCategory {
-  id: string;
-  name: string;
-  ancestors: Array<{ id: string; name: string }>;
-}
-
-interface ShopifyVideoSource {
-  url: string;
-  mimeType: string;
-  width: number;
-  height: number;
-}
-
-interface ShopifyMediaImageNode {
-  id: string;
-  image: ShopifyImage | null;
-  mediaContentType: "IMAGE";
-}
-
-interface ShopifyVideoNode {
-  mediaContentType: "VIDEO";
-  previewImage: ShopifyImage | null;
-  sources: ShopifyVideoSource[];
-}
-
-interface ShopifyOtherMediaNode {
-  mediaContentType: "EXTERNAL_VIDEO" | "MODEL_3D";
-}
-
-type ShopifyMediaNode = ShopifyMediaImageNode | ShopifyVideoNode | ShopifyOtherMediaNode;
-
-export interface ShopifyProduct {
-  id: string;
-  title: string;
-  handle: string;
-  description: string;
-  descriptionHtml: string;
-  vendor: string;
-  tags: string[];
-  updatedAt: string;
-  availableForSale: boolean;
-  isGiftCard: boolean;
-  featuredImage: ShopifyImage | null;
-  media?: ShopifyEdges<ShopifyMediaNode>;
-  /** @deprecated Kept for stale cache compatibility — new queries use `media` */
-  images?: ShopifyEdges<ShopifyImage>;
-  priceRange: {
-    minVariantPrice: ShopifyMoney;
-    maxVariantPrice: ShopifyMoney;
-  };
-  compareAtPriceRange: {
-    minVariantPrice: ShopifyMoney;
-    maxVariantPrice: ShopifyMoney;
-  } | null;
-  encodedVariantAvailability?: string | null;
-  encodedVariantExistence?: string | null;
-  variantsCount: { count: number };
-  imagePlaceholders?: { jsonValue: unknown } | null;
-  reviewsRating?: { value: string } | null;
-  reviewsRatingCount?: { value: string } | null;
-  selectedOrFirstAvailableVariant?: ShopifyVariant | null;
-  variants?: ShopifyEdges<ShopifyVariant>;
-  options: ShopifyOption[];
-  seo: {
-    title: string | null;
-    description: string | null;
-  };
-  category?: ShopifyCategory | null;
-  collections?: ShopifyEdges<{ handle: string }>;
-}
-
-export interface ShopifyProductCard {
-  id: string;
-  title: string;
-  handle: string;
-  vendor: string;
-  availableForSale: boolean;
-  isGiftCard: boolean;
-  featuredImage: ShopifyImage | null;
-  images?: ShopifyEdges<ShopifyImage>;
-  priceRange: {
-    minVariantPrice: ShopifyMoney;
-    maxVariantPrice: ShopifyMoney;
-  };
-  compareAtPriceRange?: {
-    minVariantPrice: ShopifyMoney;
-  } | null;
-  selectedOrFirstAvailableVariant?: {
-    id: string;
-    availableForSale: boolean;
-    image?: ShopifyImage | null;
-    selectedOptions: Array<{ name: string; value: string }>;
-  } | null;
-  options?: Array<Pick<ShopifyOption, "name" | "optionValues">>;
-}
-
-function transformImage(image: ShopifyImage | null, blurDataURL?: string): Image | null {
+export function transformImage(
+  image: ShopifyImage | null | undefined,
+  blurDataURL?: string,
+): Image | null {
   if (!image) return null;
   return {
-    altText: image.altText ?? "",
-    ...(blurDataURL ? { blurDataURL } : {}),
-    height: image.height,
     url: image.url,
-    width: image.width,
+    altText: image.altText ?? "",
+    width: image.width ?? 0,
+    height: image.height ?? 0,
+    ...(blurDataURL ? { blurDataURL } : {}),
   };
 }
 
@@ -187,29 +70,15 @@ function extractMediaFromProduct(product: ShopifyProduct): {
   images: Image[];
   videos: Video[];
 } {
-  // Handle stale cached responses that still use the old `images` field
-  if (!product.media && product.images) {
-    return {
-      images: flattenEdges(product.images)
-        .map((img) => transformImage(img))
-        .filter(Boolean) as Image[],
-      videos: [],
-    };
-  }
-
-  if (!product.media) {
-    return { images: [], videos: [] };
-  }
-
   const images: Image[] = [];
   const placeholders = parseImagePlaceholders(product.imagePlaceholders?.jsonValue);
   const videos: Video[] = [];
 
-  for (const node of flattenEdges(product.media)) {
-    if (node.mediaContentType === "IMAGE") {
+  for (const node of flattenConnection<ShopifyMediaNode>(product.media)) {
+    if (node.__typename === "MediaImage") {
       const img = transformImage(node.image, placeholders.get(node.id)?.blurDataURL);
       if (img) images.push(img);
-    } else if (node.mediaContentType === "VIDEO") {
+    } else if (node.__typename === "Video") {
       const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));
       const bestSource = mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
       if (bestSource) {
@@ -273,6 +142,8 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     availableForSale: variant.availableForSale,
     price: variant.price,
     compareAtPrice: variant.compareAtPrice ?? undefined,
+    productHandle: variant.product.handle,
+    productTitle: variant.product.title,
     selectedOptions: variant.selectedOptions,
     image: transformImage(variant.image),
     bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
@@ -281,7 +152,7 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
   };
 }
 
-function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSwatch | undefined {
+function transformSwatch(swatch: ShopifyOptionValueSwatch): OptionValueSwatch | undefined {
   if (!swatch) return undefined;
   const result: OptionValueSwatch = {};
   if (swatch.color) result.color = swatch.color;
@@ -292,23 +163,28 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch | null): OptionValueSw
 
 function transformOption(option: ShopifyOption): ProductOption {
   const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
-  const imageLookup = new Map<string, string | undefined>();
-  if (option.optionValues) {
-    for (const ov of option.optionValues) {
-      swatchLookup.set(ov.name, transformSwatch(ov.swatch));
-      imageLookup.set(ov.name, ov.firstSelectableVariant?.image?.url);
-    }
+  const variantLookup = new Map<string, ProductVariant | undefined>();
+  for (const ov of option.optionValues) {
+    swatchLookup.set(ov.name, transformSwatch(ov.swatch));
+    variantLookup.set(
+      ov.name,
+      ov.firstSelectableVariant ? transformVariant(ov.firstSelectableVariant) : undefined,
+    );
   }
 
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map((value): OptionValue => ({
-      id: value,
-      image: imageLookup.get(value),
-      name: value,
-      swatch: swatchLookup.get(value),
-    })),
+    values: option.values.map((value): OptionValue => {
+      const firstSelectableVariant = variantLookup.get(value);
+      return {
+        firstSelectableVariant,
+        id: value,
+        image: firstSelectableVariant?.image?.url,
+        name: value,
+        swatch: swatchLookup.get(value),
+      };
+    }),
   };
 }
 
@@ -320,14 +196,14 @@ function transformProductCard(
   const colorOption = product.options?.find(
     (option) =>
       option.name.toLowerCase().includes("colo") ||
-      option.optionValues?.some((value) => value.swatch?.color || value.swatch?.image),
+      option.optionValues.some((value) => value.swatch?.color || value.swatch?.image),
   );
-  const matchedVariant = colorOption?.optionValues?.find(
+  const matchedVariant = colorOption?.optionValues.find(
     (value) => value.name.toLowerCase() === selectedOptionValue?.toLowerCase(),
   )?.firstSelectableVariant;
   const cardVariant = matchedVariant ?? defaultVariant;
   const primaryImage = matchedVariant?.image ?? product.featuredImage;
-  const images = product.images ? flattenEdges(product.images) : [];
+  const images = flattenConnection(product.images);
   const colorVariantImageUrls = new Set(
     colorOption?.optionValues
       ?.map((value) => value.firstSelectableVariant?.image?.url)
@@ -345,7 +221,7 @@ function transformProductCard(
     secondaryImage: altImage ? transformImage(altImage) : undefined,
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,
-    compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
+    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
@@ -374,7 +250,6 @@ function hasUniformPriceRange(product: ShopifyProduct): boolean {
   if (priceRange.minVariantPrice.currencyCode !== priceRange.maxVariantPrice.currencyCode) {
     return false;
   }
-  if (!compareAtPriceRange) return true;
   return compareAtPriceRange.minVariantPrice.amount === compareAtPriceRange.maxVariantPrice.amount;
 }
 
@@ -398,7 +273,7 @@ function transformReviewsRating(product: ShopifyProduct): ProductRating | undefi
 
 export function transformShopifyProductDetails(product: ShopifyProduct): ProductDetails {
   const variants = product.variants
-    ? flattenEdges(product.variants).map(transformVariant)
+    ? flattenConnection(product.variants).map(transformVariant)
     : undefined;
   const defaultVariant = product.selectedOrFirstAvailableVariant
     ? transformVariant(product.selectedOrFirstAvailableVariant)
@@ -410,15 +285,16 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     featuredImage: transformImage(product.featuredImage),
     price: product.priceRange.minVariantPrice,
     maxPrice: product.priceRange.maxVariantPrice,
-    compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
+    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
     vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
     isGiftCard: product.isGiftCard,
+    adjacentVariants: product.adjacentVariants.map(transformVariant),
     allVariantsInStock:
       !product.encodedVariantExistence ||
       product.encodedVariantExistence === product.encodedVariantAvailability,
     hasUniformPricing: hasUniformPriceRange(product),
-    variantsCount: product.variantsCount.count,
+    variantsCount: product.variantsCount?.count ?? variants?.length ?? 0,
     defaultVariant,
     defaultVariantId: defaultVariant?.id,
     defaultVariantNumericId: defaultVariant
@@ -440,15 +316,10 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     category: transformCategory(product.category),
     updatedAt: product.updatedAt,
     priceRange: product.priceRange,
-    compareAtPriceRange: product.compareAtPriceRange ?? undefined,
+    compareAtPriceRange: product.compareAtPriceRange,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
-    manufacturerName: product.vendor,
     categoryId: product.category?.id,
-    collectionHandles: flattenEdges(product.collections ?? { edges: [] }).map((c) => c.handle),
+    collectionHandles: flattenConnection(product.collections).map((c) => c.handle),
     rating: transformReviewsRating(product),
   };
-}
-
-export function transformShopifyProductCards(products: ShopifyProductCard[]): ProductCard[] {
-  return products.map(transformShopifyProductCard);
 }

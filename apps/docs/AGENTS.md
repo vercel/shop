@@ -26,6 +26,12 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 - Do not edit generated directories such as `.source/`, `.next/`, `node_modules/`, or build output.
 - When package API behavior is unclear, read the installed package docs in `node_modules/@vercel/geistdocs/docs` (start with `agents.md` and `sitemap.md`) before guessing.
 - Update the package with `pnpm exec geistdocs update`; it bumps the dependency and never overwrites local adapter files.
+- Keep `createGeistdocs` from `@vercel/geistdocs/next` as the `next.config.ts` wrapper. It composes Fumadocs MDX and generates the App Router manifest used for agent-readable 404 recovery.
+- Keep `cacheComponents: true` and `partialPrefetching: true`. Do not export `dynamic`, `revalidate`, or `fetchCache` from App Router pages or route handlers.
+- Read `[lang]` through `next/root-params` in Server Components. Keep route context `params` in Route Handlers and Server Actions.
+- Use `prefetch={true}` for app-owned links to statically generated docs pages, and restart `next dev` after adding, deleting, or renaming routes.
+- Keep production URL construction in `lib/geistdocs/site-url.ts`. Canonicals, Open Graph, JSON-LD, sitemap, robots, and RSS must share that production origin.
+- Keep smart recovery enabled for missing mapped Markdown pages and automatic unmatched agent paths unless the app needs explicit custom ownership.
 
 ## Common edit targets
 
@@ -88,8 +94,10 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-## This is NOT the Next.js you know
+# This is NOT the Next.js you know
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->

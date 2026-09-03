@@ -36,11 +36,13 @@ export function CollectionViewedTracker({
 export function PageViewedTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const pageKey = `${pathname}?${searchParams.toString()}`;
+  const search = searchParams.toString();
 
   useEffect(() => {
-    getAnalytics()?.publish(AnalyticsEvent.PAGE_VIEWED);
-  }, [pageKey]);
+    getAnalytics()?.publish(AnalyticsEvent.PAGE_VIEWED, {
+      url: `${window.location.origin}${pathname}${search ? `?${search}` : ""}`,
+    });
+  }, [pathname, search]);
   return null;
 }
 
@@ -48,7 +50,7 @@ export function ProductViewedTracker({
   product,
   variantPromise,
 }: {
-  product: ProductDetails;
+  product: Pick<ProductDetails, "handle" | "id" | "title" | "vendor">;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const variant = use(variantPromise);
@@ -63,7 +65,7 @@ export function ProductViewedTracker({
       title: product.title,
       variantId: variant.id,
       variantTitle: variant.title,
-      vendor: product.manufacturerName,
+      vendor: product.vendor ?? "",
     };
     getAnalytics()?.publish(AnalyticsEvent.PRODUCT_VIEWED, { products: [payload] });
     trackedHandleRef.current = product.handle;
