@@ -19,7 +19,7 @@
     "@json-render/core": "0.20.0",
     "@json-render/react": "0.20.0",
     "@shopify/api-codegen-preset": "3.0.0",
-    "@shopify/hydrogen": "2026.10.0-preview.1",
+    "@shopify/hydrogen": "2026.10.0-preview.2",
     "@tailwindcss/turbopack": "4.3.3",
     "@tailwindcss/typography": "0.5.20",
     "@types/node": "26.4.0",

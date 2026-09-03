@@ -6,6 +6,8 @@ allowBuilds:
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  # Track Hydrogen 2026.10 previews on the release-hydrogen-preview-2 branch.
+  - "@shopify/hydrogen"
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
 
