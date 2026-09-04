@@ -1,6 +1,7 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
+import { unstable_navigation } from "next/cache";
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
@@ -90,7 +91,7 @@ export async function CollectionDetailPage({
   );
 }
 
-function CollectionBrowse({
+async function CollectionBrowse({
   filtersLabel,
   getCollectionResultsData,
   handle,
@@ -107,6 +108,9 @@ function CollectionBrowse({
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
+  // Results are uncached and per-user, so a per-link runtime prefetch must stop here; otherwise the
+  // whole page segment is marked partial and the header is refetched on click too.
+  await unstable_navigation();
   const collectionResultsDataPromise = getCollectionResultsData();
 
   return (
