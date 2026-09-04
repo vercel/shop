@@ -29,7 +29,7 @@ Edit `lib/config.ts` to set storefront-wide, secret-free options. Keep credentia
 
 ## Required constraints
 
-Before enabling `auth.isEnabled`, set `CUSTOMER_ACCOUNT_SESSION_SECRET` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` as described in [Environment Variables](/docs/reference/env-vars). The build fails if either variable is missing.
+Before enabling `auth.isEnabled`, set `CUSTOMER_ACCOUNT_SESSION_SECRET`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` as described in [Environment Variables](/docs/reference/env-vars). The build fails if any of these variables is missing.
 
 Enable `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so leave it disabled when self-hosting. The `deepAnalysis` level is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
 

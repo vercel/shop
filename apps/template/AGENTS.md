@@ -39,7 +39,7 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 ## Storefront Architecture Contract
 
 - Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates while rebuilding presentation. Change them only when the task explicitly changes behavior.
-- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own fetching/cache/transforms, Server Components compose the shell, client leaves own interaction, and server actions own mutations/invalidation.
+- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own fetching/cache/transforms, Server Components compose the shell, and client leaves own interaction. Cart mutations use Hydrogen's handlers; customer profile and address mutations use server actions with route revalidation.
 - Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
 - Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits it. Push request-time inputs to the smallest Suspense boundary that needs them.
 - Make visible fallbacks match the resolved section's geometry. A loading state must not introduce avoidable layout shift.
@@ -79,7 +79,7 @@ Inside a domain folder under `lib/`, name files by execution context — same id
 - `client.ts` — `"use client"` modules.
 - `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
 
-Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{index,server,client}.ts`, `lib/i18n/index.ts`.
+Examples that already follow this: `lib/cart/{index,server,client,action}.ts`, `lib/collections/{index,server,action}.ts`, `lib/auth/server.ts`, `lib/i18n/index.ts`.
 
 Two exceptions that don't fit cleanly:
 
@@ -92,7 +92,7 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 
 - Files: `kebab-case.tsx`
 - Components: `PascalCase`
-- Server actions: verb + `Action` suffix (`addToCartAction`)
+- Server actions: verb + `Action` suffix (`createAddressAction`)
 - Props interfaces: `{ComponentName}Props`. Use `interface` (not `type`) so consumers can extend or augment.
 - Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
@@ -175,13 +175,22 @@ pnpm format
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
-- `next.config.ts` rewrites for variant URL resolution
+- `lib/product.ts` for variant URL construction and selected-option parsing
 
 ## Data Flow
+
+Catalog reads follow this flow:
 
 ```text
 Request → Page → Operation → storefront.request(gql doc) → Shopify API → Transform → Domain type → Component
 ```
+
+Cart interactions use Hydrogen's client store and server handlers rather than catalog operations or server actions:
+
+- Use `useProductForm` for product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
+- Gift-card purchases use `addToCart` in `lib/cart/client.ts` to preserve recipient and scheduling line attributes. The pinned Hydrogen preview's add-form bindings omit line attributes; do not replace this path until the SDK forwards them. Cart-level attribute bindings are not a substitute.
+- Assistant tools mutate through `runCartMutation` in `lib/cart/server.ts`; the client bridge uses `applyServerCart` to synchronize the result without repeating the mutation.
+- Keep domain conversion in `lib/cart/index.ts` and presentation state in `components/cart/context.tsx`. Hydrogen form/store adapters may use SDK types; presentational primitives must remain independent of them.
 
 ## Storefront Skills (Optional Plugin)
 
@@ -199,7 +208,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
 
 Key files:
 
@@ -227,7 +236,7 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - `getLocale()` resolves the active deployment locale; the template defaults to `en-US`.
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
-- Components import domain types from `@/lib/types`, not Shopify response types.
+- Present product and cart data through domain types from `@/lib/types`, not raw Shopify responses. Hydrogen integration components may use SDK form and store types; keep those out of `components/ui/`.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
 
