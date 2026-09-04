@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
@@ -26,6 +27,30 @@ function mediaKey(item: MediaItem) {
 // Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
 const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
 const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
+
+const GRID_SIZES = "(min-width: 1024px) 25vw, 50vw";
+// Tailwind `lg`, where the 2x2 grid replaces the carousel.
+const DESKTOP_MEDIA = "(min-width: 1024px)";
+// The 2x2 desktop grid is entirely above the fold. Its non-LCP tiles stay `loading="lazy"` on the
+// <img> (so mobile never fetches them) but get a media-scoped preload so desktop requests all four
+// tiles at parse time instead of one at a time after layout. Uses getImageProps so the preload's
+// srcset/sizes match the <img> exactly and the browser reuses the response.
+const DESKTOP_GRID_PRELOAD_COUNT = 4;
+
+function preloadDesktopGridImage(image: ImageType) {
+  const { props } = getImageProps({
+    src: image.url,
+    alt: "",
+    fill: true,
+    sizes: GRID_SIZES,
+  });
+  preload(props.src, {
+    as: "image",
+    imageSrcSet: props.srcSet,
+    imageSizes: props.sizes,
+    media: DESKTOP_MEDIA,
+  });
+}
 
 function MediaImage({
   item,
@@ -201,18 +226,12 @@ function GridItem({
   return (
     <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
-        <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={priority} />
+        <MediaVideo item={item} sizes={GRID_SIZES} priority={priority} />
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
       ) : (
         <LightboxTrigger item={item}>
-          <MediaImage
-            item={item}
-            title={title}
-            idx={idx}
-            sizes="(min-width: 1024px) 25vw, 50vw"
-            priority={priority}
-          />
+          <MediaImage item={item} title={title} idx={idx} sizes={GRID_SIZES} priority={priority} />
         </LightboxTrigger>
       )}
     </div>
@@ -232,6 +251,15 @@ function Grid({
   interactive?: boolean;
   children?: React.ReactNode;
 }) {
+  // The color slot (children) occupies the first tile when present.
+  const firstTileOffset = hasColorSlot ? 1 : 0;
+  for (const [idx, item] of mediaItems.entries()) {
+    const tile = idx + firstTileOffset;
+    if (tile >= DESKTOP_GRID_PRELOAD_COUNT) break;
+    // Tile 0 is the LCP image and already preloaded via next/image's `preload` prop.
+    if (tile > 0 && item.type === "image") preloadDesktopGridImage(item.image);
+  }
+
   const grid = (
     <div className="grid grid-cols-2 gap-2.5">
       {children}
