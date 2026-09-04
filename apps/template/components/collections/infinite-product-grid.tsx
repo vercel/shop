@@ -123,6 +123,7 @@ function ClientProductCard({
         <ProductCardImageContainer>
           <ProductCardImage
             src={product.featuredImage?.url}
+            hoverSrc={product.secondaryImage?.url}
             alt={product.featuredImage?.altText || product.title}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
