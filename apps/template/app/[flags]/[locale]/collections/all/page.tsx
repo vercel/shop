@@ -53,15 +53,11 @@ export default async function AllProductsPage({
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getAllProductsResultsData({
-    locale,
-    searchStatePromise,
-  });
 
   return (
     <CollectionDetailPage
       collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
+      getCollectionResultsData={() => getAllProductsResultsData({ locale, searchStatePromise })}
       handle={ALL_PRODUCTS_HANDLE}
       locale={locale}
       searchStatePromise={searchStatePromise}

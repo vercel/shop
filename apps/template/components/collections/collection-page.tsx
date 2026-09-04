@@ -31,14 +31,16 @@ import { FilterPendingScope } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
   collection,
-  collectionResultsDataPromise,
+  getCollectionResultsData,
   handle,
   locale,
   searchStatePromise,
   sortExclude,
 }: {
   collection: Collection;
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
+  // Called inside the browse Suspense boundary. The results fetch is uncached, so starting it
+  // any higher would postpone the header along with the grid in a runtime prefetch.
+  getCollectionResultsData: () => Promise<CollectionResultsData>;
   handle: string;
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
@@ -71,50 +73,77 @@ export async function CollectionDetailPage({
                 <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
               }
             >
-              <NextIntlClientProvider
+              <CollectionBrowse
+                filtersLabel={filtersLabel}
+                getCollectionResultsData={getCollectionResultsData}
+                handle={handle}
+                locale={locale}
                 messages={{ category: messages.category, search: messages.search }}
-              >
-                <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-                  <CollectionToolbar
-                    filterSheet={
-                      <FilterSidebarSheet
-                        label={filtersLabel}
-                        trigger={
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 text-sm font-medium"
-                          >
-                            <SlidersHorizontalIcon className="size-4" />
-                            <span>{filtersLabel}</span>
-                            <CollectionActiveFilterCountBadge />
-                          </button>
-                        }
-                      >
-                        <FilterPendingScope>
-                          <CollectionFilters
-                            facetsPromise={collectionResultsDataPromise.then(
-                              (data) => data.transformedFilters,
-                            )}
-                          />
-                        </FilterPendingScope>
-                      </FilterSidebarSheet>
-                    }
-                    sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
-                  />
-
-                  <FilterPendingScope>
-                    <CollectionResultsGrid
-                      locale={locale}
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </CollectionBrowseProvider>
-              </NextIntlClientProvider>
+                searchStatePromise={searchStatePromise}
+                sortExclude={sortExclude}
+              />
             </Suspense>
           </Container>
         </Sections>
       </Page>
     </>
+  );
+}
+
+function CollectionBrowse({
+  filtersLabel,
+  getCollectionResultsData,
+  handle,
+  locale,
+  messages,
+  searchStatePromise,
+  sortExclude,
+}: {
+  filtersLabel: string;
+  getCollectionResultsData: () => Promise<CollectionResultsData>;
+  handle: string;
+  locale: Locale;
+  messages: Pick<Awaited<ReturnType<typeof getMessages>>, "category" | "search">;
+  searchStatePromise: Promise<CollectionSearchState>;
+  sortExclude?: string[];
+}) {
+  const collectionResultsDataPromise = getCollectionResultsData();
+
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+        <CollectionToolbar
+          filterSheet={
+            <FilterSidebarSheet
+              label={filtersLabel}
+              trigger={
+                <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                  <SlidersHorizontalIcon className="size-4" />
+                  <span>{filtersLabel}</span>
+                  <CollectionActiveFilterCountBadge />
+                </button>
+              }
+            >
+              <FilterPendingScope>
+                <CollectionFilters
+                  facetsPromise={collectionResultsDataPromise.then(
+                    (data) => data.transformedFilters,
+                  )}
+                />
+              </FilterPendingScope>
+            </FilterSidebarSheet>
+          }
+          sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
+        />
+
+        <FilterPendingScope>
+          <CollectionResultsGrid
+            locale={locale}
+            collectionResultsDataPromise={collectionResultsDataPromise}
+          />
+        </FilterPendingScope>
+      </CollectionBrowseProvider>
+    </NextIntlClientProvider>
   );
 }
 

@@ -9,7 +9,6 @@ import {
 } from "@/components/collections/collection-page";
 import { RememberCollection } from "@/components/collections/remember-collection";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
-import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
@@ -117,40 +116,7 @@ async function CollectionPageContent({
   params,
   searchParams,
 }: Pick<PageProps<"/[flags]/[locale]/collections/[handle]">, "params" | "searchParams">) {
-  const { handle } = await params;
-  return (
-    <>
-      <p data-bisect="after-params" className="sr-only">{handle}</p>
-      <Suspense fallback={<p data-bisect="locale-fallback" className="sr-only">l</p>}>
-        <AfterLocale handle={handle} searchParams={searchParams} />
-      </Suspense>
-    </>
-  );
-}
-
-async function AfterLocale({
-  handle,
-  searchParams,
-}: { handle: string } & Pick<PageProps<"/[flags]/[locale]/collections/[handle]">, "searchParams">) {
-  const locale = await getLocale();
-  return (
-    <>
-      <p data-bisect="after-locale" className="sr-only">{locale}</p>
-      <Suspense fallback={<p data-bisect="collection-fallback" className="sr-only">c</p>}>
-        <AfterCollection handle={handle} locale={locale} searchParams={searchParams} />
-      </Suspense>
-    </>
-  );
-}
-
-async function AfterCollection({
-  handle,
-  locale,
-  searchParams,
-}: { handle: string; locale: Locale } & Pick<
-  PageProps<"/[flags]/[locale]/collections/[handle]">,
-  "searchParams"
->) {
+  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
   const collection = await getCollection({ handle, locale });
@@ -158,28 +124,22 @@ async function AfterCollection({
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getCollectionResultsData({
-    handle,
-    locale,
-    searchStatePromise,
-  });
 
   return (
     <>
       <RememberCollection handle={handle} />
-      {/* BISECT: header outside the browse boundary */}
-      <h1 data-bisect="header" className="sr-only">
-        {collection.title}
-      </h1>
-      <Suspense fallback={<p data-bisect="browse-fallback" className="sr-only">browse</p>}>
-        <CollectionDetailPage
-          collection={collection}
-          collectionResultsDataPromise={collectionResultsDataPromise}
-          handle={handle}
-          locale={locale}
-          searchStatePromise={searchStatePromise}
-        />
-      </Suspense>
+      <CollectionDetailPage
+        collection={collection}
+        handle={handle}
+        locale={locale}
+        searchStatePromise={searchStatePromise}
+        // The results fetch is uncached, so it must start inside the browse Suspense boundary.
+        // Creating the promise here would tie this component (and the header) to it in a
+        // runtime prefetch, postponing everything.
+        getCollectionResultsData={() =>
+          getCollectionResultsData({ handle, locale, searchStatePromise })
+        }
+      />
     </>
   );
 }
