@@ -29,6 +29,8 @@ type: reference
 
 ## Variant URLs
 
-Product options use one query parameter per option. The key is the lowercased option name and the value is the selected option value.
+Product options use one query parameter per option. The key is the option name as defined in Shopify and the value is the selected option value. This matches the URLs a Liquid theme produces.
 
-For example, `/products/your-product?color=Blue&size=XS` selects the blue, extra-small variant. Without option parameters, the page selects the first available variant.
+For example, `/products/your-product?Color=Blue&Size=XS` selects the blue, extra-small variant. Option names and values are matched case-insensitively, so `?color=blue&size=xs` resolves to the same variant. Without option parameters, the page selects the first available variant.
+
+Selecting an option keeps unrelated query parameters, such as campaign tags, in the URL.
