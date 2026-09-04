@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 
 interface CategorySliderItem {
   href: string;
@@ -23,7 +23,6 @@ export function CategorySlider({ categories }: CategorySliderProps) {
         <li key={category.href} className="w-[60%] shrink-0 snap-start lg:w-auto">
           <Link
             href={category.href}
-            prefetch={true}
             className="group relative block aspect-[3/4] cursor-pointer overflow-hidden rounded-xl"
           >
             {category.image ? (

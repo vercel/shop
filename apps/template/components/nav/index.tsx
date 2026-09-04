@@ -1,10 +1,10 @@
 import { PredictiveSearchProvider } from "@shopify/hydrogen/react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { shopConfig } from "@/lib/config";
 
 import { NavAccount, NavAccountFallback } from "./account";

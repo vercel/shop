@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";

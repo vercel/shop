@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
+import Link from "@/components/ui/link";
 import type { Locale } from "@/lib/i18n";
 import { buildProductUrl } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";

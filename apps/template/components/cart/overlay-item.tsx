@@ -3,11 +3,11 @@
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 
 import { CartLineForm } from "@/components/cart/line-form";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import type { CartLine } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";
 

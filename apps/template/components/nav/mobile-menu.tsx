@@ -2,7 +2,6 @@
 
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useState } from "react";
 
 import {
@@ -11,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Link from "@/components/ui/link";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 

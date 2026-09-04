@@ -9,9 +9,9 @@ import {
 } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useLocale, useTranslations } from "next-intl";
-import Link from "next/link";
 import { useState } from "react";
 
+import Link from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilters, parseFilterInput } from "@/lib/collections";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";

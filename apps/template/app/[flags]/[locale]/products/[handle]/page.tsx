@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { ProductViewedTracker } from "@/components/analytics/trackers";
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
+import { ProductDetailSkeleton } from "@/components/product-detail/product-detail-skeleton";
 import { ProductReviewsSection } from "@/components/product-detail/product-reviews-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
@@ -86,12 +87,31 @@ export async function generateMetadata({
   return buildProductMetadata(handle, locale, `/products/${handle}`);
 }
 
-export const instant = false;
-
-export default async function ProductPage({
+// The static frame renders without URL data so the route has a prefetchable App Shell and client
+// navigations paint immediately. Everything that needs `params`/`searchParams` lives under one
+// Suspense boundary: a plain viewport prefetch shows the skeleton on click, while a per-link
+// runtime prefetch (hover upgrade or prefetch={true}) resolves the cached product before the click.
+export default function ProductPage({
   params,
   searchParams,
 }: PageProps<"/[flags]/[locale]/products/[handle]">) {
+  return (
+    <Page className="pt-0">
+      <Container className="bg-background">
+        <Sections>
+          <Suspense fallback={<ProductDetailSkeleton />}>
+            <ProductPageContent params={params} searchParams={searchParams} />
+          </Suspense>
+        </Sections>
+      </Container>
+    </Page>
+  );
+}
+
+async function ProductPageContent({
+  params,
+  searchParams,
+}: Pick<PageProps<"/[flags]/[locale]/products/[handle]">, "params" | "searchParams">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
@@ -136,22 +156,16 @@ export default async function ProductPage({
           variantPromise={variantPromise}
         />
       </Suspense>
-      <Page className="pt-0">
-        <Container className="bg-background">
-          <Sections>
-            <ProductDetailSection
-              product={product}
-              selectedOptionsPromise={selectedOptionsPromise}
-              variantPromise={variantPromise}
-              locale={locale}
-            />
-            <ProductReviewsSection />
-            {shopConfig.pdp.relatedProducts.isEnabled ? (
-              <RelatedProductsSection handle={handle} limit={4} locale={locale} />
-            ) : null}
-          </Sections>
-        </Container>
-      </Page>
+      <ProductDetailSection
+        product={product}
+        selectedOptionsPromise={selectedOptionsPromise}
+        variantPromise={variantPromise}
+        locale={locale}
+      />
+      <ProductReviewsSection />
+      {shopConfig.pdp.relatedProducts.isEnabled ? (
+        <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+      ) : null}
     </>
   );
 }

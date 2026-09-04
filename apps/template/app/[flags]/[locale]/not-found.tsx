@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 
 export default async function NotFoundError() {

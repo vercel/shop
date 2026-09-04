@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { CollectionDetailPage } from "@/components/collections/collection-page";
+import {
+  CollectionDetailPage,
+  CollectionDetailSkeleton,
+} from "@/components/collections/collection-page";
 import { RememberCollection } from "@/components/collections/remember-collection";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
@@ -84,12 +88,34 @@ export async function generateMetadata({
   };
 }
 
-export const instant = false;
-
+// The page itself reads no URL data (root params only), so the route has a prefetchable App Shell
+// and client navigations paint immediately. Everything that needs `params`/`searchParams` lives
+// under one Suspense boundary: a plain viewport prefetch shows the skeleton on click, while a
+// per-link runtime prefetch (prefetch={true}) resolves the cached collection before the click.
 export default async function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/[flags]/[locale]/collections/[handle]">) {
+  const tSearch = await getTranslations("search");
+
+  return (
+    <Suspense
+      fallback={
+        <CollectionDetailSkeleton
+          filtersLabel={tSearch("filters")}
+          sortByLabel={tSearch("sortBy")}
+        />
+      }
+    >
+      <CollectionPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function CollectionPageContent({
+  params,
+  searchParams,
+}: Pick<PageProps<"/[flags]/[locale]/collections/[handle]">, "params" | "searchParams">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
@@ -98,21 +124,21 @@ export default async function CollectionPage({
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getCollectionResultsData({
-    handle,
-    locale,
-    searchStatePromise,
-  });
 
   return (
     <>
       <RememberCollection handle={handle} />
       <CollectionDetailPage
         collection={collection}
-        collectionResultsDataPromise={collectionResultsDataPromise}
         handle={handle}
         locale={locale}
         searchStatePromise={searchStatePromise}
+        // The results fetch is uncached, so it must start inside the browse Suspense boundary.
+        // Creating the promise here would tie this component (and the header) to it in a
+        // runtime prefetch, postponing everything.
+        getCollectionResultsData={() =>
+          getCollectionResultsData({ handle, locale, searchStatePromise })
+        }
       />
     </>
   );

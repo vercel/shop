@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import type { CollectionWithThumbnail } from "@/lib/types";
 import { cn } from "@/lib/utils";
 

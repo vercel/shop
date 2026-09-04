@@ -2,7 +2,6 @@
 
 import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import {
@@ -13,6 +12,7 @@ import {
   ProductCardTitle,
   ProductCard as ProductCardRoot,
 } from "@/components/product-card/components";
+import Link from "@/components/ui/link";
 import { getBrowseSearch } from "@/lib/collections";
 import { buildProductUrl } from "@/lib/product";
 import type { PageInfo, ProductCard } from "@/lib/types";
@@ -123,6 +123,7 @@ function ClientProductCard({
         <ProductCardImageContainer>
           <ProductCardImage
             src={product.featuredImage?.url}
+            hoverSrc={product.secondaryImage?.url}
             alt={product.featuredImage?.altText || product.title}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}

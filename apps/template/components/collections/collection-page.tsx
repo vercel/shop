@@ -1,7 +1,7 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import Link from "next/link";
+import { unstable_navigation } from "next/cache";
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
@@ -16,8 +16,10 @@ import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
@@ -30,14 +32,16 @@ import { FilterPendingScope } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
   collection,
-  collectionResultsDataPromise,
+  getCollectionResultsData,
   handle,
   locale,
   searchStatePromise,
   sortExclude,
 }: {
   collection: Collection;
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
+  // Called inside the browse Suspense boundary. The results fetch is uncached, so starting it
+  // any higher would postpone the header along with the grid in a runtime prefetch.
+  getCollectionResultsData: () => Promise<CollectionResultsData>;
   handle: string;
   locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
@@ -70,50 +74,107 @@ export async function CollectionDetailPage({
                 <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
               }
             >
-              <NextIntlClientProvider
+              <CollectionBrowse
+                filtersLabel={filtersLabel}
+                getCollectionResultsData={getCollectionResultsData}
+                handle={handle}
+                locale={locale}
                 messages={{ category: messages.category, search: messages.search }}
-              >
-                <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-                  <CollectionToolbar
-                    filterSheet={
-                      <FilterSidebarSheet
-                        label={filtersLabel}
-                        trigger={
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 text-sm font-medium"
-                          >
-                            <SlidersHorizontalIcon className="size-4" />
-                            <span>{filtersLabel}</span>
-                            <CollectionActiveFilterCountBadge />
-                          </button>
-                        }
-                      >
-                        <FilterPendingScope>
-                          <CollectionFilters
-                            facetsPromise={collectionResultsDataPromise.then(
-                              (data) => data.transformedFilters,
-                            )}
-                          />
-                        </FilterPendingScope>
-                      </FilterSidebarSheet>
-                    }
-                    sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
-                  />
-
-                  <FilterPendingScope>
-                    <CollectionResultsGrid
-                      locale={locale}
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </CollectionBrowseProvider>
-              </NextIntlClientProvider>
+                searchStatePromise={searchStatePromise}
+                sortExclude={sortExclude}
+              />
             </Suspense>
           </Container>
         </Sections>
       </Page>
     </>
+  );
+}
+
+async function CollectionBrowse({
+  filtersLabel,
+  getCollectionResultsData,
+  handle,
+  locale,
+  messages,
+  searchStatePromise,
+  sortExclude,
+}: {
+  filtersLabel: string;
+  getCollectionResultsData: () => Promise<CollectionResultsData>;
+  handle: string;
+  locale: Locale;
+  messages: Pick<Awaited<ReturnType<typeof getMessages>>, "category" | "search">;
+  searchStatePromise: Promise<CollectionSearchState>;
+  sortExclude?: string[];
+}) {
+  // Results are uncached and per-user, so a per-link runtime prefetch must stop here; otherwise the
+  // whole page segment is marked partial and the header is refetched on click too.
+  await unstable_navigation();
+  const collectionResultsDataPromise = getCollectionResultsData();
+
+  return (
+    <NextIntlClientProvider messages={messages}>
+      <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+        <CollectionToolbar
+          filterSheet={
+            <FilterSidebarSheet
+              label={filtersLabel}
+              trigger={
+                <button type="button" className="flex items-center gap-2 text-sm font-medium">
+                  <SlidersHorizontalIcon className="size-4" />
+                  <span>{filtersLabel}</span>
+                  <CollectionActiveFilterCountBadge />
+                </button>
+              }
+            >
+              <FilterPendingScope>
+                <CollectionFilters
+                  facetsPromise={collectionResultsDataPromise.then(
+                    (data) => data.transformedFilters,
+                  )}
+                />
+              </FilterPendingScope>
+            </FilterSidebarSheet>
+          }
+          sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
+        />
+
+        <FilterPendingScope>
+          <CollectionResultsGrid
+            locale={locale}
+            collectionResultsDataPromise={collectionResultsDataPromise}
+          />
+        </FilterPendingScope>
+      </CollectionBrowseProvider>
+    </NextIntlClientProvider>
+  );
+}
+
+// Shell fallback for a collection route while `params`/`searchParams` resolve on navigation.
+// Uses the text-header layout (the hero variant needs the collection image, which is URL data);
+// collections with a hero shift once when the real header lands.
+export function CollectionDetailSkeleton({
+  filtersLabel,
+  sortByLabel,
+}: {
+  filtersLabel: string;
+  sortByLabel: string;
+}) {
+  return (
+    <Page className="pt-2.5 md:pt-10">
+      <Sections className="gap-5">
+        <Container>
+          <div aria-busy="true" className="grid gap-2.5">
+            <Skeleton className="h-9 w-64 sm:h-10 md:h-12 md:w-80" />
+            <Skeleton className="h-4 w-full max-w-xl" />
+          </div>
+        </Container>
+        <Container>
+          <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
+        </Container>
+      </Sections>
+    </Page>
   );
 }
 

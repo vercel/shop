@@ -8,10 +8,10 @@ import {
   SearchIcon,
   XIcon,
 } from "lucide-react";
-import Link from "next/link";
 import type * as React from "react";
 
 import { Input } from "@/components/ui/input";
+import Link from "@/components/ui/link";
 import { cn } from "@/lib/utils";
 
 function FilterSidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
