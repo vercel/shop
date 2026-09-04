@@ -4,7 +4,6 @@ import { defineRegistry } from "@json-render/react";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 
 import { CartLineForm } from "@/components/cart/line-form";
@@ -19,6 +18,7 @@ import {
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import { catalog } from "@/lib/agent";
 import type { AgentVariant } from "@/lib/agent/products";
 import { useCartForm } from "@/lib/cart/client";

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { CollectionDetailPage } from "@/components/collections/collection-page";
+import {
+  CollectionDetailPage,
+  CollectionDetailSkeleton,
+} from "@/components/collections/collection-page";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -83,12 +87,33 @@ export async function generateMetadata({
   };
 }
 
-export const instant = false;
-
+// The page itself reads no URL data so the route has a prefetchable App Shell. Everything that needs
+// `params`/`searchParams` lives under one Suspense boundary: a viewport prefetch shows the skeleton
+// on click, while a hover runtime prefetch resolves the cached collection header before the click.
 export default async function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/collections/[handle]">) {
+  const tSearch = await getTranslations("search");
+
+  return (
+    <Suspense
+      fallback={
+        <CollectionDetailSkeleton
+          filtersLabel={tSearch("filters")}
+          sortByLabel={tSearch("sortBy")}
+        />
+      }
+    >
+      <CollectionPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function CollectionPageContent({
+  params,
+  searchParams,
+}: Pick<PageProps<"/collections/[handle]">, "params" | "searchParams">) {
   const [{ handle }, locale] = await Promise.all([params, getLocale()]);
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
@@ -97,16 +122,13 @@ export default async function CollectionPage({
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getCollectionResultsData({
-    handle,
-    locale,
-    searchStatePromise,
-  });
 
   return (
     <CollectionDetailPage
       collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
+      getCollectionResultsData={() =>
+        getCollectionResultsData({ handle, locale, searchStatePromise })
+      }
       handle={handle}
       locale={locale}
       searchStatePromise={searchStatePromise}

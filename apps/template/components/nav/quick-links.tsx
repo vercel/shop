@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
 
+import Link from "@/components/ui/link";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
 

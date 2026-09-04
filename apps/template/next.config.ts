@@ -40,8 +40,13 @@ function assertRequiredEnv() {
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
-  // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
-  experimental: { useTypeScriptCli: true },
+  experimental: {
+    // Lets <Link unstable_dynamicOnHover> upgrade a viewport (App Shell) prefetch to a per-link
+    // runtime prefetch on hover/touch, so high-fan-out grids pay the per-link cost only on intent.
+    dynamicOnHover: true,
+    // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
+    useTypeScriptCli: true,
+  },
   images: {
     deviceSizes: [1080],
     imageSizes: [],

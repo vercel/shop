@@ -33,7 +33,7 @@
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.37.0",
-    "next": "16.3.3",
+    "next": "16.4.0-canary.17",
     "next-intl": "4.14.1",
     "oxfmt": "0.65.0",
     "oxlint": "1.80.0",

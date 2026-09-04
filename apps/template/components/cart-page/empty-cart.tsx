@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
+
+import Link from "@/components/ui/link";
 
 export async function Empty() {
   const t = await getTranslations("cart");
