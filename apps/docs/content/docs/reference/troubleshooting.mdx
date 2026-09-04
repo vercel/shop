@@ -38,7 +38,7 @@ type: troubleshooting
 
 **Symptom:** Selecting an option changes the URL but not the price or purchase controls.
 
-**Check:** Confirm the URL contains one query parameter per option, such as `?color=Blue&size=XS`. Option names are lowercase. Confirm the selected combination exists in Shopify.
+**Check:** Confirm the URL contains one query parameter per option, such as `?Color=Blue&Size=XS`. Option names and values are matched case-insensitively. Confirm the selected combination exists in Shopify.
 
 **Fix:** Correct links to preserve all selected option parameters. If a valid combination still fails, validate the product and variant queries against the Storefront API schema.
 
