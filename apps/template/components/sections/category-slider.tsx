@@ -23,7 +23,7 @@ export function CategorySlider({ categories }: CategorySliderProps) {
         <li key={category.href} className="w-[60%] shrink-0 snap-start lg:w-auto">
           <Link
             href={category.href}
-            prefetch={true}
+            unstable_dynamicOnHover
             className="group relative block aspect-[3/4] cursor-pointer overflow-hidden rounded-xl"
           >
             {category.image ? (

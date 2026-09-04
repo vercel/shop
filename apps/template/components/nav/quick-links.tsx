@@ -20,8 +20,10 @@ function MenuLink({ url, children, className }: MenuLinkProps) {
       </a>
     );
   }
+  // Menus fan out to many collection links; keep the viewport prefetch at the shared App Shell
+  // and upgrade to a per-link runtime prefetch only when the user hovers/touches a link.
   return (
-    <Link href={url} className={className}>
+    <Link href={url} className={className} unstable_dynamicOnHover>
       {children}
     </Link>
   );

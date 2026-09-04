@@ -35,8 +35,9 @@ function MenuLink({ url, children, className, onClick }: MenuLinkProps) {
       </a>
     );
   }
+  // touchstart fires the same upgrade as hover, so the runtime prefetch starts before the tap lands.
   return (
-    <Link href={url} className={className} onClick={onClick}>
+    <Link href={url} className={className} onClick={onClick} unstable_dynamicOnHover>
       {children}
     </Link>
   );

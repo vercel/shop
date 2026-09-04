@@ -25,6 +25,7 @@ export function CollectionCard({
       aria-label={`${viewCollectionLabel}: ${title}`}
       className={cn("flex flex-col h-full overflow-hidden", className)}
       href={`/collections/${handle}`}
+      unstable_dynamicOnHover
     >
       <div data-slot="collection-card-image" className="relative aspect-square overflow-hidden">
         {thumbnail ? (
