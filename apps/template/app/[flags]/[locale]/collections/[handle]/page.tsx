@@ -9,6 +9,7 @@ import {
 } from "@/components/collections/collection-page";
 import { RememberCollection } from "@/components/collections/remember-collection";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
+import type { Locale } from "@/lib/i18n";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
@@ -116,7 +117,40 @@ async function CollectionPageContent({
   params,
   searchParams,
 }: Pick<PageProps<"/[flags]/[locale]/collections/[handle]">, "params" | "searchParams">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
+  return (
+    <>
+      <p data-bisect="after-params" className="sr-only">{handle}</p>
+      <Suspense fallback={<p data-bisect="locale-fallback" className="sr-only">l</p>}>
+        <AfterLocale handle={handle} searchParams={searchParams} />
+      </Suspense>
+    </>
+  );
+}
+
+async function AfterLocale({
+  handle,
+  searchParams,
+}: { handle: string } & Pick<PageProps<"/[flags]/[locale]/collections/[handle]">, "searchParams">) {
+  const locale = await getLocale();
+  return (
+    <>
+      <p data-bisect="after-locale" className="sr-only">{locale}</p>
+      <Suspense fallback={<p data-bisect="collection-fallback" className="sr-only">c</p>}>
+        <AfterCollection handle={handle} locale={locale} searchParams={searchParams} />
+      </Suspense>
+    </>
+  );
+}
+
+async function AfterCollection({
+  handle,
+  locale,
+  searchParams,
+}: { handle: string; locale: Locale } & Pick<
+  PageProps<"/[flags]/[locale]/collections/[handle]">,
+  "searchParams"
+>) {
   if (handle === PLACEHOLDER_HANDLE) notFound();
 
   const collection = await getCollection({ handle, locale });
