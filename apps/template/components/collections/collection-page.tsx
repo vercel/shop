@@ -18,6 +18,7 @@ import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
@@ -114,6 +115,33 @@ export async function CollectionDetailPage({
         </Sections>
       </Page>
     </>
+  );
+}
+
+// Shell fallback for a collection route while `params`/`searchParams` resolve on navigation.
+// Uses the text-header layout (the hero variant needs the collection image, which is URL data);
+// collections with a hero shift once when the real header lands.
+export function CollectionDetailSkeleton({
+  filtersLabel,
+  sortByLabel,
+}: {
+  filtersLabel: string;
+  sortByLabel: string;
+}) {
+  return (
+    <Page className="pt-2.5 md:pt-10">
+      <Sections className="gap-5">
+        <Container>
+          <div aria-busy="true" className="grid gap-2.5">
+            <Skeleton className="h-9 w-64 sm:h-10 md:h-12 md:w-80" />
+            <Skeleton className="h-4 w-full max-w-xl" />
+          </div>
+        </Container>
+        <Container>
+          <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
+        </Container>
+      </Sections>
+    </Page>
   );
 }
 
