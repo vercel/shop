@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import type { CollectionWithThumbnail } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,6 @@ export function CollectionCard({
       aria-label={`${viewCollectionLabel}: ${title}`}
       className={cn("flex flex-col h-full overflow-hidden", className)}
       href={`/collections/${handle}`}
-      unstable_dynamicOnHover
     >
       <div data-slot="collection-card-image" className="relative aspect-square overflow-hidden">
         {thumbnail ? (

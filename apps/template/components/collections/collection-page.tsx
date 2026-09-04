@@ -1,7 +1,6 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
@@ -16,6 +15,7 @@ import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";

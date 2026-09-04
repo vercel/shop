@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import { getComplementaryProducts } from "@/lib/shopify/operations/products";
 import type { ProductCard } from "@/lib/types";
 import { formatPrice } from "@/lib/utils";

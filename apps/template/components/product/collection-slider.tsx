@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { ProductCard } from "@/components/product-card/product-card";
+import Link from "@/components/ui/link";
 import {
   Slider,
   SliderContent,

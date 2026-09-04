@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
+import Link from "@/components/ui/link";
 import type { Locale } from "@/lib/i18n";
 import { buildProductUrl } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
@@ -40,9 +40,7 @@ export async function ProductCard({
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
 
   return (
-    // Viewport prefetch fetches only the shared PDP App Shell; hover/touch upgrades this link to a
-    // per-link runtime prefetch that resolves the product through the cache before the click.
-    <Link href={href} className={className} unstable_dynamicOnHover>
+    <Link href={href} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
           <ProductCardBadge>

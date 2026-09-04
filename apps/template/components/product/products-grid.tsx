@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
+import Link from "@/components/ui/link";
 import type { Locale } from "@/lib/i18n";
 import {
   getCollectionProducts,

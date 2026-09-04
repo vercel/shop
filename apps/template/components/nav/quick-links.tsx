@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
 
+import Link from "@/components/ui/link";
 import type { MenuItem } from "@/lib/shopify/types/menu";
 import { cn } from "@/lib/utils";
 
@@ -20,10 +20,8 @@ function MenuLink({ url, children, className }: MenuLinkProps) {
       </a>
     );
   }
-  // Menus fan out to many collection links; keep the viewport prefetch at the shared App Shell
-  // and upgrade to a per-link runtime prefetch only when the user hovers/touches a link.
   return (
-    <Link href={url} className={className} unstable_dynamicOnHover>
+    <Link href={url} className={className}>
       {children}
     </Link>
   );
