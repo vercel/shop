@@ -2,7 +2,3 @@ allowBuilds:
   "@parcel/watcher": false
   "@swc/core": false
   esbuild: false
-
-minimumReleaseAgeExclude:
-  # Track Hydrogen 2026.10 previews on the release-hydrogen-preview-2 branch.
-  - "@shopify/hydrogen"
