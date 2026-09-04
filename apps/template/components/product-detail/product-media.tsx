@@ -1,8 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
@@ -22,19 +23,48 @@ function mediaKey(item: MediaItem) {
   return "placeholder";
 }
 
+// The LCP image gets a preload link + eager + fetchpriority=high (`preload` alone no longer implies high).
+// Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
+const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
+const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
+
+const GRID_SIZES = "(min-width: 1024px) 25vw, 50vw";
+// Tailwind `lg`, where the 2x2 grid replaces the carousel.
+const DESKTOP_MEDIA = "(min-width: 1024px)";
+// The 2x2 desktop grid is entirely above the fold. Its non-LCP tiles stay `loading="lazy"` on the
+// <img> (so mobile never fetches them) but get a media-scoped preload so desktop requests all four
+// tiles at parse time instead of one at a time after layout. Uses getImageProps so the preload's
+// srcset/sizes match the <img> exactly and the browser reuses the response.
+const DESKTOP_GRID_PRELOAD_COUNT = 4;
+
+function preloadDesktopGridImage(image: ImageType) {
+  const { props } = getImageProps({
+    src: image.url,
+    alt: "",
+    fill: true,
+    sizes: GRID_SIZES,
+  });
+  preload(props.src, {
+    as: "image",
+    imageSrcSet: props.srcSet,
+    imageSizes: props.sizes,
+    media: DESKTOP_MEDIA,
+  });
+}
+
 function MediaImage({
   item,
   title,
   idx,
   sizes,
-  fetchPriority,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
   title: string;
   idx: number;
   sizes: string;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
   className?: string;
 }) {
   return (
@@ -44,8 +74,7 @@ function MediaImage({
       fill
       className={cn("object-cover", className)}
       sizes={sizes}
-      fetchPriority={fetchPriority}
-      loading="lazy"
+      {...(priority ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
       draggable={false}
     />
   );
@@ -54,12 +83,12 @@ function MediaImage({
 function MediaVideo({
   item,
   sizes,
-  fetchPriority,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
   sizes: string;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
   className?: string;
 }) {
   return (
@@ -74,8 +103,8 @@ function MediaVideo({
           : null
       }
       sizes={sizes}
-      previewImageFetchPriority={fetchPriority}
-      previewImageLoading="lazy"
+      previewImageFetchPriority={priority ? "high" : "auto"}
+      previewImageLoading={priority ? "eager" : "lazy"}
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
@@ -144,24 +173,18 @@ function Carousel({
       >
         {children}
         {mediaItems.map((item, idx) => {
-          const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
+          const priority = !hasColorSlot && idx === 0;
           return (
             <div
               key={mediaKey(item)}
               className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
             >
               {item.type === "video" ? (
-                <MediaVideo item={item} sizes="100vw" fetchPriority={fetchPriority} />
+                <MediaVideo item={item} sizes="100vw" priority={priority} />
               ) : item.type === "placeholder" ? (
                 <ImagePlaceholder className="size-full" />
               ) : (
-                <MediaImage
-                  item={item}
-                  title={title}
-                  idx={idx}
-                  sizes="100vw"
-                  fetchPriority={fetchPriority}
-                />
+                <MediaImage item={item} title={title} idx={idx} sizes="100vw" priority={priority} />
               )}
             </div>
           );
@@ -193,32 +216,22 @@ function GridItem({
   item,
   title,
   idx,
-  fetchPriority,
+  priority,
 }: {
   item: MediaItem;
   title: string;
   idx: number;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
 }) {
   return (
     <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
-        <MediaVideo
-          item={item}
-          sizes="(min-width: 1024px) 25vw, 50vw"
-          fetchPriority={fetchPriority}
-        />
+        <MediaVideo item={item} sizes={GRID_SIZES} priority={priority} />
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
       ) : (
         <LightboxTrigger item={item}>
-          <MediaImage
-            item={item}
-            title={title}
-            idx={idx}
-            sizes="(min-width: 1024px) 25vw, 50vw"
-            fetchPriority={fetchPriority}
-          />
+          <MediaImage item={item} title={title} idx={idx} sizes={GRID_SIZES} priority={priority} />
         </LightboxTrigger>
       )}
     </div>
@@ -238,21 +251,27 @@ function Grid({
   interactive?: boolean;
   children?: React.ReactNode;
 }) {
+  // The color slot (children) occupies the first tile when present.
+  const firstTileOffset = hasColorSlot ? 1 : 0;
+  for (const [idx, item] of mediaItems.entries()) {
+    const tile = idx + firstTileOffset;
+    if (tile >= DESKTOP_GRID_PRELOAD_COUNT) break;
+    // Tile 0 is the LCP image and already preloaded via next/image's `preload` prop.
+    if (tile > 0 && item.type === "image") preloadDesktopGridImage(item.image);
+  }
+
   const grid = (
     <div className="grid grid-cols-2 gap-2.5">
       {children}
-      {mediaItems.map((item, idx) => {
-        const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
-        return (
-          <GridItem
-            key={mediaKey(item)}
-            item={item}
-            title={title}
-            idx={idx}
-            fetchPriority={fetchPriority}
-          />
-        );
-      })}
+      {mediaItems.map((item, idx) => (
+        <GridItem
+          key={mediaKey(item)}
+          item={item}
+          title={title}
+          idx={idx}
+          priority={!hasColorSlot && idx === 0}
+        />
+      ))}
     </div>
   );
 
@@ -266,7 +285,7 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
       item={{ type: "image", image }}
       title={title}
       idx={idx}
-      fetchPriority={idx === 0 ? "high" : "auto"}
+      priority={idx === 0}
     />
   ));
 }
@@ -283,8 +302,7 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
         fill
         className="object-cover"
         sizes="100vw"
-        fetchPriority={idx === 0 ? "high" : "auto"}
-        loading="lazy"
+        {...(idx === 0 ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
         draggable={false}
       />
     </div>
