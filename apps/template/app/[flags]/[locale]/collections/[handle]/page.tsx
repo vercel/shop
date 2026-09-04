@@ -133,13 +133,19 @@ async function CollectionPageContent({
   return (
     <>
       <RememberCollection handle={handle} />
-      <CollectionDetailPage
-        collection={collection}
-        collectionResultsDataPromise={collectionResultsDataPromise}
-        handle={handle}
-        locale={locale}
-        searchStatePromise={searchStatePromise}
-      />
+      {/* BISECT: header outside the browse boundary */}
+      <h1 data-bisect="header" className="sr-only">
+        {collection.title}
+      </h1>
+      <Suspense fallback={<p data-bisect="browse-fallback" className="sr-only">browse</p>}>
+        <CollectionDetailPage
+          collection={collection}
+          collectionResultsDataPromise={collectionResultsDataPromise}
+          handle={handle}
+          locale={locale}
+          searchStatePromise={searchStatePromise}
+        />
+      </Suspense>
     </>
   );
 }
