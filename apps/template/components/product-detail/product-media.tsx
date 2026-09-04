@@ -22,19 +22,24 @@ function mediaKey(item: MediaItem) {
   return "placeholder";
 }
 
+// The LCP image gets a preload link + eager + fetchpriority=high (`preload` alone no longer implies high).
+// Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
+const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
+const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
+
 function MediaImage({
   item,
   title,
   idx,
   sizes,
-  fetchPriority,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
   title: string;
   idx: number;
   sizes: string;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
   className?: string;
 }) {
   return (
@@ -44,8 +49,7 @@ function MediaImage({
       fill
       className={cn("object-cover", className)}
       sizes={sizes}
-      fetchPriority={fetchPriority}
-      loading="lazy"
+      {...(priority ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
       draggable={false}
     />
   );
@@ -54,12 +58,12 @@ function MediaImage({
 function MediaVideo({
   item,
   sizes,
-  fetchPriority,
+  priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
   sizes: string;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
   className?: string;
 }) {
   return (
@@ -74,8 +78,8 @@ function MediaVideo({
           : null
       }
       sizes={sizes}
-      previewImageFetchPriority={fetchPriority}
-      previewImageLoading="lazy"
+      previewImageFetchPriority={priority ? "high" : "auto"}
+      previewImageLoading={priority ? "eager" : "lazy"}
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
     />
   );
@@ -144,24 +148,18 @@ function Carousel({
       >
         {children}
         {mediaItems.map((item, idx) => {
-          const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
+          const priority = !hasColorSlot && idx === 0;
           return (
             <div
               key={mediaKey(item)}
               className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
             >
               {item.type === "video" ? (
-                <MediaVideo item={item} sizes="100vw" fetchPriority={fetchPriority} />
+                <MediaVideo item={item} sizes="100vw" priority={priority} />
               ) : item.type === "placeholder" ? (
                 <ImagePlaceholder className="size-full" />
               ) : (
-                <MediaImage
-                  item={item}
-                  title={title}
-                  idx={idx}
-                  sizes="100vw"
-                  fetchPriority={fetchPriority}
-                />
+                <MediaImage item={item} title={title} idx={idx} sizes="100vw" priority={priority} />
               )}
             </div>
           );
@@ -193,21 +191,17 @@ function GridItem({
   item,
   title,
   idx,
-  fetchPriority,
+  priority,
 }: {
   item: MediaItem;
   title: string;
   idx: number;
-  fetchPriority: "auto" | "high";
+  priority: boolean;
 }) {
   return (
     <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
-        <MediaVideo
-          item={item}
-          sizes="(min-width: 1024px) 25vw, 50vw"
-          fetchPriority={fetchPriority}
-        />
+        <MediaVideo item={item} sizes="(min-width: 1024px) 25vw, 50vw" priority={priority} />
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
       ) : (
@@ -217,7 +211,7 @@ function GridItem({
             title={title}
             idx={idx}
             sizes="(min-width: 1024px) 25vw, 50vw"
-            fetchPriority={fetchPriority}
+            priority={priority}
           />
         </LightboxTrigger>
       )}
@@ -241,18 +235,15 @@ function Grid({
   const grid = (
     <div className="grid grid-cols-2 gap-2.5">
       {children}
-      {mediaItems.map((item, idx) => {
-        const fetchPriority = !hasColorSlot && idx === 0 ? "high" : "auto";
-        return (
-          <GridItem
-            key={mediaKey(item)}
-            item={item}
-            title={title}
-            idx={idx}
-            fetchPriority={fetchPriority}
-          />
-        );
-      })}
+      {mediaItems.map((item, idx) => (
+        <GridItem
+          key={mediaKey(item)}
+          item={item}
+          title={title}
+          idx={idx}
+          priority={!hasColorSlot && idx === 0}
+        />
+      ))}
     </div>
   );
 
@@ -266,7 +257,7 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
       item={{ type: "image", image }}
       title={title}
       idx={idx}
-      fetchPriority={idx === 0 ? "high" : "auto"}
+      priority={idx === 0}
     />
   ));
 }
@@ -283,8 +274,7 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
         fill
         className="object-cover"
         sizes="100vw"
-        fetchPriority={idx === 0 ? "high" : "auto"}
-        loading="lazy"
+        {...(idx === 0 ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
         draggable={false}
       />
     </div>
