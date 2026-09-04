@@ -2,7 +2,7 @@
 
 import { createProductComponents } from "@shopify/hydrogen/react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
@@ -48,13 +48,16 @@ export function ProductForm({
   product: ProductFormInput;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   return (
     <ProductHandleContext.Provider value={product.handle}>
       <ProductProvider
         product={product}
         onSelect={(result) => {
           const handle = result.selectedVariant?.product.handle ?? product.handle;
-          router.replace(buildProductUrl(handle, result.selectedOptions), { scroll: false });
+          router.replace(buildProductUrl(handle, result.selectedOptions, searchParams), {
+            scroll: false,
+          });
         }}
       >
         <SelectedVariantPublisher />
