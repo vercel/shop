@@ -72,8 +72,8 @@ export const { registry } = defineRegistry(catalog, {
           </div>
           {!isPending && cart.checkoutUrl && (
             <div className="border-t px-2.5 py-2">
-              <Button asChild className="w-full" size="sm">
-                <a href={cart.checkoutUrl}>Checkout</a>
+              <Button className="h-12 w-full justify-center" render={<a href={cart.checkoutUrl} />}>
+                Checkout
               </Button>
             </div>
           )}
