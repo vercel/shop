@@ -137,11 +137,12 @@ export function ProductFormGiftCard({
   handle: string;
   title: string;
 }) {
-  const variant = useProductFormState().selectedVariant ?? fallbackVariant;
+  const { selectedVariant } = useProductFormState();
+  const variant = selectedVariant ?? fallbackVariant;
   if (!variant) return null;
   return (
     <GiftCardPurchaseForm
-      merchandiseId={variant.id}
+      merchandiseId={selectedVariant?.id}
       productInfo={variantToOptimisticInfo(variant, { title, handle, featuredImage })}
     />
   );

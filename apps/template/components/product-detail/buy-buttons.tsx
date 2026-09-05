@@ -25,6 +25,7 @@ export function BuyButtons({
 }) {
   const { formProps, pending, register, selectedVariant: storeVariant } = useProductForm();
   const selectedVariant = storeVariant ?? fallbackVariant;
+  const isSelectionUnresolved = !storeVariant;
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const { openOverlay } = useCartDrawer();
@@ -43,17 +44,29 @@ export function BuyButtons({
   const isOutOfStock = !selectedVariant.availableForSale;
   // Keep href while buying: removing it during the click cancels the anchor's navigation.
   const buyNowUrl = getShopPayButtonUrl({
-    disabled: isOutOfStock || requiresBundleConfiguration,
+    disabled: isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration,
     variants: [{ id: selectedVariant.id, quantity }],
   });
   const getButtonText = () => {
     if (pending) return "Adding to Cart...";
+    if (isSelectionUnresolved) return "Add to Cart";
     if (requiresBundleConfiguration) return "Choose bundle items";
     if (isOutOfStock) return "Out of Stock";
     return "Add to Cart";
   };
   return (
-    <form {...formProps({ beforeSubmit: openOverlay })} className="grid gap-2.5">
+    <form
+      {...formProps({
+        beforeSubmit: (event) => {
+          if (isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration || pending) {
+            event.preventDefault();
+            return;
+          }
+          openOverlay();
+        },
+      })}
+      className="grid gap-2.5"
+    >
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
       <div className="flex gap-2.5">
@@ -92,8 +105,9 @@ export function BuyButtons({
         ) : null}
         <Button
           {...register("addToCart", {})}
-          disabled={isOutOfStock || requiresBundleConfiguration || pending}
-          className="h-12 min-w-0 flex-1 justify-center"
+          data-selection-unresolved={isSelectionUnresolved && !pending}
+          disabled={isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration || pending}
+          className="h-12 min-w-0 flex-1 justify-center data-[selection-unresolved=true]:disabled:opacity-100"
         >
           {getButtonText()}
         </Button>
@@ -103,11 +117,18 @@ export function BuyButtons({
           aria-busy={isBuyingNow || undefined}
           aria-disabled={buyNowUrl ? undefined : true}
           className={cn(
-            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-busy:pointer-events-none aria-disabled:pointer-events-none aria-disabled:opacity-50",
+            "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-busy:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[selection-unresolved=true]:aria-disabled:opacity-100",
             !availableForSale && "invisible",
           )}
+          data-selection-unresolved={isSelectionUnresolved}
           href={buyNowUrl ?? undefined}
-          onClick={() => setIsBuyingNow(true)}
+          onClick={(event) => {
+            if (!buyNowUrl || isBuyingNow) {
+              event.preventDefault();
+              return;
+            }
+            setIsBuyingNow(true);
+          }}
           rel="nofollow"
         >
           {isBuyingNow ? (

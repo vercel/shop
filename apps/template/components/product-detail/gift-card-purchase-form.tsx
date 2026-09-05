@@ -13,7 +13,7 @@ import { addGiftCardToCart } from "@/lib/cart/gift-card-client";
 import type { OptimisticProductInfo } from "@/lib/product";
 
 interface GiftCardPurchaseFormProps {
-  merchandiseId: string;
+  merchandiseId: string | undefined;
   productInfo?: OptimisticProductInfo;
 }
 
@@ -48,7 +48,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (isPending) return;
+    if (isPending || !merchandiseId) return;
     setError(null);
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim();
@@ -158,9 +158,10 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
 
       <Button
         type="submit"
-        disabled={isPending}
+        data-selection-unresolved={!merchandiseId && !isPending}
+        disabled={isPending || !merchandiseId}
         className={cn(
-          "h-12 w-full justify-center",
+          "h-12 w-full justify-center group-valid:data-[selection-unresolved=true]:disabled:opacity-100",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",
         )}
       >

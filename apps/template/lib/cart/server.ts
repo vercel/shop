@@ -5,7 +5,9 @@ import {
   createShopifyRequestContext,
   getCartId,
   gql,
+  type ShopifyRequestContext,
 } from "@shopify/hydrogen";
+import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
 import { io } from "next/cache";
 import { headers } from "next/headers";
 import { cache } from "react";
@@ -118,14 +120,23 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   return data.cart ?? undefined;
 }
 
-/** Creates an empty cart so a streaming response can set the cookie before any line is added. */
-export async function createEmptyCart(): Promise<string | undefined> {
-  const { storefrontClient } = await getHandlerContext();
+// Streaming tools need a cart cookie before adding the first line; Hydrogen's POST rejects empty lines.
+export async function createEmptyCart(
+  requestContext: ShopifyRequestContext,
+  sessionManager?: WritableCustomerSessionManager,
+): Promise<string> {
+  const storefrontClient = createRequestStorefrontClient(requestContext);
+  const customerAccessToken = sessionManager
+    ? await (
+        await getHydrogenCustomerSession()
+      ).getOrRefreshAccessToken(sessionManager, requestContext)
+    : undefined;
   const { data, errors } = await storefrontClient.graphql(cartQueries.cartCreate, {
     variables: {
       input: {
         buyerIdentity: {
           countryCode: shopConfig.localization.country,
+          ...(customerAccessToken ? { customerAccessToken } : {}),
         },
       },
     },
@@ -133,7 +144,9 @@ export async function createEmptyCart(): Promise<string | undefined> {
   if (errors?.length) throw new Error(errors[0].message);
   const userErrors = data?.cartCreate?.userErrors ?? [];
   if (userErrors.length) throw new Error(userErrors.map((e) => e.message).join("; "));
-  return data?.cartCreate?.cart?.id;
+  const cartId = data?.cartCreate?.cart?.id;
+  if (!cartId) throw new Error("Cart creation returned no cart");
+  return cartId;
 }
 
 export type CartMutationInput =
