@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMoney } from "@shopify/hydrogen";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -9,7 +10,6 @@ import { CartLineForm } from "@/components/cart/line-form";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { useCart } from "./context";
 
@@ -40,7 +40,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatPrice({ amount: finalUnitPrice * quantity, currencyCode }, locale)}`}
+      aria-label={`${item.merchandise.product.title} - ${formatMoney({ amount: String(finalUnitPrice * quantity), currencyCode }, { currencyDisplay: "narrowSymbol", locale }).localizedString}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
@@ -156,18 +156,33 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
       <div className="self-start py-0.5 text-sm text-right">
         <div className="grid gap-0.5">
           <span className="font-medium text-foreground">
-            {formatPrice(
-              { amount: hasCartDiscount ? finalUnitPrice : sellingUnitPrice, currencyCode },
-              locale,
-            )}
+            {
+              formatMoney(
+                {
+                  amount: String(hasCartDiscount ? finalUnitPrice : sellingUnitPrice),
+                  currencyCode,
+                },
+                { currencyDisplay: "narrowSymbol", locale },
+              ).localizedString
+            }
           </span>
           {hasCartDiscount ? (
             <span className="text-xs text-muted-foreground line-through">
-              {formatPrice({ amount: sellingUnitPrice, currencyCode }, locale)}
+              {
+                formatMoney(
+                  { amount: String(sellingUnitPrice), currencyCode },
+                  { currencyDisplay: "narrowSymbol", locale },
+                ).localizedString
+              }
             </span>
           ) : hasCompareAt ? (
             <span className="text-xs text-muted-foreground line-through">
-              {formatPrice({ amount: compareAtUnitPrice, currencyCode }, locale)}
+              {
+                formatMoney(
+                  { amount: String(compareAtUnitPrice), currencyCode },
+                  { currencyDisplay: "narrowSymbol", locale },
+                ).localizedString
+              }
             </span>
           ) : null}
         </div>

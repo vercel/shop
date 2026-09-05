@@ -3,6 +3,7 @@
 import {
   type CollectionState,
   filterEquals,
+  formatMoney,
   getFilterRemovalUrl,
   isFilterInputActive,
   serializeCollectionParams,
@@ -16,7 +17,6 @@ import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilters, parseFilterInput } from "@/lib/collections";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import {
   FilterBadge,
@@ -257,7 +257,10 @@ function formatPriceRangeLabel({
 }): string {
   const format = (value: number) =>
     currencyCode
-      ? formatPrice({ amount: value, currencyCode }, locale)
+      ? formatMoney(
+          { amount: String(value), currencyCode },
+          { currencyDisplay: "narrowSymbol", locale },
+        ).localizedString
       : new Intl.NumberFormat(locale).format(value);
   if (min !== null && max !== null) return `${format(min)} - ${format(max)}`;
   if (min !== null) return `${labels.from} ${format(min)}`;

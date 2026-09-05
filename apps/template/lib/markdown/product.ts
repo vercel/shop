@@ -1,5 +1,6 @@
+import { formatMoney } from "@shopify/hydrogen";
+
 import type { ProductDetails } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { createTable, escapeMarkdown } from "./utils";
 
@@ -28,9 +29,13 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
 
   sections.push("## Pricing");
   sections.push("");
-  sections.push(`- **Price**: ${formatPrice(product.price, locale)}`);
+  sections.push(
+    `- **Price**: ${formatMoney(product.price, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
+  );
   if (product.compareAtPrice) {
-    sections.push(`- **Compare At**: ${formatPrice(product.compareAtPrice, locale)}`);
+    sections.push(
+      `- **Compare At**: ${formatMoney(product.compareAtPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
+    );
     const savings =
       Number.parseFloat(product.compareAtPrice.amount) - Number.parseFloat(product.price.amount);
     if (savings > 0) {
@@ -38,13 +43,13 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
         (savings / Number.parseFloat(product.compareAtPrice.amount)) * 100,
       );
       sections.push(
-        `- **Savings**: ${formatPrice({ amount: savings.toString(), currencyCode: product.currencyCode }, locale)} (${savingsPercent}% off)`,
+        `- **Savings**: ${formatMoney({ amount: savings.toString(), currencyCode: product.currencyCode }, { currencyDisplay: "narrowSymbol", locale }).localizedString} (${savingsPercent}% off)`,
       );
     }
   }
   if (product.priceRange.minVariantPrice.amount !== product.priceRange.maxVariantPrice.amount) {
     sections.push(
-      `- **Price Range**: ${formatPrice(product.priceRange.minVariantPrice, locale)} - ${formatPrice(product.priceRange.maxVariantPrice, locale)}`,
+      `- **Price Range**: ${formatMoney(product.priceRange.minVariantPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString} - ${formatMoney(product.priceRange.maxVariantPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
     );
   }
   sections.push("");
@@ -81,7 +86,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
       return [
         escapeMarkdown(variant.title),
         ...optionValues,
-        formatPrice(variant.price, locale),
+        formatMoney(variant.price, { currencyDisplay: "narrowSymbol", locale }).localizedString,
         variant.availableForSale ? "Yes" : "No",
       ];
     });

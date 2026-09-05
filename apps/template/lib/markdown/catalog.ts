@@ -1,6 +1,7 @@
+import { formatMoney } from "@shopify/hydrogen";
+
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { createTable, escapeMarkdown } from "./utils";
 
@@ -30,13 +31,17 @@ function formatPriceRange(priceRange: PriceRange, locale: string): string {
     return `${formatter.format(priceRange.min)} - ${formatter.format(priceRange.max)}`;
   }
 
-  return `${formatPrice(
-    { amount: priceRange.min.toString(), currencyCode: priceRange.currencyCode },
-    locale,
-  )} - ${formatPrice(
-    { amount: priceRange.max.toString(), currencyCode: priceRange.currencyCode },
-    locale,
-  )}`;
+  return `${
+    formatMoney(
+      { amount: priceRange.min.toString(), currencyCode: priceRange.currencyCode },
+      { currencyDisplay: "narrowSymbol", locale },
+    ).localizedString
+  } - ${
+    formatMoney(
+      { amount: priceRange.max.toString(), currencyCode: priceRange.currencyCode },
+      { currencyDisplay: "narrowSymbol", locale },
+    ).localizedString
+  }`;
 }
 
 export function formatSortLabel(sort?: string): string {
@@ -157,8 +162,11 @@ export function appendProductsSection(
   const rows = products.map((product) => [
     escapeMarkdown(product.title),
     escapeMarkdown(product.handle),
-    formatPrice(product.price, locale),
-    product.compareAtPrice ? formatPrice(product.compareAtPrice, locale) : "-",
+    formatMoney(product.price, { currencyDisplay: "narrowSymbol", locale }).localizedString,
+    product.compareAtPrice
+      ? formatMoney(product.compareAtPrice, { currencyDisplay: "narrowSymbol", locale })
+          .localizedString
+      : "-",
     product.availableForSale ? "Yes" : "No",
     escapeMarkdown(product.vendor ?? "-"),
     `/products/${product.handle}`,

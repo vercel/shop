@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -15,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { defaultLocale } from "@/lib/i18n";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer";
 import type { Money, OrderLineItem } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -56,7 +56,14 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
         <SummaryRow label={t("tax")} money={order.totalTax} />
         <div className="flex items-center justify-between border-t pt-2 font-medium">
           <dt>{t("total")}</dt>
-          <dd className="font-mono tabular-nums">{formatPrice(order.totalPrice, defaultLocale)}</dd>
+          <dd className="font-mono tabular-nums">
+            {
+              formatMoney(order.totalPrice, {
+                currencyDisplay: "narrowSymbol",
+                locale: defaultLocale,
+              }).localizedString
+            }
+          </dd>
         </div>
       </dl>
 
@@ -107,7 +114,10 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
       </div>
       {item.totalPrice ? (
         <span className="font-mono text-sm tabular-nums">
-          {formatPrice(item.totalPrice, defaultLocale)}
+          {
+            formatMoney(item.totalPrice, { currencyDisplay: "narrowSymbol", locale: defaultLocale })
+              .localizedString
+          }
         </span>
       ) : null}
     </li>
@@ -119,7 +129,12 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-mono tabular-nums">{formatPrice(money, defaultLocale)}</dd>
+      <dd className="font-mono tabular-nums">
+        {
+          formatMoney(money, { currencyDisplay: "narrowSymbol", locale: defaultLocale })
+            .localizedString
+        }
+      </dd>
     </div>
   );
 }

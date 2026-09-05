@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMoney } from "@shopify/hydrogen";
 import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,7 +9,6 @@ import { useCart } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
-import { formatPrice } from "@/lib/utils";
 
 function CheckoutLink({
   checkoutUrl,
@@ -94,7 +94,12 @@ export function Summary({
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
           <span className="text-xl font-medium text-foreground">
-            {formatPrice({ amount: estimatedTotal, currencyCode }, locale)}
+            {
+              formatMoney(
+                { amount: String(estimatedTotal), currencyCode },
+                { currencyDisplay: "narrowSymbol", locale },
+              ).localizedString
+            }
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>
