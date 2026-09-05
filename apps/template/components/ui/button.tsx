@@ -3,7 +3,7 @@ import { useRender } from "@base-ui/react/use-render";
 import { clsx, cn, type ClassValue } from "cn";
 import { isValidElement, type ReactElement } from "react";
 
-import type { VariantProps } from "@/lib/variants";
+import type { VariantProps } from "@/lib/types";
 
 const BUTTON_STYLES = {
   size: {

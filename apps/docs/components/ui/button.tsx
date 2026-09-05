@@ -2,7 +2,7 @@ import { type ClassValue, clsx, cn } from "cn";
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 
-import type { VariantProps } from "@/lib/variants";
+import type { VariantProps } from "@/lib/types";
 
 const buttonStyles = {
   variant: {

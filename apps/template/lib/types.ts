@@ -1,5 +1,9 @@
 import type { I18nConfig } from "@shopify/hydrogen";
 
+export type VariantProps<T> = {
+  [K in keyof T]?: keyof T[K] | null;
+};
+
 export interface Money {
   amount: string;
   currencyCode: string;
