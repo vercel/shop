@@ -193,7 +193,7 @@ Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
 - Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card-client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
-- Assistant tools mutate through `runCartMutation` in `lib/cart/server.ts`. The client bridge refreshes Hydrogen's cart store after successful tool results without replaying mutations from restored conversations.
+- Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart-client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
 - Cart types are the deliberate domain-type exception: `lib/cart/index.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.

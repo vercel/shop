@@ -3,9 +3,9 @@
 import { useCart } from "@shopify/hydrogen/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { useCheckout } from "@/hooks/use-checkout";
 import type { Cart } from "@/lib/cart";
 
 import { useCartDrawer } from "./context";
@@ -43,32 +43,15 @@ export function OverlayContent() {
   const router = useRouter();
   const displayCart = useCart<Cart, Cart>((state) => state.data);
   const isLoading = useCart((state) => state.loading);
-  const isUpdatingCart = useCart((state) =>
-    Boolean(
-      state.loading ||
-      state.revalidating ||
-      state.pending.cost ||
-      state.pending.lines.size ||
-      state.pending.discountCodes.size ||
-      state.pending.attributes ||
-      state.pending.note,
-    ),
-  );
+  const {
+    checkoutError,
+    checkoutErrorId,
+    handleCheckout,
+    isCheckingOut,
+    isCheckoutDisabled,
+    isUpdatingCart,
+  } = useCheckout();
   const { setOverlayOpen } = useCartDrawer();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  // Reset pending state when returning from checkout (bfcache / back navigation)
-  useEffect(() => {
-    const handlePageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) setIsCheckingOut(false);
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
-  const handleCheckout = () => {
-    if (isCheckingOut || isUpdatingCart || !displayCart.checkoutUrl) return;
-    setIsCheckingOut(true);
-    window.location.href = displayCart.checkoutUrl;
-  };
   if (isLoading && displayCart.lines.nodes.length === 0) {
     return (
       <div className="flex h-full items-center justify-center gap-2.5" role="status">
@@ -110,14 +93,24 @@ export function OverlayContent() {
       <footer className="px-5 py-5 space-y-5">
         <OverlaySummary cart={displayCart} />
 
-        <Button
-          onClick={handleCheckout}
-          className="w-full h-12 justify-center"
-          disabled={isCheckingOut || isUpdatingCart || !displayCart.checkoutUrl}
-          aria-label="Proceed to Checkout"
-        >
-          <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />
-        </Button>
+        <div className="grid gap-2.5">
+          <Button
+            onClick={handleCheckout}
+            className="w-full h-12 justify-center"
+            disabled={isCheckoutDisabled}
+            aria-busy={isCheckingOut || isUpdatingCart || undefined}
+            aria-describedby={checkoutError ? checkoutErrorId : undefined}
+            aria-label="Proceed to Checkout"
+            type="button"
+          >
+            <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />
+          </Button>
+          {checkoutError ? (
+            <p className="text-xs text-destructive" id={checkoutErrorId} role="alert">
+              {checkoutError}
+            </p>
+          ) : null}
+        </div>
       </footer>
     </div>
   );

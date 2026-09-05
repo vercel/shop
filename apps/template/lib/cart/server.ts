@@ -5,13 +5,15 @@ import {
   createShopifyRequestContext,
   getCartId,
   gql,
+  type ShopifyRequestContext,
 } from "@shopify/hydrogen";
+import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
 import { io } from "next/cache";
 import { headers } from "next/headers";
 import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
-import type { Cart, CartSeedData, CartWarning } from "@/lib/cart";
+import type { Cart, CartSeedData } from "@/lib/cart";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -118,14 +120,23 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   return data.cart ?? undefined;
 }
 
-/** Creates an empty cart so a streaming response can set the cookie before any line is added. */
-export async function createEmptyCart(): Promise<string | undefined> {
-  const { storefrontClient } = await getHandlerContext();
+// Streaming tools need a cart cookie before adding the first line; Hydrogen's POST rejects empty lines.
+export async function createEmptyCart(
+  requestContext: ShopifyRequestContext,
+  sessionManager?: WritableCustomerSessionManager,
+): Promise<string> {
+  const storefrontClient = createRequestStorefrontClient(requestContext);
+  const customerAccessToken = sessionManager
+    ? await (
+        await getHydrogenCustomerSession()
+      ).getOrRefreshAccessToken(sessionManager, requestContext)
+    : undefined;
   const { data, errors } = await storefrontClient.graphql(cartQueries.cartCreate, {
     variables: {
       input: {
         buyerIdentity: {
           countryCode: shopConfig.localization.country,
+          ...(customerAccessToken ? { customerAccessToken } : {}),
         },
       },
     },
@@ -133,61 +144,7 @@ export async function createEmptyCart(): Promise<string | undefined> {
   if (errors?.length) throw new Error(errors[0].message);
   const userErrors = data?.cartCreate?.userErrors ?? [];
   if (userErrors.length) throw new Error(userErrors.map((e) => e.message).join("; "));
-  return data?.cartCreate?.cart?.id;
-}
-
-export type CartMutationInput =
-  | {
-      lines: {
-        attributes?: { key: string; value: string }[];
-        merchandiseId: string;
-        quantity: number;
-      }[];
-    }
-  | { lines: { id: string; quantity: number }[] }
-  | { note: string };
-
-export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
-
-/**
- * Runs a cart mutation through Hydrogen's `/api/cart` handler without an HTTP round trip.
- * Callers that create a cart must persist `cart.id` with `createCartCookie` on their own response.
- */
-export async function runCartMutation(
-  input: CartMutationInput,
-  cartId?: string,
-): Promise<CartMutationResult> {
-  const { handlers, requestContext: sharedContext, ...context } = await getHandlerContext();
-  const requestContext = sharedContext ?? (await getRequestContext());
-  const request = new Request(new URL("/api/cart", shopConfig.site.url), {
-    body: JSON.stringify({ ...input, ...(cartId ? { cartId } : {}) }),
-    headers: {
-      "content-type": "application/json",
-      cookie: (await headers()).get("cookie") ?? "",
-    },
-    method: "POST",
-  });
-  // Cookies can't be committed from a tool call, so pass a read-only session and let refreshes fall through.
-  const result = await handlers.post({
-    ...context,
-    request,
-    requestContext,
-    sessionManager: {
-      ...("sessionManager" in context ? context.sessionManager : {}),
-      commit: undefined,
-    },
-  } as never);
-
-  if (result.type === "error") throw new Error(result.error.message);
-  if (result.type !== "json") throw new Error("Cart mutation returned an unexpected response");
-
-  // Hydrogen's POST result erases the cart fragment type even though it uses the same query as GET.
-  const data = result.data as {
-    cart?: Cart | null;
-    userErrors?: { message: string }[];
-    warnings?: CartWarning[];
-  };
-  if (data.userErrors?.length) throw new Error(data.userErrors.map((e) => e.message).join("; "));
-  if (!data.cart) throw new Error("Cart mutation returned no cart");
-  return { cart: data.cart, warnings: data.warnings ?? [] };
+  const cartId = data?.cartCreate?.cart?.id;
+  if (!cartId) throw new Error("Cart creation returned no cart");
+  return cartId;
 }

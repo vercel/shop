@@ -2,11 +2,17 @@
 
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { DefaultChatTransport } from "ai";
+import {
+  DefaultChatTransport,
+  isToolUIPart,
+  lastAssistantMessageIsCompleteWithToolCalls,
+} from "ai";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useCartDrawer } from "@/components/cart/context";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
+import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart-client";
 import { BOTID_DENIED_CODE } from "@/lib/botid";
 
 import { AgentCartBridge } from "./cart-bridge";
@@ -55,10 +61,51 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
   const [input, setInput] = useState(stored.input);
-  const { error, messages, setMessages, sendMessage, status, stop } = useChat({
-    messages: stored.messages,
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
-  });
+  const { openOverlay } = useCartDrawer();
+  const generation = useRef(0);
+  const continueAutomatically = useRef(false);
+  const executedTools = useRef(new Set<string>());
+  const { addToolOutput, clearError, error, messages, setMessages, sendMessage, status, stop } =
+    useChat({
+      messages: stored.messages,
+      onToolCall: ({ toolCall }) => {
+        if (
+          !isCartMutationTool(toolCall.toolName) ||
+          executedTools.current.has(toolCall.toolCallId)
+        )
+          return;
+        executedTools.current.add(toolCall.toolCallId);
+        const currentGeneration = generation.current;
+        // The cart request must settle independently of Stop or Clear cancelling the chat stream.
+        void executeCartTool(toolCall.toolName, toolCall.input).then((output) => {
+          if (generation.current !== currentGeneration) return;
+          if ("cartUpdated" in output) openOverlay();
+          void addToolOutput({ tool: toolCall.toolName, toolCallId: toolCall.toolCallId, output });
+        });
+      },
+      sendAutomaticallyWhen: (options) => {
+        const parts = options.messages.at(-1)?.parts ?? [];
+        const lastStep = parts.findLastIndex((part) => part.type === "step-start");
+        return (
+          continueAutomatically.current &&
+          parts
+            .slice(lastStep + 1)
+            .some(
+              (part) =>
+                isToolUIPart(part) &&
+                isCartMutationTool(
+                  part.type === "dynamic-tool" ? part.toolName : part.type.slice(5),
+                ),
+            ) &&
+          lastAssistantMessageIsCompleteWithToolCalls(options)
+        );
+      },
+      transport: new DefaultChatTransport({ api: "/api/chat" }),
+    });
+  const handleStop = useCallback(() => {
+    continueAutomatically.current = false;
+    void stop();
+  }, [stop]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
@@ -78,11 +125,34 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     return () => observer.disconnect();
   }, []);
 
-  // Drafts change per keystroke, so debounce to avoid re-serializing the transcript each time.
+  const snapshot = useRef<StoredChat>({ input: stored.input, messages: stored.messages });
+  const checkpointTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushChat = useCallback(() => {
+    if (checkpointTimer.current !== null) clearTimeout(checkpointTimer.current);
+    checkpointTimer.current = null;
+    writeStoredChat(snapshot.current);
+  }, []);
   useEffect(() => {
-    const timer = setTimeout(() => writeStoredChat({ input, messages }), DRAFT_DEBOUNCE_MS);
+    snapshot.current.input = input;
+    const timer = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [input, messages]);
+  }, [flushChat, input]);
+  useEffect(() => {
+    snapshot.current.messages = messages;
+    if (status !== "streaming" && status !== "submitted") {
+      flushChat();
+    } else if (checkpointTimer.current === null) {
+      // Streaming updates must not keep postponing the next transcript checkpoint.
+      checkpointTimer.current = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
+    }
+  }, [flushChat, messages, status]);
+  useEffect(() => {
+    window.addEventListener("pagehide", flushChat);
+    return () => {
+      window.removeEventListener("pagehide", flushChat);
+      flushChat();
+    };
+  }, [flushChat]);
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(event: MouseEvent) {
@@ -109,17 +179,22 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const handleSend = useCallback(
     (text: string) => {
       pinnedRef.current = true;
+      generation.current += 1;
+      continueAutomatically.current = true;
       void sendMessage({ text });
       setInput("");
     },
     [sendMessage],
   );
   const handleClear = useCallback(() => {
-    stop();
+    generation.current += 1;
+    handleStop();
     setMessages([]);
     setInput("");
-    writeStoredChat({ input: "", messages: [] });
-  }, [setMessages, stop]);
+    clearError();
+    snapshot.current = { input: "", messages: [] };
+    flushChat();
+  }, [clearError, flushChat, handleStop, setMessages]);
   const canClear = messages.length > 0 || input.trim().length > 0;
   return (
     <div
@@ -183,7 +258,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       </div>
       <AgentComposer
         onChange={setInput}
-        onStop={stop}
+        onStop={handleStop}
         onSubmit={handleSend}
         placeholder="Ask anything…"
         status={status}

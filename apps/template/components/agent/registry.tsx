@@ -1,9 +1,9 @@
 "use client";
 
 import { defineRegistry } from "@json-render/react";
-import type { CartState } from "@shopify/hydrogen";
 import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import { cn } from "cn";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -21,6 +21,7 @@ import {
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { useCheckout } from "@/hooks/use-checkout";
 import { catalog } from "@/lib/agent";
 import type { AgentVariant } from "@/lib/agent/products";
 import type { Cart } from "@/lib/cart";
@@ -38,13 +39,15 @@ function variantLabel(variant: AgentVariant): string {
 export const { registry } = defineRegistry(catalog, {
   components: {
     AgentCartSummary: () => {
+      const cart = useCart<Cart, Cart>((state) => state.data);
       const {
-        data: cart,
-        loading,
-        pending,
-        revalidating,
-      } = useCart<Cart, CartState<Cart>>((state) => state);
-      const isPending = loading || revalidating || pending.cost || pending.lines.size > 0;
+        checkoutError,
+        checkoutErrorId,
+        handleCheckout,
+        isCheckingOut,
+        isCheckoutDisabled,
+        isUpdatingCart,
+      } = useCheckout();
       if (cart.lines.nodes.length === 0) return <MissingData>Your cart is empty</MissingData>;
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
@@ -70,13 +73,26 @@ export const { registry } = defineRegistry(catalog, {
               Taxes and shipping calculated at checkout.
             </p>
           </div>
-          {!isPending && cart.checkoutUrl && (
-            <div className="border-t px-2.5 py-2">
-              <Button asChild className="w-full" size="sm">
-                <a href={cart.checkoutUrl}>Checkout</a>
-              </Button>
-            </div>
-          )}
+          <div className="grid gap-2.5 border-t px-2.5 py-2">
+            <Button
+              aria-busy={isCheckingOut || isUpdatingCart || undefined}
+              aria-describedby={checkoutError ? checkoutErrorId : undefined}
+              className="h-12 w-full justify-center"
+              disabled={isCheckoutDisabled}
+              onClick={handleCheckout}
+              type="button"
+            >
+              {isCheckingOut || isUpdatingCart ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : null}
+              {isCheckingOut ? "Redirecting..." : isUpdatingCart ? "Updating cart..." : "Checkout"}
+            </Button>
+            {checkoutError ? (
+              <p className="text-xs text-destructive" id={checkoutErrorId} role="alert">
+                {checkoutError}
+              </p>
+            ) : null}
+          </div>
           <span className="sr-only">This cart updates as you change it.</span>
         </div>
       );
