@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getPage } from "@/lib/shopify/operations/pages";
 import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
@@ -22,12 +21,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/pages/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) return {};
-
-  const page = await getPage({ handle, locale });
+  const page = await getPage({
+    handle,
+  });
   if (!page) notFound();
-
   const pathname = `/pages/${page.handle}`;
   return {
     alternates: buildAlternates({ pathname }),
@@ -45,11 +44,11 @@ export async function generateMetadata({
 export const instant = false;
 
 export default async function ShopifyPage({ params }: PageProps<"/pages/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
-
-  const page = await getPage({ handle, locale });
+  const page = await getPage({
+    handle,
+  });
   if (!page) notFound();
-
   return <RichTextPage body={page.body} title={page.title} />;
 }

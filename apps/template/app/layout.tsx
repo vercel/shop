@@ -1,8 +1,7 @@
-import "./globals.css";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import "./globals.css";
 import { Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
@@ -16,7 +15,6 @@ import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
-import { getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -29,23 +27,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const [locale, messages, t] = await Promise.all([
-    getLocale(),
-    getMessages(),
-    getTranslations("accessibility"),
-  ]);
-  const agentMessages = {
-    agent: messages.agent,
-    cart: messages.cart,
-    product: messages.product,
-  };
-
+export default function RootLayout({ children }: LayoutProps<"/">) {
   // Un-awaited: the promise streams to the client provider; never block the shell on it.
   const cartData = seedCartData();
-
   return (
-    <html lang={locale}>
+    <html lang={shopConfig.localization.locale}>
       <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
@@ -54,43 +40,34 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-background focus:px-5 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:ring-2 focus:ring-foreground focus:outline-none"
         >
-          {t("skipToContent")}
+          Skip to content
         </a>
-        <SiteSchema locale={locale} />
-        <NextIntlClientProvider locale={locale} messages={{ common: messages.common }}>
-          <CartProviderWrapper cartData={cartData}>
-            <Nav locale={locale} />
-            <main id="main-content" className="flex flex-1 flex-col min-w-0">
-              {children}
-            </main>
-            <Footer locale={locale} />
-            <CartUI />
-            <Suspense>
-              <ActionBar>
-                {shopConfig.agent.isEnabled && (
-                  <NextIntlClientProvider messages={agentMessages}>
-                    <AgentButton />
-                  </NextIntlClientProvider>
-                )}
-              </ActionBar>
-            </Suspense>
-            <Suspense>
-              <AnalyticsComponents locale={locale} />
-            </Suspense>
-          </CartProviderWrapper>
-          <Toaster closeButton />
-        </NextIntlClientProvider>
+        <SiteSchema />
+
+        <CartProviderWrapper cartData={cartData}>
+          <Nav />
+          <main id="main-content" className="flex flex-1 flex-col min-w-0">
+            {children}
+          </main>
+          <Footer />
+          <CartUI />
+          <Suspense>
+            <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
+          </Suspense>
+          <Suspense>
+            <AnalyticsComponents />
+          </Suspense>
+        </CartProviderWrapper>
+        <Toaster closeButton />
       </body>
     </html>
   );
 }
 
 export const generateMetadata = async (): Promise<Metadata> => {
-  const t = await getTranslations("seo");
-
   return {
     alternates: buildAlternates({ pathname: "/" }),
-    description: t("defaultDescription", { name: shopConfig.site.name }),
+    description: `Shop premium products, curated collections, and latest offers from ${shopConfig.site.name}.`,
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),
     openGraph: {

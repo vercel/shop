@@ -2,7 +2,6 @@
 
 import { cn } from "cn";
 import { Loader2, X } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { useCart } from "@/components/cart/context";
@@ -16,7 +15,6 @@ interface DiscountFormProps {
 }
 
 export function DiscountForm({ cart }: DiscountFormProps) {
-  const t = useTranslations("cart");
   const { setWarnings } = useCart();
   const { formProps, register } = useCartForm();
   const discountErrors = useHydrogenCart((state) => state.errors.discountCodes);
@@ -30,7 +28,6 @@ export function DiscountForm({ cart }: DiscountFormProps) {
     Array.from(discountErrors.values()).flatMap((group) => group.userErrors)[0]?.message ??
     networkErrors.at(-1)?.message ??
     null;
-
   return (
     <div className="grid gap-2.5">
       <form
@@ -40,7 +37,7 @@ export function DiscountForm({ cart }: DiscountFormProps) {
             const normalized = code.trim().toUpperCase();
             if (!normalized) {
               event.preventDefault();
-              setLocalError(t("discountInvalidCode"));
+              setLocalError("Enter a valid discount code");
               return;
             }
             if (cart.discountCodes.some((discount) => discount.code.toUpperCase() === normalized)) {
@@ -63,8 +60,8 @@ export function DiscountForm({ cart }: DiscountFormProps) {
             setCode(event.target.value);
             if (localError) setLocalError(null);
           }}
-          placeholder={t("discountCode")}
-          aria-label={t("discountCode")}
+          placeholder="Discount code"
+          aria-label="Discount code"
           aria-invalid={error ? true : undefined}
           disabled={isPending}
           autoComplete="off"
@@ -76,11 +73,7 @@ export function DiscountForm({ cart }: DiscountFormProps) {
           type="submit"
           disabled={isPending || code.trim() === ""}
         >
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          ) : (
-            t("applyDiscount")
-          )}
+          {isPending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : "Apply"}
         </Button>
       </form>
 
@@ -91,11 +84,10 @@ export function DiscountForm({ cart }: DiscountFormProps) {
       ) : null}
 
       {cart.discountCodes.length > 0 ? (
-        <ul className="flex flex-wrap gap-1.5" aria-label={t("discount")}>
+        <ul className="flex flex-wrap gap-1.5" aria-label="Discount">
           {cart.discountCodes.map((discount) => {
             const isCodePending = pendingDiscountCodes.has(discount.code);
             const isInvalid = !discount.applicable && !isCodePending;
-
             return (
               <li key={discount.code}>
                 {/* Hydrogen reads FormData from the native submit event, before a React onClick could populate a shared input. */}
@@ -116,14 +108,12 @@ export function DiscountForm({ cart }: DiscountFormProps) {
                   <input type="hidden" {...register("discountCode", { value: discount.code })} />
                   <span className={cn(isInvalid && "line-through")}>{discount.code}</span>
                   {isInvalid ? (
-                    <span className="text-xs uppercase tracking-wide">
-                      {t("discountNotApplicable")}
-                    </span>
+                    <span className="text-xs uppercase tracking-wide">Not applicable</span>
                   ) : null}
                   <button
                     {...register("discount-remove")}
                     type="submit"
-                    aria-label={`${t("removeDiscount")}: ${discount.code}`}
+                    aria-label={`${"Remove discount"}: ${discount.code}`}
                     disabled={isPending}
                     className={cn(
                       "ml-0.5 inline-flex size-4 items-center justify-center rounded-sm cursor-pointer disabled:cursor-not-allowed",

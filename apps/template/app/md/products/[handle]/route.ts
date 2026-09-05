@@ -1,4 +1,4 @@
-import { defaultLocale, resolveLocale } from "@/lib/i18n";
+import { shopConfig } from "@/lib/config";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { productToMarkdown } from "@/lib/markdown/product";
@@ -7,12 +7,11 @@ import { getProductWithVariants } from "@/lib/shopify/operations/products";
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
   const url = new URL(request.url);
-  const locale = resolveLocale(url.searchParams.get("locale") || defaultLocale);
   const pathname = `/products/${handle}`;
-
   try {
-    const product = await getProductWithVariants({ handle, locale });
-
+    const product = await getProductWithVariants({
+      handle,
+    });
     if (!product) {
       return new Response(notFoundMarkdown({ kind: "Product", value: handle }), {
         status: 404,
@@ -22,8 +21,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         }),
       });
     }
-
-    return new Response(productToMarkdown(product, locale), {
+    return new Response(productToMarkdown(product, shopConfig.localization.locale), {
       headers: markdownHeaders({
         cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
         pathname,

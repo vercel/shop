@@ -1,3 +1,4 @@
+import { shopConfig } from "@/lib/config";
 import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
 import {
@@ -18,7 +19,7 @@ export function searchResultsToMarkdown({
   priceRange,
   activeFilters,
   pageInfo,
-  locale,
+  locale = shopConfig.localization.locale,
   sort,
 }: {
   query?: string;
@@ -29,7 +30,7 @@ export function searchResultsToMarkdown({
   priceRange?: PriceRange;
   activeFilters: Record<string, string | string[] | undefined>;
   pageInfo: PageInfo;
-  locale: string;
+  locale?: string;
   sort?: string;
 }): string {
   const sections: string[] = [];

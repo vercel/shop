@@ -5,18 +5,17 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";
+import { shopConfig } from "@/lib/config";
 import type { BlogArticle } from "@/lib/types";
 
 export interface ArticlePageProps {
   article: BlogArticle;
-  locale: string;
 }
 
-export function ArticlePage({ article, locale }: ArticlePageProps) {
-  const publishedAt = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(
-    new Date(article.publishedAt),
-  );
-
+export function ArticlePage({ article }: ArticlePageProps) {
+  const publishedAt = new Intl.DateTimeFormat(shopConfig.localization.locale, {
+    dateStyle: "long",
+  }).format(new Date(article.publishedAt));
   return (
     <Page>
       <Container className="max-w-4xl">

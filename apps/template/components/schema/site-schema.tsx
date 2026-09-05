@@ -1,6 +1,6 @@
 import { shopConfig } from "@/lib/config";
 
-function buildSiteSchema(locale: string) {
+function buildSiteSchema() {
   return [
     {
       "@context": "https://schema.org",
@@ -14,7 +14,7 @@ function buildSiteSchema(locale: string) {
       "@type": "WebSite",
       name: shopConfig.site.name,
       url: shopConfig.site.url,
-      inLanguage: locale,
+      inLanguage: shopConfig.localization.locale,
       potentialAction: {
         "@type": "SearchAction",
         target: `${shopConfig.site.url}/search?q={search_term_string}`,
@@ -24,8 +24,8 @@ function buildSiteSchema(locale: string) {
   ];
 }
 
-export function SiteSchema({ locale }: { locale: string }) {
-  const schemas = buildSiteSchema(locale);
+export function SiteSchema() {
+  const schemas = buildSiteSchema();
   return (
     <>
       {schemas.map((schema) => (

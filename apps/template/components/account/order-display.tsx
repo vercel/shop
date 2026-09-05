@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { defaultLocale } from "@/lib/i18n";
+import { shopConfig } from "@/lib/config";
 
 export function humanizeStatus(status: string): string {
   return status
@@ -9,7 +9,10 @@ export function humanizeStatus(status: string): string {
     .join(" ");
 }
 
-export function formatOrderDate(iso: string, locale: string = defaultLocale): string {
+export function formatOrderDate(
+  iso: string,
+  locale: string = shopConfig.localization.locale,
+): string {
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
 }
 

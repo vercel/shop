@@ -1,10 +1,8 @@
 import { cn } from "cn";
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import type { Locale } from "@/lib/i18n";
 import { searchIndexProducts } from "@/lib/shopify/operations/products";
 
 interface ProductsGridSkeletonProps {
@@ -25,13 +23,10 @@ export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonP
 interface ProductsGridProps {
   collectionUrl?: string;
   limit: number;
-  locale: Locale;
   title: string;
 }
 
-export async function ProductsGrid({ collectionUrl, limit, locale, title }: ProductsGridProps) {
-  const t = await getTranslations("product");
-
+export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps) {
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
@@ -41,12 +36,12 @@ export async function ProductsGrid({ collectionUrl, limit, locale, title }: Prod
             href={collectionUrl}
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
-            {t("viewAll")}
+            View All
           </Link>
         )}
       </div>
       <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
-        <ProductsGridContent limit={limit} locale={locale} outOfStockText={t("outOfStock")} />
+        <ProductsGridContent limit={limit} outOfStockText="Out of Stock" />
       </Suspense>
     </div>
   );
@@ -54,27 +49,20 @@ export async function ProductsGrid({ collectionUrl, limit, locale, title }: Prod
 
 async function ProductsGridContent({
   limit,
-  locale,
   outOfStockText,
 }: {
   limit: number;
-  locale: Locale;
   outOfStockText: string;
 }) {
   // Use the search index (not the products connection) so these match the first items on /collections/all.
-  const { products } = await searchIndexProducts({ limit, locale });
-
+  const { products } = await searchIndexProducts({
+    limit,
+  });
   if (products.length === 0) return null;
-
   return (
     <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
       {products.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          locale={locale}
-          outOfStockText={outOfStockText}
-        />
+        <ProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
       ))}
     </div>
   );

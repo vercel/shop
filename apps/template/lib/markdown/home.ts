@@ -6,11 +6,11 @@ import { escapeMarkdown } from "./utils";
 
 export function homeToMarkdown({
   description,
-  locale,
+  locale = shopConfig.localization.locale,
   products,
 }: {
   description: string;
-  locale: string;
+  locale?: string;
   products: ProductCard[];
 }): string {
   const { name, url } = shopConfig.site;

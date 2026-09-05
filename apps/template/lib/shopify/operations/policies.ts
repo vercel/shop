@@ -1,7 +1,7 @@
 import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type { ShopPolicy } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
@@ -47,8 +47,10 @@ const GET_SHOP_POLICIES_QUERY = gql(
 );
 
 export async function getShopPolicies({
-  locale = defaultLocale,
-}: { locale?: string } = {}): Promise<ShopPolicy[]> {
+  locale = shopConfig.localization,
+}: {
+  locale?: CommerceLocale;
+} = {}): Promise<ShopPolicy[]> {
   "use cache";
   cacheLife("max");
   cacheTag("policies");
@@ -63,10 +65,10 @@ export async function getShopPolicies({
 
 export async function getShopPolicy({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ShopPolicy | undefined> {
   const policies = await getShopPolicies({ locale });
   return policies.find((policy) => policy.handle === handle);

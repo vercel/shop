@@ -1,7 +1,7 @@
 import { flattenConnection, gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type { Collection, CollectionWithThumbnail } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
@@ -57,7 +57,10 @@ const GET_COLLECTIONS_WITH_FEATURED_IMAGE_QUERY = gql(
 );
 
 export async function getCollections(
-  params: { limit?: number; locale?: string } = {},
+  params: {
+    limit?: number;
+    locale?: CommerceLocale;
+  } = {},
 ): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
@@ -70,10 +73,10 @@ export async function getCollections(
 
 export async function getCollection({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<Collection | undefined> {
   // Plain cache is required to bake the collection into the PLP shell.
   "use cache";
@@ -94,8 +97,11 @@ export async function getCollection({
 
 export async function getCollectionsListing({
   limit = 250,
-  locale = defaultLocale,
-}: { limit?: number; locale?: string } = {}): Promise<CollectionWithThumbnail[]> {
+  locale = shopConfig.localization,
+}: {
+  limit?: number;
+  locale?: CommerceLocale;
+} = {}): Promise<CollectionWithThumbnail[]> {
   "use cache";
   cacheLife("max");
   cacheTag("collections", "collections-index");

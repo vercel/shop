@@ -1,6 +1,5 @@
 import { withBotId } from "botid/next/config";
 import type { NextConfig } from "next";
-import createNextIntlPlugin from "next-intl/plugin";
 import {
   PHASE_DEVELOPMENT_SERVER,
   PHASE_PRODUCTION_BUILD,
@@ -65,14 +64,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-const withNextIntl = createNextIntlPlugin({
-  experimental: { createMessagesDeclaration: "./lib/i18n/messages/en.json" },
-  requestConfig: "./lib/i18n/request.ts",
-});
-
-const intlConfig = withNextIntl(nextConfig);
-
-const config = shopConfig.botid.isEnabled ? withBotId(intlConfig) : intlConfig;
+const config = shopConfig.botid.isEnabled ? withBotId(nextConfig) : nextConfig;
 
 function getConfig(phase: string): NextConfig {
   const isTypegen = process.argv.includes("typegen");

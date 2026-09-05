@@ -1,5 +1,4 @@
 import { cn } from "cn";
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
@@ -11,14 +10,10 @@ import type { MenuItem } from "@/lib/shopify/types/menu";
 import { SocialLinks } from "./social-links";
 import type { SocialLink } from "./social-links";
 
-export async function Footer({ locale }: { locale: string }) {
+export async function Footer() {
   const socialLinks: SocialLink[] = [];
   const items: MenuItem[] = [];
-  const [policies, t] = await Promise.all([
-    getShopPolicies({ locale }).catch(() => []),
-    getTranslations("footer"),
-  ]);
-
+  const policies = await getShopPolicies({}).catch(() => []);
   return (
     <footer>
       {/* pb-22 clears the fixed agent ActionBar pill when it renders */}
@@ -28,7 +23,7 @@ export async function Footer({ locale }: { locale: string }) {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-5">
             <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:justify-start">
               <p className="text-sm text-muted-foreground leading-5">
-                {t("copyright", { name: shopConfig.site.name })}
+                {`© ${shopConfig.site.name}. All rights reserved.`}
               </p>
               {policies.map((policy) => (
                 <Link

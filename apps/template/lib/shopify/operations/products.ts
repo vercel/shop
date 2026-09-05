@@ -3,8 +3,7 @@ import type { ProductSortKeys } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { ActiveFilters } from "@/lib/collections";
-import { shopConfig } from "@/lib/config";
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type {
   Filter,
   PageInfo,
@@ -103,10 +102,10 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
 
 export async function getProduct({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
@@ -159,11 +158,11 @@ const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = gql(
 // Empty selections intentionally resolve Shopify's first available variant.
 export async function getProductVariant({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
   selectedOptions,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
   selectedOptions: SelectedOption[];
 }): Promise<ProductVariant | undefined> {
   "use cache";
@@ -188,7 +187,7 @@ export async function getProductVariant({
 
 export async function getProductWithVariants(params: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductDetails | undefined> {
   "use cache";
   cacheLife("max");
@@ -420,7 +419,7 @@ type CatalogProductsResult = {
 
 type CatalogProductsParams = {
   limit?: number;
-  locale?: string;
+  locale?: CommerceLocale;
 };
 
 type FilteredCatalogProductsParams = CatalogProductsParams & {
@@ -436,7 +435,7 @@ async function fetchCatalogProducts({
   cursor,
   filters = [],
   limit = 50,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
   query,
   sortKey: rawSortKey = "best-matches",
 }: FilteredCatalogProductsParams): Promise<CatalogProductsResult> {
@@ -484,7 +483,7 @@ type SearchFacetsParams = {
   activeFilters?: ActiveFilters;
   collection?: string;
   filters?: ProductFilter[];
-  locale?: string;
+  locale?: CommerceLocale;
   query?: string;
 };
 
@@ -492,13 +491,17 @@ type SearchFacetsResult = { filters: Filter[]; priceRange?: PriceRange; total: n
 
 // Browse facets stay uncached so Search & Discovery changes appear immediately.
 export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
-  const { activeFilters = {}, collection, filters = [], locale = defaultLocale, query } = params;
-
+  const {
+    activeFilters = {},
+    collection,
+    filters = [],
+    locale = shopConfig.localization,
+    query,
+  } = params;
   const queryParts: string[] = [];
   if (query?.trim()) queryParts.push(query.trim());
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
-
   const response = await storefront.request(SEARCH_FACETS_QUERY, {
     locale,
     variables: {
@@ -508,7 +511,6 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   });
   assertStorefrontOk(response, "searchFacets");
   const { data } = response;
-
   const currencyCode = data.search.nodes.flatMap((node) =>
     node.__typename === "Product" ? [node.priceRange.minVariantPrice.currencyCode] : [],
   )[0];
@@ -516,7 +518,6 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
     activeFilters,
     currencyCode,
   });
-
   return {
     filters: transformed.filters,
     priceRange: transformed.priceRange,
@@ -560,7 +561,7 @@ export async function getCollectionProducts(
 
 export async function getComplementaryProducts(params: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
@@ -573,7 +574,7 @@ export async function getComplementaryProducts(params: {
 
 export async function getRelatedProducts(params: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
@@ -607,10 +608,10 @@ function decodeShopifyId(id: string): string {
 
 export async function getProductsByIds({
   ids,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   ids: string[];
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");

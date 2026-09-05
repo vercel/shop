@@ -116,7 +116,7 @@ Remove imports for integrations the storefront does not support.
 
 ### C2. Update `app/layout.tsx`
 
-Render the root analytics component near the end of `<body>`, without changing the storefront's translation-provider boundaries:
+Render the root analytics component near the end of `<body>`. The default has inline component copy, not a translation provider; in an already localized installation, preserve its scoped translation-provider boundaries:
 
 ```tsx
 import { AnalyticsComponents } from "@/components/analytics";
@@ -126,12 +126,12 @@ import { AnalyticsComponents } from "@/components/analytics";
 <body ...>
   {/* ... existing layout content and scoped providers ... */}
   <Suspense>
-    <AnalyticsComponents locale={locale} />
+    <AnalyticsComponents />
   </Suspense>
 </body>
 ```
 
-Do not pass the complete message catalog to a root `NextIntlClientProvider` for analytics. The root component remains mounted as the extension point for current and future analytics providers. Provider gates stay inside it so disabled integrations are not mounted.
+Do not add next-intl or a root message catalog for analytics. In a customized localized storefront, preserve any required commerce locale prop and existing scoped providers; do not pass the complete catalog to a root `NextIntlClientProvider`. The root component remains mounted as the extension point for current and future analytics providers. Provider gates stay inside it so disabled integrations are not mounted.
 
 ## Part D: Shopify storefront analytics
 

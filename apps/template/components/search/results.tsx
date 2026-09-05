@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import {
@@ -10,7 +9,6 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { CollectionSearchState } from "@/lib/collections/server";
-import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
 import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
@@ -27,12 +25,10 @@ export interface SearchResultsData {
 
 export async function getSearchResultsData({
   collection,
-  locale,
   query,
   searchStatePromise,
 }: {
   collection?: string;
-  locale: Locale;
   query?: string;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<SearchResultsData> {
@@ -45,11 +41,14 @@ export async function getSearchResultsData({
       sortKey: sort,
       limit: PRODUCTS_PER_PAGE,
       filters,
-      locale,
     }),
-    fetchSearchFacets({ activeFilters, query, collection, filters, locale }),
+    fetchSearchFacets({
+      activeFilters,
+      query,
+      collection,
+      filters,
+    }),
   ]);
-
   return {
     collection,
     dataSearch,
@@ -62,10 +61,8 @@ export async function getSearchResultsData({
 }
 
 export function SearchResultsGrid({
-  locale,
   searchResultsDataPromise,
 }: {
-  locale: Locale;
   searchResultsDataPromise: Promise<SearchResultsData>;
 }) {
   return (
@@ -77,40 +74,28 @@ export function SearchResultsGrid({
         />
       }
     >
-      <SearchResultsGridRender
-        locale={locale}
-        searchResultsDataPromise={searchResultsDataPromise}
-      />
+      <SearchResultsGridRender searchResultsDataPromise={searchResultsDataPromise} />
     </Suspense>
   );
 }
 
 async function SearchResultsGridRender({
-  locale,
   searchResultsDataPromise,
 }: {
-  locale: Locale;
   searchResultsDataPromise: Promise<SearchResultsData>;
 }) {
-  const [data, t, tProduct] = await Promise.all([
-    searchResultsDataPromise,
-    getTranslations("search"),
-    getTranslations("product"),
-  ]);
-
+  const data = await searchResultsDataPromise;
   const { collection, dataSearch, products, query } = data;
-
   if (products.length === 0) {
     return (
       <div className="text-center py-10">
-        <h2 className="text-2xl mb-2">{t("noResults")}</h2>
+        <h2 className="text-2xl mb-2">No products found</h2>
         <p className="text-muted-foreground">
-          {query ? t("noResultsQuery", { query }) : t("noResultsAvailable")}
+          {query ? `We couldn't find any products matching "${query}"` : "No products available"}
         </p>
       </div>
     );
   }
-
   return (
     <FilterPendingScope>
       <ProductGridPendingOverlay>
@@ -118,18 +103,15 @@ async function SearchResultsGridRender({
           key={`${query ?? ""}|${collection ?? ""}|${dataSearch}`}
           initialProducts={products}
           initialPageInfo={data.pageInfo}
-          locale={locale}
-          outOfStockText={tProduct("outOfStock")}
+          outOfStockText="Out of Stock"
           loadMore={loadMoreSearchProductsAction}
-          loadMoreParams={{ collection, locale, query }}
+          loadMoreParams={{
+            collection,
+            query,
+          }}
         >
           {products.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              locale={locale}
-              outOfStockText={tProduct("outOfStock")}
-            />
+            <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
           ))}
         </InfiniteProductGrid>
       </ProductGridPendingOverlay>

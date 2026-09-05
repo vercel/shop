@@ -1,7 +1,7 @@
-import { gql, type I18nConfig } from "@shopify/hydrogen";
+import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type { ShopAnalyticsData } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
@@ -23,18 +23,19 @@ const GET_SHOP_ANALYTICS_QUERY = gql(`#graphql
 `);
 
 export async function getShopAnalytics({
-  locale = defaultLocale,
-}: { locale?: string } = {}): Promise<ShopAnalyticsData> {
+  locale = shopConfig.localization,
+}: {
+  locale?: CommerceLocale;
+} = {}): Promise<ShopAnalyticsData> {
   "use cache";
+
   cacheLife("max");
   cacheTag("shop-analytics");
-
   const response = await storefront.request(GET_SHOP_ANALYTICS_QUERY, { locale });
   assertStorefrontOk(response, "getShopAnalytics");
-
   return {
-    acceptedLanguage: getLanguageCode(locale) as I18nConfig["language"],
-    country: getCountryCode(locale) as I18nConfig["country"],
+    acceptedLanguage: locale.language,
+    country: locale.country,
     currency: response.data.localization.country.currency.isoCode,
     shopId: response.data.shop.id,
     storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,

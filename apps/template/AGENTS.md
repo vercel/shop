@@ -30,9 +30,9 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 
 ## Critical Rules (Always Apply)
 
-1. **New user-visible strings go in ALL locale files** (`en.json`, etc.) so the documented multi-locale upgrade path stays mechanical.
-2. **Keep translations server-first.** Server Components use `getTranslations()` and pass primitive labels to client leaves. When an interactive island needs `useTranslations()`, wrap it in the nearest Server Component with a `NextIntlClientProvider` containing only the namespaces it uses; never pass the full catalog from the root layout.
-3. **Components in `ui/` must NOT import domain types**. Accept primitive props only and never call `useTranslations`.
+1. **Inline shopper-facing copy where it is used.** Keep labels and simple interpolation alongside their consuming components. Extract reusable content functionality into `lib/content/index.ts`, not a catalog of strings or one file per namespace. Do not add a custom `t()` parser, message-key runtime, or next-intl to the default storefront.
+2. **Keep copy server-first.** Server Components pass primitive labels to client leaves where appropriate; interactive copy can live in the leaf that uses it. Never pass ordinary content functions across the Server/Client Component boundary. In an already localized installation, preserve next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
+3. **Components in `ui/` must NOT import domain types or content helpers**. Accept primitive props only; domain wrappers supply labels.
 4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
 5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
 
@@ -79,11 +79,11 @@ Inside a domain folder under `lib/`, name files by execution context — same id
 - `client.ts` — `"use client"` modules.
 - `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
 
-Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{index,server,client}.ts`, `lib/i18n/index.ts`.
+Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{index,server,client}.ts`.
 
 Two exceptions that don't fit cleanly:
 
-- A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route) or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
+- A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route), or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
 - Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
 
 Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — that collides with the runtime meaning. Use a verb (`fetch.ts`) or product noun (`shopify.ts`) instead.
@@ -155,7 +155,9 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
 
-The default deployment story is single-locale with clean, unprefixed URLs (`/products/...`). The repo keeps locale catalogs and helpers in place so adding multi-locale routing later is straightforward, but that routing is not enabled by default.
+The default is one deployment with clean, unprefixed URLs (`/products/...`), inline component copy, and explicit `shopConfig.localization` settings: `{ country: "US", language: "EN", locale: "en-US" }`. Country and language configure Shopify context; locale controls display formatting. Currency always comes from Shopify responses, never from a locale-to-currency map. Changing commerce context does not translate storefront copy.
+
+The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()` in `lib/params.ts`. Operation locale arguments and cache inputs may remain intentionally; do not remove them just because presentation no longer needs locale plumbing. The i18n and Markets skills introduce localization from this baseline and must preserve already localized, customized installations.
 
 ## Development Commands
 
@@ -218,14 +220,14 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog/cart/public storefront operations, Customer for authenticated customer data, and custom-data first for metafields or metaobjects.
 - Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
 - Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
-- Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>` instead of hand-writing interfaces. `storefront.request` injects `$country`/`$language` from its `locale` option.
+- Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>` instead of hand-writing interfaces. `storefront.request` injects `$country`/`$language` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string.
 - Keep the `#graphql` comment at the top of every Storefront document; `pnpm codegen` still validates them against the live schema because type inference alone does not reject unknown fields.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns
 
 - Routes live under `app/` and use clean URLs like `/products/handle`.
-- `getLocale()` resolves the active deployment locale; the template defaults to `en-US`.
+- Read `shopConfig.localization` for the deployment's explicit country, language, and formatting locale; use inline component copy for UI text.
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
 - Components import domain types from `@/lib/types`, not Shopify response types.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.

@@ -1,3 +1,7 @@
+import type { I18nConfig } from "@shopify/hydrogen";
+
+export type CommerceLocale = Pick<I18nConfig, "country" | "language">;
+
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
 type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
@@ -24,6 +28,9 @@ export interface ShopConfig {
   botid: {
     checkLevel: BotIdCheckLevel;
     isEnabled: boolean;
+  };
+  localization: CommerceLocale & {
+    locale: string;
   };
   pdp: {
     bundles: {
@@ -77,6 +84,11 @@ export const shopConfig = {
   botid: {
     checkLevel: "basic",
     isEnabled: false,
+  },
+  localization: {
+    country: "US",
+    language: "EN",
+    locale: "en-US" as const,
   },
   pdp: {
     bundles: {

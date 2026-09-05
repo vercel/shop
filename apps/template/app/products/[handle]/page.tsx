@@ -9,7 +9,6 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
-import { getLocale } from "@/lib/params";
 import {
   defaultSelectedOptions,
   parseSelectedOptions,
@@ -26,12 +25,10 @@ import type { ProductVariant } from "@/lib/types";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
-async function buildProductMetadata(
-  handle: string,
-  locale: string,
-  canonicalPath: string,
-): Promise<Metadata> {
-  const product = await getProduct({ handle, locale });
+async function buildProductMetadata(handle: string, canonicalPath: string): Promise<Metadata> {
+  const product = await getProduct({
+    handle,
+  });
   if (!product) notFound();
   const images = product.featuredImage
     ? [
@@ -43,7 +40,6 @@ async function buildProductMetadata(
         },
       ]
     : ["/og-default.png"];
-
   return {
     title: product.seo.title,
     description: product.seo.description,
@@ -78,11 +74,9 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) return {};
-
-  return buildProductMetadata(handle, locale, `/products/${handle}`);
+  return buildProductMetadata(handle, `/products/${handle}`);
 }
 
 export const instant = false;
@@ -91,10 +85,11 @@ export default async function ProductPage({
   params,
   searchParams,
 }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
-
-  const product = await getProduct({ handle, locale });
+  const product = await getProduct({
+    handle,
+  });
   if (!product) notFound();
 
   // Keep selection separate from the variant query so the static shell stays coherent and the picker never waits on Shopify.
@@ -105,7 +100,7 @@ export default async function ProductPage({
     }),
   );
   const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
-    async (resolvedSearchParams) => {
+    (resolvedSearchParams) => {
       if (
         Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
       ) {
@@ -113,7 +108,6 @@ export default async function ProductPage({
       }
       return getProductVariant({
         handle,
-        locale,
         selectedOptions: toSelectedOptionList({
           ...defaultSelectedOptions(product),
           ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
@@ -121,7 +115,6 @@ export default async function ProductPage({
       });
     },
   );
-
   return (
     <>
       <Suspense fallback={null}>
@@ -142,10 +135,9 @@ export default async function ProductPage({
               product={product}
               selectedOptionsPromise={selectedOptionsPromise}
               variantPromise={variantPromise}
-              locale={locale}
             />
             {shopConfig.pdp.relatedProducts.isEnabled ? (
-              <RelatedProductsSection handle={handle} limit={4} locale={locale} />
+              <RelatedProductsSection handle={handle} limit={4} />
             ) : null}
           </Sections>
         </Container>

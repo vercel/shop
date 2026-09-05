@@ -1,8 +1,5 @@
 import { getSearchResultUrl } from "@shopify/hydrogen";
 
-import type { Locale } from "../i18n";
-import { defaultLocale } from "../i18n";
-
 export type AgentDestination =
   | "account"
   | "addresses"
@@ -45,24 +42,44 @@ export function buildAgentPath(destination: AgentDestination, identifier?: strin
   }
 }
 
-export function parsePageContext(url: string | null): { locale: Locale; page: PageContext } {
-  const locale = defaultLocale;
-  if (!url) return { locale, page: null };
-
+export function parsePageContext(url: string | null): {
+  page: PageContext;
+} {
+  if (!url)
+    return {
+      page: null,
+    };
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
-    return { locale, page: null };
+    return {
+      page: null,
+    };
   }
-
   const [segment, handle] = parsed.pathname.split("/").filter(Boolean);
-  if (!segment) return { locale, page: { type: "home" } };
-  if (segment === "products" && handle) return { locale, page: { handle, type: "product" } };
-  if (segment === "collections" && handle) return { locale, page: { handle, type: "collection" } };
+  if (!segment)
+    return {
+      page: { type: "home" },
+    };
+  if (segment === "products" && handle)
+    return {
+      page: { handle, type: "product" },
+    };
+  if (segment === "collections" && handle)
+    return {
+      page: { handle, type: "collection" },
+    };
   if (segment === "search") {
-    return { locale, page: { query: parsed.searchParams.get("q") ?? "", type: "search" } };
+    return {
+      page: { query: parsed.searchParams.get("q") ?? "", type: "search" },
+    };
   }
-  if (segment === "cart") return { locale, page: { type: "cart" } };
-  return { locale, page: null };
+  if (segment === "cart")
+    return {
+      page: { type: "cart" },
+    };
+  return {
+    page: null,
+  };
 }

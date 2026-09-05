@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { ProductCard } from "@/components/product-card/product-card";
@@ -6,7 +5,6 @@ import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { loadMoreCollectionProductsAction } from "@/lib/collections/action";
 import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
-import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
@@ -21,35 +19,22 @@ function Fallback() {
 }
 
 async function Render({
-  locale,
   collectionResultsDataPromise,
 }: {
-  locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
-  const [{ collection, dataSearch, result }, t, tProduct] = await Promise.all([
-    collectionResultsDataPromise,
-    getTranslations("search"),
-    getTranslations("product"),
-  ]);
+  const { collection, dataSearch, result } = await collectionResultsDataPromise;
   const products = result.products;
-
   if (products.length === 0) {
     return (
       <div className="py-10 text-center">
-        <h2 className="mb-2 text-2xl">{t("noResults")}</h2>
-        <p className="text-muted-foreground">{t("noResultsAvailable")}</p>
+        <h2 className="mb-2 text-2xl">No products found</h2>
+        <p className="text-muted-foreground">No products available</p>
       </div>
     );
   }
-
   const cards = products.map((product) => (
-    <ProductCard
-      key={product.id}
-      product={product}
-      locale={locale}
-      outOfStockText={tProduct("outOfStock")}
-    />
+    <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
   ));
 
   // /collections/all pagination must use the same search backend as its initial page.
@@ -59,25 +44,24 @@ async function Render({
         key={dataSearch}
         initialProducts={products}
         initialPageInfo={result.pageInfo}
-        locale={locale}
-        outOfStockText={tProduct("outOfStock")}
+        outOfStockText="Out of Stock"
         loadMore={loadMoreSearchProductsAction}
-        loadMoreParams={{ locale }}
+        loadMoreParams={{}}
       >
         {cards}
       </InfiniteProductGrid>
     );
   }
-
   return (
     <InfiniteProductGrid
       key={dataSearch}
       initialProducts={products}
       initialPageInfo={result.pageInfo}
-      locale={locale}
-      outOfStockText={tProduct("outOfStock")}
+      outOfStockText="Out of Stock"
       loadMore={loadMoreCollectionProductsAction}
-      loadMoreParams={{ collection, locale }}
+      loadMoreParams={{
+        collection,
+      }}
     >
       {cards}
     </InfiniteProductGrid>
@@ -85,15 +69,13 @@ async function Render({
 }
 
 export function CollectionResultsGrid({
-  locale,
   collectionResultsDataPromise,
 }: {
-  locale: Locale;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
 }) {
   return (
     <Suspense fallback={<Fallback />}>
-      <Render locale={locale} collectionResultsDataPromise={collectionResultsDataPromise} />
+      <Render collectionResultsDataPromise={collectionResultsDataPromise} />
     </Suspense>
   );
 }

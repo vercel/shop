@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -6,20 +5,18 @@ import { formatOrderDate, OrderStatusBadge } from "@/components/account/order-di
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { defaultLocale } from "@/lib/i18n";
+import { shopConfig } from "@/lib/config";
 import { getCustomerOrders } from "@/lib/shopify/operations/customer";
 import { formatPrice } from "@/lib/utils";
 
-export default async function OrdersPage({
+export default function OrdersPage({
   searchParams,
 }: {
   searchParams: Promise<{ after?: string; before?: string }>;
 }) {
-  const t = await getTranslations("account");
-
   return (
     <>
-      <AccountPageHeader title={t("orders")} description={t("ordersDescription")} />
+      <AccountPageHeader title="Orders" description="View your order history" />
       <Suspense fallback={<OrdersSkeleton />}>
         <OrdersContent searchParams={searchParams} />
       </Suspense>
@@ -32,20 +29,18 @@ async function OrdersContent({
 }: {
   searchParams: Promise<{ after?: string; before?: string }>;
 }) {
-  const [params, t] = await Promise.all([searchParams, getTranslations("account")]);
+  const params = await searchParams;
   const { orders, pageInfo } = await getCustomerOrders({
     after: params.after,
     before: params.before,
   });
-
   if (orders.length === 0) {
     return (
       <div className="rounded-lg border p-6 text-center">
-        <p className="text-sm text-muted-foreground">{t("noOrders")}</p>
+        <p className="text-sm text-muted-foreground">You have no orders yet.</p>
       </div>
     );
   }
-
   return (
     <div className="grid gap-4">
       <ul className="grid gap-3">
@@ -64,7 +59,7 @@ async function OrdersContent({
               <div className="flex items-center gap-3">
                 <OrderStatusBadge status={order.fulfillmentStatus} />
                 <span className="text-sm tabular-nums">
-                  {formatPrice(order.totalPrice, defaultLocale)}
+                  {formatPrice(order.totalPrice, shopConfig.localization.locale)}
                 </span>
               </div>
             </Link>
@@ -77,7 +72,7 @@ async function OrdersContent({
           {pageInfo.hasPreviousPage && pageInfo.startCursor ? (
             <Button asChild variant="outline" size="sm">
               <Link href={`/account/orders?before=${encodeURIComponent(pageInfo.startCursor)}`}>
-                {t("newerOrders")}
+                Newer
               </Link>
             </Button>
           ) : (
@@ -86,7 +81,7 @@ async function OrdersContent({
           {pageInfo.hasNextPage && pageInfo.endCursor ? (
             <Button asChild variant="outline" size="sm">
               <Link href={`/account/orders?after=${encodeURIComponent(pageInfo.endCursor)}`}>
-                {t("olderOrders")}
+                Older
               </Link>
             </Button>
           ) : (
