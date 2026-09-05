@@ -110,7 +110,11 @@ export const searchProductsTool = tool({
     try {
       let pool: ProductCard[] = [];
       if (mode === "semantic") {
-        pool = await semanticProducts(searchQuery, intent, poolSize);
+        try {
+          pool = await semanticProducts(searchQuery, intent, poolSize);
+        } catch (error) {
+          console.error("Semantic search failed; falling back to keyword search:", error);
+        }
       }
       if (pool.length === 0) {
         const { products } = await searchIndexProducts({

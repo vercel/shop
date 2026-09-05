@@ -24,23 +24,28 @@ export function AgentCartBridge({ messages }: { messages: readonly UIMessage[] }
     const isReplay = !hydrated.current;
     hydrated.current = true;
     let shouldRefresh = false;
+    let shouldOpen = false;
 
     for (const message of messages) {
       if (message.role !== "assistant") continue;
       for (const part of message.parts) {
-        if (!isToolUIPart(part) || !MUTATION_TOOLS.has(toolNameOf(part))) continue;
+        if (!isToolUIPart(part)) continue;
+        const toolName = toolNameOf(part);
+        if (toolName !== "getCart" && !MUTATION_TOOLS.has(toolName)) continue;
         if (part.state !== "output-available" || seen.current.has(part.toolCallId)) continue;
         seen.current.add(part.toolCallId);
         if (isReplay) continue;
-        const output = part.output as { cartUpdated?: boolean } | undefined;
-        if (output?.cartUpdated === true) shouldRefresh = true;
+        const output = part.output as { cartUpdated?: boolean; empty?: boolean } | undefined;
+        if (toolName === "getCart" && typeof output?.empty === "boolean") shouldRefresh = true;
+        if (MUTATION_TOOLS.has(toolName) && output?.cartUpdated === true) {
+          shouldRefresh = true;
+          shouldOpen = true;
+        }
       }
     }
 
-    if (shouldRefresh) {
-      void refresh();
-      openOverlay();
-    }
+    if (shouldRefresh) void refresh();
+    if (shouldOpen) openOverlay();
   }, [messages, openOverlay, refresh]);
 
   return null;

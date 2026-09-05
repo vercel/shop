@@ -29,13 +29,17 @@ Out of the box, shoppers can:
 - Ask about shipping, returns, payments, warranty, sizing, care, and other store policies
 - Open product, collection, search, cart, checkout, account, and order destinations
 
-Product, availability, and policy answers come from Shopify data rather than the model's memory. Searches with a required option can return fewer results, or none, instead of showing near matches.
+Product, availability, and policy answers come from Shopify data rather than the model's memory. If semantic search is unavailable, the assistant falls back to keyword search. Searches with a required option can return fewer results, or none, instead of showing near matches.
 
 Cart changes made in chat update the same cart used by the rest of the storefront. Product cards, variant choices, and cart summaries can appear directly in the conversation.
 
 The conversation and draft are saved in the shopper's browser and survive navigation and reloads. Sending a message also sends conversation history to the model provider. Clearing the chat removes the browser-local history, not data already sent to the provider.
 
-When the assistant reads the cart, it receives an item summary, not the full cart or gift-card recipient details. Cart changes return only an update confirmation; the cart shown in chat stays live. Personal details that shoppers type into chat are still sent to the model provider.
+When the assistant reads the cart, it receives an item summary, not the full cart or gift-card recipient details. Cart changes return an update confirmation and any Shopify warnings; the cart shown in chat stays live. Personal details that shoppers type into chat are still sent to the model provider.
+
+You can stop a response while it is loading or streaming and continue the conversation afterward. Stopping does not undo a cart change already sent to Shopify. If a change was interrupted, ask the assistant to check the cart before trying it again.
+
+The template enables request cancellation for chat on Vercel. Other hosts must propagate client disconnects to the server for Stop to cancel model generation.
 
 ## What’s next
 

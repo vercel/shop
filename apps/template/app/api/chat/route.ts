@@ -23,13 +23,19 @@ export async function POST(request: Request) {
     const { isBot } = await checkBotId(botIdCheckOptions);
     if (isBot) return Response.json({ error: BOTID_DENIED_CODE }, { status: 403 });
   }
-  let body: { messages?: unknown };
+  let body: unknown;
   try {
-    body = (await request.json()) as { messages?: unknown };
+    body = await request.json();
   } catch {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
-  if (!Array.isArray(body.messages)) {
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !("messages" in body) ||
+    !Array.isArray(body.messages) ||
+    body.messages.length === 0
+  ) {
     return Response.json({ error: "Invalid messages" }, { status: 400 });
   }
   const safeMessages = await safeValidateUIMessages({ messages: body.messages });
@@ -47,7 +53,11 @@ export async function POST(request: Request) {
   }
   const agent = createAgent({ cartId, page });
   const result = await agent.stream({
-    messages: await convertToModelMessages(safeMessages.data, { tools: agent.tools }),
+    abortSignal: request.signal,
+    messages: await convertToModelMessages(safeMessages.data, {
+      ignoreIncompleteToolCalls: true,
+      tools: agent.tools,
+    }),
   });
   const stream = createUIMessageStream({
     execute: ({ writer }) => {

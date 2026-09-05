@@ -55,7 +55,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
   const [input, setInput] = useState(stored.input);
-  const { error, messages, setMessages, sendMessage, status, stop } = useChat({
+  const { clearError, error, messages, setMessages, sendMessage, status, stop } = useChat({
     messages: stored.messages,
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
@@ -78,11 +78,34 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     return () => observer.disconnect();
   }, []);
 
-  // Drafts change per keystroke, so debounce to avoid re-serializing the transcript each time.
+  const snapshot = useRef<StoredChat>({ input: stored.input, messages: stored.messages });
+  const checkpointTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushChat = useCallback(() => {
+    if (checkpointTimer.current !== null) clearTimeout(checkpointTimer.current);
+    checkpointTimer.current = null;
+    writeStoredChat(snapshot.current);
+  }, []);
   useEffect(() => {
-    const timer = setTimeout(() => writeStoredChat({ input, messages }), DRAFT_DEBOUNCE_MS);
+    snapshot.current.input = input;
+    const timer = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [input, messages]);
+  }, [flushChat, input]);
+  useEffect(() => {
+    snapshot.current.messages = messages;
+    if (status !== "streaming" && status !== "submitted") {
+      flushChat();
+    } else if (checkpointTimer.current === null) {
+      // Streaming updates must not keep postponing the next transcript checkpoint.
+      checkpointTimer.current = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
+    }
+  }, [flushChat, messages, status]);
+  useEffect(() => {
+    window.addEventListener("pagehide", flushChat);
+    return () => {
+      window.removeEventListener("pagehide", flushChat);
+      flushChat();
+    };
+  }, [flushChat]);
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(event: MouseEvent) {
@@ -118,8 +141,10 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     stop();
     setMessages([]);
     setInput("");
-    writeStoredChat({ input: "", messages: [] });
-  }, [setMessages, stop]);
+    clearError();
+    snapshot.current = { input: "", messages: [] };
+    flushChat();
+  }, [clearError, flushChat, setMessages, stop]);
   const canClear = messages.length > 0 || input.trim().length > 0;
   return (
     <div

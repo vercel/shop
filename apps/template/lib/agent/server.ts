@@ -46,6 +46,7 @@ function createSystemPrompt(page: PageContext): string {
     `The storefront display locale is ${shopConfig.localization.locale}; its commerce country is ${shopConfig.localization.country} and catalog language is ${shopConfig.localization.language}.`,
     "You can search products, browse collections, recommend products, answer store policy questions, manage the cart, and build on-site links.",
     "Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.",
+    "Only change the cart when the shopper asks. Read the current cart before retrying an interrupted cart change; it may already have succeeded. Explain any warnings returned by a cart tool, and never claim a failed change succeeded.",
     'When the shopper names a required product option such as a colour or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) and keep the query focused on the product itself ("jackets"). Fewer results than expected is the correct outcome; state how many matched.',
     "Only describe results as matching a colour, size, or other option when the tool returned them under that option. If searchProducts reports unmatchedOptions, tell the shopper nothing matched and offer to drop or change the constraint — never present other products as if they satisfied it.",
     describePage(page),
