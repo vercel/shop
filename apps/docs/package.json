@@ -22,7 +22,7 @@
     "@vercel/geistdocs": "1.26.1",
     "@vercel/speed-insights": "2.0.0",
     "class-variance-authority": "0.7.1",
-    "cn": "0.2.5",
+    "cn": "0.2.4",
     "feed": "6.0.0",
     "fumadocs-core": "16.2.2",
     "fumadocs-mdx": "14.0.4",
