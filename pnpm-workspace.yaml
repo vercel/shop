@@ -8,7 +8,7 @@ minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
-  - "cn@0.2.5"
+  - "cn"
 
 packages:
   - "apps/*"
