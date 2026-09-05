@@ -1,7 +1,5 @@
 import { formatMoney } from "@shopify/hydrogen";
 
-export { cn } from "cn";
-
 export function formatPrice(
   money: { amount: number | string; currencyCode: string },
   locale: string,

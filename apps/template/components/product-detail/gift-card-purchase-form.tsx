@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -11,7 +12,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { addToCart } from "@/lib/cart/client";
 import type { OptimisticProductInfo } from "@/lib/product";
-import { cn } from "@/lib/utils";
 
 interface GiftCardPurchaseFormProps {
   merchandiseId: string;
