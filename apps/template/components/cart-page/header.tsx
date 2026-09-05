@@ -1,10 +1,9 @@
 "use client";
 
-import { useCartRender } from "@/components/cart/context";
+import { useCart } from "@shopify/hydrogen/react";
 
 export function Header({ title }: { title: string }) {
-  const cart = useCartRender();
-  const count = cart?.totalQuantity ?? 0;
+  const count = useCart((state) => state.data.totalQuantity);
 
   return (
     <div className="flex items-center gap-2.5">

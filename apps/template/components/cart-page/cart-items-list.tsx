@@ -1,7 +1,9 @@
 "use client";
 
-import { useCartRender } from "@/components/cart/context";
+import { useCart } from "@shopify/hydrogen/react";
+
 import { OverlayItem } from "@/components/cart/overlay-item";
+import type { Cart, CartLine } from "@/lib/cart";
 
 interface CartItemsListProps {
   emptyLabel: string;
@@ -9,8 +11,7 @@ interface CartItemsListProps {
 }
 
 export function CartItemsList({ emptyLabel, itemsLabel }: CartItemsListProps) {
-  const cart = useCartRender();
-  const lines = cart.lines.nodes;
+  const lines = useCart<Cart, CartLine[]>((state) => state.data.lines.nodes);
   return lines.length === 0 ? (
     <div className="text-center py-10">
       <p className="text-muted-foreground">{emptyLabel}</p>

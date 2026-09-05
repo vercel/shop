@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { useCartRender } from "@/components/cart/context";
+import { useSuspenseCart } from "@/lib/cart/client";
 
 interface CartPageContentProps {
   children: ReactNode;
@@ -10,6 +10,6 @@ interface CartPageContentProps {
 }
 
 export function CartPageContent({ children, empty }: CartPageContentProps) {
-  const cart = useCartRender();
-  return cart.totalQuantity === 0 ? empty : children;
+  const quantity = useSuspenseCart((state) => state.data.totalQuantity);
+  return quantity === 0 ? empty : children;
 }
