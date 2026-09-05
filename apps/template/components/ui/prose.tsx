@@ -1,6 +1,5 @@
+import { cn } from "cn";
 import type * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 export function Prose({ className, ...props }: React.ComponentProps<"article">) {
   return (

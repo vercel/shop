@@ -1,6 +1,6 @@
 import { shopConfig } from "@/lib/config";
+import { formatPrice } from "@/lib/money";
 import type { ProductCard } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { escapeMarkdown } from "./utils";
 

@@ -7,6 +7,7 @@ import {
   getCollectionSortFromState,
 } from "@/lib/collections";
 import type { Locale } from "@/lib/i18n";
+import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import {
   buildProductFiltersFromParams,
   fetchCollectionProducts,
@@ -15,7 +16,6 @@ import {
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";

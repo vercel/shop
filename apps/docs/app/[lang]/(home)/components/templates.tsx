@@ -1,6 +1,5 @@
+import { cn } from "cn";
 import Image from "next/image";
-
-import { cn } from "@/lib/utils";
 
 interface TemplatesProps {
   data: {

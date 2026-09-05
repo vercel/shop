@@ -2,8 +2,8 @@ import { resolveBrowseParams } from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
+import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

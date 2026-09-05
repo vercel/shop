@@ -8,8 +8,8 @@ import Link from "next/link";
 import { CartLineForm } from "@/components/cart/line-form";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { formatPrice } from "@/lib/money";
 import type { CartLine } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { useCart } from "./context";
 

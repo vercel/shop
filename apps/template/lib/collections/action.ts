@@ -1,9 +1,9 @@
 "use server";
 
 import { resolveBrowseParams } from "@/lib/collections/server";
+import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
 import type { PageInfo, ProductCard } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function loadMoreCollectionProductsAction(params: {
   collection: string;

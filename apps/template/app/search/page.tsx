@@ -27,9 +27,9 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCollectionSearchState } from "@/lib/collections/server";
+import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

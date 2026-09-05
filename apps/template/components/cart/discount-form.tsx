@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
@@ -9,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartForm, useHydrogenCart } from "@/lib/cart/client";
 import type { Cart } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface DiscountFormProps {
   cart: Cart;
