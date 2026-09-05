@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { CartViewedTracker } from "@/components/analytics/trackers";
 import { CartItemsList } from "@/components/cart-page/cart-items-list";
+import { CartPageContent } from "@/components/cart-page/content-client";
 import { Empty } from "@/components/cart-page/empty-cart";
 import { Header } from "@/components/cart-page/header";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
@@ -42,9 +43,7 @@ async function CartContent() {
   const cart = await withFallback(getCart(), undefined);
   return (
     <CartContextSync cart={cart ?? null}>
-      {!cart || cart.totalQuantity === 0 ? (
-        <Empty />
-      ) : (
+      <CartPageContent empty={<Empty />}>
         <Page>
           <Container>
             <Sections>
@@ -66,7 +65,7 @@ async function CartContent() {
                 </aside>
               </div>
               {shopConfig.pdp.relatedProducts.isEnabled &&
-              cart.lines.nodes[0]?.merchandise?.product.handle ? (
+              cart?.lines.nodes[0]?.merchandise?.product.handle ? (
                 <RelatedProductsSection
                   handle={cart.lines.nodes[0].merchandise.product.handle}
                   limit={4}
@@ -75,7 +74,7 @@ async function CartContent() {
             </Sections>
           </Container>
         </Page>
-      )}
+      </CartPageContent>
     </CartContextSync>
   );
 }
