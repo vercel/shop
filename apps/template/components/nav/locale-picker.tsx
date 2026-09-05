@@ -24,13 +24,17 @@ function localeLabel(code: string): string {
   return `${languageName.charAt(0).toUpperCase()}${languageName.slice(1)} (${regionName})`;
 }
 
+function setLocaleCookie(locale: string) {
+  document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000; samesite=lax`;
+}
+
 export function LocalePicker({ locale }: LocalePickerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const select = (next: string) => {
     if (next === locale) return;
-    document.cookie = `NEXT_LOCALE=${next}; path=/; max-age=31536000; samesite=lax`;
+    setLocaleCookie(next);
     startTransition(() => router.refresh());
   };
 
