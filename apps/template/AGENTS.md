@@ -39,7 +39,7 @@ The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK.
 ## Storefront Architecture Contract
 
 - Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates while rebuilding presentation. Change them only when the task explicitly changes behavior.
-- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own fetching/cache/transforms, Server Components compose the shell, client leaves own interaction, and server actions own mutations/invalidation.
+- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own public-data fetching/cache/transforms, Server Components compose the shell, and client leaves own interaction. Cart mutations use Hydrogen's server handlers, not Server Actions or public-cache invalidation.
 - Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
 - Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits it. Push request-time inputs to the smallest Suspense boundary that needs them.
 - Make visible fallbacks match the resolved section's geometry. A loading state must not introduce avoidable layout shift.
@@ -79,7 +79,7 @@ Inside a domain folder under `lib/`, name files by execution context — same id
 - `client.ts` — `"use client"` modules.
 - `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
 
-Examples that already follow this: `lib/cart/{action,server}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/{index,server,client}.ts`.
+Examples that already follow this: `lib/cart/{index,server,client,action}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/server.ts`.
 
 Two exceptions that don't fit cleanly:
 
@@ -92,7 +92,7 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 
 - Files: `kebab-case.tsx`
 - Components: `PascalCase`
-- Server actions: verb + `Action` suffix (`addToCartAction`)
+- Server actions: verb + `Action` suffix (`prepareCheckoutAction`)
 - Props interfaces: `{ComponentName}Props`. Use `interface` (not `type`) so consumers can extend or augment.
 - Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
@@ -155,6 +155,8 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
 
+The pinned `@shopify/hydrogen` dependency is the framework-agnostic preview SDK, not the Hydrogen React Router framework. Next.js owns routing, Server Component rendering, and public-data caching/invalidation. Hydrogen owns Shopify API clients, cart forms and store, predictive-search handlers, and Customer Account OAuth/session helpers. `proxy.ts` adapts Hydrogen's registered handlers to Next.js; the template supplies encrypted cookie storage and auth gates. Read the installed Hydrogen README and relevant bundled skills before changing an SDK integration; do not apply React Router loaders, actions, or Oxygen setup to this app.
+
 The default is one deployment with clean, unprefixed URLs (`/products/...`), inline component copy, and explicit `shopConfig.localization` settings: `{ country: "US", language: "EN", locale: "en-US" }`. Country and language configure Shopify context; locale controls display formatting. Currency always comes from Shopify responses, never from a locale-to-currency map. Changing commerce context does not translate storefront copy.
 
 The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()` in `lib/params.ts`. Operation locale arguments and cache inputs may remain intentionally; do not remove them just because presentation no longer needs locale plumbing. The i18n and Markets skills introduce localization from this baseline and must preserve already localized, customized installations.
@@ -177,13 +179,24 @@ pnpm format
 - `lib/types.ts` for provider-agnostic domain types
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
-- `next.config.ts` rewrites for variant URL resolution
+- `lib/product.ts` for variant URL construction and selected-option parsing
 
 ## Data Flow
+
+Catalog reads follow this flow:
 
 ```text
 Request → Page → Operation → storefront.request(gql doc) → Shopify API → Transform → Domain type → Component
 ```
+
+Cart interactions use Hydrogen's client store and server handlers:
+
+- Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
+- Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card-client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
+- Assistant tools mutate through `runCartMutation` in `lib/cart/server.ts`. The client bridge refreshes Hydrogen's cart store after successful tool results without replaying mutations from restored conversations.
+- `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
+- `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
+- Cart types are the deliberate domain-type exception: `lib/cart/index.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.
 
 ## Storefront Skills (Optional Plugin)
 
@@ -201,7 +214,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and the Shopify-issued `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and both Shopify-issued credentials: `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. Keep both secrets server-only; the session secret is not the Shopify client secret. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
 
 Key files:
 
@@ -221,7 +234,8 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
 - Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
 - Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>` instead of hand-writing interfaces. `storefront.request` injects `$country`/`$language` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string.
-- Keep the `#graphql` comment at the top of every Storefront document; `pnpm codegen` still validates them against the live schema because type inference alone does not reject unknown fields.
+- Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents. `pnpm codegen` validates Storefront documents across `app/`, `components/`, `hooks/`, and `lib/` against the configured live schema, including cart/search fragments. Customer Account documents in the dedicated `.graphqlrc.ts` paths use Hydrogen's bundled schema; add new Customer Account paths to that project and exclude them from Storefront validation.
+- Type inference is not schema validation. The pinned Hydrogen `gql check` CLI requires a JavaScript TypeScript compiler API unavailable in TypeScript 7; use the configured codegen projects instead. Build and typecheck gate on both projects. Live checks remain necessary for store-specific permissions, values, and schema/version drift.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ## Key Patterns
@@ -229,7 +243,7 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - Read `shopConfig.localization` for the deployment's explicit country, language, and formatting locale; use inline component copy for UI text.
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
-- Components import domain types from `@/lib/types`, not Shopify response types.
+- Catalog and customer presentation uses domain types from `@/lib/types`, not raw Shopify responses. Cart types come from `@/lib/cart` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
 

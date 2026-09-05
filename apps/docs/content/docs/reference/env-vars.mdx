@@ -25,11 +25,17 @@ Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Store
 
 ## Optional
 
-| Variable                            | Description                                                                                                   |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                        |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration. |
-| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.   |
-| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                |
+| Variable                            | Description                                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY`                | Server-only AI Gateway key for the shopping assistant when not using Vercel's deployment identity authentication. |
+| `UCP_AGENT_PROFILE_URL`             | Public agent profile URL sent with the assistant's Shopify MCP requests, when agent attribution is needed.        |
+| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                            |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration.     |
+| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.       |
+| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                    |
 
-Vercel supplies `VERCEL_PROJECT_PRODUCTION_URL` and `V0_CALLBACK_URL` automatically. Do not set them yourself.
+## Platform-provided values
+
+`VERCEL_PROJECT_PRODUCTION_URL` supplies the default production origin on Vercel. For other hosts, set `site.url` in [Shop Configuration](/docs/reference/shop-config).
+
+`V0_CALLBACK_URL` is a v0 preview value. When present, the template disables Next.js image optimization. It is not required for ordinary deployments.

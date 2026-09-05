@@ -10,7 +10,7 @@ import {
 import { checkBotId } from "botid/server";
 
 import { parsePageContext } from "@/lib/agent/routes";
-import { createAgent, type User, withAgentContext } from "@/lib/agent/server";
+import { createAgent } from "@/lib/agent/server";
 import { BOTID_DENIED_CODE, botIdCheckOptions } from "@/lib/botid";
 import { createEmptyCart, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
@@ -39,39 +39,34 @@ export async function POST(request: Request) {
 
   // Page context comes from the same-origin Referer rather than client-supplied product data.
   const { page } = parsePageContext(request.headers.get("referer"));
-  const user: User = {
-    type: "guest",
-  };
   let cartId = await getCartIdFromCookie();
   let newCartCookie: string | undefined;
   if (!cartId) {
     cartId = await createEmptyCart();
     if (cartId) newCartCookie = createCartCookie(cartId);
   }
-  return withAgentContext({ cart: cartId, page, user }, async () => {
-    const agent = createAgent();
-    const result = await agent.stream({
-      messages: await convertToModelMessages(safeMessages.data, { tools: agent.tools }),
-    });
-    const stream = createUIMessageStream({
-      execute: ({ writer }) => {
-        writer.merge(
-          pipeJsonRender(
-            toUIMessageStream({
-              originalMessages: safeMessages.data,
-              // pipeJsonRender only understands text deltas; reasoning parts would pass through unhandled.
-              sendReasoning: false,
-              stream: result.stream,
-              tools: agent.tools,
-            }),
-          ),
-        );
-      },
-    });
+  const agent = createAgent({ cartId, page });
+  const result = await agent.stream({
+    messages: await convertToModelMessages(safeMessages.data, { tools: agent.tools }),
+  });
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      writer.merge(
+        pipeJsonRender(
+          toUIMessageStream({
+            originalMessages: safeMessages.data,
+            // pipeJsonRender only understands text deltas; reasoning parts would pass through unhandled.
+            sendReasoning: false,
+            stream: result.stream,
+            tools: agent.tools,
+          }),
+        ),
+      );
+    },
+  });
 
-    return createUIMessageStreamResponse({
-      headers: newCartCookie ? { "Set-Cookie": newCartCookie } : undefined,
-      stream,
-    });
+  return createUIMessageStreamResponse({
+    headers: newCartCookie ? { "Set-Cookie": newCartCookie } : undefined,
+    stream,
   });
 }

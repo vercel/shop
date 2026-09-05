@@ -1,94 +1,58 @@
 # Cart Provider and Bootstrap Contract
 
-Use this contract when creating or changing global cart context, server bootstrap, nav badges, cart overlays, cart pages, or optimistic mutations. Preserve the behavior, but adapt names and component composition to the storefront.
+Use this contract when changing cart bootstrap, badges, overlays, cart pages, forms, or assistant mutations. Hydrogen owns cart state and reconciliation; the template adapts it to Next.js and supplies presentation.
 
 ## Reference implementation
 
-- Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
-- Provider and bootstrap bridge: `apps/template/components/cart/context.tsx`, `apps/template/components/cart/context-sync.tsx`
-- Nav badge and overlay: `apps/template/components/nav/cart.tsx`, `apps/template/components/nav/cart-client.tsx`, `apps/template/components/cart/overlay.tsx`, `apps/template/components/cart/overlay-content.tsx`
+- Provider: `apps/template/components/cart/context.tsx`
+- Server seed and handler extensions: `apps/template/lib/cart/server.ts`
+- Handler-derived types and typed suspense hook: `apps/template/lib/cart/{index,client}.ts`
+- Form bindings: `apps/template/components/cart/{line-form,discount-form}.tsx`
+- Root bootstrap: `apps/template/app/layout.tsx`
 - Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`
-- Server state and mutations: `apps/template/lib/cart/server.ts` (Hydrogen `createCartServerHandlers` reads and mutations), `apps/template/lib/cart/action.ts`, `apps/template/lib/cart/index.ts` (Hydrogen cart to domain `Cart` mapping)
-- Public source fallback: [cart provider source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [cart data source](https://github.com/vercel/shop/tree/main/apps/template/lib/cart), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+- Assistant synchronization: `apps/template/components/agent/cart-bridge.tsx`
+- HTTP and cookie boundary: `apps/template/proxy.ts`
+- Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
 
-## State ownership
+## Ownership
 
-Keep one authoritative confirmed cart and model pending user intent separately:
+Use Hydrogen's `CartProvider`, `useCart`, `useCartForm`, and cart actions for cart state, pending mutations, errors, and reconciliation. Do not add a parallel reducer, custom confirmed-cart store, or server-to-client hydration effect. The template's drawer context owns only overlay visibility.
 
-```text
-displayed cart = project(confirmed Shopify cart, pending adds, pending line operations)
-```
+Cart types derive from `CartDataFromHandlers<typeof cartHandlers>` in `lib/cart/index.ts`, including the additive cart fragment. They are not transformed into `lib/types.ts` models. Generic `ui/` primitives still receive primitive presentation props.
 
-- `confirmedCart` is `null` until bootstrap or a successful mutation supplies a Shopify cart.
-- Pending adds are keyed by a complete purchasable-line identity: merchandise ID plus selling plan and line attributes when present.
-- Pending line operations are keyed by Shopify cart line ID and store an absolute target quantity. Quantity `0` means removal.
-- Request versions are tracked per pending key so an older response cannot replace newer intent.
-- UI-only state such as overlay visibility, warnings, and affected-control pending status stays outside the cart data.
+Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through the custom fragment in `lib/cart/server.ts`. Validate extensions with the template's codegen command rather than guessing fields or editing SDK queries.
 
-Do not model an add as a relative optimistic reducer over a base cart that can change while the action is pending. React may replay that reducer over the new base, briefly double-applying the add. Do not make `hydrateCart` and mutation responses unrestricted competing writers.
+## Bootstrap and live reads
 
-## Bootstrap without blocking the shell
+1. Start the request-memoized `seedCartData()` in the root layout and pass its promise as `CartProvider` initial data without awaiting it in the shell.
+2. Resolve cart-dependent UI under narrow Suspense boundaries with the typed `useSuspenseCart` hook. Keep navigation and static headings outside those boundaries.
+3. Read the provider's live cart in cart-page and overlay leaves so empty/populated transitions follow mutations without a route refresh.
+4. Preserve Hydrogen's bootstrap-versus-mutation ordering. Do not publish a second server seed into an initialized provider.
 
-1. Mount the provider synchronously with `confirmedCart = null` so navigation and the page shell can render.
-2. Read the cookie-backed cart on the server inside the smallest useful Suspense boundary, normally the cart badge or a dedicated bootstrap component. Do not block the whole root layout.
-3. Bridge the resolved cart into the provider once. Accept bootstrap only while the provider is uninitialized and no client mutation has started.
-4. Treat `null` as a valid empty-cart result. Distinguish “bootstrap not resolved” with a separate status when the UI needs to know.
-5. Never let late bootstrap, route refresh, or server hydration overwrite a newer mutation response or pending client intent.
+Cart reads are memoized only within a request, never stored in the Next.js public data cache. Cart mutations do not invalidate public cache tags.
 
-The cart page may render server-fetched cart data immediately, but its client bridge follows the same rule: seed an uninitialized provider; never downgrade a newer confirmed cart.
+## Mutations
 
-## Derive the displayed cart
+Browser forms use Hydrogen bindings and the `/api/cart` handlers registered by the proxy. The handler response commits cart cookies. The remaining checkout server action is not an alternative add/update/remove transport.
 
-Project pending intent over `confirmedCart` without mutating it:
+Assistant tools invoke the same cart handlers through the server adapter without an internal HTTP round trip. The chat response owns first-cart cookie persistence before streaming. Tool results expose a mutation signal rather than full cart payloads; the client bridge refreshes Hydrogen's cart after new successful mutations and must not replay restored conversation history.
 
-1. Apply pending adds. Merge only when the complete purchasable-line identity matches; otherwise render a temporary stable line.
-2. Apply absolute quantity targets and removals by canonical line ID.
-3. Derive safe presentation values such as visible quantity and a provisional line amount.
-4. Keep Shopify authoritative for discounts, warnings, buyer identity, delivery state, currency, subtotal, total, and checkout URL. Never publish a locally reconstructed cart as confirmed state.
+Keep Shopify authoritative for inventory, discounts, buyer identity, delivery state, totals, warnings, and checkout URL. Use SDK pending/error state rather than locally reconstructing a confirmed cart. Preserve gift-card attributes, selling-plan identity, and bundle line restrictions. Keep checkout unavailable while cart changes are pending.
 
-Use a memoized pure projection, a reducer over explicit pending intent, or an equivalent external-store selector. `useOptimistic` is allowed only when the same intent cannot be replayed over the canonical response. The confirmed-cart plus pending-intents model is the default.
+## Acceptance checks
 
-## Add protocol
-
-1. Enqueue the quantity under the purchasable-line key and render it immediately. Open the overlay when the interaction calls for it.
-2. Accumulate or debounce rapid adds for the same key when that reduces network work without delaying feedback.
-3. Send the accumulated quantity to a server action. The action creates the cart when necessary, persists the cart ID through the server cookie path, and returns the updated Shopify cart plus warnings or errors.
-4. On success, replace `confirmedCart` with that returned cart and retire only the quantity acknowledged by the response. Preserve intent queued while the request was in flight.
-5. On failure, retire the failed intent, reveal the last confirmed cart, and surface the error near the initiating action or cart.
-
-## Quantity and removal protocol
-
-1. Store the requested absolute quantity and a snapshot of the last confirmed cart.
-2. Assign a monotonically increasing request version for that line.
-3. Optimistically project the absolute target. A repeated click replaces the target instead of stacking ambiguous deltas.
-4. Commit a response only if its version is still latest for the line.
-5. If newer intent arrived during the request, keep projecting it and send the final target through the chosen leading-edge or trailing-edge debounce policy.
-6. Removal sets target quantity to `0`, cancels timers, and invalidates older quantity responses for that line.
-7. On the latest request's failure, restore the confirmed snapshot unless newer intent already superseded it.
-
-Mutations for discounts, notes, buyer identity, or other cart fields also return a canonical cart. Committing them must preserve unrelated pending line intent.
-
-## Concurrency invariants
-
-- A successful response is applied at most once.
-- A pending intent is projected at most once.
-- An acknowledged intent is removed exactly once.
-- A stale response or stale hydration never moves the cart backward.
-- Pending work queued during a request survives that request's completion.
-- Pending state is scoped to the affected line or action; one mutation does not freeze unrelated controls unless Shopify ordering requires serialization.
-
-## Focused verification
-
-Exercise these flows in the available development environment:
+These are behavioral requirements for the integration, not instructions to reimplement Hydrogen internals:
 
 1. Empty cart, add one: `0 → 1`, never `0 → 1 → 2 → 1`.
 2. Existing quantity one, add one: `1 → 2` with no reversion.
-3. Add while bootstrap is unresolved; late bootstrap must not overwrite the new cart.
-4. Rapidly add the same variant and confirm the final quantity and request batching.
-5. Change one line repeatedly and deliver responses out of order; only the latest target wins.
-6. Mutate different lines concurrently and preserve both outcomes.
-7. Fail add, update, and remove mutations; restore confirmed state and show the error.
-8. Refresh after first cart creation and confirm the cookie-backed cart bootstraps once.
-9. Confirm discounts, warnings, currency, totals, line attributes, selling plans, and checkout URL converge to the Shopify response.
+3. Add during delayed bootstrap; the late seed must not overwrite the mutation.
+4. Rapid same-variant adds converge on the requested quantity.
+5. Repeated line changes and out-of-order responses do not restore older intent.
+6. Changes to different lines preserve both outcomes.
+7. Failed add, update, remove, and discount operations restore confirmed state and show the relevant error.
+8. First-cart creation persists across navigation and reload through the browser cookie.
+9. Cart page, badge, overlay, and assistant converge on the same state, including empty/populated transitions.
+10. Gift recipients, bundle relationships, discounts, totals, warnings, and checkout URL survive reconciliation.
+11. Sign-in, refresh, and logout keep buyer identity consistent with the customer session.
 
-Do not require a production build or field-performance data for routine cart-provider verification.
+Run focused automated checks and browser/live-store checks appropriate to the change. Report unavailable live flows explicitly; mocks and typechecks are not end-to-end proof.

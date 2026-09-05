@@ -36,17 +36,17 @@ Read `references/REFERENCE.md` before editing.
 
 1. Inspect the consuming route before choosing cache behavior. Classify the read as static-shell content, request-time shared content, or private/request-scoped data.
 2. Add the operation to the closest file in `lib/shopify/operations/`; create a file only for a genuinely new domain.
-3. Wrap documents in Hydrogen's `gql()` with a leading `#graphql` comment, keep them static, and use variables for dynamic values so inference and codegen can both validate them.
+3. Wrap documents in Hydrogen's `gql()` with a leading `#graphql` comment, keep them static, and use variables for dynamic values. Inference supplies types; codegen validates fields and arguments.
 4. Reuse the smallest existing fragment that fits by passing it in the `gql(source, [FRAGMENT])` list. Extend a shared fragment only when multiple operations need the same selection.
 5. Pass `locale` to `storefront.request` when Shopify localizes the result; never add `country` or `language` to `variables`.
-6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform them into provider-independent domain types before presentation.
+6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform catalog/account data into domain types before presentation. Cart types intentionally derive from Hydrogen handlers through `lib/cart/index.ts`.
 7. Preserve cache tags and the existing webhook invalidation hierarchy. Do not cache mutations.
 8. Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
 
 ## Revalidate both boundaries
 
 1. Validate the final GraphQL document again with Shopify AI Toolkit after fragment and variable changes.
-2. Run `pnpm --filter template codegen` and the local lint, typecheck, build, and affected commerce flows.
+2. Run `pnpm codegen` from the storefront root for Storefront operations, custom cart/search fragments, and Customer Account documents. Run local lint, typecheck, focused tests, and affected commerce flows; run a build when the changed surface requires it. Storefront validation uses the configured live schema; Customer Account validation uses Hydrogen's bundled schema.
 3. Report separately:
    - Shopify validation performed;
    - Vercel Shop cache and route role;

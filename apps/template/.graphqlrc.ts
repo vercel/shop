@@ -1,23 +1,53 @@
-import { ApiType, shopifyApiProject } from "@shopify/api-codegen-preset";
+import { createRequire } from "node:module";
 
+import { ApiType, pluckConfig, preset } from "@shopify/api-codegen-preset";
+
+const require = createRequire(import.meta.url);
 const apiVersion = process.env.SHOPIFY_API_VERSION ?? "unstable";
-// Customer Account documents are validated by Hydrogen's CAAPI introspection types, not this Storefront schema.
-const documents = [
-  "lib/shopify/**/*.ts",
-  "!lib/shopify/customer-account*.ts",
-  "!lib/shopify/operations/customer.ts",
+const customerDocuments = [
+  "lib/shopify/customer-account*.ts",
+  "lib/shopify/operations/customer.ts",
+];
+const storefrontDocuments = [
+  "app/**/*.{ts,tsx}",
+  "components/**/*.{ts,tsx}",
+  "hooks/**/*.{ts,tsx}",
+  "lib/**/*.{ts,tsx}",
+  ...customerDocuments.map((path) => `!${path}`),
   "!lib/shopify/types/generated/**",
 ];
 
+function project(apiType: ApiType, schema: string, documents: string[], name: string) {
+  return {
+    documents,
+    extensions: {
+      codegen: {
+        generates: {
+          [`./lib/shopify/types/generated/${name}.generated.d.ts`]: {
+            preset,
+            presetConfig: { apiType },
+          },
+        },
+        pluckConfig,
+      },
+    },
+    schema,
+  };
+}
+
 export default {
-  schema: `https://shopify.dev/storefront-graphql-direct-proxy/${apiVersion}`,
-  documents,
   projects: {
-    default: shopifyApiProject({
-      apiType: ApiType.Storefront,
-      apiVersion,
-      documents,
-      outputDir: "./lib/shopify/types/generated",
-    }),
+    customer: project(
+      ApiType.Customer,
+      require.resolve("@shopify/hydrogen/customer-account.schema.json"),
+      customerDocuments,
+      "customer",
+    ),
+    storefront: project(
+      ApiType.Storefront,
+      `https://shopify.dev/storefront-graphql-direct-proxy/${apiVersion}`,
+      storefrontDocuments,
+      "storefront",
+    ),
   },
 };

@@ -4,7 +4,7 @@ import { shopConfig } from "@/lib/config";
 
 import { catalog } from ".";
 import type { PageContext } from "./routes";
-import { addCartNoteTool, addToCartTool, getCartTool, updateCartItemTool } from "./tools/cart";
+import { createCartTools } from "./tools/cart";
 import { browseCollectionTool, listCollectionsTool } from "./tools/collections";
 import { navigateTool } from "./tools/navigate";
 import { searchShopPoliciesTool } from "./tools/policies";
@@ -14,26 +14,9 @@ import {
   searchProductsTool,
 } from "./tools/products";
 
-export type User = {
-  type: "guest";
-};
-
 export interface AgentContext {
-  cart: string | undefined;
+  cartId: string | undefined;
   page: PageContext;
-  user: User;
-}
-
-const agentContext = new AsyncLocalStorage<AgentContext>();
-
-export function getAgentContext(): AgentContext {
-  const context = agentContext.getStore();
-  if (!context) throw new Error("Agent context not found");
-  return context;
-}
-
-export function withAgentContext<T>(context: AgentContext, callback: () => T): T {
-  return agentContext.run(context, callback);
 }
 
 function describePage(page: PageContext): string {
@@ -56,8 +39,7 @@ function describePage(page: PageContext): string {
   }
 }
 
-function createSystemPrompt(context: AgentContext): string {
-  const { page } = context;
+function createSystemPrompt(page: PageContext): string {
   const instructions = [
     `You're a helpful shopping assistant for ${shopConfig.site.name}.`,
     "Never use emojis. Always respond in the same language as the shopper, preferring their language when unclear.",
@@ -82,25 +64,25 @@ function createSystemPrompt(context: AgentContext): string {
   })}`;
 }
 
-const tools = {
-  addCartNote: addCartNoteTool,
-  addToCart: addToCartTool,
-  browseCollection: browseCollectionTool,
-  getCart: getCartTool,
-  getProductDetails: getProductDetailsTool,
-  getProductRecommendations: getRecommendationsTool,
-  listCollections: listCollectionsTool,
-  navigateUser: navigateTool,
-  searchProducts: searchProductsTool,
-  searchShopPolicies: searchShopPoliciesTool,
-  updateCartItem: updateCartItemTool,
-};
+export function createAgent({ cartId, page }: AgentContext) {
+  const { addCartNote, addToCart, getCart, updateCartItem } = createCartTools({ cartId });
 
-export function createAgent() {
   return new ToolLoopAgent({
-    instructions: createSystemPrompt(getAgentContext()),
+    instructions: createSystemPrompt(page),
     model: "openai/gpt-5.6-luna",
     stopWhen: isStepCount(10),
-    tools,
+    tools: {
+      addCartNote,
+      addToCart,
+      browseCollection: browseCollectionTool,
+      getCart,
+      getProductDetails: getProductDetailsTool,
+      getProductRecommendations: getRecommendationsTool,
+      listCollections: listCollectionsTool,
+      navigateUser: navigateTool,
+      searchProducts: searchProductsTool,
+      searchShopPolicies: searchShopPoliciesTool,
+      updateCartItem,
+    },
   });
 }
