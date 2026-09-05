@@ -44,9 +44,11 @@ function giftCardAttributes(recipient: {
 export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
   const { setOverlayOpen } = useCartDrawer();
   const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isPending) return;
     setError(null);
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim();
@@ -66,26 +68,36 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
         return;
       }
     }
-    addGiftCardToCart(
-      merchandiseId,
-      1,
-      productInfo,
-      giftCardAttributes({
-        email,
-        message: message || undefined,
-        name: name || undefined,
-        sendOn: scheduled ? sendOn : undefined,
-        // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
-        timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
-      }),
-    );
-    form.reset();
-    setSendOnEnabled(false);
-    setOverlayOpen(true);
+    setIsPending(true);
+    try {
+      const confirmation = addGiftCardToCart(
+        merchandiseId,
+        1,
+        productInfo,
+        giftCardAttributes({
+          email,
+          message: message || undefined,
+          name: name || undefined,
+          sendOn: scheduled ? sendOn : undefined,
+          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
+        }),
+      );
+      setOverlayOpen(true);
+      await confirmation;
+      form.reset();
+      setSendOnEnabled(false);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not add the gift card. Please try again.",
+      );
+    } finally {
+      setIsPending(false);
+    }
   }
   return (
     <form onSubmit={handleSubmit} className="group grid gap-5">
-      <div data-slot="gift-card-fields" className="grid gap-2.5">
+      <fieldset disabled={isPending} data-slot="gift-card-fields" className="grid gap-2.5">
         <div className="grid gap-2.5">
           <Label htmlFor="gift-card-email">Recipient email</Label>
           <Input
@@ -125,6 +137,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
             <Switch
               id="gift-card-send-later"
               checked={sendOnEnabled}
+              disabled={isPending}
               onCheckedChange={setSendOnEnabled}
             />
           </div>
@@ -135,7 +148,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
             </div>
           ) : null}
         </div>
-      </div>
+      </fieldset>
 
       {error ? (
         <p role="alert" className="text-sm text-destructive">
@@ -145,12 +158,13 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
 
       <Button
         type="submit"
+        disabled={isPending}
         className={cn(
           "h-12 w-full justify-center",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",
         )}
       >
-        <span>Add to Cart</span>
+        <span>{isPending ? "Adding…" : "Add to Cart"}</span>
       </Button>
     </form>
   );
