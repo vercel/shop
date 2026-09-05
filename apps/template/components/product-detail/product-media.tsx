@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import Image, { getImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -9,6 +8,7 @@ import { preload } from "react-dom";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { Image as ImageType, Video } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 import { Lightbox, LightboxTrigger } from "./lightbox";
 

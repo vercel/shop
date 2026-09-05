@@ -10,10 +10,10 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import type { CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
 import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {
   collection?: string;

@@ -1,4 +1,3 @@
-import { cn } from "cn";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -6,6 +5,7 @@ import { Suspense } from "react";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
 import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { cn } from "@/lib/utils";
 
 interface ProductsGridSkeletonProps {
   count: number;

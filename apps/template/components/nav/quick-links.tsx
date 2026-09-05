@@ -1,8 +1,8 @@
-import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 import type { MenuItem } from "@/lib/shopify/types/menu";
+import { cn } from "@/lib/utils";
 
 const MAX_COLUMNS = 5;
 

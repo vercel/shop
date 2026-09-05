@@ -1,4 +1,3 @@
-import { cn } from "cn";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -43,6 +42,7 @@ import {
   toStaticOptionGroups,
 } from "@/lib/product";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export async function ProductDetailSection({
   product,

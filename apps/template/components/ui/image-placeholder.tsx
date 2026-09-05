@@ -1,6 +1,7 @@
-import { cn } from "cn";
 import { ImageIcon } from "lucide-react";
 import type * as React from "react";
+
+import { cn } from "@/lib/utils";
 
 interface ImagePlaceholderProps extends React.ComponentProps<"div"> {
   iconClassName?: string;

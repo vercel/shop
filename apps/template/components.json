@@ -5,7 +5,7 @@
     "hooks": "@/hooks",
     "lib": "@/lib",
     "ui": "@/components/ui",
-    "utils": "cn"
+    "utils": "@/lib/utils"
   },
   "iconLibrary": "lucide",
   "registries": {},

@@ -8,9 +8,9 @@ import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
-import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;

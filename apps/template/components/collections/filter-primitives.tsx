@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "cn";
 import {
   CheckIcon,
   ChevronLeftIcon,
@@ -13,6 +12,7 @@ import Link from "next/link";
 import type * as React from "react";
 
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 function FilterSidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
   return (

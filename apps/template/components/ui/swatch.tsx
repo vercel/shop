@@ -1,6 +1,7 @@
-import { cn } from "cn";
 import Image from "next/image";
 import type * as React from "react";
+
+import { cn } from "@/lib/utils";
 
 interface SwatchProps extends React.ComponentProps<"span"> {
   color?: string;

@@ -1,10 +1,10 @@
-import { cn } from "cn";
 import Image from "next/image";
 import type * as React from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps extends React.ComponentProps<"article"> {
   variant?: "default" | "featured";

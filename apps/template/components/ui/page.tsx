@@ -1,5 +1,6 @@
-import { cn } from "cn";
 import type * as React from "react";
+
+import { cn } from "@/lib/utils";
 
 export function Page({ children, className, ...props }: React.ComponentProps<"div">) {
   return (

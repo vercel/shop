@@ -1,7 +1,6 @@
 "use client";
 
 import { defineRegistry } from "@json-render/react";
-import { cn } from "cn";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -23,6 +22,7 @@ import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { catalog } from "@/lib/agent";
 import type { AgentVariant } from "@/lib/agent/products";
 import { useCartForm } from "@/lib/cart/client";
+import { cn } from "@/lib/utils";
 
 import { useCart } from "../cart/context";
 import { useAgentProduct, useAgentProductDetails } from "./product-context";

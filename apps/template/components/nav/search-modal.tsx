@@ -2,7 +2,6 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { getSearchResultUrl } from "@shopify/hydrogen";
-import { cn } from "cn";
 import { Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
@@ -13,6 +12,7 @@ import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
 import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);

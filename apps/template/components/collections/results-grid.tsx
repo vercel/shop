@@ -6,8 +6,8 @@ import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { loadMoreCollectionProductsAction } from "@/lib/collections/action";
 import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import { RESULTS_PER_PAGE } from "@/lib/pagination";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
+import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
 

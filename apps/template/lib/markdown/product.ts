@@ -1,5 +1,5 @@
-import { formatPrice } from "@/lib/money";
 import type { ProductDetails } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
 import { createTable, escapeMarkdown } from "./utils";
 

@@ -14,9 +14,9 @@ import { useState } from "react";
 
 import { Swatch } from "@/components/ui/swatch";
 import { getActiveFilters, parseFilterInput } from "@/lib/collections";
-import { formatPrice } from "@/lib/money";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 import type { Filter, PriceRange } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
 import {
   FilterBadge,

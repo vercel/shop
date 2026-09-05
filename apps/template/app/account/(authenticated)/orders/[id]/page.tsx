@@ -13,9 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { defaultLocale } from "@/lib/i18n";
-import { formatPrice } from "@/lib/money";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer";
 import type { Money, OrderLineItem } from "@/lib/types";
+import { formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (

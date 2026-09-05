@@ -1,5 +1,6 @@
-import { cn } from "cn";
 import type { ComponentPropsWithRef } from "react";
+
+import { cn } from "@/lib/utils";
 
 export function Sections({ children, className, ...props }: ComponentPropsWithRef<"div">) {
   return (

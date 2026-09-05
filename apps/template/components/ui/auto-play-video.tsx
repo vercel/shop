@@ -1,9 +1,10 @@
 "use client";
 
-import { cn } from "cn";
 import Image from "next/image";
 import type * as React from "react";
 import { useEffect, useRef, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 interface AutoPlayVideoPreviewImage {
   src: string;
