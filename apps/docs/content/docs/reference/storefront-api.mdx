@@ -6,9 +6,11 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The template uses [Shopify Hydrogen](https://www.npmjs.com/package/@shopify/hydrogen) for Storefront GraphQL API queries and mutations. Configure its domain, public token, and API version with the variables in [Environment Variables](/docs/reference/env-vars). Grant the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions).
+The template uses the framework-agnostic [Shopify Hydrogen](https://www.npmjs.com/package/@shopify/hydrogen) preview SDK for Storefront GraphQL API queries and mutations. It runs on Next.js, not the Hydrogen React Router framework. Next.js owns page routing, rendering, and public-data caching; Hydrogen supplies Shopify API clients and commerce handlers.
 
-The Customer Account API uses a separate endpoint, schema, client ID, and session secret. Its documents use `gql` from `@shopify/hydrogen/customer-account` and are typed by Hydrogen; Storefront API codegen does not validate them.
+Configure the store domain, public token, and API version with the variables in [Environment Variables](/docs/reference/env-vars). Grant the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions).
+
+The Customer Account API uses a separate endpoint and schema. Enabling authentication requires `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted session cookies. Keep both secrets server-only. Its documents use `gql` from `@shopify/hydrogen/customer-account` and are validated separately from Storefront documents.
 
 ## Write and validate operations
 
@@ -44,17 +46,19 @@ Validate current field names, arguments, and types with Shopify AI Toolkit. Then
 
 ## Codegen
 
-Run the Storefront schema check from your project root after editing operations. It uses [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) to validate Storefront `#graphql` documents under `lib/shopify/`:
+Run the schema checks from your project root after editing operations. The template uses [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) to validate Storefront documents across the app and Customer Account documents in a separate project:
 
 ```bash
 npm run codegen
 ```
 
-Codegen reads `SHOPIFY_API_VERSION` from the command's environment and checks operations against Shopify's live schema. If you override the API version, pass the same value when running codegen. The development command runs this check before starting Next.js but continues if it fails; the production build stops on failure. Generated validation files are gitignored.
+The Storefront check reads `SHOPIFY_API_VERSION` from the command's environment and uses Shopify's live schema. If you override the API version, pass the same value when running codegen. The Customer Account check uses the schema bundled with the pinned Hydrogen SDK, not the Storefront schema.
+
+The development command runs these checks before starting Next.js but continues if they fail; the production build stops on failure. Generated validation files are gitignored.
 
 ## Caching
 
-Choose caching by data sensitivity and behavior:
+Public-data operations use Next.js Cache Components and cache tags; the Hydrogen client does not replace that cache layer. Choose caching by data sensitivity and behavior:
 
 | Data or operation                                          | Cache contract                                                |
 | ---------------------------------------------------------- | ------------------------------------------------------------- |
@@ -67,7 +71,9 @@ Configure `POST /api/webhooks/shopify` as described in [Webhooks](/docs/anatomy/
 
 ## Mutations
 
-Cart mutations are uncached and return the updated cart. Use the returned cart instead of issuing a follow-up read.
+Storefront cart forms submit to Hydrogen's `POST /api/cart` handler through the Next.js proxy, not to cart Server Actions. Mutations are uncached and return the updated cart for Hydrogen's client store to reconcile. Cart updates do not invalidate the public catalog cache.
+
+The optional shopping assistant uses the same handlers on the server. After a successful tool result, the browser refreshes the shared cart store. See [Cart](/docs/anatomy/cart) for shopper behavior and limits.
 
 Never cache cart IDs, customer data, session data, or authenticated responses in a shared public cache.
 

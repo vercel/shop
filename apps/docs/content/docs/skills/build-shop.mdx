@@ -37,6 +37,10 @@ Build the shop around commerce truth first: what product or collection is being 
 4. Read the local Next.js documentation under `node_modules/next/dist/docs/` for any API being changed. This template may use newer Cache Components and prefetch behavior than model knowledge.
 5. Preserve existing cache directives, promises, invalidation tags, auth gates, redirects, metadata, and `notFound()` behavior unless the task explicitly changes the domain behavior.
 
+## Hydrogen ownership
+
+The template uses the framework-agnostic Hydrogen preview SDK, not Hydrogen's React Router application framework. Next.js owns routing, rendering, public-data caching, and invalidation. Hydrogen owns commerce state and protocols; the template supplies presentation and framework adapters. Use Hydrogen's cart provider/forms/handlers rather than rebuilding cart state or hydration. Cart types are handler-derived; catalog/account presentation uses domain transforms. Read the installed SDK guidance and verify adapter behavior before changing these boundaries.
+
 ## Copy and deployment defaults
 
 The default storefront uses inline component copy and reusable content functions in `lib/content/index.ts`. Keep copy server-first, pass primitive labels to UI primitives and client leaves, and keep interactive copy in its consuming leaf and import shared content functions only when needed. Do not add a custom `t()` parser, a full browser catalog, or next-intl for a single deployment.
@@ -62,7 +66,7 @@ Write down the route as five layers before editing, using commerce nouns instead
 2. **Data operation** — fetch Shopify data, transform provider types into shop domain types, and own cache scope, tags, and invalidation names.
 3. **Server composition** — render the stable catalog shell first and place independent sections like recommendations, facets, reviews, and account/cart details behind granular boundaries.
 4. **Client island** — own only selection, optimistic intent, browser APIs, effects, and event handlers: variant pickers, galleries, filter controls, carts, and forms.
-5. **Server action** — perform server mutations, return canonical Shopify state and warnings, invalidate the right domain cache, and reconcile optimistic state without double-applying it.
+5. **Mutation boundary** — use server actions for app-owned mutations and Hydrogen's proxy handlers for browser cart mutations. Return canonical Shopify state and warnings; invalidate public domain caches only when applicable. Let Hydrogen reconcile cart state without a parallel optimistic reducer.
 
 For each layer's full ownership boundary, see the responsibility table in `references/rendering-architecture.md`. For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
 
