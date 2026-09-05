@@ -66,9 +66,9 @@ async function CartContent() {
                 </aside>
               </div>
               {shopConfig.pdp.relatedProducts.isEnabled &&
-              cart.lines[0]?.merchandise.product.handle ? (
+              cart.lines.nodes[0]?.merchandise?.product.handle ? (
                 <RelatedProductsSection
-                  handle={cart.lines[0].merchandise.product.handle}
+                  handle={cart.lines.nodes[0].merchandise.product.handle}
                   limit={4}
                 />
               ) : null}

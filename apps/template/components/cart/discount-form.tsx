@@ -1,32 +1,31 @@
 "use client";
 
+import type { CartData } from "@shopify/hydrogen";
+import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import { cn } from "cn";
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 
-import { useCart } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCartForm, useHydrogenCart } from "@/lib/cart/client";
-import type { Cart } from "@/lib/types";
 
 interface DiscountFormProps {
-  cart: Cart;
+  cart: CartData;
 }
 
 export function DiscountForm({ cart }: DiscountFormProps) {
-  const { setWarnings } = useCart();
   const { formProps, register } = useCartForm();
-  const discountErrors = useHydrogenCart((state) => state.errors.discountCodes);
-  const networkErrors = useHydrogenCart((state) => state.errors.network);
-  const pendingDiscountCodes = useHydrogenCart((state) => state.pending.discountCodes);
+  const discountErrors = useCart((state) => state.errors.discountCodes);
+  const pendingDiscountCodes = useCart((state) => state.pending.discountCodes);
   const [code, setCode] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
   const isPending = pendingDiscountCodes.size > 0;
   const error =
     localError ??
-    Array.from(discountErrors.values()).flatMap((group) => group.userErrors)[0]?.message ??
-    networkErrors.at(-1)?.message ??
+    Array.from(discountErrors.values()).flatMap((group) => [
+      ...group.userErrors,
+      ...group.warnings,
+    ])[0]?.message ??
     null;
   return (
     <div className="grid gap-2.5">
@@ -47,7 +46,6 @@ export function DiscountForm({ cart }: DiscountFormProps) {
             const input = event.currentTarget.elements.namedItem("discountCode");
             if (input instanceof HTMLInputElement) input.value = normalized;
             setLocalError(null);
-            setWarnings([]);
           },
         })}
         className="flex gap-2.5"
@@ -95,7 +93,6 @@ export function DiscountForm({ cart }: DiscountFormProps) {
                   {...formProps({
                     beforeSubmit: () => {
                       setLocalError(null);
-                      setWarnings([]);
                     },
                   })}
                   className={cn(

@@ -1,12 +1,14 @@
 "use client";
 
+import { useCart } from "@shopify/hydrogen/react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import type { Cart } from "@/lib/cart";
 
-import { useCart } from "./context";
+import { useCartDrawer } from "./context";
 import { OverlayItem } from "./overlay-item";
 import { OverlaySummary } from "./overlay-summary";
 import { CartWarnings } from "./warnings";
@@ -39,7 +41,20 @@ function CheckoutButtonContent({
 
 export function OverlayContent() {
   const router = useRouter();
-  const { cart, cartWithPending, isUpdatingCart, setOverlayOpen } = useCart();
+  const displayCart = useCart<Cart, Cart>((state) => state.data);
+  const isLoading = useCart((state) => state.loading);
+  const isUpdatingCart = useCart((state) =>
+    Boolean(
+      state.loading ||
+      state.revalidating ||
+      state.pending.cost ||
+      state.pending.lines.size ||
+      state.pending.discountCodes.size ||
+      state.pending.attributes ||
+      state.pending.note,
+    ),
+  );
+  const { setOverlayOpen } = useCartDrawer();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   // Reset pending state when returning from checkout (bfcache / back navigation)
   useEffect(() => {
@@ -49,15 +64,23 @@ export function OverlayContent() {
     window.addEventListener("pageshow", handlePageShow);
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
-  const displayCart = cartWithPending;
   const handleCheckout = () => {
-    if (!displayCart?.checkoutUrl) return;
+    if (isCheckingOut || isUpdatingCart || !displayCart.checkoutUrl) return;
     setIsCheckingOut(true);
     window.location.href = displayCart.checkoutUrl;
   };
-  if (!displayCart || displayCart.lines.length === 0) {
+  if (isLoading && displayCart.lines.nodes.length === 0) {
     return (
-      <div className="flex h-full flex-col px-5">
+      <div className="flex h-full items-center justify-center gap-2.5" role="status">
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        Loading cart…
+      </div>
+    );
+  }
+  if (displayCart.lines.nodes.length === 0) {
+    return (
+      <div className="flex h-full flex-col gap-5 px-5">
+        <CartWarnings />
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <h3 className="mb-6 text-2xl">Your cart is empty</h3>
           <Button
@@ -78,19 +101,19 @@ export function OverlayContent() {
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         <CartWarnings />
         <ul className="space-y-5" aria-label="Cart items">
-          {displayCart.lines.map((item) => (
+          {displayCart.lines.nodes.map((item) => (
             <OverlayItem key={item.id} item={item} />
           ))}
         </ul>
       </div>
 
       <footer className="px-5 py-5 space-y-5">
-        <OverlaySummary cart={cart ?? displayCart} />
+        <OverlaySummary cart={displayCart} />
 
         <Button
           onClick={handleCheckout}
           className="w-full h-12 justify-center"
-          disabled={isCheckingOut || isUpdatingCart}
+          disabled={isCheckingOut || isUpdatingCart || !displayCart.checkoutUrl}
           aria-label="Proceed to Checkout"
         >
           <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />

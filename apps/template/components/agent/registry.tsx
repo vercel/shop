@@ -1,13 +1,15 @@
 "use client";
 
 import { defineRegistry } from "@json-render/react";
+import type { CartState } from "@shopify/hydrogen";
+import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import { cn } from "cn";
-import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
-import { CartLineForm } from "@/components/cart/line-form";
+import { useCartDrawer } from "@/components/cart/context";
+import { OverlayItem } from "@/components/cart/overlay-item";
 import {
   ProductCard,
   ProductCardContent,
@@ -21,9 +23,8 @@ import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { catalog } from "@/lib/agent";
 import type { AgentVariant } from "@/lib/agent/products";
-import { useCartForm } from "@/lib/cart/client";
+import type { Cart } from "@/lib/cart";
 
-import { useCart } from "../cart/context";
 import { useAgentProduct, useAgentProductDetails } from "./product-context";
 
 function MissingData({ children }: { children: string }) {
@@ -37,117 +38,39 @@ function variantLabel(variant: AgentVariant): string {
 export const { registry } = defineRegistry(catalog, {
   components: {
     AgentCartSummary: () => {
-      const { cart } = useCart();
-      if (!cart || cart.lines.length === 0) return <MissingData>Your cart is empty</MissingData>;
+      const {
+        data: cart,
+        loading,
+        pending,
+        revalidating,
+      } = useCart<Cart, CartState<Cart>>((state) => state);
+      const isPending = loading || revalidating || pending.cost || pending.lines.size > 0;
+      if (cart.lines.nodes.length === 0) return <MissingData>Your cart is empty</MissingData>;
       return (
         <div className="my-2 overflow-hidden rounded-lg border">
-          <ul className="divide-y">
-            {cart.lines.map((line) => (
-              <li key={line.id} className="flex gap-2.5 p-2.5">
-                <Link
-                  href={`/products/${line.merchandise.product.handle}`}
-                  className="relative size-12 shrink-0 overflow-hidden rounded-md"
-                >
-                  {line.merchandise.image?.url ? (
-                    <Image
-                      alt={line.merchandise.image.altText}
-                      className="object-cover"
-                      fill
-                      sizes="48px"
-                      src={line.merchandise.image.url}
-                    />
-                  ) : (
-                    <ImagePlaceholder className="size-full" />
-                  )}
-                </Link>
-                <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <Link
-                    href={`/products/${line.merchandise.product.handle}`}
-                    className="truncate font-medium text-sm hover:underline"
-                  >
-                    {line.merchandise.product.title}
-                  </Link>
-                  {line.merchandise.selectedOptions.length > 0 && (
-                    <span className="text-muted-foreground text-xs">
-                      {line.merchandise.selectedOptions.map((option) => option.value).join(" / ")}
-                    </span>
-                  )}
-                  <CartLineForm className="flex items-center gap-1.5" lineId={line.id ?? ""}>
-                    {(register) => (
-                      <>
-                        <div
-                          aria-label="Item quantity"
-                          className="grid h-6 grid-cols-[1.75rem_1.5rem_1.75rem] rounded-full ring-1 ring-border ring-inset"
-                          role="group"
-                        >
-                          <button
-                            {...register("decrease")}
-                            aria-label="Decrease quantity"
-                            className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={!line.canUpdateQuantity || line.quantity === 1}
-                            type="submit"
-                          >
-                            <MinusIcon className="size-3 shrink-0" />
-                          </button>
-                          <input
-                            key={line.quantity}
-                            {...register("quantity", {
-                              interactive: true,
-                              value: line.quantity,
-                            })}
-                            aria-label="Item quantity"
-                            className="h-6 w-6 bg-transparent text-center font-medium text-xs tabular-nums outline-none"
-                            disabled={!line.canUpdateQuantity}
-                            max={99}
-                            min={0}
-                          />
-                          <button
-                            {...register("increase")}
-                            aria-label="Increase quantity"
-                            className="flex h-6 cursor-pointer items-center justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                            disabled={!line.canUpdateQuantity || line.quantity === 99}
-                            type="submit"
-                          >
-                            <PlusIcon className="size-3 shrink-0" />
-                          </button>
-                        </div>
-                        <Button
-                          {...register("remove")}
-                          aria-label="Remove item"
-                          className="size-7 text-muted-foreground hover:text-foreground"
-                          disabled={!line.canRemove}
-                          size="icon"
-                          type="submit"
-                          variant="ghost"
-                        >
-                          <Trash2Icon className="size-4" />
-                        </Button>
-                      </>
-                    )}
-                  </CartLineForm>
-                </div>
-                <Price
-                  amount={line.cost.totalAmount.amount}
-                  className="shrink-0 text-sm"
-                  currencyCode={line.cost.totalAmount.currencyCode}
-                />
-              </li>
+          <ul className="grid gap-2.5 p-2.5">
+            {cart.lines.nodes.map((line) => (
+              <OverlayItem key={line.id} item={line} />
             ))}
           </ul>
           <div className="border-t bg-muted/50 px-2.5 py-2">
             <div className="flex items-baseline justify-between font-medium text-sm">
               <span>Estimated total</span>
-              <Price
-                amount={cart.cost.totalAmount.amount}
-                className="text-sm"
-                currencyCode={cart.cost.totalAmount.currencyCode}
-              />
+              {cart.cost.totalAmount.currencyCode ? (
+                <Price
+                  amount={cart.cost.totalAmount.amount}
+                  className="text-sm"
+                  currencyCode={cart.cost.totalAmount.currencyCode}
+                />
+              ) : (
+                <span className="text-muted-foreground">Updating…</span>
+              )}
             </div>
             <p className="mt-1 text-muted-foreground text-xs">
               Taxes and shipping calculated at checkout.
             </p>
           </div>
-          {cart.checkoutUrl && (
+          {!isPending && cart.checkoutUrl && (
             <div className="border-t px-2.5 py-2">
               <Button asChild className="w-full" size="sm">
                 <a href={cart.checkoutUrl}>Checkout</a>
@@ -194,7 +117,7 @@ export const { registry } = defineRegistry(catalog, {
       </div>
     ),
     AgentVariantPicker: ({ props }) => {
-      const { openOverlay } = useCart();
+      const { openOverlay } = useCartDrawer();
       const { formProps, register } = useCartForm();
       const product = useAgentProductDetails(props.handle);
       const [selectedId, setSelectedId] = useState<string | null>(null);

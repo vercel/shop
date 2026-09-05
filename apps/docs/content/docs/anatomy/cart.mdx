@@ -14,13 +14,13 @@ No additional setup is required for the standard cart. The cart ID is stored in 
 
 Shoppers can add products, change quantities, remove lines, apply discount codes, and proceed to checkout. The cart overlay is available throughout the storefront, and `/cart` provides the full cart with product recommendations.
 
-Updates are optimistic: quantities and badges change immediately, then reconcile with Shopify. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Checkout remains unavailable while totals are still being confirmed.
+Updates are optimistic: quantities and badges change immediately, then reconcile with Shopify. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Prices and totals show muted updating text while Shopify confirms the cost. Checkout remains unavailable until pending cart changes finish. Line-specific errors appear alongside the affected item.
 
-The cart displays confirmed discounts and sale pricing. Shopify bundles remain grouped so shoppers can understand which products belong together. Quantity and remove controls follow Shopify's rules for each line, so some bundle lines may not be editable individually.
+The cart displays confirmed discounts and sale pricing, using the same monospace prices as product pages and cards. Shopify bundles remain grouped so shoppers can understand which products belong together. Quantity and remove controls follow Shopify's rules for each line, so some bundle lines may not be editable individually.
 
 When customer authentication is enabled, sign-in can attach the existing browser cart to the customer. Checkout can then use the customer's saved details. See [Authentication](/docs/anatomy/authentication).
 
-The optional shopping assistant uses the same cart, so changes made in chat appear in the cart overlay and on `/cart`.
+The optional shopping assistant uses the same cart. After a successful change in chat, the storefront refreshes the cart from Shopify so the overlay, badge, and `/cart` show the latest contents. Restoring an old conversation does not replay its cart changes.
 
 If `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, server-side cart activity is attributed to the corresponding Headless storefront. See [Environment Variables](/docs/reference/env-vars).
 

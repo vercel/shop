@@ -1,21 +1,17 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+import type { Cart } from "@/lib/cart";
 import { getCartById, runCartMutation } from "@/lib/cart/server";
-import type { Cart } from "@/lib/types";
 
 import { getAgentContext } from "../server";
 
-/**
- * The client renders the live cart, so tools return only what the model needs to
- * narrate the turn plus the cart the reconciler syncs into cart context.
- */
 function cartSummary(cart: Cart | undefined) {
-  if (!cart || cart.lines.length === 0) return { cart: null, empty: true as const };
+  if (!cart) return { cart: null, empty: true as const };
   return {
     cart,
-    empty: false as const,
-    lines: cart.lines.map((line) => ({
+    empty: cart.lines.nodes.length === 0,
+    lines: cart.lines.nodes.map((line) => ({
       lineId: line.id,
       options: line.merchandise.selectedOptions.map((option) => option.value).join(" / "),
       productTitle: line.merchandise.product.title,
@@ -26,10 +22,20 @@ function cartSummary(cart: Cart | undefined) {
   };
 }
 
+// Keep the native cart for client reconciliation without sending its full payload to the model.
+function cartModelOutput({ output }: { output: unknown }) {
+  if (output && typeof output === "object" && "cart" in output) {
+    const { cart: _cart, ...summary } = output;
+    return { type: "text" as const, value: JSON.stringify(summary) };
+  }
+  return { type: "text" as const, value: JSON.stringify(output) };
+}
+
 export const getCartTool = tool({
   description:
     "Read the shopper's current cart. Call this before updating or removing items to obtain line IDs.",
   inputSchema: z.object({}),
+  toModelOutput: cartModelOutput,
   execute: async () => {
     const { cart: cartId } = getAgentContext();
     if (!cartId) return { cart: null, empty: true };
@@ -51,6 +57,7 @@ export const addToCartTool = tool({
     quantity: z.number().min(1).max(99).default(1),
     variantId: z.string(),
   }),
+  toModelOutput: cartModelOutput,
   execute: async ({ quantity, variantId }) => {
     const { cart: cartId } = getAgentContext();
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
@@ -75,6 +82,7 @@ export const updateCartItemTool = tool({
     lineId: z.string(),
     quantity: z.number().min(0).max(99),
   }),
+  toModelOutput: cartModelOutput,
   execute: async ({ lineId, quantity }) => {
     const { cart: cartId } = getAgentContext();
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
@@ -92,6 +100,7 @@ export const updateCartItemTool = tool({
 export const addCartNoteTool = tool({
   description: "Attach a note to the cart for gift messages, delivery, or special instructions.",
   inputSchema: z.object({ note: z.string() }),
+  toModelOutput: cartModelOutput,
   execute: async ({ note }) => {
     const { cart: cartId } = getAgentContext();
     if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
