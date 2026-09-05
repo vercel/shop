@@ -1,25 +1,19 @@
 "use client";
 
+import { useCart } from "@shopify/hydrogen/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-import { useCart } from "@/components/cart/context";
-
-const CART_ERRORS = {
-  add: "We couldn't add that item. Please try again.",
-  remove: "We couldn't remove that item. Please try again.",
-  update: "We couldn't update that quantity. Please try again.",
-};
-
 export function CartNotifications() {
-  const { clearError, lastError } = useCart();
+  const hasNetworkErrors = useCart((state) => state.errors.network.length > 0);
+  const updatedAt = useCart((state) => state.errors.networkUpdatedAt);
+
   useEffect(() => {
-    if (!lastError) return;
-    toast.error(CART_ERRORS[lastError], {
-      id: `cart-${lastError}`,
-      onAutoClose: clearError,
-      onDismiss: clearError,
+    if (!hasNetworkErrors) return;
+    toast.error("We couldn't update your cart. Please try again.", {
+      id: `cart-network-${updatedAt}`,
     });
-  }, [clearError, lastError]);
+  }, [hasNetworkErrors, updatedAt]);
+
   return null;
 }

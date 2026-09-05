@@ -10,7 +10,7 @@ interface CartItemsListProps {
 
 export function CartItemsList({ emptyLabel, itemsLabel }: CartItemsListProps) {
   const cart = useCartRender();
-  const lines = cart?.lines ?? [];
+  const lines = cart.lines.nodes;
   return lines.length === 0 ? (
     <div className="text-center py-10">
       <p className="text-muted-foreground">{emptyLabel}</p>

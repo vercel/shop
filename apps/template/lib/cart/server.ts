@@ -11,11 +11,9 @@ import { headers } from "next/headers";
 import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
+import type { Cart, CartSeedData, CartWarning } from "@/lib/cart";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
-import type { Cart, CartWarning } from "@/lib/types";
-
-import { toDomainCart } from ".";
 
 // The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
 const CART_FRAGMENT = gql(/* GraphQL */ `
@@ -99,20 +97,17 @@ async function getHandlerContext() {
   };
 }
 
-/** Starts the full-cart read from the request cookie without awaiting it. */
-export function seedCartData() {
-  return (async () => {
-    const { handlers, ...context } = await getHandlerContext();
-    const { data } = await handlers.get(context as never);
-    return data;
-  })();
-}
-
-// Carts are never put in the Next.js data cache — only this per-request memoization.
-export const getCart = cache(async (): Promise<Cart | undefined> => {
-  const { cart } = await seedCartData();
-  return toDomainCart(cart) ?? undefined;
+// Carts are never put in the Next.js data cache — layout and page share only this per-request promise.
+export const seedCartData = cache(async (): Promise<CartSeedData> => {
+  const { handlers, ...context } = await getHandlerContext();
+  const { data } = await handlers.get(context as never);
+  return data;
 });
+
+export async function getCart(): Promise<Cart | undefined> {
+  const { cart } = await seedCartData();
+  return cart ?? undefined;
+}
 
 // Hydrogen's GET handler reads `?cartId=` before the cookie, which covers carts created mid-request.
 export async function getCartById(cartId: string): Promise<Cart | undefined> {
@@ -120,7 +115,7 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   const url = new URL("/api/cart", shopConfig.site.url);
   url.searchParams.set("cartId", cartId);
   const { data } = await handlers.get({ ...context, request: new Request(url) } as never);
-  return toDomainCart(data.cart) ?? undefined;
+  return data.cart ?? undefined;
 }
 
 /** Creates an empty cart so a streaming response can set the cookie before any line is added. */
@@ -186,13 +181,13 @@ export async function runCartMutation(
   if (result.type === "error") throw new Error(result.error.message);
   if (result.type !== "json") throw new Error("Cart mutation returned an unexpected response");
 
+  // Hydrogen's POST result erases the cart fragment type even though it uses the same query as GET.
   const data = result.data as {
-    cart?: unknown;
+    cart?: Cart | null;
     userErrors?: { message: string }[];
     warnings?: CartWarning[];
   };
   if (data.userErrors?.length) throw new Error(data.userErrors.map((e) => e.message).join("; "));
-  const cart = toDomainCart(data.cart as never);
-  if (!cart) throw new Error("Cart mutation returned no cart");
-  return { cart, warnings: data.warnings ?? [] };
+  if (!data.cart) throw new Error("Cart mutation returned no cart");
+  return { cart: data.cart, warnings: data.warnings ?? [] };
 }

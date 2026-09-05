@@ -5,7 +5,7 @@ import { cn } from "cn";
 import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCartDrawer } from "@/components/cart/context";
 import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
 import type { ProductFormVariant } from "@/lib/product";
@@ -27,9 +27,8 @@ export function BuyButtons({
   const selectedVariant = storeVariant ?? fallbackVariant;
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const { openOverlay } = useCart();
+  const { openOverlay } = useCartDrawer();
 
-  // Reset pending state when returning from checkout (bfcache / back navigation)
   useEffect(() => {
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) setIsBuyingNow(false);
@@ -42,9 +41,7 @@ export function BuyButtons({
   }
   const requiresBundleConfiguration = selectedVariant.requiresBundleConfiguration;
   const isOutOfStock = !selectedVariant.availableForSale;
-  // Same-origin permalink; handleShopifyRoutes in proxy.ts 302s it to the store's checkout with attribution.
-  // isBuyingNow must not feed `disabled`: React flushes the click's setState before the anchor's activation
-  // behavior runs, so removing href here would cancel the navigation.
+  // Keep href while buying: removing it during the click cancels the anchor's navigation.
   const buyNowUrl = getShopPayButtonUrl({
     disabled: isOutOfStock || requiresBundleConfiguration,
     variants: [{ id: selectedVariant.id, quantity }],

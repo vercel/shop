@@ -3,13 +3,13 @@
 import { cn } from "cn";
 import { useState } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCartDrawer } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { addToCart } from "@/lib/cart/client";
+import { addGiftCardToCart } from "@/lib/cart/gift-card-client";
 import type { OptimisticProductInfo } from "@/lib/product";
 
 interface GiftCardPurchaseFormProps {
@@ -42,7 +42,7 @@ function giftCardAttributes(recipient: {
 }
 
 export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
-  const { setOverlayOpen, setWarnings } = useCart();
+  const { setOverlayOpen } = useCartDrawer();
   const [error, setError] = useState<string | null>(null);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -66,8 +66,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
         return;
       }
     }
-    setWarnings([]);
-    addToCart(
+    addGiftCardToCart(
       merchandiseId,
       1,
       productInfo,

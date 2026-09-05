@@ -1,13 +1,13 @@
 "use client";
 
 import { formatMoney } from "@shopify/hydrogen";
+import { useCart } from "@shopify/hydrogen/react";
 import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCartRender } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
-import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 import { shopConfig } from "@/lib/config";
 
@@ -23,6 +23,7 @@ function CheckoutLink({
   checkoutText: string;
 }) {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Reset pending state when returning from checkout (bfcache / back navigation)
   useEffect(() => {
@@ -36,29 +37,47 @@ function CheckoutLink({
   const baseClassName =
     "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors";
 
-  if (isUpdatingCart || isCheckingOut) {
-    return (
-      <span className={cn(baseClassName, "opacity-50 cursor-not-allowed")} aria-disabled="true">
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span>{isCheckingOut ? checkoutText : updatingText}</span>
-        </span>
-      </span>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      className={cn(baseClassName, "hover:bg-primary/90 cursor-pointer")}
-      onClick={async () => {
-        setIsCheckingOut(true);
-        const { checkoutUrl: url } = await prepareCheckoutAction();
-        window.location.href = url || checkoutUrl;
-      }}
-    >
-      <span>{checkoutText}</span>
-    </button>
+    <div className="grid gap-2.5">
+      <button
+        type="button"
+        className={cn(
+          baseClassName,
+          "cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50",
+        )}
+        disabled={isUpdatingCart || isCheckingOut || !checkoutUrl}
+        aria-busy={isCheckingOut || isUpdatingCart || undefined}
+        onClick={async () => {
+          if (isUpdatingCart || isCheckingOut || !checkoutUrl) return;
+          setCheckoutError(null);
+          setIsCheckingOut(true);
+          try {
+            const { checkoutUrl: url } = await prepareCheckoutAction();
+            if (!url) {
+              setIsCheckingOut(false);
+              setCheckoutError("Checkout is unavailable. Refresh your cart and try again.");
+              return;
+            }
+            window.location.href = url;
+          } catch {
+            setIsCheckingOut(false);
+            setCheckoutError("We couldn't start checkout. Please try again.");
+          }
+        }}
+      >
+        <span className="flex items-center gap-2.5">
+          {isCheckingOut || isUpdatingCart ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : null}
+          <span>{isUpdatingCart && !isCheckingOut ? updatingText : checkoutText}</span>
+        </span>
+      </button>
+      {checkoutError ? (
+        <p className="text-xs text-destructive" role="alert">
+          {checkoutError}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -75,14 +94,21 @@ export function Summary({
   taxesAndShippingNote,
   updatingCartLabel,
 }: SummaryProps) {
-  const { cart, isUpdatingCart } = useCart();
-  if (!cart) return null;
-  const lineSubtotal = cart.lines.reduce(
-    (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
-    0,
+  const cart = useCartRender();
+  const isUpdatingCart = useCart((state) =>
+    Boolean(
+      state.loading ||
+      state.revalidating ||
+      state.pending.cost ||
+      state.pending.lines.size ||
+      state.pending.discountCodes.size ||
+      state.pending.attributes ||
+      state.pending.note,
+    ),
   );
-  const estimatedTotal = Math.max(0, lineSubtotal - cartDiscountAmount(cart));
-  const currencyCode = cart.cost.subtotalAmount.currencyCode;
+  const isCostPending = useCart((state) => Boolean(state.pending.cost || state.revalidating));
+  if (!cart.lines.nodes.length) return null;
+  const { amount, currencyCode } = cart.cost.totalAmount;
   return (
     <div className="space-y-5">
       <DiscountForm cart={cart} />
@@ -90,24 +116,24 @@ export function Summary({
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
           <span className="text-xl font-medium text-foreground">
-            {
-              formatMoney(
-                {
-                  amount: String(estimatedTotal),
-                  currencyCode,
-                },
-                {
-                  locale: shopConfig.localization.locale,
-                },
-              ).localizedString
-            }
+            {isCostPending || !currencyCode
+              ? updatingCartLabel
+              : formatMoney(
+                  {
+                    amount,
+                    currencyCode,
+                  },
+                  {
+                    locale: shopConfig.localization.locale,
+                  },
+                ).localizedString}
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>
       </div>
 
       <CheckoutLink
-        checkoutUrl={cart.checkoutUrl}
+        checkoutUrl={cart.checkoutUrl ?? ""}
         isUpdatingCart={isUpdatingCart}
         updatingText={updatingCartLabel}
         checkoutText={completeCheckoutLabel}
