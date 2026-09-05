@@ -13,7 +13,6 @@ export function Price({ amount, currencyCode, className, ...props }: PriceProps)
   const price = formatMoney(
     { amount, currencyCode },
     {
-      currencyDisplay: "narrowSymbol",
       locale: shopConfig.localization.locale,
     },
   ).localizedString;

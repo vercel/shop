@@ -1,6 +1,7 @@
+import { formatMoney } from "@shopify/hydrogen";
+
 import { shopConfig } from "@/lib/config";
 import type { ProductCard } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 import { escapeMarkdown } from "./utils";
 
@@ -31,7 +32,7 @@ export function homeToMarkdown({
     sections.push("## Featured products", "");
     for (const product of products) {
       sections.push(
-        `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatPrice(product.price, locale)}${product.availableForSale ? "" : " — unavailable"}`,
+        `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatMoney(product.price, { locale }).localizedString}${product.availableForSale ? "" : " — unavailable"}`,
       );
     }
     sections.push("");

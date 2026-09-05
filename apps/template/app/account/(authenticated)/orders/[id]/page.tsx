@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -14,7 +15,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer";
 import type { Money, OrderLineItem } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -53,7 +53,11 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
         <div className="flex items-center justify-between border-t pt-2 font-medium">
           <dt>Total</dt>
           <dd className="font-mono tabular-nums">
-            {formatPrice(order.totalPrice, shopConfig.localization.locale)}
+            {
+              formatMoney(order.totalPrice, {
+                locale: shopConfig.localization.locale,
+              }).localizedString
+            }
           </dd>
         </div>
       </dl>
@@ -105,7 +109,11 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
       </div>
       {item.totalPrice ? (
         <span className="font-mono text-sm tabular-nums">
-          {formatPrice(item.totalPrice, shopConfig.localization.locale)}
+          {
+            formatMoney(item.totalPrice, {
+              locale: shopConfig.localization.locale,
+            }).localizedString
+          }
         </span>
       ) : null}
     </li>
@@ -118,7 +126,11 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-mono tabular-nums">
-        {formatPrice(money, shopConfig.localization.locale)}
+        {
+          formatMoney(money, {
+            locale: shopConfig.localization.locale,
+          }).localizedString
+        }
       </dd>
     </div>
   );

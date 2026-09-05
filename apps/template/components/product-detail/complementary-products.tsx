@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -5,7 +6,6 @@ import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { shopConfig } from "@/lib/config";
 import { getComplementaryProducts } from "@/lib/shopify/operations/products";
 import type { ProductCard } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export async function ComplementaryProducts({
   handle,
@@ -43,7 +43,11 @@ export async function ComplementaryProducts({
               )}
               <span className="min-w-0 flex-1 truncate font-medium text-sm">{product.title}</span>
               <span className="shrink-0 text-foreground/50 text-sm">
-                {formatPrice(product.price, shopConfig.localization.locale)}
+                {
+                  formatMoney(product.price, {
+                    locale: shopConfig.localization.locale,
+                  }).localizedString
+                }
               </span>
             </Link>
           </li>
