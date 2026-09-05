@@ -13,7 +13,7 @@ import { headers } from "next/headers";
 import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
-import type { Cart, CartSeedData, CartWarning } from "@/lib/cart";
+import type { Cart, CartSeedData } from "@/lib/cart";
 import { shopConfig } from "@/lib/config";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 
@@ -147,60 +147,4 @@ export async function createEmptyCart(
   const cartId = data?.cartCreate?.cart?.id;
   if (!cartId) throw new Error("Cart creation returned no cart");
   return cartId;
-}
-
-export type CartMutationInput =
-  | {
-      lines: {
-        attributes?: { key: string; value: string }[];
-        merchandiseId: string;
-        quantity: number;
-      }[];
-    }
-  | { lines: { id: string; quantity: number }[] }
-  | { note: string };
-
-export type CartMutationResult = { cart: Cart; warnings: CartWarning[] };
-
-/**
- * Runs a cart mutation through Hydrogen's `/api/cart` handler without an HTTP round trip.
- * Callers that create a cart must persist `cart.id` with `createCartCookie` on their own response.
- */
-export async function runCartMutation(
-  input: CartMutationInput,
-  cartId?: string,
-): Promise<CartMutationResult> {
-  const { handlers, requestContext: sharedContext, ...context } = await getHandlerContext();
-  const requestContext = sharedContext ?? (await getRequestContext());
-  const request = new Request(new URL("/api/cart", shopConfig.site.url), {
-    body: JSON.stringify({ ...input, ...(cartId ? { cartId } : {}) }),
-    headers: {
-      "content-type": "application/json",
-      cookie: (await headers()).get("cookie") ?? "",
-    },
-    method: "POST",
-  });
-  // Cookies can't be committed from a tool call, so pass a read-only session and let refreshes fall through.
-  const result = await handlers.post({
-    ...context,
-    request,
-    requestContext,
-    sessionManager: {
-      ...("sessionManager" in context ? context.sessionManager : {}),
-      commit: undefined,
-    },
-  } as never);
-
-  if (result.type === "error") throw new Error(result.error.message);
-  if (result.type !== "json") throw new Error("Cart mutation returned an unexpected response");
-
-  // Hydrogen's POST result erases the cart fragment type even though it uses the same query as GET.
-  const data = result.data as {
-    cart?: Cart | null;
-    userErrors?: { message: string }[];
-    warnings?: CartWarning[];
-  };
-  if (data.userErrors?.length) throw new Error(data.userErrors.map((e) => e.message).join("; "));
-  if (!data.cart) throw new Error("Cart mutation returned no cart");
-  return { cart: data.cart, warnings: data.warnings ?? [] };
 }

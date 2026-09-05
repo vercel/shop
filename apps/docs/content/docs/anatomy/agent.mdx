@@ -39,7 +39,7 @@ The conversation and draft are saved in the shopper's browser and survive naviga
 
 When the assistant reads the cart, it receives an item summary, not the full cart or gift-card recipient details. Cart changes return an update confirmation and any Shopify warnings; the cart shown in chat stays live. Personal details that shoppers type into chat are still sent to the model provider.
 
-You can stop a response while it is loading or streaming and continue the conversation afterward. Stopping does not undo a cart change already sent to Shopify. If a change was interrupted, ask the assistant to check the cart before trying it again.
+You can stop a response while it is loading or streaming and continue the conversation afterward. Stopping or clearing chat does not cancel a cart change already started: the cart keeps its pending state and updates when Shopify responds. Checkout stays unavailable while that change is pending. If a cart request fails or times out, check the cart before trying the change again.
 
 The template enables request cancellation for chat on Vercel. Other hosts must propagate client disconnects to the server for Stop to cancel model generation.
 

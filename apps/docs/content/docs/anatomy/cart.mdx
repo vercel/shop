@@ -22,7 +22,7 @@ The cart displays confirmed discounts and sale pricing. Shopify bundles remain g
 
 When customer authentication is enabled, sign-in can attach the existing browser cart to the customer. Checkout can then use the customer's saved details. See [Authentication](/docs/anatomy/authentication).
 
-The optional shopping assistant uses the same cart. After a successful change in chat, the storefront refreshes the cart from Shopify so the overlay, badge, and `/cart` show the latest contents. Restoring an old conversation does not replay its cart changes.
+The optional shopping assistant uses the same cart. Changes remain pending until Shopify responds, even if the shopper stops the response or clears chat. The overlay, badge, and `/cart` then show the confirmed contents. Restoring an old conversation does not replay its cart changes.
 
 If `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, server-side cart activity is attributed to the corresponding Headless storefront. See [Environment Variables](/docs/reference/env-vars).
 

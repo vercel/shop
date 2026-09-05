@@ -1,8 +1,13 @@
 import { tool } from "ai";
 import { z } from "zod";
 
+import {
+  addCartNoteInputSchema,
+  addToCartInputSchema,
+  updateCartItemInputSchema,
+} from "@/lib/agent/cart";
 import type { Cart } from "@/lib/cart";
-import { getCartById, runCartMutation } from "@/lib/cart/server";
+import { getCartById } from "@/lib/cart/server";
 
 interface CartToolsOptions {
   cartId: string | undefined;
@@ -54,66 +59,21 @@ export function createCartTools({ cartId }: CartToolsOptions) {
     description:
       "Add a product variant to the cart using a ProductVariant ID from getProductDetails. " +
       "Never pass a product ID. Confirm the variant first when a product has several.",
-    inputSchema: z.object({
-      quantity: z.number().int().min(1).max(99).default(1),
-      variantId: z.string(),
-    }),
+    inputSchema: addToCartInputSchema,
     toModelOutput: cartModelOutput,
-    execute: async ({ quantity, variantId }, { abortSignal }) => {
-      abortSignal?.throwIfAborted();
-      if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
-
-      try {
-        const { warnings } = await runCartMutation(
-          { lines: [{ merchandiseId: variantId, quantity }] },
-          cartId,
-        );
-        return { cartUpdated: true, warnings: warnings.map(({ message }) => message) };
-      } catch (error) {
-        console.error("Failed to add to cart:", error);
-        return { error: "Could not add that item to the cart." };
-      }
-    },
   });
 
   const updateCartItem = tool({
     description:
       "Change a cart line's quantity, or remove it by passing 0. Call getCart first to get the lineId.",
-    inputSchema: z.object({
-      lineId: z.string(),
-      quantity: z.number().int().min(0).max(99),
-    }),
+    inputSchema: updateCartItemInputSchema,
     toModelOutput: cartModelOutput,
-    execute: async ({ lineId, quantity }, { abortSignal }) => {
-      abortSignal?.throwIfAborted();
-      if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
-
-      try {
-        const { warnings } = await runCartMutation({ lines: [{ id: lineId, quantity }] }, cartId);
-        return { cartUpdated: true, warnings: warnings.map(({ message }) => message) };
-      } catch (error) {
-        console.error("Failed to update cart line:", error);
-        return { error: "Could not update that cart line." };
-      }
-    },
   });
 
   const addCartNote = tool({
     description: "Attach a note to the cart for gift messages, delivery, or special instructions.",
-    inputSchema: z.object({ note: z.string() }),
+    inputSchema: addCartNoteInputSchema,
     toModelOutput: cartModelOutput,
-    execute: async ({ note }, { abortSignal }) => {
-      abortSignal?.throwIfAborted();
-      if (!cartId) return { error: "The cart is not ready yet. Ask the shopper to try again." };
-
-      try {
-        const { warnings } = await runCartMutation({ note }, cartId);
-        return { cartUpdated: true, warnings: warnings.map(({ message }) => message) };
-      } catch (error) {
-        console.error("Failed to update cart note:", error);
-        return { error: "Could not update the cart note." };
-      }
-    },
   });
 
   return { addCartNote, addToCart, getCart, updateCartItem };
