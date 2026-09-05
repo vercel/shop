@@ -51,7 +51,8 @@ export const CartDemo = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   }, []);
 
-  const runAnimation = useCallback(() => {
+  const runAnimation = useCallback(function runAnimation() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setPhase("cursor-enter");
 
     timeoutRef.current = setTimeout(() => {
@@ -85,7 +86,7 @@ export const CartDemo = () => {
         if (entry?.isIntersecting && !hasStarted.current) {
           hasStarted.current = true;
           observer.disconnect();
-          setTimeout(() => runAnimation(), 800);
+          timeoutRef.current = setTimeout(() => runAnimation(), 800);
         }
       },
       { threshold: 0.5 },

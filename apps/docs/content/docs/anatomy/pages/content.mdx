@@ -1,6 +1,6 @@
 ---
 title: Content Pages
-description: Shopify-managed Pages, policies, blogs, and articles rendered as localized storefront routes.
+description: Publish Shopify-managed Pages, policies, blogs, and articles on your storefront.
 type: guide
 ---
 
@@ -24,7 +24,7 @@ Search and social metadata use Shopify's SEO fields when available. Sitemaps inc
 
 ## Plan for delayed updates
 
-Shopify does not provide webhook topics for Pages, policies, blogs, or articles. An edit may remain cached until you manually purge the affected content cache or redeploy. Product and collection webhook behavior does not apply to these content types; see [Webhooks](/docs/anatomy/webhooks).
+The template's webhook handler does not refresh Pages, policies, blogs, or articles. Edits can remain cached until the content is revalidated. If a change must appear immediately, arrange a cache refresh as part of publishing. See [Webhooks](/docs/anatomy/webhooks) for the content types the handler supports.
 
 Verify every published or edited page in the storefront, including its language, metadata, navigation link, and sitemap entry.
 

@@ -8,9 +8,9 @@ type: troubleshooting
 
 **Symptom:** Product pages or listings are empty.
 
-**Check:** In Shopify admin, confirm the Storefront token has the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions). Confirm each product is published to both the **Online Store** and **Headless** sales channels.
+**Check:** In Shopify admin, confirm the Storefront token has the scopes in [Storefront API Permissions](/docs/reference/storefront-api-permissions). Confirm each product is active and published to the **Headless** sales channel.
 
-**Fix:** Grant the missing scopes and publish the products to both channels.
+**Fix:** Grant the missing scopes and publish the products to Headless. Publishing to **Online Store** alone is not enough.
 
 **Expected result:** Published products appear in listings and product routes resolve.
 
@@ -20,7 +20,7 @@ type: troubleshooting
 
 **Check:** Open the bundle product's **Publishing** settings. Confirm the bundle and its component products are published to the **Headless** sales channel.
 
-**Fix:** Publish all required products to Headless. Then trigger a product webhook or redeploy to clear the cached not-found response.
+**Fix:** Publish the bundle and its component products to Headless. If the route still returns `404`, confirm that a product webhook for the bundle reaches the storefront to invalidate the cached response.
 
 **Expected result:** The bundle route loads and its component relationships appear.
 
@@ -32,7 +32,7 @@ type: troubleshooting
 
 **Fix:** Use one consistent storefront domain and remove any deployment or proxy setting that rewrites the cookie domain.
 
-**Expected result:** The same cart remains available across page loads for up to 14 days.
+**Expected result:** The cart survives navigation and reloads on the same domain. The cookie has a 14-day lifetime, but it does not guarantee that Shopify will retain the cart or that the browser will keep the cookie.
 
 ## Variant selection does not update the product
 
@@ -69,7 +69,7 @@ images: {
 **Fix:** Correct the operation, then run:
 
 ```bash
-pnpm --filter template codegen
+npm run codegen
 ```
 
 If Shopify AI Toolkit is unavailable, install the project plugin:
@@ -88,7 +88,7 @@ Use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-referen
 
 **Check:** Confirm Shopify webhooks are configured and signed with `SHOPIFY_WEBHOOK_SECRET`.
 
-**Fix:** Point the required Shopify webhooks to `POST /api/webhooks/shopify`. Follow [Webhooks](/docs/anatomy/webhooks) for setup. Redeploy once if you need to clear existing stale entries.
+**Fix:** Point the required Shopify webhooks to `POST /api/webhooks/shopify`. Follow [Webhooks](/docs/anatomy/webhooks) for setup. After a product or collection edit, check that Shopify reports a successful delivery and that the endpoint returns a nonempty `tagsInvalidated` list.
 
 **Expected result:** Shopify changes invalidate the affected cached content and appear without a redeploy.
 
@@ -106,7 +106,7 @@ Use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-referen
 
 **Symptom:** A coding agent misses project commands or shop-specific guidance.
 
-**Check:** Confirm the project root contains `AGENTS.md` and `.claude/settings.json`, and that the expected project plugins are enabled.
+**Check:** Confirm your agent reads the project's `AGENTS.md` and recognizes the installed Vercel Shop, Vercel, and Shopify plugins. Plugin support and configuration depend on the agent.
 
 **Fix:** From the project root, run:
 
@@ -122,4 +122,6 @@ npx plugins add vercel/vercel-plugin --scope project --yes
 npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 ```
 
-**Expected result:** The agent loads the project guidance and the Vercel Shop, Vercel, and Shopify tools.
+The `--no-template` command installs plugins; it does not restore a missing `AGENTS.md`. Restore that file from your project's version control if it was removed.
+
+**Expected result:** Your agent lists the installed plugins and can read the project guidance.

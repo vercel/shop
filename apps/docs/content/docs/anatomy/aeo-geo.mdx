@@ -8,11 +8,11 @@ type: guide
 
 ## Make storefront content readable to AI
 
-Product, collection, and search URLs return structured Markdown when a client requests `text/markdown`. Normal browser requests continue to receive HTML from the same URLs. No setup is required.
+The home page, product, collection, and search URLs return structured Markdown when a client requests `text/markdown`. Normal browser requests continue to receive HTML from the same URLs. No setup is required.
 
 The storefront also publishes `/llms.txt`, a concise index for AI agents. It links to search, collections, the sitemap, and crawl guidance rather than duplicating the full catalog. The [sitemap](/docs/anatomy/sitemap) remains the complete URL inventory.
 
-If you enable Shopify Markets, add a `locale` query parameter to request locale-specific prices and catalog context.
+Markdown content uses the deployment's configured Shopify country and language. If you add [Shopify Markets](/docs/skills/enable-shopify-markets), make sure AI-readable content uses the same market as the corresponding shopper page.
 
 ## Included discovery surfaces
 

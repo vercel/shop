@@ -44,13 +44,13 @@ Validate current field names, arguments, and types with Shopify AI Toolkit. Then
 
 ## Codegen
 
-Type inference does not reject unknown fields, so the template keeps a schema check. It runs [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) over every Storefront `#graphql` document:
+Run the Storefront schema check from your project root after editing operations. It uses [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) to validate Storefront `#graphql` documents under `lib/shopify/`:
 
 ```bash
-pnpm --filter template codegen
+npm run codegen
 ```
 
-Codegen reads `SHOPIFY_API_VERSION` and fails when an operation does not match Shopify's live schema. Development runs codegen without blocking startup, while the production build treats failure as a hard error. Generated validation files are gitignored.
+Codegen reads `SHOPIFY_API_VERSION` from the command's environment and checks operations against Shopify's live schema. If you override the API version, pass the same value when running codegen. The development command runs this check before starting Next.js but continues if it fails; the production build stops on failure. Generated validation files are gitignored.
 
 ## Caching
 
@@ -63,7 +63,7 @@ Choose caching by data sensitivity and behavior:
 | Cart, session, authorization, or customer data             | Keep request-scoped or private; never place in a public cache |
 | Mutations                                                  | Do not cache                                                  |
 
-Webhook-driven invalidation keeps cached Shopify content current. Configure `POST /api/webhooks/shopify` as described in [Webhooks](/docs/anatomy/webhooks).
+Configure `POST /api/webhooks/shopify` as described in [Webhooks](/docs/anatomy/webhooks) to refresh cached products and collections after edits. The handler supports product, collection, and metaobject topics; other content needs its own invalidation strategy or cache expiry.
 
 ## Mutations
 
@@ -73,7 +73,7 @@ Never cache cart IDs, customer data, session data, or authenticated responses in
 
 ## Errors and missing resources
 
-Storefront requests throw on transport failures, timeouts, and GraphQL failures without usable data. A response with both data and GraphQL errors logs a warning and allows the operation to use the partial data.
+Storefront requests throw on transport failures and timeouts. The request wrapper returns GraphQL errors alongside data; read operations check the result with `assertStorefrontOk`. This check throws when no data is returned and logs a warning when errors accompany partial data.
 
 A missing resource is not an API failure. Read operations return `undefined`, `null`, or an empty list when the requested resource does not exist.
 

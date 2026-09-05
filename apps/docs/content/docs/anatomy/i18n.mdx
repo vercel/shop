@@ -7,9 +7,7 @@ The default storefront serves one deployment with clean URLs such as `/products/
 
 ## Customize storefront copy
 
-Edit shopper-facing text alongside the component that renders it. Keep straightforward labels and interpolation inline. Reusable content functionality, such as formatting a count with its singular or plural noun, lives in `lib/content/index.ts`. There is no catalog or custom `t()` parser.
-
-Keep labels in local component configuration when rendering a list of fields or options. Render fixed text on the server where possible and pass labels to reusable UI controls. Interactive messages can stay in the client component that uses them.
+Edit shopper-facing text in the component that displays it. The default storefront has no central translation catalog; labels, messages, and accessibility text are kept with the interface they describe.
 
 After changing a quantity message, check zero, one, and multiple items. Include loading states, empty states, errors, and accessibility labels when reviewing copy.
 
