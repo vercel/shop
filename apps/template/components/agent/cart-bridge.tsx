@@ -32,8 +32,8 @@ export function AgentCartBridge({ messages }: { messages: readonly UIMessage[] }
         if (part.state !== "output-available" || seen.current.has(part.toolCallId)) continue;
         seen.current.add(part.toolCallId);
         if (isReplay) continue;
-        const output = part.output as { cart?: unknown } | undefined;
-        if (output?.cart) shouldRefresh = true;
+        const output = part.output as { cartUpdated?: boolean } | undefined;
+        if (output?.cartUpdated === true) shouldRefresh = true;
       }
     }
 

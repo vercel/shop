@@ -7,9 +7,8 @@ import { getCartById, runCartMutation } from "@/lib/cart/server";
 import { getAgentContext } from "../server";
 
 function cartSummary(cart: Cart | undefined) {
-  if (!cart) return { cart: null, empty: true as const };
+  if (!cart) return { empty: true as const };
   return {
-    cart,
     empty: cart.lines.nodes.length === 0,
     lines: cart.lines.nodes.map((line) => ({
       lineId: line.id,
@@ -22,7 +21,7 @@ function cartSummary(cart: Cart | undefined) {
   };
 }
 
-// Keep the native cart for client reconciliation without sending its full payload to the model.
+// Older browser histories still contain full carts, including gift-card recipient details.
 function cartModelOutput({ output }: { output: unknown }) {
   if (output && typeof output === "object" && "cart" in output) {
     const { cart: _cart, ...summary } = output;
@@ -38,7 +37,7 @@ export const getCartTool = tool({
   toModelOutput: cartModelOutput,
   execute: async () => {
     const { cart: cartId } = getAgentContext();
-    if (!cartId) return { cart: null, empty: true };
+    if (!cartId) return { empty: true };
 
     try {
       return cartSummary(await getCartById(cartId));
@@ -67,7 +66,7 @@ export const addToCartTool = tool({
         { lines: [{ merchandiseId: variantId, quantity }] },
         cartId,
       );
-      return { added: true, ...cartSummary(cart) };
+      return { cartUpdated: Boolean(cart) };
     } catch (error) {
       console.error("Failed to add to cart:", error);
       return { error: "Could not add that item to the cart." };
@@ -89,7 +88,7 @@ export const updateCartItemTool = tool({
 
     try {
       const { cart } = await runCartMutation({ lines: [{ id: lineId, quantity }] }, cartId);
-      return { removed: quantity === 0, updated: true, ...cartSummary(cart) };
+      return { cartUpdated: Boolean(cart) };
     } catch (error) {
       console.error("Failed to update cart line:", error);
       return { error: "Could not update that cart line." };
@@ -107,7 +106,7 @@ export const addCartNoteTool = tool({
 
     try {
       const { cart } = await runCartMutation({ note }, cartId);
-      return { noteUpdated: true, ...cartSummary(cart) };
+      return { cartUpdated: Boolean(cart) };
     } catch (error) {
       console.error("Failed to update cart note:", error);
       return { error: "Could not update the cart note." };
