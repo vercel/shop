@@ -12,7 +12,7 @@ No additional setup is required for the standard cart. The cart ID is stored in 
 
 ## Shopper experience
 
-Shoppers can add products, change quantities, remove lines, apply discount codes, and proceed to checkout. The cart overlay is available throughout the storefront, and `/cart` provides the full cart with product recommendations.
+Shoppers can add products, change quantities, remove lines, apply discount codes, and proceed to checkout. The cart overlay is available throughout the storefront, and `/cart` provides the full cart.
 
 Updates are optimistic: quantities and badges change immediately, then reconcile with Shopify. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Prices and totals show muted updating text while Shopify confirms the cost. Checkout remains unavailable until pending cart changes finish. Line-specific errors appear alongside the affected item.
 
