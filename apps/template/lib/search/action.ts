@@ -1,14 +1,13 @@
 "use server";
 
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { resolveBrowseParams } from "@/lib/collections/server";
 import { fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import type { PageInfo, ProductCard } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function loadMoreSearchProductsAction(params: {
   collection?: string;
   cursor: string;
-  locale: string;
   query?: string;
   search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
@@ -21,10 +20,8 @@ export async function loadMoreSearchProductsAction(params: {
     cursor: params.cursor,
     sortKey: sort,
     filters,
-    limit: RESULTS_PER_PAGE,
-    locale: params.locale,
+    limit: PRODUCTS_PER_PAGE,
   });
-
   return {
     products: result.products,
     pageInfo: result.pageInfo,

@@ -5,16 +5,13 @@ import { getCollections } from "@/lib/shopify/operations/collections";
 import { getCollectionProducts } from "@/lib/shopify/operations/products";
 
 import { toAgentProduct } from "../products";
-import { getAgentContext } from "../server";
 
 export const listCollectionsTool = tool({
   description: "List the store's collections and categories.",
   inputSchema: z.object({}),
   execute: async () => {
-    const { user } = getAgentContext();
-
     try {
-      const collections = await getCollections({ locale: user.locale });
+      const collections = await getCollections();
       return {
         collections: collections.map((collection) => ({
           description: collection.description,
@@ -39,13 +36,10 @@ export const browseCollectionTool = tool({
       .default("best-matches"),
   }),
   execute: async ({ collection, sortKey }) => {
-    const { user } = getAgentContext();
-
     try {
       const { products } = await getCollectionProducts({
         collection,
         limit: 6,
-        locale: user.locale,
         sortKey,
       });
       return { products: products.map(toAgentProduct) };

@@ -2,8 +2,8 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { getSearchResultUrl } from "@shopify/hydrogen";
+import { cn } from "cn";
 import { Search, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -12,7 +12,6 @@ import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
 import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);
@@ -38,8 +37,6 @@ export function SearchModal() {
 }
 
 function SearchTrigger() {
-  const t = useTranslations("nav");
-
   return (
     <DialogTrigger
       render={
@@ -48,7 +45,7 @@ function SearchTrigger() {
           className="flex items-center justify-center text-foreground hover:text-foreground/80 transition-colors"
         >
           <Search className="size-5" />
-          <span className="sr-only">{t("search")}</span>
+          <span className="sr-only">Search</span>
         </button>
       }
     />
@@ -58,15 +55,11 @@ function SearchTrigger() {
 function SearchDialogContent({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const t = useTranslations("nav");
-
   const { query, setQuery, results, isLoading, activeIndex, setActiveIndex, reset } =
     usePredictiveSearch();
-
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.focus());
   }, []);
-
   const navigate = useCallback(
     (href: string) => {
       router.push(href);
@@ -74,7 +67,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     },
     [router, onClose],
   );
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const q = inputRef.current?.value?.trim();
@@ -84,7 +76,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
 
   // Only queries and products are rendered — exclude collections from keyboard nav
   const visibleItems = (results?.queries.length ?? 0) + (results?.products.length ?? 0);
-
   function navigateToActiveItem() {
     if (!results || activeIndex < 0) return;
 
@@ -102,7 +93,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigate(`/products/${product.handle}`);
     }
   }
-
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown" && visibleItems > 0) {
       e.preventDefault();
@@ -119,9 +109,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigateToActiveItem();
     }
   }
-
   const show = query.trim().length > 0 && (results !== null || isLoading);
-
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 z-60 bg-black/30 backdrop-blur-sm" />
@@ -134,7 +122,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
         }}
       >
         <div className="w-full max-w-xl h-fit">
-          <DialogTitle className="sr-only">{t("search")}</DialogTitle>
+          <DialogTitle className="sr-only">Search</DialogTitle>
           <div className="bg-background rounded-xl shadow-lg overflow-hidden duration-200">
             <form onSubmit={handleSubmit} className="flex items-center gap-3 px-4 py-3">
               <Search className="size-4 shrink-0 text-foreground/40" />
@@ -143,7 +131,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                 type="text"
                 name="q"
                 role="combobox"
-                placeholder={t("searchPlaceholder")}
+                placeholder="Search products"
                 maxLength={100}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
@@ -167,7 +155,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                   }}
                   className="shrink-0 text-sm text-foreground/60 hover:text-foreground transition-colors"
                 >
-                  {t("searchClear")}
+                  Clear
                 </button>
               )}
               <DialogPrimitive.Close className="shrink-0 flex items-center justify-center rounded-full text-foreground/40 hover:text-foreground transition-colors">
@@ -205,7 +193,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                     {results.products.length > 0 && (
                       <div>
                         <div className="px-4 pt-3 pb-1.5 text-xs font-medium text-foreground/50 uppercase tracking-wider">
-                          {t("predictiveSearch.products")}
+                          Products
                         </div>
                         {results.products.map((product, i) => (
                           <ProductResult
@@ -222,7 +210,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                       results.collections.length === 0 &&
                       results.queries.length === 0 && (
                         <div className="px-4 py-6 text-center text-sm text-foreground/50">
-                          {t("predictiveSearch.noResults", { query })}
+                          {`No results for "${query}"`}
                         </div>
                       )}
 
@@ -238,7 +226,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                             }
                             className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
                           >
-                            {t("predictiveSearch.viewAllShort")}
+                            View All
                           </button>
                         </div>
                       )}
@@ -290,8 +278,6 @@ function ProductResult({
   active: boolean;
   onNavigate: (href: string) => void;
 }) {
-  const locale = useLocale();
-
   return (
     <button
       type="button"
@@ -317,7 +303,6 @@ function ProductResult({
         <Price
           amount={product.price.amount}
           currencyCode={product.price.currencyCode}
-          locale={locale}
           className="text-sm text-foreground/70"
         />
       </div>

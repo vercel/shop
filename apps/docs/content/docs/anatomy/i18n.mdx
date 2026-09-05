@@ -1,24 +1,34 @@
 ---
 title: Translations
-description: How the storefront keeps translation catalogs on the server and sends the browser only the messages needed for interactive UI.
+description: Customize storefront copy for one deployment, then add translated languages or Shopify Markets when needed.
 ---
 
-The storefront uses next-intl for translated copy and locale-aware formatting. Translation catalogs stay on the server by default, which keeps unnecessary messages out of browser JavaScript.
+The default storefront serves one deployment with clean URLs such as `/products/shoe`. It keeps copy alongside components rather than using a translation library. next-intl and language switching are optional upgrades.
 
-## Add translated copy
+## Customize storefront copy
 
-Add every new shopper-facing message to every locale catalog. Keep the same message structure across locales.
+Edit shopper-facing text in the component that displays it. The default storefront has no central translation catalog; labels, messages, and accessibility text are kept with the interface they describe.
 
-Render fixed text on the server whenever possible. If an interactive area needs translations after the page loads, provide only the messages used by that area. Examples include cart errors, search results, collection filters, and product purchase controls.
+After changing a quantity message, check zero, one, and multiple items. Include loading states, empty states, errors, and accessibility labels when reviewing copy.
 
-A small set of shared error messages must remain available throughout the application because route error screens run in the browser.
+## Set the deployment context
 
-## Keep browser messages small
+Set `shopConfig.localization` in `lib/config.ts` for the deployment:
 
-Pass a few translated labels directly when an interactive element needs only fixed text. Provide a translation namespace when related controls need dynamic messages, plurals, or interpolation.
+```ts
+localization: {
+  country: "US",
+  language: "EN",
+  locale: "en-US",
+},
+```
 
-Do not import complete translation catalogs into browser code. This increases the JavaScript sent to every shopper and can expose messages that the current page never uses.
+Country and language configure Shopify requests. Locale controls display formatting, such as numbers and dates. Prices use the currency returned by Shopify; changing a formatting locale does not convert a price.
+
+These settings do not translate the storefront's own labels. Edit copy separately, and publish translated product or editorial content in Shopify when needed. The default does not negotiate a shopper's locale or add locale prefixes to URLs.
 
 ## What’s next
 
-Common additions include a locale selector, Shopify Markets for localized catalogs and currencies, and a translation workflow for larger teams. Add a locale to storefront navigation only after its fixed copy, interactive states, plurals, formatting, and error messages are complete.
+Use [Enable i18n](/docs/skills/enable-i18n) to add next-intl, translated catalogs, and locale-prefixed URLs without changing the commerce country. Use [Enable Shopify Markets](/docs/skills/enable-shopify-markets) for regional commerce context and Shopify-controlled pricing. Both upgrades must preserve existing translations and routing in stores that are already localized.
+
+Add a language to navigation only when its fixed copy, interactive messages, plurals, formatting, and error states are ready. A copy-language selector and a commerce-country selector solve different problems; changing language alone should not move a shopper into another market.

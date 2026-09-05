@@ -8,17 +8,18 @@ prerequisites:
 
 Use this page to find where Shopify content appears in the storefront. For credentials and permissions, see [Getting Started](/docs/getting-started) and [Storefront API Permissions](/docs/reference/storefront-api-permissions).
 
-| Shopify content | Storefront location      | Setup or behavior                                                                                    |
-| --------------- | ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Products        | `/products/[handle]`     | [Product setup](/docs/shopify/pdp) and [PDP anatomy](/docs/anatomy/pages/pdp)                        |
-| Collections     | `/collections/[handle]`  | [PLP anatomy](/docs/anatomy/pages/plp)                                                               |
-| Pages           | `/pages/[handle]`        | [Content pages](/docs/anatomy/pages/content)                                                         |
-| Policies        | `/policies/[handle]`     | [Footer](/docs/anatomy/footer)                                                                       |
-| Search          | `/search`                | [PLP and search anatomy](/docs/anatomy/pages/plp)                                                    |
-| Cart            | `/cart` and cart overlay | [Cart](/docs/anatomy/cart)                                                                           |
-| Menus           | Navigation and footer    | [Navigation](/docs/anatomy/navigation) and [Enable Shopify menus](/docs/skills/enable-shopify-menus) |
+| Shopify content    | Storefront location                                             | Setup or behavior                                                                                    |
+| ------------------ | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Products           | `/products/[handle]`                                            | [Product setup](/docs/shopify/pdp) and [PDP anatomy](/docs/anatomy/pages/pdp)                        |
+| Collections        | `/collections/[handle]`                                         | [PLP anatomy](/docs/anatomy/pages/plp)                                                               |
+| Pages              | `/pages/[handle]`                                               | [Content pages](/docs/anatomy/pages/content)                                                         |
+| Blogs and articles | `/blogs/[blogHandle]` and `/blogs/[blogHandle]/[articleHandle]` | [Content pages](/docs/anatomy/pages/content)                                                         |
+| Policies           | `/policies/[handle]`                                            | [Footer](/docs/anatomy/footer)                                                                       |
+| Search             | `/search`                                                       | [PLP and search anatomy](/docs/anatomy/pages/plp)                                                    |
+| Cart               | `/cart` and cart overlay                                        | [Cart](/docs/anatomy/cart)                                                                           |
+| Menus              | Navigation and footer                                           | [Navigation](/docs/anatomy/navigation) and [Enable Shopify menus](/docs/skills/enable-shopify-menus) |
 
-Navigation uses the template's configured links by default. To manage it from Shopify Admin, enable Shopify menus and configure `main-menu` and `footer` under **Online Store → Navigation**.
+Navigation uses the template's configured links by default. To manage navigation and footer links in Shopify Admin, follow [Enable Shopify menus](/docs/skills/enable-shopify-menus).
 
 Configure [Shopify webhooks](/docs/anatomy/webhooks) so product and collection edits appear promptly. Without webhooks, cached content remains until its cache lifetime expires.
 

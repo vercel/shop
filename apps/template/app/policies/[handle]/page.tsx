@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopPolicies, getShopPolicy } from "@/lib/shopify/operations/policies";
 
@@ -22,12 +21,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/policies/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) return {};
-
-  const policy = await getShopPolicy({ handle, locale });
+  const policy = await getShopPolicy({
+    handle,
+  });
   if (!policy) notFound();
-
   const pathname = `/policies/${policy.handle}`;
   return {
     alternates: buildAlternates({ pathname }),
@@ -39,11 +38,11 @@ export async function generateMetadata({
 export const instant = false;
 
 export default async function PolicyPage({ params }: PageProps<"/policies/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
-
-  const policy = await getShopPolicy({ handle, locale });
+  const policy = await getShopPolicy({
+    handle,
+  });
   if (!policy) notFound();
-
   return <RichTextPage body={policy.body} title={policy.title} />;
 }

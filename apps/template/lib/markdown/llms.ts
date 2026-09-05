@@ -10,10 +10,10 @@ function summarize(text: string, max = 200): string {
 
 export function llmsTxt({
   collections,
-  locale,
+  locale = shopConfig.localization.locale,
 }: {
   collections: Collection[];
-  locale: string;
+  locale?: string;
 }): string {
   const { name, url } = shopConfig.site;
   const sections: string[] = [];

@@ -1,25 +1,24 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { getComplementaryProducts } from "@/lib/shopify/operations/products";
 import type { ProductCard } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export async function ComplementaryProducts({
   handle,
   limit,
-  locale,
   title,
 }: {
   handle: string;
   limit: number;
-  locale: string;
   title: string;
 }) {
-  const complementary = await getComplementaryProducts({ handle, locale });
+  const complementary = await getComplementaryProducts({
+    handle,
+  });
   if (complementary.length === 0) return null;
-
   return (
     <div className="grid gap-2.5" data-slot="complementary-products">
       <h2 className="font-medium text-foreground/70 text-sm">{title}</h2>
@@ -42,9 +41,11 @@ export async function ComplementaryProducts({
                 <ImagePlaceholder className="size-12 shrink-0 rounded-md" />
               )}
               <span className="min-w-0 flex-1 truncate font-medium text-sm">{product.title}</span>
-              <span className="shrink-0 text-foreground/50 text-sm">
-                {formatPrice(product.price, locale)}
-              </span>
+              <Price
+                amount={product.price.amount}
+                className="shrink-0 text-sm"
+                currencyCode={product.price.currencyCode}
+              />
             </Link>
           </li>
         ))}

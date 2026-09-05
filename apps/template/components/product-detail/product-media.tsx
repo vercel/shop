@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { cn } from "cn";
 import Image, { getImageProps } from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
@@ -8,7 +8,6 @@ import { preload } from "react-dom";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { Image as ImageType, Video } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 import { Lightbox, LightboxTrigger } from "./lightbox";
 
@@ -26,6 +25,7 @@ function mediaKey(item: MediaItem) {
 // The LCP image gets a preload link + eager + fetchpriority=high (`preload` alone no longer implies high).
 // Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
 const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
+
 const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
 
 const GRID_SIZES = "(min-width: 1024px) 25vw, 50vw";
@@ -124,8 +124,6 @@ function Carousel({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [itemCount, setItemCount] = useState(mediaItems.length);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
-  const t = useTranslations("product");
-
   const scrollToImage = (index: number) => {
     if (!container) return;
     container.scrollTo({
@@ -134,7 +132,6 @@ function Carousel({
     });
     setSelectedIndex(index);
   };
-
   useEffect(() => {
     if (!container) return;
 
@@ -163,7 +160,6 @@ function Carousel({
       mutationObserver.disconnect();
     };
   }, [container]);
-
   return (
     <div className="grid gap-5">
       <div
@@ -204,7 +200,7 @@ function Carousel({
                 ? "bg-foreground w-8"
                 : "bg-muted-foreground/30 w-1.5 hover:bg-muted-foreground/50",
             )}
-            aria-label={t("goToImage", { number: String(idx + 1) })}
+            aria-label={`Go to image ${idx + 1}`}
           />
         ))}
       </div>

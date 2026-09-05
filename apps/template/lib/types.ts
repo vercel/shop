@@ -1,7 +1,5 @@
 import type { I18nConfig } from "@shopify/hydrogen";
 
-import type { Locale } from "@/lib/i18n";
-
 export interface Money {
   amount: string;
   currencyCode: string;
@@ -134,74 +132,6 @@ export interface Category {
   ancestors: Category[];
   id: string;
   name: string;
-}
-
-export interface Cart {
-  appliedGiftCards: AppliedGiftCard[];
-  checkoutUrl: string;
-  cost: {
-    subtotalAmount: Money;
-    totalAmount: Money;
-  };
-  discountAllocations: DiscountAllocation[];
-  discountCodes: DiscountCode[];
-  id: string | undefined;
-  lines: CartLine[];
-  note: string | null;
-  shippingCost: Money | null;
-  totalQuantity: number;
-}
-
-export interface CartLine {
-  canRemove: boolean;
-  canUpdateQuantity: boolean;
-  components: CartLine[];
-  cost: {
-    totalAmount: Money;
-  };
-  discountAllocations: DiscountAllocation[];
-  id: string | undefined;
-  merchandise: CartMerchandise;
-  quantity: number;
-}
-
-interface DiscountCode {
-  applicable: boolean;
-  code: string;
-}
-
-export type DiscountAllocation =
-  | { kind: "code"; code: string; discountedAmount: Money }
-  | { kind: "automatic" | "custom"; title: string; discountedAmount: Money };
-
-interface AppliedGiftCard {
-  amountUsed: Money;
-  balance: Money;
-  id: string;
-  lastCharacters: string;
-}
-
-export interface CartWarning {
-  code: string;
-  message: string;
-  target: string;
-}
-
-interface CartMerchandise {
-  compareAtPrice?: Money;
-  id: string;
-  image?: Image;
-  price?: Money;
-  product: CartProduct;
-  selectedOptions: SelectedOption[];
-  title: string;
-}
-
-interface CartProduct {
-  featuredImage: Image;
-  handle: string;
-  id: string;
-  title: string;
 }
 
 export interface Collection {

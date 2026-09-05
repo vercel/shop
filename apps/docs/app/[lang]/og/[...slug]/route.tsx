@@ -38,7 +38,7 @@ export const GET = async (
 
   return new ImageResponse(
     <div style={{ fontFamily: "Geist" }} tw="flex h-full w-full bg-black">
-      {/** biome-ignore lint/performance/noImgElement: "Required for Satori" */}
+      {/* oxlint-disable-next-line next/no-img-element -- Satori renders this image, not the browser. */}
       <img
         alt="Vercel OpenGraph Background"
         height={628}

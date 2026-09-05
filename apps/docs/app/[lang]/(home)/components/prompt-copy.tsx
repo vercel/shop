@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@vercel/analytics";
+import { cn } from "cn";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -11,7 +12,6 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/components/ui/input-group";
-import { cn } from "@/lib/utils";
 
 const COPY_TIMEOUT = 2000;
 
@@ -52,10 +52,6 @@ export const PromptCopy = ({ className, command, agentCommand }: PromptCopyProps
     return () => window.clearTimeout(timeoutId);
   }, [copied]);
 
-  useEffect(() => {
-    setCopied(false);
-  }, [mode]);
-
   const handleCopy = async () => {
     await navigator.clipboard.writeText(activeOption.value);
     setCopied(true);
@@ -80,7 +76,12 @@ export const PromptCopy = ({ className, command, agentCommand }: PromptCopyProps
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground",
               )}
-              onClick={() => setMode(option)}
+              onClick={() => {
+                if (option !== mode) {
+                  setMode(option);
+                  setCopied(false);
+                }
+              }}
               type="button"
             >
               {option === "cli" ? "For humans" : "For agents"}

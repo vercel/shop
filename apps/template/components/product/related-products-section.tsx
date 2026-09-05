@@ -1,9 +1,7 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Locale } from "@/lib/i18n";
 import { getRelatedProducts } from "@/lib/shopify/operations/products";
 
 function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title?: string }) {
@@ -23,55 +21,34 @@ function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title
   );
 }
 
-async function Render({
-  handle,
-  limit,
-  locale,
-}: {
-  handle: string | Promise<string>;
-  limit: number;
-  locale: Locale;
-}) {
+async function Render({ handle, limit }: { handle: string | Promise<string>; limit: number }) {
   const resolvedHandle = await handle;
-  const [t, related] = await Promise.all([
-    getTranslations("product"),
-    getRelatedProducts({ handle: resolvedHandle, locale }),
-  ]);
-
+  const related = await getRelatedProducts({
+    handle: resolvedHandle,
+  });
   if (related.length === 0) return null;
-
   return (
     <div className="grid gap-4">
-      <h2 className="text-2xl sm:text-3xl">{t("recommendations")}</h2>
+      <h2 className="text-2xl sm:text-3xl">You May Also Like</h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {related.slice(0, limit).map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            locale={locale}
-            outOfStockText={t("outOfStock")}
-          />
+          <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
         ))}
       </div>
     </div>
   );
 }
 
-export async function RelatedProductsSection({
+export function RelatedProductsSection({
   handle,
   limit,
-  locale,
 }: {
   handle: string | Promise<string>;
   limit: number;
-  locale: Locale;
 }) {
-  const t = await getTranslations("product");
   return (
-    <Suspense
-      fallback={<RelatedProductsSectionSkeleton limit={limit} title={t("recommendations")} />}
-    >
-      <Render handle={handle} limit={limit} locale={locale} />
+    <Suspense fallback={<RelatedProductsSectionSkeleton limit={limit} title="You May Also Like" />}>
+      <Render handle={handle} limit={limit} />
     </Suspense>
   );
 }

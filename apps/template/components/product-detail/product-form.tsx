@@ -1,7 +1,6 @@
 "use client";
 
 import { createProductComponents } from "@shopify/hydrogen/react";
-import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
@@ -106,18 +105,15 @@ export function useProductFormState(): {
 }
 
 export function ProductFormOptions() {
-  const t = useTranslations("product");
   const { options, selectOption } = useProductFormState();
-  return <ProductInfoOptions options={options} onSelectValue={selectOption} t={t} />;
+  return <ProductInfoOptions options={options} onSelectValue={selectOption} />;
 }
 
 // Renders inside ProductInfoShell, not ProductForm; the server-resolved variant wins until the form publishes.
 export function ProductFormPrice({
   fallbackVariant,
-  locale,
 }: {
   fallbackVariant: ProductFormVariant | undefined;
-  locale: string;
 }) {
   const variant = useContext(SelectedVariantContext)?.variant ?? fallbackVariant;
   if (!variant) return null;
@@ -126,7 +122,6 @@ export function ProductFormPrice({
       amount={variant.price.amount}
       currencyCode={variant.price.currencyCode}
       compareAtAmount={variant.compareAtPrice?.amount}
-      locale={locale}
     />
   );
 }
@@ -142,11 +137,12 @@ export function ProductFormGiftCard({
   handle: string;
   title: string;
 }) {
-  const variant = useProductFormState().selectedVariant ?? fallbackVariant;
+  const { selectedVariant } = useProductFormState();
+  const variant = selectedVariant ?? fallbackVariant;
   if (!variant) return null;
   return (
     <GiftCardPurchaseForm
-      merchandiseId={variant.id}
+      merchandiseId={selectedVariant?.id}
       productInfo={variantToOptimisticInfo(variant, { title, handle, featuredImage })}
     />
   );

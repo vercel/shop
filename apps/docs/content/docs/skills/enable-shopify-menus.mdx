@@ -40,7 +40,7 @@ Wait for the user to answer before proceeding.
 
 Skip this section if the user did not select the nav menu.
 
-Edit `components/nav/index.tsx`. Add the `getMenu` import and swap the data source:
+Edit `components/nav/index.tsx`. Change the signature to `export async function Nav()` (preserving any existing props in a customized storefront), add the `getMenu` import, and swap the data source:
 
 ```tsx
 import { getMenu } from "@/lib/shopify/operations/menu";
@@ -79,12 +79,13 @@ const items = menu?.items ?? [];
 
 Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` already accepts `MenuItem[]`. The footer's default is empty (no columns), so falling back to `[]` simply hides the section when the Shopify menu is missing or empty.
 
-The `Footer` callsite in `app/layout.tsx` (or wherever it is rendered) already passes `locale`; if it is not wrapped in `<Suspense>`, the menu fetch will block layout render — that is acceptable since `getMenu` is cached with `"use cache: remote"` and `cacheLife("max")`. Wrap in `<Suspense>` only if you specifically want the rest of the page to stream ahead of the footer.
+Inspect the `Footer` callsite and `getMenu` operation instead of assuming a locale prop exists. The default uses explicit `shopConfig.localization` commerce settings and inline component copy; no `getLocale()` helper is needed. In an already localized or Markets-enabled store, preserve and pass its validated commerce context through menu operations and cache inputs. Keep existing cache directives and Suspense boundaries; do not change rendering policy just to enable a menu.
 
 ---
 
 ## Guardrails
 
+- New fallback labels belong alongside the consuming domain component; preserve catalogs and translated fallbacks in an already localized installation. Shopify menu translations and storefront fallback copy are separate.
 - The `getMenu()` operation in `lib/shopify/operations/menu.ts` already handles caching (`"use cache: remote"`, `cacheTag("menus")`) and URL transformation. Do not duplicate that logic.
 - Always preserve the inline fallback so a missing or empty Shopify menu doesn't leave the user with a blank nav or footer.
 - External links (URLs starting with `http`) are handled by the existing `MenuLink` helpers in each component — no change needed.

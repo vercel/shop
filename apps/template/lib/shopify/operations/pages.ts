@@ -1,7 +1,7 @@
 import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type { ContentPage } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
@@ -25,10 +25,10 @@ const GET_PAGE_QUERY = gql(`#graphql
 
 export async function getPage({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ContentPage | undefined> {
   "use cache";
   cacheLife("max");

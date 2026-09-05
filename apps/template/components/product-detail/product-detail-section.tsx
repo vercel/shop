@@ -1,6 +1,5 @@
+import { cn } from "cn";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
@@ -31,7 +30,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
-import type { Locale } from "@/lib/i18n";
 import {
   getSelectedColorImage,
   getSharedImages,
@@ -42,23 +40,18 @@ import {
   toStaticOptionGroups,
 } from "@/lib/product";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
-export async function ProductDetailSection({
+export function ProductDetailSection({
   product,
   selectedOptionsPromise,
   variantPromise,
-  locale,
 }: {
   product: ProductDetails;
   selectedOptionsPromise: Promise<SelectedOptions>;
   variantPromise: Promise<ProductVariant | undefined>;
-  locale: Locale;
 }) {
-  const messages = await getMessages();
-
   return (
-    <NextIntlClientProvider messages={{ cart: messages.cart, product: messages.product }}>
+    <>
       <ProductSchema
         product={{
           id: product.id,
@@ -85,9 +78,9 @@ export async function ProductDetailSection({
       />
       <div className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
         <ProductMediaArea product={product} selectedOptionsPromise={selectedOptionsPromise} />
-        <ProductInfoArea product={product} variantPromise={variantPromise} locale={locale} />
+        <ProductInfoArea product={product} variantPromise={variantPromise} />
       </div>
-    </NextIntlClientProvider>
+    </>
   );
 }
 
@@ -164,23 +157,19 @@ async function ResolvedColorImageCarousel({
   return <ColorImageCarouselItems images={[image]} title={product.title} />;
 }
 
-async function ProductInfoArea({
+function ProductInfoArea({
   product,
   variantPromise,
-  locale,
 }: {
   product: ProductDetails;
   variantPromise: Promise<ProductVariant | undefined>;
-  locale: Locale;
 }) {
   const { options, handle, descriptionHtml } = product;
   const uniformStock = product.allVariantsInStock;
   const singleVariant = product.variantsCount === 1;
-  const t = await getTranslations("product");
-  const buyFallbackT = uniformStock && !singleVariant ? t : null;
+  const showBuyLabel = uniformStock && !singleVariant;
   const allInStock = product.defaultVariant?.availableForSale ?? product.availableForSale;
   const hasOptions = options.some((option) => option.values.length > 1);
-
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
       <ProductInfoShell>
@@ -191,12 +180,11 @@ async function ProductInfoArea({
               amount={product.priceRange.minVariantPrice.amount}
               currencyCode={product.priceRange.minVariantPrice.currencyCode}
               compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
-              locale={locale}
             />
           ) : (
             // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
             <Suspense fallback={<div className="h-7" aria-hidden />}>
-              <ResolvedProductPrice variantPromise={variantPromise} locale={locale} />
+              <ResolvedProductPrice variantPromise={variantPromise} />
             </Suspense>
           )}
         </div>
@@ -210,8 +198,7 @@ async function ProductInfoArea({
                 allInStock={allInStock}
                 hasOptions={hasOptions}
                 product={product}
-                t={buyFallbackT}
-                optionsT={t}
+                showLabel={showBuyLabel}
               />
             }
           >
@@ -221,11 +208,11 @@ async function ProductInfoArea({
       </ProductInfoShell>
 
       {!product.isGiftCard && shopConfig.pdp.bundles.isEnabled ? (
-        <BundleRelationships variant={product.defaultVariant} t={t} />
+        <BundleRelationships variant={product.defaultVariant} />
       ) : null}
 
       {!product.isGiftCard && shopConfig.pdp.complementaryProducts.isEnabled ? (
-        <ComplementaryProducts handle={handle} limit={4} locale={locale} title={t("pairsWith")} />
+        <ComplementaryProducts handle={handle} limit={4} title="Pairs Well With" />
       ) : null}
 
       <ProductInfoDescription descriptionHtml={descriptionHtml} />
@@ -235,18 +222,11 @@ async function ProductInfoArea({
 
 async function ResolvedProductPrice({
   variantPromise,
-  locale,
 }: {
   variantPromise: Promise<ProductVariant | undefined>;
-  locale: Locale;
 }) {
   const variant = await variantPromise;
-  return (
-    <ProductFormPrice
-      fallbackVariant={variant ? toProductFormVariant(variant) : undefined}
-      locale={locale}
-    />
-  );
+  return <ProductFormPrice fallbackVariant={variant ? toProductFormVariant(variant) : undefined} />;
 }
 
 async function ResolvedProductInfo({
@@ -293,81 +273,69 @@ function ProductInfoContent({
 }
 
 function ProductInfoFallback({
+  showLabel,
   allInStock,
   hasOptions,
-  optionsT,
   product,
-  t,
 }: {
   allInStock: boolean;
   hasOptions: boolean;
-  optionsT: Awaited<ReturnType<typeof getTranslations<"product">>>;
   product: ProductDetails;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
+  showLabel: boolean;
 }) {
   return (
     <>
       {hasOptions ? (
-        <ProductInfoOptions options={toStaticOptionGroups(product)} t={optionsT} hideImages />
+        <ProductInfoOptions options={toStaticOptionGroups(product)} hideImages />
       ) : null}
       {product.isGiftCard ? (
-        <GiftCardPurchaseFormFallback t={optionsT} />
+        <GiftCardPurchaseFormFallback />
       ) : (
-        <BuyButtonsFallback t={t} allInStock={allInStock} />
+        <BuyButtonsFallback showLabel={showLabel} allInStock={allInStock} />
       )}
     </>
   );
 }
 
 // Bundle relationships are product-level, so keep them in the static shell.
-function BundleRelationships({
-  variant,
-  t,
-}: {
-  variant: ProductVariant | undefined;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
-}) {
+function BundleRelationships({ variant }: { variant: ProductVariant | undefined }) {
   if (!variant) return null;
   if (variant.components.length === 0 && variant.bundleParents.length === 0) return null;
   return (
     <div className="grid gap-5">
-      <BundleComponents components={variant.components} title={t("bundleIncludes")} />
-      <BundleParents variants={variant.bundleParents} title={t("availableInBundles")} />
+      <BundleComponents components={variant.components} title="Bundle Includes" />
+      <BundleParents variants={variant.bundleParents} title="Available in Bundles" />
     </div>
   );
 }
 
-function GiftCardPurchaseFormFallback({
-  t,
-}: {
-  t: Awaited<ReturnType<typeof getTranslations<"product">>>;
-}) {
+function GiftCardPurchaseFormFallback() {
   // Labels and placeholders are static translations, so render the real disabled inputs — the only
   // change on resolve is the fields becoming editable, which keeps geometry stable and avoids CLS.
   return (
     <div className="grid gap-5">
       <div className="grid gap-2.5">
         <div className="grid gap-2.5">
-          <Label>{t("giftCard.recipientEmail")}</Label>
-          <Input type="email" disabled placeholder={t("giftCard.recipientEmailPlaceholder")} />
+          <Label>Recipient email</Label>
+          <Input type="email" disabled placeholder="friend@example.com" />
         </div>
         <div className="grid gap-2.5">
-          <Label>{t("giftCard.recipientName")}</Label>
-          <Input type="text" disabled placeholder={t("giftCard.recipientNamePlaceholder")} />
+          <Label>Recipient name</Label>
+          <Input type="text" disabled placeholder="Friend's name (optional)" />
         </div>
         <div className="grid gap-2.5">
-          <Label>{t("giftCard.message")}</Label>
-          <Textarea rows={3} disabled placeholder={t("giftCard.messagePlaceholder")} />
+          <Label>Message</Label>
+          <Textarea rows={3} disabled placeholder="Write a personal note (optional)" />
         </div>
         <div className="grid gap-3 rounded-lg border p-3">
           <div className="flex items-center justify-between gap-2.5">
-            <Label>{t("giftCard.sendLater")}</Label>
+            <Label>Schedule for later</Label>
             <span className="inline-flex h-[1.15rem] w-8 items-center rounded-full bg-input opacity-50" />
           </div>
         </div>
       </div>
       <div className="flex h-12 w-full cursor-not-allowed items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground opacity-50">
-        {t("giftCard.addToCart")}
+        Add to Cart
       </div>
     </div>
   );
@@ -393,18 +361,18 @@ function QuantityPickerFallback() {
 }
 
 function BuyButtonsFallback({
+  showLabel,
   allInStock,
-  t,
 }: {
   allInStock: boolean;
-  t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
+  showLabel: boolean;
 }) {
   return (
     <div className="grid gap-2.5">
       <div className="flex gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
-          {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
+          {showLabel ? (allInStock ? "Add to Cart" : "Out of Stock") : null}
         </div>
       </div>
       {shopConfig.pdp.buyWithShop.isEnabled ? (

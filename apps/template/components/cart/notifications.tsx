@@ -1,24 +1,19 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useCart } from "@shopify/hydrogen/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
-import { useCart } from "@/components/cart/context";
-
 export function CartNotifications() {
-  const { clearError, lastError } = useCart();
-  const t = useTranslations("cart");
+  const hasNetworkErrors = useCart((state) => state.errors.network.length > 0);
+  const updatedAt = useCart((state) => state.errors.networkUpdatedAt);
 
   useEffect(() => {
-    if (!lastError) return;
-
-    toast.error(t(`errors.${lastError}`), {
-      id: `cart-${lastError}`,
-      onAutoClose: clearError,
-      onDismiss: clearError,
+    if (!hasNetworkErrors) return;
+    toast.error("We couldn't update your cart. Please try again.", {
+      id: `cart-network-${updatedAt}`,
     });
-  }, [clearError, lastError, t]);
+  }, [hasNetworkErrors, updatedAt]);
 
   return null;
 }

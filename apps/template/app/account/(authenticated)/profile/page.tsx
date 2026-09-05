@@ -1,4 +1,3 @@
-import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { AccountPageHeader } from "@/components/account/page-header";
@@ -6,12 +5,10 @@ import { ProfileForm } from "@/components/account/profile-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomerProfile } from "@/lib/shopify/operations/customer";
 
-export default async function ProfilePage() {
-  const t = await getTranslations("account");
-
+export default function ProfilePage() {
   return (
     <>
-      <AccountPageHeader title={t("profile")} description={t("profileDescription")} />
+      <AccountPageHeader title="Profile" description="Your account information" />
       <Suspense fallback={<ProfileSkeleton />}>
         <ProfileContent />
       </Suspense>
@@ -20,17 +17,16 @@ export default async function ProfilePage() {
 }
 
 async function ProfileContent() {
-  const [profile, t] = await Promise.all([getCustomerProfile(), getTranslations("account")]);
+  const profile = await getCustomerProfile();
   if (!profile) return null;
-
   return (
     <ProfileForm
       labels={{
-        email: t("email"),
-        firstName: t("firstName"),
-        lastName: t("lastName"),
-        profileUpdated: t("profileUpdated"),
-        save: t("save"),
+        email: "Email",
+        firstName: "First name",
+        lastName: "Last name",
+        profileUpdated: "Profile updated",
+        save: "Save",
       }}
       profile={profile}
     />

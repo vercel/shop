@@ -1,6 +1,6 @@
 ---
 title: Routes
-description: Every URL in the storefront and its purpose.
+description: Storefront pages, service endpoints, and product variant URLs.
 type: reference
 ---
 
@@ -22,15 +22,53 @@ type: reference
 
 ## API routes
 
-| Route                        | Description                                    |
-| ---------------------------- | ---------------------------------------------- |
-| `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation |
-| `POST /api/chat`             | Shopping-assistant stream                      |
+| Route                        | Description                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation                              |
+| `POST /api/chat`             | Shopping-assistant stream; returns `404` unless `agent.isEnabled` is `true` |
+| `GET /api/cart`              | Current cart                                                                |
+| `POST /api/cart`             | Cart creation and updates                                                   |
+| `GET /api/predictive-search` | Search suggestions                                                          |
+
+Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, and the app's webhook and chat endpoints.
+
+## Customer accounts
+
+These routes require `auth.isEnabled` and the [authentication credentials](/docs/reference/env-vars#customer-authentication): a Shopify client ID, Shopify client secret, and a separate app-generated session secret. Account pages require sign-in. Hydrogen's registered handlers serve the OAuth routes through the Next.js proxy; Next.js renders the protected account pages.
+
+| Route                    | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `/account`               | Redirects to `/account/profile`                        |
+| `/account/profile`       | Customer profile                                       |
+| `/account/addresses`     | Saved addresses                                        |
+| `/account/orders`        | Order history                                          |
+| `/account/orders/[id]`   | Order details                                          |
+| `GET /account/login`     | Starts customer sign-in                                |
+| `GET /account/authorize` | OAuth callback                                         |
+| `GET /account/refresh`   | Refreshes the customer session                         |
+| `POST /account/logout`   | Signs the customer out; requires a same-origin request |
+
+## Discovery and Markdown
+
+| Route                      | Description                         |
+| -------------------------- | ----------------------------------- |
+| `/robots.txt`              | Crawler rules                       |
+| `/sitemap.xml`             | Sitemap index                       |
+| `/sitemap/[shard]`         | Sitemap entries for a content group |
+| `/llms.txt`                | Storefront guide for AI agents      |
+| `/md`                      | Home page in Markdown               |
+| `/md/products/[handle]`    | Product in Markdown                 |
+| `/md/collections/[handle]` | Collection in Markdown              |
+| `/md/search`               | Search results in Markdown          |
+
+The home, product, collection-detail, and search URLs also return Markdown when requested with `Accept: text/markdown`. See [Proxy](/docs/anatomy/proxy) for Shopify compatibility routes.
 
 ## Variant URLs
 
-Product options use one query parameter per option. The key is the option name as defined in Shopify and the value is the selected option value. This matches the URLs a Liquid theme produces.
+Product options use one query parameter per option. The key is the option name as defined in Shopify and the value is the selected option value.
+
+Liquid-style links such as `/products/your-product?variant=123456789` redirect to the matching option-parameter URL.
 
 For example, `/products/your-product?Color=Blue&Size=XS` selects the blue, extra-small variant. Option names and values are matched case-insensitively, so `?color=blue&size=xs` resolves to the same variant. Without option parameters, the page selects the first available variant.
 
-Selecting an option keeps unrelated query parameters, such as campaign tags, in the URL.
+Selecting an option on the same product keeps unrelated query parameters, such as campaign tags, in the URL.

@@ -1,5 +1,3 @@
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { AddressBook } from "@/components/account/address-book";
@@ -7,12 +5,10 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomerAddresses } from "@/lib/shopify/operations/customer";
 
-export default async function AddressesPage() {
-  const t = await getTranslations("account");
-
+export default function AddressesPage() {
   return (
     <>
-      <AccountPageHeader title={t("addresses")} description={t("addressesDescription")} />
+      <AccountPageHeader title="Addresses" description="Manage your saved addresses" />
       <Suspense fallback={<AddressesSkeleton />}>
         <AddressesContent />
       </Suspense>
@@ -21,12 +17,8 @@ export default async function AddressesPage() {
 }
 
 async function AddressesContent() {
-  const [addresses, messages] = await Promise.all([getCustomerAddresses(), getMessages()]);
-  return (
-    <NextIntlClientProvider messages={{ account: messages.account }}>
-      <AddressBook addresses={addresses} />
-    </NextIntlClientProvider>
-  );
+  const addresses = await getCustomerAddresses();
+  return <AddressBook addresses={addresses} />;
 }
 
 function AddressesSkeleton() {

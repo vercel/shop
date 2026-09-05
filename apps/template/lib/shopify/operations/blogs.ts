@@ -1,7 +1,7 @@
 import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type { Blog, BlogArticle } from "@/lib/types";
 
 import { assertStorefrontOk } from "../errors";
@@ -74,6 +74,7 @@ const GET_BLOG_ARTICLE_QUERY = gql(
 );
 
 type ShopifyBlog = ResultOf<typeof BLOG_FRAGMENT>;
+
 type ShopifyArticle = ResultOf<typeof ARTICLE_SUMMARY_FRAGMENT> & {
   contentHtml?: string;
   seo?: { description: string | null; title: string | null } | null;
@@ -109,11 +110,11 @@ function transformArticle(article: ShopifyArticle, blog: ShopifyBlog): BlogArtic
 export async function getBlog({
   handle,
   limit = 50,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
   limit?: number;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<Blog | undefined> {
   "use cache";
   cacheLife("max");
@@ -142,11 +143,11 @@ export async function getBlog({
 export async function getBlogArticle({
   articleHandle,
   blogHandle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   articleHandle: string;
   blogHandle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<BlogArticle | undefined> {
   "use cache";
   cacheLife("max");

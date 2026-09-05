@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import {
@@ -8,14 +7,11 @@ import {
   getAllProductsResultsData,
   getCollectionSearchState,
 } from "@/lib/collections/server";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("collections.all");
-  const title = t("title");
-  const description = t("description");
-
+  const title = "Products";
+  const description = "";
   return {
     title,
     description,
@@ -47,21 +43,18 @@ const ALL_PRODUCTS_SORT_EXCLUDE = [
 ];
 
 export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
-  const [locale, collection] = await Promise.all([getLocale(), getAllProductsCollection()]);
+  const collection = await getAllProductsCollection();
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getAllProductsResultsData({
-    locale,
     searchStatePromise,
   });
-
   return (
     <CollectionDetailPage
       collection={collection}
       collectionResultsDataPromise={collectionResultsDataPromise}
       handle={ALL_PRODUCTS_HANDLE}
-      locale={locale}
       searchStatePromise={searchStatePromise}
       sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}
     />

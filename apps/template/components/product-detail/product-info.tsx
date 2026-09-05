@@ -3,21 +3,19 @@ import type * as React from "react";
 import type { OptionGroupState } from "@/lib/product";
 
 import { AboutItem } from "./about-item";
-import { ColorPicker, type ProductTranslator } from "./color-picker";
+import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 
 interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   options: OptionGroupState[];
-  t: ProductTranslator;
 }
 
 function ProductInfoOptions({
   hideImages,
   onSelectValue,
   options,
-  t,
   className,
   ...props
 }: ProductInfoOptionsProps) {
@@ -28,15 +26,12 @@ function ProductInfoOptions({
   const isShopifyDefaultOption = (opt: OptionGroupState) =>
     opt.name === "Title" && opt.values.length === 1 && opt.values[0]?.name === "Default Title";
   const isSingleValueOption = (opt: OptionGroupState) => opt.values.length === 1;
-
   const renderable = options.filter((opt) => !isShopifyDefaultOption(opt));
   const singleValueOptions = renderable.filter(isSingleValueOption);
   const colorOptions = renderable.filter((opt) => !isSingleValueOption(opt) && isColorOption(opt));
   const otherOptions = renderable.filter((opt) => !isSingleValueOption(opt) && !isColorOption(opt));
-
   if (singleValueOptions.length === 0 && colorOptions.length === 0 && otherOptions.length === 0)
     return null;
-
   return (
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-5">
@@ -52,7 +47,6 @@ function ProductInfoOptions({
             hideImages={hideImages}
             onSelectValue={onSelectValue}
             option={option}
-            t={t}
           />
         ))}
 

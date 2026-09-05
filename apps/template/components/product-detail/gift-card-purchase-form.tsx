@@ -1,20 +1,19 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { cn } from "cn";
 import { useState } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCartDrawer } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { addToCart } from "@/lib/cart/client";
+import { addGiftCardToCart } from "@/lib/cart/gift-card-client";
 import type { OptimisticProductInfo } from "@/lib/product";
-import { cn } from "@/lib/utils";
 
 interface GiftCardPurchaseFormProps {
-  merchandiseId: string;
+  merchandiseId: string | undefined;
   productInfo?: OptimisticProductInfo;
 }
 
@@ -43,109 +42,113 @@ function giftCardAttributes(recipient: {
 }
 
 export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
-  const t = useTranslations("product.giftCard");
-  const { setOverlayOpen, setWarnings } = useCart();
+  const { setOverlayOpen } = useCartDrawer();
   const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isPending || !merchandiseId) return;
     setError(null);
-
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim();
     const name = String(formData.get("name") ?? "").trim();
     const message = String(formData.get("message") ?? "").trim();
     const sendOn = String(formData.get("sendOn") ?? "");
     const form = event.currentTarget;
-
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError(t("invalidEmail"));
+      setError("A valid recipient email is required");
       return;
     }
-
     const scheduled = sendOnEnabled && sendOn;
     if (scheduled) {
       const parsed = new Date(`${sendOn}T00:00:00`);
       if (Number.isNaN(parsed.getTime()) || parsed < new Date(new Date().toDateString())) {
-        setError(t("invalidSendDate"));
+        setError("Send date must be today or later");
         return;
       }
     }
-
-    setWarnings([]);
-    addToCart(
-      merchandiseId,
-      1,
-      productInfo,
-      giftCardAttributes({
-        email,
-        message: message || undefined,
-        name: name || undefined,
-        sendOn: scheduled ? sendOn : undefined,
-        // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
-        timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
-      }),
-    );
-
-    form.reset();
-    setSendOnEnabled(false);
-    setOverlayOpen(true);
+    setIsPending(true);
+    try {
+      const confirmation = addGiftCardToCart(
+        merchandiseId,
+        1,
+        productInfo,
+        giftCardAttributes({
+          email,
+          message: message || undefined,
+          name: name || undefined,
+          sendOn: scheduled ? sendOn : undefined,
+          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
+        }),
+      );
+      setOverlayOpen(true);
+      await confirmation;
+      form.reset();
+      setSendOnEnabled(false);
+    } catch (cause) {
+      setError(
+        cause instanceof Error ? cause.message : "Could not add the gift card. Please try again.",
+      );
+    } finally {
+      setIsPending(false);
+    }
   }
-
   return (
     <form onSubmit={handleSubmit} className="group grid gap-5">
-      <div data-slot="gift-card-fields" className="grid gap-2.5">
+      <fieldset disabled={isPending} data-slot="gift-card-fields" className="grid gap-2.5">
         <div className="grid gap-2.5">
-          <Label htmlFor="gift-card-email">{t("recipientEmail")}</Label>
+          <Label htmlFor="gift-card-email">Recipient email</Label>
           <Input
             id="gift-card-email"
             name="email"
             type="email"
             required
             autoComplete="email"
-            placeholder={t("recipientEmailPlaceholder")}
+            placeholder="friend@example.com"
           />
         </div>
 
         <div className="grid gap-2.5">
-          <Label htmlFor="gift-card-name">{t("recipientName")}</Label>
+          <Label htmlFor="gift-card-name">Recipient name</Label>
           <Input
             id="gift-card-name"
             name="name"
             type="text"
             autoComplete="name"
-            placeholder={t("recipientNamePlaceholder")}
+            placeholder="Friend's name (optional)"
           />
         </div>
 
         <div className="grid gap-2.5">
-          <Label htmlFor="gift-card-message">{t("message")}</Label>
+          <Label htmlFor="gift-card-message">Message</Label>
           <Textarea
             id="gift-card-message"
             name="message"
             rows={3}
-            placeholder={t("messagePlaceholder")}
+            placeholder="Write a personal note (optional)"
           />
         </div>
 
         <div className="grid gap-3 rounded-lg border p-3">
           <div className="flex items-center justify-between gap-2.5">
-            <Label htmlFor="gift-card-send-later">{t("sendLater")}</Label>
+            <Label htmlFor="gift-card-send-later">Schedule for later</Label>
             <Switch
               id="gift-card-send-later"
               checked={sendOnEnabled}
+              disabled={isPending}
               onCheckedChange={setSendOnEnabled}
             />
           </div>
           {sendOnEnabled ? (
             <div className="grid gap-2.5">
-              <Label htmlFor="gift-card-send-on">{t("sendOnLabel")}</Label>
+              <Label htmlFor="gift-card-send-on">Delivery date</Label>
               <Input id="gift-card-send-on" name="sendOn" type="date" required />
             </div>
           ) : null}
         </div>
-      </div>
+      </fieldset>
 
       {error ? (
         <p role="alert" className="text-sm text-destructive">
@@ -155,12 +158,14 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
 
       <Button
         type="submit"
+        data-selection-unresolved={!merchandiseId && !isPending}
+        disabled={isPending || !merchandiseId}
         className={cn(
-          "h-12 w-full justify-center",
+          "h-12 w-full justify-center group-valid:data-[selection-unresolved=true]:disabled:opacity-100",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",
         )}
       >
-        <span>{t("addToCart")}</span>
+        <span>{isPending ? "Adding…" : "Add to Cart"}</span>
       </Button>
     </form>
   );

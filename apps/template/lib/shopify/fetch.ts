@@ -5,7 +5,7 @@ import type {
 } from "@shopify/hydrogen/storefront-api-types";
 
 import type { ActiveFilters } from "@/lib/collections";
-import { defaultLocale } from "@/lib/i18n";
+import { type CommerceLocale, shopConfig } from "@/lib/config";
 import type {
   Collection,
   Filter,
@@ -188,7 +188,7 @@ export type SearchIndexProductsParams = {
   cursor?: string;
   filters?: ProductFilter[];
   limit?: number;
-  locale?: string;
+  locale?: CommerceLocale;
   query?: string;
   sortKey?: string;
 };
@@ -205,7 +205,7 @@ export type CollectionProductsParams = {
   cursor?: string;
   filters?: ProductFilter[];
   limit?: number;
-  locale?: string;
+  locale?: CommerceLocale;
   sortKey?: string;
 };
 
@@ -226,19 +226,16 @@ export async function fetchSearchIndexProducts(
     cursor,
     filters = [],
     limit = 50,
-    locale = defaultLocale,
+    locale = shopConfig.localization,
     query,
     sortKey: rawSortKey = "best-matches",
   } = params;
-
   const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
-
   const trimmedQuery = query?.trim() ?? "";
   const queryParts: string[] = [];
   if (trimmedQuery) queryParts.push(trimmedQuery);
   if (collection) queryParts.push(`collection:'${escapeProductQuery(collection)}'`);
   const searchQuery = queryParts.length > 0 ? queryParts.join(" AND ") : "*";
-
   const response = await storefront.request(PRODUCTS_SEARCH_QUERY, {
     locale,
     variables: {
@@ -252,17 +249,14 @@ export async function fetchSearchIndexProducts(
   });
   assertStorefrontOk(response, "searchProducts");
   const { data } = response;
-
   const shopifyProducts = data.search.edges.flatMap((edge) =>
     edge.node.__typename === "Product" ? [edge.node] : [],
   );
-
   const selectedColor = getSelectedColorFilterLabel(
     activeFilters,
     filters,
     data.search.productFilters,
   );
-
   return {
     pageInfo: data.search.pageInfo,
     products: shopifyProducts.map((product) =>
@@ -281,12 +275,10 @@ export async function fetchCollectionProducts(
     cursor,
     filters = [],
     limit = 50,
-    locale = defaultLocale,
+    locale = shopConfig.localization,
     sortKey: rawSortKey = "best-matches",
   } = params;
-
   const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
-
   const response = await storefront.request(COLLECTION_PRODUCTS_QUERY, {
     locale,
     variables: {
@@ -300,7 +292,6 @@ export async function fetchCollectionProducts(
   });
   assertStorefrontOk(response, "collectionProducts");
   const { data } = response;
-
   if (!data.collection) {
     return {
       filters: [],
@@ -308,7 +299,6 @@ export async function fetchCollectionProducts(
       products: [],
     };
   }
-
   const shopifyProducts = flattenConnection(data.collection.products);
   const selectedColor = getSelectedColorFilterLabel(
     activeFilters,
@@ -322,7 +312,6 @@ export async function fetchCollectionProducts(
     activeFilters,
     currencyCode: products[0]?.price.currencyCode,
   });
-
   return {
     filters: transformed.filters,
     pageInfo: data.collection.products.pageInfo,
@@ -333,10 +322,10 @@ export async function fetchCollectionProducts(
 
 export async function fetchProductWithVariants({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductDetails | undefined> {
   const response = await storefront.request(GET_PRODUCT_WITH_VARIANTS_QUERY, {
     locale,
@@ -351,10 +340,10 @@ export async function fetchProductWithVariants({
 
 export async function fetchComplementaryProducts({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   const response = await storefront.request(COMPLEMENTARY_PRODUCTS_QUERY, {
     locale,
@@ -367,10 +356,10 @@ export async function fetchComplementaryProducts({
 
 export async function fetchRelatedProducts({
   handle,
-  locale = defaultLocale,
+  locale = shopConfig.localization,
 }: {
   handle: string;
-  locale?: string;
+  locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   const response = await storefront.request(RELATED_PRODUCTS_QUERY, {
     locale,
@@ -383,8 +372,11 @@ export async function fetchRelatedProducts({
 
 export async function fetchCollections({
   limit = 250,
-  locale = defaultLocale,
-}: { limit?: number; locale?: string } = {}): Promise<Collection[]> {
+  locale = shopConfig.localization,
+}: {
+  limit?: number;
+  locale?: CommerceLocale;
+} = {}): Promise<Collection[]> {
   const response = await storefront.request(GET_COLLECTIONS_QUERY, {
     locale,
     variables: { first: limit },

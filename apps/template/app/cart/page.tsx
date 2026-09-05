@@ -1,30 +1,13 @@
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { CartViewedTracker } from "@/components/analytics/trackers";
-import { CartItemsList } from "@/components/cart-page/cart-items-list";
-import { Empty } from "@/components/cart-page/empty-cart";
-import { Header } from "@/components/cart-page/header";
+import { CartPageBody } from "@/components/cart-page/body";
 import { PageSkeleton } from "@/components/cart-page/skeletons";
-import { Summary } from "@/components/cart-page/summary";
-import { CartContextSync } from "@/components/cart/context";
-import { CartWarnings } from "@/components/cart/warnings";
-import { RelatedProductsSection } from "@/components/product/related-products-section";
-import { Container } from "@/components/ui/container";
-import { Page } from "@/components/ui/page";
-import { Sections } from "@/components/ui/sections";
-import { getCart } from "@/lib/cart/server";
-import { shopConfig } from "@/lib/config";
-import type { Locale } from "@/lib/i18n";
-import { getLocale } from "@/lib/params";
-import { withFallback } from "@/lib/shopify/errors";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("cart");
   return {
-    title: t("title"),
+    title: "Cart",
     robots: {
       index: false,
       follow: false,
@@ -32,70 +15,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function CartPage() {
-  const locale = await getLocale();
-
+export default function CartPage() {
   return (
     <main>
       <CartViewedTracker />
       <Suspense fallback={<PageSkeleton />}>
-        <CartContent locale={locale} />
+        <CartPageBody />
       </Suspense>
     </main>
-  );
-}
-
-async function CartContent({ locale }: { locale: Locale }) {
-  const [cart, messages, t] = await Promise.all([
-    withFallback(getCart(), undefined),
-    getMessages(),
-    getTranslations("cart"),
-  ]);
-
-  return (
-    <NextIntlClientProvider messages={{ cart: messages.cart }}>
-      <CartContextSync cart={cart ?? null}>
-        {!cart || cart.totalQuantity === 0 ? (
-          <Empty />
-        ) : (
-          <Page>
-            <Container>
-              <Sections>
-                <Header title={t("shoppingCart")} />
-                <CartWarnings />
-                <div className="grid gap-5 lg:grid-cols-12">
-                  <div className="lg:col-span-8 xl:col-span-9">
-                    <CartItemsList
-                      emptyLabel={t("empty")}
-                      itemsLabel={t("cartItemsLabel")}
-                      locale={locale}
-                    />
-                  </div>
-                  <aside className="lg:col-span-4 xl:col-span-3">
-                    <div className="lg:sticky lg:top-20">
-                      <Summary
-                        completeCheckoutLabel={t("completeCheckout")}
-                        estimatedTotalLabel={t("estimatedTotal")}
-                        locale={locale}
-                        taxesAndShippingNote={t("taxesAndShippingNote")}
-                        updatingCartLabel={t("updatingCart")}
-                      />
-                    </div>
-                  </aside>
-                </div>
-                {shopConfig.pdp.relatedProducts.isEnabled &&
-                cart.lines[0]?.merchandise.product.handle ? (
-                  <RelatedProductsSection
-                    handle={cart.lines[0].merchandise.product.handle}
-                    limit={4}
-                    locale={locale}
-                  />
-                ) : null}
-              </Sections>
-            </Container>
-          </Page>
-        )}
-      </CartContextSync>
-    </NextIntlClientProvider>
   );
 }

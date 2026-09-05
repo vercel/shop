@@ -1,17 +1,14 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 
 import { AgentPanel } from "./client";
 
 export function AgentButton() {
-  const t = useTranslations("agent");
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-
   return (
     <>
       <button
@@ -25,7 +22,7 @@ export function AgentButton() {
         type="button"
       >
         <MessageCircle className="size-4 text-primary" />
-        <span className="sr-only">{t("openAssistant")}</span>
+        <span className="sr-only">Open shopping assistant</span>
       </button>
       {/* Mount on first open, then keep mounted so the panel keeps chat state and can animate out. */}
       {hasOpened && <AgentPanel onOpenChange={setOpen} open={open} triggerRef={triggerRef} />}
