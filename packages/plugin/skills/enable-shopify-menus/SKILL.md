@@ -29,7 +29,7 @@ Wait for the user to answer before proceeding.
 
 Skip this section if the user did not select the nav menu.
 
-Edit `components/nav/index.tsx`. Add the `getMenu` import and swap the data source:
+Edit `components/nav/index.tsx`. Change the signature to `export async function Nav()` (preserving any existing props in a customized storefront), add the `getMenu` import, and swap the data source:
 
 ```tsx
 import { getMenu } from "@/lib/shopify/operations/menu";

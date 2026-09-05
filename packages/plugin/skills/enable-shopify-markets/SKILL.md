@@ -95,14 +95,26 @@ export function isEnabledLocale(value: string): value is Locale {
 Create boundary validation such as `isEnabledLocale` on the fresh baseline; retain existing `isEnabledLocale` / `resolveLocale` behavior where present. Reject unsupported request values instead of casting arbitrary strings to `Locale`. For the approved regional-locale strategy, derive Shopify context from the validated locale:
 
 ```ts
-export function getCountryCode(locale: Locale): string {
-  return new Intl.Locale(locale).region ?? new Intl.Locale(defaultLocale).region ?? "US";
+import type { CommerceLocale } from "@/lib/config";
+
+export function getCountryCode(locale: Locale): CommerceLocale["country"] {
+  const country = new Intl.Locale(locale).region;
+  if (country === "US" || country === "CA") return country;
+  throw new Error(`Unsupported commerce country: ${country}`);
 }
 
-export function getLanguageCode(locale: Locale): string {
-  return new Intl.Locale(locale).language.toUpperCase();
+export function getLanguageCode(locale: Locale): CommerceLocale["language"] {
+  const language = new Intl.Locale(locale).language.toUpperCase();
+  if (language === "EN" || language === "FR") return language;
+  throw new Error(`Unsupported commerce language: ${language}`);
+}
+
+export function getCommerceLocale(locale: Locale): CommerceLocale {
+  return { country: getCountryCode(locale), language: getLanguageCode(locale) };
 }
 ```
+
+These guards cover only the example locale list above. Extend them deliberately for the store's approved countries and languages; reject unsupported values rather than asserting them into Shopify types. Pass `getCommerceLocale(locale)` to operation `locale` options.
 
 Prefer `Locale` over `string` for internal routing locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated. Validate the country/language conversion against Shopify's supported values with Shopify AI Toolkit; do not assume uppercasing every BCP 47 language produces a valid Shopify language code.
 

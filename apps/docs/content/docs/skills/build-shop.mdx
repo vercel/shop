@@ -37,6 +37,12 @@ Build the shop around commerce truth first: what product or collection is being 
 4. Read the local Next.js documentation under `node_modules/next/dist/docs/` for any API being changed. This template may use newer Cache Components and prefetch behavior than model knowledge.
 5. Preserve existing cache directives, promises, invalidation tags, auth gates, redirects, metadata, and `notFound()` behavior unless the task explicitly changes the domain behavior.
 
+## Copy and deployment defaults
+
+The default storefront uses inline component copy and reusable content functions in `lib/content/index.ts`. Keep copy server-first, pass primitive labels to UI primitives and client leaves, and keep interactive copy in its consuming leaf and import shared content functions only when needed. Do not add a custom `t()` parser, a full browser catalog, or next-intl for a single deployment.
+
+`shopConfig.localization` explicitly sets `{ country: "US", language: "EN", locale: "en-US" }`; country/language configure commerce requests and locale configures formatting. Currency comes from Shopify. Clean URLs and one deployment are the default; `lib/i18n/` and the `lib/params.ts` locale resolver are absent. Operation locale/cache inputs may still be intentional. Preserve existing next-intl, catalogs, localized routes, and custom commerce behavior in upgraded installations. Use `enable-i18n` for copy/routing or `enable-shopify-markets` for regional commerce rather than coupling the two implicitly.
+
 ## Route the work
 
 Read `references/rendering-architecture.md` for every route. Then read only the route references that apply:

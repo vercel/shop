@@ -80,7 +80,7 @@ NEXT_PUBLIC_GTM_ID="GTM-XXXXXX"
 
 Set the actual value in `.env.local` or in the Vercel dashboard under Environment Variables.
 
-### B3. Add GTM to `components/analytics.tsx`
+### B3. Add GTM to `components/analytics/index.tsx`
 
 Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `lib/config.ts` with a GTM integration gate, apply that gate inside the same component.
 
@@ -88,9 +88,9 @@ Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_G
 
 ## Part C: Root analytics integration
 
-### C1. Create or update `components/analytics.tsx`
+### C1. Update `components/analytics/index.tsx`
 
-Compose the selected providers in the root analytics component and apply each integration gate there:
+Extend the existing root analytics component. Do not create a sibling `components/analytics.tsx`, which would shadow the directory import. Preserve `ShopifyScriptsTracker`, its shop data, and the existing consent integration while adding the selected providers:
 
 ```tsx
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -98,8 +98,11 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { shopConfig } from "@/lib/config";
+import { getShopAnalytics } from "@/lib/shopify/operations/shop";
 
-export function AnalyticsComponents() {
+import { ShopifyScriptsTracker } from "./shopify-client";
+
+export async function AnalyticsComponents() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
   return (
@@ -107,6 +110,10 @@ export function AnalyticsComponents() {
       {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
       {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
       {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
+      <ShopifyScriptsTracker
+        shop={await getShopAnalytics({})}
+        storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? ""}
+      />
     </>
   );
 }
@@ -145,7 +152,7 @@ Third-party analytics can subscribe through the same destination API, so consent
 
 ## Guardrails
 
-- Keep root analytics providers and their gates in `components/analytics.tsx`.
+- Keep root analytics providers and their gates in `components/analytics/index.tsx`; preserve the existing Shopify scripts and consent integration.
 - Always mount `<AnalyticsComponents />` from the root layout, even when every provider is disabled.
 - The GTM container ID must come from `NEXT_PUBLIC_GTM_ID`, never hardcoded. The provider renders nothing if the env var is missing.
 - Use `@next/third-parties/google` for GTM, not a manual `<script>` tag. The Next.js component handles script loading and performance optimization.
