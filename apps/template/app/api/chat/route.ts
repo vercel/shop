@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   return withAgentContext({ cart: cartId, page, user }, async () => {
     const agent = createAgent();
     const result = await agent.stream({
-      messages: await convertToModelMessages(safeMessages.data),
+      messages: await convertToModelMessages(safeMessages.data, { tools: agent.tools }),
     });
     const stream = createUIMessageStream({
       execute: ({ writer }) => {
