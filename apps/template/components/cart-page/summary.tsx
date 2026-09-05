@@ -95,10 +95,8 @@ export function Summary({
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
           <span className="text-xl font-medium text-foreground">
             {
-              formatMoney(
-                { amount: String(estimatedTotal), currencyCode },
-                { currencyDisplay: "narrowSymbol", locale },
-              ).localizedString
+              formatMoney({ amount: String(estimatedTotal), currencyCode }, { locale })
+                .localizedString
             }
           </span>
         </div>

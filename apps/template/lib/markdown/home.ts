@@ -32,7 +32,7 @@ export function homeToMarkdown({
     sections.push("## Featured products", "");
     for (const product of products) {
       sections.push(
-        `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatMoney(product.price, { currencyDisplay: "narrowSymbol", locale }).localizedString}${product.availableForSale ? "" : " — unavailable"}`,
+        `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatMoney(product.price, { locale }).localizedString}${product.availableForSale ? "" : " — unavailable"}`,
       );
     }
     sections.push("");

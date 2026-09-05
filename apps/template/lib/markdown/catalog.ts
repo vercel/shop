@@ -34,12 +34,12 @@ function formatPriceRange(priceRange: PriceRange, locale: string): string {
   return `${
     formatMoney(
       { amount: priceRange.min.toString(), currencyCode: priceRange.currencyCode },
-      { currencyDisplay: "narrowSymbol", locale },
+      { locale },
     ).localizedString
   } - ${
     formatMoney(
       { amount: priceRange.max.toString(), currencyCode: priceRange.currencyCode },
-      { currencyDisplay: "narrowSymbol", locale },
+      { locale },
     ).localizedString
   }`;
 }
@@ -162,11 +162,8 @@ export function appendProductsSection(
   const rows = products.map((product) => [
     escapeMarkdown(product.title),
     escapeMarkdown(product.handle),
-    formatMoney(product.price, { currencyDisplay: "narrowSymbol", locale }).localizedString,
-    product.compareAtPrice
-      ? formatMoney(product.compareAtPrice, { currencyDisplay: "narrowSymbol", locale })
-          .localizedString
-      : "-",
+    formatMoney(product.price, { locale }).localizedString,
+    product.compareAtPrice ? formatMoney(product.compareAtPrice, { locale }).localizedString : "-",
     product.availableForSale ? "Yes" : "No",
     escapeMarkdown(product.vendor ?? "-"),
     `/products/${product.handle}`,

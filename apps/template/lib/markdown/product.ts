@@ -29,12 +29,10 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
 
   sections.push("## Pricing");
   sections.push("");
-  sections.push(
-    `- **Price**: ${formatMoney(product.price, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
-  );
+  sections.push(`- **Price**: ${formatMoney(product.price, { locale }).localizedString}`);
   if (product.compareAtPrice) {
     sections.push(
-      `- **Compare At**: ${formatMoney(product.compareAtPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
+      `- **Compare At**: ${formatMoney(product.compareAtPrice, { locale }).localizedString}`,
     );
     const savings =
       Number.parseFloat(product.compareAtPrice.amount) - Number.parseFloat(product.price.amount);
@@ -43,13 +41,13 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
         (savings / Number.parseFloat(product.compareAtPrice.amount)) * 100,
       );
       sections.push(
-        `- **Savings**: ${formatMoney({ amount: savings.toString(), currencyCode: product.currencyCode }, { currencyDisplay: "narrowSymbol", locale }).localizedString} (${savingsPercent}% off)`,
+        `- **Savings**: ${formatMoney({ amount: savings.toString(), currencyCode: product.currencyCode }, { locale }).localizedString} (${savingsPercent}% off)`,
       );
     }
   }
   if (product.priceRange.minVariantPrice.amount !== product.priceRange.maxVariantPrice.amount) {
     sections.push(
-      `- **Price Range**: ${formatMoney(product.priceRange.minVariantPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString} - ${formatMoney(product.priceRange.maxVariantPrice, { currencyDisplay: "narrowSymbol", locale }).localizedString}`,
+      `- **Price Range**: ${formatMoney(product.priceRange.minVariantPrice, { locale }).localizedString} - ${formatMoney(product.priceRange.maxVariantPrice, { locale }).localizedString}`,
     );
   }
   sections.push("");
@@ -86,7 +84,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
       return [
         escapeMarkdown(variant.title),
         ...optionValues,
-        formatMoney(variant.price, { currencyDisplay: "narrowSymbol", locale }).localizedString,
+        formatMoney(variant.price, { locale }).localizedString,
         variant.availableForSale ? "Yes" : "No",
       ];
     });

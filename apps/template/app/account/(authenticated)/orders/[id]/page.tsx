@@ -59,7 +59,6 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
           <dd className="font-mono tabular-nums">
             {
               formatMoney(order.totalPrice, {
-                currencyDisplay: "narrowSymbol",
                 locale: defaultLocale,
               }).localizedString
             }
@@ -114,10 +113,7 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
       </div>
       {item.totalPrice ? (
         <span className="font-mono text-sm tabular-nums">
-          {
-            formatMoney(item.totalPrice, { currencyDisplay: "narrowSymbol", locale: defaultLocale })
-              .localizedString
-          }
+          {formatMoney(item.totalPrice, { locale: defaultLocale }).localizedString}
         </span>
       ) : null}
     </li>
@@ -130,10 +126,7 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="font-mono tabular-nums">
-        {
-          formatMoney(money, { currencyDisplay: "narrowSymbol", locale: defaultLocale })
-            .localizedString
-        }
+        {formatMoney(money, { locale: defaultLocale }).localizedString}
       </dd>
     </div>
   );

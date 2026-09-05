@@ -66,7 +66,6 @@ async function OrdersContent({
                 <span className="text-sm tabular-nums">
                   {
                     formatMoney(order.totalPrice, {
-                      currencyDisplay: "narrowSymbol",
                       locale: defaultLocale,
                     }).localizedString
                   }

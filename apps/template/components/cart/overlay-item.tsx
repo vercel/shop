@@ -40,7 +40,7 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
   return (
     <li
       className="flex gap-2.5"
-      aria-label={`${item.merchandise.product.title} - ${formatMoney({ amount: String(finalUnitPrice * quantity), currencyCode }, { currencyDisplay: "narrowSymbol", locale }).localizedString}`}
+      aria-label={`${item.merchandise.product.title} - ${formatMoney({ amount: String(finalUnitPrice * quantity), currencyCode }, { locale }).localizedString}`}
     >
       <Link
         href={`/products/${item.merchandise.product.handle}`}
@@ -162,26 +162,22 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
                   amount: String(hasCartDiscount ? finalUnitPrice : sellingUnitPrice),
                   currencyCode,
                 },
-                { currencyDisplay: "narrowSymbol", locale },
+                { locale },
               ).localizedString
             }
           </span>
           {hasCartDiscount ? (
             <span className="text-xs text-muted-foreground line-through">
               {
-                formatMoney(
-                  { amount: String(sellingUnitPrice), currencyCode },
-                  { currencyDisplay: "narrowSymbol", locale },
-                ).localizedString
+                formatMoney({ amount: String(sellingUnitPrice), currencyCode }, { locale })
+                  .localizedString
               }
             </span>
           ) : hasCompareAt ? (
             <span className="text-xs text-muted-foreground line-through">
               {
-                formatMoney(
-                  { amount: String(compareAtUnitPrice), currencyCode },
-                  { currencyDisplay: "narrowSymbol", locale },
-                ).localizedString
+                formatMoney({ amount: String(compareAtUnitPrice), currencyCode }, { locale })
+                  .localizedString
               }
             </span>
           ) : null}

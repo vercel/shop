@@ -257,10 +257,7 @@ function formatPriceRangeLabel({
 }): string {
   const format = (value: number) =>
     currencyCode
-      ? formatMoney(
-          { amount: String(value), currencyCode },
-          { currencyDisplay: "narrowSymbol", locale },
-        ).localizedString
+      ? formatMoney({ amount: String(value), currencyCode }, { locale }).localizedString
       : new Intl.NumberFormat(locale).format(value);
   if (min !== null && max !== null) return `${format(min)} - ${format(max)}`;
   if (min !== null) return `${labels.from} ${format(min)}`;
