@@ -71,13 +71,18 @@ function dispatchLinesAdd(
 }
 
 // Only for adds that need line attributes; this preview's add form drops them. Use useProductForm/useCartForm otherwise.
-export function addGiftCardToCart(
+export async function addGiftCardToCart(
   merchandiseId: string,
   quantity: number,
   productInfo?: OptimisticProductInfo,
   attributes?: { key: string; value: string }[],
-): void {
+): Promise<void> {
   const line: CartMutationLine = { merchandiseId, quantity, ...(attributes ? { attributes } : {}) };
   const promise = postCart({ lines: [line] }).then(toStandardResult);
   dispatchLinesAdd([line], productInfo, promise);
+  const result = await promise;
+  if (result.userErrors?.length) {
+    throw new Error(result.userErrors.map((error) => error.message).join("; "));
+  }
+  if (!result.cart) throw new Error("Could not add the gift card. Please try again.");
 }
