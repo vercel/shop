@@ -115,7 +115,6 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Prefer `data-[attr=value]` selectors over conditional class assembly.
 - Use `cn()` from `cn` when classes must be conditional.
 - Use `data-slot` attributes as stable styling hooks on compound components.
-- Use grouped component-local class maps with the type-only `VariantProps<typeof styles>` helper from `@/lib/types` and `cn()` for multi-variant component APIs; keep defaults in parameter destructuring and let `null` omit a variant.
 - Interactive elements (buttons, clickable links, CTAs) must use `cursor-pointer`. Disabled interactive elements must use `cursor-not-allowed`.
 
 ### Exports
