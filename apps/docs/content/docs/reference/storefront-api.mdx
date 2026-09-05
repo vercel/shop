@@ -49,7 +49,7 @@ Validate current field names, arguments, and types with Shopify AI Toolkit. Then
 Run the schema checks from your project root after editing operations. The template uses [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) to validate Storefront documents across the app and Customer Account documents in a separate project:
 
 ```bash
-npm run codegen
+pnpm codegen
 ```
 
 The Storefront check reads `SHOPIFY_API_VERSION` from the command's environment and uses Shopify's live schema. If you override the API version, pass the same value when running codegen. The Customer Account check uses the schema bundled with the pinned Hydrogen SDK, not the Storefront schema.

@@ -46,7 +46,7 @@ Read `references/REFERENCE.md` before editing.
 ## Revalidate both boundaries
 
 1. Validate the final GraphQL document again with Shopify AI Toolkit after fragment and variable changes.
-2. Run `npm run codegen` from the storefront root for Storefront operations, custom cart/search fragments, and Customer Account documents. Run local lint, typecheck, focused tests, and affected commerce flows; run a build when the changed surface requires it. Storefront validation uses the configured live schema; Customer Account validation uses Hydrogen's bundled schema.
+2. Run `pnpm codegen` from the storefront root for Storefront operations, custom cart/search fragments, and Customer Account documents. Run local lint, typecheck, focused tests, and affected commerce flows; run a build when the changed surface requires it. Storefront validation uses the configured live schema; Customer Account validation uses Hydrogen's bundled schema.
 3. Report separately:
    - Shopify validation performed;
    - Vercel Shop cache and route role;
