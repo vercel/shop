@@ -8,57 +8,8 @@ import { InfiniteProductGrid } from "@/components/collections/infinite-product-g
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { CollectionSearchState } from "@/lib/collections/server";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
-import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
-import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
-
-export interface SearchResultsData {
-  collection?: string;
-  dataSearch: string;
-  pageInfo: PageInfo;
-  products: ProductCardType[];
-  query?: string;
-  total: number;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
-}
-
-export async function getSearchResultsData({
-  collection,
-  query,
-  searchStatePromise,
-}: {
-  collection?: string;
-  query?: string;
-  searchStatePromise: Promise<CollectionSearchState>;
-}): Promise<SearchResultsData> {
-  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
-  const [results, facets] = await Promise.all([
-    fetchSearchIndexProducts({
-      activeFilters,
-      query,
-      collection,
-      sortKey: sort,
-      limit: PRODUCTS_PER_PAGE,
-      filters,
-    }),
-    fetchSearchFacets({
-      activeFilters,
-      query,
-      collection,
-      filters,
-    }),
-  ]);
-  return {
-    collection,
-    dataSearch,
-    pageInfo: results.pageInfo,
-    products: results.products,
-    query,
-    total: facets.total,
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
-  };
-}
+import type { SearchResultsData } from "@/lib/search/server";
 
 export function SearchResultsGrid({
   searchResultsDataPromise,

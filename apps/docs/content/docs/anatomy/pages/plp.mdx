@@ -20,7 +20,7 @@ Filters, sorting, and pagination state are reflected in the URL using the same `
 - **Swatches** — color or image choices when Shopify provides swatch presentation data.
 - **Sorting** — Shopify's supported collection sorts. Search omits name and date because Shopify search does not support them.
 - **Infinite scroll** — loads up to 40 products at a time as the shopper moves down the page and guards against duplicates when rankings change. To change the batch size for collection and search listings, set `PRODUCTS_PER_PAGE` in `lib/collections/index.ts`.
-- **Toolbar** — provides filter access, result count, and sorting.
+- **Toolbar** — collection and search pages share filter access, sorting, and a matching loading layout. Search also shows a result count.
 - **Predictive search** — shows suggestions and products from the navigation search dialog.
 - **Structured data** — describes collection pages to search engines.
 
