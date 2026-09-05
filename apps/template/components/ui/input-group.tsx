@@ -6,6 +6,7 @@ import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { VariantProps } from "@/lib/variants";
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -31,18 +32,19 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-const INPUT_GROUP_ADDON_ALIGNMENTS = {
-  "block-end":
-    "order-last w-full justify-start px-2.5 pb-2.5 [.border-t]:pt-2.5 group-has-[>input]/input-group:pb-2.5",
-  "block-start":
-    "order-first w-full justify-start px-2.5 pt-2.5 [.border-b]:pb-2.5 group-has-[>input]/input-group:pt-2.5",
-  "inline-end": "order-last pr-2.5 has-[>button]:mr-[-0.45rem] has-[>kbd]:mr-[-0.35rem]",
-  "inline-start": "order-first pl-2.5 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
+const INPUT_GROUP_ADDON_STYLES = {
+  align: {
+    "block-end":
+      "order-last w-full justify-start px-2.5 pb-2.5 [.border-t]:pt-2.5 group-has-[>input]/input-group:pb-2.5",
+    "block-start":
+      "order-first w-full justify-start px-2.5 pt-2.5 [.border-b]:pb-2.5 group-has-[>input]/input-group:pt-2.5",
+    "inline-end": "order-last pr-2.5 has-[>button]:mr-[-0.45rem] has-[>kbd]:mr-[-0.35rem]",
+    "inline-start": "order-first pl-2.5 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
+  },
 };
 
-interface InputGroupAddonProps extends React.ComponentProps<"button"> {
-  align?: keyof typeof INPUT_GROUP_ADDON_ALIGNMENTS | null;
-}
+interface InputGroupAddonProps
+  extends React.ComponentProps<"button">, VariantProps<typeof INPUT_GROUP_ADDON_STYLES> {}
 
 function InputGroupAddon({
   align = "inline-start",
@@ -61,7 +63,7 @@ function InputGroupAddon({
       data-align={align}
       className={cn(
         "text-muted-foreground flex h-auto cursor-text items-center justify-center gap-2 py-1.5 text-sm font-medium select-none [&>svg:not([class*='size-'])]:size-4 [&>kbd]:rounded-[calc(var(--radius)-5px)] group-data-[disabled=true]/input-group:opacity-50",
-        align !== null && INPUT_GROUP_ADDON_ALIGNMENTS[align],
+        align !== null && INPUT_GROUP_ADDON_STYLES.align[align],
         className,
       )}
       type={type}
@@ -73,16 +75,19 @@ function InputGroupAddon({
   );
 }
 
-const INPUT_GROUP_BUTTON_SIZES = {
-  "icon-sm": "size-8 p-0 has-[>svg]:p-0",
-  "icon-xs": "size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0",
-  sm: "h-8 px-2.5 gap-1.5 rounded-md has-[>svg]:px-2.5",
-  xs: "h-6 gap-1 px-2 rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-3.5 has-[>svg]:px-2",
+const INPUT_GROUP_BUTTON_STYLES = {
+  size: {
+    "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+    "icon-xs": "size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0",
+    sm: "h-8 px-2.5 gap-1.5 rounded-md has-[>svg]:px-2.5",
+    xs: "h-6 gap-1 px-2 rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-3.5 has-[>svg]:px-2",
+  },
 };
 
-interface InputGroupButtonProps extends Omit<React.ComponentProps<typeof Button>, "size"> {
-  size?: keyof typeof INPUT_GROUP_BUTTON_SIZES | null;
-}
+interface InputGroupButtonProps
+  extends
+    Omit<React.ComponentProps<typeof Button>, "size">,
+    VariantProps<typeof INPUT_GROUP_BUTTON_STYLES> {}
 
 function InputGroupButton({
   className,
@@ -98,7 +103,7 @@ function InputGroupButton({
       variant={variant}
       className={cn(
         "text-sm shadow-none flex gap-2 items-center",
-        size !== null && INPUT_GROUP_BUTTON_SIZES[size],
+        size !== null && INPUT_GROUP_BUTTON_STYLES.size[size],
         className,
       )}
       {...props}

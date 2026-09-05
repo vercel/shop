@@ -2,42 +2,40 @@ import { type ClassValue, clsx, cn } from "cn";
 import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 
-const buttonVariantClasses = {
-  default: "bg-gray-1000 text-background-100 hover:bg-gray-1000/90",
-  destructive: "bg-red-800 text-background-100 hover:bg-red-800/90",
-  secondary:
-    "bg-background-100 text-gray-1000 shadow-[0_0_0_1px_var(--ds-gray-400)] hover:bg-gray-100",
-  tertiary: "text-gray-1000 hover:bg-gray-alpha-200",
-  link: "text-gray-1000 underline-offset-4 hover:underline",
-} as const;
+import type { VariantProps } from "@/lib/variants";
 
-const buttonSizeClasses = {
-  default: "h-9 px-4 py-2 has-[>svg]:px-3",
-  sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-  lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-  icon: "size-9",
-  "icon-sm": "size-8",
-  "icon-lg": "size-10",
+const buttonStyles = {
+  variant: {
+    default: "bg-gray-1000 text-background-100 hover:bg-gray-1000/90",
+    destructive: "bg-red-800 text-background-100 hover:bg-red-800/90",
+    secondary:
+      "bg-background-100 text-gray-1000 shadow-[0_0_0_1px_var(--ds-gray-400)] hover:bg-gray-100",
+    tertiary: "text-gray-1000 hover:bg-gray-alpha-200",
+    link: "text-gray-1000 underline-offset-4 hover:underline",
+  },
+  size: {
+    default: "h-9 px-4 py-2 has-[>svg]:px-3",
+    sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+    lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
+    icon: "size-9",
+    "icon-sm": "size-8",
+    "icon-lg": "size-10",
+  },
 } as const;
-
-type ButtonVariantProps = {
-  variant?: keyof typeof buttonVariantClasses | null;
-  size?: keyof typeof buttonSizeClasses | null;
-};
 
 type ButtonClassProps =
   | { class: ClassValue; className?: never }
   | { class?: never; className: ClassValue }
   | { class?: never; className?: never };
 
-function buttonVariants(props?: (ButtonVariantProps & ButtonClassProps) | null) {
+function buttonVariants(props?: (VariantProps<typeof buttonStyles> & ButtonClassProps) | null) {
   const { variant = "default", size = "default" } = props ?? {};
 
   // Keep the public helper's classes unmerged; Button applies cn after className.
   return clsx(
     "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-    variant !== null && buttonVariantClasses[variant],
-    size !== null && buttonSizeClasses[size],
+    variant !== null && buttonStyles.variant[variant],
+    size !== null && buttonStyles.size[size],
     props?.class,
     props?.className,
   );
@@ -50,7 +48,7 @@ function Button({
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
-  ButtonVariantProps & {
+  VariantProps<typeof buttonStyles> & {
     asChild?: boolean;
   }) {
   const Comp = asChild ? SlotPrimitive.Slot : "button";

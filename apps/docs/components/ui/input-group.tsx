@@ -6,6 +6,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import type { VariantProps } from "@/lib/variants";
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
@@ -35,22 +36,22 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-const inputGroupAddonAlignClasses = {
-  "inline-start": "order-first pl-3 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
-  "inline-end": "order-last pr-3 has-[>button]:mr-[-0.45rem] has-[>kbd]:mr-[-0.35rem]",
-  "block-start":
-    "order-first w-full justify-start px-3 pt-3 [.border-b]:pb-3 group-has-[>input]/input-group:pt-2.5",
-  "block-end":
-    "order-last w-full justify-start px-3 pb-3 [.border-t]:pt-3 group-has-[>input]/input-group:pb-2.5",
+const inputGroupAddonStyles = {
+  align: {
+    "inline-start": "order-first pl-3 has-[>button]:ml-[-0.45rem] has-[>kbd]:ml-[-0.35rem]",
+    "inline-end": "order-last pr-3 has-[>button]:mr-[-0.45rem] has-[>kbd]:mr-[-0.35rem]",
+    "block-start":
+      "order-first w-full justify-start px-3 pt-3 [.border-b]:pb-3 group-has-[>input]/input-group:pt-2.5",
+    "block-end":
+      "order-last w-full justify-start px-3 pb-3 [.border-t]:pt-3 group-has-[>input]/input-group:pb-2.5",
+  },
 } as const;
 
 function InputGroupAddon({
   className,
   align = "inline-start",
   ...props
-}: React.ComponentProps<"div"> & {
-  align?: keyof typeof inputGroupAddonAlignClasses | null;
-}) {
+}: React.ComponentProps<"div"> & VariantProps<typeof inputGroupAddonStyles>) {
   return (
     <div
       role="group"
@@ -58,7 +59,7 @@ function InputGroupAddon({
       data-align={align}
       className={cn(
         "text-muted-foreground flex h-auto cursor-text items-center justify-center gap-2 py-1.5 text-sm font-medium select-none [&>svg:not([class*='size-'])]:size-4 [&>kbd]:rounded-[calc(var(--radius)-5px)] group-data-[disabled=true]/input-group:opacity-50",
-        align !== null && inputGroupAddonAlignClasses[align],
+        align !== null && inputGroupAddonStyles.align[align],
         className,
       )}
       onClick={(e) => {
@@ -72,11 +73,13 @@ function InputGroupAddon({
   );
 }
 
-const inputGroupButtonSizeClasses = {
-  xs: "h-6 gap-1 px-2 rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-3.5 has-[>svg]:px-2",
-  sm: "h-8 px-2.5 gap-1.5 rounded-md has-[>svg]:px-2.5",
-  "icon-xs": "size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0",
-  "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+const inputGroupButtonStyles = {
+  size: {
+    xs: "h-6 gap-1 px-2 rounded-[calc(var(--radius)-5px)] [&>svg:not([class*='size-'])]:size-3.5 has-[>svg]:px-2",
+    sm: "h-8 px-2.5 gap-1.5 rounded-md has-[>svg]:px-2.5",
+    "icon-xs": "size-6 rounded-[calc(var(--radius)-5px)] p-0 has-[>svg]:p-0",
+    "icon-sm": "size-8 p-0 has-[>svg]:p-0",
+  },
 } as const;
 
 function InputGroupButton({
@@ -85,9 +88,8 @@ function InputGroupButton({
   variant = "tertiary",
   size = "xs",
   ...props
-}: Omit<React.ComponentProps<typeof Button>, "size"> & {
-  size?: keyof typeof inputGroupButtonSizeClasses | null;
-}) {
+}: Omit<React.ComponentProps<typeof Button>, "size"> &
+  VariantProps<typeof inputGroupButtonStyles>) {
   return (
     <Button
       type={type}
@@ -95,7 +97,7 @@ function InputGroupButton({
       variant={variant}
       className={cn(
         "text-sm shadow-none flex gap-2 items-center",
-        size !== null && inputGroupButtonSizeClasses[size],
+        size !== null && inputGroupButtonStyles.size[size],
         className,
       )}
       {...props}
