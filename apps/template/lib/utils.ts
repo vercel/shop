@@ -9,5 +9,3 @@ export function formatPrice(
     { currencyDisplay: "narrowSymbol", locale },
   ).localizedString;
 }
-
-export const RESULTS_PER_PAGE = 40;

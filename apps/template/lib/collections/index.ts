@@ -5,6 +5,8 @@ import {
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 
+export const PRODUCTS_PER_PAGE = 40;
+
 export type ActiveFilters = Record<string, string | string[] | undefined>;
 
 const SORT_TO_SORT_BY: Record<string, string> = {

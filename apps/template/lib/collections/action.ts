@@ -1,9 +1,9 @@
 "use server";
 
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { resolveBrowseParams } from "@/lib/collections/server";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
 import type { PageInfo, ProductCard } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function loadMoreCollectionProductsAction(params: {
   collection: string;
@@ -17,7 +17,7 @@ export async function loadMoreCollectionProductsAction(params: {
     collection: params.collection,
     cursor: params.cursor,
     sortKey: sort,
-    limit: RESULTS_PER_PAGE,
+    limit: PRODUCTS_PER_PAGE,
     filters,
     locale: params.locale,
   });

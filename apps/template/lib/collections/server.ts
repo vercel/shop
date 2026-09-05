@@ -6,6 +6,7 @@ import {
   getActiveFilters,
   getCollectionSortFromState,
 } from "@/lib/collections";
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
@@ -15,7 +16,6 @@ import {
 } from "@/lib/shopify/operations/products";
 import type { ProductFilter } from "@/lib/shopify/types/filters";
 import type { Collection, Filter, PriceRange } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
@@ -85,7 +85,7 @@ export async function getCollectionResultsData({
     activeFilters,
     collection: handle,
     sortKey: sort,
-    limit: RESULTS_PER_PAGE,
+    limit: PRODUCTS_PER_PAGE,
     filters,
     locale,
   });
@@ -128,7 +128,7 @@ export async function getAllProductsResultsData({
     fetchSearchIndexProducts({
       activeFilters,
       sortKey: sort,
-      limit: RESULTS_PER_PAGE,
+      limit: PRODUCTS_PER_PAGE,
       filters,
       locale,
     }),

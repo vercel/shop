@@ -1,3 +1,4 @@
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
@@ -10,7 +11,6 @@ import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { getCollection } from "@/lib/shopify/operations/collections";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
@@ -57,7 +57,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         activeFilters,
         collection: handle,
         sortKey: sort,
-        limit: RESULTS_PER_PAGE,
+        limit: PRODUCTS_PER_PAGE,
         cursor,
         filters,
         locale,
