@@ -1,6 +1,7 @@
 "use client";
 
 import { getShopPayButtonUrl } from "@shopify/hydrogen";
+import { cn } from "cn";
 import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -9,7 +10,6 @@ import { useCart } from "@/components/cart/context";
 import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
 import type { ProductFormVariant } from "@/lib/product";
-import { cn } from "@/lib/utils";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
 

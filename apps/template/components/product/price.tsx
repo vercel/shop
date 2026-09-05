@@ -1,8 +1,8 @@
 import { formatMoney } from "@shopify/hydrogen";
+import { cn } from "cn";
 import type * as React from "react";
 
 import { defaultLocale } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 interface PriceProps extends React.ComponentProps<"span"> {
   amount: string;

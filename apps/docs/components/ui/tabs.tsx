@@ -1,10 +1,9 @@
 "use client";
 
+import { cn } from "cn";
 import { Tabs as TabsPrimitive } from "radix-ui";
 import { createContext, use } from "react";
 import type * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 type TabsVariant = "default" | "underline";
 

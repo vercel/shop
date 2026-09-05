@@ -1,8 +1,8 @@
+import { cn } from "cn";
 import type * as React from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
-import { cn } from "@/lib/utils";
 
 interface ProductPriceProps extends React.ComponentProps<"div"> {
   amount: string;

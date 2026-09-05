@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -7,7 +8,7 @@ import { useCart } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
-import { cn, formatPrice } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 
 function CheckoutLink({
   checkoutUrl,

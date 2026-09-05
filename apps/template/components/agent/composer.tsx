@@ -1,11 +1,11 @@
 "use client";
 
+import { cn } from "cn";
 import { CornerDownLeftIcon, Loader2Icon, SquareIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { KeyboardEvent } from "react";
 
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
-import { cn } from "@/lib/utils";
 
 type AgentStatus = "error" | "ready" | "streaming" | "submitted";
 

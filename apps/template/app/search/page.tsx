@@ -26,10 +26,10 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -201,7 +201,7 @@ function SearchBrowseFallback({
         sortSelect={<SortSelectFallback label={sortByLabel} />}
       />
       <ProductsGridSkeleton
-        count={RESULTS_PER_PAGE}
+        count={PRODUCTS_PER_PAGE}
         className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
       />
     </>

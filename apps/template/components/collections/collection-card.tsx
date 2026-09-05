@@ -1,9 +1,9 @@
+import { cn } from "cn";
 import Image from "next/image";
 import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CollectionWithThumbnail } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export interface CollectionCardProps {
   className?: string;
