@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
@@ -6,7 +7,6 @@ import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/shopify/operations/policies";
 import type { MenuItem } from "@/lib/shopify/types/menu";
-import { cn } from "@/lib/utils";
 
 import { FooterMarquee } from "./marquee";
 import { SocialLinks } from "./social-links";

@@ -1,9 +1,8 @@
 "use client";
 
+import { cn } from "cn";
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useState } from "react";
-
-import { cn } from "@/lib/utils";
 
 interface AccordionSectionProps {
   children: React.ReactNode;

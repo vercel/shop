@@ -1,10 +1,9 @@
 "use client";
 
+import { cn } from "cn";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type * as React from "react";
 import { createContext, useCallback, useContext, useRef, useState } from "react";
-
-import { cn } from "@/lib/utils";
 
 interface SliderContextValue {
   registerContainer: (node: HTMLDivElement | null) => void;

@@ -1,6 +1,5 @@
+import { cn } from "cn";
 import Image from "next/image";
-
-import { cn } from "@/lib/utils";
 
 const COUNTRY_CODES: Record<string, string> = {
   "en-US": "US",

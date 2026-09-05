@@ -1,7 +1,6 @@
+import { cn } from "cn";
 import { Card, type CardProps } from "fumadocs-ui/components/card";
 import Link from "next/link";
-
-import { cn } from "@/lib/utils";
 
 export const StaticDocsCard = ({ external, href, ...props }: CardProps) => {
   if (!(href?.startsWith("/docs") && !external)) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "cn";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Children,
@@ -17,7 +18,6 @@ import {
 
 import { IconCheck } from "@/components/assets/icons/icon-check";
 import { IconCopy } from "@/components/assets/icons/icon-copy";
-import { cn } from "@/lib/utils";
 
 type CommandPromptContextValue = {
   value: string;

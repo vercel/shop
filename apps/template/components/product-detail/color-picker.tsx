@@ -1,9 +1,9 @@
+import { cn } from "cn";
 import type * as React from "react";
 
 import Link from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import type { OptionGroupState } from "@/lib/product";
-import { cn } from "@/lib/utils";
 
 export type ProductTranslator = (
   key: "selectVariantLabel" | "unavailableVariantLabel",

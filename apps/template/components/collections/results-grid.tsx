@@ -3,18 +3,18 @@ import { Suspense } from "react";
 
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { loadMoreCollectionProductsAction } from "@/lib/collections/action";
 import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";
 
 function Fallback() {
   return (
     <ProductsGridSkeleton
-      count={RESULTS_PER_PAGE}
+      count={PRODUCTS_PER_PAGE}
       className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
     />
   );

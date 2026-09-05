@@ -1,10 +1,10 @@
+import { cn } from "cn";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
 import type { MarketingImage } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 interface MarketingSplitProps {
   body: string;

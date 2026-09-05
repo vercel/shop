@@ -1,7 +1,6 @@
+import { cn } from "cn";
 import { Star } from "lucide-react";
 import type * as React from "react";
-
-import { cn } from "@/lib/utils";
 
 interface RatingStarsProps extends React.ComponentProps<"div"> {
   /** Pre-formatted, already-localized review count text rendered beside the stars. */

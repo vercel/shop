@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import { getTranslations } from "next-intl/server";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
@@ -9,7 +10,6 @@ import {
   searchIndexProducts,
 } from "@/lib/shopify/operations/products";
 import type { ProductCard as ProductCardData } from "@/lib/types";
-import { cn } from "@/lib/utils";
 
 export type ProductsGridColumns = 4 | 5;
 

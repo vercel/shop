@@ -8,12 +8,12 @@ import {
 import { InfiniteProductGrid } from "@/components/collections/infinite-product-grid";
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
+import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { CollectionSearchState } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
 import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
 import type { Filter, PageInfo, PriceRange, ProductCard as ProductCardType } from "@/lib/types";
-import { RESULTS_PER_PAGE } from "@/lib/utils";
 
 export interface SearchResultsData {
   collection?: string;
@@ -43,7 +43,7 @@ export async function getSearchResultsData({
       query,
       collection,
       sortKey: sort,
-      limit: RESULTS_PER_PAGE,
+      limit: PRODUCTS_PER_PAGE,
       filters,
       locale,
     }),
@@ -72,7 +72,7 @@ export function SearchResultsGrid({
     <Suspense
       fallback={
         <ProductsGridSkeleton
-          count={RESULTS_PER_PAGE}
+          count={PRODUCTS_PER_PAGE}
           className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
         />
       }
