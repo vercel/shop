@@ -167,8 +167,11 @@ export function OverlayItem({ item }: OverlayItemProps) {
         </CartLineForm>
         <CartWarnings lineId={item.id} />
       </div>
-      <div className="grid gap-0.5 self-start py-0.5 text-right text-sm">
-        <span className="font-medium text-foreground">
+      <div className="grid gap-0.5 self-start py-0.5 text-right font-mono text-sm tabular-nums tracking-tight">
+        <span
+          className="font-medium text-foreground data-[pending=true]:text-muted-foreground"
+          data-pending={isCostPending || !currencyCode}
+        >
           {isCostPending || !currencyCode ? "Updating…" : price(finalUnitPrice)}
         </span>
         {!isCostPending && currencyCode && originalUnitPrice > finalUnitPrice ? (

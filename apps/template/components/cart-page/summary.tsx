@@ -115,7 +115,10 @@ export function Summary({
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
-          <span className="text-xl font-medium text-foreground">
+          <span
+            className="font-mono text-xl font-medium text-foreground tabular-nums tracking-tight data-[pending=true]:text-muted-foreground"
+            data-pending={isCostPending || !currencyCode}
+          >
             {isCostPending || !currencyCode
               ? updatingCartLabel
               : formatMoney(

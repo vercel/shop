@@ -63,7 +63,7 @@ export const { registry } = defineRegistry(catalog, {
                   currencyCode={cart.cost.totalAmount.currencyCode}
                 />
               ) : (
-                <span>Updating…</span>
+                <span className="text-muted-foreground">Updating…</span>
               )}
             </div>
             <p className="mt-1 text-muted-foreground text-xs">
