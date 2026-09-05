@@ -6,13 +6,13 @@ import { getShopAnalytics } from "@/lib/shopify/operations/shop";
 
 import { ShopifyScriptsTracker } from "./shopify-client";
 
-export async function AnalyticsComponents({ locale }: { locale: string }) {
+export async function AnalyticsComponents() {
   return (
     <>
       {shopConfig.analytics.vercel.isEnabled && <Analytics />}
       {shopConfig.analytics.speedInsights.isEnabled && <SpeedInsights />}
       <ShopifyScriptsTracker
-        shop={await getShopAnalytics({ locale })}
+        shop={await getShopAnalytics({})}
         storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? ""}
       />
     </>

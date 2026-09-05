@@ -1,7 +1,5 @@
 import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -28,7 +26,7 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { getCollectionSearchState } from "@/lib/collections/server";
-import { getLocale } from "@/lib/params";
+import { formatCount } from "@/lib/content";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -40,12 +38,12 @@ function getParam(searchParams: SearchParams, key: string): string | undefined {
 
 export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
-  const t = await getTranslations("seo");
   const query = getParam(resolvedSearchParams, "q") ?? "";
   const hasQuery = query.length > 0;
-  const title = hasQuery ? t("searchTitleQuery", { query }) : t("searchTitle");
-  const description = hasQuery ? t("searchDescriptionQuery", { query }) : t("searchDescription");
-
+  const title = hasQuery ? `Search results for "${query}"` : "Search";
+  const description = hasQuery
+    ? `Find products matching "${query}"`
+    : "Search for products in our store";
   return {
     title,
     description,
@@ -72,28 +70,19 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
-export default async function SearchPage({ searchParams }: PageProps<"/search">) {
-  const [locale, messages, t] = await Promise.all([
-    getLocale(),
-    getMessages(),
-    getTranslations("search"),
-  ]);
-
+export default function SearchPage({ searchParams }: PageProps<"/search">) {
   // Don't await searchParams here — it would force the route fully dynamic.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const searchResultsDataPromise = (async () => {
     const resolved = await searchParams;
     return getSearchResultsData({
       collection: getParam(resolved, "collection"),
-      locale,
       query: getParam(resolved, "q"),
       searchStatePromise,
     });
   })();
-
-  const filtersLabel = t("filters");
-  const sortByLabel = t("sortBy");
-
+  const filtersLabel = "Filters";
+  const sortByLabel = "Sort";
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
@@ -103,7 +92,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           </Suspense>
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl">
-              <Link href="/search">{t("title")}</Link>
+              <Link href="/search">Search</Link>
               <Suspense fallback={null}>
                 <SearchQueryLabel searchParamsPromise={searchParams} />
               </Suspense>
@@ -114,17 +103,12 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
               <SearchBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
             }
           >
-            <NextIntlClientProvider
-              messages={{ category: messages.category, search: messages.search }}
-            >
-              <SearchBrowse
-                filtersLabel={filtersLabel}
-                locale={locale}
-                searchParamsPromise={searchParams}
-                searchResultsDataPromise={searchResultsDataPromise}
-                searchStatePromise={searchStatePromise}
-              />
-            </NextIntlClientProvider>
+            <SearchBrowse
+              filtersLabel={filtersLabel}
+              searchParamsPromise={searchParams}
+              searchResultsDataPromise={searchResultsDataPromise}
+              searchStatePromise={searchStatePromise}
+            />
           </Suspense>
         </Sections>
       </Container>
@@ -134,13 +118,11 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
 async function SearchBrowse({
   filtersLabel,
-  locale,
   searchParamsPromise,
   searchResultsDataPromise,
   searchStatePromise,
 }: {
   filtersLabel: string;
-  locale: Awaited<ReturnType<typeof getLocale>>;
   searchParamsPromise: PageProps<"/search">["searchParams"];
   searchResultsDataPromise: Promise<SearchResultsData>;
   searchStatePromise: Promise<Awaited<ReturnType<typeof getCollectionSearchState>>>;
@@ -176,7 +158,7 @@ async function SearchBrowse({
         }
         sortSelect={<CollectionsSortSelect exclude={SEARCH_SORT_EXCLUDE} />}
       />
-      <SearchResultsGrid locale={locale} searchResultsDataPromise={searchResultsDataPromise} />
+      <SearchResultsGrid searchResultsDataPromise={searchResultsDataPromise} />
     </CollectionBrowseProvider>
   );
 }
@@ -222,17 +204,14 @@ async function SearchQueryLabel({
 }: {
   searchParamsPromise: PageProps<"/search">["searchParams"];
 }) {
-  const [resolvedSearchParams, t] = await Promise.all([
-    searchParamsPromise,
-    getTranslations("search"),
-  ]);
+  const resolvedSearchParams = await searchParamsPromise;
   const query = getParam(resolvedSearchParams, "q");
   if (!query) return null;
-  return t("forQuery", { query });
+  return ` for "${query}"`;
 }
 
 async function SearchResultCount({ dataPromise }: { dataPromise: Promise<SearchResultsData> }) {
-  const [data, t] = await Promise.all([dataPromise, getTranslations("search")]);
+  const data = await dataPromise;
   if (data.total === 0) return null;
-  return t("resultCount", { count: data.total });
+  return formatCount(data.total, "Item");
 }

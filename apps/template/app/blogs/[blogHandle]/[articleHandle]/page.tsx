@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ArticlePage } from "@/components/blog/article-page";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getBlog, getBlogArticle } from "@/lib/shopify/operations/blogs";
 import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
@@ -32,12 +31,13 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/blogs/[blogHandle]/[articleHandle]">): Promise<Metadata> {
-  const [{ blogHandle, articleHandle }, locale] = await Promise.all([params, getLocale()]);
+  const { blogHandle, articleHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE || articleHandle === PLACEHOLDER_HANDLE) return {};
-
-  const article = await getBlogArticle({ articleHandle, blogHandle, locale });
+  const article = await getBlogArticle({
+    articleHandle,
+    blogHandle,
+  });
   if (!article) notFound();
-
   const pathname = `/blogs/${article.blogHandle}/${article.handle}`;
   const images = article.image
     ? [
@@ -49,7 +49,6 @@ export async function generateMetadata({
         },
       ]
     : ["/og-default.png"];
-
   return {
     alternates: buildAlternates({ pathname }),
     description: article.seo.description,
@@ -73,11 +72,12 @@ export async function generateMetadata({
 export default async function BlogArticlePage({
   params,
 }: PageProps<"/blogs/[blogHandle]/[articleHandle]">) {
-  const [{ blogHandle, articleHandle }, locale] = await Promise.all([params, getLocale()]);
+  const { blogHandle, articleHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE || articleHandle === PLACEHOLDER_HANDLE) notFound();
-
-  const article = await getBlogArticle({ articleHandle, blogHandle, locale });
+  const article = await getBlogArticle({
+    articleHandle,
+    blogHandle,
+  });
   if (!article) notFound();
-
-  return <ArticlePage article={article} locale={locale} />;
+  return <ArticlePage article={article} />;
 }

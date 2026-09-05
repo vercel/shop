@@ -14,7 +14,9 @@ The Customer Account API uses a separate endpoint, schema, client ID, and sessio
 
 Define each operation with Hydrogen's `gql()` tag and pass dynamic values as GraphQL variables. Do not interpolate runtime values or conditional fields into the document. Compose shared selections by passing fragment documents as the second argument.
 
-Result and variable types are inferred from the document, so the request wrapper returns typed data without a hand-written response type. Include Shopify's `@inContext` directive when localized pricing or content depends on country and language; the wrapper fills `$country` and `$language` from the `locale` option:
+Result and variable types are inferred from the document, so the request wrapper returns typed data without a hand-written response type. Include Shopify's `@inContext` directive when localized pricing or content depends on country and language. The wrapper defaults `$country` and `$language` to `shopConfig.localization.country` and `shopConfig.localization.language`. The separate `shopConfig.localization.locale` controls display formatting; it does not select a market or currency. Currency comes from Shopify.
+
+Omit the operation's `locale` option to use the deployment settings. For an explicit commerce context, pass a `{ country, language }` object, not a formatting locale string. Keep that object in cached operation arguments when results vary by market or language:
 
 ```ts
 import { gql } from "@shopify/hydrogen";
@@ -33,7 +35,7 @@ const GET_PRODUCT_QUERY = gql(`#graphql
 `);
 
 const response = await storefront.request(GET_PRODUCT_QUERY, {
-  locale,
+  locale: { country: "US", language: "EN" },
   variables: { handle },
 });
 ```

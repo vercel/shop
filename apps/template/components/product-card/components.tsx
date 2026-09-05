@@ -123,7 +123,6 @@ interface ProductCardPriceProps {
   maxAmount?: string;
   compareAtAmount?: string;
   compareAtCurrencyCode?: string;
-  locale: string;
   discountVariant?: "green" | "blue";
   className?: string;
 }
@@ -139,7 +138,6 @@ function ProductCardPrice({
   maxAmount,
   compareAtAmount,
   compareAtCurrencyCode,
-  locale,
   discountVariant = "green",
   className,
 }: ProductCardPriceProps) {
@@ -148,24 +146,17 @@ function ProductCardPrice({
   const isRange = maxAmount != null && maxAmount !== amount;
   // A range's per-variant discounts differ, so a single compare-at would be misleading.
   const discountPercent = isRange ? null : getDiscountPercent(priceNum, compareAtNum);
-
   return (
     <div data-slot="product-card-price" className={cn(className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span className="inline-flex items-baseline gap-x-1 text-sm text-foreground">
-          <Price
-            amount={amount}
-            currencyCode={currencyCode}
-            locale={locale}
-            className="text-sm text-foreground"
-          />
+          <Price amount={amount} currencyCode={currencyCode} className="text-sm text-foreground" />
           {isRange && (
             <>
               <span>–</span>
               <Price
                 amount={maxAmount}
                 currencyCode={currencyCode}
-                locale={locale}
                 className="text-sm text-foreground"
               />
             </>
@@ -176,7 +167,6 @@ function ProductCardPrice({
             <Price
               amount={compareAtAmount}
               currencyCode={compareAtCurrencyCode}
-              locale={locale}
               className="text-xs text-muted-foreground line-through"
             />
             <DiscountBadge percent={discountPercent} variant={discountVariant} />

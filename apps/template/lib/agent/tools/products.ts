@@ -13,7 +13,6 @@ import { searchCatalog } from "@/lib/shopify/storefront";
 import type { ProductCard } from "@/lib/types";
 
 import { toAgentProduct, toAgentProductDetails } from "../products";
-import { getAgentContext } from "../server";
 
 const RESULT_LIMIT = 6;
 // Shopify pads results to the requested count, so constrained searches scan a wider pool
@@ -39,16 +38,17 @@ function queryWithoutOptions(query: string, options: ProductOption[]): string {
 
 // Shopify's semantic catalog search returns GIDs only, so canonical fields always come
 // from the Storefront API; a semantic miss falls back to the keyword index.
-async function semanticProducts(
-  query: string,
-  intent: string | undefined,
-  locale: string,
-  limit: number,
-) {
-  const { products = [] } = await searchCatalog({ intent, limit, locale, query });
+async function semanticProducts(query: string, intent: string | undefined, limit: number) {
+  const { products = [] } = await searchCatalog({
+    intent,
+    limit,
+    query,
+  });
   const ids = products.map((product) => product.id);
   if (ids.length === 0) return [];
-  const resolved = await getProductsByIds({ ids, locale });
+  const resolved = await getProductsByIds({
+    ids,
+  });
   const byId = new Map(resolved.map((product) => [product.id, product]));
   return ids.flatMap((id) => {
     const product = byId.get(id);
@@ -104,26 +104,22 @@ export const searchProductsTool = tool({
       .describe("Only applies to keyword mode."),
   }),
   execute: async ({ intent, mode, options, query, sortKey }) => {
-    const { user } = getAgentContext();
     const constrained = options.length > 0;
     const searchQuery = queryWithoutOptions(query, options);
     const poolSize = constrained ? CONSTRAINED_POOL : RESULT_LIMIT;
-
     try {
       let pool: ProductCard[] = [];
       if (mode === "semantic") {
-        pool = await semanticProducts(searchQuery, intent, user.locale, poolSize);
+        pool = await semanticProducts(searchQuery, intent, poolSize);
       }
       if (pool.length === 0) {
         const { products } = await searchIndexProducts({
           limit: poolSize,
-          locale: user.locale,
           query: searchQuery,
           sortKey,
         });
         pool = products;
       }
-
       const matching = await keepMatching(pool, options);
       if (constrained && matching.length === 0) {
         return {
@@ -145,10 +141,10 @@ export const getProductDetailsTool = tool({
     "pricing, and availability. Use this before adding a multi-variant product to the cart.",
   inputSchema: z.object({ handle: z.string() }),
   execute: async ({ handle }) => {
-    const { user } = getAgentContext();
-
     try {
-      const product = await getProductWithVariants({ handle, locale: user.locale });
+      const product = await getProductWithVariants({
+        handle,
+      });
       if (!product) return { error: `No product found for handle "${handle}".` };
       return { product: toAgentProductDetails(product) };
     } catch (error) {
@@ -162,12 +158,14 @@ export const getRecommendationsTool = tool({
   description: "Get complementary and related product recommendations for a product handle.",
   inputSchema: z.object({ handle: z.string() }),
   execute: async ({ handle }) => {
-    const { user } = getAgentContext();
-
     try {
       const [complementary, related] = await Promise.all([
-        getComplementaryProducts({ handle, locale: user.locale }),
-        getRelatedProducts({ handle, locale: user.locale }),
+        getComplementaryProducts({
+          handle,
+        }),
+        getRelatedProducts({
+          handle,
+        }),
       ]);
       const seen = new Set<string>();
       const products = [...complementary, ...related].filter((product) => {

@@ -1,7 +1,5 @@
-import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
-import type { Locale } from "@/lib/i18n";
 import { buildProductUrl } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
@@ -18,30 +16,26 @@ import {
 
 export interface ProductCardProps {
   product: ProductCardType;
-  locale: Locale;
   variant?: "default" | "featured";
   outOfStockText?: string;
   className?: string;
 }
 
-export async function ProductCard({
+export function ProductCard({
   product,
-  locale,
   variant = "default",
   outOfStockText,
   className,
 }: ProductCardProps) {
   const isFeatured = variant === "featured";
-  const t = isFeatured ? await getTranslations("product") : null;
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
-
   return (
     <Link href={href} className={className}>
       <ProductCardRoot variant={variant}>
-        {isFeatured && t && (
+        {isFeatured && (
           <ProductCardBadge>
             <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
-              {t("featuredBadge")}
+              Assistant's pick
             </span>
           </ProductCardBadge>
         )}
@@ -60,7 +54,6 @@ export async function ProductCard({
               maxAmount={product.maxPrice.amount}
               compareAtAmount={product.compareAtPrice?.amount}
               compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-              locale={locale}
               discountVariant={isFeatured ? "blue" : "green"}
             />
           </ProductCardContent>

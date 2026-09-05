@@ -5,23 +5,16 @@ import type * as React from "react";
 import { Swatch } from "@/components/ui/swatch";
 import type { OptionGroupState } from "@/lib/product";
 
-export type ProductTranslator = (
-  key: "selectVariantLabel" | "unavailableVariantLabel",
-  values: { name: string; value: string },
-) => string;
-
 interface ColorPickerProps extends React.ComponentProps<"div"> {
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   option: OptionGroupState;
-  t: ProductTranslator;
 }
 
 export function ColorPicker({
   hideImages,
   onSelectValue,
   option,
-  t,
   className,
   ...props
 }: ColorPickerProps) {
@@ -36,7 +29,6 @@ export function ColorPicker({
           const imageUrl = hideImages
             ? undefined
             : value.swatch?.image || (value.swatch?.color ? undefined : value.image);
-
           const swatch = (
             <Swatch
               color={value.swatch?.color}
@@ -45,26 +37,24 @@ export function ColorPicker({
               selected={value.selected}
             />
           );
-
           if (!value.exists || !value.available) {
             return (
               <span
                 key={value.name}
                 className="block cursor-not-allowed opacity-40"
-                aria-label={t("unavailableVariantLabel", { name: option.name, value: value.name })}
+                aria-label={`${option.name}: ${value.name} (unavailable)`}
               >
                 {swatch}
               </span>
             );
           }
-
           return (
             <Link
               key={value.name}
               href={value.href}
               scroll={false}
               className="block cursor-pointer"
-              aria-label={t("selectVariantLabel", { name: option.name, value: value.name })}
+              aria-label={`Select ${option.name}: ${value.name}`}
               aria-current={value.selected ? "true" : undefined}
               onClick={
                 onSelectValue && !value.crossProduct

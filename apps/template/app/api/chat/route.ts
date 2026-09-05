@@ -23,34 +23,31 @@ export async function POST(request: Request) {
     const { isBot } = await checkBotId(botIdCheckOptions);
     if (isBot) return Response.json({ error: BOTID_DENIED_CODE }, { status: 403 });
   }
-
   let body: { messages?: unknown };
   try {
     body = (await request.json()) as { messages?: unknown };
   } catch {
     return Response.json({ error: "Invalid request body" }, { status: 400 });
   }
-
   if (!Array.isArray(body.messages)) {
     return Response.json({ error: "Invalid messages" }, { status: 400 });
   }
-
   const safeMessages = await safeValidateUIMessages({ messages: body.messages });
   if (!safeMessages.success) {
     return Response.json({ error: "Invalid messages" }, { status: 400 });
   }
 
   // Page context comes from the same-origin Referer rather than client-supplied product data.
-  const { locale, page } = parsePageContext(request.headers.get("referer"));
-  const user: User = { locale, type: "guest" };
-
+  const { page } = parsePageContext(request.headers.get("referer"));
+  const user: User = {
+    type: "guest",
+  };
   let cartId = await getCartIdFromCookie();
   let newCartCookie: string | undefined;
   if (!cartId) {
-    cartId = await createEmptyCart(locale);
+    cartId = await createEmptyCart();
     if (cartId) newCartCookie = createCartCookie(cartId);
   }
-
   return withAgentContext({ cart: cartId, page, user }, async () => {
     const agent = createAgent();
     const result = await agent.stream({

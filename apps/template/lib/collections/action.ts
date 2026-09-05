@@ -8,7 +8,6 @@ import type { PageInfo, ProductCard } from "@/lib/types";
 export async function loadMoreCollectionProductsAction(params: {
   collection: string;
   cursor: string;
-  locale: string;
   search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
   const { activeFilters, filters, sort } = resolveBrowseParams(params.search);
@@ -19,9 +18,7 @@ export async function loadMoreCollectionProductsAction(params: {
     sortKey: sort,
     limit: PRODUCTS_PER_PAGE,
     filters,
-    locale: params.locale,
   });
-
   return {
     products: result.products,
     pageInfo: result.pageInfo,

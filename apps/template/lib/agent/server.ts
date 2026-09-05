@@ -3,7 +3,6 @@ import { isStepCount, ToolLoopAgent } from "ai";
 import { shopConfig } from "@/lib/config";
 
 import { catalog } from ".";
-import type { Locale } from "../i18n";
 import type { PageContext } from "./routes";
 import { addCartNoteTool, addToCartTool, getCartTool, updateCartItemTool } from "./tools/cart";
 import { browseCollectionTool, listCollectionsTool } from "./tools/collections";
@@ -15,7 +14,9 @@ import {
   searchProductsTool,
 } from "./tools/products";
 
-export type User = { locale: Locale; type: "guest" };
+export type User = {
+  type: "guest";
+};
 
 export interface AgentContext {
   cart: string | undefined;
@@ -56,19 +57,17 @@ function describePage(page: PageContext): string {
 }
 
 function createSystemPrompt(context: AgentContext): string {
-  const { page, user } = context;
-
+  const { page } = context;
   const instructions = [
     `You're a helpful shopping assistant for ${shopConfig.site.name}.`,
     "Never use emojis. Always respond in the same language as the shopper, preferring their language when unclear.",
-    `The active locale is ${user.locale}.`,
+    `The storefront display locale is ${shopConfig.localization.locale}; its commerce country is ${shopConfig.localization.country} and catalog language is ${shopConfig.localization.language}.`,
     "You can search products, browse collections, recommend products, answer store policy questions, manage the cart, and build on-site links.",
     "Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.",
     'When the shopper names a required product option such as a colour or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) and keep the query focused on the product itself ("jackets"). Fewer results than expected is the correct outcome; state how many matched.',
     "Only describe results as matching a colour, size, or other option when the tool returned them under that option. If searchProducts reports unmatchedOptions, tell the shopper nothing matched and offer to drop or change the constraint — never present other products as if they satisfied it.",
     describePage(page),
   ].filter(Boolean);
-
   return `${instructions.join("\n\n")}\n\n${catalog.prompt({
     customRules: [
       "When a tool returns products, render every one of them: an AgentProductCard per product, wrapped in a single AgentProductGrid.",

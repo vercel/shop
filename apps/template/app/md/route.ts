@@ -1,23 +1,15 @@
-import { getTranslations } from "next-intl/server";
-
-import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { markdownHeaders } from "@/lib/markdown/headers";
 import { homeToMarkdown } from "@/lib/markdown/home";
 import { searchIndexProducts } from "@/lib/shopify/operations/products";
 
 export async function GET(request: Request): Promise<Response> {
-  const locale = resolveLocale(new URL(request.url).searchParams.get("locale") || defaultLocale);
-
   try {
-    const [result, t] = await Promise.all([
-      searchIndexProducts({ limit: 8, locale }),
-      getTranslations("home"),
-    ]);
-
+    const result = await searchIndexProducts({
+      limit: 8,
+    });
     return new Response(
       homeToMarkdown({
-        description: `${t("headline")}. ${t("subheadline")}`,
-        locale,
+        description: `${"Agentic Infrastructure for Commerce"}. ${"An agent-friendly Shopify storefront built with Next.js and Hydrogen."}`,
         products: result.products,
       }),
       {

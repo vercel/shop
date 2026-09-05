@@ -20,7 +20,6 @@ import type { PageInfo, ProductCard } from "@/lib/types";
 interface InfiniteProductGridProps<TParams> {
   initialProducts: ProductCard[];
   initialPageInfo: PageInfo;
-  locale: string;
   outOfStockText: string;
   // Top-level "use server" action; passed by reference, no closure encryption.
   loadMore: (
@@ -33,7 +32,6 @@ interface InfiniteProductGridProps<TParams> {
 export function InfiniteProductGrid<TParams>({
   initialProducts,
   initialPageInfo,
-  locale,
   outOfStockText,
   loadMore,
   loadMoreParams,
@@ -46,7 +44,6 @@ export function InfiniteProductGrid<TParams>({
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
-
   const loadMorePage = useEffectEvent(async () => {
     if (loadingRef.current || !pageInfo.hasNextPage || !pageInfo.endCursor) return;
     loadingRef.current = true;
@@ -82,18 +79,12 @@ export function InfiniteProductGrid<TParams>({
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [endCursor, hasNextPage]);
-
   return (
     <>
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {children}
         {additionalProducts.map((product) => (
-          <ClientProductCard
-            key={product.id}
-            product={product}
-            locale={locale}
-            outOfStockText={outOfStockText}
-          />
+          <ClientProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
         ))}
       </div>
 
@@ -108,15 +99,12 @@ export function InfiniteProductGrid<TParams>({
 
 function ClientProductCard({
   product,
-  locale,
   outOfStockText,
 }: {
   product: ProductCard;
-  locale: string;
   outOfStockText: string;
 }) {
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
-
   return (
     <Link href={href}>
       <ProductCardRoot>
@@ -135,7 +123,6 @@ function ClientProductCard({
               maxAmount={product.maxPrice.amount}
               compareAtAmount={product.compareAtPrice?.amount}
               compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-              locale={locale}
             />
           </ProductCardContent>
         </ProductCardImageContainer>

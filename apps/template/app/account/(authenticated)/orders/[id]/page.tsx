@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { formatMoney } from "@shopify/hydrogen";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -12,10 +12,9 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { defaultLocale } from "@/lib/i18n";
+import { shopConfig } from "@/lib/config";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer";
 import type { Money, OrderLineItem } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -26,13 +25,10 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 }
 
 async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, t] = await Promise.all([params, getTranslations("account")]);
-
+  const { id } = await params;
   if (!id) notFound();
-
   const order = await getCustomerOrder(id);
   if (!order) notFound();
-
   return (
     <>
       <AccountPageHeader title={order.name} description={formatOrderDate(order.processedAt)} />
@@ -51,18 +47,24 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
       </ul>
 
       <dl className="grid gap-2 rounded-lg border p-4 text-sm">
-        <SummaryRow label={t("subtotal")} money={order.subtotal} />
-        <SummaryRow label={t("shipping")} money={order.totalShipping} />
-        <SummaryRow label={t("tax")} money={order.totalTax} />
+        <SummaryRow label="Subtotal" money={order.subtotal} />
+        <SummaryRow label="Shipping" money={order.totalShipping} />
+        <SummaryRow label="Tax" money={order.totalTax} />
         <div className="flex items-center justify-between border-t pt-2 font-medium">
-          <dt>{t("total")}</dt>
-          <dd className="font-mono tabular-nums">{formatPrice(order.totalPrice, defaultLocale)}</dd>
+          <dt>Total</dt>
+          <dd className="font-mono tabular-nums">
+            {
+              formatMoney(order.totalPrice, {
+                locale: shopConfig.localization.locale,
+              }).localizedString
+            }
+          </dd>
         </div>
       </dl>
 
       {order.shippingAddress && order.shippingAddress.formatted.length > 0 ? (
         <div className="grid gap-2 rounded-lg border p-4">
-          <h2 className="text-sm font-medium">{t("shippingAddress")}</h2>
+          <h2 className="text-sm font-medium">Shipping address</h2>
           <address className="text-sm text-muted-foreground not-italic">
             {order.shippingAddress.formatted.map((line, index) => (
               <span key={index} className="block">
@@ -76,7 +78,7 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
       <div className="flex gap-2">
         <Button asChild variant="outline" size="sm">
           <a href={order.statusPageUrl} target="_blank" rel="noopener noreferrer">
-            {t("viewOrderStatus")}
+            View order status
           </a>
         </Button>
       </div>
@@ -107,7 +109,11 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
       </div>
       {item.totalPrice ? (
         <span className="font-mono text-sm tabular-nums">
-          {formatPrice(item.totalPrice, defaultLocale)}
+          {
+            formatMoney(item.totalPrice, {
+              locale: shopConfig.localization.locale,
+            }).localizedString
+          }
         </span>
       ) : null}
     </li>
@@ -119,7 +125,13 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-mono tabular-nums">{formatPrice(money, defaultLocale)}</dd>
+      <dd className="font-mono tabular-nums">
+        {
+          formatMoney(money, {
+            locale: shopConfig.localization.locale,
+          }).localizedString
+        }
+      </dd>
     </div>
   );
 }

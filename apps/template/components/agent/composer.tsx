@@ -2,7 +2,6 @@
 
 import { cn } from "cn";
 import { CornerDownLeftIcon, Loader2Icon, SquareIcon, XIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import type { KeyboardEvent } from "react";
 
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
@@ -28,9 +27,7 @@ export function AgentComposer({
   placeholder,
   className,
 }: AgentComposerProps) {
-  const t = useTranslations("agent");
   const isBusy = status === "submitted" || status === "streaming";
-
   const submit = () => {
     if (status === "streaming") {
       onStop();
@@ -40,20 +37,16 @@ export function AgentComposer({
     if (!text || isBusy) return;
     onSubmit(text);
   };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) return;
     e.preventDefault();
     submit();
   };
-
   let icon = <CornerDownLeftIcon className="size-4" />;
   if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
   else if (status === "streaming") icon = <SquareIcon className="size-4" />;
   else if (status === "error") icon = <XIcon className="size-4" />;
-
   const isStopping = status === "streaming";
-
   return (
     <form
       onSubmit={(e) => {
@@ -75,7 +68,7 @@ export function AgentComposer({
           type="submit"
           size="icon-sm"
           variant="default"
-          aria-label={isStopping ? t("stop") : t("send")}
+          aria-label={isStopping ? "Stop" : "Send"}
           disabled={!value.trim() && !isStopping}
           className="mr-1.5 mb-1.5"
         >

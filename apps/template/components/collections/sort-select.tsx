@@ -1,20 +1,19 @@
 "use client";
 
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
-import { useTranslations } from "next-intl";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { getCollectionSortByValue, getCollectionSortFromState } from "@/lib/collections";
 
 const SORT_OPTIONS = [
-  { value: "best-matches", key: "bestMatches" },
-  { value: "best-selling", key: "bestSelling" },
-  { value: "product-name-ascending", key: "nameAscending" },
-  { value: "product-name-descending", key: "nameDescending" },
-  { value: "price-low-to-high", key: "priceLowToHigh" },
-  { value: "price-high-to-low", key: "priceHighToLow" },
-  { value: "date-old-to-new", key: "dateOldToNew" },
-  { value: "date-new-to-old", key: "dateNewToOld" },
+  { value: "best-matches", label: "Best Matches" },
+  { value: "best-selling", label: "Best Selling" },
+  { value: "product-name-ascending", label: "Name: A-Z" },
+  { value: "product-name-descending", label: "Name: Z-A" },
+  { value: "price-low-to-high", label: "Price: Low to High" },
+  { value: "price-high-to-low", label: "Price: High to Low" },
+  { value: "date-old-to-new", label: "Date: Old to New" },
+  { value: "date-new-to-old", label: "Date: New to Old" },
 ] as const;
 
 // Storefront `search` only sorts by RELEVANCE and PRICE.
@@ -29,12 +28,9 @@ export const SEARCH_SORT_EXCLUDE: string[] = [
 export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {
   const { reverse, sortKey, status } = useCollection();
   const { setSortByValue } = useCollectionActions();
-  const tSort = useTranslations("search.sort");
-  const tSearch = useTranslations("search");
   const options = exclude
     ? SORT_OPTIONS.filter((option) => !exclude.includes(option.value))
     : SORT_OPTIONS;
-
   return (
     <Select
       value={getCollectionSortFromState(sortKey, reverse)}
@@ -42,12 +38,12 @@ export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) 
       disabled={status === "loading"}
     >
       <SelectTrigger className="border-0 shadow-none bg-transparent px-0">
-        <span>{tSearch("sortBy")}</span>
+        <span>Sort</span>
       </SelectTrigger>
       <SelectContent>
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {tSort(option.key)}
+            {option.label}
           </SelectItem>
         ))}
       </SelectContent>

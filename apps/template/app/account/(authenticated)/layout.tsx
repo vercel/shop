@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -15,9 +14,8 @@ import { shopConfig } from "@/lib/config";
 import { getCustomerProfile } from "@/lib/shopify/operations/customer";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("seo");
   return {
-    title: t("accountTitle"),
+    title: "Account",
     robots: { index: false, follow: false },
   };
 }
@@ -68,18 +66,13 @@ async function AccountGate({ children }: { children: React.ReactNode }) {
 async function AccountLabel() {
   if (!shopConfig.auth.isEnabled) notFound();
   await requireCustomerSession();
-
   const accessToken = await getCustomerAccessToken();
   if (!accessToken) {
-    const t = await getTranslations("nav");
-    return <p className="text-sm font-medium">{t("account")}</p>;
+    return <p className="text-sm font-medium">Account</p>;
   }
-
   const profile = await getCustomerProfile();
   if (!profile) return null;
-
   const name = [profile.firstName, profile.lastName].filter(Boolean).join(" ");
-
   return (
     <div>
       <p className="text-sm font-medium">{name || profile.email}</p>

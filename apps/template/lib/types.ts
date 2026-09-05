@@ -1,7 +1,5 @@
 import type { I18nConfig } from "@shopify/hydrogen";
 
-import type { Locale } from "@/lib/i18n";
-
 export interface Money {
   amount: string;
   currencyCode: string;

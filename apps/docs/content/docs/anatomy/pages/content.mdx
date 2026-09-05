@@ -16,7 +16,7 @@ Unknown handles return a not-found page. There is no combined `/blogs` page, so 
 
 ## Publish content in Shopify
 
-Manage Pages and blog posts in Shopify Admin, and manage store policies in Shopify settings. The storefront uses the active locale when requesting this content.
+Manage Pages and blog posts in Shopify Admin, and manage store policies in Shopify settings. The default storefront requests this content using the deployment's configured Shopify country and language. These settings are separate from the storefront's own [copy](/docs/anatomy/i18n).
 
 Shopify Pages include a title, rich-text body, and SEO fields. Blogs list recent articles with dates, excerpts, and optional images. Articles include the title, author, date, image, and body. Policy URLs exist only when the corresponding policy has content, and the [footer](/docs/anatomy/footer) links to every configured policy.
 
@@ -26,7 +26,7 @@ Search and social metadata use Shopify's SEO fields when available. Sitemaps inc
 
 Shopify does not provide webhook topics for Pages, policies, blogs, or articles. An edit may remain cached until you manually purge the affected content cache or redeploy. Product and collection webhook behavior does not apply to these content types; see [Webhooks](/docs/anatomy/webhooks).
 
-Verify every published or edited page in the storefront, including its active locale, metadata, navigation link, and sitemap entry.
+Verify every published or edited page in the storefront, including its language, metadata, navigation link, and sitemap entry.
 
 ## Know when Shopify content is enough
 

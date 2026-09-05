@@ -1,5 +1,4 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
-import { getTranslations } from "next-intl/server";
 
 import {
   type ActiveFilters,
@@ -7,7 +6,6 @@ import {
   getCollectionSortFromState,
 } from "@/lib/collections";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
   fetchCollectionProducts,
@@ -73,11 +71,9 @@ function recordToSearchParams(
 
 export async function getCollectionResultsData({
   handle,
-  locale,
   searchStatePromise,
 }: {
   handle: string;
-  locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
   const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
@@ -87,9 +83,7 @@ export async function getCollectionResultsData({
     sortKey: sort,
     limit: PRODUCTS_PER_PAGE,
     filters,
-    locale,
   });
-
   return {
     activeFilters,
     collection: handle,
@@ -102,9 +96,8 @@ export async function getCollectionResultsData({
 }
 
 export async function getAllProductsCollection(): Promise<Collection> {
-  const t = await getTranslations("collections.all");
-  const title = t("title");
-  const description = t("description");
+  const title = "Products";
+  const description = "";
   return {
     handle: ALL_PRODUCTS_HANDLE,
     title,
@@ -117,10 +110,8 @@ export async function getAllProductsCollection(): Promise<Collection> {
 }
 
 export async function getAllProductsResultsData({
-  locale,
   searchStatePromise,
 }: {
-  locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
   const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
@@ -130,11 +121,12 @@ export async function getAllProductsResultsData({
       sortKey: sort,
       limit: PRODUCTS_PER_PAGE,
       filters,
-      locale,
     }),
-    fetchSearchFacets({ activeFilters, filters, locale }),
+    fetchSearchFacets({
+      activeFilters,
+      filters,
+    }),
   ]);
-
   return {
     activeFilters,
     collection: ALL_PRODUCTS_HANDLE,

@@ -5,7 +5,6 @@ import {
   createShopifyRequestContext,
   getCartId,
   gql,
-  type I18nConfig,
 } from "@shopify/hydrogen";
 import { io } from "next/cache";
 import { headers } from "next/headers";
@@ -13,7 +12,6 @@ import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
 import { shopConfig } from "@/lib/config";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
 import type { Cart, CartWarning } from "@/lib/types";
 
@@ -78,9 +76,9 @@ const getRequestContext = cache(async () => {
   // Hydrogen's createShopifyRequestContext calls crypto.randomUUID(); exclude it from the static shell.
   await io();
   const i18n = {
-    country: getCountryCode(defaultLocale),
-    language: getLanguageCode(defaultLocale),
-  } as I18nConfig;
+    country: shopConfig.localization.country,
+    language: shopConfig.localization.language,
+  };
   return createShopifyRequestContext({ i18n, request: { headers: await headers() } });
 });
 
@@ -126,10 +124,16 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
 }
 
 /** Creates an empty cart so a streaming response can set the cookie before any line is added. */
-export async function createEmptyCart(locale: string = defaultLocale): Promise<string | undefined> {
+export async function createEmptyCart(): Promise<string | undefined> {
   const { storefrontClient } = await getHandlerContext();
   const { data, errors } = await storefrontClient.graphql(cartQueries.cartCreate, {
-    variables: { input: { buyerIdentity: { countryCode: getCountryCode(locale) as never } } },
+    variables: {
+      input: {
+        buyerIdentity: {
+          countryCode: shopConfig.localization.country,
+        },
+      },
+    },
   });
   if (errors?.length) throw new Error(errors[0].message);
   const userErrors = data?.cartCreate?.userErrors ?? [];

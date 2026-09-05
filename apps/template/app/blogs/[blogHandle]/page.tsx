@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { ArticleCard } from "@/components/blog/article-card";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getBlog } from "@/lib/shopify/operations/blogs";
 import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
@@ -26,12 +24,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/blogs/[blogHandle]">): Promise<Metadata> {
-  const [{ blogHandle }, locale] = await Promise.all([params, getLocale()]);
+  const { blogHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE) return {};
-
-  const blog = await getBlog({ handle: blogHandle, locale });
+  const blog = await getBlog({
+    handle: blogHandle,
+  });
   if (!blog) notFound();
-
   const pathname = `/blogs/${blog.handle}`;
   return {
     alternates: buildAlternates({ pathname }),
@@ -47,16 +45,12 @@ export async function generateMetadata({
 }
 
 export default async function BlogPage({ params }: PageProps<"/blogs/[blogHandle]">) {
-  const [{ blogHandle }, locale, t] = await Promise.all([
-    params,
-    getLocale(),
-    getTranslations("blog"),
-  ]);
+  const { blogHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE) notFound();
-
-  const blog = await getBlog({ handle: blogHandle, locale });
+  const blog = await getBlog({
+    handle: blogHandle,
+  });
   if (!blog) notFound();
-
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
@@ -65,11 +59,11 @@ export default async function BlogPage({ params }: PageProps<"/blogs/[blogHandle
           {blog.articles.length > 0 ? (
             <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
               {blog.articles.map((article) => (
-                <ArticleCard article={article} key={article.handle} locale={locale} />
+                <ArticleCard article={article} key={article.handle} />
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">{t("empty")}</p>
+            <p className="text-muted-foreground">No articles found.</p>
           )}
         </Sections>
       </Container>

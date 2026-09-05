@@ -1,3 +1,4 @@
+import { shopConfig } from "@/lib/config";
 import type { Collection, Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
 import {
@@ -16,7 +17,7 @@ export function collectionToMarkdown({
   priceRange,
   activeFilters,
   pageInfo,
-  locale,
+  locale = shopConfig.localization.locale,
   sort,
 }: {
   collection: Collection;
@@ -25,7 +26,7 @@ export function collectionToMarkdown({
   priceRange?: PriceRange;
   activeFilters: Record<string, string | string[] | undefined>;
   pageInfo: PageInfo;
-  locale: string;
+  locale?: string;
   sort?: string;
 }): string {
   const sections: string[] = [];

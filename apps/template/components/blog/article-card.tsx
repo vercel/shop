@@ -2,19 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { shopConfig } from "@/lib/config";
 import type { BlogArticle } from "@/lib/types";
 
 export interface ArticleCardProps {
   article: BlogArticle;
-  locale: string;
 }
 
-export function ArticleCard({ article, locale }: ArticleCardProps) {
+export function ArticleCard({ article }: ArticleCardProps) {
   const href = `/blogs/${article.blogHandle}/${article.handle}`;
-  const publishedAt = new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(
-    new Date(article.publishedAt),
-  );
-
+  const publishedAt = new Intl.DateTimeFormat(shopConfig.localization.locale, {
+    dateStyle: "long",
+  }).format(new Date(article.publishedAt));
   return (
     <article className="grid content-start gap-4">
       <Link className="relative aspect-3/2 overflow-hidden rounded-xl" href={href}>

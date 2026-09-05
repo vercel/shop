@@ -1,6 +1,4 @@
 import { SlidersHorizontalIcon } from "lucide-react";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -18,7 +16,6 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
-import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
 import {
@@ -27,29 +24,21 @@ import {
 } from "./collection-browse-provider";
 import { FilterPendingScope } from "./filter-pending-context";
 
-export async function CollectionDetailPage({
+export function CollectionDetailPage({
   collection,
   collectionResultsDataPromise,
   handle,
-  locale,
   searchStatePromise,
   sortExclude,
 }: {
   collection: Collection;
   collectionResultsDataPromise: Promise<CollectionResultsData>;
   handle: string;
-  locale: Locale;
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
-  const [messages, tSearch, tBreadcrumb] = await Promise.all([
-    getMessages(),
-    getTranslations("search"),
-    getTranslations("collections.breadcrumb"),
-  ]);
-  const filtersLabel = tSearch("filters");
-  const sortByLabel = tSearch("sortBy");
-
+  const filtersLabel = "Filters";
+  const sortByLabel = "Sort";
   return (
     <>
       {collection.id ? (
@@ -58,56 +47,47 @@ export async function CollectionDetailPage({
       <Page className="pt-2.5 md:pt-10">
         <Container>
           <Sections className="gap-5">
-            <CollectionHeader
-              collection={collection}
-              handle={handle}
-              homeLabel={tBreadcrumb("home")}
-            />
+            <CollectionHeader collection={collection} handle={handle} homeLabel="Home" />
 
             <Suspense
               fallback={
                 <CollectionBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
               }
             >
-              <NextIntlClientProvider
-                messages={{ category: messages.category, search: messages.search }}
-              >
-                <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-                  <CollectionToolbar
-                    filterSheet={
-                      <FilterSidebarSheet
-                        label={filtersLabel}
-                        trigger={
-                          <button
-                            type="button"
-                            className="flex items-center gap-2 text-sm font-medium"
-                          >
-                            <SlidersHorizontalIcon className="size-4" />
-                            <span>{filtersLabel}</span>
-                            <CollectionActiveFilterCountBadge />
-                          </button>
-                        }
-                      >
-                        <FilterPendingScope>
-                          <CollectionFilters
-                            facetsPromise={collectionResultsDataPromise.then(
-                              (data) => data.transformedFilters,
-                            )}
-                          />
-                        </FilterPendingScope>
-                      </FilterSidebarSheet>
-                    }
-                    sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
-                  />
+              <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
+                <CollectionToolbar
+                  filterSheet={
+                    <FilterSidebarSheet
+                      label={filtersLabel}
+                      trigger={
+                        <button
+                          type="button"
+                          className="flex items-center gap-2 text-sm font-medium"
+                        >
+                          <SlidersHorizontalIcon className="size-4" />
+                          <span>{filtersLabel}</span>
+                          <CollectionActiveFilterCountBadge />
+                        </button>
+                      }
+                    >
+                      <FilterPendingScope>
+                        <CollectionFilters
+                          facetsPromise={collectionResultsDataPromise.then(
+                            (data) => data.transformedFilters,
+                          )}
+                        />
+                      </FilterPendingScope>
+                    </FilterSidebarSheet>
+                  }
+                  sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
+                />
 
-                  <FilterPendingScope>
-                    <CollectionResultsGrid
-                      locale={locale}
-                      collectionResultsDataPromise={collectionResultsDataPromise}
-                    />
-                  </FilterPendingScope>
-                </CollectionBrowseProvider>
-              </NextIntlClientProvider>
+                <FilterPendingScope>
+                  <CollectionResultsGrid
+                    collectionResultsDataPromise={collectionResultsDataPromise}
+                  />
+                </FilterPendingScope>
+              </CollectionBrowseProvider>
             </Suspense>
           </Sections>
         </Container>

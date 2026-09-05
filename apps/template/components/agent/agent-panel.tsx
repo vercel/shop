@@ -4,7 +4,6 @@ import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import { MinusIcon, Trash2Icon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
@@ -15,6 +14,7 @@ import { ChatMessage } from "./chat-message";
 import { AgentComposer } from "./composer";
 
 const STORAGE_KEY = "template-agent-chat";
+
 const DRAFT_DEBOUNCE_MS = 400;
 
 interface StoredChat {
@@ -52,7 +52,6 @@ export interface AgentPanelProps {
 }
 
 export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) {
-  const t = useTranslations("agent");
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
   const [input, setInput] = useState(stored.input);
@@ -60,17 +59,14 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     messages: stored.messages,
     transport: new DefaultChatTransport({ api: "/api/chat" }),
   });
-
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
-
   const handleScroll = useCallback(() => {
     const element = scrollRef.current;
     if (!element) return;
     pinnedRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
   }, []);
-
   useEffect(() => {
     const scroller = scrollRef.current;
     const content = contentRef.current;
@@ -87,7 +83,6 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     const timer = setTimeout(() => writeStoredChat({ input, messages }), DRAFT_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [input, messages]);
-
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(event: MouseEvent) {
@@ -110,9 +105,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       document.removeEventListener("keydown", handleEscape);
     };
   }, [onOpenChange, open, triggerRef]);
-
   useScrollContain(panelRef, open, "[data-slot=agent-messages]");
-
   const handleSend = useCallback(
     (text: string) => {
       pinnedRef.current = true;
@@ -121,20 +114,17 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     },
     [sendMessage],
   );
-
   const handleClear = useCallback(() => {
     stop();
     setMessages([]);
     setInput("");
     writeStoredChat({ input: "", messages: [] });
   }, [setMessages, stop]);
-
   const canClear = messages.length > 0 || input.trim().length > 0;
-
   return (
     <div
       ref={panelRef}
-      aria-label={t("assistantLabel")}
+      aria-label="Shopping assistant"
       data-state={open ? "open" : "closed"}
       onTransitionEnd={(event) => {
         if (event.target === event.currentTarget && event.propertyName === "opacity" && open) {
@@ -147,10 +137,10 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     >
       <AgentCartBridge messages={messages} />
       <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
-        <span className="font-semibold text-sm">{t("name")}</span>
+        <span className="font-semibold text-sm">Shop Assistant</span>
         <div className="flex items-center gap-1">
           <button
-            aria-label={t("clearChat")}
+            aria-label="Clear chat"
             className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
             disabled={!canClear}
             onClick={handleClear}
@@ -159,7 +149,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
             <Trash2Icon className="size-4" />
           </button>
           <button
-            aria-label={t("minimizeAssistant")}
+            aria-label="Minimize assistant"
             className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             onClick={() => onOpenChange(false)}
             type="button"
@@ -179,7 +169,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           className="flex min-h-full flex-col justify-end gap-6 p-5 [&>*]:shrink-0"
         >
           {messages.length === 0 ? (
-            <p className="text-foreground text-sm">{t("greeting")}</p>
+            <p className="text-foreground text-sm">Hi, how can I help?</p>
           ) : (
             messages.map((message, index) => (
               <ChatMessage
@@ -195,13 +185,15 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         onChange={setInput}
         onStop={stop}
         onSubmit={handleSend}
-        placeholder={t("inputPlaceholder")}
+        placeholder="Ask anything…"
         status={status}
         value={input}
       />
       {error && (
         <p className="px-5 pb-2 text-red-500 text-xs">
-          {error.message.includes(BOTID_DENIED_CODE) ? t("blocked") : t("error")}
+          {error.message.includes(BOTID_DENIED_CODE)
+            ? "We couldn't verify this request. Reload the page and try again."
+            : "Something went wrong. Try again."}
         </p>
       )}
     </div>

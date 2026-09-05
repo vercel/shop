@@ -1,5 +1,6 @@
 "use client";
 
+import { formatMoney } from "@shopify/hydrogen";
 import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,7 +9,7 @@ import { useCart } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
 import { cartDiscountAmount } from "@/lib/cart";
 import { prepareCheckoutAction } from "@/lib/cart/action";
-import { formatPrice } from "@/lib/utils";
+import { shopConfig } from "@/lib/config";
 
 function CheckoutLink({
   checkoutUrl,
@@ -64,7 +65,6 @@ function CheckoutLink({
 interface SummaryProps {
   completeCheckoutLabel: string;
   estimatedTotalLabel: string;
-  locale: string;
   taxesAndShippingNote: string;
   updatingCartLabel: string;
 }
@@ -72,21 +72,17 @@ interface SummaryProps {
 export function Summary({
   completeCheckoutLabel,
   estimatedTotalLabel,
-  locale,
   taxesAndShippingNote,
   updatingCartLabel,
 }: SummaryProps) {
   const { cart, isUpdatingCart } = useCart();
-
   if (!cart) return null;
-
   const lineSubtotal = cart.lines.reduce(
     (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
     0,
   );
   const estimatedTotal = Math.max(0, lineSubtotal - cartDiscountAmount(cart));
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
-
   return (
     <div className="space-y-5">
       <DiscountForm cart={cart} />
@@ -94,7 +90,17 @@ export function Summary({
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
           <span className="text-xl font-medium text-foreground">
-            {formatPrice({ amount: estimatedTotal, currencyCode }, locale)}
+            {
+              formatMoney(
+                {
+                  amount: String(estimatedTotal),
+                  currencyCode,
+                },
+                {
+                  locale: shopConfig.localization.locale,
+                },
+              ).localizedString
+            }
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>

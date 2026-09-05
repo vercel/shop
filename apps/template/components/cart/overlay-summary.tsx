@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 import { DiscountForm } from "@/components/cart/discount-form";
 import { Price } from "@/components/product/price";
 import { cartDiscountAmount } from "@/lib/cart";
@@ -9,11 +7,9 @@ import type { Cart } from "@/lib/types";
 
 interface OverlaySummaryProps {
   cart: Cart;
-  locale: string;
 }
 
-export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
-  const t = useTranslations("cart");
+export function OverlaySummary({ cart }: OverlaySummaryProps) {
   const currencyCode = cart.cost.subtotalAmount.currencyCode;
 
   // Sum line totals locally — Shopify's `subtotalAmount` lags during optimistic updates.
@@ -22,21 +18,21 @@ export function OverlaySummary({ cart, locale }: OverlaySummaryProps) {
     0,
   );
   const estimatedTotal = Math.max(0, lineSubtotal - cartDiscountAmount(cart));
-
   return (
     <div className="grid gap-2.5">
       <DiscountForm cart={cart} />
-      <div aria-label={t("estimatedTotal")}>
+      <div aria-label="Estimated total">
         <div className="flex items-baseline justify-between">
-          <span className="text-base text-muted-foreground">{t("estimatedTotal")}</span>
+          <span className="text-base text-muted-foreground">Estimated total</span>
           <Price
             amount={estimatedTotal.toString()}
             currencyCode={currencyCode}
-            locale={locale}
             className="text-xl font-medium text-foreground"
           />
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{t("taxesAndShippingNote")}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Taxes and shipping calculated at checkout.
+        </p>
       </div>
     </div>
   );

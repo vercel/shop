@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
-import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
 
@@ -23,21 +21,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps<"/collections/[handle]">): Promise<Metadata> {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
-
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) {
     notFound();
   }
-
-  const [collection, t] = await Promise.all([
-    getCollection({ handle, locale }),
-    getTranslations("seo"),
-  ]);
-
+  const collection = await getCollection({
+    handle,
+  });
   if (!collection) {
-    const title = t("collectionFallbackTitle");
-    const description = t("collectionFallbackDescription");
-
+    const title = "Collection";
+    const description = "Browse collection products.";
     return {
       title,
       description,
@@ -58,10 +51,8 @@ export async function generateMetadata({
       },
     };
   }
-
   const title = collection.seo.title;
   const description = collection.seo.description;
-
   return {
     title,
     description,
@@ -89,26 +80,24 @@ export default async function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/collections/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+  const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
-
-  const collection = await getCollection({ handle, locale });
+  const collection = await getCollection({
+    handle,
+  });
   if (!collection) notFound();
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const collectionResultsDataPromise = getCollectionResultsData({
     handle,
-    locale,
     searchStatePromise,
   });
-
   return (
     <CollectionDetailPage
       collection={collection}
       collectionResultsDataPromise={collectionResultsDataPromise}
       handle={handle}
-      locale={locale}
       searchStatePromise={searchStatePromise}
     />
   );

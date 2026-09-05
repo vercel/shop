@@ -8,14 +8,12 @@ interface ProductPriceProps extends React.ComponentProps<"div"> {
   amount: string;
   currencyCode: string;
   compareAtAmount?: string;
-  locale?: string;
 }
 
 export function ProductPrice({
   amount,
   currencyCode,
   compareAtAmount,
-  locale,
   className,
   ...props
 }: ProductPriceProps) {
@@ -23,15 +21,13 @@ export function ProductPrice({
     compareAtAmount && Number(compareAtAmount) > Number(amount)
       ? Math.round(((Number(compareAtAmount) - Number(amount)) / Number(compareAtAmount)) * 100)
       : null;
-
   return (
     <div className={cn("flex items-center gap-2.5 flex-wrap", className)} {...props}>
-      <Price amount={amount} currencyCode={currencyCode} locale={locale} className="text-xl" />
+      <Price amount={amount} currencyCode={currencyCode} className="text-xl" />
       {compareAtAmount && Number(compareAtAmount) > Number(amount) && (
         <Price
           amount={compareAtAmount}
           currencyCode={currencyCode}
-          locale={locale}
           className="text-xl line-through text-foreground/35"
         />
       )}

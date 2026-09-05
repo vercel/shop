@@ -1,28 +1,23 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-
 export function AgentThinking({ active, tool }: { active: boolean; tool?: string }) {
-  const t = useTranslations("agent");
   if (!active) return null;
-
   const toolLabels: Record<string, string> = {
-    addCartNote: t("toolAddCartNote"),
-    addToCart: t("toolAddToCart"),
-    browseCollection: t("toolBrowseCollection"),
-    getCart: t("toolGetCart"),
-    getProductDetails: t("toolGetProductDetails"),
-    getProductRecommendations: t("toolGetRecommendations"),
-    listCollections: t("toolListCollections"),
-    navigateUser: t("toolNavigate"),
-    searchProducts: t("toolSearchProducts"),
-    searchShopPolicies: t("toolSearchPolicies"),
-    updateCartItem: t("toolUpdateCart"),
+    addCartNote: "Adding your note…",
+    addToCart: "Adding to cart…",
+    browseCollection: "Browsing the collection…",
+    getCart: "Checking your cart…",
+    getProductDetails: "Looking up product details…",
+    getProductRecommendations: "Finding recommendations…",
+    listCollections: "Looking at collections…",
+    navigateUser: "Finding the page…",
+    searchProducts: "Searching products…",
+    searchShopPolicies: "Checking store policies…",
+    updateCartItem: "Updating your cart…",
   };
-
   return (
     <p className="shimmer w-fit text-muted-foreground text-sm">
-      {(tool ? toolLabels[tool] : undefined) ?? t("thinking")}
+      {(tool ? toolLabels[tool] : undefined) ?? "Thinking…"}
     </p>
   );
 }

@@ -6,13 +6,11 @@ import { OverlayItem } from "@/components/cart/overlay-item";
 interface CartItemsListProps {
   emptyLabel: string;
   itemsLabel: string;
-  locale: string;
 }
 
-export function CartItemsList({ emptyLabel, itemsLabel, locale }: CartItemsListProps) {
+export function CartItemsList({ emptyLabel, itemsLabel }: CartItemsListProps) {
   const cart = useCartRender();
   const lines = cart?.lines ?? [];
-
   return lines.length === 0 ? (
     <div className="text-center py-10">
       <p className="text-muted-foreground">{emptyLabel}</p>
@@ -20,7 +18,7 @@ export function CartItemsList({ emptyLabel, itemsLabel, locale }: CartItemsListP
   ) : (
     <ul className="space-y-5" aria-label={itemsLabel}>
       {lines.map((item) => (
-        <OverlayItem key={item.id} item={item} locale={locale} />
+        <OverlayItem key={item.id} item={item} />
       ))}
     </ul>
   );
