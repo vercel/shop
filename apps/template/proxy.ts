@@ -39,23 +39,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const pathname = request.nextUrl.pathname;
 
   if (pathname === "/.well-known/ucp") {
-    if (request.method !== "GET" && request.method !== "HEAD") {
-      return new Response(null, {
-        headers: { Allow: "GET, HEAD", "Cache-Control": "no-store" },
-        status: 405,
-      });
-    }
-
-    const headers = new Headers();
-    for (const name of ["accept", "if-modified-since", "if-none-match"]) {
-      const value = request.headers.get(name);
-      if (value) headers.set(name, value);
-    }
-
     // Hydrogen's well-known proxy does not yet include UCP.
     return NextResponse.rewrite(
       new URL(`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/.well-known/ucp`),
-      { request: { headers } },
     );
   }
 
