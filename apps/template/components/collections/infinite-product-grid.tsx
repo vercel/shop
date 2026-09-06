@@ -2,6 +2,7 @@
 
 import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { ProductCard } from "@/components/product-card/product-card";
@@ -17,7 +18,7 @@ interface InfiniteProductGridProps<TParams> {
     params: TParams & { cursor: string; search: string },
   ) => Promise<{ products: ProductCardType[]; pageInfo: PageInfo }>;
   loadMoreParams: TParams;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function InfiniteProductGrid<TParams>({

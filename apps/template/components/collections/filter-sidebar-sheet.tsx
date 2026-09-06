@@ -1,13 +1,13 @@
 "use client";
 
-import type * as React from "react";
+import type { ReactElement, ReactNode } from "react";
 
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface FilterSidebarSheetProps {
-  children: React.ReactNode;
+  children: ReactNode;
   label: string;
-  trigger: React.ReactElement;
+  trigger: ReactElement;
 }
 
 export function FilterSidebarSheet({ children, label, trigger }: FilterSidebarSheetProps) {

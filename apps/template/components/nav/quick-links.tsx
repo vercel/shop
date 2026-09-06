@@ -1,6 +1,7 @@
 import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import type { MenuItem } from "@/lib/shopify/types/menu";
 
@@ -8,7 +9,7 @@ const MAX_COLUMNS = 5;
 
 interface MenuLinkProps {
   url: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 

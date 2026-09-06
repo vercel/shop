@@ -6,6 +6,7 @@ import { cn } from "cn";
 import { Search, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import type { FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Price } from "@/components/product/price";
@@ -67,7 +68,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     },
     [router, onClose],
   );
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const q = inputRef.current?.value?.trim();
     if (!q) return;
@@ -93,7 +94,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigate(`/products/${product.handle}`);
     }
   }
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: ReactKeyboardEvent) {
     if (e.key === "ArrowDown" && visibleItems > 0) {
       e.preventDefault();
       setActiveIndex(Math.min(activeIndex + 1, visibleItems - 1));

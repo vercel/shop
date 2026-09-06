@@ -1,11 +1,11 @@
 import { cn } from "cn";
 import Link from "next/link";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import { Swatch } from "@/components/ui/swatch";
 import type { OptionGroupState } from "@/lib/product";
 
-interface ColorPickerProps extends React.ComponentProps<"div"> {
+interface ColorPickerProps extends ComponentProps<"div"> {
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   option: OptionGroupState;

@@ -1,11 +1,11 @@
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import type { OptionGroupState } from "@/lib/product";
 
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 
-interface ProductInfoOptionsProps extends React.ComponentProps<"div"> {
+interface ProductInfoOptionsProps extends ComponentProps<"div"> {
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   options: OptionGroupState[];
@@ -57,7 +57,7 @@ function ProductInfoOptions({
   );
 }
 
-interface ProductInfoDescriptionProps extends React.ComponentProps<"div"> {
+interface ProductInfoDescriptionProps extends ComponentProps<"div"> {
   descriptionHtml: string;
 }
 

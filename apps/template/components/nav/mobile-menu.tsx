@@ -2,6 +2,7 @@
 
 import { Menu } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import {
@@ -15,7 +16,7 @@ import type { MenuItem } from "@/lib/shopify/types/menu";
 
 interface MenuLinkProps {
   url: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   onClick?: () => void;
 }

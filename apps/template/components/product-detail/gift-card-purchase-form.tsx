@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "cn";
+import type { FormEvent } from "react";
 import { useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
@@ -46,7 +47,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isPending || !merchandiseId) return;
     setError(null);

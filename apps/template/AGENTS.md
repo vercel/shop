@@ -94,7 +94,8 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Components: `PascalCase`
 - Server actions: verb + `Action` suffix (`prepareCheckoutAction`)
 - Props interfaces: `{ComponentName}Props`. Use `interface` (not `type`) so consumers can extend or augment.
-- Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
+- Use explicit named React type imports, such as `import type { ComponentProps, ReactNode } from "react"`, rather than namespace imports or ambient `React.*` references.
+- Native-element prop pass-through: use `ComponentProps<"div">`, not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
 
 ### Spacing

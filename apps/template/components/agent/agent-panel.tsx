@@ -8,6 +8,7 @@ import {
   lastAssistantMessageIsCompleteWithToolCalls,
 } from "ai";
 import { MinusIcon, Trash2Icon } from "lucide-react";
+import type { RefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
@@ -54,7 +55,7 @@ function writeStoredChat(chat: StoredChat): void {
 export interface AgentPanelProps {
   onOpenChange: (open: boolean) => void;
   open: boolean;
-  triggerRef: React.RefObject<HTMLElement | null>;
+  triggerRef: RefObject<HTMLElement | null>;
 }
 
 export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) {

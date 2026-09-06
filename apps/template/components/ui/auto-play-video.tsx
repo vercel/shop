@@ -2,7 +2,7 @@
 
 import { cn } from "cn";
 import Image from "next/image";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 import { useEffect, useRef, useState } from "react";
 
 interface AutoPlayVideoPreviewImage {
@@ -11,7 +11,7 @@ interface AutoPlayVideoPreviewImage {
 }
 
 interface AutoPlayVideoProps extends Omit<
-  React.ComponentProps<"video">,
+  ComponentProps<"video">,
   "autoPlay" | "loop" | "muted" | "onCanPlay" | "playsInline" | "ref"
 > {
   previewImage?: AutoPlayVideoPreviewImage | null;

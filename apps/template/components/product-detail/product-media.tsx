@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 import Image, { getImageProps } from "next/image";
+import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
 
@@ -119,7 +120,7 @@ function Carousel({
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [itemCount, setItemCount] = useState(mediaItems.length);
@@ -245,7 +246,7 @@ function Grid({
   title: string;
   hasColorSlot: boolean;
   interactive?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) {
   // The color slot (children) occupies the first tile when present.
   const firstTileOffset = hasColorSlot ? 1 : 0;
@@ -317,8 +318,8 @@ export function ProductMedia({
   videos: Video[];
   title: string;
   className?: string;
-  desktopSlot?: React.ReactNode;
-  mobileSlot?: React.ReactNode;
+  desktopSlot?: ReactNode;
+  mobileSlot?: ReactNode;
 }) {
   const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),

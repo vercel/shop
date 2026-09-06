@@ -1,7 +1,7 @@
 import { cn } from "cn";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
-interface DiscountBadgeProps extends React.ComponentProps<"span"> {
+interface DiscountBadgeProps extends ComponentProps<"span"> {
   percent: number;
   variant?: "green" | "blue";
 }
