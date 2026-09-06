@@ -1,17 +1,39 @@
+import { formatMoney } from "@shopify/hydrogen";
+
+import { shopConfig } from "@/lib/config";
 import { markdownHeaders } from "@/lib/markdown/headers";
-import { homeToMarkdown } from "@/lib/markdown/home";
+import { escapeMarkdown } from "@/lib/markdown/utils";
 import { searchIndexProducts } from "@/lib/shopify/operations/products";
 
-export async function GET(request: Request): Promise<Response> {
+export async function GET(): Promise<Response> {
   try {
-    const result = await searchIndexProducts({
-      limit: 8,
-    });
+    const { name, url } = shopConfig.site;
+    const { locale } = shopConfig.localization;
+    const { products } = await searchIndexProducts({ limit: 8 });
+    const productLinks = products.map(
+      (product) =>
+        `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatMoney(product.price, { locale }).localizedString}${product.availableForSale ? "" : " — unavailable"}`,
+    );
+
     return new Response(
-      homeToMarkdown({
-        description: `${"Agentic Infrastructure for Commerce"}. ${"An agent-friendly Shopify storefront built with Next.js and Hydrogen."}`,
-        products: result.products,
-      }),
+      `# ${escapeMarkdown(name)}
+
+Agentic Infrastructure for Commerce. An agent-friendly Shopify storefront built with Next.js and Hydrogen.
+
+## Browse
+
+- [All products](${url}/collections/all): Browse the complete catalog.
+- [Search](${url}/search): Search products by keyword.
+- [Collections](${url}/collections): Browse products by collection.
+${productLinks.length > 0 ? `\n## Featured products\n\n${productLinks.join("\n")}\n` : ""}
+## Agent resources
+
+- [Storefront guide](${url}/llms.txt): When and how to use this storefront.
+- [Sitemap](${url}/sitemap.xml): Complete index of storefront content.
+
+---
+
+*Locale: ${locale}*`,
       {
         headers: markdownHeaders({
           cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
