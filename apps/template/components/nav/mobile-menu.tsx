@@ -2,8 +2,7 @@
 
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import {
   Accordion,

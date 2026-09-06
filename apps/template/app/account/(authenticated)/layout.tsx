@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { AccountMobileTabs } from "@/components/account/mobile-tabs";
 import { AccountSidebar } from "@/components/account/sidebar";

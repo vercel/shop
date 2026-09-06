@@ -1,8 +1,7 @@
 "use client";
 
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import type { FormEvent } from "react";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

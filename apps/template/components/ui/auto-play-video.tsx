@@ -2,8 +2,7 @@
 
 import { cn } from "cn";
 import Image from "next/image";
-import type { ComponentProps } from "react";
-import { useEffect, useRef, useState } from "react";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
 
 interface AutoPlayVideoPreviewImage {
   src: string;
