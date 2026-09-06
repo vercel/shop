@@ -23,7 +23,6 @@ import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
 export function SearchModal() {
   const [open, setOpen] = useState(false);
 
-  // ⌘K / Ctrl+K toggles the modal from anywhere on the page.
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
       if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
@@ -221,22 +220,19 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                         </div>
                       )}
 
-                    {query.trim() &&
-                      (results.products.length > 0 || results.queries.length > 0) && (
-                        <div className="px-4 py-3 flex justify-center">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(
-                                getSearchResultUrl({ baseUrl: "/search", term: query.trim() }),
-                              )
-                            }
-                            className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
-                          >
-                            View All
-                          </button>
-                        </div>
-                      )}
+                    {visibleItems > 0 && (
+                      <div className="px-4 py-3 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(getSearchResultUrl({ baseUrl: "/search", term: query.trim() }))
+                          }
+                          className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
+                        >
+                          View All
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

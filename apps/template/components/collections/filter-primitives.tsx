@@ -1,14 +1,7 @@
 "use client";
 
 import { cn } from "cn";
-import {
-  CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LoaderCircleIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react";
+import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
 import Link from "next/link";
 import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
@@ -61,31 +54,6 @@ function FilterSidebarHeader({
       )}
       {children}
     </header>
-  );
-}
-
-interface FilterSidebarResultsCountProps extends ComponentProps<"div"> {
-  count: number;
-  label?: string;
-}
-
-function FilterSidebarResultsCount({
-  count,
-  label = "Results",
-  className,
-  ...props
-}: FilterSidebarResultsCountProps) {
-  return (
-    <div
-      data-slot="filter-sidebar-results-count"
-      className={cn("flex items-center gap-1.5 text-sm text-foreground/50", className)}
-      {...props}
-    >
-      <SearchIcon className="size-3.5" />
-      <span>
-        {count} {label}
-      </span>
-    </div>
   );
 }
 
@@ -347,86 +315,6 @@ function FilterPriceRange({
         <CheckIcon className="size-4" />
       </button>
     </div>
-  );
-}
-
-function FilterSidebarCategories({ className, children, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="filter-sidebar-categories"
-      className={cn("flex flex-col gap-2.5", className)}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-interface FilterSidebarCategoryBackProps extends ComponentProps<"button"> {
-  pending?: boolean;
-}
-
-function FilterSidebarCategoryBack({
-  pending = false,
-  className,
-  children,
-  ...props
-}: FilterSidebarCategoryBackProps) {
-  return (
-    <button
-      type="button"
-      data-slot="filter-sidebar-category-back"
-      data-pending={pending}
-      className={cn(
-        "flex items-center gap-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-        className,
-      )}
-      {...props}
-    >
-      {pending ? (
-        <LoaderCircleIcon className="size-4 animate-spin" />
-      ) : (
-        <ChevronLeftIcon className="size-4" />
-      )}
-      {children}
-    </button>
-  );
-}
-
-interface FilterSidebarCategoryItemProps extends ComponentProps<"button"> {
-  label: string;
-  count?: number;
-  pending?: boolean;
-}
-
-function FilterSidebarCategoryItem({
-  label,
-  count,
-  pending = false,
-  className,
-  ...props
-}: FilterSidebarCategoryItemProps) {
-  return (
-    <button
-      type="button"
-      data-slot="filter-sidebar-category-item"
-      data-pending={pending}
-      className={cn(
-        "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-        className,
-      )}
-      {...props}
-    >
-      <span>
-        {label}
-        {count !== undefined && <span className="text-muted-foreground"> ({count})</span>}
-      </span>
-      {pending ? (
-        <LoaderCircleIcon className="size-4 animate-spin" />
-      ) : (
-        <ChevronRightIcon className="size-4" />
-      )}
-    </button>
   );
 }
 

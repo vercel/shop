@@ -1,10 +1,5 @@
 export function escapeMarkdown(text: string): string {
-  return text
-    .replace(/\|/g, "\\|")
-    .replace(/\*/g, "\\*")
-    .replace(/_/g, "\\_")
-    .replace(/`/g, "\\`")
-    .replace(/^#/gm, "\\#");
+  return text.replace(/[|*_`]/g, "\\$&").replace(/^#/gm, "\\#");
 }
 
 export function createTable(headers: string[], rows: string[][]): string {

@@ -26,11 +26,11 @@ function ProductInfoOptions({
     opt.name === "Title" && opt.values.length === 1 && opt.values[0]?.name === "Default Title";
   const isSingleValueOption = (opt: OptionGroupState) => opt.values.length === 1;
   const renderable = options.filter((opt) => !isShopifyDefaultOption(opt));
+  if (renderable.length === 0) return null;
+
   const singleValueOptions = renderable.filter(isSingleValueOption);
   const colorOptions = renderable.filter((opt) => !isSingleValueOption(opt) && isColorOption(opt));
   const otherOptions = renderable.filter((opt) => !isSingleValueOption(opt) && !isColorOption(opt));
-  if (singleValueOptions.length === 0 && colorOptions.length === 0 && otherOptions.length === 0)
-    return null;
   return (
     <div data-slot="product-info-options" className={className} {...props}>
       <div className="grid gap-5">
