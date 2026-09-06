@@ -83,6 +83,7 @@ export const shopConfig = {
     isEnabled: false,
   },
   botid: {
+    // Client protection and server verification must use the same check level.
     checkLevel: "basic",
     isEnabled: false,
   },

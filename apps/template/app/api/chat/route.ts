@@ -12,7 +12,6 @@ import { checkBotId } from "botid/server";
 import { parsePageContext } from "@/lib/agent/routes";
 import { createAgent } from "@/lib/agent/server";
 import { createCustomerRequestContext, createCustomerSessionManager } from "@/lib/auth/server";
-import { botIdCheckOptions } from "@/lib/botid";
 import { createEmptyCart, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 
@@ -21,7 +20,9 @@ export async function POST(request: Request) {
 
   // Runs before body parsing and cart creation so rejected traffic costs no Shopify or gateway work.
   if (shopConfig.botid.isEnabled) {
-    const { isBot } = await checkBotId(botIdCheckOptions);
+    const { isBot } = await checkBotId({
+      advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
+    });
     if (isBot) return new Response(null, { status: 403 });
   }
   let body: unknown;
