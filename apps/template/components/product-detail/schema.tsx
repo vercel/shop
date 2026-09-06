@@ -2,25 +2,28 @@ import { shopConfig } from "@/lib/config";
 import type { Image, Money } from "@/lib/types";
 
 interface ProductSchemaData {
-  id: string;
-  handle: string;
-  title: string;
-  description: string;
-  images: Image[];
-  vendor?: string;
-  currencyCode: string;
-  priceRange: {
-    minVariantPrice: Money;
-    maxVariantPrice: Money;
-  };
-  offerCount: number;
   availableForSale: boolean;
+  currencyCode: string;
+  description: string;
+  handle: string;
+  id: string;
+  images: Image[];
+  offerCount: number;
+  priceRange: {
+    maxVariantPrice: Money;
+    minVariantPrice: Money;
+  };
+  title: string;
+  vendor?: string;
 }
 
-function generateProductSchema(product: ProductSchemaData) {
-  const url = `${shopConfig.site.url}/products/${product.handle}`;
+interface ProductSchemaProps {
+  product: ProductSchemaData;
+}
 
-  return {
+export function ProductSchema({ product }: ProductSchemaProps) {
+  const url = `${shopConfig.site.url}/products/${product.handle}`;
+  const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
@@ -45,10 +48,6 @@ function generateProductSchema(product: ProductSchemaData) {
     },
     sku: product.id,
   };
-}
-
-export function ProductSchema({ product }: { product: ProductSchemaData }) {
-  const schema = generateProductSchema(product);
 
   return <script type="application/ld+json">{JSON.stringify(schema)}</script>;
 }

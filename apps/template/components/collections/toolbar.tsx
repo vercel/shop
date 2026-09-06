@@ -1,4 +1,4 @@
-import { SlidersHorizontalIcon } from "lucide-react";
+import { ChevronDownIcon, SlidersHorizontalIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
@@ -10,7 +10,6 @@ import { FilterPendingScope } from "./filter-pending-context";
 import { FilterSidebarSheet } from "./filter-sidebar-sheet";
 import { CollectionFilters } from "./filters";
 import { CollectionsSortSelect } from "./sort-select";
-import { SortSelectFallback } from "./sort-select-fallback";
 
 interface BrowseToolbarProps {
   facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
@@ -64,7 +63,12 @@ export function BrowseFallback({ resultCount }: BrowseFallbackProps) {
           </button>
         }
         resultCount={resultCount}
-        sortSelect={<SortSelectFallback label="Sort" />}
+        sortSelect={
+          <div className="flex h-9 w-fit items-center justify-between gap-2 rounded-md bg-transparent px-0 py-2 text-sm whitespace-nowrap">
+            <span>Sort</span>
+            <ChevronDownIcon className="size-4 text-muted-foreground opacity-50" />
+          </div>
+        }
       />
       <ProductsGridSkeleton
         count={PRODUCTS_PER_PAGE}
