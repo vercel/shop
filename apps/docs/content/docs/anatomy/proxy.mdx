@@ -10,7 +10,7 @@ The storefront uses a [Next.js proxy](https://nextjs.org/docs/app/getting-starte
 
 Shopify handles its cart, Storefront API, Model Context Protocol (MCP), Ajax cart, agent, and customer-account endpoints. Storefront pages continue to Next.js with the Shopify request context needed for Storefront API calls, analytics, and safe caching.
 
-Set `ucp.isEnabled` to `true` in `lib/config.ts` to proxy Shopify’s Universal Commerce Protocol (UCP) business profile at `/.well-known/ucp`.
+The proxy also forwards `/.well-known/ucp` to Shopify’s Universal Commerce Protocol (UCP) business profile.
 
 Other application API routes bypass the proxy unless you explicitly assign them to an integration. This avoids collisions between Shopify endpoints and your own APIs.
 

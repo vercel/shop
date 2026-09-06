@@ -39,9 +39,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const pathname = request.nextUrl.pathname;
 
   if (pathname === "/.well-known/ucp") {
-    if (!shopConfig.ucp.isEnabled) {
-      return new Response(null, { headers: { "Cache-Control": "no-store" }, status: 404 });
-    }
     if (request.method !== "GET" && request.method !== "HEAD") {
       return new Response(null, {
         headers: { Allow: "GET, HEAD", "Cache-Control": "no-store" },
