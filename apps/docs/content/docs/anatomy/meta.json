@@ -12,6 +12,7 @@
     "proxy",
     "aeo-geo",
     "webmcp",
+    "ucp",
     "sitemap",
     "webhooks"
   ]

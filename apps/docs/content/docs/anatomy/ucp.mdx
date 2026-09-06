@@ -1,0 +1,23 @@
+---
+title: Universal Commerce Protocol
+description: Serve Shopify’s business profile from your storefront domain.
+type: guide
+prerequisites:
+  - /docs/getting-started
+---
+
+The storefront can serve Shopify’s Universal Commerce Protocol (UCP) business profile at `/.well-known/ucp`. Agents use the profile to discover the store’s advertised commerce capabilities and endpoints.
+
+## Enable the business profile
+
+Set `ucp.isEnabled` to `true` in `lib/config.ts`, then deploy the storefront. Requests to `/.well-known/ucp` are proxied to the same path on `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` without redirecting the caller to that domain.
+
+Open `https://your-storefront.example/.well-known/ucp` after deployment. Confirm that Shopify returns a profile with the expected capabilities and endpoints. Enabling the storefront setting does not create a profile or enable commerce capabilities in Shopify.
+
+The integration is disabled by default and returns `404` while disabled. When enabled, it accepts `GET` and `HEAD`; other methods return `405`. Shopify determines the profile content and upstream response, including whether a profile is available. The storefront does not add a custom cache policy or substitute a storefront error page for Shopify’s response.
+
+This setting controls only business-profile discovery. It does not enable or disable the shopping assistant, WebMCP, or other Shopify endpoints.
+
+## What’s next
+
+Use the profile’s advertised capabilities to plan agent integrations. Supported commerce flows depend on what Shopify publishes for the store, not just whether this endpoint is enabled.

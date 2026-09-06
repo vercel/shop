@@ -54,6 +54,9 @@ export interface ShopConfig {
     name: string;
     url: string;
   };
+  ucp: {
+    isEnabled: boolean;
+  };
   webmcp: {
     isEnabled: boolean;
   };
@@ -111,6 +114,9 @@ export const shopConfig = {
   site: {
     name: "Vercel Shop",
     url: defaultUrl,
+  },
+  ucp: {
+    isEnabled: false,
   },
   webmcp: {
     isEnabled: false,
