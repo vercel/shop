@@ -23,14 +23,6 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
   );
 }
 
-function ProductCardBadge({ className, children, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div data-slot="product-card-badge" className={cn(className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
 interface ProductCardImageContainerProps extends React.ComponentProps<"div"> {
   variant?: "default" | "featured";
 }
@@ -194,7 +186,6 @@ function ProductCardSkeleton({ className }: { className?: string }) {
 
 export {
   ProductCard,
-  ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
