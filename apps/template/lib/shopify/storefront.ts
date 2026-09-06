@@ -13,9 +13,13 @@ import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
 import { logShopifyDebug } from "./logging";
 
 const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string;
+
 const SHOPIFY_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
+
 const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
+
 const SHOPIFY_STOREFRONT_ID = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID;
+
 function operationName(body: RequestInit["body"]): string {
   if (typeof body !== "string") return "anonymous";
   try {
@@ -95,7 +99,7 @@ export interface StorefrontResponse<T> {
 }
 
 export const storefront = {
-  async request<const Doc extends AnyStorefrontQueryString>(
+  async request<Doc extends AnyStorefrontQueryString>(
     doc: Doc,
     ...[options]: Record<string, never> extends StorefrontVariables<Doc>
       ? [options?: StorefrontRequestOptions<Doc>]
@@ -111,6 +115,7 @@ export const storefront = {
 };
 
 const MCP_ENDPOINT = `https://${SHOPIFY_STORE_DOMAIN}/api/mcp`;
+
 const UCP_AGENT_PROFILE_URL = process.env.UCP_AGENT_PROFILE_URL;
 
 let mcpRpcId = 0;
@@ -197,13 +202,11 @@ export async function searchCatalog(params: {
   query: string;
 }): Promise<McpCatalogSearchResult> {
   const { intent, limit = 10, locale = defaultLocale, query } = params;
-
   const context: Record<string, unknown> = {
     address_country: getCountryCode(locale),
     language: getLanguageCode(locale),
   };
   if (intent) context.intent = intent;
-
   return callStorefrontMcp<McpCatalogSearchResult>("search_catalog", {
     catalog: { context, pagination: { limit }, query },
   });

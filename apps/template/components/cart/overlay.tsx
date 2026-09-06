@@ -1,13 +1,14 @@
 "use client";
 
+import { useCart } from "@shopify/hydrogen/react";
+
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
-import { useCart } from "./context";
+import { useCartDrawer } from "./context";
 import { OverlayContent } from "./overlay-content";
 
 function CartCountBadge() {
-  const { cartWithPending } = useCart();
-  const count = cartWithPending?.totalQuantity ?? 0;
+  const count = useCart((state) => state.data.totalQuantity);
   if (count === 0) return null;
   return (
     <span className="flex size-5 items-center justify-center rounded-full bg-foreground text-xs text-background">
@@ -22,7 +23,7 @@ interface CartOverlayProps {
 }
 
 export function CartOverlay({ description, title }: CartOverlayProps) {
-  const { isOverlayOpen, setOverlayOpen } = useCart();
+  const { isOverlayOpen, setOverlayOpen } = useCartDrawer();
 
   return (
     <Sheet open={isOverlayOpen} onOpenChange={setOverlayOpen}>

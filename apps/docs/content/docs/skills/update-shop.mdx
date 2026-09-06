@@ -81,6 +81,8 @@ For each remaining entry, decide one of:
 
 Validate each decision against the current codebase. Do not assume a change is missing just because the scaffold is old, and do not invent upgrade work when no entries apply — say so explicitly. Call out uncertainty when the project has heavily diverged from template conventions.
 
+The simplified single-deployment template's inline copy and reusable content functions and explicit `shopConfig.localization` are defaults for new storefronts, not a mandate to remove localization from existing stores. Preserve next-intl, catalogs, translations, scoped providers, locale routing, custom market selection, and intentional operation/cache locale inputs. Do not classify these customizations as obsolete drift or replace them with template English. Any requested simplification must separately assess copy, formatting, commerce country/language, public URLs, and migration parity; currency remains Shopify-owned. Rollout entries are currently paused, so their absence is not evidence that every newer template behavior is already installed.
+
 Present the plan grouped by decision. In plan mode, stop here and do not edit files.
 
 ## Phase 3 — apply

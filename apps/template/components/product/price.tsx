@@ -13,7 +13,7 @@ interface PriceProps extends React.ComponentProps<"span"> {
 export function Price({ amount, currencyCode, locale, className, ...props }: PriceProps) {
   const price = formatMoney(
     { amount, currencyCode },
-    { currencyDisplay: "narrowSymbol", locale: locale || defaultLocale },
+    { locale: locale || defaultLocale },
   ).localizedString;
 
   return (

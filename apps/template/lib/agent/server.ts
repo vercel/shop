@@ -1,38 +1,20 @@
 import { isStepCount, ToolLoopAgent } from "ai";
 
 import { shopConfig } from "@/lib/config";
+import { getCountryCode, getLanguageCode, type Locale } from "@/lib/i18n";
 
 import { catalog } from ".";
-import type { Locale } from "../i18n";
 import type { PageContext } from "./routes";
-import { addCartNoteTool, addToCartTool, getCartTool, updateCartItemTool } from "./tools/cart";
-import { browseCollectionTool, listCollectionsTool } from "./tools/collections";
+import { createCartTools } from "./tools/cart";
+import { createCollectionTools } from "./tools/collections";
 import { navigateTool } from "./tools/navigate";
 import { searchShopPoliciesTool } from "./tools/policies";
-import {
-  getProductDetailsTool,
-  getRecommendationsTool,
-  searchProductsTool,
-} from "./tools/products";
-
-export type User = { locale: Locale; type: "guest" };
+import { createProductTools } from "./tools/products";
 
 export interface AgentContext {
-  cart: string | undefined;
+  cartId: string | undefined;
+  locale: Locale;
   page: PageContext;
-  user: User;
-}
-
-const agentContext = new AsyncLocalStorage<AgentContext>();
-
-export function getAgentContext(): AgentContext {
-  const context = agentContext.getStore();
-  if (!context) throw new Error("Agent context not found");
-  return context;
-}
-
-export function withAgentContext<T>(context: AgentContext, callback: () => T): T {
-  return agentContext.run(context, callback);
 }
 
 function describePage(page: PageContext): string {
@@ -55,20 +37,18 @@ function describePage(page: PageContext): string {
   }
 }
 
-function createSystemPrompt(context: AgentContext): string {
-  const { page, user } = context;
-
+function createSystemPrompt(page: PageContext, locale: Locale): string {
   const instructions = [
     `You're a helpful shopping assistant for ${shopConfig.site.name}.`,
     "Never use emojis. Always respond in the same language as the shopper, preferring their language when unclear.",
-    `The active locale is ${user.locale}.`,
+    `The storefront display locale is ${locale}; its commerce country is ${getCountryCode(locale)} and catalog language is ${getLanguageCode(locale)}.`,
     "You can search products, browse collections, recommend products, answer store policy questions, manage the cart, and build on-site links.",
     "Never guess policy, shipping, returns, payment, warranty, sizing, or care answers; use searchShopPolicies.",
+    "Only change the cart when the shopper asks. Read the current cart before retrying an interrupted cart change; it may already have succeeded. Explain any warnings returned by a cart tool, and never claim a failed change succeeded.",
     'When the shopper names a required product option such as a colour or size, pass it to searchProducts as options (e.g. [{"name":"Color","value":"Orange"}]) and keep the query focused on the product itself ("jackets"). Fewer results than expected is the correct outcome; state how many matched.',
     "Only describe results as matching a colour, size, or other option when the tool returned them under that option. If searchProducts reports unmatchedOptions, tell the shopper nothing matched and offer to drop or change the constraint — never present other products as if they satisfied it.",
     describePage(page),
   ].filter(Boolean);
-
   return `${instructions.join("\n\n")}\n\n${catalog.prompt({
     customRules: [
       "When a tool returns products, render every one of them: an AgentProductCard per product, wrapped in a single AgentProductGrid.",
@@ -83,25 +63,28 @@ function createSystemPrompt(context: AgentContext): string {
   })}`;
 }
 
-const tools = {
-  addCartNote: addCartNoteTool,
-  addToCart: addToCartTool,
-  browseCollection: browseCollectionTool,
-  getCart: getCartTool,
-  getProductDetails: getProductDetailsTool,
-  getProductRecommendations: getRecommendationsTool,
-  listCollections: listCollectionsTool,
-  navigateUser: navigateTool,
-  searchProducts: searchProductsTool,
-  searchShopPolicies: searchShopPoliciesTool,
-  updateCartItem: updateCartItemTool,
-};
+export function createAgent({ cartId, locale, page }: AgentContext) {
+  const { addCartNote, addToCart, getCart, updateCartItem } = createCartTools({ cartId, locale });
+  const { browseCollectionTool, listCollectionsTool } = createCollectionTools(locale);
+  const { getProductDetailsTool, getRecommendationsTool, searchProductsTool } =
+    createProductTools(locale);
 
-export function createAgent() {
   return new ToolLoopAgent({
-    instructions: createSystemPrompt(getAgentContext()),
+    instructions: createSystemPrompt(page, locale),
     model: "openai/gpt-5.6-luna",
     stopWhen: isStepCount(10),
-    tools,
+    tools: {
+      addCartNote,
+      addToCart,
+      browseCollection: browseCollectionTool,
+      getCart,
+      getProductDetails: getProductDetailsTool,
+      getProductRecommendations: getRecommendationsTool,
+      listCollections: listCollectionsTool,
+      navigateUser: navigateTool,
+      searchProducts: searchProductsTool,
+      searchShopPolicies: searchShopPoliciesTool,
+      updateCartItem,
+    },
   });
 }

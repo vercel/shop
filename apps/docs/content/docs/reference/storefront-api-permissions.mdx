@@ -1,6 +1,6 @@
 ---
 title: Storefront API Permissions
-description: Shopify Storefront API scopes required by Vercel Shop and its optional skills.
+description: Shopify Storefront API scopes for the default storefront and custom data.
 type: reference
 prerequisites:
   - /docs/getting-started
@@ -10,20 +10,22 @@ After [Getting Started](/docs/getting-started), open **Settings → Apps and sal
 
 ## Required
 
-| Scope                                      | Enables                                           |
-| ------------------------------------------ | ------------------------------------------------- |
-| `unauthenticated_read_product_listings`    | Product pages, search, and recommendations        |
-| `unauthenticated_read_product_inventory`   | Product and collection availability               |
-| `unauthenticated_read_collection_listings` | Collection pages and navigation                   |
-| `unauthenticated_write_checkouts`          | Cart operations and checkout                      |
-| `unauthenticated_read_content`             | Pages, policies, blogs, articles, and metaobjects |
+| Scope                                   | Enables                                            |
+| --------------------------------------- | -------------------------------------------------- |
+| `unauthenticated_read_product_listings` | Products, collections, search, and recommendations |
+| `unauthenticated_read_product_tags`     | Product tags requested by the storefront           |
+| `unauthenticated_write_checkouts`       | Cart operations and checkout                       |
+| `unauthenticated_read_content`          | Pages, blogs, and articles                         |
 
 ## Optional
 
-Grant optional scopes only when you enable the related feature.
+Grant optional scopes only when your storefront queries the related data.
 
-| Scope                                | Required by                                    |
-| ------------------------------------ | ---------------------------------------------- |
-| `unauthenticated_read_customer_tags` | [Authentication](/docs/anatomy/authentication) |
+| Scope                                    | Enables                                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `unauthenticated_read_product_inventory` | Inventory quantities, such as `quantityAvailable`; not required for the default availability indicators |
+| `unauthenticated_read_metaobjects`       | Custom content stored in metaobjects                                                                    |
+
+Customer sign-in uses separate Customer Account API permissions. See [Authentication](/docs/anatomy/authentication) for account setup and [Shopify's scope reference](https://shopify.dev/docs/api/usage/access-scopes) for additional permissions.
 
 See [Environment Variables](/docs/reference/env-vars) for token configuration and [Storefront API](/docs/reference/storefront-api) for query validation and runtime behavior.

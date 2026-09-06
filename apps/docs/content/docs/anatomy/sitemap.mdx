@@ -24,7 +24,7 @@ Shopify determines how many pages each content type needs. The storefront lists 
 
 Product and collection webhooks refresh affected sitemap entries. Creating or deleting those resources also refreshes the relevant sitemap listing. See [Webhooks](/docs/anatomy/webhooks).
 
-Shopify does not provide webhook topics for Pages, blogs, or articles. Changes to those resources, and to policies, may remain cached until you manually purge the relevant cache or redeploy.
+The template's webhook handler does not refresh Pages, blogs, articles, or policies. Their sitemap entries can remain cached until revalidation. If a publishing change must appear immediately, refresh the sitemap as well as the page content.
 
 ## What’s next
 

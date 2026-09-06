@@ -4,7 +4,7 @@ title: Setup
 type: guide
 ---
 
-Connect a Shopify store and run Vercel Shop locally in a few minutes.
+Connect a Shopify store and run Vercel Shop locally. Use Node.js 24, the version required by the template.
 
 ## 1. Get Shopify credentials
 
@@ -23,7 +23,7 @@ To deploy instead, use the Vercel flow:
   <img src="https://vercel.com/button" alt="Deploy with Vercel" />
 </a>
 
-The deploy flow connects your Shopify store and configures the required credentials.
+The deploy flow offers the Shopify integration. Before deploying, confirm that the required [environment variables](/docs/reference/env-vars) are configured.
 
 ## 3. Add your credentials
 
@@ -39,12 +39,12 @@ See [Environment Variables](/docs/reference/env-vars) for optional settings.
 ## 4. Run the storefront
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and confirm that your Shopify products appear.
 
-For local HTTPS, install [Portless](https://portless.sh) with `npm install -g portless`, then run `npm run dev:portless`. Use HTTPS when testing OAuth callbacks or secure cookies.
+For local HTTPS, install [Portless](https://portless.sh) with `pnpm add -g portless`, then run `pnpm dev:portless`. Use HTTPS when testing OAuth callbacks or secure cookies.
 
 ## Next steps
 

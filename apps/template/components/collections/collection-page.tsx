@@ -1,4 +1,3 @@
-import { SlidersHorizontalIcon } from "lucide-react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { unstable_navigation } from "next/cache";
@@ -6,13 +5,8 @@ import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
 import { CollectionHero } from "@/components/collections/collection-hero";
-import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
-import { CollectionFilters } from "@/components/collections/filters";
 import { CollectionResultsGrid } from "@/components/collections/results-grid";
-import { CollectionsSortSelect } from "@/components/collections/sort-select";
-import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
-import { CollectionToolbar } from "@/components/collections/toolbar";
-import { ProductsGridSkeleton } from "@/components/product/products-grid";
+import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -24,10 +18,7 @@ import type { CollectionResultsData, CollectionSearchState } from "@/lib/collect
 import type { Locale } from "@/lib/i18n";
 import type { Collection } from "@/lib/types";
 
-import {
-  CollectionActiveFilterCountBadge,
-  CollectionBrowseProvider,
-} from "./collection-browse-provider";
+import { CollectionBrowseProvider } from "./collection-browse-provider";
 import { FilterPendingScope } from "./filter-pending-context";
 
 export async function CollectionDetailPage({
@@ -116,28 +107,10 @@ async function CollectionBrowse({
   return (
     <NextIntlClientProvider messages={messages}>
       <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-        <CollectionToolbar
-          filterSheet={
-            <FilterSidebarSheet
-              label={filtersLabel}
-              trigger={
-                <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                  <SlidersHorizontalIcon className="size-4" />
-                  <span>{filtersLabel}</span>
-                  <CollectionActiveFilterCountBadge />
-                </button>
-              }
-            >
-              <FilterPendingScope>
-                <CollectionFilters
-                  facetsPromise={collectionResultsDataPromise.then(
-                    (data) => data.transformedFilters,
-                  )}
-                />
-              </FilterPendingScope>
-            </FilterSidebarSheet>
-          }
-          sortSelect={<CollectionsSortSelect exclude={sortExclude} />}
+        <BrowseToolbar
+          facetsPromise={collectionResultsDataPromise.then((data) => data.transformedFilters)}
+          filtersLabel={filtersLabel}
+          sortExclude={sortExclude}
         />
 
         <FilterPendingScope>
@@ -185,20 +158,7 @@ function CollectionBrowseFallback({
   filtersLabel: string;
   sortByLabel: string;
 }) {
-  return (
-    <>
-      <CollectionToolbar
-        filterSheet={
-          <button type="button" className="flex items-center gap-2 text-sm font-medium">
-            <SlidersHorizontalIcon className="size-4" />
-            <span>{filtersLabel}</span>
-          </button>
-        }
-        sortSelect={<SortSelectFallback label={sortByLabel} />}
-      />
-      <ProductsGridSkeleton count={40} className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" />
-    </>
-  );
+  return <BrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />;
 }
 
 function CollectionHeader({

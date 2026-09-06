@@ -3,14 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "graphql-codegen && next build",
-    "codegen": "graphql-codegen",
-    "codegen:watch": "graphql-codegen --watch",
-    "dev": "graphql-codegen || true && next dev",
-    "dev:portless": "graphql-codegen || true && portless shop next dev",
+    "build": "pnpm codegen && next build",
+    "codegen": "pnpm codegen:storefront && pnpm codegen:customer",
+    "codegen:customer": "graphql-codegen --project customer",
+    "codegen:storefront": "graphql-codegen --project storefront",
+    "codegen:watch": "graphql-codegen --project storefront --watch",
+    "dev": "pnpm codegen || true && next dev",
+    "dev:portless": "pnpm codegen || true && portless shop next dev",
     "format": "oxfmt",
     "lint": "oxlint . && oxfmt --check",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit && pnpm codegen"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.94",

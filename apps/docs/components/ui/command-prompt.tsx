@@ -264,25 +264,28 @@ export function CommandPromptViewport({
   const copyValue = activeItem?.copyValue ?? fallbackCopyValue;
 
   useLayoutEffect(() => {
+    setActiveCopyValue(copyValue);
     setIsOverflowing(false);
     setCanShowGradient(Boolean(shouldReduceMotion));
-  }, [copyValue, setCanShowGradient, setIsOverflowing, shouldReduceMotion]);
+  }, [copyValue, setActiveCopyValue, setCanShowGradient, setIsOverflowing, shouldReduceMotion]);
 
   useEffect(() => {
-    setActiveCopyValue(copyValue);
-
     return () => {
-      setIsOverflowing(false);
       scrollObserverCleanup.current?.();
       scrollObserverCleanup.current = null;
     };
-  }, [copyValue, setActiveCopyValue, setIsOverflowing]);
+  }, []);
 
   useLayoutEffect(() => {
-    if (!measureRef.current) return;
+    const element = measureRef.current;
+    if (!element) return;
 
-    setCommandWidth(measureRef.current.getBoundingClientRect().width);
-  }, [command, copyValue, setCommandWidth]);
+    const measure = () => setCommandWidth(element.getBoundingClientRect().width);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [setCommandWidth]);
 
   return (
     <motion.span

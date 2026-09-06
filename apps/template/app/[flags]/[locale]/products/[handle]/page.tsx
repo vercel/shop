@@ -126,7 +126,7 @@ async function ProductPageContent({
     }),
   );
   const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
-    async (resolvedSearchParams) => {
+    (resolvedSearchParams) => {
       if (
         Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
       ) {

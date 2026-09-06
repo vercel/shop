@@ -1,7 +1,6 @@
 import { getSearchResultUrl } from "@shopify/hydrogen";
 
-import type { Locale } from "../i18n";
-import { defaultLocale } from "../i18n";
+import { defaultLocale, isEnabledLocale, resolveLocale, type Locale } from "@/lib/i18n";
 
 export type AgentDestination =
   | "account"
@@ -45,18 +44,29 @@ export function buildAgentPath(destination: AgentDestination, identifier?: strin
   }
 }
 
-export function parsePageContext(url: string | null): { locale: Locale; page: PageContext } {
-  const locale = defaultLocale;
+export function parsePageContext(
+  url: string | null,
+  fallbackLocale: Locale = defaultLocale,
+): {
+  locale: Locale;
+  page: PageContext;
+} {
+  let locale = fallbackLocale;
   if (!url) return { locale, page: null };
-
   let parsed: URL;
   try {
     parsed = new URL(url);
   } catch {
     return { locale, page: null };
   }
-
-  const [segment, handle] = parsed.pathname.split("/").filter(Boolean);
+  const segments = parsed.pathname.split("/").filter(Boolean);
+  if (isEnabledLocale(segments[0] ?? "")) {
+    locale = resolveLocale(segments.shift());
+  } else if (isEnabledLocale(segments[1] ?? "")) {
+    segments.shift();
+    locale = resolveLocale(segments.shift());
+  }
+  const [segment, handle] = segments;
   if (!segment) return { locale, page: { type: "home" } };
   if (segment === "products" && handle) return { locale, page: { handle, type: "product" } };
   if (segment === "collections" && handle) return { locale, page: { handle, type: "collection" } };

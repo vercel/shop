@@ -8,13 +8,13 @@ Inspect the source files listed in the skill's "Ground the work in source" step 
 
 Vercel Shop enables `cacheComponents`, `partialPrefetching`, and the React Compiler. Keep route responsibilities separated:
 
-| Layer | Owns | Must not own |
-| --- | --- | --- |
-| Route orchestration | URL identity, metadata, redirects, auth gates, real 404 decisions, promise orchestration | Interactive state or provider-specific presentation |
-| Data operation | GraphQL, cache policy, tags, locale flow, transforms into domain types | React loading UI |
-| Server composition | Static shell, section composition, Suspense placement | Browser effects or duplicated data fetching |
-| Client island | Local interaction, optimistic UI, browser APIs | Initial public reads, secrets, or broad page composition |
-| Server action | Mutation, authorization, invalidation, canonical result | Long-lived client state |
+| Layer               | Owns                                                                                     | Must not own                                             |
+| ------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Route orchestration | URL identity, metadata, redirects, auth gates, real 404 decisions, promise orchestration | Interactive state or provider-specific presentation      |
+| Data operation      | GraphQL, cache policy, tags, locale flow, transforms into domain types                   | React loading UI                                         |
+| Server composition  | Static shell, section composition, Suspense placement                                    | Browser effects or duplicated data fetching              |
+| Client island       | Local interaction, optimistic UI, browser APIs                                           | Initial public reads, secrets, or broad page composition |
+| Server action       | Mutation, authorization, invalidation, canonical result                                  | Long-lived client state                                  |
 
 Do not call internal Route Handlers from Server Components. Call the operation directly so there is no avoidable HTTP hop. Do not let presentation import raw Shopify response types.
 
@@ -33,20 +33,26 @@ A Suspense boundary exposes an async dependency; it does not remove it. If the p
 
 ## Pass request-time work down to a resolved leaf
 
-The request-time promise shape is the pattern most often written wrong. Verify it against `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx`; the distilled shape:
+The request-time promise shape is the pattern most often written wrong. Verify it against `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx`; the distilled shape below imports `shopConfig` from `@/lib/config` and keeps intentional operation locale inputs. The simplified baseline has no `getLocale()` helper. In a localized installation, preserve its validated request locale and commerce context instead of replacing them with deployment defaults:
 
 ```tsx
 // 1. Route: await the stable, cacheable read → static shell. Leave searchParams
 //    UNAWAITED; derive request-time promises from it, split by cost, pass DOWN.
-export default async function ProductPage({ params, searchParams }: PageProps<"/products/[handle]">) {
-  const [{ handle }, locale] = await Promise.all([params, getLocale()]);
+export default async function ProductPage({
+  params,
+  searchParams,
+}: PageProps<"/products/[handle]">) {
+  const { handle } = await params;
+  const locale = shopConfig.localization;
   const product = await getProduct({ handle, locale }); // cacheable → lives in the shell
   if (!product) notFound();
 
   // Cheap URL parse and the network variant query ride SEPARATE promises, so the
   // picker highlight never waits on the round-trip that only price + buy need.
   const selectedOptionsPromise = searchParams.then((sp) => resolveOptions(product, sp));
-  const variantPromise = searchParams.then((sp) => getProductVariant({ handle, locale, sp }));
+  const variantPromise = selectedOptionsPromise.then((options) =>
+    getProductVariant({ handle, locale, selectedOptions: toSelectedOptionList(options) }),
+  );
 
   return (
     <ProductDetailSection
@@ -63,10 +69,14 @@ function ProductInfoArea({ product, variantPromise }: ProductInfoAreaProps) {
   return (
     <>
       <ProductTitle title={product.title} /> {/* stable — no Suspense */}
-      <Suspense fallback={<div className="h-7" aria-hidden />}> {/* fallback matches resolved height */}
+      <Suspense fallback={<div className="h-7" aria-hidden />}>
+        {" "}
+        {/* fallback matches resolved height */}
         <ResolvedProductPrice variantPromise={variantPromise} />
       </Suspense>
-      <Suspense fallback={<ProductInfoFallback product={product} />}> {/* static pickers + disabled buy */}
+      <Suspense fallback={<ProductInfoFallback product={product} />}>
+        {" "}
+        {/* static pickers + disabled buy */}
         <ResolvedProductInfo product={product} variantPromise={variantPromise} />
       </Suspense>
     </>
@@ -74,7 +84,11 @@ function ProductInfoArea({ product, variantPromise }: ProductInfoAreaProps) {
 }
 
 // 3. The resolved leaf is ASYNC, awaits exactly ONE promise, and sits inside its own boundary.
-async function ResolvedProductPrice({ variantPromise }: { variantPromise: Promise<ProductVariant | undefined> }) {
+async function ResolvedProductPrice({
+  variantPromise,
+}: {
+  variantPromise: Promise<ProductVariant | undefined>;
+}) {
   const variant = await variantPromise;
   return <ProductPrice amount={variant?.price} />;
 }
@@ -104,12 +118,12 @@ Invariants the shape enforces:
 
 ## Choose cache ownership deliberately
 
-| Data | Default treatment |
-| --- | --- |
-| Public content that belongs in the prerendered shell | Plain `"use cache"` with the existing `cacheLife` and `cacheTag` policy |
-| Public results resolved after request inputs such as filters or search params | `"use cache: remote"` when a shared runtime cache is justified |
-| Customer, session, cart, or authorization-dependent data | Uncached or private per-session handling; never place it in a shared remote cache |
-| Mutation results | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |
+| Data                                                                          | Default treatment                                                                                                                   |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Public content that belongs in the prerendered shell                          | Plain `"use cache"` with the existing `cacheLife` and `cacheTag` policy                                                             |
+| Public results resolved after request inputs such as filters or search params | `"use cache: remote"` when a shared runtime cache is justified                                                                      |
+| Customer, session, cart, or authorization-dependent data                      | Uncached or private per-session handling; never place it in a shared remote cache                                                   |
+| Mutation results                                                              | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |
 
 Keep cache directives in the data layer. Do not add a second cache in presentation code.
 

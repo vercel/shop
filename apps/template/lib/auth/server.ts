@@ -13,12 +13,15 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
 import { shopConfig } from "@/lib/config";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { getCountryCode, getLanguageCode, getRequestLocale } from "@/lib/i18n";
 import { resolveShopId } from "@/lib/shopify/discovery";
 
 const COOKIE_CHUNK_SIZE = 3_800;
+
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
+
 const COOKIE_MAX_CHUNKS = 4;
+
 const COOKIE_NAME = "shop_customer_session";
 
 type SessionData = Record<string, unknown>;
@@ -101,11 +104,13 @@ function createSessionManager(
   origin: string,
   writable: false,
 ): ReadonlyCustomerSessionManager;
+
 function createSessionManager(
   cookieHeader: string | null,
   origin: string,
   writable: true,
 ): WritableCustomerSessionManager;
+
 function createSessionManager(
   cookieHeader: string | null,
   origin: string,
@@ -222,10 +227,11 @@ export function createCustomerSessionManager(request: Request): WritableCustomer
 }
 
 export function createCustomerRequestContext(request: Request): ShopifyRequestContext {
+  const locale = getRequestLocale(request);
   return createShopifyRequestContext({
     i18n: {
-      country: getCountryCode(defaultLocale) as never,
-      language: getLanguageCode(defaultLocale) as never,
+      country: getCountryCode(locale) as never,
+      language: getLanguageCode(locale) as never,
     },
     request,
   });

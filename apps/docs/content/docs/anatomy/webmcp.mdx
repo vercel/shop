@@ -18,15 +18,15 @@ WebMCP and Shopify analytics are separate choices. Enabling WebMCP does not enab
 
 ## Test locally
 
-WebMCP is available only behind a Chrome testing flag:
+For local testing, use a Chrome build that exposes the WebMCP testing flag:
 
-1. Use Chrome 150 or newer.
+1. Check that your Chrome build supports WebMCP testing.
 2. Open `chrome://flags/#enable-webmcp-testing`.
 3. Enable **WebMCP for testing**, then relaunch Chrome.
 4. Set `webmcp.isEnabled` to `true` in `lib/config.ts`, then load the site.
 5. Use a WebMCP inspector or a connected browser agent to list and invoke the registered tools.
 6. Confirm that search returns structured catalog results and cart actions update the shopper's cart.
 
-Public deployments during Chrome's origin trial also require a trial token bound to the exact deployment origin.
+Browser support and origin-trial requirements can change. Check your browser's current WebMCP documentation before enabling it on a public deployment.
 
 Leave the feature disabled for shoppers unless you accept the compatibility and stability limits of an experimental API.

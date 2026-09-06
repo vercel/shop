@@ -1,63 +1,58 @@
 "use client";
 
+import { formatMoney } from "@shopify/hydrogen";
+import { useCart } from "@shopify/hydrogen/react";
 import { cn } from "cn";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { useCart } from "@/components/cart/context";
 import { DiscountForm } from "@/components/cart/discount-form";
-import { cartDiscountAmount } from "@/lib/cart";
-import { prepareCheckoutAction } from "@/lib/cart/action";
-import { formatPrice } from "@/lib/utils";
+import { useCheckout } from "@/hooks/use-checkout";
+import type { Cart } from "@/lib/cart";
 
-function CheckoutLink({
-  checkoutUrl,
-  isUpdatingCart,
-  updatingText,
-  checkoutText,
-}: {
-  checkoutUrl: string;
-  isUpdatingCart: boolean;
-  updatingText: string;
+interface CheckoutButtonProps {
   checkoutText: string;
-}) {
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  updatingText: string;
+}
 
-  // Reset pending state when returning from checkout (bfcache / back navigation)
-  useEffect(() => {
-    const handlePageShow = (e: PageTransitionEvent) => {
-      if (e.persisted) setIsCheckingOut(false);
-    };
-    window.addEventListener("pageshow", handlePageShow);
-    return () => window.removeEventListener("pageshow", handlePageShow);
-  }, []);
+function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
+  const {
+    checkoutError,
+    checkoutErrorId,
+    handleCheckout,
+    isCheckingOut,
+    isCheckoutDisabled,
+    isUpdatingCart,
+  } = useCheckout();
 
   const baseClassName =
     "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors";
 
-  if (isUpdatingCart || isCheckingOut) {
-    return (
-      <span className={cn(baseClassName, "opacity-50 cursor-not-allowed")} aria-disabled="true">
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span>{isCheckingOut ? checkoutText : updatingText}</span>
-        </span>
-      </span>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      className={cn(baseClassName, "hover:bg-primary/90 cursor-pointer")}
-      onClick={async () => {
-        setIsCheckingOut(true);
-        const { checkoutUrl: url } = await prepareCheckoutAction();
-        window.location.href = url || checkoutUrl;
-      }}
-    >
-      <span>{checkoutText}</span>
-    </button>
+    <div className="grid gap-2.5">
+      <button
+        type="button"
+        className={cn(
+          baseClassName,
+          "cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50",
+        )}
+        disabled={isCheckoutDisabled}
+        aria-busy={isCheckingOut || isUpdatingCart || undefined}
+        aria-describedby={checkoutError ? checkoutErrorId : undefined}
+        onClick={handleCheckout}
+      >
+        <span className="flex items-center gap-2.5">
+          {isCheckingOut || isUpdatingCart ? (
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+          ) : null}
+          <span>{isUpdatingCart && !isCheckingOut ? updatingText : checkoutText}</span>
+        </span>
+      </button>
+      {checkoutError ? (
+        <p className="text-xs text-destructive" id={checkoutErrorId} role="alert">
+          {checkoutError}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -76,36 +71,37 @@ export function Summary({
   taxesAndShippingNote,
   updatingCartLabel,
 }: SummaryProps) {
-  const { cart, isUpdatingCart } = useCart();
-
-  if (!cart) return null;
-
-  const lineSubtotal = cart.lines.reduce(
-    (sum, line) => sum + parseFloat(line.cost.totalAmount.amount),
-    0,
-  );
-  const estimatedTotal = Math.max(0, lineSubtotal - cartDiscountAmount(cart));
-  const currencyCode = cart.cost.subtotalAmount.currencyCode;
-
+  const cart = useCart<Cart, Cart>((state) => state.data);
+  const isCostPending = useCart((state) => Boolean(state.pending.cost || state.revalidating));
+  if (!cart.lines.nodes.length) return null;
+  const { amount, currencyCode } = cart.cost.totalAmount;
   return (
     <div className="space-y-5">
       <DiscountForm cart={cart} />
       <div>
         <div className="flex items-baseline justify-between">
           <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
-          <span className="text-xl font-medium text-foreground">
-            {formatPrice({ amount: estimatedTotal, currencyCode }, locale)}
+          <span
+            className="font-mono text-xl font-medium text-foreground tabular-nums tracking-tight data-[pending=true]:text-muted-foreground"
+            data-pending={isCostPending || !currencyCode}
+          >
+            {isCostPending || !currencyCode
+              ? updatingCartLabel
+              : formatMoney(
+                  {
+                    amount,
+                    currencyCode,
+                  },
+                  {
+                    locale,
+                  },
+                ).localizedString}
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>
       </div>
 
-      <CheckoutLink
-        checkoutUrl={cart.checkoutUrl}
-        isUpdatingCart={isUpdatingCart}
-        updatingText={updatingCartLabel}
-        checkoutText={completeCheckoutLabel}
-      />
+      <CheckoutButton checkoutText={completeCheckoutLabel} updatingText={updatingCartLabel} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
@@ -6,9 +7,8 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import Link from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { defaultLocale } from "@/lib/i18n";
+import { getLocale } from "@/lib/params";
 import { getCustomerOrders } from "@/lib/shopify/operations/customer";
-import { formatPrice } from "@/lib/utils";
 
 export default async function OrdersPage({
   searchParams,
@@ -32,7 +32,11 @@ async function OrdersContent({
 }: {
   searchParams: Promise<{ after?: string; before?: string }>;
 }) {
-  const [params, t] = await Promise.all([searchParams, getTranslations("account")]);
+  const [params, locale, t] = await Promise.all([
+    searchParams,
+    getLocale(),
+    getTranslations("account"),
+  ]);
   const { orders, pageInfo } = await getCustomerOrders({
     after: params.after,
     before: params.before,
@@ -58,13 +62,16 @@ async function OrdersContent({
               <div className="grid gap-1">
                 <span className="font-medium">{order.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {formatOrderDate(order.processedAt)}
+                  {formatOrderDate(order.processedAt, locale)}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <OrderStatusBadge status={order.fulfillmentStatus} />
                 <span className="text-sm tabular-nums">
-                  {formatPrice(order.totalPrice, defaultLocale)}
+                  {
+                    formatMoney(order.totalPrice, { currencyDisplay: "narrowSymbol", locale })
+                      .localizedString
+                  }
                 </span>
               </div>
             </Link>

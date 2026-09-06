@@ -1,6 +1,6 @@
 ---
 title: Webhooks
-description: Shopify webhook handler that invalidates Next.js cache tags when products, collections, or CMS metaobjects change.
+description: Refresh supported storefront content when Shopify products, collections, or metaobjects change.
 type: guide
 ---
 
@@ -44,7 +44,7 @@ Metaobject notifications refresh metaobject-backed content only when your custom
 
 The included handler does not refresh inventory-level changes. Stock updates therefore appear at cache expiry unless another supported product webhook arrives or you add a live inventory strategy.
 
-Shopify does not provide webhook topics for Online Store pages, blogs, articles, or store policies. Those edits rely on cache expiry, a manual purge, or a redeploy. See [Content pages](/docs/anatomy/pages/content) for the current content-page guidance.
+This handler does not refresh Online Store pages, blogs, articles, or store policies. Those edits wait for cache revalidation unless you arrange a separate refresh. See [Content pages](/docs/anatomy/pages/content) for publishing guidance.
 
 Navigation menu edits are also outside this handler.
 

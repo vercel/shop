@@ -1,34 +1,21 @@
-import { SlidersHorizontalIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
-import {
-  CollectionActiveFilterCountBadge,
-  CollectionBrowseProvider,
-} from "@/components/collections/collection-browse-provider";
-import { FilterPendingScope } from "@/components/collections/filter-pending-context";
-import { FilterSidebarSheet } from "@/components/collections/filter-sidebar-sheet";
-import { CollectionFilters } from "@/components/collections/filters";
-import { CollectionsSortSelect, SEARCH_SORT_EXCLUDE } from "@/components/collections/sort-select";
-import { SortSelectFallback } from "@/components/collections/sort-select-fallback";
-import { CollectionToolbar } from "@/components/collections/toolbar";
-import { ProductsGridSkeleton } from "@/components/product/products-grid";
-import {
-  type SearchResultsData,
-  SearchResultsGrid,
-  getSearchResultsData,
-} from "@/components/search/results";
+import { CollectionBrowseProvider } from "@/components/collections/collection-browse-provider";
+import { SEARCH_SORT_EXCLUDE } from "@/components/collections/sort-select";
+import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
+import { SearchResultsGrid } from "@/components/search/results";
 import { Container } from "@/components/ui/container";
 import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { getCollectionSearchState } from "@/lib/collections/server";
 import { getLocale } from "@/lib/params";
+import { getSearchResultsData, type SearchResultsData } from "@/lib/search/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -93,9 +80,6 @@ export default async function SearchPage({ searchParams }: PageProps<"/[flags]/[
     });
   })();
 
-  const filtersLabel = t("filters");
-  const sortByLabel = t("sortBy");
-
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
@@ -111,16 +95,11 @@ export default async function SearchPage({ searchParams }: PageProps<"/[flags]/[
               </Suspense>
             </h1>
           </div>
-          <Suspense
-            fallback={
-              <SearchBrowseFallback filtersLabel={filtersLabel} sortByLabel={sortByLabel} />
-            }
-          >
+          <Suspense fallback={<BrowseFallback resultCount={<Skeleton className="h-4 w-20" />} />}>
             <NextIntlClientProvider
               messages={{ category: messages.category, search: messages.search }}
             >
               <SearchBrowse
-                filtersLabel={filtersLabel}
                 locale={locale}
                 searchParamsPromise={searchParams}
                 searchResultsDataPromise={searchResultsDataPromise}
@@ -135,13 +114,11 @@ export default async function SearchPage({ searchParams }: PageProps<"/[flags]/[
 }
 
 async function SearchBrowse({
-  filtersLabel,
   locale,
   searchParamsPromise,
   searchResultsDataPromise,
   searchStatePromise,
 }: {
-  filtersLabel: string;
   locale: Awaited<ReturnType<typeof getLocale>>;
   searchParamsPromise: PageProps<"/[flags]/[locale]/search">["searchParams"];
   searchResultsDataPromise: Promise<SearchResultsData>;
@@ -152,61 +129,17 @@ async function SearchBrowse({
   // A new term rebuilds the browse store so stale filters never carry across searches.
   return (
     <CollectionBrowseProvider handle={`search:${query}`} searchStatePromise={searchStatePromise}>
-      <CollectionToolbar
+      <BrowseToolbar
+        facetsPromise={searchResultsDataPromise.then((data) => data.transformedFilters)}
         resultCount={
           <Suspense fallback={<Skeleton className="h-4 w-20" />}>
             <SearchResultCount dataPromise={searchResultsDataPromise} />
           </Suspense>
         }
-        filterSheet={
-          <FilterSidebarSheet
-            label={filtersLabel}
-            trigger={
-              <button type="button" className="flex items-center gap-2 text-sm font-medium">
-                <SlidersHorizontalIcon className="size-4" />
-                <span>{filtersLabel}</span>
-                <CollectionActiveFilterCountBadge />
-              </button>
-            }
-          >
-            <FilterPendingScope>
-              <CollectionFilters
-                facetsPromise={searchResultsDataPromise.then((data) => data.transformedFilters)}
-              />
-            </FilterPendingScope>
-          </FilterSidebarSheet>
-        }
-        sortSelect={<CollectionsSortSelect exclude={SEARCH_SORT_EXCLUDE} />}
+        sortExclude={SEARCH_SORT_EXCLUDE}
       />
       <SearchResultsGrid locale={locale} searchResultsDataPromise={searchResultsDataPromise} />
     </CollectionBrowseProvider>
-  );
-}
-
-function SearchBrowseFallback({
-  filtersLabel,
-  sortByLabel,
-}: {
-  filtersLabel: string;
-  sortByLabel: string;
-}) {
-  return (
-    <>
-      <CollectionToolbar
-        resultCount={<Skeleton className="h-4 w-20" />}
-        filterSheet={
-          <button type="button" className="flex items-center gap-2 text-sm font-medium">
-            <SlidersHorizontalIcon className="size-4" />
-            <span>{filtersLabel}</span>
-          </button>
-        }
-        sortSelect={<SortSelectFallback label={sortByLabel} />}
-      />
-      <ProductsGridSkeleton
-        count={PRODUCTS_PER_PAGE}
-        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      />
-    </>
   );
 }
 

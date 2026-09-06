@@ -1,25 +1,27 @@
 "use client";
 
+import { useCart } from "@shopify/hydrogen/react";
 import { HandbagIcon } from "lucide-react";
 
-import { useCart } from "@/components/cart/context";
-import type { Cart } from "@/lib/types";
+import { useCartDrawer } from "@/components/cart/context";
 
-export function CartIconClient({
-  cartLabel,
-  initialCart,
-}: {
+interface CartIconClientProps {
   cartLabel: string;
-  initialCart: Cart | null;
-}) {
-  const { cartWithPending, openOverlay } = useCart();
-  const displayCart = cartWithPending ?? initialCart;
-  const quantity = displayCart?.totalQuantity ?? 0;
+  initialCart: { totalQuantity: number } | null;
+}
+
+export function CartIconClient({ cartLabel, initialCart }: CartIconClientProps) {
+  const quantity = useCart((state) =>
+    state.loading
+      ? (initialCart?.totalQuantity ?? state.data.totalQuantity)
+      : state.data.totalQuantity,
+  );
+  const { openOverlay } = useCartDrawer();
 
   return (
     <button
       onClick={openOverlay}
-      className="flex items-center justify-center gap-1.5 text-foreground hover:text-foreground/80 transition-colors"
+      className="flex cursor-pointer items-center justify-center gap-1.5 text-foreground hover:text-foreground/80 transition-colors"
       type="button"
     >
       <span className="relative">

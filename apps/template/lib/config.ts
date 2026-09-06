@@ -1,5 +1,9 @@
+import type { I18nConfig } from "@shopify/hydrogen";
+
 import { enterpriseFooterItems, enterpriseNavItems, socialLinks } from "./enterprise-navigation";
 import type { MenuItem } from "./shopify/types/menu";
+
+export type CommerceLocale = Pick<I18nConfig, "country" | "language">;
 
 export type BotIdCheckLevel = "basic" | "deepAnalysis";
 
@@ -42,6 +46,9 @@ export interface ShopConfig {
   botid: {
     checkLevel: BotIdCheckLevel;
     isEnabled: boolean;
+  };
+  localization: CommerceLocale & {
+    locale: string;
   };
   navigation: {
     footer: MenuItem[];
@@ -104,6 +111,11 @@ export const shopConfig = {
   navigation: {
     footer: enterpriseFooterItems,
     nav: enterpriseNavItems,
+  },
+  localization: {
+    country: "US",
+    language: "EN",
+    locale: "en-US" as const,
   },
   pdp: {
     bundles: {

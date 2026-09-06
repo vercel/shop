@@ -32,12 +32,12 @@ export function AgentComposer({
   const isBusy = status === "submitted" || status === "streaming";
 
   const submit = () => {
-    if (status === "streaming") {
+    if (isBusy) {
       onStop();
       return;
     }
     const text = value.trim();
-    if (!text || isBusy) return;
+    if (!text) return;
     onSubmit(text);
   };
 
@@ -51,9 +51,7 @@ export function AgentComposer({
   if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
   else if (status === "streaming") icon = <SquareIcon className="size-4" />;
   else if (status === "error") icon = <XIcon className="size-4" />;
-
-  const isStopping = status === "streaming";
-
+  const isStopping = isBusy;
   return (
     <form
       onSubmit={(e) => {

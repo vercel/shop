@@ -6,9 +6,10 @@ import {
   type CustomerAccountDocument,
   createCustomerAccountClient,
 } from "@shopify/hydrogen/customer-account";
+import { headers } from "next/headers";
 
 import { shopConfig } from "@/lib/config";
-import { defaultLocale, getCountryCode, getLanguageCode } from "@/lib/i18n";
+import { getCountryCode, getLanguageCode, getRequestLocale } from "@/lib/i18n";
 
 import { resolveShopId } from "./discovery";
 import { logShopifyDebug, shopifyLogger } from "./logging";
@@ -25,29 +26,31 @@ type CustomerAccountVariables<Doc extends AnyCustomerAccountDocument> = Omit<
 type CustomerAccountFetchOptions<Doc extends AnyCustomerAccountDocument> = {
   accessToken: string;
   document: Doc;
+  locale?: string;
   operation: string;
 } & (Record<string, never> extends CustomerAccountVariables<Doc>
   ? { variables?: CustomerAccountVariables<Doc> }
   : { variables: CustomerAccountVariables<Doc> });
 
-export async function customerAccountFetch<const Doc extends AnyCustomerAccountDocument>({
+export async function customerAccountFetch<Doc extends AnyCustomerAccountDocument>({
   accessToken,
   document,
+  locale,
   operation,
   variables,
 }: CustomerAccountFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
+  const activeLocale = locale ?? getRequestLocale({ headers: await headers() });
   const shopId = await resolveShopId();
   const client: CustomerAccountClient = createCustomerAccountClient({
     shopId,
     requestContext: createShopifyRequestContext({
       i18n: {
-        country: getCountryCode(defaultLocale) as never,
-        language: getLanguageCode(defaultLocale) as never,
+        country: getCountryCode(activeLocale) as never,
+        language: getLanguageCode(activeLocale) as never,
       },
       request: new Request(shopConfig.site.url),
     }),
   });
-
   const start = performance.now();
   try {
     const { data, errors } = await client.graphql(document, { accessToken, variables } as never);

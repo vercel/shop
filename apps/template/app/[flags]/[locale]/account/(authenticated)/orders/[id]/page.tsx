@@ -1,3 +1,4 @@
+import { formatMoney } from "@shopify/hydrogen";
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -12,10 +13,9 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { defaultLocale } from "@/lib/i18n";
+import { getLocale } from "@/lib/params";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer";
 import type { Money, OrderLineItem } from "@/lib/types";
-import { formatPrice } from "@/lib/utils";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -26,7 +26,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 }
 
 async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
-  const [{ id }, t] = await Promise.all([params, getTranslations("account")]);
+  const [{ id }, locale, t] = await Promise.all([params, getLocale(), getTranslations("account")]);
 
   if (!id) notFound();
 
@@ -35,7 +35,10 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
 
   return (
     <>
-      <AccountPageHeader title={order.name} description={formatOrderDate(order.processedAt)} />
+      <AccountPageHeader
+        title={order.name}
+        description={formatOrderDate(order.processedAt, locale)}
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         <OrderStatusBadge status={order.fulfillmentStatus} />
@@ -46,17 +49,22 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
 
       <ul className="grid divide-y rounded-lg border">
         {order.lineItems.map((item, index) => (
-          <OrderLineItemRow key={index} item={item} />
+          <OrderLineItemRow key={index} item={item} locale={locale} />
         ))}
       </ul>
 
       <dl className="grid gap-2 rounded-lg border p-4 text-sm">
-        <SummaryRow label={t("subtotal")} money={order.subtotal} />
-        <SummaryRow label={t("shipping")} money={order.totalShipping} />
-        <SummaryRow label={t("tax")} money={order.totalTax} />
+        <SummaryRow label={t("subtotal")} locale={locale} money={order.subtotal} />
+        <SummaryRow label={t("shipping")} locale={locale} money={order.totalShipping} />
+        <SummaryRow label={t("tax")} locale={locale} money={order.totalTax} />
         <div className="flex items-center justify-between border-t pt-2 font-medium">
           <dt>{t("total")}</dt>
-          <dd className="font-mono tabular-nums">{formatPrice(order.totalPrice, defaultLocale)}</dd>
+          <dd className="font-mono tabular-nums">
+            {
+              formatMoney(order.totalPrice, { currencyDisplay: "narrowSymbol", locale })
+                .localizedString
+            }
+          </dd>
         </div>
       </dl>
 
@@ -84,7 +92,7 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
   );
 }
 
-function OrderLineItemRow({ item }: { item: OrderLineItem }) {
+function OrderLineItemRow({ item, locale }: { item: OrderLineItem; locale: string }) {
   return (
     <li className="flex items-center gap-3 p-3">
       <div className="relative size-14 shrink-0 overflow-hidden rounded-md bg-muted">
@@ -107,19 +115,32 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
       </div>
       {item.totalPrice ? (
         <span className="font-mono text-sm tabular-nums">
-          {formatPrice(item.totalPrice, defaultLocale)}
+          {
+            formatMoney(item.totalPrice, { currencyDisplay: "narrowSymbol", locale })
+              .localizedString
+          }
         </span>
       ) : null}
     </li>
   );
 }
 
-function SummaryRow({ label, money }: { label: string; money: Money | null }) {
+function SummaryRow({
+  label,
+  locale,
+  money,
+}: {
+  label: string;
+  locale: string;
+  money: Money | null;
+}) {
   if (!money) return null;
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-mono tabular-nums">{formatPrice(money, defaultLocale)}</dd>
+      <dd className="font-mono tabular-nums">
+        {formatMoney(money, { currencyDisplay: "narrowSymbol", locale }).localizedString}
+      </dd>
     </div>
   );
 }

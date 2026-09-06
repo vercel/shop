@@ -4,17 +4,17 @@ import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { useCart } from "@/components/cart/context";
+import { useCartDrawer } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { addToCart } from "@/lib/cart/client";
+import { addGiftCardToCart } from "@/lib/cart/gift-card-client";
 import type { OptimisticProductInfo } from "@/lib/product";
 
 interface GiftCardPurchaseFormProps {
-  merchandiseId: string;
+  merchandiseId: string | undefined;
   productInfo?: OptimisticProductInfo;
 }
 
@@ -44,12 +44,14 @@ function giftCardAttributes(recipient: {
 
 export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPurchaseFormProps) {
   const t = useTranslations("product.giftCard");
-  const { setOverlayOpen, setWarnings } = useCart();
+  const tCart = useTranslations("cart");
+  const { setOverlayOpen } = useCartDrawer();
   const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isPending || !merchandiseId) return;
     setError(null);
 
     const formData = new FormData(event.currentTarget);
@@ -72,30 +74,35 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
         return;
       }
     }
-
-    setWarnings([]);
-    addToCart(
-      merchandiseId,
-      1,
-      productInfo,
-      giftCardAttributes({
-        email,
-        message: message || undefined,
-        name: name || undefined,
-        sendOn: scheduled ? sendOn : undefined,
-        // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
-        timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
-      }),
-    );
-
-    form.reset();
-    setSendOnEnabled(false);
-    setOverlayOpen(true);
+    setIsPending(true);
+    try {
+      const confirmation = addGiftCardToCart(
+        merchandiseId,
+        1,
+        productInfo,
+        giftCardAttributes({
+          email,
+          message: message || undefined,
+          name: name || undefined,
+          sendOn: scheduled ? sendOn : undefined,
+          // Captured in the browser so Shopify schedules delivery in the buyer's timezone, not the server's.
+          timezoneOffset: scheduled ? new Date().getTimezoneOffset() : undefined,
+        }),
+      );
+      setOverlayOpen(true);
+      await confirmation;
+      form.reset();
+      setSendOnEnabled(false);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : tCart("errors.add"));
+    } finally {
+      setIsPending(false);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="group grid gap-5">
-      <div data-slot="gift-card-fields" className="grid gap-2.5">
+      <fieldset disabled={isPending} data-slot="gift-card-fields" className="grid gap-2.5">
         <div className="grid gap-2.5">
           <Label htmlFor="gift-card-email">{t("recipientEmail")}</Label>
           <Input
@@ -135,6 +142,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
             <Switch
               id="gift-card-send-later"
               checked={sendOnEnabled}
+              disabled={isPending}
               onCheckedChange={setSendOnEnabled}
             />
           </div>
@@ -145,7 +153,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
             </div>
           ) : null}
         </div>
-      </div>
+      </fieldset>
 
       {error ? (
         <p role="alert" className="text-sm text-destructive">
@@ -155,12 +163,14 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
 
       <Button
         type="submit"
+        data-selection-unresolved={!merchandiseId && !isPending}
+        disabled={isPending || !merchandiseId}
         className={cn(
-          "h-12 w-full justify-center",
+          "h-12 w-full justify-center group-valid:data-[selection-unresolved=true]:disabled:opacity-100",
           "group-invalid:cursor-not-allowed group-invalid:opacity-50",
         )}
       >
-        <span>{t("addToCart")}</span>
+        <span>{isPending ? tCart("adding") : t("addToCart")}</span>
       </Button>
     </form>
   );

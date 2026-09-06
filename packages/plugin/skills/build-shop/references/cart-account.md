@@ -4,7 +4,7 @@
 
 - Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart), [authentication anatomy](https://vercel.shop/docs/anatomy/authentication)
 - Cart route and components: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`, `apps/template/components/cart/`
-- Cart data and mutations: `apps/template/lib/cart/` (all reads and mutations go through Hydrogen's `createCartServerHandlers`; there is no template-owned cart GraphQL)
+- Cart data and mutations: `apps/template/lib/cart/` (Hydrogen handlers own reads and mutations; the template supplies an additive fragment and uses Hydrogen's cart-create query to establish a cookie before assistant streaming)
 - Account routes and components: `apps/template/app/account/`, `apps/template/components/account/`
 - Auth and Customer Account API: `apps/template/lib/auth/`, `apps/template/lib/customer/action.ts`, `apps/template/lib/shopify/customer-account.ts`, `apps/template/lib/shopify/operations/customer.ts`
 - Public source fallback: [cart source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [account source](https://github.com/vercel/shop/tree/main/apps/template/app/account), [template source](https://github.com/vercel/shop/tree/main/apps/template)
@@ -15,7 +15,7 @@ Cart and account data depend on cookies, sessions, or customer access tokens. Do
 
 Carts are never placed in the Next.js data cache, so cart mutations need no cache invalidation step. Preserve optimistic cart reconciliation so the interface responds immediately and converges on the server result.
 
-For cart provider, bootstrap, optimistic state, nav badge, overlay, or mutation work, read `cart-provider.md` and preserve its confirmed-cart plus pending-intents model.
+For cart provider, bootstrap, optimistic state, nav badge, overlay, or mutation work, read `cart-provider.md` and preserve Hydrogen's ownership of state and reconciliation; do not introduce a parallel cart store.
 
 ## Shared shell
 

@@ -13,7 +13,7 @@ Edit `lib/config.ts` to set storefront-wide, secret-free options. Keep credentia
 | `agent.isEnabled`                     | `true`           | Shows the shopping assistant and enables `POST /api/chat`. The disabled endpoint returns `404`. |
 | `analytics.vercel.isEnabled`          | `false`          | Enables Vercel Web Analytics.                                                                   |
 | `analytics.speedInsights.isEnabled`   | `false`          | Enables Vercel Speed Insights.                                                                  |
-| `analytics.shopify.isEnabled`         | `false`          | Sends storefront page views to Shopify analytics.                                               |
+| `analytics.shopify.isEnabled`         | `false`          | Sends storefront browsing and cart events to Shopify analytics, subject to consent.             |
 | `analytics.shopify.consentMode`       | `default-banner` | Selects the Shopify consent experience described below.                                         |
 | `auth.isEnabled`                      | `true`           | Enables customer authentication.                                                                |
 | `botid.isEnabled`                     | `true`           | Protects `POST /api/chat` with [Vercel BotID](https://vercel.com/docs/botid).                   |
@@ -31,9 +31,9 @@ Edit `lib/config.ts` to set storefront-wide, secret-free options. Keep credentia
 
 ## Required constraints
 
-Because `auth.isEnabled` is enabled on this branch, set `CUSTOMER_ACCOUNT_SESSION_SECRET` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` as described in [Environment Variables](/docs/reference/env-vars). The build fails if either variable is missing. Set the flag to `false` for a guest-only storefront.
+Because `auth.isEnabled` is enabled on this branch, set `CUSTOMER_ACCOUNT_SESSION_SECRET`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` as described in [Environment Variables](/docs/reference/env-vars). Development startup and production builds fail if any of these variables are missing. Set the flag to `false` for a guest-only storefront.
 
-This branch enables `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so disable BotID when self-hosting. The `deepAnalysis` level is [billed per check](https://vercel.com/docs/botid#pricing) on Pro plans.
+This branch enables `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so disable BotID when self-hosting. Check [BotID pricing](https://vercel.com/docs/botid#pricing) before selecting `deepAnalysis`.
 
 `site.url` resolves from the Vercel production URL and falls back to `http://localhost:3000` during local development. Set `site.url` directly when deploying elsewhere.
 
@@ -42,7 +42,7 @@ This branch enables `botid.isEnabled` with `agent.isEnabled`. BotID verification
 | Value            | Behavior                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------- |
 | `default-banner` | Uses Shopify's hosted privacy banner where consent is required.                              |
-| `custom-banner`  | Uses the storefront's own consent interface.                                                 |
+| `custom-banner`  | Requires you to supply a consent interface and connect it to Shopify's Customer Privacy API. |
 | `no-banner`      | Shows no consent interface. Where consent is required, analytics events cannot be delivered. |
 
 Only expose the public Storefront API token to the browser. Never use a private token for Shopify analytics or consent requests.
