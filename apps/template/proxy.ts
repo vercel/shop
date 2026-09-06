@@ -36,8 +36,16 @@ const NOOP_SESSION_MANAGER = {
 };
 
 export async function proxy(request: NextRequest): Promise<Response> {
-  const requestContext = createCustomerRequestContext(request);
   const pathname = request.nextUrl.pathname;
+
+  if (pathname === "/.well-known/ucp") {
+    // Hydrogen's well-known proxy does not yet include UCP.
+    return NextResponse.rewrite(
+      new URL(`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/.well-known/ucp`),
+    );
+  }
+
+  const requestContext = createCustomerRequestContext(request);
 
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
   const usesCustomerCart = shopConfig.auth.isEnabled && (isAuthPath || pathname === "/api/cart");
