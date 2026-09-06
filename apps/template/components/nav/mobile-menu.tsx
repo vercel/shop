@@ -2,7 +2,7 @@
 
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import {
   Accordion,
@@ -15,7 +15,7 @@ import type { MenuItem } from "@/lib/shopify/types/menu";
 
 interface MenuLinkProps {
   url: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   onClick?: () => void;
 }
@@ -58,26 +58,14 @@ export function MobileMenu({ items }: { items: MenuItem[] }) {
           <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
         </div>
         <nav className="px-5">
-          <MobileMenuList
-            items={items}
-            onLinkClick={close}
-            showAllLabel={(title: string) => `Show all ${title}`}
-          />
+          <MobileMenuList items={items} onLinkClick={close} />
         </nav>
       </SheetContent>
     </Sheet>
   );
 }
 
-function MobileMenuList({
-  items,
-  onLinkClick,
-  showAllLabel,
-}: {
-  items: MenuItem[];
-  onLinkClick: () => void;
-  showAllLabel: (title: string) => string;
-}) {
+function MobileMenuList({ items, onLinkClick }: { items: MenuItem[]; onLinkClick: () => void }) {
   const hasAnyChildren = items.some((item) => item.items.length > 0);
 
   if (!hasAnyChildren) {
@@ -112,7 +100,7 @@ function MobileMenuList({
                   onClick={onLinkClick}
                   className="mt-3 block text-xs font-medium uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showAllLabel(item.title)}
+                  {`Show all ${item.title}`}
                 </MenuLink>
               ) : null}
             </AccordionContent>

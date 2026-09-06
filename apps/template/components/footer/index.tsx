@@ -1,5 +1,6 @@
 import { cn } from "cn";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
@@ -44,7 +45,7 @@ export async function Footer() {
 }
 
 interface MenuLinkProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   url: string;
 }

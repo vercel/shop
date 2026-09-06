@@ -310,8 +310,7 @@ function BundleRelationships({ variant }: { variant: ProductVariant | undefined 
 }
 
 function GiftCardPurchaseFormFallback() {
-  // Labels and placeholders are static translations, so render the real disabled inputs — the only
-  // change on resolve is the fields becoming editable, which keeps geometry stable and avoids CLS.
+  // Match the resolved form's geometry to avoid layout shift.
   return (
     <div className="grid gap-5">
       <div className="grid gap-2.5">

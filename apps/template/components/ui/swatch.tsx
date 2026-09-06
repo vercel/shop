@@ -1,8 +1,8 @@
 import { cn } from "cn";
 import Image from "next/image";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
-interface SwatchProps extends React.ComponentProps<"span"> {
+interface SwatchProps extends ComponentProps<"span"> {
   color?: string;
   image?: string;
   label: string;

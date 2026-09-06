@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -121,7 +121,7 @@ function AddressForm({ address, onSuccess }: { address?: CustomerAddress; onSucc
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isPending, startTransition] = useTransition();
   const isCurrentDefault = address?.isDefault ?? false;
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setFieldErrors({});

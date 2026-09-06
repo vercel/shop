@@ -1,5 +1,5 @@
 import { SlidersHorizontalIcon } from "lucide-react";
-import type * as React from "react";
+import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
@@ -14,7 +14,7 @@ import { SortSelectFallback } from "./sort-select-fallback";
 
 interface BrowseToolbarProps {
   facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
-  resultCount?: React.ReactNode;
+  resultCount?: ReactNode;
   sortExclude?: string[];
 }
 
@@ -47,7 +47,7 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
 }
 
 interface BrowseFallbackProps {
-  resultCount?: React.ReactNode;
+  resultCount?: ReactNode;
 }
 
 export function BrowseFallback({ resultCount }: BrowseFallbackProps) {
@@ -75,9 +75,9 @@ export function BrowseFallback({ resultCount }: BrowseFallbackProps) {
 }
 
 interface ToolbarLayoutProps {
-  filterSheet: React.ReactNode;
-  resultCount?: React.ReactNode;
-  sortSelect: React.ReactNode;
+  filterSheet: ReactNode;
+  resultCount?: ReactNode;
+  sortSelect: ReactNode;
 }
 
 function ToolbarLayout({ filterSheet, resultCount, sortSelect }: ToolbarLayoutProps) {

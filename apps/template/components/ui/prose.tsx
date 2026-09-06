@@ -1,7 +1,7 @@
 import { cn } from "cn";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
-export function Prose({ className, ...props }: React.ComponentProps<"article">) {
+export function Prose({ className, ...props }: ComponentProps<"article">) {
   return (
     <article
       className={cn(

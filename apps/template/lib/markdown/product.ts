@@ -4,16 +4,12 @@ import type { ProductDetails } from "@/lib/types";
 
 import { createTable, escapeMarkdown } from "./utils";
 
-/** Output is consumed by agents/crawlers, so structure must stay parseable. */
 export function productToMarkdown(product: ProductDetails, locale: string): string {
   const sections: string[] = [];
 
-  sections.push(`# ${escapeMarkdown(product.title)}`);
-  sections.push("");
+  sections.push(`# ${escapeMarkdown(product.title)}`, "");
 
-  sections.push("## Product Information");
-  sections.push("");
-  sections.push(`- **Handle**: ${product.handle}`);
+  sections.push("## Product Information", "", `- **Handle**: ${product.handle}`);
   if (product.vendor) {
     sections.push(`- **Brand**: ${escapeMarkdown(product.vendor)}`);
   }
@@ -24,12 +20,13 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     ].join(" > ");
     sections.push(`- **Category**: ${escapeMarkdown(categoryPath)}`);
   }
-  sections.push(`- **Available**: ${product.availableForSale ? "Yes" : "No"}`);
-  sections.push("");
+  sections.push(`- **Available**: ${product.availableForSale ? "Yes" : "No"}`, "");
 
-  sections.push("## Pricing");
-  sections.push("");
-  sections.push(`- **Price**: ${formatMoney(product.price, { locale }).localizedString}`);
+  sections.push(
+    "## Pricing",
+    "",
+    `- **Price**: ${formatMoney(product.price, { locale }).localizedString}`,
+  );
   if (product.compareAtPrice) {
     sections.push(
       `- **Compare At**: ${formatMoney(product.compareAtPrice, { locale }).localizedString}`,
@@ -53,15 +50,11 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   sections.push("");
 
   if (product.description) {
-    sections.push("## Description");
-    sections.push("");
-    sections.push(escapeMarkdown(product.description));
-    sections.push("");
+    sections.push("## Description", "", escapeMarkdown(product.description), "");
   }
 
   if (product.options.length > 0) {
-    sections.push("## Options");
-    sections.push("");
+    sections.push("## Options", "");
     for (const option of product.options) {
       const values = option.values.map((v) => escapeMarkdown(v.name)).join(", ");
       sections.push(`- **${escapeMarkdown(option.name)}**: ${values}`);
@@ -70,8 +63,7 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   }
 
   if (product.variants && product.variants.length > 0) {
-    sections.push("## Variants");
-    sections.push("");
+    sections.push("## Variants", "");
 
     const optionNames = product.options.map((o) => o.name);
     const headers = ["Variant", ...optionNames.map(escapeMarkdown), "Price", "Available"];
@@ -89,13 +81,11 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
       ];
     });
 
-    sections.push(createTable(headers, rows));
-    sections.push("");
+    sections.push(createTable(headers, rows), "");
   }
 
   if (product.images.length > 0) {
-    sections.push("## Images");
-    sections.push("");
+    sections.push("## Images", "");
     for (const image of product.images) {
       sections.push(`- ${image.url}`);
     }
@@ -103,15 +93,11 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   }
 
   if (product.tags.length > 0) {
-    sections.push("## Tags");
-    sections.push("");
-    sections.push(product.tags.join(", "));
-    sections.push("");
+    sections.push("## Tags", "", product.tags.join(", "), "");
   }
 
   if (product.seo.title || product.seo.description) {
-    sections.push("## SEO");
-    sections.push("");
+    sections.push("## SEO", "");
     if (product.seo.title) {
       sections.push(`- **Title**: ${escapeMarkdown(product.seo.title)}`);
     }
@@ -121,10 +107,12 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
     sections.push("");
   }
 
-  sections.push("---");
-  sections.push("");
-  sections.push(`*Last updated: ${product.updatedAt}*`);
-  sections.push(`*Locale: ${locale} | Currency: ${product.currencyCode}*`);
+  sections.push(
+    "---",
+    "",
+    `*Last updated: ${product.updatedAt}*`,
+    `*Locale: ${locale} | Currency: ${product.currencyCode}*`,
+  );
 
   return sections.join("\n");
 }

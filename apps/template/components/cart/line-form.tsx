@@ -2,13 +2,10 @@
 
 import { sanitizeQuantity, type CartFormRegister } from "@shopify/hydrogen";
 import { useCartForm } from "@shopify/hydrogen/react";
-import type * as React from "react";
+import type { ComponentProps, ReactNode } from "react";
 
-interface CartLineFormProps extends Omit<
-  React.ComponentProps<"form">,
-  "action" | "children" | "method"
-> {
-  children: (register: CartFormRegister) => React.ReactNode;
+interface CartLineFormProps extends Omit<ComponentProps<"form">, "action" | "children" | "method"> {
+  children: (register: CartFormRegister) => ReactNode;
   lineId: string;
   maxQuantity?: number;
   minQuantity?: number;

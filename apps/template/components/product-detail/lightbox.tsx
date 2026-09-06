@@ -3,8 +3,7 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 import Image from "next/image";
-import { createContext, useCallback, useContext, useState } from "react";
-import type { ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import type { Image as ImageType, Video } from "@/lib/types";
