@@ -36,6 +36,8 @@ Before enabling `auth.isEnabled`, set `CUSTOMER_ACCOUNT_SESSION_SECRET`, `SHOPIF
 
 Enable `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so leave it disabled when self-hosting. Check [BotID pricing](https://vercel.com/docs/botid#pricing) before selecting `deepAnalysis`.
 
+Blocked assistant requests return `403` before any cart or AI work starts. The assistant shows the same generic error message as other request failures.
+
 `site.url` resolves from the Vercel production URL and falls back to `http://localhost:3000` during local development. Set `site.url` directly when deploying elsewhere.
 
 ## Shopify consent modes

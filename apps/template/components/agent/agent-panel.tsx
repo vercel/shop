@@ -13,7 +13,6 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from "react"
 import { useCartDrawer } from "@/components/cart/context";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
 import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart-client";
-import { BOTID_DENIED_CODE } from "@/lib/botid";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
@@ -264,13 +263,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         status={status}
         value={input}
       />
-      {error && (
-        <p className="px-5 pb-2 text-red-500 text-xs">
-          {error.message.includes(BOTID_DENIED_CODE)
-            ? "We couldn't verify this request. Reload the page and try again."
-            : "Something went wrong. Try again."}
-        </p>
-      )}
+      {error && <p className="px-5 pb-2 text-red-500 text-xs">Something went wrong. Try again.</p>}
     </div>
   );
 }

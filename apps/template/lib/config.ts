@@ -1,10 +1,7 @@
-import type { I18nConfig } from "@shopify/hydrogen";
+import type { ConsentConfig, I18nConfig } from "@shopify/hydrogen";
+import type { initBotId } from "botid/client/core";
 
 export type CommerceLocale = Pick<I18nConfig, "country" | "language">;
-
-export type BotIdCheckLevel = "basic" | "deepAnalysis";
-
-type ShopifyConsentMode = "custom-banner" | "default-banner" | "no-banner";
 
 export interface ShopConfig {
   agent: {
@@ -12,7 +9,7 @@ export interface ShopConfig {
   };
   analytics: {
     shopify: {
-      consentMode: ShopifyConsentMode;
+      consentMode: NonNullable<ConsentConfig["mode"]>;
       isEnabled: boolean;
     };
     speedInsights: {
@@ -26,7 +23,11 @@ export interface ShopConfig {
     isEnabled: boolean;
   };
   botid: {
-    checkLevel: BotIdCheckLevel;
+    checkLevel: NonNullable<
+      NonNullable<
+        Parameters<typeof initBotId>[0]["protect"][number]["advancedOptions"]
+      >["checkLevel"]
+    >;
     isEnabled: boolean;
   };
   localization: CommerceLocale & {
