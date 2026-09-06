@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,7 @@ export function ProfileForm({
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setSaved(false);

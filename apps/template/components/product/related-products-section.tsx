@@ -1,17 +1,12 @@
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getRelatedProducts } from "@/lib/shopify/operations/products";
 
-function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title?: string }) {
+function RelatedProductsSectionSkeleton({ limit }: { limit: number }) {
   return (
     <div className="grid gap-4">
-      {title ? (
-        <h2 className="text-2xl sm:text-3xl">{title}</h2>
-      ) : (
-        <Skeleton className="h-9 w-48" />
-      )}
+      <h2 className="text-2xl sm:text-3xl">You May Also Like</h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {Array.from({ length: limit }, (_, index) => (
           <ProductCardSkeleton key={index} />
@@ -47,7 +42,7 @@ export function RelatedProductsSection({
   limit: number;
 }) {
   return (
-    <Suspense fallback={<RelatedProductsSectionSkeleton limit={limit} title="You May Also Like" />}>
+    <Suspense fallback={<RelatedProductsSectionSkeleton limit={limit} />}>
       <Render handle={handle} limit={limit} />
     </Suspense>
   );

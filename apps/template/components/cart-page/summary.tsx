@@ -2,7 +2,6 @@
 
 import { formatMoney } from "@shopify/hydrogen";
 import { useCart } from "@shopify/hydrogen/react";
-import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 
 import { DiscountForm } from "@/components/cart/discount-form";
@@ -10,12 +9,7 @@ import { useCheckout } from "@/hooks/use-checkout";
 import type { Cart } from "@/lib/cart";
 import { shopConfig } from "@/lib/config";
 
-interface CheckoutButtonProps {
-  checkoutText: string;
-  updatingText: string;
-}
-
-function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
+function CheckoutButton() {
   const {
     checkoutError,
     checkoutErrorId,
@@ -25,17 +19,11 @@ function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
     isUpdatingCart,
   } = useCheckout();
 
-  const baseClassName =
-    "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors";
-
   return (
     <div className="grid gap-2.5">
       <button
         type="button"
-        className={cn(
-          baseClassName,
-          "cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50",
-        )}
+        className="flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isCheckoutDisabled}
         aria-busy={isCheckingOut || isUpdatingCart || undefined}
         aria-describedby={checkoutError ? checkoutErrorId : undefined}
@@ -45,7 +33,7 @@ function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
           {isCheckingOut || isUpdatingCart ? (
             <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           ) : null}
-          <span>{isUpdatingCart && !isCheckingOut ? updatingText : checkoutText}</span>
+          <span>{isUpdatingCart && !isCheckingOut ? "Updating cart..." : "Go to Checkout"}</span>
         </span>
       </button>
       {checkoutError ? (
@@ -57,19 +45,7 @@ function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
   );
 }
 
-interface SummaryProps {
-  completeCheckoutLabel: string;
-  estimatedTotalLabel: string;
-  taxesAndShippingNote: string;
-  updatingCartLabel: string;
-}
-
-export function Summary({
-  completeCheckoutLabel,
-  estimatedTotalLabel,
-  taxesAndShippingNote,
-  updatingCartLabel,
-}: SummaryProps) {
+export function Summary() {
   const cart = useCart<Cart, Cart>((state) => state.data);
   const isCostPending = useCart((state) => Boolean(state.pending.cost || state.revalidating));
   if (!cart.lines.nodes.length) return null;
@@ -79,13 +55,13 @@ export function Summary({
       <DiscountForm cart={cart} />
       <div>
         <div className="flex items-baseline justify-between">
-          <span className="text-base text-muted-foreground">{estimatedTotalLabel}</span>
+          <span className="text-base text-muted-foreground">Estimated total</span>
           <span
             className="font-mono text-xl font-medium text-foreground tabular-nums tracking-tight data-[pending=true]:text-muted-foreground"
             data-pending={isCostPending || !currencyCode}
           >
             {isCostPending || !currencyCode
-              ? updatingCartLabel
+              ? "Updating cart..."
               : formatMoney(
                   {
                     amount,
@@ -97,10 +73,12 @@ export function Summary({
                 ).localizedString}
           </span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{taxesAndShippingNote}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Taxes and shipping calculated at checkout.
+        </p>
       </div>
 
-      <CheckoutButton checkoutText={completeCheckoutLabel} updatingText={updatingCartLabel} />
+      <CheckoutButton />
     </div>
   );
 }

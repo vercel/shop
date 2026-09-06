@@ -1,10 +1,10 @@
 import { cn } from "cn";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 
-interface ProductPriceProps extends React.ComponentProps<"div"> {
+interface ProductPriceProps extends ComponentProps<"div"> {
   amount: string;
   currencyCode: string;
   compareAtAmount?: string;

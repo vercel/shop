@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { AccountMobileTabs } from "@/components/account/mobile-tabs";
 import { AccountSidebar } from "@/components/account/sidebar";
@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function AccountLayout({ children }: { children: React.ReactNode }) {
+export default function AccountLayout({ children }: { children: ReactNode }) {
   return (
     <Page className="flex flex-1 flex-col">
       <Container className="flex flex-1 flex-col gap-6 md:flex-row md:gap-10">
@@ -57,7 +57,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   );
 }
 
-async function AccountGate({ children }: { children: React.ReactNode }) {
+async function AccountGate({ children }: { children: ReactNode }) {
   if (!shopConfig.auth.isEnabled) notFound();
   await requireCustomerSession();
   return <>{children}</>;

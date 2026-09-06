@@ -4,7 +4,6 @@ import { buildProductUrl } from "@/lib/product";
 import type { ProductCard as ProductCardType } from "@/lib/types";
 
 import {
-  ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
@@ -33,11 +32,11 @@ export function ProductCard({
     <Link href={href} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && (
-          <ProductCardBadge>
+          <div data-slot="product-card-badge">
             <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
               Assistant's pick
             </span>
-          </ProductCardBadge>
+          </div>
         )}
         <ProductCardImageContainer variant={variant}>
           <ProductCardImage

@@ -6,7 +6,14 @@ import { cn } from "cn";
 import { Search, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -16,7 +23,6 @@ import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
 export function SearchModal() {
   const [open, setOpen] = useState(false);
 
-  // ⌘K / Ctrl+K toggles the modal from anywhere on the page.
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
       if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
@@ -67,7 +73,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     },
     [router, onClose],
   );
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const q = inputRef.current?.value?.trim();
     if (!q) return;
@@ -93,7 +99,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigate(`/products/${product.handle}`);
     }
   }
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: ReactKeyboardEvent) {
     if (e.key === "ArrowDown" && visibleItems > 0) {
       e.preventDefault();
       setActiveIndex(Math.min(activeIndex + 1, visibleItems - 1));
@@ -214,22 +220,19 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                         </div>
                       )}
 
-                    {query.trim() &&
-                      (results.products.length > 0 || results.queries.length > 0) && (
-                        <div className="px-4 py-3 flex justify-center">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(
-                                getSearchResultUrl({ baseUrl: "/search", term: query.trim() }),
-                              )
-                            }
-                            className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
-                          >
-                            View All
-                          </button>
-                        </div>
-                      )}
+                    {visibleItems > 0 && (
+                      <div className="px-4 py-3 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(getSearchResultUrl({ baseUrl: "/search", term: query.trim() }))
+                          }
+                          className="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-medium h-9 px-5 hover:bg-primary/90 transition-colors"
+                        >
+                          View All
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>

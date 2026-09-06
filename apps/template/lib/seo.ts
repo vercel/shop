@@ -7,8 +7,6 @@ type SearchParamsInput =
   | Record<string, string | string[] | undefined>
   | undefined;
 
-const PAGINATION_CURSOR_PARAMS = ["cursor"];
-
 function normalizePath(pathname: string): string {
   if (!pathname) return "/";
   const withLeadingSlash = pathname.startsWith("/") ? pathname : `/${pathname}`;
@@ -39,11 +37,9 @@ function toSearchParams(input: SearchParamsInput): URLSearchParams {
   return params;
 }
 
-export function buildCanonicalPath(pathname: string, searchParams?: SearchParamsInput): string {
+function buildCanonicalPath(pathname: string, searchParams?: SearchParamsInput): string {
   const params = toSearchParams(searchParams);
-  for (const key of PAGINATION_CURSOR_PARAMS) {
-    params.delete(key);
-  }
+  params.delete("cursor");
 
   const query = params.toString();
   const normalizedPath = normalizePath(pathname);
@@ -57,11 +53,7 @@ export function buildAlternates({
   pathname: string;
   searchParams?: SearchParamsInput;
 }): Metadata["alternates"] {
-  const canonical = buildCanonicalPath(pathname, searchParams);
-
-  return {
-    canonical,
-  };
+  return { canonical: buildCanonicalPath(pathname, searchParams) };
 }
 
 export function buildOpenGraph({
