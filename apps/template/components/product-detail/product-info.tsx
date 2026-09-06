@@ -2,7 +2,6 @@ import type * as React from "react";
 
 import type { OptionGroupState } from "@/lib/product";
 
-import { AboutItem } from "./about-item";
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 
@@ -70,7 +69,10 @@ function ProductInfoDescription({
   if (!descriptionHtml) return null;
   return (
     <div data-slot="product-info-description" className={className} {...props}>
-      <AboutItem descriptionHtml={descriptionHtml} />
+      <div
+        className="prose prose-sm text-foreground/80"
+        dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+      />
     </div>
   );
 }

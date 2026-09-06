@@ -49,12 +49,7 @@ export function CartPageBody() {
             </div>
             <aside className="lg:col-span-4 xl:col-span-3">
               <div className="lg:sticky lg:top-20">
-                <Summary
-                  completeCheckoutLabel="Go to Checkout"
-                  estimatedTotalLabel="Estimated total"
-                  taxesAndShippingNote="Taxes and shipping calculated at checkout."
-                  updatingCartLabel="Updating cart..."
-                />
+                <Summary />
               </div>
             </aside>
           </div>

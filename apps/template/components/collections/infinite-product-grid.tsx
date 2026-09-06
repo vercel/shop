@@ -2,29 +2,20 @@
 
 import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
-import {
-  ProductCardContent,
-  ProductCardImage,
-  ProductCardImageContainer,
-  ProductCardPrice,
-  ProductCardTitle,
-  ProductCard as ProductCardRoot,
-} from "@/components/product-card/components";
+import { ProductCard } from "@/components/product-card/product-card";
 import { getBrowseSearch } from "@/lib/collections";
-import { buildProductUrl } from "@/lib/product";
-import type { PageInfo, ProductCard } from "@/lib/types";
+import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
 
 interface InfiniteProductGridProps<TParams> {
-  initialProducts: ProductCard[];
+  initialProducts: ProductCardType[];
   initialPageInfo: PageInfo;
   outOfStockText: string;
   // Top-level "use server" action; passed by reference, no closure encryption.
   loadMore: (
     params: TParams & { cursor: string; search: string },
-  ) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
+  ) => Promise<{ products: ProductCardType[]; pageInfo: PageInfo }>;
   loadMoreParams: TParams;
   children: React.ReactNode;
 }
@@ -39,7 +30,7 @@ export function InfiniteProductGrid<TParams>({
 }: InfiniteProductGridProps<TParams>) {
   // The store, not a server snapshot, is the single source of truth for filters and sort mid-scroll.
   const search = useCollection(getBrowseSearch);
-  const [additionalProducts, setAdditionalProducts] = useState<ProductCard[]>([]);
+  const [additionalProducts, setAdditionalProducts] = useState<ProductCardType[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -84,7 +75,7 @@ export function InfiniteProductGrid<TParams>({
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {children}
         {additionalProducts.map((product) => (
-          <ClientProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
+          <ProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
         ))}
       </div>
 
@@ -94,39 +85,5 @@ export function InfiniteProductGrid<TParams>({
         </div>
       )}
     </>
-  );
-}
-
-function ClientProductCard({
-  product,
-  outOfStockText,
-}: {
-  product: ProductCard;
-  outOfStockText: string;
-}) {
-  const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
-  return (
-    <Link href={href}>
-      <ProductCardRoot>
-        <ProductCardImageContainer>
-          <ProductCardImage
-            src={product.featuredImage?.url}
-            alt={product.featuredImage?.altText || product.title}
-            outOfStock={!product.availableForSale}
-            outOfStockText={outOfStockText}
-          />
-          <ProductCardContent>
-            <ProductCardTitle>{product.title}</ProductCardTitle>
-            <ProductCardPrice
-              amount={product.price.amount}
-              currencyCode={product.price.currencyCode}
-              maxAmount={product.maxPrice.amount}
-              compareAtAmount={product.compareAtPrice?.amount}
-              compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-            />
-          </ProductCardContent>
-        </ProductCardImageContainer>
-      </ProductCardRoot>
-    </Link>
   );
 }
