@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 
 import type { CustomerAddressInput } from "@/lib/customer/types";
@@ -78,7 +78,7 @@ export async function createAddressAction(
 
   try {
     const result = mapUserErrors(await createCustomerAddress(input, isDefault));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -103,7 +103,7 @@ export async function updateAddressAction(
 
   try {
     const result = mapUserErrors(await updateCustomerAddress(addressId, input, isDefault));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -120,7 +120,7 @@ export async function deleteAddressAction(addressId: string): Promise<AccountAct
 
   try {
     const result = mapUserErrors(await deleteCustomerAddress(addressId));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -143,7 +143,7 @@ export async function updateProfileAction(raw: {
 
   try {
     const result = mapUserErrors(await updateCustomerProfile(input));
-    if (result.success) revalidatePath("/account/profile");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
