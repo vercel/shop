@@ -12,7 +12,7 @@ import type { Image as ImageType, Video } from "@/lib/media/types";
 
 import { LightboxTrigger } from "./lightbox";
 
-const IMAGE_SIZES = "(min-width: 1536px) 776px, (min-width: 1024px) calc(60vw - 146px), 100vw";
+const IMAGE_SIZES = "(min-width: 1536px) 696px, (min-width: 1024px) calc(60vw - 226px), 100vw";
 
 type GalleryItem = { image: ImageType; type: "image" } | { type: "video"; video: Video };
 
@@ -63,7 +63,7 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
 
   return (
     <div
-      className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-2.5"
+      className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-2.5 pr-20"
       data-pdp-gallery="enabled"
     >
       <div className="relative h-full min-h-0">

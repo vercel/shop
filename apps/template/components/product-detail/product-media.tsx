@@ -380,7 +380,7 @@ export function ProductMedia({
   );
 
   const content = (
-    <div className={className}>
+    <div className={cn(className, desktopGallery && "lg:sticky lg:top-20")}>
       <div className="lg:hidden">
         <Carousel
           key={mediaItems.map(mediaKey).join(",")}

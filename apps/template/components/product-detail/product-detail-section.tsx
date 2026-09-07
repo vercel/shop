@@ -147,7 +147,7 @@ async function ProductMediaArea({
         galleryEnabled ? (
           <Suspense
             fallback={
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-2.5">
+              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-2.5 pr-20">
                 <div />
                 <div className="aspect-square" />
               </div>
@@ -276,14 +276,21 @@ async function ProductInfoArea({
   const t = await getTranslations("product");
   // Read the precomputed value so the button color varies per [flags] cache entry
   // instead of re-deciding (and splitting the cache) at render time.
-  const ctaColored = await ctaColor(await getFlagsCode(), precomputedFlags);
+  const flagsCode = await getFlagsCode();
+  const [ctaColored, galleryEnabled] = await Promise.all([
+    ctaColor(flagsCode, precomputedFlags),
+    pdpGallery(flagsCode, precomputedFlags),
+  ]);
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = product.defaultVariant?.availableForSale ?? product.availableForSale;
   const hasOptions = options.some((option) => option.values.length > 1);
   const reviewSummary = product.rating;
 
   return (
-    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+    <div
+      className="grid gap-10 lg:col-span-4 lg:data-[gallery=false]:sticky lg:data-[gallery=false]:top-20"
+      data-gallery={galleryEnabled}
+    >
       <ProductInfoShell>
         <div data-slot="product-info-header" className="grid gap-2.5">
           {reviewSummary ? (
