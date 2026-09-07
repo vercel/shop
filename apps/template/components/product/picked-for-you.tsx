@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { unstable_navigation } from "next/cache";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
@@ -91,8 +92,11 @@ async function PickedForYouContent({
   rememberedCollectionCookie: string;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // Reading searchParams and cookies opts this grid into PPR's dynamic hole so it
-  // streams in behind the skeleton.
+  // Wait for navigation before reading personalization so runtime prefetches don't
+  // resolve the grid with an earlier remembered collection. Keep the heading and
+  // skeleton outside this gate, and leave the product data's shared cache intact.
+  await unstable_navigation();
+
   const [params, cookieStore] = await Promise.all([searchParams, cookies()]);
 
   // A remembered collection (from a cookie set on a prior collection page) follows the
