@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 
 import { ArticlePage } from "@/components/blog/article-page";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getBlog, getBlogArticle } from "@/lib/shopify/operations/blogs";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
+import { getBlog, getBlogArticle } from "@/lib/shopify/operations/blogs/server";
+import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

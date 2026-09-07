@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
-import type { Image as ImageType, Video } from "@/lib/types";
+import type { Image as ImageType, Video } from "@/lib/media/types";
 
 type MediaItem = { type: "video"; video: Video } | { type: "image"; image: ImageType };
 

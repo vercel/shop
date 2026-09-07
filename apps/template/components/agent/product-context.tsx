@@ -4,7 +4,7 @@ import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
-import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products";
+import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/types";
 
 type ProductMap = Map<string, AgentProduct | AgentProductDetails>;
 

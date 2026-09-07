@@ -5,8 +5,9 @@ import { ApiType, pluckConfig, preset } from "@shopify/api-codegen-preset";
 const require = createRequire(import.meta.url);
 const apiVersion = process.env.SHOPIFY_API_VERSION ?? "unstable";
 const customerDocuments = [
-  "lib/shopify/customer-account*.ts",
-  "lib/shopify/operations/customer.ts",
+  "lib/shopify/customer-account/**/*.ts",
+  "lib/shopify/fragments/customer*/**/*.ts",
+  "lib/shopify/operations/customer/**/*.ts",
 ];
 const storefrontDocuments = [
   "app/**/*.{ts,tsx}",

@@ -5,7 +5,7 @@
 - Docs: [home page anatomy](https://vercel.shop/docs/anatomy/pages/home)
 - Source: `apps/template/app/page.tsx`
 - Product sections: `apps/template/components/product/products-grid.tsx`, `apps/template/components/product-card/product-card.tsx`
-- Catalog operations: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/products.ts`
+- Catalog operations: `apps/template/lib/shopify/operations/collections/server.ts`, `apps/template/lib/shopify/operations/products/server.ts`
 - Public source fallback: [home route source](https://github.com/vercel/shop/blob/main/apps/template/app/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## Rendering contract

@@ -13,9 +13,9 @@ import { headers } from "next/headers";
 import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
-import type { Cart, CartSeedData } from "@/lib/cart";
+import type { Cart, CartSeedData } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
-import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
+import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 // The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
 const CART_FRAGMENT = gql(/* GraphQL */ `

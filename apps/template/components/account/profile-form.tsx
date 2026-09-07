@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfileAction } from "@/lib/customer/action";
-import type { CustomerProfile } from "@/lib/types";
+import type { CustomerProfile } from "@/lib/customer/types";
 
 interface ProfileFormLabels {
   email: string;

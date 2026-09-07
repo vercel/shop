@@ -21,7 +21,7 @@ import {
   deleteAddressAction,
   updateAddressAction,
 } from "@/lib/customer/action";
-import type { CustomerAddress, CustomerAddressInput } from "@/lib/types";
+import type { CustomerAddress, CustomerAddressInput } from "@/lib/customer/types";
 
 type FormState = { address: CustomerAddress; mode: "edit" } | { mode: "create" } | null;
 

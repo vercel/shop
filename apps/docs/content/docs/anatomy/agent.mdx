@@ -12,7 +12,7 @@ The assistant is disabled by default. When disabled, the chat control is hidden 
 
 ## Enable the assistant
 
-Set `agent.isEnabled` to `true` in `lib/config.ts`, then deploy with access to the Vercel AI Gateway. The included assistant uses OpenAI GPT-5.6 Luna by default.
+Set `agent.isEnabled` to `true` in `lib/config/index.ts`, then deploy with access to the Vercel AI Gateway. The included assistant uses OpenAI GPT-5.6 Luna by default.
 
 The chat endpoint is public and each message can incur model usage. Bot protection is configured separately and is also disabled by default. Before production traffic, review [Shop Configuration](/docs/reference/shop-config) and add rate limits or spending controls that match your risk tolerance.
 

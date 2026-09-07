@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Filter, PriceRange } from "@/lib/types";
+import type { Filter, PriceRange } from "@/lib/filters/types";
 
 function CollectionFilterSidebarSkeleton() {
   return (

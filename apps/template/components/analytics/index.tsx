@@ -2,7 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { shopConfig } from "@/lib/config";
-import { getShopAnalytics } from "@/lib/shopify/operations/shop";
+import { getShopAnalytics } from "@/lib/shopify/operations/shop/server";
 
 import { ShopifyScriptsTracker } from "./shopify-client";
 

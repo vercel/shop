@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 
 import { DiscountForm } from "@/components/cart/discount-form";
 import { useCheckout } from "@/hooks/use-checkout";
-import type { Cart } from "@/lib/cart";
+import type { Cart } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 
 function CheckoutButton() {

@@ -1,8 +1,11 @@
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { resolveBrowseParams } from "@/lib/collections/server";
-import { markdownHeaders } from "@/lib/markdown/headers";
+import { markdownHeaders } from "@/lib/markdown/representation";
 import { searchResultsToMarkdown } from "@/lib/markdown/search";
-import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
+import {
+  fetchSearchFacets,
+  fetchSearchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);

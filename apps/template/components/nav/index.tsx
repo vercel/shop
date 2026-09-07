@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { shopConfig } from "@/lib/config";
-import type { MenuItem } from "@/lib/shopify/types/menu";
+import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";

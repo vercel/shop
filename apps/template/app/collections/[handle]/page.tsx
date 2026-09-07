@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CollectionDetailPage } from "@/components/collections/collection-page";
 import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollection, getCollections } from "@/lib/shopify/operations/collections";
+import { getCollection, getCollections } from "@/lib/shopify/operations/collections/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

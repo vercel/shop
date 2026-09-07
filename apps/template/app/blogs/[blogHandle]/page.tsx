@@ -6,8 +6,8 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getBlog } from "@/lib/shopify/operations/blogs";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
+import { getBlog } from "@/lib/shopify/operations/blogs/server";
+import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

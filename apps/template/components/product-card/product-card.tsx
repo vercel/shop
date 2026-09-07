@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { buildProductUrl } from "@/lib/product";
-import type { ProductCard as ProductCardType } from "@/lib/types";
+import type { ProductCard as ProductCardType } from "@/lib/product/types";
 
 import {
   ProductCardContent,

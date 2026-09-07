@@ -51,7 +51,7 @@ Do not print the token in the final response. Write these values to `.env.local`
 - `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`: normalized `.myshopify.com` domain
 - `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`: reused or created public token
 
-The storefront display name is not an environment variable. If `shop.name` differs from the default, set it as the `site.name` literal in `lib/config.ts`.
+The storefront display name is not an environment variable. If `shop.name` differs from the default, set it as the `site.name` literal in `lib/config/index.ts`.
 
 ## Fallback
 

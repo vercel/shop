@@ -1,6 +1,6 @@
-import "server-only";
 import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 
+import "server-only";
 import { createShopifyRequestContext, type ShopifyRequestContext } from "@shopify/hydrogen";
 import {
   createCustomerSession,
@@ -13,7 +13,9 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
 import { shopConfig } from "@/lib/config";
-import { resolveShopId } from "@/lib/shopify/discovery";
+import { resolveShopId } from "@/lib/shopify/discovery/server";
+
+import type { SessionData } from "./types";
 
 const COOKIE_CHUNK_SIZE = 3_800;
 
@@ -22,8 +24,6 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 const COOKIE_MAX_CHUNKS = 4;
 
 const COOKIE_NAME = "shop_customer_session";
-
-type SessionData = Record<string, unknown>;
 
 function parseCookies(cookieHeader: string | null): Map<string, string> {
   const cookies = new Map<string, string>();
