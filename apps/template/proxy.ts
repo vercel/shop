@@ -16,10 +16,10 @@ import {
 } from "@/lib/auth/server";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
-import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/negotiation";
-import { getMarkdownPath } from "@/lib/markdown/routing";
+import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/representation";
+import { getMarkdownPath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
-import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
+import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,

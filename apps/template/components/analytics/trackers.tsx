@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { use, useEffect, useRef } from "react";
 
 import { AnalyticsEvent, getAnalytics } from "@/lib/analytics/client";
-import type { ProductDetails, ProductVariant } from "@/lib/types";
+import type { ProductDetails, ProductVariant } from "@/lib/product/types";
 
 export function CartViewedTracker() {
   const cartState = useCart((state) => state);

@@ -11,7 +11,7 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCustomerAccessToken, requireCustomerSession } from "@/lib/auth/server";
 import { shopConfig } from "@/lib/config";
-import { getCustomerProfile } from "@/lib/shopify/operations/customer";
+import { getCustomerProfile } from "@/lib/shopify/operations/customer/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

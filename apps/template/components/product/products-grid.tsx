@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { searchIndexProducts } from "@/lib/shopify/operations/products/server";
 
 interface ProductsGridSkeletonProps {
   count: number;

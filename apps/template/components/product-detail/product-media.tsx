@@ -7,7 +7,7 @@ import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import type { Image as ImageType, Video } from "@/lib/types";
+import type { Image as ImageType, Video } from "@/lib/media/types";
 
 import { Lightbox, LightboxTrigger } from "./lightbox";
 

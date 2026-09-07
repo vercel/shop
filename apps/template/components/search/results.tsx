@@ -9,7 +9,7 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
-import type { SearchResultsData } from "@/lib/search/server";
+import type { SearchResultsData } from "@/lib/search/types";
 
 export function SearchResultsGrid({
   searchResultsDataPromise,

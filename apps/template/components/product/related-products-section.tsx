@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { getRelatedProducts } from "@/lib/shopify/operations/products";
+import { getRelatedProducts } from "@/lib/shopify/operations/products/server";
 
 function RelatedProductsSectionSkeleton({ limit }: { limit: number }) {
   return (

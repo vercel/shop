@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react";
 
-import type { OptionGroupState } from "@/lib/product";
+import type { OptionGroupState } from "@/lib/product/types";
 
 import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";

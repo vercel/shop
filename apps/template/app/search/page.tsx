@@ -13,7 +13,8 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getCollectionSearchState } from "@/lib/collections/server";
 import { formatCount } from "@/lib/content";
-import { getSearchResultsData, type SearchResultsData } from "@/lib/search/server";
+import { getSearchResultsData } from "@/lib/search/server";
+import { type SearchResultsData } from "@/lib/search/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 type SearchParams = Record<string, string | string[] | undefined>;

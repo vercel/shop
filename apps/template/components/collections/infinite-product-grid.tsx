@@ -6,7 +6,8 @@ import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "rea
 
 import { ProductCard } from "@/components/product-card/product-card";
 import { getBrowseSearch } from "@/lib/collections";
-import type { PageInfo, ProductCard as ProductCardType } from "@/lib/types";
+import type { PageInfo } from "@/lib/pagination/types";
+import type { ProductCard as ProductCardType } from "@/lib/product/types";
 
 interface InfiniteProductGridProps<TParams> {
   initialProducts: ProductCardType[];

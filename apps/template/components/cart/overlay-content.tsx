@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { useCheckout } from "@/hooks/use-checkout";
-import type { Cart } from "@/lib/cart";
+import type { Cart } from "@/lib/cart/types";
 
 import { useCartDrawer } from "./context";
 import { OverlayItem } from "./overlay-item";

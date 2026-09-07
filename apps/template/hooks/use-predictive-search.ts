@@ -7,7 +7,7 @@ import {
 } from "@shopify/hydrogen/react";
 import { useCallback, useState } from "react";
 
-import type { PredictiveSearchResult } from "@/lib/types";
+import type { PredictiveSearchResult } from "@/lib/search/types";
 
 type HydrogenProduct = PredictiveSearchData["items"]["products"][number] & {
   availableForSale: boolean;

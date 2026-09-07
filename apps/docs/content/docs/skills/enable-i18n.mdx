@@ -16,13 +16,13 @@ type: guide
 
 # Enable i18n (next-intl, no Markets)
 
-Add next-intl so the storefront serves locale-prefixed URLs (`/en-US/products/foo`), loads per-locale message catalogs, and exposes a copy-language switcher. The default is one deployment with clean URLs, inline component copy with reusable functions in `lib/content/index.ts`, and `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`. There is no next-intl dependency, message catalog, `lib/i18n/` directory, or `lib/params.ts` locale resolver to reuse in a fresh template.
+Add next-intl so the storefront serves locale-prefixed URLs (`/en-US/products/foo`), loads per-locale message catalogs, and exposes a copy-language switcher. The default is one deployment with clean URLs, inline component copy with reusable functions in `lib/content/index.ts`, and `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`. There is no next-intl dependency, message catalog, `lib/i18n/` directory, or `lib/params/server.ts` locale resolver to reuse in a fresh template.
 
 > **Use `enable-shopify-markets` instead** for regional commerce. This skill translates storefront copy and adds routing; it must not infer a commerce country from a copy locale or mutate cart buyer country when language changes. Keep Shopify country/language configuration explicit, preserve intentional operation locale/cache inputs, and always display currency from Shopify responses.
 
 ## Inspect and preserve the installation
 
-Read scoped `AGENTS.md`, `package.json`, `next.config.ts`, `lib/config.ts`, `lib/content/index.ts`, routes, components, layout, proxy, and any existing localization files. Trace copy consumers, formatting, SEO, markdown, cart, auth, and chat boundaries before editing.
+Read scoped `AGENTS.md`, `package.json`, `next.config.ts`, `lib/config/index.ts`, `lib/content/index.ts`, routes, components, layout, proxy, and any existing localization files. Trace copy consumers, formatting, SEO, markdown, cart, auth, and chat boundaries before editing.
 
 Choose the migration path from evidence:
 
@@ -35,7 +35,7 @@ Confirm the default copy locale and supported copy locales with the user. In a n
 ## Introduce next-intl and migrate copy
 
 1. On a fresh installation, run `pnpm add next-intl` from the storefront root. Read the installed next-intl plugin/request/routing APIs and local Next.js guides before wiring them. If next-intl already exists, preserve its compatible version rather than reinstalling blindly.
-2. Create `lib/i18n/request.ts` as described below, then compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Preserve all existing wrappers, rewrites, redirects, and Cache Components settings.
+2. Create `lib/i18n/request/server.ts` as described below, then compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Preserve all existing wrappers, rewrites, redirects, and Cache Components settings.
 3. Inventory inline JSX text, labels in component configuration, template literals, and reusable functions in `lib/content/index.ts`. Create the default catalog from the storefront's actual customized copy, not a template snapshot. Convert functions to equivalent ICU messages with the same parameter names, zero/one/many behavior, number formatting, rich text, and accessibility labels. Do not serialize functions into JSON or build a custom `t()` parser.
 4. Create catalogs and explicit loaders for each approved locale. Keep keys and interpolation arguments aligned. Do not present an English fallback as a completed translation; agree on any temporary fallback before enabling that locale publicly.
 5. Replace inline server copy and content function calls with `getTranslations()` from `next-intl/server`. Pass translated primitive labels to client leaves when possible. For interactive plurals/interpolation, wrap only the relevant leaf in a Server Component's `NextIntlClientProvider` with the namespaces it uses, then use `useTranslations()` there. Never pass the full catalog from the root layout, and never pass ordinary copy functions across the server/client boundary. Keep `components/ui/` copy-agnostic.
@@ -50,8 +50,9 @@ On a fresh installation, create `lib/i18n/index.ts` with the user's approved loc
 Example only; replace with the approved list and seed the default from the deployment's formatting locale when appropriate:
 
 ```ts
+import type { Locale } from "./types";
+
 export const locales = ["en-US", "fr-FR"] as const;
-export type Locale = (typeof locales)[number];
 export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = locales;
 
@@ -60,16 +61,26 @@ export function isEnabledLocale(value: string): value is Locale {
 }
 ```
 
+Define the shared `Locale` contract in `lib/i18n/types.ts`; import it directly wherever it is needed:
+
+```ts
+import type { locales } from "./index";
+
+export type Locale = (typeof locales)[number];
+```
+
+Use domain/context files for new modules: universal routing configuration in `lib/i18n/routing/index.ts`, client navigation in `lib/i18n/navigation/client.ts`, server request configuration in `lib/i18n/request/server.ts`, and the root-param resolver in `lib/params/server.ts`. Do not add barrels or forwarding exports. Preserve working paths in an existing customized installation rather than renaming them solely to match these examples.
+
 Validate route params, action inputs, and request payloads against this list. Retain any existing resolver and fallback policy rather than resetting it.
 
 ## What this skill turns on
 
-1. `lib/i18n/routing.ts` and `lib/i18n/navigation.ts` (next-intl)
+1. `lib/i18n/routing/index.ts` and `lib/i18n/navigation/client.ts` (next-intl)
 2. Route segment `app/[locale]/` containing every page
 3. `proxy.ts` middleware running `next-intl/middleware`
-4. `lib/params.ts` `getLocale()` reading from `next/root-params`
-5. A new next-intl plugin wrapper, catalogs, and `lib/i18n/request.ts` loading messages by resolved locale
-6. Locale-prefixed canonicals + hreflang alternates in `lib/seo.ts`
+4. `lib/params/server.ts` `getLocale()` reading from `next/root-params`
+5. A new next-intl plugin wrapper, catalogs, and `lib/i18n/request/server.ts` loading messages by resolved locale
+6. Locale-prefixed canonicals + hreflang alternates in `lib/seo/index.ts`
 7. Sitemap entries per locale
 8. `next.config.ts` rewrites/redirects on `/:locale/*` sources
 9. `app/(unlocalized)/page.tsx` fallback redirect to default locale
@@ -90,7 +101,7 @@ next-intl docs sometimes show `setRequestLocale(locale)` calls in layouts/pages.
 
 ### C. Don't swap `next/link` to next-intl's `<Link>`
 
-The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
+The straightforward instinct is to replace every `import Link from "next/link"` with `import { Link } from "@/lib/i18n/navigation/client"`. **Don't.** next-intl's Link reads request context (locale) on render; in a server-component tree under cacheComponents, that triggers:
 
 ```
 Error: Route "/[locale]/..." accessed [...] which is not defined in the `unstable_samples` of `instant`.
@@ -148,20 +159,13 @@ Error: Route "..." accessed header "x-vercel-ip-postal-code" which is not
        sample's `headers` array, or `["...", null]` if it should be absent.
 ```
 
-### F. `redirect()` from next-intl doesn't return `never`
+### F. Keep server redirects outside client navigation
 
-```ts
-// BREAKS: TS doesn't narrow `session` after redirect
-import { redirect } from "@/lib/i18n/navigation";
-if (!session) redirect({ href: "/account/login", locale });
-return session; // type error: session is CustomerSession | null
-```
-
-next-intl's `redirect` is typed to return `void`, so TypeScript doesn't treat it as control-flow-ending. Use `next/navigation`'s `redirect` (which returns `never`) and prefix the locale yourself:
+Do not import `lib/i18n/navigation/client.ts` into a server auth gate. Use `next/navigation`'s `redirect` (which returns `never`) and prefix the locale yourself:
 
 ```ts
 import { redirect } from "next/navigation";
-import { getLocale } from "@/lib/params";
+import { getLocale } from "@/lib/params/server";
 
 if (!session) redirect(`/${await getLocale()}/account/login`);
 return session; // OK, narrowed
@@ -171,11 +175,11 @@ return session; // OK, narrowed
 
 ### Step 1: Routing config
 
-Create `lib/i18n/routing.ts`:
+Create `lib/i18n/routing/index.ts`:
 
 ```ts
 import { defineRouting } from "next-intl/routing";
-import { defaultLocale, enabledLocales } from ".";
+import { defaultLocale, enabledLocales } from "@/lib/i18n";
 
 export const routing = defineRouting({
   locales: enabledLocales, // pulled from lib/i18n/index.ts — never hardcode
@@ -184,11 +188,13 @@ export const routing = defineRouting({
 });
 ```
 
-Create `lib/i18n/navigation.ts`:
+Create `lib/i18n/navigation/client.ts`:
 
 ```ts
+"use client";
+
 import { createNavigation } from "next-intl/navigation";
-import { routing } from "./routing";
+import { routing } from "@/lib/i18n/routing";
 
 export const { Link, redirect, usePathname, useRouter } = createNavigation(routing);
 ```
@@ -209,14 +215,15 @@ In the moved layout, fix `import "./globals.css"` → `import "../globals.css"`.
 
 Update every `PageProps<"/foo">` and `LayoutProps<"/foo">` generic to include the locale segment: `PageProps<"/[locale]/products/[handle]">`, `LayoutProps<"/[locale]">`, etc.
 
-### Step 3: Create `lib/params.ts` for Server Component root params
+### Step 3: Create `lib/params/server.ts` for Server Component root params
 
 This is a new module on the simplified baseline. In a customized installation, preserve unrelated helpers and extend its existing resolver. Route Handlers use their route context or validated request inputs; Server Actions receive a validated locale argument, not this getter.
 
 ```ts
 import { notFound } from "next/navigation";
 import { locale as rootLocale } from "next/root-params";
-import { type Locale, locales } from "./i18n";
+import { locales } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/types";
 
 export async function getLocale(): Promise<Locale> {
   const current = await rootLocale();
@@ -225,18 +232,18 @@ export async function getLocale(): Promise<Locale> {
 }
 ```
 
-### Step 4: `lib/i18n/request.ts` loads messages by resolved locale
+### Step 4: `lib/i18n/request/server.ts` loads messages by resolved locale
 
 ```ts
 import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { getLocale } from "../params";
-import type enMessages from "./messages/en.json";
-import { routing } from "./routing";
+import { getLocale } from "@/lib/params/server";
+import type enMessages from "@/lib/i18n/messages/en.json";
+import { routing } from "@/lib/i18n/routing";
 
 const messageLoaders: Record<string, () => Promise<{ default: typeof enMessages }>> = {
-  "en-US": () => import("./messages/en.json"),
-  "fr-FR": () => import("./messages/fr.json"),
+  "en-US": () => import("@/lib/i18n/messages/en.json"),
+  "fr-FR": () => import("@/lib/i18n/messages/fr.json"),
 };
 
 // We intentionally do NOT destructure `{ locale }` from the callback args.
@@ -316,32 +323,44 @@ For programmatic redirects in server code, use `next/navigation`'s `redirect`:
 redirect(`/${await getLocale()}/account/login`);
 ```
 
-### Step 7: `lib/seo.ts` — locale-aware canonicals + hreflang alternates
+### Step 7: `lib/seo/index.ts` — locale-aware canonicals + hreflang alternates
+
+Keep this module universal: callers resolve and validate the locale on the server, then pass it explicitly. Do not import the server root-param resolver into `index.ts`.
 
 ```ts
-import { defaultLocale, enabledLocales } from "./i18n";
-import { getLocale } from "./params";
+import { defaultLocale, enabledLocales } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/types";
 
 function withLocalePath(locale: string, pathname: string): string {
   const normalized = normalizePath(pathname);
   return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
 }
 
-export async function buildAlternates({ pathname, searchParams }: {...}): Promise<Metadata["alternates"]> {
-  const locale = await getLocale();
+export function buildAlternates({
+  locale,
+  pathname,
+  searchParams,
+}: {
+  locale: Locale;
+  pathname: string;
+  searchParams?: SearchParamsInput;
+}): Metadata["alternates"] {
   const canonical = buildCanonicalPath(withLocalePath(locale, pathname), searchParams);
 
   const languages: Record<string, string> = {};
   for (const candidate of enabledLocales) {
     languages[candidate] = buildCanonicalPath(withLocalePath(candidate, pathname), searchParams);
   }
-  languages["x-default"] = buildCanonicalPath(withLocalePath(defaultLocale, pathname), searchParams);
+  languages["x-default"] = buildCanonicalPath(
+    withLocalePath(defaultLocale, pathname),
+    searchParams,
+  );
 
   return { canonical, languages };
 }
 ```
 
-`buildAlternates` is now async — update every caller to `await`.
+Update every caller to pass its validated locale. Server Components can call `getLocale()` from `lib/params/server.ts`; Route Handlers and Server Actions must validate their own inputs.
 
 ### Step 8: Sitemap per-locale entries
 

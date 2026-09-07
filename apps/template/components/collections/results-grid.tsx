@@ -4,7 +4,8 @@ import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { loadMoreCollectionProductsAction } from "@/lib/collections/action";
-import { ALL_PRODUCTS_HANDLE, type CollectionResultsData } from "@/lib/collections/server";
+import { ALL_PRODUCTS_HANDLE } from "@/lib/collections/server";
+import { type CollectionResultsData } from "@/lib/collections/types";
 import { loadMoreSearchProductsAction } from "@/lib/search/action";
 
 import { InfiniteProductGrid } from "./infinite-product-grid";

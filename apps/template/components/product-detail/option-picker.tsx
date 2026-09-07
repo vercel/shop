@@ -2,7 +2,7 @@ import { cn } from "cn";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-import type { OptionGroupState } from "@/lib/product";
+import type { OptionGroupState } from "@/lib/product/types";
 
 interface OptionPickerProps extends ComponentProps<"div"> {
   onSelectValue?: (optionName: string, value: string) => void;

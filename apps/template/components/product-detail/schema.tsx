@@ -1,5 +1,6 @@
 import { shopConfig } from "@/lib/config";
-import type { Image, Money } from "@/lib/types";
+import type { Image } from "@/lib/media/types";
+import type { Money } from "@/lib/money/types";
 
 interface ProductSchemaData {
   availableForSale: boolean;

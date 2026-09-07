@@ -22,11 +22,11 @@ Read `references/REFERENCE.md` before editing.
 ## Apply the Vercel Shop conventions
 
 1. Inspect the consuming route before choosing cache behavior. Classify the read as static-shell content, request-time shared content, or private/request-scoped data.
-2. Add the operation to the closest file in `lib/shopify/operations/`; create a file only for a genuinely new domain.
+2. Add the operation to `lib/shopify/operations/<resource>/server.ts` in the closest resource domain. Keep pure transforms in `lib/shopify/transforms/<resource>/index.ts`, named shared contracts in the owning domain's `types.ts`, and reusable fragment documents in their resource domain. Import implementations and types directly; do not add barrels or forwarding exports.
 3. Wrap documents in Hydrogen's `gql()` with a leading `#graphql` comment, keep them static, and use variables for dynamic values. Inference supplies types; codegen validates fields and arguments.
 4. Reuse the smallest existing fragment that fits by passing it in the `gql(source, [FRAGMENT])` list. Extend a shared fragment only when multiple operations need the same selection.
 5. Pass `locale` to `storefront.request` when Shopify localizes the result; never add `country` or `language` to `variables`.
-6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform catalog/account data into domain types before presentation. Cart types intentionally derive from Hydrogen handlers through `lib/cart/index.ts`.
+6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform catalog/account data into domain types before presentation. Cart types intentionally derive from Hydrogen handlers through `lib/cart/types.ts`.
 7. Preserve cache tags and the existing webhook invalidation hierarchy. Do not cache mutations.
 8. Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
 

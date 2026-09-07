@@ -5,8 +5,8 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";
+import type { BlogArticle } from "@/lib/blog/types";
 import { shopConfig } from "@/lib/config";
-import type { BlogArticle } from "@/lib/types";
 
 export interface ArticlePageProps {
   article: BlogArticle;

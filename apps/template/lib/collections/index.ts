@@ -5,9 +5,9 @@ import {
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 
-export const PRODUCTS_PER_PAGE = 40;
+import type { ActiveFilters } from "./types";
 
-export type ActiveFilters = Record<string, string | string[] | undefined>;
+export const PRODUCTS_PER_PAGE = 40;
 
 const SORT_TO_SORT_BY: Record<string, string> = {
   "best-selling": "best-selling",
