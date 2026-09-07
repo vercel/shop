@@ -116,6 +116,18 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
     components: variant.components?.nodes.map(transformBundleComponent) ?? [],
     requiresComponents: variant.requiresComponents ?? false,
+    requiresSellingPlan: variant.product.requiresSellingPlan,
+    sellingPlanAllocations: variant.sellingPlanAllocations.nodes.map((allocation) => {
+      const adjustment = allocation.priceAdjustments[0];
+      if (!adjustment) {
+        throw new Error(`Missing selling plan price adjustment for variant ${variant.id}`);
+      }
+      return {
+        compareAtPrice: adjustment.compareAtPrice,
+        price: adjustment.price,
+        sellingPlan: allocation.sellingPlan,
+      };
+    }),
   };
 }
 

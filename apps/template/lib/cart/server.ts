@@ -23,6 +23,11 @@ const CART_FRAGMENT = gql(/* GraphQL */ `
     updatedAt
     lines(first: 250) {
       nodes {
+        sellingPlanAllocation {
+          sellingPlan {
+            name
+          }
+        }
         discountAllocations {
           __typename
           discountedAmount {
