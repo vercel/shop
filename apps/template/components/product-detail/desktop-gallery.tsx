@@ -3,7 +3,7 @@
 import { PlayIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image, { getImageProps } from "next/image";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
@@ -12,7 +12,7 @@ import type { Image as ImageType, Video } from "@/lib/media/types";
 
 import { LightboxTrigger } from "./lightbox";
 
-const IMAGE_SIZES = "(min-width: 1536px) 766px, (min-width: 1024px) calc(60vw - 156px), 100vw";
+const IMAGE_SIZES = "(min-width: 1536px) 776px, (min-width: 1024px) calc(60vw - 146px), 100vw";
 
 type GalleryItem = { image: ImageType; type: "image" } | { type: "video"; video: Video };
 
@@ -25,7 +25,17 @@ interface DesktopGalleryProps {
 
 export function DesktopGallery({ images, overlay, title, videos }: DesktopGalleryProps) {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const thumbnailsRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("product");
+
+  // Activity keeps state on navigation but runs layout-effect cleanup when hiding the gallery.
+  useLayoutEffect(() => {
+    const thumbnails = thumbnailsRef.current;
+    return () => {
+      setSelectedIndex(0);
+      if (thumbnails) thumbnails.scrollTop = 0;
+    };
+  }, []);
   const items: GalleryItem[] = [
     ...images.map((image): GalleryItem => ({ image, type: "image" })),
     ...videos.map((video): GalleryItem => ({ type: "video", video })),
@@ -53,11 +63,14 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
 
   return (
     <div
-      className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-5"
+      className="grid grid-cols-[5rem_minmax(0,1fr)] items-start gap-2.5"
       data-pdp-gallery="enabled"
     >
       <div className="relative h-full min-h-0">
-        <div className="absolute inset-0 flex flex-col gap-2.5 overflow-y-auto overscroll-contain">
+        <div
+          ref={thumbnailsRef}
+          className="absolute inset-0 flex flex-col gap-2.5 overflow-y-auto overscroll-contain"
+        >
           {items.map((item, index) => {
             const image = item.type === "image" ? item.image : item.video.previewImage;
             return (
@@ -65,14 +78,14 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
                 key={item.type === "image" ? item.image.url : item.video.url}
                 aria-label={t("goToImage", { number: String(index + 1) })}
                 aria-pressed={index === activeIndex}
-                className="relative aspect-square w-full shrink-0 cursor-pointer overflow-hidden border-2 border-transparent p-1 outline-none hover:border-muted-foreground focus-visible:border-foreground data-[active=true]:border-foreground"
+                className="relative aspect-square w-full shrink-0 cursor-pointer overflow-hidden outline-none after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-transparent hover:after:border-muted-foreground focus-visible:after:border-foreground data-[active=true]:after:border-foreground"
                 data-active={index === activeIndex}
                 onClick={() => setSelectedIndex(index)}
                 type="button"
               >
                 <span className="relative block size-full">
                   {image ? (
-                    <Image alt="" className="object-contain" fill sizes="68px" src={image.url} />
+                    <Image alt="" className="object-cover" fill sizes="80px" src={image.url} />
                   ) : (
                     <ImagePlaceholder className="size-full" />
                   )}
@@ -108,7 +121,7 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
                 src={activeItem.image.url}
               />
             </LightboxTrigger>
-            {overlay}
+            {activeIndex === 0 ? overlay : null}
           </>
         ) : activeItem?.type === "video" ? (
           <AutoPlayVideo

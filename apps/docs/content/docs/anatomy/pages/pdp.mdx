@@ -16,7 +16,7 @@ While an option choice is being resolved, purchase controls temporarily block pu
 
 When colors have distinct media, the gallery leads with the selected color's image. Virtual try-on also uses the active variant's image, with the product image as a fallback. Desktop shoppers get a grid and lightbox; mobile shoppers get a swipeable gallery.
 
-In the enterprise demo, turn on the Vercel `pdp-gallery` flag to use a desktop gallery with thumbnails on the left and one large image or video. A border marks the active thumbnail. Selecting a different color returns the gallery to that color's image. Images still open in a lightbox, and virtual try-on uses the selected variant. The flag defaults to off, and the mobile gallery stays unchanged. Reload the product page after toggling the flag.
+In the enterprise demo, turn on the Vercel `pdp-gallery` flag to use a desktop gallery with thumbnails on the left and one large image or video. A border marks the active thumbnail. Selecting a different color returns the gallery to that color's image. Images still open in a lightbox. Virtual try-on appears only on the leading variant image, with the product image as a fallback. Leaving and returning to the page resets the gallery to its first image. The flag defaults to off, and the mobile gallery stays unchanged. Reload the product page after toggling the flag.
 
 Product updates are cached and refreshed by Shopify webhooks. See [Webhooks](/docs/anatomy/webhooks).
 

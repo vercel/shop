@@ -147,7 +147,7 @@ async function ProductMediaArea({
         galleryEnabled ? (
           <Suspense
             fallback={
-              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-5">
+              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-2.5">
                 <div />
                 <div className="aspect-square" />
               </div>
@@ -214,7 +214,7 @@ async function ResolvedDesktopGallery({
     <DesktopGallery
       key={`${product.id}:${image?.url ?? "default"}`}
       images={images}
-      overlay={overlay}
+      overlay={image ? overlay : undefined}
       title={product.title}
       videos={product.videos}
     />
