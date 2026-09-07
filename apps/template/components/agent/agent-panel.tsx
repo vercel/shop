@@ -12,7 +12,7 @@ import { type RefObject, useCallback, useEffect, useRef, useState } from "react"
 
 import { useCartDrawer } from "@/components/cart/context";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart-client";
+import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";

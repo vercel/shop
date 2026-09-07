@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { ProfileForm } from "@/components/account/profile-form";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomerProfile } from "@/lib/shopify/operations/customer";
+import { getCustomerProfile } from "@/lib/shopify/operations/customer/server";
 
 export default function ProfilePage() {
   return (

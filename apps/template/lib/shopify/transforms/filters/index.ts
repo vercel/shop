@@ -1,0 +1,265 @@
+import type {
+  ActiveFilterBadge,
+  ProductFilter,
+  ShopifyFilter,
+  ShopifyFilterPresentation,
+  ShopifyFilterType,
+  ShopifyFilterValue,
+  TransformFiltersOptions,
+  TransformedFilters,
+} from "@/lib/shopify/transforms/filters/types";
+import type {
+  Filter,
+  FilterPresentation,
+  FilterType,
+  FilterValue,
+  OptionValueSwatch,
+  PriceRange,
+} from "@/lib/types";
+
+function isColorKey(value: string): boolean {
+  return value.toLowerCase().includes("colo");
+}
+
+export function getSelectedColorFilterLabel(
+  activeFilters: Record<string, string | string[] | undefined>,
+  filters: ProductFilter[],
+  shopifyFilters: Array<{
+    values: Array<Pick<ShopifyFilterValue, "input" | "label">>;
+  }>,
+): string | undefined {
+  const selectedValues = new Set(
+    filters.flatMap((filter) => {
+      if (filter.variantOption && isColorKey(filter.variantOption.name)) {
+        return [filter.variantOption.value];
+      }
+      if (filter.taxonomyMetafield && isColorKey(filter.taxonomyMetafield.key)) {
+        return [filter.taxonomyMetafield.value];
+      }
+      return [];
+    }),
+  );
+
+  if (selectedValues.size !== 1) return undefined;
+  const selectedValue = selectedValues.values().next().value;
+  if (!selectedValue) return undefined;
+
+  const hasExactlyOneSelectedColor = Object.entries(activeFilters).some(([key, value]) => {
+    if (!key.startsWith("filter.") || !isColorKey(key)) return false;
+    return Array.isArray(value) ? value.length === 1 : Boolean(value);
+  });
+  if (!hasExactlyOneSelectedColor) return undefined;
+
+  for (const filter of shopifyFilters) {
+    for (const value of filter.values) {
+      if (parseShopifyFilterValue(value.input) === selectedValue) return value.label;
+    }
+  }
+
+  return selectedValue;
+}
+
+function getParamKeyFromShopifyId(filterId: string): string {
+  return filterId.toLowerCase();
+}
+
+function normalizeShopifyFilterInput(inputJson: string): string {
+  try {
+    const input = JSON.parse(inputJson) as ProductFilter;
+    if (input.taxonomyMetafield) {
+      return JSON.stringify({
+        taxonomyMetafield: {
+          key: `${input.taxonomyMetafield.namespace}.${input.taxonomyMetafield.key}`,
+          value: input.taxonomyMetafield.value,
+        },
+      });
+    }
+    return inputJson;
+  } catch {
+    return inputJson;
+  }
+}
+
+function parseShopifyFilterValue(inputJson: string): string | null {
+  try {
+    const input = JSON.parse(inputJson) as ProductFilter;
+    if (input.variantOption) return input.variantOption.value;
+    if (input.productVendor) return input.productVendor;
+    if (input.productType) return input.productType;
+    if (input.available !== undefined) {
+      return input.available ? "1" : "0";
+    }
+    if (input.tag) return input.tag;
+    if (input.productMetafield) return input.productMetafield.value;
+    if (input.taxonomyMetafield) return input.taxonomyMetafield.value;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function mapShopifyFilterType(type: ShopifyFilterType): FilterType {
+  switch (type) {
+    case "PRICE_RANGE":
+      return "price";
+    case "BOOLEAN":
+      return "boolean";
+    default:
+      return "list";
+  }
+}
+
+function mapShopifyFilterPresentation(
+  presentation: ShopifyFilterPresentation | null | undefined,
+): FilterPresentation | undefined {
+  switch (presentation) {
+    case "IMAGE":
+      return "image";
+    case "SWATCH":
+      return "swatch";
+    case "TEXT":
+      return "text";
+    default:
+      return undefined;
+  }
+}
+
+function transformFilterSwatch(
+  swatch: ShopifyFilterValue["swatch"],
+): OptionValueSwatch | undefined {
+  if (!swatch) return undefined;
+  const result: OptionValueSwatch = {};
+  if (swatch.color) result.color = swatch.color;
+  if (swatch.image?.previewImage?.url) result.image = swatch.image.previewImage.url;
+  if (!result.color && !result.image) return undefined;
+  return result;
+}
+
+function transformFilterValue(value: ShopifyFilterValue): FilterValue | null {
+  const parsedValue = parseShopifyFilterValue(value.input);
+  if (!parsedValue) return null;
+
+  const swatch = transformFilterSwatch(value.swatch);
+
+  return {
+    count: value.count,
+    id: value.id,
+    input: normalizeShopifyFilterInput(value.input),
+    label: value.label,
+    ...(swatch ? { swatch } : {}),
+    value: parsedValue,
+  };
+}
+
+function transformFilter(filter: ShopifyFilter): Filter {
+  const values = filter.values
+    .map(transformFilterValue)
+    .filter((v): v is FilterValue => v !== null);
+
+  const presentation = mapShopifyFilterPresentation(filter.presentation);
+
+  return {
+    id: filter.id,
+    label: filter.label,
+    paramKey: getParamKeyFromShopifyId(filter.id),
+    ...(presentation ? { presentation } : {}),
+    type: mapShopifyFilterType(filter.type),
+    values,
+  };
+}
+
+function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): PriceRange {
+  for (const value of priceFilter.values) {
+    try {
+      const input = JSON.parse(value.input) as ProductFilter;
+      if (input.price) {
+        return {
+          ...(currencyCode ? { currencyCode } : {}),
+          max: input.price.max ?? 1000,
+          min: input.price.min ?? 0,
+        };
+      }
+    } catch {}
+  }
+
+  return { ...(currencyCode ? { currencyCode } : {}), max: 1000, min: 0 };
+}
+
+function isFilterValueSelected(
+  activeFilters: Record<string, string | string[] | undefined>,
+  paramKey: string,
+  value: string,
+): boolean {
+  const current = activeFilters[paramKey];
+  return Array.isArray(current) ? current.includes(value) : current === value;
+}
+
+export function transformShopifyFilters(
+  shopifyFilters: ShopifyFilter[],
+  options: TransformFiltersOptions = {},
+): TransformedFilters {
+  const { activeFilters = {}, currencyCode, hideZeroCount = true } = options;
+
+  const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");
+  const listFilters = shopifyFilters.filter((f) => f.type === "LIST");
+
+  let filters = listFilters
+    .map(transformFilter)
+    .filter(
+      (filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"),
+    );
+
+  if (hideZeroCount) {
+    filters = filters
+      .map((filter) => ({
+        ...filter,
+        values: filter.values.filter(
+          (value) =>
+            value.count > 0 || isFilterValueSelected(activeFilters, filter.paramKey, value.value),
+        ),
+      }))
+      .filter((filter) => filter.values.length > 0);
+  }
+
+  // Keep an active singleton facet so the shopper can still clear it.
+  filters = filters.filter(
+    (filter) =>
+      filter.values.length > 1 ||
+      filter.values.some((value) =>
+        isFilterValueSelected(activeFilters, filter.paramKey, value.value),
+      ),
+  );
+
+  return {
+    filters,
+    priceRange: priceFilter ? extractPriceRange(priceFilter, currencyCode) : undefined,
+  };
+}
+
+export function getActiveFilterBadges(
+  filters: Filter[],
+  activeFilters: Record<string, string | string[] | undefined>,
+): ActiveFilterBadge[] {
+  const badges: ActiveFilterBadge[] = [];
+
+  for (const filter of filters) {
+    const currentValue = activeFilters[filter.paramKey];
+    if (!currentValue) continue;
+
+    const values = Array.isArray(currentValue) ? currentValue : [currentValue];
+
+    for (const value of values) {
+      const filterValue = filter.values.find((v) => v.value === value);
+      if (!filterValue) continue;
+
+      badges.push({
+        paramKey: filter.paramKey,
+        value,
+        label: filterValue.label,
+        filterLabel: filter.label,
+      });
+    }
+  }
+
+  return badges;
+}

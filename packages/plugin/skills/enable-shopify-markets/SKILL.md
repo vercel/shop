@@ -9,7 +9,7 @@ argument-hint: "[sub-path|invisible-cookie|per-domain]"
 
 # Enable Shopify Markets
 
-Add multi-region commerce to the Vercel Shop template. The fresh baseline is one deployment with clean URLs, inline component copy and reusable functions in `lib/content/index.ts`, and explicit `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`. It does not include next-intl, catalogs, `lib/i18n/`, or a `lib/params.ts` locale resolver.
+Add multi-region commerce to the Vercel Shop template. The fresh baseline is one deployment with clean URLs, inline component copy and reusable functions in `lib/content/index.ts`, and explicit `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`. It does not include next-intl, catalogs, `lib/i18n/`, or a `lib/params/server.ts` locale resolver.
 
 Copy translation and commerce market selection are separate concerns. This skill's regional-locale strategy deliberately combines them: a validated `en-US`, `en-CA`, or `fr-CA` selects translated copy plus Shopify country/language context. Confirm that coupling fits the store before adopting it. Do not infer a shopper's commerce country merely from a copy locale introduced by `enable-i18n`. Preserve existing installations that intentionally separate language and country; do not force them into this example model.
 
@@ -27,7 +27,7 @@ Never generate redundant paths such as `/ca/fr-CA/products/shoe`.
 
 Read the current versions of:
 
-- `package.json`, `lib/config.ts`, `lib/content/index.ts`, and inline copy throughout routes and components
+- `package.json`, `lib/config/index.ts`, `lib/content/index.ts`, and inline copy throughout routes and components
 - Existing `lib/i18n/`, catalogs, next-intl plugin/providers, locale resolvers, and localized routes if present; these do not exist on the fresh baseline
 - `next.config.ts` and any existing `proxy.ts`
 - Every Storefront API operation and cache wrapper
@@ -78,9 +78,9 @@ For a fresh regional-locale implementation, create `lib/i18n/index.ts` with the 
 The following is an example of the opted-in regional-locale model, not a replacement for every store's custom configuration:
 
 ```ts
-export const locales = ["en-US", "en-CA", "fr-CA"] as const;
+import type { Locale } from "./types";
 
-export type Locale = (typeof locales)[number];
+export const locales = ["en-US", "en-CA", "fr-CA"] as const;
 
 export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = locales;
@@ -92,10 +92,12 @@ export function isEnabledLocale(value: string): value is Locale {
 }
 ```
 
+Define `Locale` in `lib/i18n/types.ts` as `type Locale = (typeof locales)[number]` with a type-only import of `locales` from `./index`, and import the contract directly from `types.ts`. Use `lib/i18n/routing/index.ts` for universal routing configuration, `lib/i18n/navigation/client.ts` for client navigation, `lib/i18n/request/server.ts` for request configuration, `lib/i18n/action.ts` for locale-switch actions, and `lib/params/server.ts` for the Server Component root-param resolver. Do not add barrels or forwarding exports. Preserve working module paths in customized installations rather than renaming them solely to match these examples.
+
 Create boundary validation such as `isEnabledLocale` on the fresh baseline; retain existing `isEnabledLocale` / `resolveLocale` behavior where present. Reject unsupported request values instead of casting arbitrary strings to `Locale`. For the approved regional-locale strategy, derive Shopify context from the validated locale:
 
 ```ts
-import type { CommerceLocale } from "@/lib/config";
+import type { CommerceLocale } from "@/lib/config/types";
 
 export function getCountryCode(locale: Locale): CommerceLocale["country"] {
   const country = new Intl.Locale(locale).region;
@@ -118,7 +120,7 @@ These guards cover only the example locale list above. Extend them deliberately 
 
 Prefer `Locale` over `string` for internal routing locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated. Validate the country/language conversion against Shopify's supported values with Shopify AI Toolkit; do not assume uppercasing every BCP 47 language produces a valid Shopify language code.
 
-The simplified transport's operation `locale` option is a `CommerceLocale` object (`{ country, language }` from `lib/config.ts`), not a BCP 47 string. Convert once at the validated commerce boundary and propagate that object through existing operation/cache inputs. Keep the copy/routing `Locale` string distinct. For an older customized transport, adapt its actual signature instead of replacing it wholesale.
+The simplified transport's operation `locale` option is a `CommerceLocale` object (`{ country, language }` from `lib/config/types.ts`), not a BCP 47 string. Convert once at the validated commerce boundary and propagate that object through existing operation/cache inputs. Keep the copy/routing `Locale` string distinct. For an older customized transport, adapt its actual signature instead of replacing it wholesale.
 
 ### Currency rule
 
@@ -140,14 +142,14 @@ Validate every generated JSON file and keep keys and interpolation arguments ali
 
 ## 4. Configure routing
 
-Create `lib/i18n/routing.ts` and use `enabledLocales` directly. There is no market mapping layer.
+Create `lib/i18n/routing/index.ts` and use `enabledLocales` directly. There is no market mapping layer.
 
 ### Locale sub-path
 
 ```ts
 import { defineRouting } from "next-intl/routing";
 
-import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from ".";
+import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 
 export const routing = defineRouting({
   defaultLocale,
@@ -164,7 +166,7 @@ Use full regional locale prefixes. One segment is enough.
 ```ts
 import { defineRouting } from "next-intl/routing";
 
-import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from ".";
+import { defaultLocale, enabledLocales, LOCALE_COOKIE_NAME } from "@/lib/i18n";
 
 export const routing = defineRouting({
   alternateLinks: false,
@@ -197,12 +199,14 @@ export const routing = defineRouting({
 
 The domain configuration is routing configuration, not a separate commerce market model. Shopify country and language still derive from the resolved regional locale.
 
-Create client navigation exports only for components that explicitly switch locales:
+Create `lib/i18n/navigation/client.ts` only for components that explicitly switch locales:
 
 ```ts
+"use client";
+
 import { createNavigation } from "next-intl/navigation";
 
-import { routing } from "./routing";
+import { routing } from "@/lib/i18n/routing";
 
 export const { usePathname, useRouter } = createNavigation(routing);
 ```
@@ -232,13 +236,14 @@ Do not call `setRequestLocale` with Cache Components. Resolve locale through the
 
 ## 6. Resolve locale from the root param
 
-Create `lib/params.ts` on the fresh baseline, or extend the existing resolver without overwriting unrelated helpers. This getter is for Server Components only:
+Create `lib/params/server.ts` on the fresh baseline, or extend the existing resolver without overwriting unrelated helpers. This getter is for Server Components only:
 
 ```ts
 import { notFound } from "next/navigation";
 import { locale as rootLocale } from "next/root-params";
 
-import { isEnabledLocale, type Locale } from "./i18n";
+import { isEnabledLocale } from "@/lib/i18n";
+import type { Locale } from "@/lib/i18n/types";
 
 export async function getLocale(): Promise<Locale> {
   const value = await rootLocale();
@@ -247,7 +252,7 @@ export async function getLocale(): Promise<Locale> {
 }
 ```
 
-Create or update `lib/i18n/request.ts` to call `getLocale()` and load the matching messages. Do not resolve locale by reading cookies or request headers from a cached component. The proxy owns request negotiation; React receives the validated internal route param. Set `<html lang>` and UI formatting from that locale.
+Create or update `lib/i18n/request/server.ts` to call `getLocale()` and load the matching messages. Do not resolve locale by reading cookies or request headers from a cached component. The proxy owns request negotiation; React receives the validated internal route param. Set `<html lang>` and UI formatting from that locale.
 
 Do not call this root-param getter from Route Handlers or Server Actions: use route context or explicit request/action inputs and validate them at the boundary. Keep API, OAuth, markdown, and chat handling outside the Server Component request config.
 
@@ -346,7 +351,7 @@ import { cookies } from "next/headers";
 
 import { getCartIdFromCookie } from "@/lib/cart/server";
 import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
-import { storefront } from "@/lib/shopify/storefront";
+import { storefront } from "@/lib/shopify/storefront/server";
 
 const BUYER_IDENTITY_MUTATION = gql(`#graphql
   mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {

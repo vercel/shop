@@ -7,7 +7,7 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
-import { getCustomerOrders } from "@/lib/shopify/operations/customer";
+import { getCustomerOrders } from "@/lib/shopify/operations/customer/server";
 
 export default function OrdersPage({
   searchParams,

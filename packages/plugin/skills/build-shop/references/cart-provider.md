@@ -6,7 +6,7 @@ Use this contract when changing cart bootstrap, badges, overlays, cart pages, fo
 
 - Provider: `apps/template/components/cart/context.tsx`
 - Server seed and handler extensions: `apps/template/lib/cart/server.ts`
-- Handler-derived types and typed suspense hook: `apps/template/lib/cart/{index,client}.ts`
+- Handler-derived types and typed suspense hook: `apps/template/lib/cart/{types,client}.ts`
 - Form bindings: `apps/template/components/cart/{line-form,discount-form}.tsx`
 - Root bootstrap: `apps/template/app/layout.tsx`
 - Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`
@@ -18,7 +18,7 @@ Use this contract when changing cart bootstrap, badges, overlays, cart pages, fo
 
 Use Hydrogen's `CartProvider`, `useCart`, `useCartForm`, and cart actions for cart state, pending mutations, errors, and reconciliation. Do not add a parallel reducer, custom confirmed-cart store, or server-to-client hydration effect. The template's drawer context owns only overlay visibility.
 
-Cart types derive from `CartDataFromHandlers<typeof cartHandlers>` in `lib/cart/index.ts`, including the additive cart fragment. They are not transformed into `lib/types.ts` models. Generic `ui/` primitives still receive primitive presentation props.
+Cart types derive from `CartDataFromHandlers<typeof cartHandlers>` in `lib/cart/types.ts`, including the additive cart fragment. They are not transformed into `lib/types.ts` models. Generic `ui/` primitives still receive primitive presentation props.
 
 Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through the custom fragment in `lib/cart/server.ts`. Validate extensions with the template's codegen command rather than guessing fields or editing SDK queries.
 

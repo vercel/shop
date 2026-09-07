@@ -13,7 +13,7 @@ Build the shop around commerce truth first: what product or collection is being 
 2. If the Vercel Shop template source is available, inspect it before relying on this prose:
    - Template rules: `apps/template/AGENTS.md`
    - Route/layout shell: `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
-   - Shopify boundary: `apps/template/lib/shopify/storefront.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
+   - Shopify boundary: `apps/template/lib/shopify/storefront/server.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
    - Shared UI layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
    - Public source fallback: [apps/template source](https://github.com/vercel/shop/tree/main/apps/template)
 3. Use the docs to orient before editing unfamiliar areas:
@@ -28,11 +28,25 @@ Build the shop around commerce truth first: what product or collection is being 
 
 The template uses the framework-agnostic Hydrogen preview SDK, not Hydrogen's React Router application framework. Next.js owns routing, rendering, public-data caching, and invalidation. Hydrogen owns commerce state and protocols; the template supplies presentation and framework adapters. Use Hydrogen's cart provider/forms/handlers rather than rebuilding cart state or hydration. Cart types are handler-derived; catalog/account presentation uses domain transforms. Read the installed SDK guidance and verify adapter behavior before changing these boundaries.
 
+## Organize code by domain and execution context
+
+Organize `lib/` by domain, then use only the context files that domain needs:
+
+- `index.ts` contains universal implementation safe for server and client imports; it is never a re-export barrel.
+- `server.ts` contains server-only implementation, guarded with `import "server-only"` where appropriate.
+- `client.ts` is a `"use client"` boundary for browser interaction, not an HTTP transport wrapper.
+- `action.ts` is a `"use server"` entry point whose exports use a verb plus `Action` suffix.
+- `types.ts` owns named shared contracts; consumers import types directly rather than through `server.ts` or `action.ts`.
+
+Subdivide large domains with the same filenames: `lib/cart/gift-card/client.ts`, `lib/agent/cart/client.ts`, `lib/agent/routes/index.ts` with shared contracts in `lib/agent/routes/types.ts`, and `lib/shopify/operations/products/server.ts`. Keep universal helpers in `lib/config/index.ts`, `lib/product/index.ts`, and `lib/seo/index.ts`. Put Shopify transports in their API domain's `server.ts` and pure transforms in `index.ts`, even when all current callers run on the server. Do not add descriptive sibling files, flat root implementation modules, empty entry points, forwarding exports, or barrels.
+
+Keep shared storefront models in `lib/types.ts`, SDK-specific contracts under `lib/shopify/`, and handler-derived cart contracts in `lib/cart/types.ts`. Component props stay with their component; small private implementation types may stay local. Generated artifacts keep generator-owned paths and names.
+
 ## Copy and deployment defaults
 
 The default storefront uses inline component copy and reusable content functions in `lib/content/index.ts`. Keep copy server-first, pass primitive labels to UI primitives and client leaves, and keep interactive copy in its consuming leaf and import shared content functions only when needed. Do not add a custom `t()` parser, a full browser catalog, or next-intl for a single deployment.
 
-`shopConfig.localization` explicitly sets `{ country: "US", language: "EN", locale: "en-US" }`; country/language configure commerce requests and locale configures formatting. Currency comes from Shopify. Clean URLs and one deployment are the default; `lib/i18n/` and the `lib/params.ts` locale resolver are absent. Operation locale/cache inputs may still be intentional. Preserve existing next-intl, catalogs, localized routes, and custom commerce behavior in upgraded installations. Use `enable-i18n` for copy/routing or `enable-shopify-markets` for regional commerce rather than coupling the two implicitly.
+`shopConfig.localization` explicitly sets `{ country: "US", language: "EN", locale: "en-US" }`; country/language configure commerce requests and locale configures formatting. Currency comes from Shopify. Clean URLs and one deployment are the default; `lib/i18n/` and a Server Component locale resolver are absent. Operation locale/cache inputs may still be intentional. Preserve existing next-intl, catalogs, localized routes, and custom commerce behavior in upgraded installations. Use `enable-i18n` for copy/routing or `enable-shopify-markets` for regional commerce rather than coupling the two implicitly.
 
 ## Route the work
 

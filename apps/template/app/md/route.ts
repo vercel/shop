@@ -1,9 +1,9 @@
 import { formatMoney } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
-import { markdownHeaders } from "@/lib/markdown/headers";
-import { escapeMarkdown } from "@/lib/markdown/utils";
-import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { escapeMarkdown } from "@/lib/markdown";
+import { markdownHeaders } from "@/lib/markdown/representation";
+import { searchIndexProducts } from "@/lib/shopify/operations/products/server";
 
 export async function GET(): Promise<Response> {
   try {

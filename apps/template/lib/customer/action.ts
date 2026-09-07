@@ -5,18 +5,14 @@ import { unstable_rethrow } from "next/navigation";
 
 import {
   createCustomerAddress,
-  type CustomerUserError,
   deleteCustomerAddress,
   updateCustomerAddress,
   updateCustomerProfile,
-} from "@/lib/shopify/operations/customer";
+} from "@/lib/shopify/operations/customer/server";
+import { type CustomerUserError } from "@/lib/shopify/operations/customer/types";
 import type { CustomerAddressInput } from "@/lib/types";
 
-export interface AccountActionResult {
-  error?: string;
-  fieldErrors?: Record<string, string>;
-  success: boolean;
-}
+import type { AccountActionResult } from "./types";
 
 const MAX_FIELD_LENGTH = 255;
 const MAX_NAME_LENGTH = 100;

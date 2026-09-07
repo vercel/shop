@@ -30,7 +30,7 @@ function assertRequiredEnv() {
     if (missing.length > 0) {
       throw new Error(
         `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth via auth.isEnabled in lib/config.ts.`,
+          `Set the missing variables or disable auth via auth.isEnabled in lib/config/index.ts.`,
       );
     }
   }

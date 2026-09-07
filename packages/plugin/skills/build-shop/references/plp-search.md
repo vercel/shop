@@ -7,7 +7,7 @@
 - Search route: `apps/template/app/search/page.tsx`
 - Components: `apps/template/components/collections/`, `apps/template/components/search/results.tsx`, `apps/template/components/product-card/product-card.tsx`
 - Browse state: `apps/template/lib/collections/{index,server,action}.ts`, `apps/template/lib/search/action.ts`
-- Operations and transforms: `apps/template/lib/shopify/operations/collections.ts`, `apps/template/lib/shopify/operations/products.ts`, `apps/template/lib/shopify/fetch.ts`, `apps/template/lib/shopify/transforms/collection.ts`, `apps/template/lib/shopify/transforms/filters.ts`
+- Operations and transforms: `apps/template/lib/shopify/operations/collections/server.ts`, `apps/template/lib/shopify/operations/products/server.ts`, `apps/template/lib/shopify/transforms/collection/index.ts`, `apps/template/lib/shopify/transforms/filters/index.ts`
 - Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/apps/template/app/collections), [search route source](https://github.com/vercel/shop/blob/main/apps/template/app/search/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## Preserve the static header

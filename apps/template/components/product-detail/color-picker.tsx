@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 
 import { Swatch } from "@/components/ui/swatch";
-import type { OptionGroupState } from "@/lib/product";
+import type { OptionGroupState } from "@/lib/product/types";
 
 interface ColorPickerProps extends ComponentProps<"div"> {
   hideImages?: boolean;

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { AddressBook } from "@/components/account/address-book";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomerAddresses } from "@/lib/shopify/operations/customer";
+import { getCustomerAddresses } from "@/lib/shopify/operations/customer/server";
 
 export default function AddressesPage() {
   return (

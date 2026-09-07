@@ -9,7 +9,7 @@ import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
+import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/types";
 import type { Collection } from "@/lib/types";
 
 import { CollectionBrowseProvider } from "./collection-browse-provider";

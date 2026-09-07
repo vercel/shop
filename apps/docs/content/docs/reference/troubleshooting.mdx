@@ -96,7 +96,7 @@ Use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-referen
 
 **Symptom:** The storefront keeps one language or currency after a regional selection.
 
-**Check:** The default serves one deployment using `shopConfig.localization` in `lib/config.ts`. Storefront copy, display formatting, and Shopify commerce context are separate. A formatting locale does not translate labels or convert prices.
+**Check:** The default serves one deployment using `shopConfig.localization` in `lib/config/index.ts`. Storefront copy, display formatting, and Shopify commerce context are separate. A formatting locale does not translate labels or convert prices.
 
 **Fix:** Edit [storefront copy](/docs/anatomy/i18n) for a single-language deployment, or use [Enable i18n](/docs/skills/enable-i18n) for translated UI and locale URLs. For regional commerce, run [`/vercel-shop:enable-shopify-markets`](/docs/skills/enable-shopify-markets) and choose locale-prefixed, cookie-based, or per-domain routing.
 

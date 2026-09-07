@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import { getComplementaryProducts } from "@/lib/shopify/operations/products";
+import { getComplementaryProducts } from "@/lib/shopify/operations/products/server";
 import type { ProductCard } from "@/lib/types";
 
 export async function ComplementaryProducts({

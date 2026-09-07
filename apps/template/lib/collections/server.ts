@@ -1,39 +1,19 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
 
-import {
-  type ActiveFilters,
-  getActiveFilters,
-  getCollectionSortFromState,
-} from "@/lib/collections";
+import { getActiveFilters, getCollectionSortFromState } from "@/lib/collections";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import {
   buildProductFiltersFromParams,
   fetchCollectionProducts,
   fetchSearchFacets,
   fetchSearchIndexProducts,
-} from "@/lib/shopify/operations/products";
-import type { ProductFilter } from "@/lib/shopify/types/filters";
-import type { Collection, Filter, PriceRange } from "@/lib/types";
+} from "@/lib/shopify/operations/products/server";
+import type { Collection } from "@/lib/types";
+
+import type { CollectionResultsData, CollectionSearchState } from "./types";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
-
-interface BrowseParams {
-  activeFilters: ActiveFilters;
-  filters: ProductFilter[];
-  sort?: string;
-}
-
-export interface CollectionSearchState extends BrowseParams {
-  dataSearch: string;
-}
-
-export interface CollectionResultsData extends BrowseParams {
-  collection: string;
-  dataSearch: string;
-  result: Awaited<ReturnType<typeof fetchCollectionProducts>>;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
-}
 
 export function resolveBrowseParams(search: string | URLSearchParams): CollectionSearchState {
   const state = parseCollectionParams(

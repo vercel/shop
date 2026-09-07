@@ -9,18 +9,14 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
-import {
-  defaultSelectedOptions,
-  parseSelectedOptions,
-  type SelectedOptions,
-  toSelectedOptionList,
-} from "@/lib/product";
+import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
+import { type SelectedOptions } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   getCatalogProducts,
   getProduct,
   getProductVariant,
-} from "@/lib/shopify/operations/products";
+} from "@/lib/shopify/operations/products/server";
 import type { ProductVariant } from "@/lib/types";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";

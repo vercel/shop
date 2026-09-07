@@ -7,14 +7,13 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from "
 import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { ProductPrice } from "@/components/product-detail/product-price";
+import { buildProductUrl, variantToOptimisticInfo } from "@/lib/product";
 import {
-  buildProductUrl,
   type OptionGroupState,
   type ProductFormInput,
   type ProductFormSwatch,
   type ProductFormVariant,
-  variantToOptimisticInfo,
-} from "@/lib/product";
+} from "@/lib/product/types";
 import type { Image } from "@/lib/types";
 
 const { ProductProvider, useProduct, useProductForm } = createProductComponents<ProductFormInput>();

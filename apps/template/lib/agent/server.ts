@@ -3,21 +3,17 @@ import { isStepCount, ToolLoopAgent } from "ai";
 import { shopConfig } from "@/lib/config";
 
 import { catalog } from ".";
-import type { PageContext } from "./routes";
-import { createCartTools } from "./tools/cart";
-import { browseCollectionTool, listCollectionsTool } from "./tools/collections";
-import { navigateTool } from "./tools/navigate";
-import { searchShopPoliciesTool } from "./tools/policies";
+import type { PageContext } from "./routes/types";
+import { createCartTools } from "./tools/cart/server";
+import { browseCollectionTool, listCollectionsTool } from "./tools/collections/server";
+import { navigateTool } from "./tools/navigate/server";
+import { searchShopPoliciesTool } from "./tools/policies/server";
 import {
   getProductDetailsTool,
   getRecommendationsTool,
   searchProductsTool,
-} from "./tools/products";
-
-export interface AgentContext {
-  cartId: string | undefined;
-  page: PageContext;
-}
+} from "./tools/products/server";
+import type { AgentContext } from "./types";
 
 function describePage(page: PageContext): string {
   if (!page) return "";

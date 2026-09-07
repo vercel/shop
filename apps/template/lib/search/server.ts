@@ -1,20 +1,14 @@
-import "server-only";
 import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
+import "server-only";
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { CollectionSearchState } from "@/lib/collections/server";
-import { fetchSearchFacets, fetchSearchIndexProducts } from "@/lib/shopify/operations/products";
-import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
+import type { CollectionSearchState } from "@/lib/collections/types";
+import {
+  fetchSearchFacets,
+  fetchSearchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
-export interface SearchResultsData {
-  collection?: string;
-  dataSearch: string;
-  pageInfo: PageInfo;
-  products: ProductCard[];
-  query?: string;
-  total: number;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
-}
+import type { SearchResultsData } from "./types";
 
 export async function getSearchResultsData({
   collection,

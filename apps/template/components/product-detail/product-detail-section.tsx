@@ -34,11 +34,11 @@ import {
   getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
-  type SelectedOptions,
   toProductFormInput,
   toProductFormVariant,
   toStaticOptionGroups,
 } from "@/lib/product";
+import { type SelectedOptions } from "@/lib/product/types";
 import type { ProductDetails, ProductVariant } from "@/lib/types";
 
 export function ProductDetailSection({
