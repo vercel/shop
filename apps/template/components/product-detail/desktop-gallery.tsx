@@ -78,7 +78,7 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
                 key={item.type === "image" ? item.image.url : item.video.url}
                 aria-label={t("goToImage", { number: String(index + 1) })}
                 aria-pressed={index === activeIndex}
-                className="relative aspect-square w-full shrink-0 cursor-pointer overflow-hidden outline-none after:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-transparent hover:after:border-muted-foreground focus-visible:after:border-foreground data-[active=true]:after:border-foreground"
+                className="relative aspect-square w-full shrink-0 cursor-pointer overflow-hidden outline-none after:pointer-events-none after:absolute after:inset-0 after:border after:border-transparent hover:after:border-muted-foreground focus-visible:after:border-foreground data-[active=true]:after:border-foreground"
                 data-active={index === activeIndex}
                 onClick={() => setSelectedIndex(index)}
                 type="button"
