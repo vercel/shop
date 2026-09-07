@@ -23,7 +23,7 @@ Product updates are cached and refreshed by Shopify webhooks. See [Webhooks](/do
 - **Variant picker** — shows available colors, sizes, and other options.
 - **Add to cart** — adds the selected variant without waiting for the full cart response.
 - **Quantity** — accepts values from 1 through 99.
-- **Subscriptions** — lets shoppers choose a recurring plan offered for the selected variant.
+- **Subscriptions** — lets shoppers choose a recurring plan offered for the selected variant and check out through the cart. Configure plans in Shopify and enable the `unauthenticated_read_selling_plans` Storefront API permission.
 - **Gift cards** — collects recipient details and keeps gifts for different recipients separate in the cart.
 - **Buy with Shop** — starts Shopify checkout.
 - **Bundles** — shows included items and other bundles containing the product.
@@ -32,16 +32,6 @@ Product updates are cached and refreshed by Shopify webhooks. See [Webhooks](/do
 - **Structured data** — describes the product and breadcrumbs to search engines.
 
 Quantity, Buy with Shop, bundles, complementary products, and related products are enabled by default. Disable sections that do not fit the catalog or purchase journey.
-
-## Offer subscriptions
-
-Create recurring selling plans in Shopify and assign them to product variants. Enable the `unauthenticated_read_selling_plans` Storefront API permission for your Headless channel. Products without plans keep the standard purchase controls.
-
-Shoppers can choose a one-time purchase or a named subscription plan. The purchase options show Shopify’s price for the first billing period; later pricing and subscription terms are confirmed at checkout. Products that require a subscription omit the one-time option and cannot be added without an eligible plan.
-
-The cart shows the selected plan and keeps one-time and subscription purchases separate. Subscription purchases use Add to Cart and the cart’s checkout button; the direct Buy with Shop link is hidden while a subscription is selected.
-
-This simple UI supports recurring plans among the first 100 allocations per variant. It does not provide subscription management, prepaid-plan scheduling, or non-recurring purchase options. Subscription management remains with your Shopify subscription app.
 
 ## What’s next
 
