@@ -13,5 +13,16 @@ export const ctaColor = flag<boolean>({
   adapter: vercelAdapter<boolean, unknown>(),
 });
 
+export const pdpGallery = flag<boolean>({
+  adapter: vercelAdapter<boolean, unknown>(),
+  defaultValue: false,
+  description: "Enable the desktop PDP gallery preview",
+  key: "pdp-gallery",
+  options: [
+    { label: "Default", value: false },
+    { label: "Gallery preview", value: true },
+  ],
+});
+
 // Precomputed in proxy.ts and encoded into the hidden [flags] segment.
-export const precomputedFlags = [ctaColor] as const;
+export const precomputedFlags = [ctaColor, pdpGallery] as const;

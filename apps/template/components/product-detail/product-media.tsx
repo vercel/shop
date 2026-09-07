@@ -344,7 +344,23 @@ export function ColorImageCarouselItems({
   });
 }
 
+interface DesktopGalleryPreviewProps {
+  children: ReactNode;
+}
+
+function DesktopGalleryPreview({ children }: DesktopGalleryPreviewProps) {
+  return (
+    <div className="relative" data-pdp-gallery="enabled">
+      {children}
+      <div className="pointer-events-none absolute top-4 left-4 z-10 rounded-md bg-background px-4 py-2 text-sm text-foreground shadow-sm">
+        pdp-gallery enabled
+      </div>
+    </div>
+  );
+}
+
 export function ProductMedia({
+  galleryEnabled = false,
   otherImages,
   videos,
   title,
@@ -353,6 +369,7 @@ export function ProductMedia({
   mobileSlot,
   overlay,
 }: {
+  galleryEnabled?: boolean;
   otherImages: ImageType[];
   videos: Video[];
   title: string;
@@ -371,6 +388,12 @@ export function ProductMedia({
   const isEmpty = sharedMediaItems.length === 0 && !hasColorSlot;
   const mediaItems: MediaItem[] = isEmpty ? [{ type: "placeholder" }] : sharedMediaItems;
 
+  const desktopGrid = (
+    <Grid mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot} overlay={overlay}>
+      {desktopSlot}
+    </Grid>
+  );
+
   const content = (
     <div className={className}>
       <div className="lg:hidden">
@@ -385,9 +408,11 @@ export function ProductMedia({
         </Carousel>
       </div>
       <div className="hidden lg:block">
-        <Grid mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot} overlay={overlay}>
-          {desktopSlot}
-        </Grid>
+        {galleryEnabled ? (
+          <DesktopGalleryPreview>{desktopGrid}</DesktopGalleryPreview>
+        ) : (
+          desktopGrid
+        )}
       </div>
     </div>
   );

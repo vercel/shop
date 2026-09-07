@@ -16,6 +16,8 @@ While an option choice is being resolved, purchase controls temporarily block pu
 
 When colors have distinct media, the gallery leads with the selected color's image. Virtual try-on also uses the active variant's image, with the product image as a fallback. Desktop shoppers get a grid and lightbox; mobile shoppers get a swipeable gallery.
 
+In the enterprise demo, the Vercel `pdp-gallery` flag controls a desktop-only preview marker. It defaults to off. Turning it on shows “pdp-gallery enabled” over the existing desktop grid; the mobile gallery stays unchanged. Reload the product page after toggling the flag to see the selected state. The preview does not include a thumbnail-sidebar layout.
+
 Product updates are cached and refreshed by Shopify webhooks. See [Webhooks](/docs/anatomy/webhooks).
 
 ## Included purchase features

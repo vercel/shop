@@ -35,7 +35,7 @@ import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
-import { ctaColor, precomputedFlags } from "@/lib/flags";
+import { ctaColor, pdpGallery, precomputedFlags } from "@/lib/flags";
 import type { Locale } from "@/lib/i18n";
 import { getFlagsCode } from "@/lib/params";
 import {
@@ -100,7 +100,7 @@ export async function ProductDetailSection({
   );
 }
 
-function ProductMediaArea({
+async function ProductMediaArea({
   product,
   selectedOptionsPromise,
   variantPromise,
@@ -109,6 +109,7 @@ function ProductMediaArea({
   selectedOptionsPromise: Promise<SelectedOptions>;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
+  const galleryEnabled = await pdpGallery(await getFlagsCode(), precomputedFlags);
   const fallbackImageUrl = product.featuredImage?.url ?? product.images[0]?.url;
   const tryOnOverlay = (
     <Suspense fallback={null}>
@@ -119,6 +120,7 @@ function ProductMediaArea({
   if (!hasColorImagePartitioning(product.options)) {
     return (
       <ProductMedia
+        galleryEnabled={galleryEnabled}
         otherImages={product.images}
         videos={product.videos}
         title={product.title}
@@ -130,6 +132,7 @@ function ProductMediaArea({
 
   return (
     <ProductMedia
+      galleryEnabled={galleryEnabled}
       otherImages={getSharedImages(product.images, product.options)}
       videos={product.videos}
       title={product.title}
