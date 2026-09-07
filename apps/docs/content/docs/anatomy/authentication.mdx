@@ -66,7 +66,7 @@ Sessions use encrypted, HttpOnly cookies rather than browser-readable storage. E
 
 When authentication is enabled, the cart follows the customer session. Signing in attaches the browser cart when possible, and checkout can carry the customer's saved details. Cart synchronization is best-effort; an authentication redirect still completes if cart synchronization fails.
 
-Successful profile and address changes refresh the current account view automatically. Customer Account API data is personalized and is not publicly cached.
+Customer Account API data is personalized and is not publicly cached.
 
 > **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
 
