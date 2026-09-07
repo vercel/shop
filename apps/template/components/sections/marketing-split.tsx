@@ -52,9 +52,7 @@ export function MarketingSplit({
           <p className="max-w-prose text-muted-foreground">{body}</p>
         </div>
         <Button asChild className="h-11 w-fit px-5">
-          <Link href={ctaLink} prefetch={true}>
-            {ctaText}
-          </Link>
+          <Link href={ctaLink}>{ctaText}</Link>
         </Button>
       </div>
     </div>

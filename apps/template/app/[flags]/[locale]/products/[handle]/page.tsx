@@ -85,7 +85,7 @@ export async function generateMetadata({
 // The static frame renders without URL data so the route has a prefetchable App Shell and client
 // navigations paint immediately. Everything that needs `params`/`searchParams` lives under one
 // Suspense boundary: a plain viewport prefetch shows the skeleton on click, while a per-link
-// runtime prefetch (hover upgrade or prefetch={true}) resolves the cached product before the click.
+// hover prefetch can resolve the cached product before the click.
 export default function ProductPage({
   params,
   searchParams,

@@ -98,9 +98,7 @@ export function BannerSection({ hero, headingLevel = "h1" }: BannerSectionProps)
                   hasMedia && "bg-background text-foreground hover:bg-background/90",
                 )}
               >
-                <Link href={hero.ctaLink} prefetch={true}>
-                  {hero.ctaText}
-                </Link>
+                <Link href={hero.ctaLink}>{hero.ctaText}</Link>
               </Button>
             )}
           </div>

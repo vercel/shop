@@ -21,9 +21,7 @@ export function ErrorBoundaryContent({ reset }: { reset: () => void }) {
       <div className="flex flex-col gap-2.5 sm:flex-row">
         <Button onClick={reset}>{t("tryAgain")}</Button>
         <Button variant="outline" asChild>
-          <Link href="/" prefetch={true}>
-            {t("goHome")}
-          </Link>
+          <Link href="/">{t("goHome")}</Link>
         </Button>
       </div>
     </div>

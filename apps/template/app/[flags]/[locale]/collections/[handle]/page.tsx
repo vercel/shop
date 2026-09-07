@@ -91,7 +91,7 @@ export async function generateMetadata({
 // The page itself reads no URL data (root params only), so the route has a prefetchable App Shell
 // and client navigations paint immediately. Everything that needs `params`/`searchParams` lives
 // under one Suspense boundary: a plain viewport prefetch shows the skeleton on click, while a
-// per-link runtime prefetch (prefetch={true}) resolves the cached collection before the click.
+// hover prefetch can resolve the cached collection before the click.
 export default async function CollectionPage({
   params,
   searchParams,
