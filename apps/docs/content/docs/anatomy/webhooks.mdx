@@ -34,7 +34,7 @@ See [Environment Variables](/docs/reference/env-vars) for the full variable refe
 
 Every configured request must carry a valid Shopify signature. Missing, malformed, or incorrect signatures return `401`. The handler rejects the request before using its topic or payload.
 
-Product notifications refresh the affected product wherever it appears, including recommendations and sitemap content. Product creation and deletion also refresh catalog membership.
+Product notifications refresh the affected product wherever it appears, including recommendations and sitemap content. They also invalidate initial collection grids and their facets, including All products: an edit can change which products belong in a result or their order, even when the edited product was not previously shown. Product creation and deletion also refresh product sitemap membership.
 
 Collection notifications refresh the affected collection and collection listings. Collection creation and deletion also refresh collection membership and sitemap content.
 
@@ -48,7 +48,7 @@ This handler does not refresh Online Store pages, blogs, articles, or store poli
 
 Navigation menu edits are also outside this handler.
 
-Malformed product or collection update payloads cannot identify a specific resource, so they do not refresh the full catalog. Valid Shopify deliveries include the expected identifiers.
+Malformed product payloads still invalidate initial collection grids but cannot identify a specific product to refresh. Malformed collection payloads cannot identify a collection to refresh. Valid Shopify deliveries include the expected identifiers.
 
 After registering a topic, use **Send test notification** in Shopify Admin and confirm the delivery succeeds before relying on it for storefront freshness.
 

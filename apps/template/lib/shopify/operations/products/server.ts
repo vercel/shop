@@ -543,6 +543,43 @@ export async function getCollectionProducts(
   return result;
 }
 
+// Initial collection grids can be prepared on intent; cursor-based browse requests stay live.
+export async function getInitialCollectionProducts(
+  params: Omit<CollectionProductsParams, "cursor">,
+): Promise<CollectionProductsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", "collections", "collection-results", `collection-${params.collection}`);
+
+  const result = await fetchCollectionProducts(params);
+  tagProducts(result.products);
+  return result;
+}
+
+export async function getInitialAllProducts(
+  params: Omit<SearchIndexProductsParams, "collection" | "cursor" | "query">,
+): Promise<CollectionProductsResult> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("products", "collection-results");
+
+  const [products, facets] = await Promise.all([
+    fetchSearchIndexProducts(params),
+    fetchSearchFacets({
+      activeFilters: params.activeFilters,
+      filters: params.filters,
+      locale: params.locale,
+    }),
+  ]);
+  tagProducts(products.products);
+  return {
+    filters: facets.filters,
+    pageInfo: products.pageInfo,
+    priceRange: facets.priceRange,
+    products: products.products,
+  };
+}
+
 export async function getComplementaryProducts(params: {
   handle: string;
   locale?: ShopifyLocale;

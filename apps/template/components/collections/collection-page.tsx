@@ -1,6 +1,5 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
-import { unstable_navigation } from "next/cache";
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
@@ -30,8 +29,7 @@ export async function CollectionDetailPage({
   sortExclude,
 }: {
   collection: Collection;
-  // Called inside the browse Suspense boundary. The results fetch is uncached, so starting it
-  // any higher would postpone the header along with the grid in a runtime prefetch.
+  // Resolve URL-dependent results inside the browse boundary so the header can render independently.
   getCollectionResultsData: () => Promise<CollectionResultsData>;
   handle: string;
   locale: Locale;
@@ -99,9 +97,7 @@ async function CollectionBrowse({
   searchStatePromise: Promise<CollectionSearchState>;
   sortExclude?: string[];
 }) {
-  // Results are uncached and per-user, so a per-link runtime prefetch must stop here; otherwise the
-  // whole page segment is marked partial and the header is refetched on click too.
-  await unstable_navigation();
+  // Cached first-page results can resolve during an intent prefetch, including their facets.
   const collectionResultsDataPromise = getCollectionResultsData();
 
   return (

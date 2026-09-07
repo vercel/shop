@@ -133,9 +133,7 @@ async function CollectionPageContent({
         handle={handle}
         locale={locale}
         searchStatePromise={searchStatePromise}
-        // The results fetch is uncached, so it must start inside the browse Suspense boundary.
-        // Creating the promise here would tie this component (and the header) to it in a
-        // runtime prefetch, postponing everything.
+        // Resolve URL-dependent results inside the browse boundary, independently of the header.
         getCollectionResultsData={() =>
           getCollectionResultsData({ handle, locale, searchStatePromise })
         }

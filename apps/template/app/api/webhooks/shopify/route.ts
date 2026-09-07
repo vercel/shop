@@ -34,8 +34,9 @@ export async function POST(request: Request) {
   const tagsInvalidated: string[] = [];
 
   if (topic.startsWith("products/")) {
-    // Product tags cascade through every surface without purging the full catalog.
-    const productTags: string[] = [];
+    // Initial grids include membership, sorting, and facets, which can change even when
+    // this product wasn't in the cached result. Other surfaces retain targeted invalidation.
+    const productTags: string[] = ["collection-results"];
 
     if (topic === "products/create" || topic === "products/delete") {
       productTags.push("products-index");
@@ -56,7 +57,9 @@ export async function POST(request: Request) {
         productTags.push(`product-${payload.id}`);
       }
     } catch {
-      console.error("[Shopify Webhook] Could not parse products payload; no tags invalidated");
+      console.error(
+        "[Shopify Webhook] Could not parse products payload; only initial grids invalidated",
+      );
     }
 
     for (const tag of productTags) {

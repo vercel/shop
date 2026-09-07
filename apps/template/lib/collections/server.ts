@@ -7,9 +7,8 @@ import type { Collection } from "@/lib/collections/types";
 import type { Locale } from "@/lib/i18n";
 import {
   buildProductFiltersFromParams,
-  fetchCollectionProducts,
-  fetchSearchFacets,
-  fetchSearchIndexProducts,
+  getInitialAllProducts,
+  getInitialCollectionProducts,
 } from "@/lib/shopify/operations/products/server";
 
 import type { CollectionResultsData, CollectionSearchState } from "./types";
@@ -61,7 +60,7 @@ export async function getCollectionResultsData({
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
   const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
-  const result = await fetchCollectionProducts({
+  const result = await getInitialCollectionProducts({
     activeFilters,
     collection: handle,
     sortKey: sort,
@@ -104,16 +103,13 @@ export async function getAllProductsResultsData({
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
   const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
-  const [products, facets] = await Promise.all([
-    fetchSearchIndexProducts({
-      activeFilters,
-      sortKey: sort,
-      limit: PRODUCTS_PER_PAGE,
-      filters,
-      locale,
-    }),
-    fetchSearchFacets({ activeFilters, filters, locale }),
-  ]);
+  const result = await getInitialAllProducts({
+    activeFilters,
+    sortKey: sort,
+    limit: PRODUCTS_PER_PAGE,
+    filters,
+    locale,
+  });
 
   return {
     activeFilters,
@@ -121,12 +117,7 @@ export async function getAllProductsResultsData({
     dataSearch,
     sort,
     filters,
-    result: {
-      products: products.products,
-      pageInfo: products.pageInfo,
-      filters: facets.filters,
-      priceRange: facets.priceRange,
-    },
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
+    result,
+    transformedFilters: { filters: result.filters, priceRange: result.priceRange },
   };
 }

@@ -67,6 +67,8 @@ Public-data operations use Next.js Cache Components and cache tags; the Hydrogen
 | Cart, session, authorization, or customer data             | Keep request-scoped or private; never place in a public cache |
 | Mutations                                                  | Do not cache                                                  |
 
+The initial results and facets on collection pages, including All products, use a shared remote cache with `cacheLife("max")`. Cache keys include the collection where applicable, locale, filters, sort, and page size. These results can be prepared during hover prefetching; load-more requests and live search remain request-time reads. The `max` profile allows server revalidation after 30 days and hard expiry after one year; it is not tag-only caching. Facet configuration changes without a supported webhook can therefore require an explicit cache invalidation.
+
 Configure `POST /api/webhooks/shopify` as described in [Webhooks](/docs/anatomy/webhooks) to refresh cached products and collections after edits. The handler supports product, collection, and metaobject topics; other content needs its own invalidation strategy or cache expiry.
 
 ## Mutations
