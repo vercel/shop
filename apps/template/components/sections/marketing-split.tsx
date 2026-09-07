@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
-import type { MarketingImage } from "@/lib/types";
+import type { MarketingImage } from "@/lib/content/types";
 
 interface MarketingSplitProps {
   body: string;

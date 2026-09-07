@@ -2,18 +2,13 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Locale } from "@/lib/i18n";
-import { getRelatedProducts } from "@/lib/shopify/operations/products";
+import { getRelatedProducts } from "@/lib/shopify/operations/products/server";
 
-function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title?: string }) {
+function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title: string }) {
   return (
     <div className="grid gap-4">
-      {title ? (
-        <h2 className="text-2xl sm:text-3xl">{title}</h2>
-      ) : (
-        <Skeleton className="h-9 w-48" />
-      )}
+      <h2 className="text-2xl sm:text-3xl">{title}</h2>
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
         {Array.from({ length: limit }, (_, index) => (
           <ProductCardSkeleton key={index} />

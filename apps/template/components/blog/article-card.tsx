@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
-import type { BlogArticle } from "@/lib/types";
+import type { BlogArticle } from "@/lib/blog/types";
 
 export interface ArticleCardProps {
   article: BlogArticle;

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
-import type { ProductVariantComponent, ProductVariantReference } from "@/lib/types";
+import type { ProductVariantComponent, ProductVariantReference } from "@/lib/product/types";
 
 interface BundleListItem {
   href: string;

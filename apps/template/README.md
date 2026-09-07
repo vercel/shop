@@ -56,14 +56,14 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 - **Next.js 16 App Router** with React 19 and React Compiler
 - **Shopify Storefront API** via GraphQL with type-safe operations
-- **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via `lib/config.ts`
+- **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via `lib/config/index.ts`
 - **Tailwind CSS 4** and shadcn/ui components
 - **Single-locale storefront** with explicit country, language, and display locale; optional skills add next-intl and multi-locale routing
 - **AI-ready** with opt-in Vercel AI SDK integration
 - **Optimistic cart** with Hydrogen forms, shared cart state, and server handlers
 - **SEO** with structured data and dynamic metadata
 
-Customer authentication is disabled by default. To enable it, set `auth.isEnabled` in `lib/config.ts` and provide `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET`. Keep both secrets server-only. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure callback URLs and local HTTPS.
+Customer authentication is disabled by default. To enable it, set `auth.isEnabled` in `lib/config/index.ts` and provide `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET`. Keep both secrets server-only. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure callback URLs and local HTTPS.
 
 ## Skills
 

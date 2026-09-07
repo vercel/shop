@@ -1,13 +1,13 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfileAction } from "@/lib/customer/action";
-import type { CustomerProfile } from "@/lib/types";
+import type { CustomerProfile } from "@/lib/customer/types";
 
 interface ProfileFormLabels {
   email: string;
@@ -30,7 +30,7 @@ export function ProfileForm({
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setSaved(false);

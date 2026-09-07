@@ -5,9 +5,9 @@ import {
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 
-export const PRODUCTS_PER_PAGE = 40;
+import type { ActiveFilters } from "./types";
 
-export type ActiveFilters = Record<string, string | string[] | undefined>;
+export const PRODUCTS_PER_PAGE = 40;
 
 const SORT_TO_SORT_BY: Record<string, string> = {
   "best-selling": "best-selling",
@@ -19,11 +19,6 @@ const SORT_TO_SORT_BY: Record<string, string> = {
   "product-name-descending": "title-descending",
 };
 
-const SORT_BY_TO_SORT: Record<string, string> = {
-  ...Object.fromEntries(Object.entries(SORT_TO_SORT_BY).map(([sort, sortBy]) => [sortBy, sort])),
-  manual: "best-matches",
-};
-
 export function getCollectionSortByValue(sort: string): string | undefined {
   return SORT_TO_SORT_BY[sort];
 }
@@ -32,22 +27,18 @@ export function getCollectionSortFromState(
   sortKey: ProductCollectionSortKeys | undefined,
   reverse: boolean,
 ): string {
-  if (!sortKey || sortKey === "COLLECTION_DEFAULT") return "best-matches";
-  const base =
-    sortKey === "BEST_SELLING"
-      ? "best-selling"
-      : sortKey === "CREATED"
-        ? "created"
-        : sortKey === "PRICE"
-          ? "price"
-          : sortKey === "TITLE"
-            ? "title"
-            : undefined;
-  if (!base) return "best-matches";
-  const sortBy = ["created", "price", "title"].includes(base)
-    ? `${base}-${reverse ? "descending" : "ascending"}`
-    : base;
-  return SORT_BY_TO_SORT[sortBy] ?? "best-matches";
+  switch (sortKey) {
+    case "BEST_SELLING":
+      return "best-selling";
+    case "CREATED":
+      return reverse ? "date-new-to-old" : "date-old-to-new";
+    case "PRICE":
+      return reverse ? "price-high-to-low" : "price-low-to-high";
+    case "TITLE":
+      return reverse ? "product-name-descending" : "product-name-ascending";
+    default:
+      return "best-matches";
+  }
 }
 
 export function getBrowseSearch(

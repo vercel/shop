@@ -13,9 +13,10 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { OrderLineItem } from "@/lib/customer/types";
+import type { Money } from "@/lib/money/types";
 import { getLocale } from "@/lib/params";
-import { getCustomerOrder } from "@/lib/shopify/operations/customer";
-import type { Money, OrderLineItem } from "@/lib/types";
+import { getCustomerOrder } from "@/lib/shopify/operations/customer/server";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (

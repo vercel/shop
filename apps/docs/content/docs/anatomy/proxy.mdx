@@ -10,6 +10,8 @@ The storefront uses a [Next.js proxy](https://nextjs.org/docs/app/getting-starte
 
 Shopify handles its cart, Storefront API, Model Context Protocol (MCP), Ajax cart, agent, and customer-account endpoints. Storefront pages continue to Next.js with the Shopify request context needed for Storefront API calls, analytics, and safe caching.
 
+The proxy also forwards `/.well-known/ucp` to Shopify’s Universal Commerce Protocol (UCP) business profile.
+
 Other application API routes bypass the proxy unless you explicitly assign them to an integration. This avoids collisions between Shopify endpoints and your own APIs.
 
 Authentication changes only cart and customer-account handling. When authentication is enabled, those requests can synchronize the shopper's identity with the cart. Other requests keep the guest-cart behavior. See [Environment Variables](/docs/reference/env-vars) for the authentication setting.

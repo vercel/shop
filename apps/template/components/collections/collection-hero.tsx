@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
-import type { Image as ImageType } from "@/lib/types";
+import type { Image as ImageType } from "@/lib/media/types";
 
 interface CollectionHeroProps {
   image: ImageType;

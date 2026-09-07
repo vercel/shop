@@ -9,12 +9,11 @@ import {
 } from "ai";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart-client";
-import { BOTID_DENIED_CODE } from "@/lib/botid";
+import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
@@ -54,7 +53,7 @@ function writeStoredChat(chat: StoredChat): void {
 export interface AgentPanelProps {
   onOpenChange: (open: boolean) => void;
   open: boolean;
-  triggerRef: React.RefObject<HTMLElement | null>;
+  triggerRef: RefObject<HTMLElement | null>;
 }
 
 export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) {
@@ -271,11 +270,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         status={status}
         value={input}
       />
-      {error && (
-        <p className="px-5 pb-2 text-red-500 text-xs">
-          {error.message.includes(BOTID_DENIED_CODE) ? t("blocked") : t("error")}
-        </p>
-      )}
+      {error && <p className="px-5 pb-2 text-red-500 text-xs">{t("error")}</p>}
     </div>
   );
 }

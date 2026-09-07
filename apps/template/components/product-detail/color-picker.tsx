@@ -1,16 +1,16 @@
 import { cn } from "cn";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import Link from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
-import type { OptionGroupState } from "@/lib/product";
+import type { OptionGroupState } from "@/lib/product/types";
 
 export type ProductTranslator = (
   key: "selectVariantLabel" | "unavailableVariantLabel",
   values: { name: string; value: string },
 ) => string;
 
-interface ColorPickerProps extends React.ComponentProps<"div"> {
+interface ColorPickerProps extends ComponentProps<"div"> {
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   option: OptionGroupState;

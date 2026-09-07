@@ -1,8 +1,8 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
-import { markdownHeaders } from "@/lib/markdown/headers";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { productToMarkdown } from "@/lib/markdown/product";
-import { getProductWithVariants } from "@/lib/shopify/operations/products";
+import { markdownHeaders } from "@/lib/markdown/representation";
+import { getProductWithVariants } from "@/lib/shopify/operations/products/server";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;

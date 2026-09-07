@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { useCartDrawer } from "@/components/cart/context";
 import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
-import type { ProductFormVariant } from "@/lib/product";
+import type { ProductFormVariant } from "@/lib/product/types";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
 

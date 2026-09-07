@@ -1,4 +1,3 @@
-import "server-only";
 import {
   cartQueries,
   createCartServerHandlers,
@@ -8,16 +7,17 @@ import {
   type ShopifyRequestContext,
   type I18nConfig,
 } from "@shopify/hydrogen";
+import "server-only";
 import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
 import { io } from "next/cache";
 import { headers } from "next/headers";
 import { cache } from "react";
 
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
-import type { Cart, CartSeedData } from "@/lib/cart";
+import type { Cart, CartSeedData } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 import { getCountryCode, getLanguageCode, getRequestLocale } from "@/lib/i18n";
-import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
+import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 // The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
 const CART_FRAGMENT = gql(/* GraphQL */ `

@@ -8,8 +8,8 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getBlog } from "@/lib/shopify/operations/blogs";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
+import { getBlog } from "@/lib/shopify/operations/blogs/server";
+import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

@@ -12,19 +12,14 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
-import {
-  defaultSelectedOptions,
-  parseSelectedOptions,
-  type SelectedOptions,
-  toSelectedOptionList,
-} from "@/lib/product";
+import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
+import type { ProductVariant, SelectedOptions } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   getCatalogProducts,
   getProduct,
   getProductVariant,
-} from "@/lib/shopify/operations/products";
-import type { ProductVariant } from "@/lib/types";
+} from "@/lib/shopify/operations/products/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

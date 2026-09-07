@@ -11,7 +11,7 @@ import { CartWarnings } from "@/components/cart/warnings";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
-import type { CartLine } from "@/lib/cart";
+import type { CartLine } from "@/lib/cart/types";
 
 interface OverlayItemProps {
   item: CartLine;

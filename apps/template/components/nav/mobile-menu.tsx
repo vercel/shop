@@ -2,7 +2,7 @@
 
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 
 import {
   Accordion,
@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/accordion";
 import Link from "@/components/ui/link";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import type { MenuItem } from "@/lib/shopify/types/menu";
+import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 interface MenuLinkProps {
   url: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   onClick?: () => void;
 }

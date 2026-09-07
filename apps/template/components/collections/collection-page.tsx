@@ -14,9 +14,9 @@ import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/server";
+import type { CollectionResultsData, CollectionSearchState } from "@/lib/collections/types";
+import type { Collection } from "@/lib/collections/types";
 import type { Locale } from "@/lib/i18n";
-import type { Collection } from "@/lib/types";
 
 import { CollectionBrowseProvider } from "./collection-browse-provider";
 import { FilterPendingScope } from "./filter-pending-context";

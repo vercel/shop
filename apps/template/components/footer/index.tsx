@@ -1,12 +1,13 @@
 import { cn } from "cn";
 import { getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
 
 import { Container } from "@/components/ui/container";
 import Link from "@/components/ui/link";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
-import { getShopPolicies } from "@/lib/shopify/operations/policies";
-import type { MenuItem } from "@/lib/shopify/types/menu";
+import { getShopPolicies } from "@/lib/shopify/operations/policies/server";
+import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 import { FooterMarquee } from "./marquee";
 import { SocialLinks } from "./social-links";
@@ -58,7 +59,7 @@ export async function Footer({ locale }: { locale: string }) {
 }
 
 interface MenuLinkProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   url: string;
 }

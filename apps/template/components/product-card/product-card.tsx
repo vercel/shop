@@ -3,10 +3,9 @@ import { getTranslations } from "next-intl/server";
 import Link from "@/components/ui/link";
 import type { Locale } from "@/lib/i18n";
 import { buildProductUrl } from "@/lib/product";
-import type { ProductCard as ProductCardType } from "@/lib/types";
+import type { ProductCard as ProductCardType } from "@/lib/product/types";
 
 import {
-  ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,
@@ -43,11 +42,11 @@ export async function ProductCard({
     <Link href={href} className={className}>
       <ProductCardRoot variant={variant}>
         {isFeatured && t && (
-          <ProductCardBadge>
+          <div data-slot="product-card-badge">
             <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
               {t("featuredBadge")}
             </span>
-          </ProductCardBadge>
+          </div>
         )}
         <ProductCardImageContainer variant={variant}>
           <ProductCardImage

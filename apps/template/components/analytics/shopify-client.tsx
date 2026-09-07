@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useSyncExternalStore } from "react";
 
 import { PageViewedTracker } from "@/components/analytics/trackers";
+import type { ShopAnalyticsData } from "@/lib/analytics/types";
 import { shopConfig } from "@/lib/config";
-import type { ShopAnalyticsData } from "@/lib/types";
 
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;

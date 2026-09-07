@@ -1,10 +1,10 @@
 import { cn } from "cn";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import Link from "@/components/ui/link";
-import type { OptionGroupState } from "@/lib/product";
+import type { OptionGroupState } from "@/lib/product/types";
 
-interface OptionPickerProps extends React.ComponentProps<"div"> {
+interface OptionPickerProps extends ComponentProps<"div"> {
   onSelectValue?: (optionName: string, value: string) => void;
   option: OptionGroupState;
 }

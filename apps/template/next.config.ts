@@ -31,7 +31,7 @@ function assertRequiredEnv() {
     if (missing.length > 0) {
       throw new Error(
         `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth via auth.isEnabled in lib/config.ts.`,
+          `Set the missing variables or disable auth via auth.isEnabled in lib/config/index.ts.`,
       );
     }
   }
@@ -40,13 +40,7 @@ function assertRequiredEnv() {
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
-  experimental: {
-    // Lets <Link unstable_dynamicOnHover> upgrade a viewport (App Shell) prefetch to a per-link
-    // runtime prefetch on hover/touch, so high-fan-out grids pay the per-link cost only on intent.
-    dynamicOnHover: true,
-    // TS7's native compiler doesn't expose the programmatic API Next uses for type checking; the CLI path does.
-    useTypeScriptCli: true,
-  },
+  experimental: { dynamicOnHover: true },
   images: {
     deviceSizes: [1080],
     imageSizes: [],

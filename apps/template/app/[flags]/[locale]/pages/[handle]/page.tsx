@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { RichTextPage } from "@/components/content/rich-text-page";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getPage } from "@/lib/shopify/operations/pages";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap";
+import { getPage } from "@/lib/shopify/operations/pages/server";
+import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

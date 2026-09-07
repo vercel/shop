@@ -13,16 +13,18 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 
 | Resource                                    | Role                                                                                                  |
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `lib/shopify/storefront.ts`                 | Shared `@shopify/hydrogen` storefront client wrapper, typed `storefront.request`, and `ResultOf<Doc>` |
-| `lib/shopify/errors.ts`                     | `assertStorefrontOk()` response contract                                                              |
+| `lib/shopify/storefront/server.ts`          | Shared `@shopify/hydrogen` storefront client wrapper and typed `storefront.request`                    |
+| `lib/shopify/errors/server.ts`              | `assertStorefrontOk()` response contract                                                              |
 | `.graphqlrc.ts` + `pnpm codegen`         | Validates Storefront documents against the live schema and Customer Account documents against Hydrogen's bundled schema |
-| `lib/shopify/customer-account.ts`           | Separate Customer Account API transport and `CustomerAccountResultOf<Doc>`                            |
-| `lib/shopify/customer-account-fragments.ts` | Shared Customer Account selections                                                                    |
-| `lib/shopify/fragments.ts`                  | Shared Storefront selections                                                                          |
-| `lib/shopify/operations/*.ts`               | Domain-oriented query and mutation entry points                                                       |
-| `lib/shopify/transforms/*.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
-| `lib/shopify/types/**`                      | App-owned filter input shape and generated validation output                                          |
-| `lib/types.ts`                              | Provider-independent types consumed by presentation                                                   |
+| `lib/shopify/customer-account/server.ts`   | Separate Customer Account API transport                                                               |
+| `lib/shopify/fragments/customer/index.ts`, `lib/shopify/fragments/customer-address/index.ts`, `lib/shopify/fragments/customer-order/index.ts` | Shared Customer Account selections |
+| `lib/shopify/fragments/<resource>/index.ts` | Shared Storefront selections grouped by resource                                                      |
+| `lib/shopify/operations/*/server.ts`               | Domain-oriented query and mutation entry points                                                       |
+| `lib/shopify/transforms/*/index.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
+| `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
+| `lib/shopify/transforms/filters/types.ts`, `lib/shopify/transforms/menu/types.ts` | Resource-owned filter inputs and menu contracts                     |
+| `lib/shopify/types/generated/`             | Generator-owned validation output                                                                     |
+| `lib/product/types.ts`, `lib/collections/types.ts`, `lib/customer/types.ts` | Domain-owned models consumed by transforms and presentation |
 | `lib/cart/server.ts`                        | Cart cookie helpers and server-side cart read seeding                                                 |
 | `app/api/webhooks/shopify/route.ts`         | Public-content invalidation entry point                                                               |
 
@@ -33,7 +35,7 @@ Route → domain operation → storefront.request → validated Shopify operatio
       ← domain type      ← transform         ← Shopify response
 ```
 
-Do not add an internal HTTP hop between a Server Component and `lib/shopify/operations/`. Catalog and account presentation use transformed domain types. Cart state is intentionally different: derive its types from Hydrogen handlers through `lib/cart/index.ts`, rather than maintaining a second cart model. Product selection adapts catalog models to Hydrogen's `ProductInput`; generic `ui/` primitives still accept primitive presentation props.
+Do not add an internal HTTP hop between a Server Component and `lib/shopify/operations/`. Catalog and account presentation use transformed domain types. Cart state is intentionally different: derive its types from Hydrogen handlers through `lib/cart/types.ts`, rather than maintaining a second cart model. Product selection adapts catalog models to Hydrogen's `ProductInput`; generic `ui/` primitives still accept primitive presentation props.
 
 ## Documents and codegen
 
@@ -41,8 +43,8 @@ Do not add an internal HTTP hop between a Server Component and `lib/shopify/oper
 - Compose fragments by passing them as the second `gql(source, [FRAGMENT_A, FRAGMENT_B])` argument. Never interpolate a fragment string into another document.
 - Do not add a separate `MoneyFields` or `ImageFields` fragment. Inline `amount currencyCode` and `url altText width height`; two fragments that both embed the same leaf fragment would emit it twice in one document.
 - Keep documents static. Pass dynamic values as GraphQL variables or choose between separate static documents at the call site.
-- Call `storefront.request(QUERY, { variables })` for deployment defaults, or pass `locale: { country, language }` for explicit commerce context, then `assertStorefrontOk(response, operationName)`. `locale` is a `CommerceLocale` object from `lib/config.ts`, not the formatting locale string. Result and variable types come from the document; do not write a response type. Omit `country` and `language` from `variables` — the wrapper injects them from that context.
-- Derive raw Shopify types for transforms with `ResultOf<typeof FRAGMENT>` (Storefront) or `CustomerAccountResultOf<typeof FRAGMENT>` (Customer Account) instead of hand-writing interfaces.
+- Call `storefront.request(QUERY, { variables })` for deployment defaults, or pass `locale: { country, language }` for explicit commerce context, then `assertStorefrontOk(response, operationName)`. `locale` is a `CommerceLocale` object from `lib/config/types.ts`, not the formatting locale string. Result and variable types come from the document; do not write a response type. Omit `country` and `language` from `variables` — the wrapper injects them from that context.
+- Derive raw Shopify types for transforms with `ResultOf<typeof FRAGMENT>` (Storefront) or `CustomerAccountResultOf<typeof FRAGMENT>` (Customer Account), imported from `lib/shopify/types.ts`, instead of hand-writing interfaces. Keep named resource contracts in the owning domain's `types.ts`; do not import shared types from a transport or operation's `server.ts`.
 - Select `__typename` on union or interface fields (`node`, `nodes`, `search` results) and narrow with `node.__typename === "Product"`.
 - Run `pnpm codegen` from the storefront project after changing any document. It checks Storefront operations and additive cart/search fragments against the configured live schema, then Customer Account documents against Hydrogen's bundled schema. Keep Customer Account documents in the dedicated paths configured in `.graphqlrc.ts`; extend those paths when adding a new Customer Account module. Generated validation output is gitignored.
 
@@ -67,7 +69,7 @@ Current examples of intent:
 
 ## Deployment context versus copy locale
 
-The fresh template reads explicit `{ country: "US", language: "EN", locale: "en-US" }` from `shopConfig.localization`. UI copy lives alongside its consuming components; reusable content functions live in `lib/content/index.ts`; there is no default next-intl layer or `lib/params.ts` locale resolver. Inspect the transport and operation signatures before changing them: existing `locale` arguments and cache inputs can remain intentional. Do not reintroduce UI locale plumbing solely to call an operation.
+The fresh template reads explicit `{ country: "US", language: "EN", locale: "en-US" }` from `shopConfig.localization`. UI copy lives alongside its consuming components; reusable content functions live in `lib/content/index.ts`; there is no default next-intl layer or Server Component locale resolver. Inspect the transport and operation signatures before changing them: existing `locale` arguments and cache inputs can remain intentional. Do not reintroduce UI locale plumbing solely to call an operation.
 
 Country/language scope Shopify commerce data; the formatting locale and translated UI copy are not an implicit market selection. Preserve validated request context in already localized or Markets-enabled stores rather than pinning them to deployment defaults. Currency always comes from Shopify responses.
 

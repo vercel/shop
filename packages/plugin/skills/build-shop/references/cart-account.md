@@ -6,7 +6,7 @@
 - Cart route and components: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`, `apps/template/components/cart/`
 - Cart data and mutations: `apps/template/lib/cart/` (Hydrogen handlers own reads and mutations; the template supplies an additive fragment and uses Hydrogen's cart-create query to establish a cookie before assistant streaming)
 - Account routes and components: `apps/template/app/account/`, `apps/template/components/account/`
-- Auth and Customer Account API: `apps/template/lib/auth/`, `apps/template/lib/customer/action.ts`, `apps/template/lib/shopify/customer-account.ts`, `apps/template/lib/shopify/operations/customer.ts`
+- Auth and Customer Account API: `apps/template/lib/auth/`, `apps/template/lib/customer/action.ts`, `apps/template/lib/shopify/customer-account/server.ts`, `apps/template/lib/shopify/operations/customer/server.ts`
 - Public source fallback: [cart source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [account source](https://github.com/vercel/shop/tree/main/apps/template/app/account), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
 ## Never share personalized data

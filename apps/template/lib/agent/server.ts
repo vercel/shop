@@ -4,18 +4,13 @@ import { shopConfig } from "@/lib/config";
 import { getCountryCode, getLanguageCode, type Locale } from "@/lib/i18n";
 
 import { catalog } from ".";
-import type { PageContext } from "./routes";
-import { createCartTools } from "./tools/cart";
-import { createCollectionTools } from "./tools/collections";
-import { navigateTool } from "./tools/navigate";
-import { searchShopPoliciesTool } from "./tools/policies";
-import { createProductTools } from "./tools/products";
-
-export interface AgentContext {
-  cartId: string | undefined;
-  locale: Locale;
-  page: PageContext;
-}
+import type { PageContext } from "./routes/types";
+import { createCartTools } from "./tools/cart/server";
+import { createCollectionTools } from "./tools/collections/server";
+import { navigateTool } from "./tools/navigate/server";
+import { searchShopPoliciesTool } from "./tools/policies/server";
+import { createProductTools } from "./tools/products/server";
+import type { AgentContext } from "./types";
 
 function describePage(page: PageContext): string {
   if (!page) return "";

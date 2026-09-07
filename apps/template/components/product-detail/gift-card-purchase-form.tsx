@@ -2,7 +2,7 @@
 
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { addGiftCardToCart } from "@/lib/cart/gift-card-client";
-import type { OptimisticProductInfo } from "@/lib/product";
+import { addGiftCardToCart } from "@/lib/cart/gift-card/client";
+import type { OptimisticProductInfo } from "@/lib/product/types";
 
 interface GiftCardPurchaseFormProps {
   merchandiseId: string | undefined;
@@ -49,7 +49,7 @@ export function GiftCardPurchaseForm({ merchandiseId, productInfo }: GiftCardPur
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [sendOnEnabled, setSendOnEnabled] = useState(false);
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (isPending || !merchandiseId) return;
     setError(null);

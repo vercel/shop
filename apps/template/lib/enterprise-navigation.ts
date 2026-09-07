@@ -1,5 +1,5 @@
-import type { SocialLink } from "./config";
-import type { MenuItem } from "./shopify/types/menu";
+import type { SocialLink } from "./config/types";
+import type { MenuItem } from "./shopify/transforms/menu/types";
 
 export const socialLinks: SocialLink[] = [
   { platform: "facebook", url: "https://www.facebook.com" },

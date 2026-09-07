@@ -1,0 +1,117 @@
+import { formatMoney } from "@shopify/hydrogen";
+
+import { createTable, escapeMarkdown } from "@/lib/markdown";
+import type { ProductDetails } from "@/lib/product/types";
+
+export function productToMarkdown(product: ProductDetails, locale: string): string {
+  const sections: string[] = [];
+
+  sections.push(`# ${escapeMarkdown(product.title)}`, "");
+
+  sections.push("## Product Information", "", `- **Handle**: ${product.handle}`);
+  if (product.vendor) {
+    sections.push(`- **Brand**: ${escapeMarkdown(product.vendor)}`);
+  }
+  if (product.category) {
+    const categoryPath = [
+      ...product.category.ancestors.map((a) => a.name),
+      product.category.name,
+    ].join(" > ");
+    sections.push(`- **Category**: ${escapeMarkdown(categoryPath)}`);
+  }
+  sections.push(`- **Available**: ${product.availableForSale ? "Yes" : "No"}`, "");
+
+  sections.push(
+    "## Pricing",
+    "",
+    `- **Price**: ${formatMoney(product.price, { locale }).localizedString}`,
+  );
+  if (product.compareAtPrice) {
+    sections.push(
+      `- **Compare At**: ${formatMoney(product.compareAtPrice, { locale }).localizedString}`,
+    );
+    const savings =
+      Number.parseFloat(product.compareAtPrice.amount) - Number.parseFloat(product.price.amount);
+    if (savings > 0) {
+      const savingsPercent = Math.round(
+        (savings / Number.parseFloat(product.compareAtPrice.amount)) * 100,
+      );
+      sections.push(
+        `- **Savings**: ${formatMoney({ amount: savings.toString(), currencyCode: product.currencyCode }, { locale }).localizedString} (${savingsPercent}% off)`,
+      );
+    }
+  }
+  if (product.priceRange.minVariantPrice.amount !== product.priceRange.maxVariantPrice.amount) {
+    sections.push(
+      `- **Price Range**: ${formatMoney(product.priceRange.minVariantPrice, { locale }).localizedString} - ${formatMoney(product.priceRange.maxVariantPrice, { locale }).localizedString}`,
+    );
+  }
+  sections.push("");
+
+  if (product.description) {
+    sections.push("## Description", "", escapeMarkdown(product.description), "");
+  }
+
+  if (product.options.length > 0) {
+    sections.push("## Options", "");
+    for (const option of product.options) {
+      const values = option.values.map((v) => escapeMarkdown(v.name)).join(", ");
+      sections.push(`- **${escapeMarkdown(option.name)}**: ${values}`);
+    }
+    sections.push("");
+  }
+
+  if (product.variants && product.variants.length > 0) {
+    sections.push("## Variants", "");
+
+    const optionNames = product.options.map((o) => o.name);
+    const headers = ["Variant", ...optionNames.map(escapeMarkdown), "Price", "Available"];
+
+    const rows = product.variants.map((variant) => {
+      const optionValues = optionNames.map((name) => {
+        const option = variant.selectedOptions.find((o) => o.name === name);
+        return escapeMarkdown(option?.value || "-");
+      });
+      return [
+        escapeMarkdown(variant.title),
+        ...optionValues,
+        formatMoney(variant.price, { locale }).localizedString,
+        variant.availableForSale ? "Yes" : "No",
+      ];
+    });
+
+    sections.push(createTable(headers, rows), "");
+  }
+
+  if (product.images.length > 0) {
+    sections.push("## Images", "");
+    for (const image of product.images) {
+      sections.push(`- ${image.url}`);
+    }
+    sections.push("");
+  }
+
+  if (product.tags.length > 0) {
+    sections.push("## Tags", "", product.tags.join(", "), "");
+  }
+
+  if (product.seo.title || product.seo.description) {
+    sections.push("## SEO", "");
+    if (product.seo.title) {
+      sections.push(`- **Title**: ${escapeMarkdown(product.seo.title)}`);
+    }
+    if (product.seo.description) {
+      sections.push(`- **Description**: ${escapeMarkdown(product.seo.description)}`);
+    }
+    sections.push("");
+  }
+
+  sections.push(
+    "---",
+    "",
+    `*Last updated: ${product.updatedAt}*`,
+    `*Locale: ${locale} | Currency: ${product.currencyCode}*`,
+  );
+
+  return sections.join("\n");
+}

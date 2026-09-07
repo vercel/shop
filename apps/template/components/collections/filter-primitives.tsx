@@ -1,20 +1,13 @@
 "use client";
 
 import { cn } from "cn";
-import {
-  CheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  LoaderCircleIcon,
-  SearchIcon,
-  XIcon,
-} from "lucide-react";
-import type * as React from "react";
+import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
+import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 import { Input } from "@/components/ui/input";
 import Link from "@/components/ui/link";
 
-function FilterSidebar({ className, children, ...props }: React.ComponentProps<"aside">) {
+function FilterSidebar({ className, children, ...props }: ComponentProps<"aside">) {
   return (
     <aside
       data-slot="filter-sidebar"
@@ -26,7 +19,7 @@ function FilterSidebar({ className, children, ...props }: React.ComponentProps<"
   );
 }
 
-interface FilterSidebarHeaderProps extends React.ComponentProps<"header"> {
+interface FilterSidebarHeaderProps extends ComponentProps<"header"> {
   title?: string;
   activeCount?: number;
   onReset?: () => void;
@@ -64,36 +57,7 @@ function FilterSidebarHeader({
   );
 }
 
-interface FilterSidebarResultsCountProps extends React.ComponentProps<"div"> {
-  count: number;
-  label?: string;
-}
-
-function FilterSidebarResultsCount({
-  count,
-  label = "Results",
-  className,
-  ...props
-}: FilterSidebarResultsCountProps) {
-  return (
-    <div
-      data-slot="filter-sidebar-results-count"
-      className={cn("flex items-center gap-1.5 text-sm text-foreground/50", className)}
-      {...props}
-    >
-      <SearchIcon className="size-3.5" />
-      <span>
-        {count} {label}
-      </span>
-    </div>
-  );
-}
-
-function FilterSidebarActiveFilters({
-  className,
-  children,
-  ...props
-}: React.ComponentProps<"div">) {
+function FilterSidebarActiveFilters({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-sidebar-active-filters"
@@ -105,7 +69,7 @@ function FilterSidebarActiveFilters({
   );
 }
 
-interface FilterBadgeProps extends React.ComponentProps<"button"> {
+interface FilterBadgeProps extends ComponentProps<"button"> {
   href?: string;
   variant?: "default" | "primary";
   onRemove?: () => void;
@@ -160,7 +124,7 @@ function FilterBadge({
   );
 }
 
-function FilterSection({ className, children, ...props }: React.ComponentProps<"div">) {
+function FilterSection({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div data-slot="filter-section" className={cn("flex flex-col gap-2.5", className)} {...props}>
       {children}
@@ -171,7 +135,7 @@ function FilterSection({ className, children, ...props }: React.ComponentProps<"
 interface FilterSectionHeaderProps {
   title: string;
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 function FilterSectionHeader({ title, className, children }: FilterSectionHeaderProps) {
@@ -186,7 +150,7 @@ function FilterSectionHeader({ title, className, children }: FilterSectionHeader
   );
 }
 
-function FilterSectionContent({ className, children, ...props }: React.ComponentProps<"div">) {
+function FilterSectionContent({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div data-slot="filter-section-content" className={cn(className)} {...props}>
       {children}
@@ -194,7 +158,7 @@ function FilterSectionContent({ className, children, ...props }: React.Component
   );
 }
 
-function FilterOptionList({ className, children, ...props }: React.ComponentProps<"div">) {
+function FilterOptionList({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-option-list"
@@ -206,7 +170,7 @@ function FilterOptionList({ className, children, ...props }: React.ComponentProp
   );
 }
 
-function FilterSwatchGrid({ className, children, ...props }: React.ComponentProps<"div">) {
+function FilterSwatchGrid({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-swatch-grid"
@@ -218,7 +182,7 @@ function FilterSwatchGrid({ className, children, ...props }: React.ComponentProp
   );
 }
 
-interface FilterOptionProps extends React.ComponentProps<"button"> {
+interface FilterOptionProps extends ComponentProps<"button"> {
   label: string;
   count?: number;
   selected?: boolean;
@@ -268,7 +232,7 @@ function FilterOption({
         data-slot="filter-option"
         data-selected={selected}
         className={sharedClassName}
-        onClick={onClick as unknown as React.MouseEventHandler<HTMLAnchorElement>}
+        onClick={onClick as unknown as MouseEventHandler<HTMLAnchorElement>}
       >
         {content}
       </Link>
@@ -289,7 +253,7 @@ function FilterOption({
   );
 }
 
-interface FilterPriceRangeProps extends React.ComponentProps<"div"> {
+interface FilterPriceRangeProps extends ComponentProps<"div"> {
   minValue?: string;
   maxValue?: string;
   onMinChange?: (value: string) => void;
@@ -354,87 +318,7 @@ function FilterPriceRange({
   );
 }
 
-function FilterSidebarCategories({ className, children, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="filter-sidebar-categories"
-      className={cn("flex flex-col gap-2.5", className)}
-      {...props}
-    >
-      {children}
-    </div>
-  );
-}
-
-interface FilterSidebarCategoryBackProps extends React.ComponentProps<"button"> {
-  pending?: boolean;
-}
-
-function FilterSidebarCategoryBack({
-  pending = false,
-  className,
-  children,
-  ...props
-}: FilterSidebarCategoryBackProps) {
-  return (
-    <button
-      type="button"
-      data-slot="filter-sidebar-category-back"
-      data-pending={pending}
-      className={cn(
-        "flex items-center gap-2 text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-        className,
-      )}
-      {...props}
-    >
-      {pending ? (
-        <LoaderCircleIcon className="size-4 animate-spin" />
-      ) : (
-        <ChevronLeftIcon className="size-4" />
-      )}
-      {children}
-    </button>
-  );
-}
-
-interface FilterSidebarCategoryItemProps extends React.ComponentProps<"button"> {
-  label: string;
-  count?: number;
-  pending?: boolean;
-}
-
-function FilterSidebarCategoryItem({
-  label,
-  count,
-  pending = false,
-  className,
-  ...props
-}: FilterSidebarCategoryItemProps) {
-  return (
-    <button
-      type="button"
-      data-slot="filter-sidebar-category-item"
-      data-pending={pending}
-      className={cn(
-        "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-        className,
-      )}
-      {...props}
-    >
-      <span>
-        {label}
-        {count !== undefined && <span className="text-muted-foreground"> ({count})</span>}
-      </span>
-      {pending ? (
-        <LoaderCircleIcon className="size-4 animate-spin" />
-      ) : (
-        <ChevronRightIcon className="size-4" />
-      )}
-    </button>
-  );
-}
-
-function FilterSidebarScrollFade({ className, ...props }: React.ComponentProps<"div">) {
+function FilterSidebarScrollFade({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="filter-sidebar-scroll-fade"

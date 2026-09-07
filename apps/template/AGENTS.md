@@ -72,21 +72,19 @@ Use `/vercel-shop:build-shop` when the project plugin is installed for the full 
 
 #### `lib/<domain>/` files
 
-Inside a domain folder under `lib/`, name files by execution context — same idea as the directive suffix above, applied to the lib side:
+Organize `lib/` by domain first, then execution context. Use only the files each domain needs:
 
-- `index.ts` — universal modules (safe to import from server _and_ client code).
-- `server.ts` — server-only modules. Top-of-file `import "server-only"` when the runtime guard helps.
-- `client.ts` — `"use client"` modules.
-- `action.ts` — `"use server"` server actions (verb + `Action` suffix on each export).
+- `index.ts` — universal implementation safe for server and client imports; never a re-export barrel.
+- `server.ts` — server-only implementation. Use `import "server-only"` to guard runtime boundaries where appropriate.
+- `client.ts` — `"use client"` implementation.
+- `action.ts` — `"use server"` entry points, with verb + `Action` suffix on each export.
+- `types.ts` — named contracts owned by the domain, imported with `import type` directly from this file.
 
-Examples that already follow this: `lib/cart/{index,server,client,action}.ts`, `lib/collections/{action,server}.ts`, `lib/auth/server.ts`.
+Subdivide large domains into meaningful subdirectories using the same filenames: `lib/cart/gift-card/client.ts`, `lib/shopify/operations/products/server.ts`, and `lib/markdown/product/index.ts`. Do not add descriptive sibling files such as `cart-client.ts`, flat root implementation modules, empty entry points, or forwarding exports.
 
-Two exceptions that don't fit cleanly:
+Keep storefront models in their owning domain's `types.ts`, such as `lib/product/types.ts` and `lib/customer/types.ts`; shared use does not change domain ownership. Cross-domain primitives live in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`. Types-only domains do not need an `index.ts` or re-export barrel. Keep SDK-specific contracts and inferred response types under `lib/shopify/`. Preserve SDK-derived cart types in `lib/cart/types.ts`. Component props stay beside their components, and small private implementation types may remain local. Consumers must not import shared types from `server.ts` or `action.ts`. Generated artifacts retain their generator-owned paths and naming.
 
-- A folder grouping multiple modules of the _same_ execution context (one module per resource), like `lib/markdown/` (one generator per route), or `lib/agent/tools/` (one tool per file). Keep descriptive filenames per module — the convention's purpose-by-filename collapses when there are several purpose-equal modules in one folder.
-- Flat single-file modules at `lib/` root (`lib/types.ts`, `lib/seo.ts`, etc.). They aren't in a domain folder, so the convention doesn't apply.
-
-Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — that collides with the runtime meaning. Use a verb (`fetch.ts`) or product noun (`shopify.ts`) instead.
+`client.ts` means a React client boundary, not an HTTP client wrapper. Shopify transports belong in their API domain's `server.ts`. Pure transforms and formatting helpers belong in `index.ts`, even when their current callers are all server-side.
 
 ### Naming
 
@@ -94,7 +92,8 @@ Avoid the word "client" in a filename to mean an HTTP/SDK client wrapper — tha
 - Components: `PascalCase`
 - Server actions: verb + `Action` suffix (`prepareCheckoutAction`)
 - Props interfaces: `{ComponentName}Props`. Use `interface` (not `type`) so consumers can extend or augment.
-- Native-element prop pass-through: use `React.ComponentProps<"div">` (with `import type * as React from "react"`), not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
+- Keep React imports in one declaration per file, using explicit named imports rather than namespace imports or ambient `React.*` references. When importing both types and runtime values, use inline type modifiers: `import { type ReactNode, Suspense } from "react"`. Use `import type { ComponentProps, ReactNode } from "react"` when all imports are types.
+- Native-element prop pass-through: use `ComponentProps<"div">`, not `ComponentPropsWithoutRef`. Refs are regular props in React 19, so the extra type is unnecessary noise.
 - Constants: `SCREAMING_SNAKE_CASE`
 
 ### Spacing
@@ -176,10 +175,10 @@ pnpm format
 - `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
 - `lib/agent/` for the AI SDK agent, tools, and json-render catalog
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
-- `lib/types.ts` for provider-agnostic domain types
+- `lib/<domain>/types.ts` for domain-owned models and contracts
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
-- `lib/product.ts` for variant URL construction and selected-option parsing
+- `lib/product/index.ts` for variant URL construction and selected-option parsing
 
 ## Data Flow
 
@@ -192,11 +191,11 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
-- Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card-client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
-- Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart-client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
+- Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card/client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
+- Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart/client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
-- Cart types are the deliberate domain-type exception: `lib/cart/index.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.
+- Cart types are the deliberate domain-type exception: `lib/cart/types.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.
 
 ## Storefront Skills (Optional Plugin)
 
@@ -214,7 +213,7 @@ These are agent-side conveniences. The template runs and deploys without them.
 
 ## Authentication
 
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and both Shopify-issued credentials: `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. Keep both secrets server-only; the session secret is not the Shopify client secret. Read `shopConfig.auth.isEnabled` directly from `lib/config.ts` to gate auth surfaces in server and client code alike.
+Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config/index.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and both Shopify-issued credentials: `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. Keep both secrets server-only; the session secret is not the Shopify client secret. Read `shopConfig.auth.isEnabled` directly from `lib/config/index.ts` to gate auth surfaces in server and client code alike.
 
 Key files:
 
@@ -243,7 +242,7 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - Read `shopConfig.localization` for the deployment's explicit country, language, and formatting locale; use inline component copy for UI text.
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
-- Catalog and customer presentation uses domain types from `@/lib/types`, not raw Shopify responses. Cart types come from `@/lib/cart` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
+- Catalog and customer presentation uses domain models from `@/lib/product/types`, `@/lib/collections/types`, and `@/lib/customer/types`, not raw Shopify responses. Cart types come from `@/lib/cart/types` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
 

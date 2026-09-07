@@ -4,7 +4,7 @@ import { CollectionProvider, useCollection } from "@shopify/hydrogen/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, type ReactNode } from "react";
 
-import type { CollectionSearchState } from "@/lib/collections/server";
+import type { CollectionSearchState } from "@/lib/collections/types";
 
 import { FilterTransitionProvider, useFilterTransition } from "./filter-pending-context";
 

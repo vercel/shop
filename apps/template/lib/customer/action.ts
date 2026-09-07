@@ -1,22 +1,18 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { refresh } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 
+import type { CustomerAddressInput } from "@/lib/customer/types";
 import {
   createCustomerAddress,
-  type CustomerUserError,
   deleteCustomerAddress,
   updateCustomerAddress,
   updateCustomerProfile,
-} from "@/lib/shopify/operations/customer";
-import type { CustomerAddressInput } from "@/lib/types";
+} from "@/lib/shopify/operations/customer/server";
+import { type CustomerUserError } from "@/lib/shopify/operations/customer/types";
 
-export interface AccountActionResult {
-  error?: string;
-  fieldErrors?: Record<string, string>;
-  success: boolean;
-}
+import type { AccountActionResult } from "./types";
 
 const MAX_FIELD_LENGTH = 255;
 const MAX_NAME_LENGTH = 100;
@@ -82,7 +78,7 @@ export async function createAddressAction(
 
   try {
     const result = mapUserErrors(await createCustomerAddress(input, isDefault));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -107,7 +103,7 @@ export async function updateAddressAction(
 
   try {
     const result = mapUserErrors(await updateCustomerAddress(addressId, input, isDefault));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -124,7 +120,7 @@ export async function deleteAddressAction(addressId: string): Promise<AccountAct
 
   try {
     const result = mapUserErrors(await deleteCustomerAddress(addressId));
-    if (result.success) revalidatePath("/account/addresses");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);
@@ -147,7 +143,7 @@ export async function updateProfileAction(raw: {
 
   try {
     const result = mapUserErrors(await updateCustomerProfile(input));
-    if (result.success) revalidatePath("/account/profile");
+    if (result.success) refresh();
     return result;
   } catch (error) {
     unstable_rethrow(error);

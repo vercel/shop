@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
-import { getShopPolicies } from "@/lib/shopify/operations/policies";
-import { getShopifySitemapPage, type ShopifySitemapType } from "@/lib/shopify/operations/sitemap";
+import { getShopPolicies } from "@/lib/shopify/operations/policies/server";
+import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
+import { type ShopifySitemapType } from "@/lib/shopify/operations/sitemap/types";
 
 function escapeXml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

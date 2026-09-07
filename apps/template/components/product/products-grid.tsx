@@ -4,12 +4,12 @@ import { getTranslations } from "next-intl/server";
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import Link from "@/components/ui/link";
 import type { Locale } from "@/lib/i18n";
+import type { ProductCard as ProductCardData } from "@/lib/product/types";
 import {
   getCollectionProducts,
   getFilteredCatalogProducts,
   searchIndexProducts,
-} from "@/lib/shopify/operations/products";
-import type { ProductCard as ProductCardData } from "@/lib/types";
+} from "@/lib/shopify/operations/products/server";
 
 export type ProductsGridColumns = 4 | 5;
 

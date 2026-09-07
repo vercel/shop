@@ -24,8 +24,8 @@ import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
 import { useCheckout } from "@/hooks/use-checkout";
 import { catalog } from "@/lib/agent";
-import type { AgentVariant } from "@/lib/agent/products";
-import type { Cart } from "@/lib/cart";
+import type { AgentVariant } from "@/lib/agent/products/types";
+import type { Cart } from "@/lib/cart/types";
 
 import { useAgentProduct, useAgentProductDetails } from "./product-context";
 

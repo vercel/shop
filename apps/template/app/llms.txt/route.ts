@@ -1,6 +1,6 @@
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { llmsTxt } from "@/lib/markdown/llms";
-import { getCollections } from "@/lib/shopify/operations/collections";
+import { getCollections } from "@/lib/shopify/operations/collections/server";
 
 export async function GET(request: Request): Promise<Response> {
   const locale = resolveLocale(new URL(request.url).searchParams.get("locale") || defaultLocale);

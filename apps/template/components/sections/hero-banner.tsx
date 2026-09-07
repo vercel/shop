@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import Link from "@/components/ui/link";
-import type { MarketingImage } from "@/lib/types";
+import type { MarketingImage } from "@/lib/content/types";
 
 interface HeroBannerProps {
   backgroundImage?: MarketingImage | null;

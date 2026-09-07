@@ -5,7 +5,7 @@ description: Add Vercel Analytics, Vercel Speed Insights, and Google Tag Manager
 
 # Enable Analytics
 
-The current storefront includes support for Vercel Web Analytics and Vercel Speed Insights, with each integration disabled by default in `lib/config.ts`. This skill enables or adds those integrations and can also add Google Tag Manager using the recommended integration.
+The current storefront includes support for Vercel Web Analytics and Vercel Speed Insights, with each integration disabled by default in `lib/config/index.ts`. This skill enables or adds those integrations and can also add Google Tag Manager using the recommended integration.
 
 ## Before you start
 
@@ -28,7 +28,7 @@ Wait for the user to answer both questions before proceeding.
 
 ## Part A: Vercel Analytics and Speed Insights
 
-If the storefront has `analytics` configuration in `lib/config.ts`, enable only the selected integrations. If the user selected neither, keep both integration gates disabled and skip the remaining steps in this section.
+If the storefront has `analytics` configuration in `lib/config/index.ts`, enable only the selected integrations. If the user selected neither, keep both integration gates disabled and skip the remaining steps in this section.
 
 ```ts
 analytics: {
@@ -82,7 +82,7 @@ Set the actual value in `.env.local` or in the Vercel dashboard under Environmen
 
 ### B3. Add GTM to `components/analytics/index.tsx`
 
-Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `lib/config.ts` with a GTM integration gate, apply that gate inside the same component.
+Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_GTM_ID` in the analytics component and render `<GoogleTagManager gtmId={gtmId} />` only when the value exists. If the storefront extends `lib/config/index.ts` with a GTM integration gate, apply that gate inside the same component.
 
 ---
 
@@ -98,7 +98,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { shopConfig } from "@/lib/config";
-import { getShopAnalytics } from "@/lib/shopify/operations/shop";
+import { getShopAnalytics } from "@/lib/shopify/operations/shop/server";
 
 import { ShopifyScriptsTracker } from "./shopify-client";
 
@@ -144,9 +144,9 @@ Do not add next-intl or a root message catalog for analytics. In a customized lo
 
 Only make changes here if the user asked about Shopify analytics.
 
-The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn Shopify's built-in analytics destination on, set `analytics.shopify.isEnabled` to `true` in `lib/config.ts`.
+The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn Shopify's built-in analytics destination on, set `analytics.shopify.isEnabled` to `true` in `lib/config/index.ts`.
 
-Consent mode is set by `analytics.shopify.consentMode` in `lib/config.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
+Consent mode is set by `analytics.shopify.consentMode` in `lib/config/index.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 
 Third-party analytics can subscribe through the same destination API, so consent gating and buffered replay remain centralized. Register destinations with `addAnalyticsDestination()` from `lib/analytics/client.ts`; do not publish cart-change events manually.
 

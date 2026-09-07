@@ -3,8 +3,8 @@ import Image from "next/image";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
-import { getComplementaryProducts } from "@/lib/shopify/operations/products";
-import type { ProductCard } from "@/lib/types";
+import type { ProductCard } from "@/lib/product/types";
+import { getComplementaryProducts } from "@/lib/shopify/operations/products/server";
 
 export async function ComplementaryProducts({
   handle,

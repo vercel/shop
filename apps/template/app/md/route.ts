@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
-import { markdownHeaders } from "@/lib/markdown/headers";
 import { homeToMarkdown } from "@/lib/markdown/home";
-import { searchIndexProducts } from "@/lib/shopify/operations/products";
+import { markdownHeaders } from "@/lib/markdown/representation";
+import { searchIndexProducts } from "@/lib/shopify/operations/products/server";
 
 export async function GET(request: Request): Promise<Response> {
   const locale = resolveLocale(new URL(request.url).searchParams.get("locale") || defaultLocale);

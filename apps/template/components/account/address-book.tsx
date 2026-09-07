@@ -2,7 +2,7 @@
 
 import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { type FormEvent, useState, useTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,7 @@ import {
   deleteAddressAction,
   updateAddressAction,
 } from "@/lib/customer/action";
-import type { CustomerAddress, CustomerAddressInput } from "@/lib/types";
+import type { CustomerAddress, CustomerAddressInput } from "@/lib/customer/types";
 
 type FormState = { address: CustomerAddress; mode: "edit" } | { mode: "create" } | null;
 
@@ -130,8 +130,7 @@ function AddressForm({ address, onSuccess }: { address?: CustomerAddress; onSucc
   const [isPending, startTransition] = useTransition();
 
   const isCurrentDefault = address?.isDefault ?? false;
-
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     setError(null);
     setFieldErrors({});

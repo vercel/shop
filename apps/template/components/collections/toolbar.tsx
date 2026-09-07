@@ -1,22 +1,21 @@
-import { SlidersHorizontalIcon } from "lucide-react";
+import { ChevronDownIcon, SlidersHorizontalIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import type * as React from "react";
+import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Filter, PriceRange } from "@/lib/types";
+import type { Filter, PriceRange } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
 import { FilterPendingScope } from "./filter-pending-context";
 import { FilterSidebarSheet } from "./filter-sidebar-sheet";
 import { CollectionFilters } from "./filters";
 import { CollectionsSortSelect } from "./sort-select";
-import { SortSelectFallback } from "./sort-select-fallback";
 
 interface BrowseToolbarProps {
   facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
   filtersLabel?: string;
-  resultCount?: React.ReactNode;
+  resultCount?: ReactNode;
   sortExclude?: string[];
 }
 
@@ -58,7 +57,7 @@ export async function BrowseToolbar({
 interface BrowseFallbackProps {
   filtersLabel?: string;
   sortByLabel?: string;
-  resultCount?: React.ReactNode;
+  resultCount?: ReactNode;
 }
 
 export async function BrowseFallback({
@@ -80,7 +79,12 @@ export async function BrowseFallback({
           </button>
         }
         resultCount={resultCount}
-        sortSelect={<SortSelectFallback label={sortByLabel ?? t("sortBy")} />}
+        sortSelect={
+          <div className="flex h-9 w-fit items-center justify-between gap-2 rounded-md bg-transparent px-0 py-2 text-sm whitespace-nowrap">
+            <span>{sortByLabel ?? t("sortBy")}</span>
+            <ChevronDownIcon className="size-4 text-muted-foreground opacity-50" />
+          </div>
+        }
       />
       <ProductsGridSkeleton
         count={PRODUCTS_PER_PAGE}
@@ -91,9 +95,9 @@ export async function BrowseFallback({
 }
 
 interface ToolbarLayoutProps {
-  filterSheet: React.ReactNode;
-  resultCount?: React.ReactNode;
-  sortSelect: React.ReactNode;
+  filterSheet: ReactNode;
+  resultCount?: ReactNode;
+  sortSelect: ReactNode;
 }
 
 export function CollectionToolbar({ filterSheet, resultCount, sortSelect }: ToolbarLayoutProps) {

@@ -7,17 +7,23 @@ import { Search, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
-import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
+import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/search/types";
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);
 
-  // ⌘K / Ctrl+K toggles the modal from anywhere on the page.
   useEffect(() => {
     function handleShortcut(event: KeyboardEvent) {
       if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
@@ -74,8 +80,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     },
     [router, onClose],
   );
-
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const q = inputRef.current?.value?.trim();
     if (!q) return;
@@ -102,8 +107,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigate(`/products/${product.handle}`);
     }
   }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
+  function handleKeyDown(e: ReactKeyboardEvent) {
     if (e.key === "ArrowDown" && visibleItems > 0) {
       e.preventDefault();
       setActiveIndex(Math.min(activeIndex + 1, visibleItems - 1));

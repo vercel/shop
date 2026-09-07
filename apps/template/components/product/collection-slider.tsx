@@ -11,7 +11,7 @@ import {
   SliderTitle,
 } from "@/components/ui/slider";
 import type { Locale } from "@/lib/i18n";
-import { getCollectionProducts } from "@/lib/shopify/operations/products";
+import { getCollectionProducts } from "@/lib/shopify/operations/products/server";
 
 interface CollectionSliderProps {
   collection: string;

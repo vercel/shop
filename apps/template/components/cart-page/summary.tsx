@@ -2,12 +2,11 @@
 
 import { formatMoney } from "@shopify/hydrogen";
 import { useCart } from "@shopify/hydrogen/react";
-import { cn } from "cn";
 import { Loader2 } from "lucide-react";
 
 import { DiscountForm } from "@/components/cart/discount-form";
 import { useCheckout } from "@/hooks/use-checkout";
-import type { Cart } from "@/lib/cart";
+import type { Cart } from "@/lib/cart/types";
 
 interface CheckoutButtonProps {
   checkoutText: string;
@@ -24,17 +23,11 @@ function CheckoutButton({ checkoutText, updatingText }: CheckoutButtonProps) {
     isUpdatingCart,
   } = useCheckout();
 
-  const baseClassName =
-    "flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors";
-
   return (
     <div className="grid gap-2.5">
       <button
         type="button"
-        className={cn(
-          baseClassName,
-          "cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50",
-        )}
+        className="flex items-center justify-center w-full h-12 rounded-lg text-sm font-medium bg-primary text-primary-foreground transition-colors cursor-pointer hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         disabled={isCheckoutDisabled}
         aria-busy={isCheckingOut || isUpdatingCart || undefined}
         aria-describedby={checkoutError ? checkoutErrorId : undefined}

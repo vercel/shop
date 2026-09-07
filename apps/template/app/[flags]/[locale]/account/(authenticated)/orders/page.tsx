@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLocale } from "@/lib/params";
-import { getCustomerOrders } from "@/lib/shopify/operations/customer";
+import { getCustomerOrders } from "@/lib/shopify/operations/customer/server";
 
 export default async function OrdersPage({
   searchParams,

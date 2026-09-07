@@ -3,12 +3,12 @@
 import { cn } from "cn";
 import { useTranslations } from "next-intl";
 import Image, { getImageProps } from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import type { Image as ImageType, Video } from "@/lib/types";
+import type { Image as ImageType, Video } from "@/lib/media/types";
 
 import { Lightbox, LightboxTrigger } from "./lightbox";
 
@@ -125,8 +125,8 @@ function Carousel({
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
-  overlay?: React.ReactNode;
-  children?: React.ReactNode;
+  overlay?: ReactNode;
+  children?: ReactNode;
 }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [itemCount, setItemCount] = useState(mediaItems.length);
@@ -231,7 +231,7 @@ function GridItem({
   title: string;
   idx: number;
   priority: boolean;
-  overlay?: React.ReactNode;
+  overlay?: ReactNode;
 }) {
   return (
     <div className="relative w-full overflow-hidden aspect-square">
@@ -259,8 +259,8 @@ function Grid({
   mediaItems: MediaItem[];
   title: string;
   hasColorSlot: boolean;
-  overlay?: React.ReactNode;
-  children?: React.ReactNode;
+  overlay?: ReactNode;
+  children?: ReactNode;
 }) {
   // The color slot (children) occupies the first tile when present.
   const firstTileOffset = hasColorSlot ? 1 : 0;
@@ -294,7 +294,7 @@ export function ColorImageGrid({
   title,
 }: {
   images: ImageType[];
-  overlay?: React.ReactNode;
+  overlay?: ReactNode;
   title: string;
 }) {
   return images.map((image, idx) => (
@@ -315,7 +315,7 @@ export function ColorImageCarouselItems({
   title,
 }: {
   images: ImageType[];
-  overlay?: React.ReactNode;
+  overlay?: ReactNode;
   title: string;
 }) {
   return images.map((image, idx) => {
@@ -357,10 +357,10 @@ export function ProductMedia({
   videos: Video[];
   title: string;
   className?: string;
-  desktopSlot?: React.ReactNode;
-  mobileSlot?: React.ReactNode;
+  desktopSlot?: ReactNode;
+  mobileSlot?: ReactNode;
   /** Rendered over the first/primary image cell (e.g. the virtual try-on button). */
-  overlay?: React.ReactNode;
+  overlay?: ReactNode;
 }) {
   const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),

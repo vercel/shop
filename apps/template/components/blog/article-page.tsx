@@ -5,7 +5,7 @@ import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";
-import type { BlogArticle } from "@/lib/types";
+import type { BlogArticle } from "@/lib/blog/types";
 
 export interface ArticlePageProps {
   article: BlogArticle;

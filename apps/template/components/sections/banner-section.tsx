@@ -5,7 +5,7 @@ import Image from "next/image";
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
 import { Button } from "@/components/ui/button";
 import Link from "@/components/ui/link";
-import type { BannerSection as BannerSectionType } from "@/lib/types";
+import type { BannerSection as BannerSectionType } from "@/lib/content/types";
 
 interface BannerSectionProps {
   hero: BannerSectionType;

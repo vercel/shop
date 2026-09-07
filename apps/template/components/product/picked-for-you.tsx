@@ -11,8 +11,7 @@ import type { Locale } from "@/lib/i18n";
 import {
   getCollectionProducts,
   getFilteredCatalogProducts,
-} from "@/lib/shopify/operations/products";
-import type { SearchParamsPromise } from "@/lib/types";
+} from "@/lib/shopify/operations/products/server";
 
 // A ?utm_campaign= value selects a collection only when it's in the caller's allowlist;
 // anything else (missing, unknown, multi-valued) falls through to the regular resolution.
@@ -34,7 +33,7 @@ interface PickedForYouProps {
   limit: number;
   locale: Locale;
   rememberedCollectionCookie: string;
-  searchParams: SearchParamsPromise;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
   title: string;
 }
 
@@ -90,7 +89,7 @@ async function PickedForYouContent({
   locale: Locale;
   outOfStockText: string;
   rememberedCollectionCookie: string;
-  searchParams: SearchParamsPromise;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   // Reading searchParams and cookies opts this grid into PPR's dynamic hole so it
   // streams in behind the skeleton.

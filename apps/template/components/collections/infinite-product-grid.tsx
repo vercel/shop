@@ -2,7 +2,7 @@
 
 import { useCollection } from "@shopify/hydrogen/react";
 import { LoaderCircleIcon } from "lucide-react";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 
 import {
   ProductCardContent,
@@ -14,20 +14,21 @@ import {
 } from "@/components/product-card/components";
 import Link from "@/components/ui/link";
 import { getBrowseSearch } from "@/lib/collections";
+import type { PageInfo } from "@/lib/pagination/types";
 import { buildProductUrl } from "@/lib/product";
-import type { PageInfo, ProductCard } from "@/lib/types";
+import type { ProductCard as ProductCardType } from "@/lib/product/types";
 
 interface InfiniteProductGridProps<TParams> {
-  initialProducts: ProductCard[];
+  initialProducts: ProductCardType[];
   initialPageInfo: PageInfo;
   locale: string;
   outOfStockText: string;
   // Top-level "use server" action; passed by reference, no closure encryption.
   loadMore: (
     params: TParams & { cursor: string; search: string },
-  ) => Promise<{ products: ProductCard[]; pageInfo: PageInfo }>;
+  ) => Promise<{ products: ProductCardType[]; pageInfo: PageInfo }>;
   loadMoreParams: TParams;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export function InfiniteProductGrid<TParams>({
@@ -41,7 +42,7 @@ export function InfiniteProductGrid<TParams>({
 }: InfiniteProductGridProps<TParams>) {
   // The store, not a server snapshot, is the single source of truth for filters and sort mid-scroll.
   const search = useCollection(getBrowseSearch);
-  const [additionalProducts, setAdditionalProducts] = useState<ProductCard[]>([]);
+  const [additionalProducts, setAdditionalProducts] = useState<ProductCardType[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -111,7 +112,7 @@ function ClientProductCard({
   locale,
   outOfStockText,
 }: {
-  product: ProductCard;
+  product: ProductCardType;
   locale: string;
   outOfStockText: string;
 }) {

@@ -1,12 +1,12 @@
 import { cn } from "cn";
 import Image from "next/image";
-import type * as React from "react";
+import type { ComponentProps } from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 
-interface ProductCardProps extends React.ComponentProps<"article"> {
+interface ProductCardProps extends ComponentProps<"article"> {
   variant?: "default" | "featured";
 }
 
@@ -23,15 +23,7 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
   );
 }
 
-function ProductCardBadge({ className, children, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div data-slot="product-card-badge" className={cn(className)} {...props}>
-      {children}
-    </div>
-  );
-}
-
-interface ProductCardImageContainerProps extends React.ComponentProps<"div"> {
+interface ProductCardImageContainerProps extends ComponentProps<"div"> {
   variant?: "default" | "featured";
 }
 
@@ -121,7 +113,7 @@ function ProductCardImage({
   );
 }
 
-function ProductCardContent({ className, children, ...props }: React.ComponentProps<"div">) {
+function ProductCardContent({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="product-card-content"
@@ -133,7 +125,7 @@ function ProductCardContent({ className, children, ...props }: React.ComponentPr
   );
 }
 
-function ProductCardTitle({ className, children, ...props }: React.ComponentProps<"h3">) {
+function ProductCardTitle({ className, children, ...props }: ComponentProps<"h3">) {
   return (
     <h3
       data-slot="product-card-title"
@@ -232,7 +224,6 @@ function ProductCardSkeleton({ className }: { className?: string }) {
 
 export {
   ProductCard,
-  ProductCardBadge,
   ProductCardContent,
   ProductCardImage,
   ProductCardImageContainer,

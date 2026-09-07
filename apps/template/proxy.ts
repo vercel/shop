@@ -19,10 +19,13 @@ import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { precomputedFlags } from "@/lib/flags";
 import { defaultLocale, isEnabledLocale, isLocale } from "@/lib/i18n";
-import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/negotiation";
-import { getMarkdownPath } from "@/lib/markdown/routing";
+import {
+  appendVaryAccept,
+  getMarkdownPath,
+  negotiateRepresentation,
+} from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
-import { createRequestStorefrontClient } from "@/lib/shopify/storefront";
+import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
@@ -40,8 +43,16 @@ const NOOP_SESSION_MANAGER = {
 
 // Hidden rewrite: serve pages from /[flags]/[locale] while the address bar stays clean.
 export async function proxy(request: NextRequest): Promise<Response> {
-  const requestContext = createCustomerRequestContext(request);
   const { pathname, search } = request.nextUrl;
+
+  if (pathname === "/.well-known/ucp") {
+    // Hydrogen's well-known proxy does not yet include UCP.
+    return NextResponse.rewrite(
+      new URL(`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/.well-known/ucp`),
+    );
+  }
+
+  const requestContext = createCustomerRequestContext(request);
 
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
   const usesCustomerCart = shopConfig.auth.isEnabled && (isAuthPath || pathname === "/api/cart");
