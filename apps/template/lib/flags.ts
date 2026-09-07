@@ -16,11 +16,11 @@ export const ctaColor = flag<boolean>({
 export const pdpGallery = flag<boolean>({
   adapter: vercelAdapter<boolean, unknown>(),
   defaultValue: false,
-  description: "Enable the desktop PDP gallery preview",
+  description: "Use the desktop PDP thumbnail gallery",
   key: "pdp-gallery",
   options: [
     { label: "Default", value: false },
-    { label: "Gallery preview", value: true },
+    { label: "Thumbnail gallery", value: true },
   ],
 });
 

@@ -8,6 +8,7 @@ import { BundleComponents, BundleParents } from "@/components/product-detail/bun
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { DesktopGallery } from "@/components/product-detail/desktop-gallery";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductForm,
@@ -120,7 +121,17 @@ async function ProductMediaArea({
   if (!hasColorImagePartitioning(product.options)) {
     return (
       <ProductMedia
-        galleryEnabled={galleryEnabled}
+        desktopGallery={
+          galleryEnabled ? (
+            <DesktopGallery
+              key={product.id}
+              images={product.images}
+              overlay={tryOnOverlay}
+              title={product.title}
+              videos={product.videos}
+            />
+          ) : undefined
+        }
         otherImages={product.images}
         videos={product.videos}
         title={product.title}
@@ -132,7 +143,24 @@ async function ProductMediaArea({
 
   return (
     <ProductMedia
-      galleryEnabled={galleryEnabled}
+      desktopGallery={
+        galleryEnabled ? (
+          <Suspense
+            fallback={
+              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-5">
+                <div />
+                <div className="aspect-square" />
+              </div>
+            }
+          >
+            <ResolvedDesktopGallery
+              overlay={tryOnOverlay}
+              product={product}
+              selectedOptionsPromise={selectedOptionsPromise}
+            />
+          </Suspense>
+        ) : undefined
+      }
       otherImages={getSharedImages(product.images, product.options)}
       videos={product.videos}
       title={product.title}
@@ -161,6 +189,34 @@ async function ProductMediaArea({
           />
         </Suspense>
       }
+    />
+  );
+}
+
+interface ResolvedDesktopGalleryProps {
+  overlay?: ReactNode;
+  product: ProductDetails;
+  selectedOptionsPromise: Promise<SelectedOptions>;
+}
+
+async function ResolvedDesktopGallery({
+  overlay,
+  product,
+  selectedOptionsPromise,
+}: ResolvedDesktopGalleryProps) {
+  const image = getSelectedColorImage(product, await selectedOptionsPromise);
+  const sharedImages = getSharedImages(product.images, product.options);
+  const images = image
+    ? [image, ...sharedImages.filter((shared) => shared.url !== image.url)]
+    : sharedImages;
+
+  return (
+    <DesktopGallery
+      key={`${product.id}:${image?.url ?? "default"}`}
+      images={images}
+      overlay={overlay}
+      title={product.title}
+      videos={product.videos}
     />
   );
 }

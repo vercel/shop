@@ -344,23 +344,8 @@ export function ColorImageCarouselItems({
   });
 }
 
-interface DesktopGalleryPreviewProps {
-  children: ReactNode;
-}
-
-function DesktopGalleryPreview({ children }: DesktopGalleryPreviewProps) {
-  return (
-    <div className="relative" data-pdp-gallery="enabled">
-      {children}
-      <div className="pointer-events-none absolute top-4 left-4 z-10 rounded-md bg-background px-4 py-2 text-sm text-foreground shadow-sm">
-        pdp-gallery enabled
-      </div>
-    </div>
-  );
-}
-
 export function ProductMedia({
-  galleryEnabled = false,
+  desktopGallery,
   otherImages,
   videos,
   title,
@@ -369,7 +354,7 @@ export function ProductMedia({
   mobileSlot,
   overlay,
 }: {
-  galleryEnabled?: boolean;
+  desktopGallery?: ReactNode;
   otherImages: ImageType[];
   videos: Video[];
   title: string;
@@ -407,13 +392,7 @@ export function ProductMedia({
           {mobileSlot}
         </Carousel>
       </div>
-      <div className="hidden lg:block">
-        {galleryEnabled ? (
-          <DesktopGalleryPreview>{desktopGrid}</DesktopGalleryPreview>
-        ) : (
-          desktopGrid
-        )}
-      </div>
+      <div className="hidden lg:block">{desktopGallery ?? desktopGrid}</div>
     </div>
   );
 
