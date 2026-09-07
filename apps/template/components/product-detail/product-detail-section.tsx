@@ -8,6 +8,7 @@ import { BundleComponents, BundleParents } from "@/components/product-detail/bun
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { DesktopGallery } from "@/components/product-detail/desktop-gallery";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductForm,
@@ -35,7 +36,7 @@ import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/ui/rating-stars";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
-import { ctaColor, precomputedFlags } from "@/lib/flags";
+import { ctaColor, pdpGallery, precomputedFlags } from "@/lib/flags";
 import type { Locale } from "@/lib/i18n";
 import { getFlagsCode } from "@/lib/params";
 import {
@@ -100,7 +101,7 @@ export async function ProductDetailSection({
   );
 }
 
-function ProductMediaArea({
+async function ProductMediaArea({
   product,
   selectedOptionsPromise,
   variantPromise,
@@ -109,6 +110,7 @@ function ProductMediaArea({
   selectedOptionsPromise: Promise<SelectedOptions>;
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
+  const galleryEnabled = await pdpGallery(await getFlagsCode(), precomputedFlags);
   const fallbackImageUrl = product.featuredImage?.url ?? product.images[0]?.url;
   const tryOnOverlay = (
     <Suspense fallback={null}>
@@ -119,6 +121,17 @@ function ProductMediaArea({
   if (!hasColorImagePartitioning(product.options)) {
     return (
       <ProductMedia
+        desktopGallery={
+          galleryEnabled ? (
+            <DesktopGallery
+              key={product.id}
+              images={product.images}
+              overlay={tryOnOverlay}
+              title={product.title}
+              videos={product.videos}
+            />
+          ) : undefined
+        }
         otherImages={product.images}
         videos={product.videos}
         title={product.title}
@@ -130,6 +143,24 @@ function ProductMediaArea({
 
   return (
     <ProductMedia
+      desktopGallery={
+        galleryEnabled ? (
+          <Suspense
+            fallback={
+              <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-2.5 pr-20">
+                <div />
+                <div className="aspect-square" />
+              </div>
+            }
+          >
+            <ResolvedDesktopGallery
+              overlay={tryOnOverlay}
+              product={product}
+              selectedOptionsPromise={selectedOptionsPromise}
+            />
+          </Suspense>
+        ) : undefined
+      }
       otherImages={getSharedImages(product.images, product.options)}
       videos={product.videos}
       title={product.title}
@@ -158,6 +189,34 @@ function ProductMediaArea({
           />
         </Suspense>
       }
+    />
+  );
+}
+
+interface ResolvedDesktopGalleryProps {
+  overlay?: ReactNode;
+  product: ProductDetails;
+  selectedOptionsPromise: Promise<SelectedOptions>;
+}
+
+async function ResolvedDesktopGallery({
+  overlay,
+  product,
+  selectedOptionsPromise,
+}: ResolvedDesktopGalleryProps) {
+  const image = getSelectedColorImage(product, await selectedOptionsPromise);
+  const sharedImages = getSharedImages(product.images, product.options);
+  const images = image
+    ? [image, ...sharedImages.filter((shared) => shared.url !== image.url)]
+    : sharedImages;
+
+  return (
+    <DesktopGallery
+      key={`${product.id}:${image?.url ?? "default"}`}
+      images={images}
+      overlay={image ? overlay : undefined}
+      title={product.title}
+      videos={product.videos}
     />
   );
 }
@@ -217,14 +276,21 @@ async function ProductInfoArea({
   const t = await getTranslations("product");
   // Read the precomputed value so the button color varies per [flags] cache entry
   // instead of re-deciding (and splitting the cache) at render time.
-  const ctaColored = await ctaColor(await getFlagsCode(), precomputedFlags);
+  const flagsCode = await getFlagsCode();
+  const [ctaColored, galleryEnabled] = await Promise.all([
+    ctaColor(flagsCode, precomputedFlags),
+    pdpGallery(flagsCode, precomputedFlags),
+  ]);
   const buyFallbackT = uniformStock && !singleVariant ? t : null;
   const allInStock = product.defaultVariant?.availableForSale ?? product.availableForSale;
   const hasOptions = options.some((option) => option.values.length > 1);
   const reviewSummary = product.rating;
 
   return (
-    <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
+    <div
+      className="grid gap-10 lg:col-span-4 lg:data-[gallery=false]:sticky lg:data-[gallery=false]:top-20"
+      data-gallery={galleryEnabled}
+    >
       <ProductInfoShell>
         <div data-slot="product-info-header" className="grid gap-2.5">
           {reviewSummary ? (

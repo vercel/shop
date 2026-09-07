@@ -345,6 +345,7 @@ export function ColorImageCarouselItems({
 }
 
 export function ProductMedia({
+  desktopGallery,
   otherImages,
   videos,
   title,
@@ -353,6 +354,7 @@ export function ProductMedia({
   mobileSlot,
   overlay,
 }: {
+  desktopGallery?: ReactNode;
   otherImages: ImageType[];
   videos: Video[];
   title: string;
@@ -371,8 +373,14 @@ export function ProductMedia({
   const isEmpty = sharedMediaItems.length === 0 && !hasColorSlot;
   const mediaItems: MediaItem[] = isEmpty ? [{ type: "placeholder" }] : sharedMediaItems;
 
+  const desktopGrid = (
+    <Grid mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot} overlay={overlay}>
+      {desktopSlot}
+    </Grid>
+  );
+
   const content = (
-    <div className={className}>
+    <div className={cn(className, desktopGallery && "lg:sticky lg:top-20")}>
       <div className="lg:hidden">
         <Carousel
           key={mediaItems.map(mediaKey).join(",")}
@@ -384,11 +392,7 @@ export function ProductMedia({
           {mobileSlot}
         </Carousel>
       </div>
-      <div className="hidden lg:block">
-        <Grid mediaItems={mediaItems} title={title} hasColorSlot={hasColorSlot} overlay={overlay}>
-          {desktopSlot}
-        </Grid>
-      </div>
+      <div className="hidden lg:block">{desktopGallery ?? desktopGrid}</div>
     </div>
   );
 
