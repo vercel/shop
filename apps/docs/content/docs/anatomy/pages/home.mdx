@@ -20,6 +20,12 @@ The default grid shows the first eight products from the same relevance-ranked c
 
 Use a specific Shopify collection when merchants need direct control over featured products. Additional sections can highlight new arrivals, best sellers, or promotions, but keep the page focused on the next action you want shoppers to take.
 
+## Remember browsing preferences
+
+The enterprise demo’s “Picked for you” section uses the most recently visited collection, remembered in a cookie for 30 days. An allowed campaign collection takes priority; without either, the section shows jackets.
+
+Returning home updates only this section when the remembered collection changes, without refreshing the page or clearing cached navigation. Hovering a collection link does not count as a visit. The initial grid renders on the server; subsequent updates show the same loading skeleton while the new products load.
+
 ## What’s next
 
 Common additions include a hero image or video, merchant-curated collections, new-arrival or best-selling sections, and promotional content between product groups. Keep each section focused on a clear next action for shoppers.

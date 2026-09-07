@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
-import { unstable_navigation } from "next/cache";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
+import { PickedForYouClient } from "@/components/product/picked-for-you-client";
 import {
   type ProductsGridColumns,
   ProductsGridSection,
@@ -92,36 +92,39 @@ async function PickedForYouContent({
   rememberedCollectionCookie: string;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // Wait for navigation before reading personalization so runtime prefetches don't
-  // resolve the grid with an earlier remembered collection. Keep the heading and
-  // skeleton outside this gate, and leave the product data's shared cache intact.
-  await unstable_navigation();
+  const campaign = resolveCampaignCollection(await searchParams, campaignCollections);
 
-  const [params, cookieStore] = await Promise.all([searchParams, cookies()]);
+  async function load() {
+    "use server";
 
-  // A remembered collection (from a cookie set on a prior collection page) follows the
-  // campaign override but takes precedence over the default collection.
-  const rememberedCollection = cookieStore.get(rememberedCollectionCookie)?.value;
+    const collection = (await cookies()).get(rememberedCollectionCookie)?.value;
+    const handle = campaign ?? collection ?? defaultCollection;
+    const { products } = handle
+      ? await getCollectionProducts({ collection: handle, limit, locale })
+      : await getFilteredCatalogProducts({ limit, locale, sortKey: fallbackSortKey });
 
-  // Priority: ?utm_campaign= match, remembered collection, default collection, or the
-  // fallback vector (catalog sort key).
-  const collectionHandle =
-    resolveCampaignCollection(params, campaignCollections) ??
-    rememberedCollection ??
-    defaultCollection;
+    return {
+      collection,
+      content: products.length ? (
+        <ProductsGridSection
+          columns={columns}
+          locale={locale}
+          outOfStockText={outOfStockText}
+          products={products}
+        />
+      ) : null,
+    };
+  }
 
-  const { products } = collectionHandle
-    ? await getCollectionProducts({ collection: collectionHandle, limit, locale })
-    : await getFilteredCatalogProducts({ limit, locale, sortKey: fallbackSortKey });
-
-  if (products.length === 0) return null;
+  const initial = await load();
+  if (campaign) return initial.content;
 
   return (
-    <ProductsGridSection
-      columns={columns}
-      locale={locale}
-      outOfStockText={outOfStockText}
-      products={products}
+    <PickedForYouClient
+      cookieName={rememberedCollectionCookie}
+      fallback={<ProductsGridSkeleton columns={columns} count={limit} />}
+      initial={initial}
+      load={load}
     />
   );
 }
