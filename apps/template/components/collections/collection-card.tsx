@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import type { CollectionWithThumbnail } from "@/lib/types";
+import type { CollectionWithThumbnail } from "@/lib/collections/types";
 
 export interface CollectionCardProps {
   className?: string;

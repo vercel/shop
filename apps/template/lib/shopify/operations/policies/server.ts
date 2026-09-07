@@ -3,10 +3,10 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
+import type { ShopPolicy } from "@/lib/content/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { SHOP_POLICY_FRAGMENT } from "@/lib/shopify/fragments/policies";
 import { storefront } from "@/lib/shopify/storefront/server";
-import type { ShopPolicy } from "@/lib/types";
 
 const GET_SHOP_POLICIES_QUERY = gql(
   `#graphql

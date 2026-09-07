@@ -1,5 +1,17 @@
 import { flattenConnection } from "@shopify/hydrogen";
 
+import type { Image, Video } from "@/lib/media/types";
+import type {
+  Category,
+  OptionValue,
+  OptionValueSwatch,
+  ProductCard,
+  ProductDetails,
+  ProductOption,
+  ProductVariant,
+  ProductVariantComponent,
+  ProductVariantReference,
+} from "@/lib/product/types";
 import type {
   ShopifyBundleComponentVariant,
   ShopifyCategory,
@@ -11,19 +23,6 @@ import type {
   ShopifyProductCard,
   ShopifyVariant,
 } from "@/lib/shopify/transforms/product/types";
-import type {
-  Category,
-  Image,
-  OptionValue,
-  OptionValueSwatch,
-  ProductCard,
-  ProductDetails,
-  ProductOption,
-  ProductVariant,
-  ProductVariantComponent,
-  ProductVariantReference,
-  Video,
-} from "@/lib/types";
 
 export function transformImage(image: ShopifyImage | null | undefined): Image | null {
   if (!image) return null;

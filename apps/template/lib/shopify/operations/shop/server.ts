@@ -1,11 +1,11 @@
 import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
+import type { ShopAnalyticsData } from "@/lib/analytics/types";
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { storefront } from "@/lib/shopify/storefront/server";
-import type { ShopAnalyticsData } from "@/lib/types";
 
 const GET_SHOP_ANALYTICS_QUERY = gql(`#graphql
   query getShopAnalytics($country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {

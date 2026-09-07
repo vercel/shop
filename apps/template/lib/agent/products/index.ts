@@ -1,4 +1,5 @@
-import type { Money, ProductCard, ProductDetails, ProductVariant } from "@/lib/types";
+import type { Money } from "@/lib/money/types";
+import type { ProductCard, ProductDetails, ProductVariant } from "@/lib/product/types";
 
 import type { AgentProduct, AgentProductDetails, AgentVariant } from "./types";
 

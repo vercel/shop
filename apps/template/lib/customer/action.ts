@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
 
+import type { CustomerAddressInput } from "@/lib/customer/types";
 import {
   createCustomerAddress,
   deleteCustomerAddress,
@@ -10,7 +11,6 @@ import {
   updateCustomerProfile,
 } from "@/lib/shopify/operations/customer/server";
 import { type CustomerUserError } from "@/lib/shopify/operations/customer/types";
-import type { CustomerAddressInput } from "@/lib/types";
 
 import type { AccountActionResult } from "./types";
 

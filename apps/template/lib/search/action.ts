@@ -2,8 +2,9 @@
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { resolveBrowseParams } from "@/lib/collections/server";
+import type { PageInfo } from "@/lib/pagination/types";
+import type { ProductCard } from "@/lib/product/types";
 import { fetchSearchIndexProducts } from "@/lib/shopify/operations/products/server";
-import type { PageInfo, ProductCard } from "@/lib/types";
 
 export async function loadMoreSearchProductsAction(params: {
   collection?: string;

@@ -1,6 +1,7 @@
 import { flattenConnection, gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
+import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
@@ -11,7 +12,6 @@ import {
   transformShopifyCollection,
   transformShopifyCollections,
 } from "@/lib/shopify/transforms/collection";
-import type { Collection, CollectionWithThumbnail } from "@/lib/types";
 
 function tagCollections(collections: Array<{ handle: string }>): void {
   for (const collection of collections) {

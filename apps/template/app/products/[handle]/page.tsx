@@ -11,13 +11,13 @@ import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
 import { type SelectedOptions } from "@/lib/product/types";
+import type { ProductVariant } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   getCatalogProducts,
   getProduct,
   getProductVariant,
 } from "@/lib/shopify/operations/products/server";
-import type { ProductVariant } from "@/lib/types";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 
 import { toAgentProduct, toAgentProductDetails } from "@/lib/agent/products";
+import type { ProductCard } from "@/lib/product/types";
 import { searchCatalog } from "@/lib/shopify/mcp/server";
 import {
   getComplementaryProducts,
@@ -11,7 +12,6 @@ import {
   getRelatedProducts,
   searchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
-import type { ProductCard } from "@/lib/types";
 
 import type { ProductOption } from "./types";
 

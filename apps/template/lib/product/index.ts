@@ -1,13 +1,13 @@
 import { buildProductSelectionSearchParams, getSelectedProductOptions } from "@shopify/hydrogen";
 
+import type { Image } from "@/lib/media/types";
+import type { Money } from "@/lib/money/types";
 import type {
-  Image,
-  Money,
   ProductDetails,
   ProductOption,
   ProductVariant,
   SelectedOption,
-} from "@/lib/types";
+} from "@/lib/product/types";
 
 import type {
   OptimisticProductInfo,

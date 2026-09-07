@@ -82,7 +82,7 @@ Organize `lib/` by domain first, then execution context. Use only the files each
 
 Subdivide large domains into meaningful subdirectories using the same filenames: `lib/cart/gift-card/client.ts`, `lib/shopify/operations/products/server.ts`, and `lib/markdown/product/index.ts`. Do not add descriptive sibling files such as `cart-client.ts`, flat root implementation modules, empty entry points, or forwarding exports.
 
-Keep shared storefront models in the root `lib/types.ts`; keep SDK-specific contracts and inferred response types under `lib/shopify/`. Preserve SDK-derived cart types in `lib/cart/types.ts`. Component props stay beside their components, and small private implementation types may remain local. Consumers must not import shared types from `server.ts` or `action.ts`. Generated artifacts retain their generator-owned paths and naming.
+Keep storefront models in their owning domain's `types.ts`, such as `lib/product/types.ts` and `lib/customer/types.ts`; shared use does not change domain ownership. Cross-domain primitives live in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`. Types-only domains do not need an `index.ts` or re-export barrel. Keep SDK-specific contracts and inferred response types under `lib/shopify/`. Preserve SDK-derived cart types in `lib/cart/types.ts`. Component props stay beside their components, and small private implementation types may remain local. Consumers must not import shared types from `server.ts` or `action.ts`. Generated artifacts retain their generator-owned paths and naming.
 
 `client.ts` means a React client boundary, not an HTTP client wrapper. Shopify transports belong in their API domain's `server.ts`. Pure transforms and formatting helpers belong in `index.ts`, even when their current callers are all server-side.
 
@@ -175,7 +175,7 @@ pnpm format
 - `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
 - `lib/agent/` for the AI SDK agent, tools, and json-render catalog
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
-- `lib/types.ts` for provider-agnostic domain types
+- `lib/<domain>/types.ts` for domain-owned models and contracts
 - `components/ui/` for presentational primitives
 - `components/product/` for domain-aware product wrappers
 - `lib/product/index.ts` for variant URL construction and selected-option parsing
@@ -242,7 +242,7 @@ The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(au
 - Routes live under `app/` and use clean URLs like `/products/handle`.
 - Read `shopConfig.localization` for the deployment's explicit country, language, and formatting locale; use inline component copy for UI text.
 - Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
-- Catalog and customer presentation uses domain types from `@/lib/types`, not raw Shopify responses. Cart types come from `@/lib/cart/types` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
+- Catalog and customer presentation uses domain models from `@/lib/product/types`, `@/lib/collections/types`, and `@/lib/customer/types`, not raw Shopify responses. Cart types come from `@/lib/cart/types` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
 - Prefer Tailwind data-attribute selectors over conditional class assembly.
 - Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
 

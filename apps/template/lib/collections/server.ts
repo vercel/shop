@@ -2,13 +2,13 @@ import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydro
 
 import { getActiveFilters, getCollectionSortFromState } from "@/lib/collections";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
+import type { Collection } from "@/lib/collections/types";
 import {
   buildProductFiltersFromParams,
   fetchCollectionProducts,
   fetchSearchFacets,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
-import type { Collection } from "@/lib/types";
 
 import type { CollectionResultsData, CollectionSearchState } from "./types";
 

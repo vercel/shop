@@ -1,4 +1,5 @@
 import { shopConfig } from "@/lib/config";
+import type { Filter, PriceRange } from "@/lib/filters/types";
 import { escapeMarkdown } from "@/lib/markdown";
 import {
   appendAppliedFiltersSection,
@@ -7,7 +8,8 @@ import {
   appendProductsSection,
   formatSortLabel,
 } from "@/lib/markdown/catalog";
-import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
+import type { PageInfo } from "@/lib/pagination/types";
+import type { ProductCard } from "@/lib/product/types";
 
 export function searchResultsToMarkdown({
   query,

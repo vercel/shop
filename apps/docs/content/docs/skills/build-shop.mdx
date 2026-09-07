@@ -26,7 +26,7 @@ Build the shop around commerce truth first: what product or collection is being 
 2. If the Vercel Shop template source is available, inspect it before relying on this prose:
    - Template rules: `apps/template/AGENTS.md`
    - Route/layout shell: `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
-   - Shopify boundary: `apps/template/lib/shopify/storefront/server.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/types.ts`
+   - Shopify boundary: `apps/template/lib/shopify/storefront/server.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/product/types.ts`, `apps/template/lib/customer/types.ts`
    - Shared UI layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
    - Public source fallback: [apps/template source](https://github.com/vercel/shop/tree/main/apps/template)
 3. Use the docs to orient before editing unfamiliar areas:
@@ -53,7 +53,7 @@ Organize `lib/` by domain, then use only the context files that domain needs:
 
 Subdivide large domains with the same filenames: `lib/cart/gift-card/client.ts`, `lib/agent/cart/client.ts`, `lib/agent/routes/index.ts` with shared contracts in `lib/agent/routes/types.ts`, and `lib/shopify/operations/products/server.ts`. Keep universal helpers in `lib/config/index.ts`, `lib/product/index.ts`, and `lib/seo/index.ts`. Put Shopify transports in their API domain's `server.ts` and pure transforms in `index.ts`, even when all current callers run on the server. Do not add descriptive sibling files, flat root implementation modules, empty entry points, forwarding exports, or barrels.
 
-Keep shared storefront models in `lib/types.ts`, SDK-specific contracts under `lib/shopify/`, and handler-derived cart contracts in `lib/cart/types.ts`. Component props stay with their component; small private implementation types may stay local. Generated artifacts keep generator-owned paths and names.
+Keep storefront models in their owning domain's `types.ts`, such as `lib/product/types.ts`, `lib/collections/types.ts`, and `lib/customer/types.ts`. Shared use does not change ownership: primitives live in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`. Types-only domains need no `index.ts` or re-export barrel. Keep SDK-specific contracts under `lib/shopify/` and handler-derived cart contracts in `lib/cart/types.ts`. Component props stay with their component; small private implementation types may stay local. Generated artifacts keep generator-owned paths and names.
 
 ## Copy and deployment defaults
 

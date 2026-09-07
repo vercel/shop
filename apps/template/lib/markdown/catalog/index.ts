@@ -1,8 +1,10 @@
 import { formatMoney } from "@shopify/hydrogen";
 
+import type { Filter, PriceRange } from "@/lib/filters/types";
 import { createTable, escapeMarkdown } from "@/lib/markdown";
+import type { PageInfo } from "@/lib/pagination/types";
+import type { ProductCard } from "@/lib/product/types";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
-import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
 const SORT_LABELS: Record<string, string> = {
   "best-matches": "Best matches",

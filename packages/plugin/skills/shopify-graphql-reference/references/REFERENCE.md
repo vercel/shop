@@ -24,7 +24,7 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
 | `lib/shopify/transforms/filters/types.ts`, `lib/shopify/transforms/menu/types.ts` | Resource-owned filter inputs and menu contracts                     |
 | `lib/shopify/types/generated/`             | Generator-owned validation output                                                                     |
-| `lib/types.ts`                              | Provider-independent types consumed by presentation                                                   |
+| `lib/product/types.ts`, `lib/collections/types.ts`, `lib/customer/types.ts` | Domain-owned models consumed by transforms and presentation |
 | `lib/cart/server.ts`                        | Cart cookie helpers and server-side cart read seeding                                                 |
 | `app/api/webhooks/shopify/route.ts`         | Public-content invalidation entry point                                                               |
 

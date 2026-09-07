@@ -3,9 +3,9 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
+import type { ContentPage } from "@/lib/content/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { storefront } from "@/lib/shopify/storefront/server";
-import type { ContentPage } from "@/lib/types";
 
 const GET_PAGE_QUERY = gql(`#graphql
   query getPage($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {

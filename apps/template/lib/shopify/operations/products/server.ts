@@ -8,6 +8,12 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
+import type {
+  ProductCard,
+  ProductDetails,
+  ProductVariant,
+  SelectedOption,
+} from "@/lib/product/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { BUNDLE_RELATIONSHIPS_FRAGMENT } from "@/lib/shopify/fragments/bundle";
 import { FILTER_FRAGMENT } from "@/lib/shopify/fragments/filters";
@@ -46,7 +52,6 @@ import {
   transformShopifyProductDetails,
   transformVariant,
 } from "@/lib/shopify/transforms/product";
-import type { ProductCard, ProductDetails, ProductVariant, SelectedOption } from "@/lib/types";
 
 function productIdTag(gid: string): string | null {
   const numericId = getNumericShopifyId(gid);

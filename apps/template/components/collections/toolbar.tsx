@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Filter, PriceRange } from "@/lib/types";
+import type { Filter, PriceRange } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
 import { FilterPendingScope } from "./filter-pending-context";

@@ -1,4 +1,4 @@
-import type { Money } from "@/lib/types";
+import type { Money } from "@/lib/money/types";
 
 export interface AgentProduct {
   available: boolean;

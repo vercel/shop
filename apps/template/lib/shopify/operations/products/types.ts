@@ -1,7 +1,9 @@
 import type { ActiveFilters } from "@/lib/collections/types";
 import type { CommerceLocale } from "@/lib/config/types";
+import type { Filter, PriceRange } from "@/lib/filters/types";
+import type { PageInfo } from "@/lib/pagination/types";
+import type { ProductCard } from "@/lib/product/types";
 import type { ProductFilter } from "@/lib/shopify/transforms/filters/types";
-import type { Filter, PageInfo, PriceRange, ProductCard } from "@/lib/types";
 
 export type SearchIndexProductsParams = {
   activeFilters?: ActiveFilters;

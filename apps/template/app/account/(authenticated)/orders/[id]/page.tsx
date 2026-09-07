@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
+import type { OrderLineItem } from "@/lib/customer/types";
+import type { Money } from "@/lib/money/types";
 import { getCustomerOrder } from "@/lib/shopify/operations/customer/server";
-import type { Money, OrderLineItem } from "@/lib/types";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (

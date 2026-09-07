@@ -1,5 +1,5 @@
+import type { BlogArticle } from "@/lib/blog/types";
 import type { ShopifyArticle, ShopifyBlog } from "@/lib/shopify/transforms/blogs/types";
-import type { BlogArticle } from "@/lib/types";
 
 export function transformArticle(article: ShopifyArticle, blog: ShopifyBlog): BlogArticle {
   return {

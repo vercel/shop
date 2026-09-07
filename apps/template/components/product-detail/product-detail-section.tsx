@@ -39,7 +39,7 @@ import {
   toStaticOptionGroups,
 } from "@/lib/product";
 import { type SelectedOptions } from "@/lib/product/types";
-import type { ProductDetails, ProductVariant } from "@/lib/types";
+import type { ProductDetails, ProductVariant } from "@/lib/product/types";
 
 export function ProductDetailSection({
   product,

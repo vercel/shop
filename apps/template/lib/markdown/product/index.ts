@@ -1,7 +1,7 @@
 import { formatMoney } from "@shopify/hydrogen";
 
 import { createTable, escapeMarkdown } from "@/lib/markdown";
-import type { ProductDetails } from "@/lib/types";
+import type { ProductDetails } from "@/lib/product/types";
 
 export function productToMarkdown(product: ProductDetails, locale: string): string {
   const sections: string[] = [];

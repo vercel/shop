@@ -1,6 +1,6 @@
+import type { Filter, PriceRange } from "@/lib/filters/types";
 import type { FILTER_FRAGMENT } from "@/lib/shopify/fragments/filters";
 import type { ResultOf } from "@/lib/shopify/types";
-import type { Filter, PriceRange } from "@/lib/types";
 
 export interface TransformFiltersOptions {
   activeFilters?: Record<string, string | string[] | undefined>;

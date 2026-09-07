@@ -1,13 +1,13 @@
 import { gql } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
+import type { Blog, BlogArticle } from "@/lib/blog/types";
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { ARTICLE_SUMMARY_FRAGMENT, BLOG_FRAGMENT } from "@/lib/shopify/fragments/blogs";
 import { storefront } from "@/lib/shopify/storefront/server";
 import { transformArticle } from "@/lib/shopify/transforms/blogs";
-import type { Blog, BlogArticle } from "@/lib/types";
 
 const GET_BLOG_QUERY = gql(
   `#graphql

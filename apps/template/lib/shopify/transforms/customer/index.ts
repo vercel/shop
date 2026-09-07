@@ -1,4 +1,12 @@
 import type {
+  CustomerAddress,
+  CustomerOrder,
+  CustomerOrderSummary,
+  CustomerProfile,
+  OrderLineItem,
+} from "@/lib/customer/types";
+import type { Money } from "@/lib/money/types";
+import type {
   ShopifyCustomerAddress,
   ShopifyCustomerProfile,
   ShopifyLineItem,
@@ -7,14 +15,6 @@ import type {
   ShopifyOrderSummary,
 } from "@/lib/shopify/transforms/customer/types";
 import { transformImage } from "@/lib/shopify/transforms/product";
-import type {
-  CustomerAddress,
-  CustomerOrder,
-  CustomerOrderSummary,
-  CustomerProfile,
-  Money,
-  OrderLineItem,
-} from "@/lib/types";
 
 function transformMoney(money: ShopifyMoney): Money {
   return { amount: money.amount, currencyCode: money.currencyCode };

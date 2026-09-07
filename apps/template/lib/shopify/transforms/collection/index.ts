@@ -1,5 +1,5 @@
+import type { Collection } from "@/lib/collections/types";
 import type { ShopifyCollection } from "@/lib/shopify/transforms/collection/types";
-import type { Collection } from "@/lib/types";
 
 export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {

@@ -1,4 +1,12 @@
 import type {
+  Filter,
+  FilterPresentation,
+  FilterType,
+  FilterValue,
+  PriceRange,
+} from "@/lib/filters/types";
+import type { OptionValueSwatch } from "@/lib/product/types";
+import type {
   ActiveFilterBadge,
   ProductFilter,
   ShopifyFilter,
@@ -8,14 +16,6 @@ import type {
   TransformFiltersOptions,
   TransformedFilters,
 } from "@/lib/shopify/transforms/filters/types";
-import type {
-  Filter,
-  FilterPresentation,
-  FilterType,
-  FilterValue,
-  OptionValueSwatch,
-  PriceRange,
-} from "@/lib/types";
 
 function isColorKey(value: string): boolean {
   return value.toLowerCase().includes("colo");

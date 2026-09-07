@@ -3,6 +3,13 @@ import { type AnyCustomerAccountDocument, gql } from "@shopify/hydrogen/customer
 import { cache } from "react";
 
 import { requireCustomerAccessToken } from "@/lib/auth/server";
+import type {
+  CustomerAddress,
+  CustomerAddressInput,
+  CustomerOrder,
+  CustomerOrdersPage,
+  CustomerProfile,
+} from "@/lib/customer/types";
 import { customerAccountFetch } from "@/lib/shopify/customer-account/server";
 import { CUSTOMER_PROFILE_FRAGMENT } from "@/lib/shopify/fragments/customer";
 import { ADDRESS_FRAGMENT } from "@/lib/shopify/fragments/customer-address";
@@ -18,13 +25,6 @@ import {
   transformOrderSummary,
 } from "@/lib/shopify/transforms/customer";
 import type { CustomerAccountResultOf } from "@/lib/shopify/types";
-import type {
-  CustomerAddress,
-  CustomerAddressInput,
-  CustomerOrder,
-  CustomerOrdersPage,
-  CustomerProfile,
-} from "@/lib/types";
 
 const ORDERS_PER_PAGE = 10;
 

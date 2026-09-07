@@ -18,7 +18,7 @@ import {
 import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { usePredictiveSearch } from "@/hooks/use-predictive-search";
-import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/types";
+import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/search/types";
 
 export function SearchModal() {
   const [open, setOpen] = useState(false);
