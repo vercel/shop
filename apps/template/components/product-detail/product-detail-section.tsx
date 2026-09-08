@@ -5,7 +5,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { BuyButtons, PurchaseOptions } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { DesktopGallery } from "@/components/product-detail/desktop-gallery";
@@ -40,6 +40,7 @@ import { ctaColor, pdpGallery, precomputedFlags } from "@/lib/flags";
 import type { Locale } from "@/lib/i18n";
 import { getFlagsCode } from "@/lib/params";
 import {
+  getProductPurchaseOptions,
   getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
@@ -458,7 +459,12 @@ function ProductInfoFallback({
       {product.isGiftCard ? (
         <GiftCardPurchaseFormFallback t={optionsT} />
       ) : (
-        <BuyButtonsFallback t={t} allInStock={allInStock} ctaColored={ctaColored} />
+        <BuyButtonsFallback
+          allInStock={allInStock}
+          ctaColored={ctaColored}
+          t={t}
+          variant={product.defaultVariant}
+        />
       )}
     </>
   );
@@ -541,13 +547,25 @@ function BuyButtonsFallback({
   allInStock,
   ctaColored,
   t,
+  variant,
 }: {
   allInStock: boolean;
   ctaColored: boolean;
   t: Awaited<ReturnType<typeof getTranslations<"product">>> | null;
+  variant: ProductVariant | undefined;
 }) {
+  const { plans, selectedPlan } = getProductPurchaseOptions(variant);
   return (
     <div className="grid gap-2.5">
+      {variant ? (
+        <PurchaseOptions
+          disabled
+          plans={plans}
+          price={variant.price}
+          requiresSellingPlan={variant.requiresSellingPlan}
+          selectedPlan={selectedPlan}
+        />
+      ) : null}
       <div className="flex gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
         <div
@@ -559,7 +577,7 @@ function BuyButtonsFallback({
           {t ? (allInStock ? t("addToCart") : t("outOfStock")) : null}
         </div>
       </div>
-      {shopConfig.pdp.buyWithShop.isEnabled ? (
+      {shopConfig.pdp.buyWithShop.isEnabled && !selectedPlan && !variant?.requiresSellingPlan ? (
         <div
           className={cn(
             "flex h-12 items-center justify-center rounded-lg border border-foreground bg-transparent px-4 text-foreground",

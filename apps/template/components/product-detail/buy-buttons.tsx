@@ -9,7 +9,9 @@ import { useEffect, useId, useState } from "react";
 import { useCartDrawer } from "@/components/cart/context";
 import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
-import type { ProductFormVariant } from "@/lib/product/types";
+import type { Money } from "@/lib/money/types";
+import { getProductPurchaseOptions } from "@/lib/product";
+import type { ProductFormVariant, SellingPlanAllocation } from "@/lib/product/types";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
 
@@ -29,21 +31,13 @@ export function BuyButtons({
   const { formProps, pending, register, selectedVariant: storeVariant } = useProductForm();
   const selectedVariant = storeVariant ?? fallbackVariant;
 
-  const locale = useLocale();
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
   const isSelectionUnresolved = !storeVariant;
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [purchaseOption, setPurchaseOption] = useState("");
-  const purchaseOptionId = useId();
-  const plans =
-    selectedVariant?.sellingPlanAllocations.filter(
-      (allocation) => allocation.sellingPlan.recurringDeliveries,
-    ) ?? [];
-  const selectedPlan =
-    plans.find((allocation) => allocation.sellingPlan.id === purchaseOption) ??
-    (selectedVariant?.requiresSellingPlan ? plans[0] : undefined);
+  const { plans, selectedPlan } = getProductPurchaseOptions(selectedVariant, purchaseOption);
   const missingRequiredPlan = Boolean(selectedVariant?.requiresSellingPlan && !selectedPlan);
   const { openOverlay } = useCartDrawer();
 
@@ -95,47 +89,14 @@ export function BuyButtons({
       })}
       className="grid gap-2.5"
     >
-      {plans.length > 0 ? (
-        <fieldset className="grid gap-2.5" disabled={pending || isSelectionUnresolved}>
-          <legend className="pb-2.5 text-sm font-medium">{t("purchaseOptions")}</legend>
-          {[
-            ...(!selectedVariant.requiresSellingPlan
-              ? [{ id: "", name: t("oneTimePurchase"), price: selectedVariant.price }]
-              : []),
-            ...plans.map((allocation) => ({
-              id: allocation.sellingPlan.id,
-              name: allocation.sellingPlan.name,
-              price: allocation.price,
-            })),
-          ].map((option) => (
-            <label
-              key={option.id}
-              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-4 has-checked:border-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50"
-            >
-              <input
-                type="radio"
-                name={purchaseOptionId}
-                value={option.id}
-                checked={(selectedPlan?.sellingPlan.id ?? "") === option.id}
-                onChange={() => setPurchaseOption(option.id)}
-                className="size-4 cursor-pointer accent-foreground disabled:cursor-not-allowed"
-              />
-              <span className="flex flex-1 flex-wrap items-center justify-between gap-2.5 text-sm">
-                <span>{option.name}</span>
-                <span className="tabular-nums">
-                  {formatMoney(option.price, { locale }).localizedString}
-                </span>
-              </span>
-            </label>
-          ))}
-          {selectedPlan ? (
-            <p className="text-sm text-muted-foreground">
-              {t("recurringPurchase")}{" "}
-              {selectedPlan.sellingPlan.description || t("subscriptionCheckoutDetails")}
-            </p>
-          ) : null}
-        </fieldset>
-      ) : null}
+      <PurchaseOptions
+        disabled={pending || isSelectionUnresolved}
+        onSelect={setPurchaseOption}
+        plans={plans}
+        price={selectedVariant.price}
+        requiresSellingPlan={selectedVariant.requiresSellingPlan}
+        selectedPlan={selectedPlan}
+      />
       <input type="hidden" name="sellingPlanId" value={selectedPlan?.sellingPlan.id ?? ""} />
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
@@ -221,5 +182,69 @@ export function BuyButtons({
         </a>
       ) : null}
     </form>
+  );
+}
+
+interface PurchaseOptionsProps {
+  disabled?: boolean;
+  onSelect?: (id: string) => void;
+  plans: SellingPlanAllocation[];
+  price: Money;
+  requiresSellingPlan: boolean;
+  selectedPlan: SellingPlanAllocation | undefined;
+}
+
+export function PurchaseOptions({
+  disabled = false,
+  onSelect,
+  plans,
+  price,
+  requiresSellingPlan,
+  selectedPlan,
+}: PurchaseOptionsProps) {
+  const locale = useLocale();
+  const t = useTranslations("product");
+  const purchaseOptionId = useId();
+  if (plans.length === 0) return null;
+
+  return (
+    <fieldset className="grid gap-2.5" disabled={disabled}>
+      <legend className="pb-2.5 text-sm font-medium">{t("purchaseOptions")}</legend>
+      {[
+        ...(!requiresSellingPlan ? [{ id: "", name: t("oneTimePurchase"), price }] : []),
+        ...plans.map((allocation) => ({
+          id: allocation.sellingPlan.id,
+          name: allocation.sellingPlan.name,
+          price: allocation.price,
+        })),
+      ].map((option) => (
+        <label
+          key={option.id}
+          className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-4 has-checked:border-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50"
+        >
+          <input
+            type="radio"
+            name={purchaseOptionId}
+            value={option.id}
+            checked={(selectedPlan?.sellingPlan.id ?? "") === option.id}
+            onChange={onSelect ? () => onSelect(option.id) : undefined}
+            readOnly={!onSelect}
+            className="size-4 cursor-pointer accent-foreground disabled:cursor-not-allowed"
+          />
+          <span className="flex flex-1 flex-wrap items-center justify-between gap-2.5 text-sm">
+            <span>{option.name}</span>
+            <span className="tabular-nums">
+              {formatMoney(option.price, { locale }).localizedString}
+            </span>
+          </span>
+        </label>
+      ))}
+      {selectedPlan ? (
+        <p className="text-sm text-muted-foreground">
+          {t("recurringPurchase")}{" "}
+          {selectedPlan.sellingPlan.description || t("subscriptionCheckoutDetails")}
+        </p>
+      ) : null}
+    </fieldset>
   );
 }
