@@ -3,7 +3,7 @@ import { MinusIcon, PlusIcon } from "lucide-react";
 import { Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { BuyButtons, PurchaseOptions } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
@@ -31,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
 import {
+  getProductPurchaseOptions,
   getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
@@ -291,7 +292,11 @@ function ProductInfoFallback({
       {product.isGiftCard ? (
         <GiftCardPurchaseFormFallback />
       ) : (
-        <BuyButtonsFallback showLabel={showLabel} allInStock={allInStock} />
+        <BuyButtonsFallback
+          allInStock={allInStock}
+          showLabel={showLabel}
+          variant={product.defaultVariant}
+        />
       )}
     </>
   );
@@ -360,21 +365,33 @@ function QuantityPickerFallback() {
 }
 
 function BuyButtonsFallback({
-  showLabel,
   allInStock,
+  showLabel,
+  variant,
 }: {
   allInStock: boolean;
   showLabel: boolean;
+  variant: ProductVariant | undefined;
 }) {
+  const { plans, selectedPlan } = getProductPurchaseOptions(variant);
   return (
     <div className="grid gap-2.5">
+      {variant ? (
+        <PurchaseOptions
+          disabled
+          plans={plans}
+          price={variant.price}
+          requiresSellingPlan={variant.requiresSellingPlan}
+          selectedPlan={selectedPlan}
+        />
+      ) : null}
       <div className="flex gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
           {showLabel ? (allInStock ? "Add to Cart" : "Out of Stock") : null}
         </div>
       </div>
-      {shopConfig.pdp.buyWithShop.isEnabled ? (
+      {shopConfig.pdp.buyWithShop.isEnabled && !selectedPlan && !variant?.requiresSellingPlan ? (
         <div
           className={cn(
             "flex h-12 items-center justify-center rounded-lg bg-shop px-4 text-white",

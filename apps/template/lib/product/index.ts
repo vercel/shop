@@ -54,6 +54,20 @@ export function toStaticOptionGroups(product: ProductDetails): OptionGroupState[
   }));
 }
 
+export function getProductPurchaseOptions(
+  variant: Pick<ProductVariant, "requiresSellingPlan" | "sellingPlanAllocations"> | undefined,
+  purchaseOption = "",
+) {
+  const plans =
+    variant?.sellingPlanAllocations.filter(
+      (allocation) => allocation.sellingPlan.recurringDeliveries,
+    ) ?? [];
+  const selectedPlan =
+    plans.find((allocation) => allocation.sellingPlan.id === purchaseOption) ??
+    (variant?.requiresSellingPlan ? plans[0] : undefined);
+  return { plans, selectedPlan };
+}
+
 // Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
 export function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
   return {
