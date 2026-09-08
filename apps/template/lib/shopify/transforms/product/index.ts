@@ -14,7 +14,6 @@ import type {
   ProductVariantReference,
 } from "@/lib/product/types";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
-import { parseImagePlaceholders } from "@/lib/shopify/transforms/image-placeholders";
 import type {
   ShopifyBundleComponentVariant,
   ShopifyCategory,
@@ -27,17 +26,13 @@ import type {
   ShopifyVariant,
 } from "@/lib/shopify/transforms/product/types";
 
-export function transformImage(
-  image: ShopifyImage | null | undefined,
-  blurDataURL?: string,
-): Image | null {
+export function transformImage(image: ShopifyImage | null | undefined): Image | null {
   if (!image) return null;
   return {
     url: image.url,
     altText: image.altText ?? "",
     width: image.width ?? 0,
     height: image.height ?? 0,
-    ...(blurDataURL ? { blurDataURL } : {}),
   };
 }
 
@@ -46,12 +41,11 @@ function extractMediaFromProduct(product: ShopifyProduct): {
   videos: Video[];
 } {
   const images: Image[] = [];
-  const placeholders = parseImagePlaceholders(product.imagePlaceholders?.jsonValue);
   const videos: Video[] = [];
 
   for (const node of flattenConnection<ShopifyMediaNode>(product.media)) {
     if (node.__typename === "MediaImage") {
-      const img = transformImage(node.image, placeholders.get(node.id)?.blurDataURL);
+      const img = transformImage(node.image);
       if (img) images.push(img);
     } else if (node.__typename === "Video") {
       const mp4Sources = node.sources.filter((s) => s.mimeType.startsWith("video/mp4"));

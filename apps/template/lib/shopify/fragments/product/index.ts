@@ -31,7 +31,6 @@ export const PRODUCT_FRAGMENT = gql(
           __typename
           mediaContentType
           ... on MediaImage {
-            id
             image {
               url
         altText
@@ -116,9 +115,6 @@ export const PRODUCT_FRAGMENT = gql(
     }
     reviewsRatingCount: metafield(namespace: "reviews", key: "rating_count") {
       value
-    }
-    imagePlaceholders: metafield(namespace: "custom", key: "image_placeholders") {
-      jsonValue: value
     }
     category {
       ...TaxonomyCategoryFields
