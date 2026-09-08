@@ -30,7 +30,31 @@ export const PRODUCT_VARIANT_FRAGMENT = gql(
     }
     product {
       handle
+      requiresSellingPlan
       title
+    }
+    sellingPlanAllocations(first: 100) {
+      nodes {
+        priceAdjustments {
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+          price {
+            amount
+            currencyCode
+          }
+        }
+        sellingPlan {
+          description
+          id
+          name
+          recurringDeliveries
+        }
+      }
+      pageInfo {
+        hasNextPage
+      }
     }
   }
 `,

@@ -64,7 +64,9 @@ export function toProductFormVariant(variant: ProductVariant): ProductFormVarian
     price: variant.price,
     product: { handle: variant.productHandle, title: variant.productTitle },
     requiresBundleConfiguration: variant.requiresComponents && variant.components.length === 0,
+    requiresSellingPlan: variant.requiresSellingPlan,
     selectedOptions: variant.selectedOptions,
+    sellingPlanAllocations: variant.sellingPlanAllocations,
     title: variant.title,
   };
 }

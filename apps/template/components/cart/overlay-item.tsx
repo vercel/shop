@@ -90,6 +90,11 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
                 {merchandise.selectedOptions.map((option) => option.value).join(" / ")}
               </p>
             ) : null}
+            {item.sellingPlanAllocation ? (
+              <p className="text-xs text-muted-foreground">
+                {item.sellingPlanAllocation.sellingPlan.name || t("subscription")}
+              </p>
+            ) : null}
           </div>
           {components.length ? (
             <div className="grid gap-1">

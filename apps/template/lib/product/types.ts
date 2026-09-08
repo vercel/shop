@@ -8,7 +8,15 @@ export type SelectedOptions = Record<string, string>;
 
 export type ProductFormVariant = Pick<
   ProductVariant,
-  "availableForSale" | "compareAtPrice" | "id" | "image" | "price" | "selectedOptions" | "title"
+  | "availableForSale"
+  | "compareAtPrice"
+  | "id"
+  | "image"
+  | "price"
+  | "requiresSellingPlan"
+  | "selectedOptions"
+  | "sellingPlanAllocations"
+  | "title"
 > & {
   product: { handle: string; title: string };
   requiresBundleConfiguration: boolean;
@@ -118,8 +126,22 @@ export interface ProductVariant {
   productHandle: string;
   productTitle: string;
   requiresComponents: boolean;
+  requiresSellingPlan: boolean;
   selectedOptions: SelectedOption[];
+  // Only the first 100 allocations are loaded, even when Shopify reports another page.
+  sellingPlanAllocations: SellingPlanAllocation[];
   title: string;
+}
+
+export interface SellingPlanAllocation {
+  compareAtPrice: Money;
+  price: Money;
+  sellingPlan: {
+    description?: string | null;
+    id: string;
+    name: string;
+    recurringDeliveries: boolean;
+  };
 }
 
 export interface ProductVariantComponent {

@@ -1,10 +1,10 @@
 "use client";
 
-import { getShopPayButtonUrl } from "@shopify/hydrogen";
+import { formatMoney, getShopPayButtonUrl } from "@shopify/hydrogen";
 import { cn } from "cn";
 import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useEffect, useId, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { useProductForm } from "@/components/product-detail/product-form";
@@ -29,11 +29,22 @@ export function BuyButtons({
   const { formProps, pending, register, selectedVariant: storeVariant } = useProductForm();
   const selectedVariant = storeVariant ?? fallbackVariant;
 
+  const locale = useLocale();
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
   const isSelectionUnresolved = !storeVariant;
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [purchaseOption, setPurchaseOption] = useState("");
+  const purchaseOptionId = useId();
+  const plans =
+    selectedVariant?.sellingPlanAllocations.filter(
+      (allocation) => allocation.sellingPlan.recurringDeliveries,
+    ) ?? [];
+  const selectedPlan =
+    plans.find((allocation) => allocation.sellingPlan.id === purchaseOption) ??
+    (selectedVariant?.requiresSellingPlan ? plans[0] : undefined);
+  const missingRequiredPlan = Boolean(selectedVariant?.requiresSellingPlan && !selectedPlan);
   const { openOverlay } = useCartDrawer();
 
   useEffect(() => {
@@ -60,6 +71,7 @@ export function BuyButtons({
     if (pending) return t("addingToCart");
     if (isSelectionUnresolved) return t("addToCart");
     if (requiresBundleConfiguration) return t("bundleConfigurationRequired");
+    if (missingRequiredPlan) return t("subscriptionUnavailable");
     if (isOutOfStock) return t("outOfStock");
     return t("addToCart");
   };
@@ -68,7 +80,13 @@ export function BuyButtons({
     <form
       {...formProps({
         beforeSubmit: (event) => {
-          if (isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration || pending) {
+          if (
+            isSelectionUnresolved ||
+            isOutOfStock ||
+            requiresBundleConfiguration ||
+            missingRequiredPlan ||
+            pending
+          ) {
             event.preventDefault();
             return;
           }
@@ -77,6 +95,48 @@ export function BuyButtons({
       })}
       className="grid gap-2.5"
     >
+      {plans.length > 0 ? (
+        <fieldset className="grid gap-2.5" disabled={pending || isSelectionUnresolved}>
+          <legend className="pb-2.5 text-sm font-medium">{t("purchaseOptions")}</legend>
+          {[
+            ...(!selectedVariant.requiresSellingPlan
+              ? [{ id: "", name: t("oneTimePurchase"), price: selectedVariant.price }]
+              : []),
+            ...plans.map((allocation) => ({
+              id: allocation.sellingPlan.id,
+              name: allocation.sellingPlan.name,
+              price: allocation.price,
+            })),
+          ].map((option) => (
+            <label
+              key={option.id}
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-border p-4 has-checked:border-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50"
+            >
+              <input
+                type="radio"
+                name={purchaseOptionId}
+                value={option.id}
+                checked={(selectedPlan?.sellingPlan.id ?? "") === option.id}
+                onChange={() => setPurchaseOption(option.id)}
+                className="size-4 cursor-pointer accent-foreground disabled:cursor-not-allowed"
+              />
+              <span className="flex flex-1 flex-wrap items-center justify-between gap-2.5 text-sm">
+                <span>{option.name}</span>
+                <span className="tabular-nums">
+                  {formatMoney(option.price, { locale }).localizedString}
+                </span>
+              </span>
+            </label>
+          ))}
+          {selectedPlan ? (
+            <p className="text-sm text-muted-foreground">
+              {t("recurringPurchase")}{" "}
+              {selectedPlan.sellingPlan.description || t("subscriptionCheckoutDetails")}
+            </p>
+          ) : null}
+        </fieldset>
+      ) : null}
+      <input type="hidden" name="sellingPlanId" value={selectedPlan?.sellingPlan.id ?? ""} />
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
       <div className="flex gap-2.5">
@@ -116,7 +176,13 @@ export function BuyButtons({
         <Button
           {...register("addToCart", {})}
           data-selection-unresolved={isSelectionUnresolved && !pending}
-          disabled={isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration || pending}
+          disabled={
+            isSelectionUnresolved ||
+            isOutOfStock ||
+            requiresBundleConfiguration ||
+            missingRequiredPlan ||
+            pending
+          }
           className={cn(
             "h-12 min-w-0 flex-1 justify-center data-[selection-unresolved=true]:disabled:opacity-100",
             ctaColored && "bg-[#ff7900] text-white hover:bg-[#ff7900]/90",
@@ -125,7 +191,7 @@ export function BuyButtons({
           {getButtonText()}
         </Button>
       </div>
-      {buyWithShop ? (
+      {buyWithShop && !selectedPlan && !selectedVariant.requiresSellingPlan ? (
         <a
           aria-busy={isBuyingNow || undefined}
           aria-disabled={buyNowUrl ? undefined : true}
