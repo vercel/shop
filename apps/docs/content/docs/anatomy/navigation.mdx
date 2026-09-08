@@ -14,9 +14,17 @@ Search opens as a dialog. It shows suggestions and matching products as the shop
 
 The cart badge shows the current item count and opens the cart.
 
+## Prepare pages before navigation
+
+Storefront links prepare a shared page shell when they become visible. After a shopper hovers or focuses a link with the keyboard for 100 milliseconds, the storefront can also prepare cached content for that destination. Moving to another link cancels the previous intent upgrade; it does not guarantee cancellation of network requests already sent. Touch interactions keep the shared-shell behavior.
+
+The storefront Link defaults to `prefetch="intent"`. Use `prefetch="auto"` or `null` for Next.js's default shell prefetching, `true` for eager per-link prefetching, or `false` to disable all prefetching for that link. Use a regular anchor or `prefetch={false}` for action URLs. Intent upgrades are skipped for external destinations, downloads, new-tab targets, same-page fragments, and disabled links, and while offline, hidden, or using a browser's Save-Data setting. These checks do not disable Next.js's default shell prefetching.
+
+Prefetching is best-effort: uncached content still streams after navigation, and a quick click can arrive before the destination is ready.
+
 ## Choose how links are managed
 
-The default storefront includes a single Shop link. This is suitable for a small catalog or a navigation structure managed in code.
+Set `shopConfig.navigation.nav` and `shopConfig.navigation.footer` to manage header links and footer columns in code.
 
 Use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to let merchants manage desktop links, mobile links, and footer columns through Shopify Navigation. Menus can contain up to three levels.
 
