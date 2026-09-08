@@ -73,10 +73,6 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
 }
 
 function LightboxImage({ image, label }: { image: ImageType; label: string }) {
-  const blurProps = image.blurDataURL
-    ? { blurDataURL: image.blurDataURL, placeholder: "blur" as const }
-    : {};
-
   return (
     <div
       className="pointer-events-none relative h-full max-w-full"
@@ -90,7 +86,6 @@ function LightboxImage({ image, label }: { image: ImageType; label: string }) {
         sizes="90vw"
         fetchPriority="high"
         loading="eager"
-        {...blurProps}
       />
     </div>
   );

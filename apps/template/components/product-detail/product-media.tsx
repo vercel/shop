@@ -67,10 +67,6 @@ function MediaImage({
   priority: boolean;
   className?: string;
 }) {
-  const blurProps = item.image.blurDataURL
-    ? { blurDataURL: item.image.blurDataURL, placeholder: "blur" as const }
-    : {};
-
   return (
     <Image
       src={item.image.url}
@@ -80,7 +76,6 @@ function MediaImage({
       sizes={sizes}
       {...(priority ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
       draggable={false}
-      {...blurProps}
     />
   );
 }
@@ -319,10 +314,6 @@ export function ColorImageCarouselItems({
   title: string;
 }) {
   return images.map((image, idx) => {
-    const blurProps = image.blurDataURL
-      ? { blurDataURL: image.blurDataURL, placeholder: "blur" as const }
-      : {};
-
     return (
       <div
         key={image.url}
@@ -336,7 +327,6 @@ export function ColorImageCarouselItems({
           sizes="100vw"
           {...(idx === 0 ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
           draggable={false}
-          {...blurProps}
         />
         {idx === 0 ? overlay : null}
       </div>

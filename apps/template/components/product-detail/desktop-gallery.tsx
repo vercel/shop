@@ -111,12 +111,10 @@ export function DesktopGallery({ images, overlay, title, videos }: DesktopGaller
               <Image
                 key={activeItem.image.url}
                 alt={activeItem.image.altText || title}
-                blurDataURL={activeItem.image.blurDataURL}
                 className="object-contain"
                 draggable={false}
                 fetchPriority={activeIndex === 0 ? "high" : "auto"}
                 fill
-                placeholder={activeItem.image.blurDataURL ? "blur" : "empty"}
                 sizes={IMAGE_SIZES}
                 src={activeItem.image.url}
               />
