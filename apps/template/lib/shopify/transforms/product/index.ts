@@ -116,6 +116,15 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
     bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
     components: variant.components?.nodes.map(transformBundleComponent) ?? [],
     requiresComponents: variant.requiresComponents ?? false,
+    requiresSellingPlan: variant.product.requiresSellingPlan,
+    sellingPlanAllocations: variant.sellingPlanAllocations.nodes.map((allocation) => {
+      const adjustment = allocation.priceAdjustments[0];
+      return {
+        compareAtPrice: adjustment?.compareAtPrice ?? variant.compareAtPrice ?? variant.price,
+        price: adjustment?.price ?? variant.price,
+        sellingPlan: allocation.sellingPlan,
+      };
+    }),
   };
 }
 
