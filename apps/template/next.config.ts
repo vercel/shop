@@ -40,7 +40,6 @@ function assertRequiredEnv() {
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
-  experimental: { dynamicOnHover: true },
   images: {
     deviceSizes: [1080],
     imageSizes: [],
