@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { unstable_navigation } from "next/cache";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
@@ -27,6 +28,7 @@ async function Render({
   limit: number;
   locale: Locale;
 }) {
+  await unstable_navigation();
   const resolvedHandle = await handle;
   const [t, related] = await Promise.all([
     getTranslations("product"),
