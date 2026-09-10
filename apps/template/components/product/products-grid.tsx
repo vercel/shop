@@ -23,10 +23,11 @@ export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonP
 interface ProductsGridProps {
   collectionUrl?: string;
   limit: number;
+  query?: string;
   title: string;
 }
 
-export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps) {
+export function ProductsGrid({ collectionUrl, limit, query, title }: ProductsGridProps) {
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
@@ -41,7 +42,7 @@ export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps)
         )}
       </div>
       <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
-        <ProductsGridContent limit={limit} outOfStockText="Out of Stock" />
+        <ProductsGridContent limit={limit} outOfStockText="Out of Stock" query={query} />
       </Suspense>
     </div>
   );
@@ -50,13 +51,15 @@ export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps)
 async function ProductsGridContent({
   limit,
   outOfStockText,
+  query,
 }: {
   limit: number;
   outOfStockText: string;
+  query?: string;
 }) {
-  // Use the search index (not the products connection) so these match the first items on /collections/all.
   const { products } = await searchIndexProducts({
     limit,
+    query,
   });
   if (products.length === 0) return null;
   return (

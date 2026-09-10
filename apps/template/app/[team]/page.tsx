@@ -46,7 +46,12 @@ export default async function HomePage() {
         </section>
 
         <Container>
-          <ProductsGrid title="Products" limit={8} collectionUrl="/collections/all" />
+          <ProductsGrid
+            collectionUrl="/collections/all"
+            limit={8}
+            query={team.apparelColor}
+            title="Products"
+          />
         </Container>
       </Sections>
     </Page>

@@ -2,6 +2,7 @@ import type { Team, TeamId } from "./types";
 
 export const TEAMS = {
   team1: {
+    apparelColor: "Blue",
     ctaColor: "#1d4ed8",
     ctaForeground: "#ffffff",
     description: "Find your next game-day favorite and show up for Northside.",
@@ -10,6 +11,7 @@ export const TEAMS = {
     name: "Northside Hawks",
   },
   team2: {
+    apparelColor: "Red",
     ctaColor: "#b91c1c",
     ctaForeground: "#ffffff",
     description: "Apparel for Harbor supporters, from the first whistle to the trip home.",
@@ -18,6 +20,7 @@ export const TEAMS = {
     name: "Harbor Foxes",
   },
   team3: {
+    apparelColor: "Green",
     ctaColor: "#166534",
     ctaForeground: "#ffffff",
     description: "Get ready for the season with everyday favorites for Summit fans.",
@@ -26,6 +29,7 @@ export const TEAMS = {
     name: "Summit Bears",
   },
   team4: {
+    apparelColor: "Purple",
     ctaColor: "#7e22ce",
     ctaForeground: "#ffffff",
     description: "Pick your game-day look and support Metro wherever you watch.",
