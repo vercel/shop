@@ -81,6 +81,14 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     status,
   } = agent;
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
+  const hasReachedLimit = messages.some((message) =>
+    message.parts.some(
+      (part) =>
+        part.type === "dynamic-tool" &&
+        part.state === "approval-requested" &&
+        part.toolMetadata?.eve?.inputRequest?.kind === "session-limit",
+    ),
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
@@ -149,7 +157,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     });
   };
   const handleSend = (text: string) => {
-    if (busy || clearing) return;
+    if (busy || clearing || hasReachedLimit) return;
     pinnedRef.current = true;
     setAgentCartPending(true);
     setControlError(null);
@@ -257,8 +265,13 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
             : "Restoring your conversation… Clear chat to start fresh."}
         </p>
       )}
+      {hasReachedLimit && (
+        <p role="alert" className="px-5 py-2 text-muted-foreground text-xs">
+          This conversation has reached its limit. Clear chat to start a new conversation.
+        </p>
+      )}
       <AgentComposer
-        disabled={clearing}
+        disabled={clearing || hasReachedLimit}
         onChange={setInput}
         onStop={handleStop}
         onSubmit={handleSend}

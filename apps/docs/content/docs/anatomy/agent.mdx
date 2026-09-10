@@ -52,6 +52,8 @@ Cart tools expose an item summary and mutation warnings, not the full cart or gi
 
 ## Production limits
 
+Each conversation has a usage limit. When it is reached, the assistant stops accepting new messages and prompts the shopper to clear the chat to start a new conversation.
+
 BotID is configured separately and disabled by default. Enable `botid.isEnabled` on Vercel to protect anonymous browser requests. Bot detection is not user authentication or a spending cap. Add deployment-level rate limits and Gateway spending controls appropriate to public traffic.
 
 The assistant has no shell, file, general web-browsing, or delegation tools. Its Shopify connections expose only catalog and policy reads; cart writes use Hydrogen's server handlers.

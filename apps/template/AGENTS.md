@@ -26,7 +26,21 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ## The AI assistant uses Eve — read its bundled docs
 
-The assistant uses `agent/`, `withEve`, and `useEveAgent`. Start with `node_modules/eve/docs/README.md` and read the relevant channel, tool, connection, and frontend guides before changing it. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js only prepares the browser cart under `/api/agent/session`. Eve tools call Shopify directly using shared uncached catalog operations and Hydrogen cart handlers. Keep Next.js request/cache APIs out of Eve's runtime import graph.
+The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js only prepares the browser cart under `/api/agent/session`. Eve tools call Shopify directly using shared uncached catalog operations and Hydrogen cart handlers. Keep Next.js request/cache APIs out of Eve's runtime import graph.
+
+### Keep Eve work bounded
+
+- Before changing framework behavior, start with `node_modules/eve/docs/README.md` and read the page it routes the task to. Resolve the installed package from this app; package-manager links can hide files from recursive searches even when direct reads work.
+- Inspect public types or follow additional references only when that guide leaves a concrete question unanswered. Stop discovery once the file location, imports, and API shape are clear; implement the smallest complete change, then expand investigation only when a focused check fails.
+- For copy-only changes, edit the existing authored instructions. Preserve the selected model unless the user requests a model change.
+- Before adding an external integration, use `pnpm exec eve registry search <query> --json` and `pnpm exec eve registry view <item>`. Prefer a suitable native integration over a custom transport. Preserve this app's Next.js deployment through `withEve`; standalone Eve deployment instructions are not a replacement for it.
+
+### Verify shopper-visible behavior
+
+- For conversation or catalog changes, check multiple product-search turns in one browser session with real Shopify responses. Confirm visible cards, follow-up responses, and token usage; a successful build, HTTP status, or tool result does not establish that the shopper saw a result.
+- For session-control changes, check restoration, Stop/Clear recovery, failures, and usage-limit feedback. Pending approvals and session limits must not appear as successful empty responses or allow messages to disappear into a paused session.
+- When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering or raising budgets. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
+- Use the narrowest checks that establish the changed behavior. Distinguish mocked or replayed checks, local production-browser checks, and checks against the deployed preview; do not present one as proof of another. Keep diagnostic credentials out of source and output, and default to read-only probes.
 
 ## Critical Rules (Always Apply)
 
