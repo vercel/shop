@@ -24,7 +24,9 @@ function getParam(searchParams: SearchParams, key: string): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export async function generateMetadata({ searchParams }: PageProps<"/search">): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/[team]/search">): Promise<Metadata> {
   const resolvedSearchParams = await searchParams;
   const query = getParam(resolvedSearchParams, "q") ?? "";
   const hasQuery = query.length > 0;
@@ -58,7 +60,7 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
   };
 }
 
-export default function SearchPage({ searchParams }: PageProps<"/search">) {
+export default function SearchPage({ searchParams }: PageProps<"/[team]/search">) {
   // Don't await searchParams here — it would force the route fully dynamic.
   const searchStatePromise = getCollectionSearchState(searchParams);
   const searchResultsDataPromise = (async () => {
@@ -102,7 +104,7 @@ async function SearchBrowse({
   searchResultsDataPromise,
   searchStatePromise,
 }: {
-  searchParamsPromise: PageProps<"/search">["searchParams"];
+  searchParamsPromise: PageProps<"/[team]/search">["searchParams"];
   searchResultsDataPromise: Promise<SearchResultsData>;
   searchStatePromise: Promise<Awaited<ReturnType<typeof getCollectionSearchState>>>;
 }) {
@@ -128,7 +130,7 @@ async function SearchBrowse({
 async function SearchAnalyticsTracker({
   searchParamsPromise,
 }: {
-  searchParamsPromise: PageProps<"/search">["searchParams"];
+  searchParamsPromise: PageProps<"/[team]/search">["searchParams"];
 }) {
   const query = getParam(await searchParamsPromise, "q");
   return <SearchViewedTracker searchTerm={query ?? ""} />;
@@ -137,7 +139,7 @@ async function SearchAnalyticsTracker({
 async function SearchQueryLabel({
   searchParamsPromise,
 }: {
-  searchParamsPromise: PageProps<"/search">["searchParams"];
+  searchParamsPromise: PageProps<"/[team]/search">["searchParams"];
 }) {
   const resolvedSearchParams = await searchParamsPromise;
   const query = getParam(resolvedSearchParams, "q");

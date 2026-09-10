@@ -23,7 +23,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/blogs/[blogHandle]">): Promise<Metadata> {
+}: PageProps<"/[team]/blogs/[blogHandle]">): Promise<Metadata> {
   const { blogHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE) return {};
   const blog = await getBlog({
@@ -44,7 +44,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPage({ params }: PageProps<"/blogs/[blogHandle]">) {
+export default async function BlogPage({ params }: PageProps<"/[team]/blogs/[blogHandle]">) {
   const { blogHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE) notFound();
   const blog = await getBlog({

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import "./globals.css";
-import { Suspense } from "react";
+import "../globals.css";
+import { type CSSProperties, Suspense } from "react";
 
 import { ActionBar } from "@/components/action-bar";
 import { AgentButton } from "@/components/agent/agent-button";
@@ -16,6 +16,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { buildAlternates } from "@/lib/seo";
+import { TEAMS } from "@/lib/tenant";
+import { getTeam } from "@/lib/tenant/server";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +29,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export function generateStaticParams() {
+  return Object.keys(TEAMS).map((team) => ({ team }));
+}
+
+export default async function RootLayout({ children }: LayoutProps<"/[team]">) {
+  const team = await getTeam();
   // Un-awaited: the promise streams to the client provider; never block the shell on it.
   const cartData = seedCartData();
   return (
@@ -35,6 +42,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head />
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
+        data-team={team.id}
+        style={
+          {
+            "--primary": team.ctaColor,
+            "--primary-foreground": team.ctaForeground,
+          } as CSSProperties
+        }
       >
         <a
           href="#main-content"
@@ -45,7 +59,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteSchema />
 
         <CartProviderWrapper cartData={cartData}>
-          <Nav />
+          <Nav name={team.name} />
           <main id="main-content" className="flex flex-1 flex-col min-w-0">
             {children}
           </main>
@@ -65,17 +79,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 }
 
 export const generateMetadata = async (): Promise<Metadata> => {
+  const team = await getTeam();
   return {
     alternates: buildAlternates({ pathname: "/" }),
-    description: `Shop premium products, curated collections, and latest offers from ${shopConfig.site.name}.`,
+    description: team.description,
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),
     openGraph: {
       images: [{ url: "/og-default.png", width: 1200, height: 630 }],
     },
     title: {
-      default: shopConfig.site.name,
-      template: `%s | ${shopConfig.site.name}`,
+      default: team.name,
+      template: `%s | ${team.name}`,
     },
   };
 };

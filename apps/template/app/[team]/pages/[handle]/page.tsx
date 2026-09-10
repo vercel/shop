@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/pages/[handle]">): Promise<Metadata> {
+}: PageProps<"/[team]/pages/[handle]">): Promise<Metadata> {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) return {};
   const page = await getPage({
@@ -43,7 +43,7 @@ export async function generateMetadata({
 
 export const instant = false;
 
-export default async function ShopifyPage({ params }: PageProps<"/pages/[handle]">) {
+export default async function ShopifyPage({ params }: PageProps<"/[team]/pages/[handle]">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const page = await getPage({

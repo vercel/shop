@@ -20,6 +20,7 @@ import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/repres
 import { getMarkdownPath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
+import { getTeamIdFromHost, isTeamId } from "@/lib/tenant";
 
 const AUTH_PATHS = new Set<string>([
   CUSTOMER_ACCOUNT_AUTHORIZE_PATH,
@@ -37,6 +38,17 @@ const NOOP_SESSION_MANAGER = {
 
 export async function proxy(request: NextRequest): Promise<Response> {
   const pathname = request.nextUrl.pathname;
+  // Local Next servers can normalize nextUrl to localhost even when the request uses a tenant host.
+  const team = getTeamIdFromHost(request.headers.get("host") ?? request.nextUrl.host);
+  let firstSegment: string;
+  try {
+    firstSegment = decodeURIComponent(pathname.split("/")[1] ?? "");
+  } catch {
+    return new NextResponse("Not found", { status: 404 });
+  }
+  if (!team || isTeamId(firstSegment)) {
+    return new NextResponse("Not found", { status: 404 });
+  }
 
   if (pathname === "/.well-known/ucp") {
     // Hydrogen's well-known proxy does not yet include UCP.
@@ -104,9 +116,13 @@ export async function proxy(request: NextRequest): Promise<Response> {
     }
   }
 
-  const response = NextResponse.next({
-    request: { headers: requestContext.getForwardedRequestHeaders() },
-  });
+  const unscoped = [".well-known", "__shopify", "_next", "agent", "api", "md", "sitemap"].includes(
+    firstSegment,
+  );
+  const url = request.nextUrl.clone();
+  url.pathname = `/${team}${pathname === "/" ? "" : pathname}`;
+  const options = { request: { headers: requestContext.getForwardedRequestHeaders() } };
+  const response = unscoped ? NextResponse.next(options) : NextResponse.rewrite(url, options);
   if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
@@ -122,7 +138,7 @@ export const config = {
     "/agent/:action(handoff|buyer-claims).:format",
     "/cart.:format(js|json)",
     "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/((?!api(?:/|$)|_next(?:/|$)|_vercel(?:/|$)|favicon\\.ico$|robots\\.txt$|sitemap\\.xml$|llms\\.txt$|og-default\\.png$).*)",
     "/.well-known/:path*",
   ],
 };

@@ -12,7 +12,7 @@ import { MobileMenu } from "./mobile-menu";
 import { QuickLinks } from "./quick-links";
 import { SearchModal } from "./search-modal";
 
-export function Nav() {
+export function Nav({ name = shopConfig.site.name }: { name?: string }) {
   const items: MenuItem[] = [
     { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
   ];
@@ -25,7 +25,7 @@ export function Nav() {
         <MobileMenu items={items} />
 
         <Link className="flex items-center shrink-0" href="/">
-          <span className="text-xl leading-4">{shopConfig.site.name}</span>
+          <span className="text-xl leading-4">{name}</span>
         </Link>
 
         <QuickLinks items={items} />

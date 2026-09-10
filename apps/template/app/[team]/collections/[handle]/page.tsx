@@ -20,7 +20,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/collections/[handle]">): Promise<Metadata> {
+}: PageProps<"/[team]/collections/[handle]">): Promise<Metadata> {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) {
     notFound();
@@ -79,7 +79,7 @@ export const instant = false;
 export default async function CollectionPage({
   params,
   searchParams,
-}: PageProps<"/collections/[handle]">) {
+}: PageProps<"/[team]/collections/[handle]">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const collection = await getCollection({
