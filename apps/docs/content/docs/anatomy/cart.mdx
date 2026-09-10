@@ -6,33 +6,37 @@ type: guide
 
 <CartBrowser />
 
-The storefront ships with a shared Shopify cart across product pages, the cart overlay, the full cart page, checkout, and the optional shopping assistant. Shoppers see changes immediately while Shopify confirms prices, discounts, and availability.
+Shoppers use one Shopify cart across product pages, the cart drawer, and the full cart page. [Shop Agent](/docs/anatomy/agent) uses that same cart when enabled.
 
-No additional setup is required for the standard cart. The cart ID is stored in a `cart` cookie for 14 days. After that cookie expires, the shopper starts a new cart.
+The standard cart is ready to use without additional setup. The storefront remembers it in the same browser for up to 14 days.
 
 ## Shopper experience
 
-Shoppers can add products, change quantities, remove lines, apply discount codes, and proceed to checkout. The cart overlay is available throughout the storefront, and `/cart` provides the full cart.
+Shoppers can add products, change quantities, remove items, apply discount codes, and proceed to checkout. The cart drawer is available throughout the storefront, and `/cart` provides a full-page view.
 
-Updates are optimistic: quantities and badges change immediately, then reconcile with Shopify. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Prices and totals show muted updating text while Shopify confirms the cost. Line-specific errors appear alongside the affected item.
+Quantity changes appear immediately while Shopify confirms them. If Shopify rejects a change, the cart returns to its confirmed state and shows the relevant error. Prices and totals indicate when they are still updating. Errors for a particular item appear alongside it.
 
-Checkout stays unavailable while cart changes or a cart refresh are pending, including changes to discounts, order notes, and cart attributes. The cart page and overlay confirm the checkout link before sending the shopper to Shopify. If checkout preparation fails or the cart changes during preparation, an inline message lets the shopper try again. Returning from checkout restores the checkout button.
+Checkout stays unavailable until pending cart changes are confirmed. If checkout cannot start, an inline message lets the shopper try again without rebuilding the cart.
 
-The cart displays confirmed discounts and sale pricing. Shopify bundles remain grouped so shoppers can understand which products belong together. Quantity and remove controls follow Shopify's rules for each line, so some bundle lines may not be editable individually.
+The cart displays discounts and sale pricing confirmed by Shopify. Bundles remain grouped so shoppers can understand which products belong together. Some bundle items cannot be edited individually.
 
-When customer authentication is enabled, sign-in can attach the existing browser cart to the customer. Checkout can then use the customer's saved details. See [Authentication](/docs/anatomy/authentication).
+When [customer authentication](/docs/anatomy/authentication) is enabled, signing in can attach the browser cart to the customer so checkout can use their saved details. Customer sign-in is optional and disabled by default.
 
-The shopping assistant uses the same cart. The storefront refreshes it after the assistant's response settles. Stopping a response does not roll back a Shopify write that has already started. Checkout in that tab waits during the response and cart reconciliation. Inspect the cart before requesting another change. The browser does not resubmit mutations from restored messages, but Eve can rerun an interrupted tool step; see [Agent](/docs/anatomy/agent) for replay and access limitations.
+### Cart changes through chat
 
-If `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` is set, server-side cart activity is attributed to the corresponding Headless storefront. See [Environment Variables](/docs/reference/env-vars).
+Shop Agent is optional and disabled by default. When enabled, it can add items, update quantities, remove items, and add an order note. Confirmed changes open the cart drawer for review.
+
+Stopping a reply does not guarantee that a cart change has stopped. Check the cart before repeating a request after an interruption. See [Shop Agent](/docs/anatomy/agent) for setup, conversation controls, and usage limits.
 
 ## Important limits
 
-- The cookie has a 14-day lifetime, but shoppers can lose access sooner if they clear browser data or Shopify no longer returns the cart.
-- Shopify remains authoritative for inventory, prices, discounts, and line-editing rules.
+- Cart recovery depends on the browser retaining its cookie and Shopify still returning the cart. Clearing browser data can start a new cart sooner than 14 days.
+- Shopify determines inventory, prices, discounts, and which changes are allowed. An item being in the cart does not guarantee it will remain available at checkout.
 - Cart updates can fail because of availability, quantity, discount, or checkout restrictions.
-- Gift cards and bundles can carry information that ordinary product lines do not; preserve that data when extending cart behavior.
+- Preserve gift-card recipient details and bundle information when customizing the cart so that checkout receives everything needed to fulfill the order.
+
+If you need to attribute cart activity to a particular Headless storefront, set `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID`. See [Environment Variables](/docs/reference/env-vars#optional).
 
 ## What’s next
 
-You can adjust the cart lifetime, expose order-level attributes, support personalized products, or add custom bundle purchase flows. Keep the cookie lifetime aligned with Shopify's cart handling, preserve all line attributes needed at checkout, and continue treating Shopify's confirmed cart as the source of truth.
+Add gift messages, personalization, or other order details to suit your store. Make sure that information reaches checkout, and keep Shopify responsible for prices and availability. Custom bundle flows should make clear which items shoppers can change together or separately.

@@ -130,7 +130,7 @@ When UI outside a price object needs a currency code, pass one from fetched Shop
 
 ## 3. Install next-intl and migrate copy
 
-Use the `enable-i18n` section "Introduce next-intl and migrate copy" for the full migration. On a fresh storefront, run `pnpm add next-intl`, create its request config, and compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Preserve other wrappers, rewrites, and Cache Components settings. Do not apply copy-only commerce rules or force `localePrefix: "always"` when using this Markets skill.
+Use the `enable-i18n` section "Introduce next-intl and migrate copy" for the full migration. On a fresh storefront, run `pnpm add next-intl`, create its request config, and compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Use the existing `withShopConfig` plugin list when present, preserving conditional `withBotId` and `withEve` entries, their order, and the installation's feature settings. Preserve other wrappers, rewrites, and Cache Components settings. Do not apply copy-only commerce rules or force `localePrefix: "always"` when using this Markets skill.
 
 Build the initial catalog from the installation's actual inline copy, component configuration labels, and reusable functions in `lib/content/index.ts`. Convert typed interpolation and plural functions to equivalent ICU messages, preserving parameters, zero/one/many behavior, rich text, errors, and accessibility labels. Do not serialize functions or write a custom `t()` parser. Preserve already translated/customized catalogs rather than regenerating them from the template.
 
@@ -225,6 +225,7 @@ Move:
 Keep these unlocalized at `app/`:
 
 - `api/`
+- the assistant's public profile under `agent/`
 - markdown route handlers under `md/`
 - `robots.ts`
 - `sitemap.xml/` and `sitemap/`
@@ -295,7 +296,7 @@ export const config = {
 };
 ```
 
-Never widen the matcher to `/api/:path*`: application Route Handlers such as `/api/webhooks`, `/api/agent/session`, `/api/agent/commerce`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
+Never widen the matcher to `/api/:path*`: application Route Handlers such as `/api/webhooks/shopify`, `/api/agent/session`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
 
 For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 
@@ -324,6 +325,8 @@ Inspect `getMenu` and its callers; where needed, extend `getMenu({ handle })` to
 Pass the active validated commerce context into the Shopify/Hydrogen request context instead of pinning it to `shopConfig.localization` or an older `defaultLocale`. Preserve locale across login, authorize, refresh, and logout return URLs. Validate any locale carried through OAuth state or URL params.
 
 ### Chat and agent API
+
+Shop Agent is disabled by default. Preserve that setting; enabling Markets must not enable chat. When chat is enabled, inspect `agent/channels/eve.ts`, `agent/tools/`, `agent/lib/`, and the Shopify connections rather than adding an app-owned chat route or commerce HTTP bridge.
 
 Eve's session routes live outside `[locale]`, and invisible URLs do not reveal locale in the referer. Carry the selected locale explicitly, validate it against the installed locale allowlist during cart setup and in Eve's channel, and pass the validated commerce context to the direct Shopify tools and connections. Client context can describe the page, but must not select an arbitrary cart or an unsupported locale. Do not infer locale from URL segments or fall back unconditionally to `defaultLocale`.
 

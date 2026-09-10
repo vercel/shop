@@ -59,13 +59,13 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 - **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via `lib/config/index.ts`
 - **Tailwind CSS 4** and shadcn/ui components
 - **Single-locale storefront** with explicit country, language, and display locale; optional skills add next-intl and multi-locale routing
-- **Shopping assistant** with Eve sessions and Shopify connections
+- **Optional Shop Agent** for product discovery, store questions, and cart updates
 - **Optimistic cart** with Hydrogen forms, shared cart state, and server handlers
 - **SEO** with structured data and dynamic metadata
 
-Customer authentication is disabled by default. To enable it, set `auth.isEnabled` in `lib/config/index.ts` and provide `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET`. Keep both secrets server-only. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure callback URLs and local HTTPS.
+Customer authentication is disabled by default. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure Shopify credentials and callback URLs before enabling `auth.isEnabled` in `lib/config/index.ts`.
 
-Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` to enable it with the existing Shopify credentials plus AI Gateway access. Follow the [assistant guide](https://vercel.shop/docs/anatomy/agent) for Eve, BotID, public-session limitations, and deployment setup. When enabled, Vercel builds the Eve service through the Next.js integration. For local production with the agent enabled, run `pnpm build:agent && pnpm build`, then keep `pnpm exec eve start --port 4274` running alongside `pnpm start`. With the agent enabled, `pnpm dev` starts both automatically.
+Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` and follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to configure AI Gateway access and review privacy and spending safeguards before enabling public chat.
 
 ## Skills
 

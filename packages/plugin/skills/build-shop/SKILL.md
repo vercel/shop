@@ -48,6 +48,16 @@ The default storefront uses inline component copy and reusable content functions
 
 `shopConfig.localization` explicitly sets `{ country: "US", language: "EN", locale: "en-US" }`; country/language configure commerce requests and locale configures formatting. Currency comes from Shopify. Clean URLs and one deployment are the default; `lib/i18n/` and a Server Component locale resolver are absent. Operation locale/cache inputs may still be intentional. Preserve existing next-intl, catalogs, localized routes, and custom commerce behavior in upgraded installations. Use `enable-i18n` for copy/routing or `enable-shopify-markets` for regional commerce rather than coupling the two implicitly.
 
+## Shop Agent boundaries
+
+Shop Agent, customer authentication, and BotID are disabled by default. Preserve the installation's feature settings; a storefront redesign or localization change must not enable them implicitly.
+
+For assistant changes, read the installed Eve docs starting at `node_modules/eve/docs/README.md`, then only the guide relevant to the task. Preserve Next.js deployment through `withEve` and the conditional plugin list passed to `withShopConfig` in `next.config.ts`.
+
+Eve owns `/eve/v1/*`. Next.js prepares the browser cart through `/api/agent/session`; do not add another chat route or internal commerce HTTP bridge. Tool schemas and execution belong in `agent/tools/`, shared execution helpers in `agent/lib/`, and browser state, presentation helpers, and shared result types in `lib/agent/`. Keep Next.js request/cache APIs out of Eve's runtime imports. Use shared uncached catalog operations and Hydrogen cart handlers directly, with cart identity bound from the browser cookie rather than model arguments.
+
+Preserve confirmed-mutation signals and Hydrogen reconciliation; restored messages must not replay cart writes or reopen the drawer. Do not claim exactly-once writes, conversation ownership, or server-history deletion on Clear. For conversation changes, check multiple search turns, visible results, and cumulative usage. For session controls, check restoration, Stop/Clear recovery, failures, and usage-limit feedback. Distinguish browser/live-store evidence from mocks and build checks.
+
 ## Route the work
 
 Read `references/rendering-architecture.md` for every route. Then read only the route references that apply:

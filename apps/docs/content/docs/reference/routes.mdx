@@ -1,76 +1,86 @@
 ---
 title: Routes
-description: Storefront pages, service endpoints, and product variant URLs.
+description: Storefront URLs, optional account and chat routes, and service endpoints.
 type: reference
 ---
 
+Storefront pages use the paths below without a language prefix. Customer accounts and Shop Agent are optional and disabled by default.
+
 ## Pages
 
-| Route                                 | Description                                                   |
-| ------------------------------------- | ------------------------------------------------------------- |
-| `/`                                   | Home page                                                     |
-| `/products/[handle]`                  | Product detail page; option query parameters select a variant |
-| `/collections`                        | Collection index                                              |
-| `/collections/[handle]`               | Collection listing with filters, sorting, and pagination      |
-| `/collections/all`                    | All-products listing                                          |
-| `/search`                             | Product search results                                        |
-| `/cart`                               | Cart and related products                                     |
-| `/blogs/[blogHandle]`                 | Shopify blog listing                                          |
-| `/blogs/[blogHandle]/[articleHandle]` | Shopify article                                               |
-| `/pages/[handle]`                     | Shopify page                                                  |
-| `/policies/[handle]`                  | Shopify store policy                                          |
+| Route                                 | Description                                               |
+| ------------------------------------- | --------------------------------------------------------- |
+| `/`                                   | Home page                                                 |
+| `/products/[handle]`                  | Product details; option query parameters select a variant |
+| `/collections`                        | Collection index                                          |
+| `/collections/[handle]`               | Collection with filtering, sorting, and pagination        |
+| `/collections/all`                    | All products                                              |
+| `/search`                             | Product search results                                    |
+| `/cart`                               | Full cart page                                            |
+| `/blogs/[blogHandle]`                 | Shopify blog                                              |
+| `/blogs/[blogHandle]/[articleHandle]` | Shopify article                                           |
+| `/pages/[handle]`                     | Shopify page                                              |
+| `/policies/[handle]`                  | Store policy                                              |
 
-## API routes
+## Cart, search, and webhooks
 
-| Route                                          | Description                                                                                         |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `POST /api/webhooks/shopify`                   | Shopify webhook handler for cache invalidation                                                      |
-| `/eve/v1/session` and `/eve/v1/session/[id]/*` | Eve conversation creation, messages, streams, and controls; available when the assistant is enabled |
-| `POST /api/agent/session`                      | Same-origin cart setup before an assistant message                                                  |
-| `GET /agent/ucp-profile.json`                  | Public assistant profile when enabled; distinct from the merchant's `/.well-known/ucp`              |
-| `GET /api/cart`                                | Current cart                                                                                        |
-| `POST /api/cart`                               | Cart creation and updates                                                                           |
-| `GET /api/predictive-search`                   | Search suggestions                                                                                  |
+| Route                        | Description                                         |
+| ---------------------------- | --------------------------------------------------- |
+| `GET /api/cart`              | Read the current cart                               |
+| `POST /api/cart`             | Create a cart or change its contents                |
+| `GET /api/predictive-search` | Search suggestions                                  |
+| `POST /api/webhooks/shopify` | Receive signed Shopify webhooks for catalog updates |
 
-Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, webhook, and assistant cart setup. Eve owns conversation routes on the same origin and calls Shopify directly.
+See [Cart](/docs/anatomy/cart) for shopper behavior and [Environment Variables](/docs/reference/env-vars) for webhook configuration.
+
+## Shop Agent
+
+These endpoints are available only when `agent.isEnabled` is `true`. Follow [Shop Agent setup](/docs/anatomy/agent) before enabling them.
+
+| Route                         | Description                                                          |
+| ----------------------------- | -------------------------------------------------------------------- |
+| `/eve/v1/*`                   | Conversation creation, messages, history, and controls               |
+| `POST /api/agent/session`     | Prepare the browser cart for chat; accepts same-origin requests only |
+| `GET /agent/ucp-profile.json` | Public profile for the assistant's Shopify catalog integration       |
+
+Conversation endpoints are supplied by [Eve](https://eve.dev/docs). Enabling customer accounts does not make conversations private; see the [chat privacy requirements](/docs/anatomy/agent#privacy-and-usage-limits).
 
 ## Customer accounts
 
-These routes require `auth.isEnabled` and the [authentication credentials](/docs/reference/env-vars#customer-authentication): a Shopify client ID, Shopify client secret, and a separate app-generated session secret. Account pages require sign-in. Hydrogen's registered handlers serve the OAuth routes through the Next.js proxy; Next.js renders the protected account pages.
+These routes require `auth.isEnabled` to be `true` and the [customer authentication credentials](/docs/reference/env-vars#customer-authentication). Account pages require sign-in. See [Authentication](/docs/anatomy/authentication) for setup and callback URLs.
 
-| Route                    | Description                                            |
-| ------------------------ | ------------------------------------------------------ |
-| `/account`               | Redirects to `/account/profile`                        |
-| `/account/profile`       | Customer profile                                       |
-| `/account/addresses`     | Saved addresses                                        |
-| `/account/orders`        | Order history                                          |
-| `/account/orders/[id]`   | Order details                                          |
-| `GET /account/login`     | Starts customer sign-in                                |
-| `GET /account/authorize` | OAuth callback                                         |
-| `GET /account/refresh`   | Refreshes the customer session                         |
-| `POST /account/logout`   | Signs the customer out; requires a same-origin request |
+| Route                    | Description                              |
+| ------------------------ | ---------------------------------------- |
+| `/account`               | Redirect to `/account/profile`           |
+| `/account/profile`       | Customer profile                         |
+| `/account/addresses`     | Saved addresses                          |
+| `/account/orders`        | Order history                            |
+| `/account/orders/[id]`   | Order details                            |
+| `GET /account/login`     | Start customer sign-in                   |
+| `GET /account/authorize` | Sign-in callback                         |
+| `GET /account/refresh`   | Refresh the customer session             |
+| `POST /account/logout`   | Sign out; requires a same-origin request |
 
 ## Discovery and Markdown
 
-| Route                      | Description                         |
-| -------------------------- | ----------------------------------- |
-| `/robots.txt`              | Crawler rules                       |
-| `/sitemap.xml`             | Sitemap index                       |
-| `/sitemap/[shard]`         | Sitemap entries for a content group |
-| `/llms.txt`                | Storefront guide for AI agents      |
-| `/md`                      | Home page in Markdown               |
-| `/md/products/[handle]`    | Product in Markdown                 |
-| `/md/collections/[handle]` | Collection in Markdown              |
-| `/md/search`               | Search results in Markdown          |
+| Route                      | Description                                          |
+| -------------------------- | ---------------------------------------------------- |
+| `/robots.txt`              | Crawler rules                                        |
+| `/sitemap.xml`             | Sitemap index                                        |
+| `/sitemap/[shard]`         | Sitemap entries for a content group                  |
+| `/llms.txt`                | Storefront guide for AI agents                       |
+| `/md`                      | Home page in Markdown                                |
+| `/md/products/[handle]`    | Product in Markdown                                  |
+| `/md/collections/[handle]` | Collection in Markdown                               |
+| `/md/search`               | Search results in Markdown                           |
+| `/.well-known/ucp`         | Shopify's business profile for commerce integrations |
 
-The home, product, collection-detail, and search URLs also return Markdown when requested with `Accept: text/markdown`. See [Proxy](/docs/anatomy/proxy) for Shopify compatibility routes.
+The home, product, collection-detail, and search URLs also return Markdown when requested with `Accept: text/markdown`. See [Proxy](/docs/anatomy/proxy) when adding custom routing or integrations.
 
 ## Variant URLs
 
-Product options use one query parameter per option. The key is the option name as defined in Shopify and the value is the selected option value.
+Product options use one query parameter per option. The key is the option name in Shopify, and the value is the selected option value.
 
-Liquid-style links such as `/products/your-product?variant=123456789` redirect to the matching option-parameter URL.
+For example, `/products/your-product?Color=Blue&Size=XS` selects the blue, extra-small variant. Names and values are matched case-insensitively, so `?color=blue&size=xs` selects the same options. Without option parameters, the page uses the product's default variant.
 
-For example, `/products/your-product?Color=Blue&Size=XS` selects the blue, extra-small variant. Option names and values are matched case-insensitively, so `?color=blue&size=xs` resolves to the same variant. Without option parameters, the page selects the first available variant.
-
-Selecting an option on the same product keeps unrelated query parameters, such as campaign tags, in the URL.
+Liquid-style links such as `/products/your-product?variant=123456789` redirect to the matching option-parameter URL. Selecting an option on the same product keeps unrelated query parameters, such as campaign tags.

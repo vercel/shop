@@ -30,7 +30,7 @@ Confirm the default copy locale and supported copy locales with the user. In a n
 ## Introduce next-intl and migrate copy
 
 1. On a fresh installation, run `pnpm add next-intl` from the storefront root. Read the installed next-intl plugin/request/routing APIs and local Next.js guides before wiring them. If next-intl already exists, preserve its compatible version rather than reinstalling blindly.
-2. Create `lib/i18n/request/server.ts` as described below, then compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Preserve all existing wrappers, rewrites, redirects, and Cache Components settings.
+2. Create `lib/i18n/request/server.ts` as described below, then create the plugin with `createNextIntlPlugin` from `next-intl/plugin` and the explicit request-config path. In the current template, add that plugin to the list passed to `withShopConfig(nextConfig, plugins)`; preserve the conditional `withBotId` and `withEve` entries and their existing order. Do not pass the exported async config factory to a plugin that expects a config object. Preserve customized wrapper composition, rewrites, redirects, and Cache Components settings, and do not enable optional features as part of localization.
 3. Inventory inline JSX text, labels in component configuration, template literals, and reusable functions in `lib/content/index.ts`. Create the default catalog from the storefront's actual customized copy, not a template snapshot. Convert functions to equivalent ICU messages with the same parameter names, zero/one/many behavior, number formatting, rich text, and accessibility labels. Do not serialize functions into JSON or build a custom `t()` parser.
 4. Create catalogs and explicit loaders for each approved locale. Keep keys and interpolation arguments aligned. Do not present an English fallback as a completed translation; agree on any temporary fallback before enabling that locale publicly.
 5. Replace inline server copy and content function calls with `getTranslations()` from `next-intl/server`. Pass translated primitive labels to client leaves when possible. For interactive plurals/interpolation, wrap only the relevant leaf in a Server Component's `NextIntlClientProvider` with the namespaces it uses, then use `useTranslations()` there. Never pass the full catalog from the root layout, and never pass ordinary copy functions across the server/client boundary. Keep `components/ui/` copy-agnostic.
@@ -204,7 +204,7 @@ Move every route file from `app/` into `app/[locale]/`:
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
 - `app/account/`, `app/cart/`, `app/collections/`, `app/pages/`, `app/policies/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
-**Stay at `app/`:** `api/`, `md/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`. Include blogs and any custom storefront pages in the localized route audit; do not limit the move to the example list.
+**Stay at `app/`:** `api/`, `agent/`, `md/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`. Include blogs and any custom storefront pages in the localized route audit; do not limit the move to the example list.
 
 In the moved layout, fix `import "./globals.css"` → `import "../globals.css"`.
 
@@ -305,6 +305,8 @@ export const config = {
 ```
 
 Do not replace the explicit entries with `/api/:path*`: downstream applications must be able to add Route Handlers such as `/api/webhooks` or `/api/custom` without sending them through Shopify dispatch or locale middleware. If a new Hydrogen feature claims another reserved route, add that exact route family.
+
+Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside Shopify dispatch and locale negotiation. Keep `/api/agent/session` and `/agent/ucp-profile.json` unlocalized. If Shop Agent is enabled, carry and validate the copy locale explicitly for conversation context and navigation outputs without changing the deployment's Shopify country/language or allowing client context to select a cart. Keep Next.js request/cache APIs out of Eve's runtime imports.
 
 The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
 
