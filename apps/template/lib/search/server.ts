@@ -1,5 +1,4 @@
 import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
-import "server-only";
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { CollectionSearchState } from "@/lib/collections/types";

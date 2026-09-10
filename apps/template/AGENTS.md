@@ -75,7 +75,7 @@ Use `/vercel-shop:build-shop` when the project plugin is installed for the full 
 Organize `lib/` by domain first, then execution context. Use only the files each domain needs:
 
 - `index.ts` — universal implementation safe for server and client imports; never a re-export barrel.
-- `server.ts` — server-only implementation. Use `import "server-only"` to guard runtime boundaries where appropriate.
+- `server.ts` — server-side implementation; keep it out of client import graphs.
 - `client.ts` — `"use client"` implementation.
 - `action.ts` — `"use server"` entry points, with verb + `Action` suffix on each export.
 - `types.ts` — named contracts owned by the domain, imported with `import type` directly from this file.

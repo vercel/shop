@@ -33,7 +33,7 @@ The template uses the framework-agnostic Hydrogen preview SDK, not Hydrogen's Re
 Organize `lib/` by domain, then use only the context files that domain needs:
 
 - `index.ts` contains universal implementation safe for server and client imports; it is never a re-export barrel.
-- `server.ts` contains server-only implementation, guarded with `import "server-only"` where appropriate.
+- `server.ts` contains server-side implementation; keep it out of client import graphs.
 - `client.ts` is a `"use client"` boundary for browser interaction, not an HTTP transport wrapper.
 - `action.ts` is a `"use server"` entry point whose exports use a verb plus `Action` suffix.
 - `types.ts` owns named shared contracts; consumers import types directly rather than through `server.ts` or `action.ts`.

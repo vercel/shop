@@ -1,4 +1,3 @@
-import "server-only";
 import { type AnyCustomerAccountDocument, gql } from "@shopify/hydrogen/customer-account";
 import { cache } from "react";
 
