@@ -9,27 +9,29 @@ import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/u
 type AgentStatus = "error" | "ready" | "resuming" | "streaming" | "submitted";
 
 interface AgentComposerProps {
-  value: string;
+  className?: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onStop: () => void;
   onSubmit: (text: string) => void;
-  status: AgentStatus;
   placeholder?: string;
-  className?: string;
+  status: AgentStatus;
+  value: string;
 }
 
 export function AgentComposer({
-  value,
+  className,
+  disabled = false,
   onChange,
   onStop,
   onSubmit,
-  status,
   placeholder,
-  className,
+  status,
+  value,
 }: AgentComposerProps) {
   const isBusy = status === "submitted" || status === "streaming";
   const submit = () => {
-    if (status === "resuming") return;
+    if (disabled || status === "resuming") return;
     if (isBusy) {
       onStop();
       return;
@@ -70,7 +72,7 @@ export function AgentComposer({
           size="icon-sm"
           variant="default"
           aria-label={isStopping ? "Stop" : "Send"}
-          disabled={status === "resuming" || (!value.trim() && !isStopping)}
+          disabled={disabled || status === "resuming" || (!value.trim() && !isStopping)}
           className="mr-1.5 mb-1.5"
         >
           {icon}

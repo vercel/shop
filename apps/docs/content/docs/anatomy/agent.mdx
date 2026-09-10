@@ -34,7 +34,9 @@ The assistant uses the cart identified by the storefront's cookie, not a cart ID
 
 Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. The storefront refreshes the cart after a response settles. The browser does not execute cart mutations from restored messages.
 
-Stop requests cancellation of the Eve turn. A Shopify write that has already started may still finish. Clear waits for an active response to settle before starting a fresh conversation. Checkout in that browser tab waits while the assistant is busy or cart reconciliation is pending. Wait for the response before checking out in another tab.
+Stop requests cancellation of the Eve turn. Clear requests cancellation and starts a fresh conversation, including while saved messages are loading. If cancellation cannot be confirmed, the assistant warns the shopper to inspect the cart before requesting another change. A Shopify write that has already started may still finish.
+
+Checkout in that browser tab waits while the assistant is busy or cart reconciliation is pending. Wait for the response before checking out in another tab.
 
 Eve records completed tool steps, but a step interrupted during execution can run again. Cart writes do not have application-level deduplication. Inspect the cart after an interrupted response and before requesting another change.
 

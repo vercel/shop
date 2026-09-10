@@ -12,6 +12,7 @@ import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
 import { AgentComposer } from "./composer";
 
+const CANCEL_TIMEOUT_MS = 10_000;
 const STORAGE_KEY = "template-eve-chat-v1";
 interface StoredChat {
   input: string;
@@ -52,13 +53,9 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const [input, setInput] = useState(stored.input);
   const snapshot = useRef<StoredChat>(stored);
   const [clearing, setClearing] = useState(false);
-  const clearRequested = useRef(false);
   const [controlError, setControlError] = useState<string | null>(null);
   const agent = useEveAgent({
     initialSession: stored.session,
-    onFinish() {
-      if (clearRequested.current) clearChat();
-    },
     onSessionChange(session) {
       snapshot.current.session = session ? { ...session, streamIndex: 0 } : undefined;
       writeStoredChat(snapshot.current);
@@ -116,7 +113,6 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     };
   }, []);
   function clearChat() {
-    clearRequested.current = false;
     agent.reset();
     setInput("");
     setClearing(false);
@@ -149,8 +145,6 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const handleStop = () => {
     setControlError(null);
     void agent.cancel().catch(() => {
-      clearRequested.current = false;
-      setClearing(false);
       setControlError("Could not stop the response. Please try again.");
     });
   };
@@ -168,15 +162,31 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       );
     setInput("");
   };
-  const handleClear = () => {
-    if (status === "resuming") return;
-    if (!busy) {
-      clearChat();
-      return;
-    }
-    clearRequested.current = true;
+  const handleClear = async () => {
+    if (clearing) return;
     setClearing(true);
-    handleStop();
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let couldNotStop = false;
+    try {
+      await Promise.race([
+        agent.cancel(),
+        new Promise<never>((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error("Cancellation timed out")),
+            CANCEL_TIMEOUT_MS,
+          );
+        }),
+      ]);
+    } catch {
+      couldNotStop = true;
+    } finally {
+      clearTimeout(timeout);
+      clearChat();
+    }
+    if (couldNotStop)
+      setControlError(
+        "Started a new chat, but the previous response may still finish. Check your cart before requesting another change.",
+      );
   };
   return (
     <div
@@ -199,11 +209,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           <button
             aria-label="Clear chat"
             className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={
-              clearing ||
-              status === "resuming" ||
-              (!messages.length && !input.trim() && !stored.session)
-            }
+            disabled={clearing || (!messages.length && !input.trim() && !agent.session && !busy)}
             onClick={handleClear}
             type="button"
           >
@@ -244,12 +250,20 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           )}
         </div>
       </div>
+      {(clearing || (status === "resuming" && messages.length > 0)) && (
+        <p role="status" className="px-5 py-2 text-muted-foreground text-xs">
+          {clearing
+            ? "Starting a new conversation…"
+            : "Restoring your conversation… Clear chat to start fresh."}
+        </p>
+      )}
       <AgentComposer
+        disabled={clearing}
         onChange={setInput}
         onStop={handleStop}
         onSubmit={handleSend}
         placeholder="Ask anything…"
-        status={clearing ? "resuming" : status}
+        status={status}
         value={input}
       />
       {(error || controlError) && (
