@@ -8,7 +8,13 @@ prerequisites:
 
 All stores require the Shopify [Headless sales channel](https://apps.shopify.com/headless). Install and set it up first. Install the other Shopify apps only when your store needs their storefront features.
 
-## Publish products to Headless
+<Callout type="note" title="Stores from the Vercel Marketplace">
+  If you created your store through the [Vercel Marketplace Shopify
+  integration](https://vercel.com/marketplace/shopify), you have the **Vercel Storefronts** channel
+  instead of **Headless**. Manage the storefront and its access token there.
+</Callout>
+
+## Publish products to your Storefront
 
 Install Shopify's [Headless sales channel](https://apps.shopify.com/headless). In your Shopify admin, open the **Headless** app under **Sales channels**, then click **Add storefront** to create a storefront.
 
@@ -23,13 +29,11 @@ Grant the storefront's Storefront API token the required permissions:
 
 For optional scopes and details, see [Storefront API permissions](/docs/reference/storefront-api-permissions).
 
-Publish the products and collections you want to show to the **Headless** channel. See Shopify's guide to [product availability](https://help.shopify.com/en/manual/products/add-update-products#product-availability).
+Publish the products and collections you want to show to the **Headless** channel. See Shopify's guide [here](https://help.shopify.com/en/manual/products/add-update-products#product-availability). Content published only to the **Online Store** channel does not appear in your storefront.
 
-<Callout type="warn" title="Publish to Headless, not only Online Store">
-  Content published only to **Online Store** does not appear in Vercel Shop.
-</Callout>
+## Set the storefront ID
 
-To attribute server-side cart activity to this storefront, copy the storefront's numeric ID to `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID`. Find it in the storefront's URL in the Headless app, after `/headless/`. For example, `https://admin.shopify.com/store/your-store/headless/330461` uses the ID `330461`. Setting it attributes cart and checkout activity to the storefront on the server, which gives you more reliable analytics and funnel metrics that do not depend on the shopper's browser.
+Set the `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` environment variable to attribute server-side cart activity to this storefront. Find the numeric ID in the storefront's URL in the Headless app, after `/headless/`. For example, `https://admin.shopify.com/store/your-store/headless/330461` uses the ID `330461`. Server-side attribution gives you more reliable analytics and funnel metrics that do not depend on the shopper's browser.
 
 ## Configure search, filters, and recommendations
 
@@ -37,16 +41,16 @@ Install [Shopify Search & Discovery](https://apps.shopify.com/search-and-discove
 
 ## Optional Shopify features and apps
 
-<Callout type="info" title="Enable more with skills">
+<Callout type="note" title="Enable more with skills">
   Use [skills](/docs/skills) to enable additional Shopify features on your store with a coding
   agent.
 </Callout>
 
 ### Enable kitting and bundling
 
-Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**. Publishing only to **Online Store** is not enough.
+Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**.
 
-## Next steps
+## Related links
 
 <Cards>
   <Card title="Product Setup" href="/docs/shopify/pdp">

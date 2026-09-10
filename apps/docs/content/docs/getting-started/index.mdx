@@ -6,16 +6,16 @@ type: guide
 
 Connect a Shopify store, then run Vercel Shop locally or deploy it to Vercel.
 
-<Callout type="info" title="Check your Node version">
+<Callout type="note" title="Check your Node version">
   Vercel Shop requires Node.js 24. If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm install
   24 && nvm use 24` before the steps below.
 </Callout>
 
 ## 1. Configure Shopify store
 
-Install Shopify's [Headless sales channel](https://apps.shopify.com/headless), create a storefront, and copy its **Storefront API access token**. Grant the required [Storefront API permissions](/docs/reference/storefront-api-permissions). For the full walkthrough, see [Shopify Setup](/docs/getting-started/shopify-setup).
+Install Shopify's [Headless sales channel](https://apps.shopify.com/headless), create a new storefront in the Headless channel app in your Shopify admin, and copy its **Storefront API access token**. Grant the required [Storefront API permissions](/docs/reference/storefront-api-permissions). For the full walkthrough, see [Shopify Setup](/docs/getting-started/shopify-setup).
 
-<Callout type="info" title="Stores from the Vercel Marketplace">
+<Callout type="note" title="Stores from the Vercel Marketplace">
   If you created your store through the [Vercel Marketplace Shopify
   integration](https://vercel.com/marketplace/shopify), you have the **Vercel Storefronts** channel
   instead of **Headless**. Manage the storefront and its access token there.
@@ -39,7 +39,7 @@ NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN="shpat_1234567890abcdefghijklmnopqrs
 
 Find `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` under [Settings → Domains](https://help.shopify.com/en/manual/domains) in Shopify admin. Find `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` in the [Headless channel storefront](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/manage-headless-channels).
 
-<Callout type="info" title="Customer login needs more setup">
+<Callout type="note" title="Customer login needs more setup">
   Customer accounts require additional credentials and configuration. See
   [Authentication](/docs/anatomy/authentication) before enabling sign-in.
 </Callout>
@@ -53,6 +53,8 @@ pnpm dev
 ```
 
 Open [localhost:3000](http://localhost:3000) and confirm that your Shopify products appear.
+
+If no products appear, you may still need to publish products to the Headless channel. See [publishing products to your storefront](/docs/getting-started/shopify-setup#publish-products-to-your-storefront).
 
 For local HTTPS, install [Portless](https://portless.sh) with `pnpm add -g portless`, then run `pnpm dev:portless`. Use HTTPS when testing OAuth callbacks or secure cookies.
 
@@ -69,7 +71,7 @@ vercel
 
 Add the required [environment variables](/docs/reference/env-vars) to the Vercel project before your first production deploy. Stores created through the [Vercel Marketplace Shopify integration](https://vercel.com/marketplace/shopify) have their Shopify credentials configured for you.
 
-## Next steps
+## Related links
 
 <Cards>
   <Card title="Shopify Setup" href="/docs/getting-started/shopify-setup">

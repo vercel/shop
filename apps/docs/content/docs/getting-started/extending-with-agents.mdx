@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-Use a coding agent to change the storefront while following the template's conventions and verification steps.
+Coding agents can build and extend your storefront. The template ships plugins, skills, and `AGENTS.md` conventions so an agent works with the same patterns and verification steps your team uses.
 
 ## Set up the agent
 
@@ -41,13 +41,13 @@ Ask the agent to propose its plan before editing when the change spans several p
 
 ## Use storefront skills
 
-Skills provide task-specific instructions and checks. In Claude Code, run a skill directly:
+Skills provide task-specific instructions and checks. Run a skill directly by name:
 
 ```bash
 /vercel-shop:enable-shopify-markets
 ```
 
-In your harness, describe the outcome and reference the matching skill. Use the [`update-shop` skill](/docs/skills/update-shop) when bringing an existing storefront up to date.
+Or describe the outcome in your harness and reference the matching skill. Use the [update-shop skill](/docs/skills/update-shop) when bringing an existing storefront up to date.
 
 | Skill                                                                 | What it does                                                                             | Shopify docs                                                                       |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
