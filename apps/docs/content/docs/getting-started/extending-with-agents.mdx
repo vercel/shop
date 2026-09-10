@@ -10,13 +10,13 @@ Use a coding agent to change the storefront while following the template's conve
 
 ## Set up the agent
 
-`create-vercel-shop` installs project plugins for Vercel Shop, Next.js, Vercel, and Shopify. To install those plugins in an existing project without downloading the template, run:
+`create-vercel-shop` installs agentic plugins for Vercel Shop, Next.js, Vercel, and Shopify for your coding harnesses. To install those plugins in an existing project without downloading the template, run:
 
 ```bash
 npx create-vercel-shop@latest --no-template
 ```
 
-If the plugins are missing, install them directly:
+To manually install the plugins individually, run:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes
@@ -47,17 +47,20 @@ Skills provide task-specific instructions and checks. In Claude Code, run a skil
 /vercel-shop:enable-shopify-markets
 ```
 
-In Cursor or Codex, describe the outcome and reference the matching skill page. Use the [`update-shop` skill](/docs/skills/update-shop) when bringing an existing storefront up to date.
+In your harness, describe the outcome and reference the matching skill. Use the [`update-shop` skill](/docs/skills/update-shop) when bringing an existing storefront up to date.
 
-<Cards>
-  <Card title="Build with Vercel Shop" href="/docs/skills/build-shop">
-    Source-backed storefront architecture and commerce behavior.
-  </Card>
-  <Card title="Enable Shopify Markets" href="/docs/skills/enable-shopify-markets">
-    Multi-locale and multi-currency support.
-  </Card>
-</Cards>
+| Skill                                                                 | What it does                                                                             | Shopify docs                                                                       |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [Build with Vercel Shop](/docs/skills/build-shop)                     | Build or adapt storefront routes, commerce data, and rendering with template patterns.   |                                                                                    |
+| [Update Vercel Shop](/docs/skills/update-shop)                        | Audit drift and roll newer template changes into an existing storefront.                 |                                                                                    |
+| [Shopify GraphQL integration](/docs/skills/shopify-graphql-reference) | Add Shopify-validated Storefront or Customer Account GraphQL using template conventions. | [Storefront API](https://shopify.dev/docs/api/storefront)                          |
+| [Enable analytics](/docs/skills/enable-analytics)                     | Add Vercel Web Analytics, Speed Insights, and Google Tag Manager.                        |                                                                                    |
+| [Enable i18n](/docs/skills/enable-i18n)                               | Add locale-prefixed URLs and per-locale copy with next-intl, without Shopify Markets.    |                                                                                    |
+| [Enable Shopify Markets](/docs/skills/enable-shopify-markets)         | Add multi-region locales, currency, and localized commerce context.                      | [Markets](https://help.shopify.com/en/manual/markets)                              |
+| [Enable Shopify menus](/docs/skills/enable-shopify-menus)             | Replace the hardcoded nav and footer with Shopify-managed menus.                         | [Menus and links](https://help.shopify.com/en/manual/online-store/menus-and-links) |
 
 ## What’s next
 
 Start with a contained storefront change, such as adding a product metafield, adjusting navigation, or changing a merchandising section. For repeated work, turn your preferred conventions and checks into a project skill so future agent changes follow the same approach.
+
+Vercel is adding more skills for Shopify features, and working with third-party partners to build and maintain their own. Over time this gives you a growing set of features that a coding agent can enable the same way every time.
