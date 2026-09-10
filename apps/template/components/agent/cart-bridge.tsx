@@ -5,8 +5,8 @@ import type { EveMessage } from "eve/react";
 import { useEffect, useRef } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
+import { getCartMutationResult } from "@/lib/agent/cart";
 import { setAgentCartPending } from "@/lib/agent/cart/client";
-import { getCartMutationResult } from "@/lib/agent/commerce";
 
 export function AgentCartBridge({
   messages,

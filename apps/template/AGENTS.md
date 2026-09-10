@@ -28,6 +28,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js only prepares the browser cart under `/api/agent/session`. Eve tools call Shopify directly using shared uncached catalog operations and Hydrogen cart handlers. Keep Next.js request/cache APIs out of Eve's runtime import graph.
 
+Tool definitions, input schemas, and tool-specific execution belong in `agent/tools/`. Share execution helpers in `agent/lib/`; keep `lib/agent/` for browser state, presentation helpers, and shared result types. Do not add a second tool-name dispatcher outside Eve.
+
 ### Keep Eve work bounded
 
 - Before changing framework behavior, start with `node_modules/eve/docs/README.md` and read the page it routes the task to. Resolve the installed package from this app; package-manager links can hide files from recursive searches even when direct reads work.
@@ -188,7 +190,7 @@ pnpm format
 
 - `app/` for routes, including same-origin cart setup for the assistant
 - `agent/` for Eve instructions, tools, channels, and Shopify connections
-- `lib/agent/` for shared presentation contracts and direct Shopify tool execution
+- `lib/agent/` for browser state, presentation helpers, and shared result types
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/<domain>/types.ts` for domain-owned models and contracts
 - `components/ui/` for presentational primitives

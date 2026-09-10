@@ -1,16 +1,6 @@
-import type { ToolContext } from "eve/tools";
-
-import type { commerceSchemas } from "../../lib/agent/commerce";
-import { executeCommerce } from "../../lib/agent/commerce/server";
-
-export async function callCommerce(
-  tool: keyof typeof commerceSchemas,
-  input: unknown,
-  ctx: ToolContext,
-) {
-  const cartId = ctx.session.auth.current?.attributes.cartId;
+export async function runCommerce<T>(execute: () => Promise<T>) {
   try {
-    return await executeCommerce(tool, input, typeof cartId === "string" ? cartId : undefined);
+    return await execute();
   } catch {
     return {
       error:

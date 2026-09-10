@@ -1,11 +1,23 @@
 import { defineTool } from "eve/tools";
+import { z } from "zod";
 
-import { commerceSchemas } from "../../lib/agent/commerce";
-import { callCommerce } from "../lib/commerce";
+import { getCart, getSessionCartId, mutateCart } from "../lib/cart";
+import { runCommerce } from "../lib/commerce";
 
 export default defineTool({
   description:
     "Set the quantity of an existing cart line, or remove it with quantity zero. Read get-cart first.",
-  inputSchema: commerceSchemas["update-cart-item"],
-  execute: (input, ctx) => callCommerce("update-cart-item", input, ctx),
+  inputSchema: z.strictObject({
+    lineId: z.string().regex(/^gid:\/\/shopify\/CartLine\/[^\s]+$/),
+    quantity: z.number().int().min(0).max(99),
+  }),
+  execute: ({ lineId, quantity }, ctx) =>
+    runCommerce(async () => {
+      const cartId = getSessionCartId(ctx);
+      if (!cartId) return { error: "Open the storefront to change your cart." };
+      const cart = await getCart(cartId);
+      if (!cart?.lines.nodes.some((line) => line.id === lineId))
+        return { error: "This line is not in the current cart." };
+      return mutateCart(cartId, { lines: [{ id: lineId, quantity }] });
+    }),
 });

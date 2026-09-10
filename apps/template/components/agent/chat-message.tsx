@@ -7,7 +7,7 @@ import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import { getCartMutationResult, isCartMutation } from "@/lib/agent/commerce";
+import { getCartMutationResult, isCartMutation } from "@/lib/agent/cart";
 
 import { AgentProductProvider } from "./product-context";
 import { registry } from "./registry";
