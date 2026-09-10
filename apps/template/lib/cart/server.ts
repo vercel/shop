@@ -3,7 +3,6 @@ import {
   createCartServerHandlers,
   createShopifyRequestContext,
   getCartId,
-  gql,
   type ShopifyRequestContext,
 } from "@shopify/hydrogen";
 import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
@@ -14,51 +13,8 @@ import { cache } from "react";
 import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
 import type { Cart, CartSeedData } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
+import { CART_FRAGMENT } from "@/lib/shopify/fragments/cart";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
-
-// The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
-const CART_FRAGMENT = gql(/* GraphQL */ `
-  fragment CartFragment on Cart {
-    updatedAt
-    lines(first: 250) {
-      nodes {
-        sellingPlanAllocation {
-          sellingPlan {
-            name
-          }
-        }
-        discountAllocations {
-          __typename
-          discountedAmount {
-            amount
-            currencyCode
-          }
-          ... on CartCodeDiscountAllocation {
-            code
-          }
-          ... on CartAutomaticDiscountAllocation {
-            title
-          }
-          ... on CartCustomDiscountAllocation {
-            title
-          }
-        }
-        merchandise {
-          ... on ProductVariant {
-            price {
-              amount
-              currencyCode
-            }
-            compareAtPrice {
-              amount
-              currencyCode
-            }
-          }
-        }
-      }
-    }
-  }
-`);
 
 export const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
 

@@ -1,6 +1,6 @@
 ---
 title: Agent
-description: Enable an Eve shopping assistant for product discovery, cart management, and store questions.
+description: Configure an Eve shopping assistant for product discovery, cart management, and store questions.
 type: guide
 prerequisites:
   - /docs/getting-started
@@ -8,35 +8,35 @@ prerequisites:
 
 The storefront includes a shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
 
-The assistant is enabled by default. It requires AI Gateway access, a private Redis database, and a stable session secret. Customer login is optional. Set `agent.isEnabled` to `false` in `lib/config/index.ts` to disable it.
+The assistant is enabled by default. It uses the existing Shopify credentials and requires AI Gateway access to generate responses. Set `agent.isEnabled` to `false` in `lib/config/index.ts` to disable it. Customer login is optional.
 
-## Enable the assistant
+## Run the assistant
 
-1. Create an Upstash Redis database and configure `AGENT_REDIS_URL` and `AGENT_REDIS_TOKEN` with its REST credentials. Use separate credentials or deployment origins for separate environments.
-2. Generate a secret with `openssl rand -base64 32` and set `AGENT_SESSION_SECRET`. Keep the same value across instances. Rotating it invalidates browser access to existing conversations.
-3. Set `AGENT_STOREFRONT_URL` to the exact browser-facing origin, including the local port during development. Production and preview deployments each need their own HTTPS origin. Eve uses this URL to reach the storefront's protected commerce adapter.
-4. Set `agent.isEnabled` to `true` in `lib/config/index.ts`. The included model is OpenAI GPT-5.6 Luna through Vercel AI Gateway.
-5. Run `pnpm dev` locally. On Vercel, the Next.js integration builds and mounts Eve as a service in the same project. For local production or self-hosting, run `pnpm build:agent` before `pnpm build && pnpm start`.
+Run `pnpm dev` locally. Eve starts alongside Next.js and shares the browser's origin, including localhost. On Vercel, the Next.js integration builds and mounts Eve as a service in the same project.
 
-When deployment protection blocks Eve's commerce requests, provide `VERCEL_AUTOMATION_BYPASS_SECRET`. Keep this credential server-only. See [Environment Variables](/docs/reference/env-vars) for the complete setup reference.
+For local production, run `pnpm build:agent && pnpm build`, then run `pnpm exec eve start --port 4274` and `pnpm start` in separate terminals. The built Next.js routes forward Eve requests to port 4274.
+
+The included model is OpenAI GPT-5.6 Luna through Vercel AI Gateway. Use Vercel's deployment identity or configure `AI_GATEWAY_API_KEY` when needed. See [Environment Variables](/docs/reference/env-vars).
 
 Open the assistant and send a product question. A response should show current Shopify products; selecting a product can show variant choices without leaving the conversation.
 
 ## Shopify connections
 
-Eve discovers catalog tools from Shopify's UCP endpoint and policy answers from Storefront MCP. Product cards, recommendations, collections, and cart changes use the storefront's validated data operations and Hydrogen handlers.
+Eve discovers catalog tools from Shopify's UCP endpoint and policy answers from Storefront MCP. Product cards, recommendations, collections, and cart changes call Shopify directly through shared data operations and Hydrogen handlers.
 
-The agent publishes its public profile at `/agent/ucp-profile.json`. The merchant profile remains at `/.well-known/ucp`. Set `UCP_AGENT_PROFILE_URL` to override the agent profile URL, for example when testing a protected preview through a public endpoint. Local Eve development uses Shopify's public example profile because Shopify cannot fetch localhost.
+The agent publishes its public profile at `/agent/ucp-profile.json`, using the configured site origin. The merchant profile remains at `/.well-known/ucp`. Local development and Vercel previews use Shopify's public example profile because localhost and protected previews may be unreachable from Shopify. Set `UCP_AGENT_PROFILE_URL` only to override this behavior.
 
 Required color or size options filter the products shown. If semantic search is unavailable, the assistant can use keyword search. Policy questions use Shopify's answers rather than the model's memory.
 
 ## Cart and checkout
 
-The assistant uses the shopper's existing cart. A first conversation can create an empty cart; when customer authentication is enabled, creation preserves the customer association when the session is usable or refreshable.
+The assistant uses the cart identified by the storefront's cookie, not a cart ID chosen by the model. Before sending a message, the storefront ensures a cart exists. When customer authentication is enabled, cart creation preserves the customer association when the session is usable or refreshable.
 
-Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. The storefront refreshes the cart after a response settles. Restoring a conversation never resubmits an old cart change.
+Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. The storefront refreshes the cart after a response settles. The browser does not execute cart mutations from restored messages.
 
-Stop requests cancellation of the Eve turn. A Shopify write that has already started may still finish. Clear waits for an active response to settle before starting a fresh conversation. Checkout is unavailable while the assistant is busy or cart reconciliation is pending. An interrupted cart write can temporarily block further assistant writes and checkout for up to two minutes; inspect the cart before requesting another change.
+Stop requests cancellation of the Eve turn. A Shopify write that has already started may still finish. Clear waits for an active response to settle before starting a fresh conversation. Checkout in that browser tab waits while the assistant is busy or cart reconciliation is pending. Wait for the response before checking out in another tab.
+
+Eve records completed tool steps, but a step interrupted during execution can run again. Cart writes do not have application-level deduplication. Inspect the cart after an interrupted response and before requesting another change.
 
 Checkout remains a shopper action through the storefront's checkout button. The assistant cannot complete payments or cancel orders.
 
@@ -44,16 +44,16 @@ Checkout remains a shopper action through the storefront's checkout button. The 
 
 Conversations are stored by Eve on the server. The browser stores a conversation reference and draft, not a copy of the full transcript. Sessions have a one-day lifetime. Clearing chat discards the browser's reference; it does not delete server records or information already sent to the model provider. Session expiry is not a data-deletion policy.
 
-A signed HttpOnly cookie and private session records restrict each conversation's messages, stream, and controls to its browser session. Cart identity is supplied by the application, not chosen by the model. If the active cart is replaced, clear the conversation before continuing. Redis stores session ownership and cart bindings for one day and mutation receipts for two days.
+The default browser channel permits anonymous access. A session ID is not a user-ownership check: anyone who obtains one may be able to read or control that conversation. Do not share session IDs or use this default channel for private customer-account or support data. Add application authentication and session-ownership checks before introducing private conversations.
 
 Cart tools expose an item summary and mutation warnings, not the full cart or gift-card recipient details. Personal information shoppers type into chat still reaches Eve and the model provider. Configure retention and operational access for those services before serving production traffic.
 
 ## Production limits
 
-BotID is configured separately and disabled by default. Enable `botid.isEnabled` on Vercel to protect assistant requests. A per-browser-session limit allows 20 message requests per minute, but it is not an IP rate limit or a spending cap. Add deployment-level rate limits and Gateway spending controls appropriate to public traffic.
+BotID is configured separately and disabled by default. Enable `botid.isEnabled` on Vercel to protect anonymous browser requests. Bot detection is not user authentication or a spending cap. Add deployment-level rate limits and Gateway spending controls appropriate to public traffic.
 
-The assistant has no shell, file, general web-browsing, or delegation tools. Its Shopify connections expose only catalog and policy reads; cart writes pass through the application-owned replay protection.
+The assistant has no shell, file, general web-browsing, or delegation tools. Its Shopify connections expose only catalog and policy reads; cart writes use Hydrogen's server handlers.
 
 ## What’s next
 
-Adjust the model, instructions, or product presentation for your store. Preserve Shopify as the source of product facts and keep cart ownership outside model input. Cross-device history requires customer-linked authorization and a retention/deletion policy; do not expose a conversation merely because someone knows its ID.
+Adjust the model, instructions, or product presentation for your store. Preserve Shopify as the source of product facts and keep cart identity outside model input. Private or cross-device history requires customer-linked authorization and a retention/deletion policy. Add durable operation receipts or upstream idempotency before requiring replay-safe cart writes.

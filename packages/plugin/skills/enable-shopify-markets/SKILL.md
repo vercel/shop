@@ -325,9 +325,9 @@ Pass the active validated commerce context into the Shopify/Hydrogen request con
 
 ### Chat and agent API
 
-Eve's session routes live outside `[locale]`, and invisible URLs do not reveal locale in the referer. Validate the selected locale during the Next.js assistant session bootstrap, store it with the trusted shopper/session binding, and propagate it through Eve's channel context and the signed commerce adapter. Client context can describe the page, but must not authorize the commerce locale or cart identity. Do not infer locale from URL segments or fall back unconditionally to `defaultLocale`.
+Eve's session routes live outside `[locale]`, and invisible URLs do not reveal locale in the referer. Carry the selected locale explicitly, validate it against the installed locale allowlist during cart setup and in Eve's channel, and pass the validated commerce context to the direct Shopify tools and connections. Client context can describe the page, but must not select an arbitrary cart or an unsupported locale. Do not infer locale from URL segments or fall back unconditionally to `defaultLocale`.
 
-Agent tools, Shopify connections, product context, cart creation, and navigation outputs must use that validated locale. Keep Next.js request and cache APIs in the storefront adapter rather than importing them into Eve's runtime.
+Agent tools, Shopify connections, product context, cart creation, and navigation outputs must use that validated locale. Keep Next.js request and cache APIs in the storefront; Eve uses the shared uncached Shopify catalog operations and Hydrogen handlers.
 
 ### Markdown negotiation
 

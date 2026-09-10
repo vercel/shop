@@ -1,8 +1,15 @@
+import { shopConfig } from "../../lib/config";
+
 export function agentProfileUrl() {
   if (process.env.UCP_AGENT_PROFILE_URL) return process.env.UCP_AGENT_PROFILE_URL;
-  if (process.env.EVE_DEV === "1")
+  const origin = new URL(shopConfig.site.url);
+  if (
+    process.env.EVE_DEV === "1" ||
+    process.env.VERCEL_ENV === "preview" ||
+    ["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname)
+  )
     return "https://shopify.dev/ucp/agent-profiles/examples/2026-08-25/valid-with-capabilities.json";
-  return new URL("/agent/ucp-profile.json", process.env.AGENT_STOREFRONT_URL).href;
+  return new URL("/agent/ucp-profile.json", origin).href;
 }
 
 export const agentProfile = {

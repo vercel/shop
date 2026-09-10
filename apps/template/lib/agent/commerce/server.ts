@@ -1,30 +1,47 @@
-import { createCartCookie, createShopifyRequestContext } from "@shopify/hydrogen";
+import {
+  createCartCookie,
+  createCartServerHandlers,
+  createShopifyRequestContext,
+} from "@shopify/hydrogen";
 import { z } from "zod";
 
 import { toAgentProduct, toAgentProductDetails } from "@/lib/agent/products";
-import { cartHandlers, getCartById } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import type { ProductCard } from "@/lib/product/types";
-import { getCollections } from "@/lib/shopify/operations/collections/server";
 import {
-  getCollectionProducts,
-  getComplementaryProducts,
-  getProductOptionValues,
-  getProductsByIds,
-  getProductWithVariants,
-  getRelatedProducts,
-  searchIndexProducts,
-} from "@/lib/shopify/operations/products/server";
+  fetchCollections as getCollections,
+  fetchCollectionProducts as getCollectionProducts,
+  fetchComplementaryProducts as getComplementaryProducts,
+  fetchProductOptionValues,
+  fetchProductsByIds as getProductsByIds,
+  fetchProductWithVariants as getProductWithVariants,
+  fetchRelatedProducts as getRelatedProducts,
+  fetchSearchIndexProducts as searchIndexProducts,
+} from "@/lib/shopify/catalog/server";
+import { CART_FRAGMENT } from "@/lib/shopify/fragments/cart";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 import { commerceSchemas } from "./index";
+
+const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
+
+async function getCartById(cartId: string | undefined) {
+  if (!cartId) return undefined;
+  const request = new Request(new URL("/api/cart", shopConfig.site.url), {
+    headers: { cookie: createCartCookie(cartId).split(";")[0] },
+  });
+  const requestContext = createShopifyRequestContext({ i18n: shopConfig.localization, request });
+  const storefrontClient = createRequestStorefrontClient(requestContext);
+  const { data } = await cartHandlers.get({ request, storefrontClient });
+  return data.cart ?? undefined;
+}
 
 async function matchingProducts(
   products: ProductCard[],
   options: { name: string; value: string }[],
 ) {
   if (!options.length || !products.length) return products.slice(0, 12).map(toAgentProduct);
-  const values = await getProductOptionValues({ ids: products.map((product) => product.id) });
+  const values = await fetchProductOptionValues(products.map((product) => product.id));
   return products
     .filter((product) =>
       options.every((option) =>
@@ -38,7 +55,7 @@ async function matchingProducts(
 export async function executeCommerce(
   tool: keyof typeof commerceSchemas,
   input: unknown,
-  cartId: string,
+  cartId?: string,
 ) {
   switch (tool) {
     case "present-products": {
@@ -113,6 +130,7 @@ export async function executeCommerce(
       };
     }
     default: {
+      if (!cartId) return { error: "Open the storefront to change your cart." };
       let payload: object;
       if (tool === "add-to-cart") {
         const { quantity, variantId } = commerceSchemas[tool].parse(input);

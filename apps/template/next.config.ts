@@ -21,19 +21,6 @@ function assertRequiredEnv() {
     );
   }
 
-  if (shopConfig.agent.isEnabled) {
-    const missing = [
-      "AGENT_SESSION_SECRET",
-      "AGENT_REDIS_URL",
-      "AGENT_REDIS_TOKEN",
-      "AGENT_STOREFRONT_URL",
-    ].filter((key) => !process.env[key]);
-    if (missing.length)
-      throw new Error(`Enabled assistant requires: ${missing.join(", ")}. See .env.example.`);
-    if (process.env.AGENT_SESSION_SECRET!.length < 32)
-      throw new Error("AGENT_SESSION_SECRET must contain at least 32 characters.");
-  }
-
   if (shopConfig.auth.isEnabled) {
     const missing = [
       "CUSTOMER_ACCOUNT_SESSION_SECRET",

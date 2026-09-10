@@ -23,29 +23,18 @@ These variables are required when `auth.isEnabled` is `true` in [`lib/config/ind
 
 Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Store one stable value in server-side environment variables across all deployment instances. Rotating it invalidates existing customer sessions.
 
-## Shopping assistant
-
-These values are required when `agent.isEnabled` is `true`. Keep credentials server-only and use the same settings for the Next.js app and its Eve service.
-
-| Variable               | Description                                                                                                                   |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `AGENT_SESSION_SECRET` | At least 32 characters. Generate with `openssl rand -base64 32`; signs assistant browser sessions and commerce requests.      |
-| `AGENT_REDIS_URL`      | Upstash Redis REST URL for private session ownership, cart bindings, and mutation receipts.                                   |
-| `AGENT_REDIS_TOKEN`    | REST token for that Redis database.                                                                                           |
-| `AGENT_STOREFRONT_URL` | Exact browser-facing origin, including the local development port. Use the deployment's HTTPS URL in production and previews. |
-
 ## Optional
 
-| Variable                            | Description                                                                                                                                                       |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AI_GATEWAY_API_KEY`                | Server-only AI Gateway key for the shopping assistant when not using Vercel's deployment identity authentication.                                                 |
-| `UCP_AGENT_PROFILE_URL`             | Overrides the public assistant profile URL. Defaults to `/agent/ucp-profile.json` at `AGENT_STOREFRONT_URL`; local Eve development uses Shopify's public example. |
-| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                                                                            |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration.                                                     |
-| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.                                                       |
-| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                                                                    |
+| Variable                            | Description                                                                                                                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY`                | Server-only AI Gateway key for the shopping assistant when not using Vercel's deployment identity authentication.                                                         |
+| `UCP_AGENT_PROFILE_URL`             | Overrides the public assistant profile URL. Defaults to `/agent/ucp-profile.json` at the site origin; local development and Vercel previews use Shopify's public example. |
+| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                                                                                    |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration.                                                             |
+| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.                                                               |
+| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                                                                            |
 
-`VERCEL_AUTOMATION_BYPASS_SECRET` is needed only when deployment protection blocks Eve's server-to-server commerce requests. `EVE_DEV=1` is set by Eve's development server to select the public example profile.
+`EVE_DEV=1` is set by Eve's development server to select the public example profile. Vercel supplies `VERCEL_ENV`; preview deployments also use the public example profile.
 
 ## Platform-provided values
 

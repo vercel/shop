@@ -8,31 +8,31 @@ Edit `lib/config/index.ts` to set storefront-wide, secret-free options. Keep cre
 
 ## Settings
 
-| Setting                               | Default          | Behavior                                                                                                    |
-| ------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| `agent.isEnabled`                     | `true`           | Shows the shopping assistant and mounts Eve's session routes. Requires the assistant environment variables. |
-| `analytics.vercel.isEnabled`          | `false`          | Enables Vercel Web Analytics.                                                                               |
-| `analytics.speedInsights.isEnabled`   | `false`          | Enables Vercel Speed Insights.                                                                              |
-| `analytics.shopify.isEnabled`         | `false`          | Sends storefront browsing and cart events to Shopify analytics, subject to consent.                         |
-| `analytics.shopify.consentMode`       | `default-banner` | Selects the Shopify consent experience described below.                                                     |
-| `auth.isEnabled`                      | `false`          | Enables customer authentication.                                                                            |
-| `botid.isEnabled`                     | `false`          | Protects assistant setup and Eve session requests with [Vercel BotID](https://vercel.com/docs/botid).       |
-| `botid.checkLevel`                    | `basic`          | Selects `basic` or `deepAnalysis` detection.                                                                |
-| `localization.country`                | `"US"`           | Sets the country sent to Shopify for commerce context.                                                      |
-| `localization.language`               | `"EN"`           | Requests catalog content in this language from Shopify.                                                     |
-| `localization.locale`                 | `"en-US"`        | Sets display formatting; does not translate labels or select currency.                                      |
-| `pdp.bundles.isEnabled`               | `true`           | Shows product bundle relationships when Shopify provides them.                                              |
-| `pdp.buyWithShop.isEnabled`           | `true`           | Shows Buy with Shop.                                                                                        |
-| `pdp.complementaryProducts.isEnabled` | `true`           | Shows complementary products when Shopify provides them.                                                    |
-| `pdp.quantityPicker.isEnabled`        | `true`           | Shows the quantity picker.                                                                                  |
-| `pdp.relatedProducts.isEnabled`       | `true`           | Shows related products when Shopify provides them.                                                          |
-| `site.name`                           | `"Vercel Shop"`  | Sets the name used in navigation, metadata, structured data, the footer, and the assistant.                 |
-| `site.url`                            | `defaultUrl`     | Sets the canonical base URL for sitemaps, structured data, and absolute links.                              |
-| `webmcp.isEnabled`                    | `false`          | Enables the experimental WebMCP integration in supported browsers.                                          |
+| Setting                               | Default          | Behavior                                                                                              |
+| ------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------- |
+| `agent.isEnabled`                     | `true`           | Shows the shopping assistant and mounts Eve's session routes. Responses require AI Gateway access.    |
+| `analytics.vercel.isEnabled`          | `false`          | Enables Vercel Web Analytics.                                                                         |
+| `analytics.speedInsights.isEnabled`   | `false`          | Enables Vercel Speed Insights.                                                                        |
+| `analytics.shopify.isEnabled`         | `false`          | Sends storefront browsing and cart events to Shopify analytics, subject to consent.                   |
+| `analytics.shopify.consentMode`       | `default-banner` | Selects the Shopify consent experience described below.                                               |
+| `auth.isEnabled`                      | `false`          | Enables customer authentication.                                                                      |
+| `botid.isEnabled`                     | `false`          | Protects assistant setup and Eve session requests with [Vercel BotID](https://vercel.com/docs/botid). |
+| `botid.checkLevel`                    | `basic`          | Selects `basic` or `deepAnalysis` detection.                                                          |
+| `localization.country`                | `"US"`           | Sets the country sent to Shopify for commerce context.                                                |
+| `localization.language`               | `"EN"`           | Requests catalog content in this language from Shopify.                                               |
+| `localization.locale`                 | `"en-US"`        | Sets display formatting; does not translate labels or select currency.                                |
+| `pdp.bundles.isEnabled`               | `true`           | Shows product bundle relationships when Shopify provides them.                                        |
+| `pdp.buyWithShop.isEnabled`           | `true`           | Shows Buy with Shop.                                                                                  |
+| `pdp.complementaryProducts.isEnabled` | `true`           | Shows complementary products when Shopify provides them.                                              |
+| `pdp.quantityPicker.isEnabled`        | `true`           | Shows the quantity picker.                                                                            |
+| `pdp.relatedProducts.isEnabled`       | `true`           | Shows related products when Shopify provides them.                                                    |
+| `site.name`                           | `"Vercel Shop"`  | Sets the name used in navigation, metadata, structured data, the footer, and the assistant.           |
+| `site.url`                            | `defaultUrl`     | Sets the canonical base URL for sitemaps, structured data, and absolute links.                        |
+| `webmcp.isEnabled`                    | `false`          | Enables the experimental WebMCP integration in supported browsers.                                    |
 
 ## Required constraints
 
-With `agent.isEnabled` enabled by default, configure `AGENT_SESSION_SECRET`, `AGENT_REDIS_URL`, `AGENT_REDIS_TOKEN`, and `AGENT_STOREFRONT_URL`. Follow the [assistant setup guide](/docs/anatomy/agent); customer login is not required.
+The assistant uses the existing Shopify credentials and AI Gateway access. Follow the [assistant setup guide](/docs/anatomy/agent) for the default public-session behavior; customer login is not required.
 
 Before enabling `auth.isEnabled`, set `CUSTOMER_ACCOUNT_SESSION_SECRET`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` as described in [Environment Variables](/docs/reference/env-vars). Development startup and production builds fail if any of these variables are missing.
 

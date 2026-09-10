@@ -1,19 +1,17 @@
 import { createCartCookie } from "@shopify/hydrogen";
 import { checkBotId } from "botid/server";
 
-import {
-  getShopperSession,
-  isSameOrigin,
-  saveShopperSession,
-  shopperCookie,
-} from "@/lib/agent/session/server";
 import { createCustomerRequestContext, createCustomerSessionManager } from "@/lib/auth/server";
 import { createEmptyCart, getCartById, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 
 export async function POST(request: Request) {
   if (!shopConfig.agent.isEnabled) return new Response(null, { status: 404 });
-  if (!isSameOrigin(request)) return new Response(null, { status: 403 });
+  if (
+    request.headers.get("origin") !== new URL(request.url).origin ||
+    request.headers.get("sec-fetch-site") === "cross-site"
+  )
+    return new Response(null, { status: 403 });
   if (
     shopConfig.botid.isEnabled &&
     (await checkBotId({ advancedOptions: { checkLevel: shopConfig.botid.checkLevel } })).isBot
@@ -26,21 +24,13 @@ export async function POST(request: Request) {
   let response: Response;
   try {
     let cartId = await getCartIdFromCookie();
-    const previous = await getShopperSession(request);
-    if (!cartId || !previous || previous.cartId !== cartId) {
-      if (!cartId || !(await getCartById(cartId)))
-        cartId = await createEmptyCart(requestContext, sessionManager);
-    }
-    const session = await saveShopperSession(request, cartId);
+    if (!cartId || !(await getCartById(cartId)))
+      cartId = await createEmptyCart(requestContext, sessionManager);
     response = Response.json({ ok: true }, { headers: { "Cache-Control": "private, no-store" } });
     response.headers.append("Set-Cookie", createCartCookie(cartId));
-    response.headers.append(
-      "Set-Cookie",
-      shopperCookie(session.id, new URL(process.env.AGENT_STOREFRONT_URL!).protocol === "https:"),
-    );
   } catch {
     response = Response.json(
-      { error: "Could not prepare the assistant. Please try again." },
+      { error: "Could not prepare your cart. Please try again." },
       { status: 503 },
     );
   }
