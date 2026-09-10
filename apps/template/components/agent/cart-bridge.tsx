@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { setAgentCartPending } from "@/lib/agent/cart/client";
-import { isCartMutation } from "@/lib/agent/commerce";
+import { getCartMutationResult } from "@/lib/agent/commerce";
 
 export function AgentCartBridge({
   messages,
@@ -26,7 +26,7 @@ export function AgentCartBridge({
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
   useEffect(() => {
     setAgentCartPending(true);
-    if (busy) return;
+    let cartChanged = false;
     for (const message of messages)
       for (const part of message.parts) {
         if (
@@ -37,29 +37,24 @@ export function AgentCartBridge({
         )
           continue;
         seen.current.add(part.toolCallId);
-        if (
-          hydrated.current &&
-          isCartMutation(part.toolName) &&
-          part.output &&
-          typeof part.output === "object" &&
-          "cartUpdated" in part.output
-        )
-          shouldOpen.current = true;
+        if (hydrated.current && getCartMutationResult(part)) cartChanged = true;
       }
-    hydrated.current = true;
+    if (!busy) hydrated.current = true;
+    if (busy && !cartChanged) return;
+    if (cartChanged) shouldOpen.current = true;
     refreshing.current = true;
     observedLoading.current = false;
     refresh();
   }, [busy, messages, refresh]);
   useEffect(() => {
-    if (!refreshing.current || busy) return;
+    if (!refreshing.current) return;
     if (cart.loading || cart.revalidating) {
       observedLoading.current = true;
       return;
     }
     if (!observedLoading.current || cart.errors.network.length) return;
     refreshing.current = false;
-    setAgentCartPending(false);
+    if (!busy) setAgentCartPending(false);
     if (shouldOpen.current) {
       shouldOpen.current = false;
       openOverlay();

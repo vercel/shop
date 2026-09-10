@@ -1,45 +1,18 @@
 "use client";
 
-import type { ClientSessionState } from "eve/client";
 import { useEveAgent } from "eve/react";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
 import { setAgentCartPending } from "@/lib/agent/cart/client";
+import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
 import { AgentComposer } from "./composer";
 
 const CANCEL_TIMEOUT_MS = 10_000;
-const STORAGE_KEY = "template-eve-chat-v1";
-interface StoredChat {
-  input: string;
-  session?: ClientSessionState;
-}
-
-function readStoredChat(): StoredChat {
-  try {
-    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
-    return {
-      input: typeof stored?.input === "string" ? stored.input : "",
-      session:
-        typeof stored?.session?.sessionId === "string"
-          ? { sessionId: stored.session.sessionId, streamIndex: 0 }
-          : undefined,
-    };
-  } catch {
-    return { input: "" };
-  }
-}
-function writeStoredChat(value: StoredChat) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-  } catch {
-    /* Chat remains usable without browser storage. */
-  }
-}
 
 export interface AgentPanelProps {
   onOpenChange: (open: boolean) => void;
@@ -51,7 +24,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
   const [input, setInput] = useState(stored.input);
-  const snapshot = useRef<StoredChat>(stored);
+  const snapshot = useRef(stored);
   const [clearing, setClearing] = useState(false);
   const [controlError, setControlError] = useState<string | null>(null);
   const agent = useEveAgent({
@@ -130,6 +103,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   }
   useEffect(() => {
     if (!open) return;
+    panelRef.current?.querySelector("textarea")?.focus({ preventScroll: true });
     function handleClickOutside(event: MouseEvent) {
       if (
         panelRef.current &&

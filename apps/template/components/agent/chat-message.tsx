@@ -7,7 +7,7 @@ import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import { isCartMutation } from "@/lib/agent/commerce";
+import { getCartMutationResult, isCartMutation } from "@/lib/agent/commerce";
 
 import { AgentProductProvider } from "./product-context";
 import { registry } from "./registry";
@@ -27,6 +27,9 @@ function shoppingSpec(message: EveMessage): Spec | null {
   const children: string[] = [];
   const elements: Spec["elements"] = { response: { type: "AgentResponse", props: {}, children } };
   const seen = new Set<string>();
+  const changesCart = message.parts.some(
+    (part) => part.type === "dynamic-tool" && isCartMutation(part.toolName),
+  );
   for (const part of message.parts) {
     if (part.type !== "dynamic-tool" || part.state !== "output-available" || part.partial) continue;
     const output = part.output;
@@ -63,6 +66,7 @@ function shoppingSpec(message: EveMessage): Spec | null {
       }
     }
     if (
+      !changesCart &&
       part.toolName === "get-product-details" &&
       "product" in output &&
       output.product &&
@@ -77,7 +81,7 @@ function shoppingSpec(message: EveMessage): Spec | null {
         children: [],
       };
     }
-    if (part.toolName === "get-cart" || isCartMutation(part.toolName)) {
+    if (!changesCart && part.toolName === "get-cart") {
       if (!elements.cart) children.push("cart");
       elements.cart = { type: "AgentCartSummary", props: {}, children: [] };
     }
@@ -104,6 +108,11 @@ export function ChatMessage({
       </div>
     ) : null;
   const spec = shoppingSpec(message);
+  const mutations = message.parts.flatMap((part) => {
+    const result = getCartMutationResult(part);
+    return result ? [result] : [];
+  });
+  const warnings = [...new Set(mutations.flatMap((mutation) => mutation.warnings))];
   const active = message.parts.find(
     (part) =>
       part.type === "dynamic-tool" &&
@@ -117,6 +126,20 @@ export function ChatMessage({
         tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
       />
       {text && <Markdown>{text}</Markdown>}
+      {mutations.length > 0 && (
+        <div className="grid gap-2.5 rounded-lg border px-3.5 py-2.5">
+          <p role="status">
+            {mutations.every((mutation) => mutation.toolName === "add-to-cart")
+              ? "Added to cart"
+              : "Cart updated"}
+          </p>
+          {warnings.map((warning) => (
+            <p key={warning} role="alert" className="text-muted-foreground text-xs">
+              {warning}
+            </p>
+          ))}
+        </div>
+      )}
       {spec && (
         <AgentProductProvider parts={message.parts}>
           <JSONUIProvider registry={registry}>

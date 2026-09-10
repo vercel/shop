@@ -13,7 +13,7 @@ export const catalog = defineCatalog(schema, {
     AgentCartSummary: {
       description:
         "The shopper's live cart with quantity steppers, remove buttons, totals, and a checkout button. " +
-        "Takes no props — it reads real cart state. Render it after getCart or any cart mutation.",
+        "Takes no props — it reads real cart state. Render it for get-cart, not cart mutations.",
       props: z.object({}),
     },
 

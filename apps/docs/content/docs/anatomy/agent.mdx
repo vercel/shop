@@ -20,6 +20,8 @@ The included model is OpenAI GPT-5.6 Luna through Vercel AI Gateway. Use Vercel'
 
 Open the assistant and send a product question. A response should show current Shopify products; selecting a product can show variant choices without leaving the conversation.
 
+A saved conversation starts restoring in the background when the storefront loads. The assistant stays closed until the shopper opens it.
+
 ## Shopify connections
 
 Eve discovers catalog tools from Shopify's UCP endpoint and policy answers from Storefront MCP. Product cards, recommendations, collections, and cart changes call Shopify directly through shared data operations and Hydrogen handlers.
@@ -32,7 +34,7 @@ Color or size options you request filter the products shown. Without a requested
 
 The assistant uses the cart identified by the storefront's cookie, not a cart ID chosen by the model. Before sending a message, the storefront ensures a cart exists. When customer authentication is enabled, cart creation preserves the customer association when the session is usable or refreshable.
 
-Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. The storefront refreshes the cart after a response settles. The browser does not execute cart mutations from restored messages.
+Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. A confirmed change shows a short confirmation in the conversation and opens the cart drawer once its contents have refreshed. The assistant does not show another variant picker or cart summary in that reply. Restoring a conversation does not repeat cart changes or reopen the drawer.
 
 Stop requests cancellation of the Eve turn. Clear requests cancellation and starts a fresh conversation, including while saved messages are loading. If cancellation cannot be confirmed, the assistant warns the shopper to inspect the cart before requesting another change. A Shopify write that has already started may still finish.
 

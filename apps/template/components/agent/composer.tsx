@@ -60,7 +60,6 @@ export function AgentComposer({
     >
       <InputGroup className="h-auto flex-row items-end rounded-2xl border-0 bg-input shadow-none">
         <InputGroupTextarea
-          autoFocus
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
