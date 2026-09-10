@@ -26,7 +26,7 @@ Eve discovers catalog tools from Shopify's UCP endpoint and policy answers from 
 
 The agent publishes its public profile at `/agent/ucp-profile.json`, using the configured site origin. The merchant profile remains at `/.well-known/ucp`. Local development and Vercel previews use Shopify's public example profile because localhost and protected previews may be unreachable from Shopify. Set `UCP_AGENT_PROFILE_URL` only to override this behavior.
 
-Required color or size options filter the products shown. If semantic search is unavailable, the assistant can use keyword search. Policy questions use Shopify's answers rather than the model's memory.
+Color or size options you request filter the products shown. Without a requested color or size, results are not restricted to one. If semantic search is unavailable, the assistant can use keyword search. Policy questions use Shopify's answers rather than the model's memory.
 
 ## Cart and checkout
 

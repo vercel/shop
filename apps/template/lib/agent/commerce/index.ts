@@ -7,9 +7,25 @@ const handle = z
   .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/)
   .max(255);
 const options = z
-  .array(z.strictObject({ name: z.string().max(100), value: z.string().max(100) }))
+  .array(
+    z.strictObject({
+      name: z
+        .string()
+        .max(100)
+        .describe("A product option the shopper explicitly requested, such as Color or Size."),
+      value: z
+        .string()
+        .max(100)
+        .describe(
+          "The option value requested by the shopper, not a default variant value from search results.",
+        ),
+    }),
+  )
   .max(10)
-  .default([]);
+  .default([])
+  .describe(
+    "Only product-option constraints explicitly requested by the shopper. Use [] when none were requested. Never include country, language, locale, or currency: the storefront applies commerce context automatically.",
+  );
 
 export const commerceSchemas = {
   "add-cart-note": addCartNoteInputSchema,

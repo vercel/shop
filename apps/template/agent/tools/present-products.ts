@@ -5,7 +5,7 @@ import { callCommerce } from "../lib/commerce";
 
 export default defineTool({
   description:
-    "Render exact Shopify Product IDs selected from catalog search. Pass every required option; nonmatching products are excluded.",
+    "Render chosen exact Shopify Product IDs from native catalog search. Filter only by product options explicitly requested by the shopper; otherwise use []. Never infer preferences from featured variants. Other authored product tools already render their results.",
   inputSchema: commerceSchemas["present-products"],
   execute: (input, ctx) => callCommerce("present-products", input, ctx),
 });
