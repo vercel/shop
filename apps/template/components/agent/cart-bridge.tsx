@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { getCartMutationResult } from "@/lib/agent/cart";
-import { setAgentCartPending } from "@/lib/agent/cart/client";
+import { setAgentCartPending, useAgentCartPending } from "@/lib/agent/cart/client";
 
 export function AgentCartBridge({
   messages,
@@ -22,8 +22,11 @@ export function AgentCartBridge({
   const hydrated = useRef(false);
   const refreshing = useRef(false);
   const observedLoading = useRef(false);
+  const previousNetworkErrorAt = useRef(0);
   const shouldOpen = useRef(false);
+  const agentPending = useAgentCartPending();
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
+  const refreshFailed = !busy && agentPending && cart.errors.network.length > 0;
   useEffect(() => {
     setAgentCartPending(true);
     let cartChanged = false;
@@ -50,9 +53,15 @@ export function AgentCartBridge({
     if (!refreshing.current) return;
     if (cart.loading || cart.revalidating) {
       observedLoading.current = true;
+      previousNetworkErrorAt.current = cart.errors.networkUpdatedAt;
       return;
     }
-    if (!observedLoading.current || cart.errors.network.length) return;
+    // Hydrogen retains network errors from unrelated mutations across refreshes.
+    if (
+      !observedLoading.current ||
+      (cart.errors.network.length && cart.errors.networkUpdatedAt > previousNetworkErrorAt.current)
+    )
+      return;
     refreshing.current = false;
     if (!busy) setAgentCartPending(false);
     if (shouldOpen.current) {
@@ -60,5 +69,25 @@ export function AgentCartBridge({
       openOverlay();
     }
   }, [busy, cart, openOverlay]);
-  return null;
+  if (!refreshFailed) return null;
+  return (
+    <div role="alert" className="grid gap-2.5 px-5 py-2 text-red-500 text-xs">
+      <p>
+        We couldn't confirm your cart. Refresh it before checking out or requesting another change.
+      </p>
+      <button
+        className="w-fit cursor-pointer underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={cart.loading || cart.revalidating}
+        onClick={() => {
+          setAgentCartPending(true);
+          refreshing.current = true;
+          observedLoading.current = false;
+          refresh();
+        }}
+        type="button"
+      >
+        {cart.loading || cart.revalidating ? "Refreshing…" : "Refresh cart"}
+      </button>
+    </div>
+  );
 }
