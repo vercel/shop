@@ -1,4 +1,5 @@
 import { withBotId } from "botid/next/config";
+import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 import {
   PHASE_DEVELOPMENT_SERVER,
@@ -18,6 +19,19 @@ function assertRequiredEnv() {
     throw new Error(
       `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
     );
+  }
+
+  if (shopConfig.agent.isEnabled) {
+    const missing = [
+      "AGENT_SESSION_SECRET",
+      "AGENT_REDIS_URL",
+      "AGENT_REDIS_TOKEN",
+      "AGENT_STOREFRONT_URL",
+    ].filter((key) => !process.env[key]);
+    if (missing.length)
+      throw new Error(`Enabled assistant requires: ${missing.join(", ")}. See .env.example.`);
+    if (process.env.AGENT_SESSION_SECRET!.length < 32)
+      throw new Error("AGENT_SESSION_SECRET must contain at least 32 characters.");
   }
 
   if (shopConfig.auth.isEnabled) {
@@ -78,4 +92,4 @@ function getConfig(phase: string): NextConfig {
   return config;
 }
 
-export default getConfig;
+export default shopConfig.agent.isEnabled ? withEve(getConfig) : getConfig;

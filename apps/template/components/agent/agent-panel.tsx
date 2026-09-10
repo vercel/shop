@@ -1,52 +1,42 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
-import {
-  DefaultChatTransport,
-  isToolUIPart,
-  lastAssistantMessageIsCompleteWithToolCalls,
-} from "ai";
+import type { ClientSessionState } from "eve/client";
+import { useEveAgent } from "eve/react";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
-import { useCartDrawer } from "@/components/cart/context";
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { executeCartTool, isCartMutationTool } from "@/lib/agent/cart/client";
+import { setAgentCartPending } from "@/lib/agent/cart/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
 import { AgentComposer } from "./composer";
 
-const STORAGE_KEY = "template-agent-chat";
-
-const DRAFT_DEBOUNCE_MS = 400;
-
+const STORAGE_KEY = "template-eve-chat-v1";
 interface StoredChat {
   input: string;
-  messages: UIMessage[];
+  session?: ClientSessionState;
 }
 
 function readStoredChat(): StoredChat {
-  if (typeof window === "undefined") return { input: "", messages: [] };
   try {
-    const parsed = JSON.parse(
-      window.localStorage.getItem(STORAGE_KEY) ?? "null",
-    ) as Partial<StoredChat> | null;
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null");
     return {
-      input: typeof parsed?.input === "string" ? parsed.input : "",
-      messages: Array.isArray(parsed?.messages) ? parsed.messages : [],
+      input: typeof stored?.input === "string" ? stored.input : "",
+      session:
+        typeof stored?.session?.sessionId === "string"
+          ? { sessionId: stored.session.sessionId, streamIndex: 0 }
+          : undefined,
     };
   } catch {
-    return { input: "", messages: [] };
+    return { input: "" };
   }
 }
-
-function writeStoredChat(chat: StoredChat): void {
+function writeStoredChat(value: StoredChat) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(chat));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
-    // Ignore storage failures such as quota exceeded.
+    /* Chat remains usable without browser storage. */
   }
 }
 
@@ -60,58 +50,47 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
   const [input, setInput] = useState(stored.input);
-  const { openOverlay } = useCartDrawer();
-  const generation = useRef(0);
-  const continueAutomatically = useRef(false);
-  const executedTools = useRef(new Set<string>());
-  const { addToolOutput, clearError, error, messages, setMessages, sendMessage, status, stop } =
-    useChat({
-      messages: stored.messages,
-      onToolCall: ({ toolCall }) => {
-        if (
-          !isCartMutationTool(toolCall.toolName) ||
-          executedTools.current.has(toolCall.toolCallId)
-        )
-          return;
-        executedTools.current.add(toolCall.toolCallId);
-        const currentGeneration = generation.current;
-        // The cart request must settle independently of Stop or Clear cancelling the chat stream.
-        void executeCartTool(toolCall.toolName, toolCall.input).then((output) => {
-          if (generation.current !== currentGeneration) return;
-          if ("cartUpdated" in output) openOverlay();
-          void addToolOutput({ tool: toolCall.toolName, toolCallId: toolCall.toolCallId, output });
-        });
-      },
-      sendAutomaticallyWhen: (options) => {
-        const parts = options.messages.at(-1)?.parts ?? [];
-        const lastStep = parts.findLastIndex((part) => part.type === "step-start");
-        return (
-          continueAutomatically.current &&
-          parts
-            .slice(lastStep + 1)
-            .some(
-              (part) =>
-                isToolUIPart(part) &&
-                isCartMutationTool(
-                  part.type === "dynamic-tool" ? part.toolName : part.type.slice(5),
-                ),
-            ) &&
-          lastAssistantMessageIsCompleteWithToolCalls(options)
-        );
-      },
-      transport: new DefaultChatTransport({ api: "/api/chat" }),
-    });
-  const handleStop = useCallback(() => {
-    continueAutomatically.current = false;
-    void stop();
-  }, [stop]);
+  const snapshot = useRef<StoredChat>(stored);
+  const [clearing, setClearing] = useState(false);
+  const clearRequested = useRef(false);
+  const [controlError, setControlError] = useState<string | null>(null);
+  const agent = useEveAgent({
+    initialSession: stored.session,
+    onFinish() {
+      if (clearRequested.current) clearChat();
+    },
+    onSessionChange(session) {
+      snapshot.current.session = session ? { ...session, streamIndex: 0 } : undefined;
+      writeStoredChat(snapshot.current);
+    },
+    async prepareSend(turn) {
+      const response = await fetch("/api/agent/session", {
+        credentials: "same-origin",
+        method: "POST",
+        redirect: "error",
+      });
+      if (!response.ok) throw new Error("Could not prepare the assistant. Please try again.");
+      return {
+        ...turn,
+        clientContext: { pathname: location.pathname, search: location.search },
+        turnPolicy: "queue",
+      };
+    },
+    resume: Boolean(stored.session),
+  });
+  const {
+    data: { messages },
+    error,
+    status,
+  } = agent;
+  const busy = status === "submitted" || status === "streaming" || status === "resuming";
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
   const handleScroll = useCallback(() => {
     const element = scrollRef.current;
-    if (!element) return;
-    pinnedRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
+    if (element)
+      pinnedRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
   }, []);
   useEffect(() => {
     const scroller = scrollRef.current;
@@ -123,35 +102,28 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     observer.observe(content);
     return () => observer.disconnect();
   }, []);
-
-  const snapshot = useRef<StoredChat>({ input: stored.input, messages: stored.messages });
-  const checkpointTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const flushChat = useCallback(() => {
-    if (checkpointTimer.current !== null) clearTimeout(checkpointTimer.current);
-    checkpointTimer.current = null;
-    writeStoredChat(snapshot.current);
-  }, []);
   useEffect(() => {
     snapshot.current.input = input;
-    const timer = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
+    const timer = setTimeout(() => writeStoredChat(snapshot.current), 400);
     return () => clearTimeout(timer);
-  }, [flushChat, input]);
+  }, [input]);
   useEffect(() => {
-    snapshot.current.messages = messages;
-    if (status !== "streaming" && status !== "submitted") {
-      flushChat();
-    } else if (checkpointTimer.current === null) {
-      // Streaming updates must not keep postponing the next transcript checkpoint.
-      checkpointTimer.current = setTimeout(flushChat, DRAFT_DEBOUNCE_MS);
-    }
-  }, [flushChat, messages, status]);
-  useEffect(() => {
-    window.addEventListener("pagehide", flushChat);
+    const flush = () => writeStoredChat(snapshot.current);
+    window.addEventListener("pagehide", flush);
     return () => {
-      window.removeEventListener("pagehide", flushChat);
-      flushChat();
+      window.removeEventListener("pagehide", flush);
+      flush();
     };
-  }, [flushChat]);
+  }, []);
+  function clearChat() {
+    clearRequested.current = false;
+    agent.reset();
+    setInput("");
+    setClearing(false);
+    setControlError(null);
+    snapshot.current = { input: "" };
+    writeStoredChat(snapshot.current);
+  }
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(event: MouseEvent) {
@@ -160,9 +132,8 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         !panelRef.current.contains(event.target as Node) &&
         triggerRef.current &&
         !triggerRef.current.contains(event.target as Node)
-      ) {
+      )
         onOpenChange(false);
-      }
     }
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") onOpenChange(false);
@@ -175,26 +146,38 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     };
   }, [onOpenChange, open, triggerRef]);
   useScrollContain(panelRef, open, "[data-slot=agent-messages]");
-  const handleSend = useCallback(
-    (text: string) => {
-      pinnedRef.current = true;
-      generation.current += 1;
-      continueAutomatically.current = true;
-      void sendMessage({ text });
-      setInput("");
-    },
-    [sendMessage],
-  );
-  const handleClear = useCallback(() => {
-    generation.current += 1;
-    handleStop();
-    setMessages([]);
+  const handleStop = () => {
+    setControlError(null);
+    void agent.cancel().catch(() => {
+      clearRequested.current = false;
+      setClearing(false);
+      setControlError("Could not stop the response. Please try again.");
+    });
+  };
+  const handleSend = (text: string) => {
+    if (busy || clearing) return;
+    pinnedRef.current = true;
+    setAgentCartPending(true);
+    setControlError(null);
+    void agent
+      .send(text)
+      .catch(() =>
+        setControlError(
+          "Could not send your message. Try again, or clear an expired conversation.",
+        ),
+      );
     setInput("");
-    clearError();
-    snapshot.current = { input: "", messages: [] };
-    flushChat();
-  }, [clearError, flushChat, handleStop, setMessages]);
-  const canClear = messages.length > 0 || input.trim().length > 0;
+  };
+  const handleClear = () => {
+    if (status === "resuming") return;
+    if (!busy) {
+      clearChat();
+      return;
+    }
+    clearRequested.current = true;
+    setClearing(true);
+    handleStop();
+  };
   return (
     <div
       ref={panelRef}
@@ -209,14 +192,18 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       role="dialog"
       className="fixed right-5 bottom-18.5 z-40 flex h-auto max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm transition-[opacity,transform,display] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] transition-discrete data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-2.5 data-[state=closed]:hidden starting:opacity-0 starting:translate-y-2.5"
     >
-      <AgentCartBridge messages={messages} />
+      <AgentCartBridge messages={messages} status={status} />
       <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
         <span className="font-semibold text-sm">Shop Assistant</span>
         <div className="flex items-center gap-1">
           <button
             aria-label="Clear chat"
-            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
-            disabled={!canClear}
+            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={
+              clearing ||
+              status === "resuming" ||
+              (!messages.length && !input.trim() && !stored.session)
+            }
             onClick={handleClear}
             type="button"
           >
@@ -243,7 +230,9 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           className="flex min-h-full flex-col justify-end gap-6 p-5 [&>*]:shrink-0"
         >
           {messages.length === 0 ? (
-            <p className="text-foreground text-sm">Hi, how can I help?</p>
+            <p className="text-foreground text-sm">
+              {status === "resuming" ? "Restoring your conversation…" : "Hi, how can I help?"}
+            </p>
           ) : (
             messages.map((message, index) => (
               <ChatMessage
@@ -260,10 +249,15 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         onStop={handleStop}
         onSubmit={handleSend}
         placeholder="Ask anything…"
-        status={status}
+        status={clearing ? "resuming" : status}
         value={input}
       />
-      {error && <p className="px-5 pb-2 text-red-500 text-xs">Something went wrong. Try again.</p>}
+      {(error || controlError) && (
+        <p role="alert" className="px-5 pb-2 text-red-500 text-xs">
+          {controlError ??
+            "The assistant is unavailable. Try again, or clear an expired conversation."}
+        </p>
+      )}
     </div>
   );
 }

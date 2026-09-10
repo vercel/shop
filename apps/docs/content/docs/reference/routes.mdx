@@ -22,15 +22,18 @@ type: reference
 
 ## API routes
 
-| Route                        | Description                                                                 |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation                              |
-| `POST /api/chat`             | Shopping-assistant stream; returns `404` unless `agent.isEnabled` is `true` |
-| `GET /api/cart`              | Current cart                                                                |
-| `POST /api/cart`             | Cart creation and updates                                                   |
-| `GET /api/predictive-search` | Search suggestions                                                          |
+| Route                                          | Description                                                                                         |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `POST /api/webhooks/shopify`                   | Shopify webhook handler for cache invalidation                                                      |
+| `/eve/v1/session` and `/eve/v1/session/[id]/*` | Eve conversation creation, messages, streams, and controls; available when the assistant is enabled |
+| `POST /api/agent/session`                      | Same-origin assistant browser-session and cart setup                                                |
+| `POST /api/agent/commerce`                     | Signed server-to-server storefront adapter; not a public chat endpoint                              |
+| `GET /agent/ucp-profile.json`                  | Public assistant profile when enabled; distinct from the merchant's `/.well-known/ucp`              |
+| `GET /api/cart`                                | Current cart                                                                                        |
+| `POST /api/cart`                               | Cart creation and updates                                                                           |
+| `GET /api/predictive-search`                   | Search suggestions                                                                                  |
 
-Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, and the app's webhook and chat endpoints.
+Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, webhook, and assistant setup/commerce adapters. Eve owns conversation routes on the same origin.
 
 ## Customer accounts
 

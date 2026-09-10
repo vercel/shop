@@ -24,9 +24,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## The AI assistant uses AI SDK — read its bundled docs
+## The AI assistant uses Eve — read its bundled docs
 
-The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK. Before changing the route, agent, tools, or `useChat` client, read the relevant guide in `node_modules/ai/docs/`.
+The opt-in assistant uses `agent/`, `withEve`, and `useEveAgent`. Start with `node_modules/eve/docs/README.md` and read the relevant channel, tool, connection, and frontend guides before changing it. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js owns the signed commerce adapter and browser-session bootstrap under `/api/agent/`. Keep Eve's runtime imports free of Next.js request/cache APIs; share pure contracts and call the authenticated commerce adapter for storefront operations.
 
 ## Critical Rules (Always Apply)
 
@@ -152,7 +152,7 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with Eve.
 
 The pinned `@shopify/hydrogen` dependency is the framework-agnostic preview SDK, not the Hydrogen React Router framework. Next.js owns routing, Server Component rendering, and public-data caching/invalidation. Hydrogen owns Shopify API clients, cart forms and store, predictive-search handlers, and Customer Account OAuth/session helpers. `proxy.ts` adapts Hydrogen's registered handlers to Next.js; the template supplies encrypted cookie storage and auth gates. Read the installed Hydrogen README and relevant bundled skills before changing an SDK integration; do not apply React Router loaders, actions, or Oxygen setup to this app.
 
@@ -172,8 +172,9 @@ pnpm format
 
 ## Directory Structure
 
-- `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
-- `lib/agent/` for the AI SDK agent, tools, and json-render catalog
+- `app/` for routes, including the protected assistant session and commerce adapters
+- `agent/` for Eve instructions, tools, channels, and Shopify connections
+- `lib/agent/` for shared presentation contracts, private session ownership, and commerce adapters
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/<domain>/types.ts` for domain-owned models and contracts
 - `components/ui/` for presentational primitives
@@ -192,7 +193,7 @@ Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
 - Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card/client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
-- Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart/client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
+- Eve cart tools call the signed Next.js commerce adapter, which binds the cart from private Redis session state and invokes Hydrogen's handlers. Keep the operation claim durable before writing; an interrupted operation must never be resubmitted on replay. The browser only refreshes Hydrogen after turns settle; never write cart IDs or replay mutations from restored messages. Keep cart writes independent of chat cancellation and checkout blocked until reconciliation. BotID is not session authorization; verify ownership on every Eve stream, message, and control route.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
 - Cart types are the deliberate domain-type exception: `lib/cart/types.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.

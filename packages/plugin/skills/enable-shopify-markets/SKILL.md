@@ -295,7 +295,7 @@ export const config = {
 };
 ```
 
-Never widen the matcher to `/api/:path*`: application Route Handlers such as `/api/webhooks`, `/api/chat`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Add exact route families when a new Shopify integration requires proxy handling.
+Never widen the matcher to `/api/:path*`: application Route Handlers such as `/api/webhooks`, `/api/agent/session`, `/api/agent/commerce`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
 
 For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 
@@ -325,9 +325,9 @@ Pass the active validated commerce context into the Shopify/Hydrogen request con
 
 ### Chat and agent API
 
-The chat route lives outside `[locale]`, and invisible URLs do not reveal locale in the referer. Send the current locale explicitly in the client request payload, validate it in `app/api/chat/route.ts`, and put it in agent context. Do not infer it from URL segments or fall back unconditionally to `defaultLocale`.
+Eve's session routes live outside `[locale]`, and invisible URLs do not reveal locale in the referer. Validate the selected locale during the Next.js assistant session bootstrap, store it with the trusted shopper/session binding, and propagate it through Eve's channel context and the signed commerce adapter. Client context can describe the page, but must not authorize the commerce locale or cart identity. Do not infer locale from URL segments or fall back unconditionally to `defaultLocale`.
 
-Agent tools, Storefront MCP calls, product context, cart creation, and navigation outputs must use that validated locale.
+Agent tools, Shopify connections, product context, cart creation, and navigation outputs must use that validated locale. Keep Next.js request and cache APIs in the storefront adapter rather than importing them into Eve's runtime.
 
 ### Markdown negotiation
 

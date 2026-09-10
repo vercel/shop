@@ -5,6 +5,11 @@ import { z } from "zod";
 export const catalog = defineCatalog(schema, {
   actions: {},
   components: {
+    AgentResponse: {
+      description: "A stack of storefront-rendered shopping results.",
+      props: z.object({}),
+      slots: ["default"],
+    },
     AgentCartSummary: {
       description:
         "The shopper's live cart with quantity steppers, remove buttons, totals, and a checkout button. " +

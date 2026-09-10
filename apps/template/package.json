@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "pnpm codegen && next build",
+    "build:agent": "eve build",
     "codegen": "pnpm codegen:storefront && pnpm codegen:customer",
     "codegen:customer": "graphql-codegen --project customer",
     "codegen:storefront": "graphql-codegen --project storefront",
@@ -16,7 +17,6 @@
     "typecheck": "next typegen && tsc --noEmit && pnpm codegen"
   },
   "dependencies": {
-    "@ai-sdk/react": "4.0.96",
     "@base-ui/react": "1.8.0",
     "@graphql-codegen/cli": "7.4.0",
     "@json-render/core": "0.20.0",
@@ -28,6 +28,7 @@
     "@types/node": "26.4.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
+    "@upstash/redis": "1.38.4",
     "@vercel/analytics": "2.0.1",
     "@vercel/speed-insights": "2.0.0",
     "ai": "7.0.93",
@@ -35,6 +36,7 @@
     "botid": "1.5.11",
     "class-variance-authority": "0.7.1",
     "cn": "0.2.5",
+    "eve": "0.47.2",
     "lucide-react": "1.41.0",
     "next": "16.3.4",
     "oxfmt": "0.66.0",
