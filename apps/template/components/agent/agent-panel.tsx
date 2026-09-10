@@ -173,7 +173,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   return (
     <div
       ref={panelRef}
-      aria-label="Shopping assistant"
+      aria-label="Shop Agent"
       data-state={open ? "open" : "closed"}
       onTransitionEnd={(event) => {
         if (event.target === event.currentTarget && event.propertyName === "opacity" && open) {
@@ -186,7 +186,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     >
       <AgentCartBridge messages={messages} status={status} />
       <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
-        <span className="font-semibold text-sm">Shop Assistant</span>
+        <span className="font-semibold text-sm">Shop Agent</span>
         <div className="flex items-center gap-1">
           <button
             aria-label="Clear chat"
@@ -198,7 +198,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
             <Trash2Icon className="size-4" />
           </button>
           <button
-            aria-label="Minimize assistant"
+            aria-label="Minimize Shop Agent"
             className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             onClick={() => onOpenChange(false)}
             type="button"

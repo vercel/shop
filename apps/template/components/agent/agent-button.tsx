@@ -35,7 +35,7 @@ export function AgentButton() {
         type="button"
       >
         <MessageCircle className="size-4 text-primary" />
-        <span className="sr-only">Open shopping assistant</span>
+        <span className="sr-only">Open Shop Agent</span>
       </button>
       {(hasOpened || shouldRestore) && (
         <AgentPanel onOpenChange={setOpen} open={open} triggerRef={triggerRef} />

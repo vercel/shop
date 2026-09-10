@@ -6,7 +6,7 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes a shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
+The storefront includes Shop Agent, a shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
 
 The assistant is enabled by default. It uses the existing Shopify credentials and requires AI Gateway access to generate responses. Set `agent.isEnabled` to `false` in `lib/config/index.ts` to disable it. Customer login is optional.
 
@@ -34,7 +34,7 @@ Color or size options you request filter the products shown. Without a requested
 
 The assistant uses the cart identified by the storefront's cookie, not a cart ID chosen by the model. Before sending a message, the storefront ensures a cart exists. When customer authentication is enabled, cart creation preserves the customer association when the session is usable or refreshable.
 
-Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. A confirmed change shows a short confirmation in the conversation and opens the cart drawer once its contents have refreshed. The assistant does not show another variant picker or cart summary in that reply. Restoring a conversation does not repeat cart changes or reopen the drawer.
+Shoppers can add a chosen variant, change quantities, remove lines, and add a cart note. A confirmed change shows a short confirmation in the conversation and opens the cart drawer once its contents have refreshed. The assistant does not show another variant picker or cart summary in that reply. In replies without a cart change, those controls appear only after the assistant finishes replying. Restoring a conversation does not repeat cart changes or reopen the drawer.
 
 Stop requests cancellation of the Eve turn. Clear requests cancellation and starts a fresh conversation, including while saved messages are loading. If cancellation cannot be confirmed, the assistant warns the shopper to inspect the cart before requesting another change. A Shopify write that has already started may still finish.
 

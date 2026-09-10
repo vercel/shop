@@ -23,7 +23,7 @@ const Markdown = memo(({ children }: { children: string }) => (
   </Streamdown>
 ));
 
-function shoppingSpec(message: EveMessage): Spec | null {
+function shoppingSpec(message: EveMessage, isStreaming: boolean): Spec | null {
   const children: string[] = [];
   const elements: Spec["elements"] = { response: { type: "AgentResponse", props: {}, children } };
   const seen = new Set<string>();
@@ -66,6 +66,7 @@ function shoppingSpec(message: EveMessage): Spec | null {
       }
     }
     if (
+      !isStreaming &&
       !changesCart &&
       part.toolName === "get-product-details" &&
       "product" in output &&
@@ -81,7 +82,7 @@ function shoppingSpec(message: EveMessage): Spec | null {
         children: [],
       };
     }
-    if (!changesCart && part.toolName === "get-cart") {
+    if (!isStreaming && !changesCart && part.toolName === "get-cart") {
       if (!elements.cart) children.push("cart");
       elements.cart = { type: "AgentCartSummary", props: {}, children: [] };
     }
@@ -107,7 +108,7 @@ export function ChatMessage({
         </Bubble>
       </div>
     ) : null;
-  const spec = shoppingSpec(message);
+  const spec = shoppingSpec(message, isStreaming);
   const mutations = message.parts.flatMap((part) => {
     const result = getCartMutationResult(part);
     return result ? [result] : [];
