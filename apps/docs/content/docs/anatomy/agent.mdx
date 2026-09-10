@@ -6,9 +6,9 @@ prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an opt-in shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
+The storefront includes a shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
 
-The assistant is disabled by default. Enabling it requires AI Gateway access, a private Redis database, and a stable session secret. Customer login is optional.
+The assistant is enabled by default. It requires AI Gateway access, a private Redis database, and a stable session secret. Customer login is optional. Set `agent.isEnabled` to `false` in `lib/config/index.ts` to disable it.
 
 ## Enable the assistant
 
