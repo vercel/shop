@@ -8,11 +8,11 @@ prerequisites:
 
 The storefront includes Shop Agent, a shopping assistant built with [Eve](https://eve.dev). It helps shoppers discover products, browse collections, ask store-policy questions, and manage the same cart used throughout the storefront.
 
-The assistant is enabled by default. It uses the existing Shopify credentials and requires AI Gateway access to generate responses. Set `agent.isEnabled` to `false` in `lib/config/index.ts` to disable it. Customer login is optional.
+Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` to enable it. It uses the existing Shopify credentials and requires AI Gateway access to generate responses. Customer login is optional.
 
 ## Run the assistant
 
-Run `pnpm dev` locally. Eve starts alongside Next.js and shares the browser's origin, including localhost. On Vercel, the Next.js integration builds and mounts Eve as a service in the same project.
+After enabling Shop Agent, run `pnpm dev` locally. Eve starts alongside Next.js and shares the browser's origin, including localhost. On Vercel, the Next.js integration builds and mounts Eve as a service in the same project.
 
 For local production, run `pnpm build:agent && pnpm build`, then run `pnpm exec eve start --port 4274` and `pnpm start` in separate terminals. The built Next.js routes forward Eve requests to port 4274.
 

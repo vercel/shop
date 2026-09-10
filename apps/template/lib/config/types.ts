@@ -1,7 +1,21 @@
 import type { ConsentConfig, I18nConfig } from "@shopify/hydrogen";
 import type { initBotId } from "botid/client/core";
+import type { NextConfig } from "next";
 
 export type CommerceLocale = Pick<I18nConfig, "country" | "language">;
+
+export interface NextConfigContext {
+  defaultConfig: NextConfig;
+}
+
+export type NextConfigFactory = (
+  phase: string,
+  context: NextConfigContext,
+) => NextConfig | Promise<NextConfig>;
+
+export type NextConfigInput = NextConfig | NextConfigFactory;
+
+export type NextConfigPlugin = (config: NextConfig) => NextConfigInput | Promise<NextConfigInput>;
 
 export interface ShopConfig {
   agent: {

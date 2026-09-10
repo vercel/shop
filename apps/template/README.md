@@ -65,7 +65,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 Customer authentication is disabled by default. To enable it, set `auth.isEnabled` in `lib/config/index.ts` and provide `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET`. Keep both secrets server-only. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure callback URLs and local HTTPS.
 
-The shopping assistant is enabled by default and uses the existing Shopify credentials plus AI Gateway access. Set `agent.isEnabled` to `false` to run without it. Follow the [assistant guide](https://vercel.shop/docs/anatomy/agent) for Eve, BotID, public-session limitations, and deployment setup. Vercel builds the Eve service through the Next.js integration. For local production, run `pnpm build:agent && pnpm build`, then keep `pnpm exec eve start --port 4274` running alongside `pnpm start`. Normal `pnpm dev` starts both automatically.
+Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` to enable it with the existing Shopify credentials plus AI Gateway access. Follow the [assistant guide](https://vercel.shop/docs/anatomy/agent) for Eve, BotID, public-session limitations, and deployment setup. When enabled, Vercel builds the Eve service through the Next.js integration. For local production with the agent enabled, run `pnpm build:agent && pnpm build`, then keep `pnpm exec eve start --port 4274` running alongside `pnpm start`. With the agent enabled, `pnpm dev` starts both automatically.
 
 ## Skills
 

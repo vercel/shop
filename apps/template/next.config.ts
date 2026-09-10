@@ -1,45 +1,12 @@
 import { withBotId } from "botid/next/config";
 import { withEve } from "eve/next";
 import type { NextConfig } from "next";
-import {
-  PHASE_DEVELOPMENT_SERVER,
-  PHASE_PRODUCTION_BUILD,
-  PHASE_PRODUCTION_SERVER,
-} from "next/constants";
 
 import { shopConfig } from "./lib/config";
-
-function assertRequiredEnv() {
-  const missingShopify = [
-    "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
-    "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
-  ].filter((key) => !process.env[key]);
-
-  if (missingShopify.length > 0) {
-    throw new Error(
-      `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
-    );
-  }
-
-  if (shopConfig.auth.isEnabled) {
-    const missing = [
-      "CUSTOMER_ACCOUNT_SESSION_SECRET",
-      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID",
-      "SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET",
-    ].filter((key) => !process.env[key]);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `Enabled auth requires: ${missing.join(", ")}. ` +
-          `Set the missing variables or disable auth via auth.isEnabled in lib/config/index.ts.`,
-      );
-    }
-  }
-}
+import { withShopConfig } from "./lib/config/server";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  partialPrefetching: true,
   images: {
     deviceSizes: [1080],
     imageSizes: [],
@@ -52,6 +19,7 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
+  partialPrefetching: true,
   reactCompiler: true,
   turbopack: {
     rules: {
@@ -63,20 +31,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-const config = shopConfig.botid.isEnabled ? withBotId(nextConfig) : nextConfig;
-
-function getConfig(phase: string): NextConfig {
-  const isTypegen = process.argv.includes("typegen");
-  const isRuntime =
-    phase === PHASE_DEVELOPMENT_SERVER ||
-    phase === PHASE_PRODUCTION_BUILD ||
-    phase === PHASE_PRODUCTION_SERVER;
-
-  if (isRuntime && !isTypegen) {
-    assertRequiredEnv();
-  }
-
-  return config;
-}
-
-export default shopConfig.agent.isEnabled ? withEve(getConfig) : getConfig;
+export default withShopConfig(nextConfig, [
+  shopConfig.botid.isEnabled && withBotId,
+  shopConfig.agent.isEnabled && withEve,
+]);
