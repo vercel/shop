@@ -1,6 +1,6 @@
 ---
 description: Install and configure the Shopify Headless channel and the apps your storefront needs.
-title: Shopify Setup
+title: Setup Shopify
 type: guide
 prerequisites:
   - /docs/getting-started
@@ -31,7 +31,7 @@ For optional scopes and details, see [Storefront API permissions](/docs/referenc
 
 Publish the products and collections you want to show to the **Headless** channel. See Shopify's guide [here](https://help.shopify.com/en/manual/products/add-update-products#product-availability). Content published only to the **Online Store** channel does not appear in your storefront.
 
-## Set the storefront ID
+## Set the storefront ID to enable server-side analytics
 
 Set the `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` environment variable to attribute server-side cart activity to this storefront. Find the numeric ID in the storefront's URL in the Headless app, after `/headless/`. For example, `https://admin.shopify.com/store/your-store/headless/330461` uses the ID `330461`. Server-side attribution gives you more reliable analytics and funnel metrics that do not depend on the shopper's browser.
 
@@ -48,7 +48,7 @@ Install [Shopify Search & Discovery](https://apps.shopify.com/search-and-discove
 
 ### Enable kitting and bundling
 
-Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**.
+Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**. The storefront displays bundle relationships when `pdp.bundles.isEnabled` is on in your [shop configuration](/docs/reference/shop-config), which is the default.
 
 ## Related links
 

@@ -4,13 +4,13 @@ title: Introduction
 type: overview
 ---
 
-Vercel Shop is an enterprise-ready Shopify storefront built with Next.js. Shopify runs your catalog, checkout, and payments. Vercel Shop gives you the storefront in front of them: product pages, collections, search, and a cart, all backed by the Shopify Storefront API and ready to customize.
+Vercel Shop is an enterprise-ready Shopify storefront built with Next.js. Shopify runs your catalog, checkout, and payments. Vercel Shop gives you the storefront in front of them: product pages, collections, search, and a cart, all backed by the Shopify Storefront API and ready to customize. It's the Next.js storefront template for Shopify's new Hydrogen.
 
-You get the storefront as source in your own repository. Read it, change it, and extend it with your team or a coding agent. Vercel, Shopify, and third-party partners maintain skills that package common workflows, so an agent adds features the same way every time. When you are ready, deploy it to Vercel.
+Vercel Shop is open source. Extend it directly with your team or with coding agents. Vercel, Shopify, and third-party partners maintain skills that package common workflows, giving agents a repeatable, best-practice-driven way to implement new features and functionality on your site. It deploys to Vercel and uses Vercel's agentic infrastructure and best practices to power the fastest headless storefront experience on Shopify.
 
 ## What you get out of the box
 
-Going headless usually means rebuilding the same foundation before you can ship. Vercel Shop includes that foundation:
+Going headless usually means rebuilding the same foundation before you can ship. Vercel Shop includes that foundation and is at feature parity with Horizon, Shopify's Liquid theme, so going headless does not cost you storefront features:
 
 - Product, collection, and search pages backed by the Shopify Storefront API.
 - A server-backed cart and checkout handoff to Shopify.
@@ -22,13 +22,13 @@ Going headless usually means rebuilding the same foundation before you can ship.
 
 ## Enterprise-ready
 
-- **Scale.** Static generation, streaming, and caching on Vercel handle traffic spikes and large catalogs.
-- **Security.** Shopify owns checkout and payment data. Customer sessions are encrypted, and API secrets stay server-side.
-- **Composability.** The storefront is a standard Next.js app talking to Shopify's APIs, so you add features, services, and integrations in your own codebase.
+- **Scale.** Static generation, streaming, and caching on Vercel handles traffic spikes and large catalogs.
+- **Security.** Shopify owns checkout and payment data, so card details never touch your storefront. Customer sessions are encrypted, and API secrets stay server-side. A managed firewall and DDoS mitigation protect the site on Vercel, and you can optionally turn on [BotID](https://vercel.com/docs/botid) for invisible bot detection in your [shop configuration](/docs/reference/shop-config).
+- **Composability.** The storefront is a standard Next.js app that talks to Shopify's APIs. Bring your own CMS, search, analytics, or payment services, and add custom routes, pages, and integrations alongside the commerce foundation. You compose the stack around your needs in your own codebase, with no proprietary framework to work around.
 
 ## Built for agentic development
 
-Vercel, Shopify, and third-party partners maintain skills and embedded docs so coding agents extend the storefront correctly. Skills carry task-specific instructions and checks, and the repository ships `AGENTS.md` conventions so an agent follows the same patterns your team does. See [Extending with Agents](/docs/getting-started/extending-with-agents).
+Vercel, Shopify, and third-party partners maintain skills and embedded docs so coding agents extend the storefront with best practices in mind. Skills carry task-specific instructions and checks, and the repository ships `AGENTS.md` conventions so an agent follows the same best-practice patterns. See [Extending with Agents](/docs/getting-started/extending-with-agents).
 
 ## Start with the template
 
@@ -42,7 +42,7 @@ Vercel is a design partner on the rebuild of [Shopify Hydrogen](https://vercel.c
 
 ## Why teams choose Vercel Shop
 
-- [Open source](https://github.com/vercel/shop) and maintained by Vercel. Track upstream improvements and roll them into your storefront with the [update-shop skill](/docs/skills/update-shop).
+- Open source and maintained by Vercel. Track upstream improvements and roll them into your storefront with the [update-shop skill](/docs/skills/update-shop).
 - Vercel builds and maintains Next.js, so the framework and the template move forward together.
 - Shopify features and third-party integrations arrive as maintained skills, so a coding agent adds them the same way every time.
 - The storefront is yours. Extend it in your own codebase instead of waiting on a vendor roadmap.
