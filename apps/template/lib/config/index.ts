@@ -55,7 +55,7 @@ export const shopConfig = {
     },
   },
   site: {
-    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Ship Shop",
+    name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Ship Things",
     socialLinks,
     url: defaultUrl,
   },
