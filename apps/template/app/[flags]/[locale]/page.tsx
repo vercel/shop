@@ -68,6 +68,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[flags]/[lo
           <ProductsGrid
             collectionUrl="/collections/all"
             columns={5}
+            fallbackSortKey="date-new-to-old"
             imageLoading="eager"
             limit={5}
             locale={locale}
@@ -174,8 +175,7 @@ export default async function HomePage({ searchParams }: PageProps<"/[flags]/[lo
 
         <Container>
           <CollectionSlider
-            collection="hoodies"
-            collectionUrl="/collections/hoodies"
+            collectionUrl="/collections/all"
             limit={8}
             locale={locale}
             title={t("bestsellers")}

@@ -11,10 +11,13 @@ import {
   SliderTitle,
 } from "@/components/ui/slider";
 import type { Locale } from "@/lib/i18n";
-import { getCollectionProducts } from "@/lib/shopify/operations/products/server";
+import {
+  getCollectionProducts,
+  searchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
 interface CollectionSliderProps {
-  collection: string;
+  collection?: string;
   collectionUrl?: string;
   limit: number;
   locale: Locale;
@@ -29,7 +32,9 @@ export async function CollectionSlider({
   title,
 }: CollectionSliderProps) {
   const t = await getTranslations("product");
-  const { products } = await getCollectionProducts({ collection, limit, locale });
+  const { products } = collection
+    ? await getCollectionProducts({ collection, limit, locale })
+    : await searchIndexProducts({ limit, locale, sortKey: "RELEVANCE" });
 
   if (products.length === 0) return null;
 
