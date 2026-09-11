@@ -1,11 +1,12 @@
 allowBuilds:
-  '@parcel/watcher': false
-  '@swc/core': false
+  "@parcel/watcher": false
+  "@swc/core": false
   esbuild: false
 
 minimumReleaseAge: 2880
 
 minimumReleaseAgeExclude:
+  - "@shopify/hydrogen"
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
 
