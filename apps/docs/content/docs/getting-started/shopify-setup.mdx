@@ -1,28 +1,56 @@
 ---
-description: Configure Shopify's Headless channel, Search & Discovery, and optional storefront apps.
-title: Shopify Setup
+description: Install and configure the Shopify Headless channel and the apps your storefront needs.
+title: Setup Shopify
 type: guide
 prerequisites:
   - /docs/getting-started
 ---
 
-Publish your catalog to the **Headless** sales channel first. Add the other Shopify apps only when you need their storefront features.
+All stores require the Shopify [Headless sales channel](https://apps.shopify.com/headless). Install and set it up first. Install the other Shopify apps only when your store needs their storefront features.
 
-## Publish products to Headless
+<Callout type="note" title="Stores from the Vercel Marketplace">
+  If you created your store through the [Vercel Marketplace Shopify
+  integration](https://vercel.com/marketplace/shopify), you have the **Vercel Storefronts** channel
+  instead of **Headless**. Manage the storefront and its access token there.
+</Callout>
 
-Install Shopify's **Headless** sales channel and create a storefront. Enable the required [Storefront API permissions](/docs/reference/storefront-api-permissions), then publish the products and collections you want to show to **Headless**. Content published only to **Online Store** does not appear in Vercel Shop.
+## Publish products to your Storefront
 
-To attribute server-side cart activity to this storefront, copy the storefront's numeric ID to `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID`.
+Install Shopify's [Headless sales channel](https://apps.shopify.com/headless). In your Shopify admin, open the **Headless** app under **Sales channels**, then click **Add storefront** to create a storefront.
 
-## Configure filters and recommendations
+Grant the storefront's Storefront API token the required permissions:
+
+| Scope                                   | Enables                                            |
+| --------------------------------------- | -------------------------------------------------- |
+| `unauthenticated_read_product_listings` | Products, collections, search, and recommendations |
+| `unauthenticated_read_product_tags`     | Product tags requested by the storefront           |
+| `unauthenticated_write_checkouts`       | Cart operations and checkout                       |
+| `unauthenticated_read_content`          | Pages, blogs, and articles                         |
+
+For optional scopes and details, see [Storefront API permissions](/docs/reference/storefront-api-permissions).
+
+Publish the products and collections you want to show to the **Headless** channel. See Shopify's guide [here](https://help.shopify.com/en/manual/products/add-update-products#product-availability). Content published only to the **Online Store** channel does not appear in your storefront.
+
+## Set the storefront ID to enable server-side analytics
+
+Set the `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` environment variable to attribute server-side cart activity to this storefront. Find the numeric ID in the storefront's URL in the Headless app, after `/headless/`. For example, `https://admin.shopify.com/store/your-store/headless/330461` uses the ID `330461`. Server-side attribution gives you more reliable analytics and funnel metrics that do not depend on the shopper's browser.
+
+## Configure search, filters, and recommendations
 
 Install [Shopify Search & Discovery](https://apps.shopify.com/search-and-discovery) to configure collection and search filters. You can also assign complementary products, which appear as “Pairs Well With” on product pages. Shopify supplies related product recommendations automatically.
 
-## Publish fixed bundles
+## Optional Shopify features and apps
 
-Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**; publishing only to **Online Store** is not enough.
+<Callout type="note" title="Enable more with skills">
+  Use [skills](/docs/skills) to enable additional Shopify features on your store with a coding
+  agent.
+</Callout>
 
-## Next steps
+### Enable kitting and bundling
+
+Install [Shopify Bundles](https://apps.shopify.com/shopify-bundles) if you sell fixed bundles. Publish the bundle and its component products to **Headless**. The storefront displays bundle relationships when `pdp.bundles.isEnabled` is on in your [shop configuration](/docs/reference/shop-config), which is the default.
+
+## Related links
 
 <Cards>
   <Card title="Product Setup" href="/docs/shopify/pdp">

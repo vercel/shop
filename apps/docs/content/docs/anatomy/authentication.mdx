@@ -40,6 +40,11 @@ Keep both secrets server-only and identical across every instance of a deploymen
 
 Customer Account OAuth requires a public HTTPS origin. The storefront derives callback and logout URLs from each incoming request, including forwarded host and protocol headers. This lets production, preview, and tunnel deployments use their own registered origin. For local testing, open the storefront through a public HTTPS tunnel.
 
+<Callout type="note" title="Local HTTPS with Portless">
+  For local HTTPS, install [Portless](https://portless.sh) with `pnpm add -g portless`, then run
+  `pnpm dev:portless`. Use HTTPS when testing OAuth callbacks or secure cookies.
+</Callout>
+
 In Shopify Admin:
 
 1. Go to **Settings → Customer accounts → Edit**.

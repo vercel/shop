@@ -1,14 +1,51 @@
 ---
-description: Learn about the Vercel Shop template and what it offers.
+description: What Vercel Shop is, what you get out of the box, and how it fits Shopify's new Hydrogen.
 title: Introduction
 type: overview
 ---
 
-Vercel Shop gives you a production-ready Shopify storefront built with Next.js. Connect Shopify, run the storefront, then adapt it to your business with your team or a coding agent.
+Vercel Shop is an enterprise-ready Shopify storefront built with Next.js. Shopify runs your catalog, checkout, and payments. Vercel Shop gives you the storefront in front of them: product pages, collections, search, and a cart, all backed by the Shopify Storefront API and ready to customize. It's the Next.js storefront template for Shopify's new Hydrogen.
 
-The template includes product pages, collections, search, and a cart backed by Shopify. Customer accounts and the shopping assistant are optional. Configure webhooks to refresh cached products and collections when you edit them in Shopify.
+Vercel Shop is open source. Extend it directly with your team or with coding agents. Vercel, Shopify, and third-party partners maintain skills that package common workflows, giving agents a repeatable, best-practice-driven way to implement new features and functionality on your site. It deploys to Vercel and uses Vercel's agentic infrastructure and best practices to power the fastest headless storefront experience on Shopify.
 
-Start with [Getting Started](/docs/getting-started). For the design goals behind the template, read [Why Use This](/docs/why-use-this).
+## What you get out of the box
+
+Going headless usually means rebuilding the same foundation before you can ship. Vercel Shop includes that foundation and gives you everything Shopify's default Liquid theme, Horizon, has out of the box:
+
+- Product, collection, and search pages backed by the Shopify Storefront API.
+- A server-backed cart and checkout handoff to Shopify.
+- Navigation and footer, with optional Shopify-managed menus.
+- SEO, sitemaps, and structured data for product and collection pages.
+- Machine-readable content for AI answer engines. See [AEO and GEO](/docs/anatomy/aeo-geo).
+- Webhook-driven revalidation, so edits in Shopify Admin refresh the storefront.
+- Optional customer accounts and an AI shopping assistant.
+
+## Enterprise-ready
+
+- **Scale.** Static generation, streaming, and caching on Vercel handles traffic spikes and large catalogs.
+- **Security.** Shopify owns checkout and payment data, so card details never touch your storefront. Customer sessions are encrypted, and API secrets stay server-side. A managed firewall and DDoS mitigation protect the site on Vercel, and you can optionally turn on [BotID](https://vercel.com/docs/botid) for invisible bot detection in your [shop configuration](/docs/reference/shop-config).
+- **Composability.** The storefront is a standard Next.js app that talks to Shopify's APIs. Bring your own CMS, search, analytics, or payment services, and add custom routes, pages, and integrations alongside the commerce foundation. You compose the stack around your needs in your own codebase, with no proprietary framework to work around.
+
+## Built for agentic development
+
+Vercel, Shopify, and third-party partners maintain skills and embedded docs so coding agents extend the storefront with best practices in mind. Skills carry task-specific instructions and checks, and the repository ships `AGENTS.md` conventions so an agent follows the same best-practice patterns. See [Extending with Agents](/docs/getting-started/extending-with-agents).
+
+## Start with the template
+
+`create-vercel-shop` scaffolds the base template, the starting point for development. It ships the commerce foundation with room to build on top. Head to [Getting Started](/docs/getting-started) to create your project.
+
+To see what a storefront looks like with the optional features turned on, explore the [enterprise demo](https://shop-template-git-demo-enterprise.labs.vercel.dev/). It runs the same template with agentic features, subscriptions, and more already enabled.
+
+## Part of the new Hydrogen
+
+Vercel is a design partner on the rebuild of [Shopify Hydrogen](https://vercel.com/blog/vercel-and-shopify-are-rebuilding-hydrogen), Shopify's storefront toolkit, redesigned with the Next.js team to be framework-agnostic and runtime-agnostic. Vercel Shop is the Next.js template for Shopify and Hydrogen going forward, and adopts the new Hydrogen as part of that work.
+
+## Why teams choose Vercel Shop
+
+- Open source and maintained by Vercel. Track upstream improvements and roll them into your storefront with the [update-shop skill](/docs/skills/update-shop).
+- Vercel builds and maintains Next.js, so the framework and the template move forward together.
+- Shopify features and third-party integrations arrive as maintained skills, so a coding agent adds them the same way every time.
+- The storefront is yours. Extend it in your own codebase instead of waiting on a vendor roadmap.
 
 <Cards>
   <Card title="Getting Started" href="/docs/getting-started">
@@ -16,8 +53,5 @@ Start with [Getting Started](/docs/getting-started). For the design goals behind
   </Card>
   <Card title="Extending with Agents" href="/docs/getting-started/extending-with-agents">
     Extend and customize the storefront with Claude Code or Cursor.
-  </Card>
-  <Card title="Why Use This" href="/docs/why-use-this">
-    Decide whether an owned Next.js storefront fits your team.
   </Card>
 </Cards>
