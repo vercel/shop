@@ -1,7 +1,6 @@
 {
   "title": "Features",
   "pages": [
-    "index",
     "agent",
     "authentication",
     "cart",
