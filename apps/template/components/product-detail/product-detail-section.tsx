@@ -6,10 +6,10 @@ import { BundleComponents, BundleParents } from "@/components/product-detail/bun
 import { BuyButtons, PurchaseOptions } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductForm,
-  ProductFormGiftCard,
   ProductFormOptions,
   ProductFormPrice,
   ProductInfoShell,
@@ -255,12 +255,7 @@ function ProductInfoContent({
     <ProductForm product={toProductFormInput(product, selectedVariant)}>
       {hasOptions ? <ProductFormOptions /> : null}
       {product.isGiftCard ? (
-        <ProductFormGiftCard
-          fallbackVariant={fallbackVariant}
-          featuredImage={product.featuredImage}
-          handle={product.handle}
-          title={product.title}
-        />
+        <GiftCardPurchaseForm />
       ) : (
         <BuyButtons
           fallbackVariant={fallbackVariant}

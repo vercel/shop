@@ -4,11 +4,9 @@ import { createProductComponents } from "@shopify/hydrogen/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
-import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { ProductPrice } from "@/components/product-detail/product-price";
-import type { Image } from "@/lib/media/types";
-import { buildProductUrl, variantToOptimisticInfo } from "@/lib/product";
+import { buildProductUrl } from "@/lib/product";
 import {
   type OptionGroupState,
   type ProductFormInput,
@@ -121,28 +119,6 @@ export function ProductFormPrice({
       amount={variant.price.amount}
       currencyCode={variant.price.currencyCode}
       compareAtAmount={variant.compareAtPrice?.amount}
-    />
-  );
-}
-
-export function ProductFormGiftCard({
-  fallbackVariant,
-  featuredImage,
-  handle,
-  title,
-}: {
-  fallbackVariant: ProductFormVariant | undefined;
-  featuredImage: Image | null;
-  handle: string;
-  title: string;
-}) {
-  const { selectedVariant } = useProductFormState();
-  const variant = selectedVariant ?? fallbackVariant;
-  if (!variant) return null;
-  return (
-    <GiftCardPurchaseForm
-      merchandiseId={selectedVariant?.id}
-      productInfo={variantToOptimisticInfo(variant, { title, handle, featuredImage })}
     />
   );
 }

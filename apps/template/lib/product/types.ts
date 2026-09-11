@@ -54,15 +54,6 @@ export interface OptionGroupState {
   values: OptionValueState[];
 }
 
-export type OptimisticProductInfo = {
-  image: Image;
-  price: Money;
-  productHandle: string;
-  productTitle: string;
-  selectedOptions: SelectedOption[];
-  variantTitle: string;
-};
-
 export interface ProductCard {
   availableForSale: boolean;
   compareAtPrice?: Money;
