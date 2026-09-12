@@ -36,7 +36,7 @@ Inspect the existing PDP boundaries before changing them. Render stable product 
 ## Variant interaction
 
 - Show the default or URL-selected option state without waiting for unrelated network work.
-- Keep option controls as a small client island. Product copy, shared media, schema, and recommendations do not need to enter that boundary.
+- Keep variant-dependent price, options, and purchase controls in one Hydrogen provider. Product copy, shared media, schema, and recommendations stay outside.
 - Preserve optimistic add-to-cart behavior and exact variant availability.
 - Reserve price and purchase-control space so variant resolution does not shift the page.
 - Avoid serial work: selected-option parsing should not wait on the variant request, and recommendations should not block the buy section.

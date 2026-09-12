@@ -20,7 +20,7 @@ Use Hydrogen's `CartProvider`, `useCart`, `useCartForm`, and cart actions for ca
 
 Cart types derive from `CartDataFromHandlers<typeof cartHandlers>` in `lib/cart/types.ts`, including the additive cart fragment. They are not transformed into a separate provider-independent cart model. Generic `ui/` primitives still receive primitive presentation props.
 
-Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through the custom fragment in `lib/cart/server.ts`. Validate extensions with the template's codegen command rather than guessing fields or editing SDK queries.
+Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through a custom fragment. Validate extensions with the template's codegen command rather than guessing fields or editing SDK queries.
 
 ## Bootstrap and live reads
 
@@ -35,7 +35,7 @@ Cart reads are memoized only within a request, never stored in the Next.js publi
 
 Browser forms use Hydrogen bindings and the `/api/cart` handlers registered by the proxy. The handler response commits cart cookies. The remaining checkout server action is not an alternative add/update/remove transport.
 
-Eve tools invoke Hydrogen cart handlers directly through `agent/lib/cart.ts`, without an internal HTTP round trip. Before sending a message, the browser calls `/api/agent/session` to prepare the cart and persist its cookie; Eve's channel binds that cookie-derived identity to tool context. Tool results expose a confirmed-mutation signal rather than full cart payloads. The client bridge refreshes Hydrogen after fresh confirmed mutations, including while a reply is streaming, and opens the drawer only after successful reconciliation. Restored results must not replay mutations or reopen the drawer. An interrupted write may still complete; do not automatically retry an uncertain mutation.
+Eve tools call Hydrogen handlers directly through `agent/lib/cart.ts`. Prepare the cookie-bound cart at `/api/agent/session` before sending; model arguments must not choose it. Refresh Hydrogen when turns settle and after fresh confirmed mutations during streaming. Open the drawer only for fresh mutations after successful reconciliation. Keep checkout and new messages blocked until the turn settles and the cart is confirmed. Restored results must not replay writes or reopen the drawer. Do not automatically retry uncertain writes.
 
 Keep Shopify authoritative for inventory, discounts, buyer identity, delivery state, totals, warnings, and checkout URL. Use SDK pending/error state rather than locally reconstructing a confirmed cart. Preserve gift-card attributes, selling-plan identity, and bundle line restrictions. Keep checkout unavailable while cart changes are pending.
 

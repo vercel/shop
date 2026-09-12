@@ -6,23 +6,11 @@ type: guide
 
 The template includes opt-in customer authentication through Shopify Customer Accounts. Signed-in customers can manage their profile and addresses, review orders, and continue to checkout with their customer identity.
 
-Authentication is disabled by default. The storefront remains guest-only until you enable `auth.isEnabled` in `lib/config/index.ts` and complete the Shopify setup below.
+Authentication is disabled by default. The storefront remains guest-only until you complete the setup below.
 
 ## Configure customer accounts
 
-Enable authentication:
-
-```ts
-export const shopConfig = {
-  // ...
-  auth: {
-    isEnabled: true,
-  },
-  // ...
-};
-```
-
-Set these environment variables:
+Set `auth.isEnabled` to `true` in `lib/config/index.ts` and configure these environment variables:
 
 ```bash
 CUSTOMER_ACCOUNT_SESSION_SECRET="your-session-secret-here"
@@ -38,7 +26,7 @@ openssl rand -base64 32
 
 Keep both secrets server-only and identical across every instance of a deployment. Rotating the session secret signs out all customers. A build with authentication enabled fails when the session secret, client ID, or client secret is missing.
 
-Customer Account OAuth requires a public HTTPS origin. The storefront derives callback and logout URLs from each incoming request, including forwarded host and protocol headers. This lets production, preview, and tunnel deployments use their own registered origin. For local testing, open the storefront through a public HTTPS tunnel.
+Customer Account OAuth requires a public HTTPS origin. For local testing, open the storefront through a public HTTPS tunnel.
 
 In Shopify Admin:
 
@@ -68,7 +56,7 @@ When authentication is enabled, the cart follows the customer session. Signing i
 
 Customer Account API data is personalized and is not publicly cached.
 
-> **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`. Register callback and logout URIs exactly, and rotate `CUSTOMER_ACCOUNT_SESSION_SECRET` only when you intend to invalidate all sessions.
+> **Security requirements:** Never expose access, refresh, or ID tokens to browser-readable storage. Keep logout as a same-origin `POST`.
 
 If sign-in redirects fail, compare the deployed origin, callback URI, logout URI, store domain, client ID, and client secret character for character. Failed callbacks return to the storefront instead of restarting sign-in.
 

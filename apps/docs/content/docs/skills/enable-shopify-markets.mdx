@@ -51,7 +51,7 @@ Classify the installation before proceeding:
 - **Already localized/customized:** preserve existing catalogs, translations, copy functions not yet migrated, scoped providers, public URLs, domains, cookies, redirects, and commerce/cache contracts. Extend only missing functionality; do not reinstall next-intl blindly, reset supported locales, replace custom copy with template English, or move routes twice.
 - **Copy-only i18n already enabled:** keep its translations and routing. Identify the existing fixed commerce country/language before introducing regional selection. Obtain approval for any new coupling or changed public URLs.
 
-Inventory mixed copy/catalog consumers and retain modules still in use. Preserve intentional operation locale/cache inputs even where the new default no longer passes locale through presentation. In a noninteractive run, stop and report unresolved routing or market-model choices rather than choosing for the user.
+Inventory mixed copy/catalog consumers and retain modules still in use. Preserve intentional operation locale/cache inputs even where presentation does not use them. In a noninteractive run, stop and report unresolved routing or market-model choices rather than choosing for the user.
 
 For any Shopify GraphQL edit, use Shopify AI Toolkit to confirm current API facts and validate the complete operation. Then follow `shopify-graphql-reference` for this template's placement, transforms, cache role, locale flow, and invalidation.
 
@@ -127,7 +127,7 @@ These guards cover only the example locale list above. Extend them deliberately 
 
 Prefer `Locale` over `string` for internal routing locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated. Validate the country/language conversion against Shopify's supported values with Shopify AI Toolkit; do not assume uppercasing every BCP 47 language produces a valid Shopify language code.
 
-The simplified transport's operation `locale` option is a `CommerceLocale` object (`{ country, language }` from `lib/config/types.ts`), not a BCP 47 string. Convert once at the validated commerce boundary and propagate that object through existing operation/cache inputs. Keep the copy/routing `Locale` string distinct. For an older customized transport, adapt its actual signature instead of replacing it wholesale.
+The transport's operation `locale` option is a `CommerceLocale` object (`{ country, language }` from `lib/config/types.ts`), not a BCP 47 string. Convert once at the validated commerce boundary and propagate that object through existing operation/cache inputs. Keep the copy/routing `Locale` string distinct. For an older customized transport, adapt its actual signature instead of replacing it wholesale.
 
 ### Currency rule
 
@@ -309,7 +309,7 @@ For invisible cookie routing, direct public locale-prefixed URLs should canonica
 
 ## 8. Propagate locale through commerce
 
-Audit definitions and real callers. Under the opted-in regional-locale model, localized Storefront API operations receive validated locale/context, derive country and language at the commerce boundary, and use Shopify's validated `@inContext(country: $country, language: $language)`. Inspect existing operation signatures before adding arguments: locale and cache inputs may already exist intentionally even though default UI locale plumbing was removed. Preserve an existing explicitly separated country/language model rather than repurposing its copy locale.
+Audit definitions and real callers. Under the opted-in regional-locale model, localized Storefront API operations receive validated locale/context, derive country and language at the commerce boundary, and use Shopify's validated `@inContext(country: $country, language: $language)`. Inspect existing locale and cache inputs before adding arguments. Preserve an explicitly separated country/language model rather than repurposing its copy locale.
 
 This includes:
 
@@ -350,57 +350,7 @@ Switching language within the same country must not mutate buyer identity:
 - `fr-CA` to `en-CA`: set locale; no cart country update
 - `en-CA` to `en-US`: set locale and update buyer country to `US`
 
-Keep the mutation in a server action, validate both inputs, and update the cart's buyer identity directly — read the cart id from the shared `cart` cookie and issue `cartBuyerIdentityUpdate` through `storefront.request`:
-
-```ts
-"use server";
-
-import { gql } from "@shopify/hydrogen";
-import type { CountryCode } from "@shopify/hydrogen/storefront-api-types";
-import { cookies } from "next/headers";
-
-import { getCartIdFromCookie } from "@/lib/cart/server";
-import { getCountryCode, isEnabledLocale, LOCALE_COOKIE_NAME } from "@/lib/i18n";
-import { storefront } from "@/lib/shopify/storefront/server";
-
-const BUYER_IDENTITY_MUTATION = gql(`#graphql
-  mutation cartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
-    cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
-      cart {
-        id
-      }
-    }
-  }
-`);
-
-export async function switchLocaleAction(currentValue: string, nextValue: string) {
-  if (!isEnabledLocale(currentValue) || !isEnabledLocale(nextValue)) {
-    return { error: "Unsupported locale", success: false } as const;
-  }
-
-  if (getCountryCode(currentValue) !== getCountryCode(nextValue)) {
-    const cartId = await getCartIdFromCookie();
-    if (cartId) {
-      await storefront.request(BUYER_IDENTITY_MUTATION, {
-        variables: {
-          buyerIdentity: { countryCode: getCountryCode(nextValue) as CountryCode },
-          cartId,
-        },
-      });
-    }
-  }
-
-  const cookieStore = await cookies();
-  cookieStore.set(LOCALE_COOKIE_NAME, nextValue, {
-    path: "/",
-    sameSite: "lax",
-  });
-
-  return { success: true } as const;
-}
-```
-
-`getCartIdFromCookie()` (in `lib/cart/server.ts`) reads the shared `cart` cookie and returns the full `gid://shopify/Cart/...` id, so the action reuses the same format the Hydrogen handlers write.
+Validate both locales in a server action and read the cart ID from the shared cookie, never from client input. When the country changes, confirm the existing cart's buyer-country update before saving the locale cookie. On failure, keep the current locale and show the error. Refresh Hydrogen's cart after a country change so prices and checkout use the confirmed cart; do not invalidate public cache tags.
 
 The selector remains a leaf Client Component.
 
@@ -452,9 +402,9 @@ Then run the app and verify the selected strategy.
 - Report whether the fresh-baseline migration and an existing-localized migration were actually exercised; static checks cannot prove either path's parity.
 - Every enabled regional locale produces the expected Shopify country/language context.
 - Product and cart currency codes come from Shopify responses.
-- Cache entries do not leak products, prices, menus, or cart state between locales.
+- Public caches separate localized products, prices, and menus; carts remain uncached.
 - `fr-CA` to `en-CA` does not update buyer country.
-- `en-CA` to `en-US` updates buyer country and invalidates cart cache.
+- `en-CA` to `en-US` updates buyer country and confirms the refreshed cart.
 - Chat/agent operations receive the explicit validated locale.
 - Markdown responses use the same locale as HTML responses.
 - Variant and filter query parameters survive switching and rewrites.

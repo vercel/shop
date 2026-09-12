@@ -10,7 +10,7 @@ The storefront's [Next.js proxy](https://nextjs.org/docs/app/getting-started/pro
 
 The proxy supports cart updates, search suggestions, Shopify API access, and Shopify-compatible commerce endpoints. This includes legacy cart URLs and Shopify's business profile at `/.well-known/ucp`.
 
-Customer sign-in routes are available only when you enable [customer authentication](/docs/anatomy/authentication). Shop Agent is enabled separately and uses `/eve/v1/` for conversations; those requests are not sent to Shopify's route handler.
+Customer sign-in routes are available only when you enable [customer authentication](/docs/anatomy/authentication). Shop Agent is enabled separately and uses `/eve/v1/` for conversations.
 
 Ordinary pages continue to Next.js. Home, product, collection-detail, and search pages can also return Markdown for clients that request it. See [Routes](/docs/reference/routes) for page URLs and service endpoints.
 

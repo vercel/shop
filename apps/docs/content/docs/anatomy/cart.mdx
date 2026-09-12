@@ -22,17 +22,11 @@ The cart displays discounts and sale pricing confirmed by Shopify. Bundles remai
 
 When [customer authentication](/docs/anatomy/authentication) is enabled, signing in can attach the browser cart to the customer so checkout can use their saved details. Customer sign-in is optional and disabled by default.
 
-### Cart changes through chat
-
-Shop Agent is optional and disabled by default. When enabled, it can add items, update quantities, remove items, and add an order note. Confirmed changes open the cart drawer for review.
-
-Stopping a reply does not guarantee that a cart change has stopped. Check the cart before repeating a request after an interruption. See [Shop Agent](/docs/anatomy/agent) for setup, conversation controls, and usage limits.
-
 ## Important limits
 
 - Cart recovery depends on the browser retaining its cookie and Shopify still returning the cart. Clearing browser data can start a new cart sooner than 14 days.
 - Shopify determines inventory, prices, discounts, and which changes are allowed. An item being in the cart does not guarantee it will remain available at checkout.
-- Cart updates can fail because of availability, quantity, discount, or checkout restrictions.
+- A cart change may finish after a chat response is interrupted. Check the cart before repeating the request.
 - Preserve gift-card recipient details and bundle information when customizing the cart so that checkout receives everything needed to fulfill the order.
 
 If you need to attribute cart activity to a particular Headless storefront, set `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID`. See [Environment Variables](/docs/reference/env-vars#optional).
