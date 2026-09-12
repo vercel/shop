@@ -9,7 +9,6 @@ minimumReleaseAgeExclude:
   - "@shopify/hydrogen"
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
-  - "eve"
 
 packages:
   - "apps/*"
