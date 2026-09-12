@@ -3,13 +3,13 @@ import { formatMoney } from "@shopify/hydrogen";
 import { shopConfig } from "@/lib/config";
 import { escapeMarkdown } from "@/lib/markdown";
 import { markdownHeaders } from "@/lib/markdown/representation";
-import { searchIndexProducts } from "@/lib/shopify/operations/products/server";
+import { getSearchIndexProducts } from "@/lib/product/server";
 
 export async function GET(): Promise<Response> {
   try {
     const { name, url } = shopConfig.site;
     const { locale } = shopConfig.localization;
-    const { products } = await searchIndexProducts({ limit: 8 });
+    const { products } = await getSearchIndexProducts({ limit: 8 });
     const productLinks = products.map(
       (product) =>
         `- [${escapeMarkdown(product.title)}](${url}/products/${product.handle}): ${formatMoney(product.price, { locale }).localizedString}${product.availableForSale ? "" : " — unavailable"}`,

@@ -14,6 +14,7 @@ Build the shop around commerce truth first: what product or collection is being 
    - Template rules: `apps/template/AGENTS.md`
    - Route/layout shell: `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
    - Shopify boundary: `apps/template/lib/shopify/storefront/server.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/product/types.ts`, `apps/template/lib/customer/types.ts`
+   - Next.js cache boundary: `apps/template/lib/<domain>/server.ts` cached `get*` wrappers around the uncached `fetch*` operations
    - Shared UI layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
    - Public source fallback: [apps/template source](https://github.com/vercel/shop/tree/main/apps/template)
 3. Use the docs to orient before editing unfamiliar areas:

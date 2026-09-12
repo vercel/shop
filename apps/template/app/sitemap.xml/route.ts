@@ -1,5 +1,5 @@
 import { shopConfig } from "@/lib/config";
-import { getShopifySitemapPagesCount } from "@/lib/shopify/operations/sitemap/server";
+import { getShopifySitemapPagesCount } from "@/lib/seo/server";
 
 function escapeXml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { toAgentProduct } from "../../lib/agent/products";
 import type { ProductCard } from "../../lib/product/types";
-import { fetchProductOptionValues } from "../../lib/shopify/catalog/server";
+import { fetchProductOptionValues } from "../../lib/shopify/operations/products/server";
 
 export const productHandleSchema = z
   .string()

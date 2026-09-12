@@ -1,7 +1,7 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { fetchProductsByIds } from "../../lib/shopify/catalog/server";
+import { fetchProductsByIds } from "../../lib/shopify/operations/products/server";
 import { matchingProducts, productOptionsSchema } from "../lib/catalog";
 
 export default defineTool({

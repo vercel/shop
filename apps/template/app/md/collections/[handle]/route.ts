@@ -5,11 +5,11 @@ import {
   getAllProductsResultsData,
   resolveBrowseParams,
 } from "@/lib/collections/server";
+import { getCollection } from "@/lib/collections/server";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { markdownHeaders } from "@/lib/markdown/representation";
-import { fetchCollectionProducts } from "@/lib/shopify/catalog/server";
-import { getCollection } from "@/lib/shopify/operations/collections/server";
+import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;

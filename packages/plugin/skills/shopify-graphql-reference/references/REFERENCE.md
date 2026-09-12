@@ -19,7 +19,8 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/shopify/customer-account/server.ts`   | Separate Customer Account API transport                                                               |
 | `lib/shopify/fragments/customer/index.ts`, `lib/shopify/fragments/customer-address/index.ts`, `lib/shopify/fragments/customer-order/index.ts` | Shared Customer Account selections |
 | `lib/shopify/fragments/<resource>/index.ts` | Shared Storefront selections grouped by resource                                                      |
-| `lib/shopify/operations/*/server.ts`               | Domain-oriented query and mutation entry points                                                       |
+| `lib/shopify/operations/*/server.ts`               | Uncached `fetch*` Storefront operations and mutations; no `next/cache` imports                        |
+| `lib/<domain>/server.ts`                    | Cached `get*` wrappers owning `"use cache"`, `cacheLife`, and `cacheTag` for rendered pages         |
 | `lib/shopify/transforms/*/index.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
 | `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
 | `lib/shopify/transforms/filters/types.ts`, `lib/shopify/transforms/menu/types.ts` | Resource-owned filter inputs and menu contracts                     |
@@ -31,8 +32,8 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 ## Data flow
 
 ```text
-Route → domain operation → storefront.request → validated Shopify operation
-      ← domain type      ← transform         ← Shopify response
+Route → lib/<domain>/server.ts get* (cache) → lib/shopify/operations fetch* → storefront.request → validated Shopify operation
+      ← domain type                          ← transform                       ← Shopify response
 ```
 
 Do not add an internal HTTP hop between a Server Component and `lib/shopify/operations/`. Catalog and account presentation use transformed domain types. Cart state is intentionally different: derive its types from Hydrogen handlers through `lib/cart/types.ts`, rather than maintaining a second cart model. Product selection adapts catalog models to Hydrogen's `ProductInput`; generic `ui/` primitives still accept primitive presentation props.
@@ -64,7 +65,8 @@ Follow the closest existing operation with the same render role. Do not choose a
 Current examples of intent:
 
 - Product and collection identity/body reads use plain `"use cache"` when their stable content belongs in the PDP or PLP shell.
-- Filtered collection, search, facet, and cursor reads use `"use cache: remote"` when request inputs resolve outside those shells and results are reusable.
+- Fixed grids and recommendations use `"use cache: remote"` through `lib/product/server.ts`.
+- Filtered collection browse, search results, facets, and cursor pages call the uncached `fetch*` operations directly from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
 - Customer Account operations and cart reads remain customer/request scoped.
 
 ## Deployment context versus copy locale

@@ -2,7 +2,7 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { toAgentProductDetails } from "../../lib/agent/products";
-import { fetchProductWithVariants } from "../../lib/shopify/catalog/server";
+import { fetchProductWithVariants } from "../../lib/shopify/operations/products/server";
 import { productHandleSchema } from "../lib/catalog";
 
 export default defineTool({

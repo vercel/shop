@@ -2,8 +2,10 @@ import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { CollectionSearchState } from "@/lib/collections/types";
-import { fetchSearchIndexProducts } from "@/lib/shopify/catalog/server";
-import { fetchSearchFacets } from "@/lib/shopify/operations/products/server";
+import {
+  fetchSearchFacets,
+  fetchSearchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
 import type { SearchResultsData } from "./types";
 

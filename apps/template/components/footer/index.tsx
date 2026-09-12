@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
-import { getShopPolicies } from "@/lib/shopify/operations/policies/server";
+import { getShopPolicies } from "@/lib/content/server";
 import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 import { SocialLinks } from "./social-links";

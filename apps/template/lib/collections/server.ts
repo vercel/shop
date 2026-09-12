@@ -1,18 +1,75 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { getActiveFilters, getCollectionSortFromState } from "@/lib/collections";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Collection } from "@/lib/collections/types";
-import { fetchCollectionProducts, fetchSearchIndexProducts } from "@/lib/shopify/catalog/server";
+import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
+import type { CommerceLocale } from "@/lib/config/types";
+import { buildProductFiltersFromParams } from "@/lib/filters";
+import { tagProducts } from "@/lib/product/server";
 import {
-  buildProductFiltersFromParams,
+  fetchCollection,
+  fetchCollections,
+  fetchCollectionsListing,
+} from "@/lib/shopify/operations/collections/server";
+import {
+  fetchCollectionProducts,
   fetchSearchFacets,
+  fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
 
 import type { CollectionResultsData, CollectionSearchState } from "./types";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
+
+function tagCollections(collections: Array<{ handle: string }>): void {
+  for (const collection of collections) {
+    cacheTag(`collection-${collection.handle}`);
+  }
+}
+
+export async function getCollections(
+  params: { limit?: number; locale?: CommerceLocale } = {},
+): Promise<Collection[]> {
+  "use cache: remote";
+  cacheLife("max");
+  cacheTag("collections", "collections-index");
+
+  const collections = await fetchCollections(params);
+  tagCollections(collections);
+  return collections;
+}
+
+export async function getCollection(params: {
+  handle: string;
+  locale?: CommerceLocale;
+}): Promise<Collection | undefined> {
+  // Plain cache is required to bake the collection into the PLP shell.
+  "use cache";
+  cacheLife("max");
+  cacheTag("collections", `collection-${params.handle}`);
+
+  return fetchCollection(params);
+}
+
+export async function getCollectionsListing(
+  params: { limit?: number; locale?: CommerceLocale } = {},
+): Promise<CollectionWithThumbnail[]> {
+  "use cache";
+  cacheLife("max");
+  cacheTag("collections", "collections-index");
+
+  const collections = await fetchCollectionsListing(params);
+  tagCollections(collections);
+  // Thumbnails fall back to product imagery, so product updates must refresh the listing.
+  tagProducts(
+    collections.flatMap((collection) =>
+      collection.thumbnailProductId ? [{ id: collection.thumbnailProductId }] : [],
+    ),
+  );
+  return collections;
+}
 
 export function resolveBrowseParams(search: string | URLSearchParams): CollectionSearchState {
   const state = parseCollectionParams(
@@ -48,6 +105,7 @@ function recordToSearchParams(
   return params;
 }
 
+// Browse pages and facets stay uncached: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
 export async function getCollectionResultsData({
   handle,
   searchStatePromise,

@@ -36,4 +36,5 @@ export interface Collection {
 
 export interface CollectionWithThumbnail extends Collection {
   thumbnail: Image | null;
+  thumbnailProductId: string | null;
 }

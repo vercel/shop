@@ -2,7 +2,10 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { toAgentProduct } from "../../lib/agent/products";
-import { fetchComplementaryProducts, fetchRelatedProducts } from "../../lib/shopify/catalog/server";
+import {
+  fetchComplementaryProducts,
+  fetchRelatedProducts,
+} from "../../lib/shopify/operations/products/server";
 import { productHandleSchema } from "../lib/catalog";
 
 export default defineTool({
