@@ -67,7 +67,7 @@ export function getProductPurchaseOptions(
 }
 
 // Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
-export function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
+function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
   return {
     availableForSale: variant.availableForSale,
     compareAtPrice: variant.compareAtPrice,
