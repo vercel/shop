@@ -208,7 +208,6 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
-- Gift-card purchases use `addGiftCardToCart` in `lib/cart/gift-card/client.ts` to preserve recipient and scheduling line attributes. The pinned preview's add-form bindings omit line attributes; preserve this adapter until the SDK forwards them.
 - Eve cart tools bind the cart from the incoming browser cookie through channel auth context and call Hydrogen's handlers directly. Never let model arguments select the cart. The browser only refreshes Hydrogen after turns settle; never write cart IDs or replay mutations from restored messages. The default channel is public with optional BotID, not per-user session authorization. Completed Eve steps are durable, but interrupted writes have no application-owned deduplication; do not claim exactly-once behavior or automatically retry an uncertain mutation.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.

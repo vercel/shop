@@ -4,4 +4,5 @@ allowBuilds:
   esbuild: false
 
 minimumReleaseAgeExclude:
+  - "@shopify/hydrogen"
   - "eve"

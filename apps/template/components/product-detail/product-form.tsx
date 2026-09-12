@@ -1,24 +1,18 @@
 "use client";
 
-import { createProductComponents } from "@shopify/hydrogen/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
-import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { ProductPrice } from "@/components/product-detail/product-price";
-import type { Image } from "@/lib/media/types";
-import { buildProductUrl, variantToOptimisticInfo } from "@/lib/product";
+import { buildProductUrl } from "@/lib/product";
+import { ProductProvider, useProduct } from "@/lib/product/client";
 import {
   type OptionGroupState,
   type ProductFormInput,
   type ProductFormSwatch,
   type ProductFormVariant,
 } from "@/lib/product/types";
-
-const { ProductProvider, useProduct, useProductForm } = createProductComponents<ProductFormInput>();
-
-export { useProductForm };
 
 const ProductHandleContext = createContext<string | null>(null);
 
@@ -74,7 +68,7 @@ function SelectedVariantPublisher() {
   return null;
 }
 
-export function useProductFormState(): {
+function useProductFormState(): {
   options: OptionGroupState[];
   selectOption: (name: string, value: string) => void;
   selectedVariant: ProductFormVariant | null;
@@ -121,28 +115,6 @@ export function ProductFormPrice({
       amount={variant.price.amount}
       currencyCode={variant.price.currencyCode}
       compareAtAmount={variant.compareAtPrice?.amount}
-    />
-  );
-}
-
-export function ProductFormGiftCard({
-  fallbackVariant,
-  featuredImage,
-  handle,
-  title,
-}: {
-  fallbackVariant: ProductFormVariant | undefined;
-  featuredImage: Image | null;
-  handle: string;
-  title: string;
-}) {
-  const { selectedVariant } = useProductFormState();
-  const variant = selectedVariant ?? fallbackVariant;
-  if (!variant) return null;
-  return (
-    <GiftCardPurchaseForm
-      merchandiseId={selectedVariant?.id}
-      productInfo={variantToOptimisticInfo(variant, { title, handle, featuredImage })}
     />
   );
 }

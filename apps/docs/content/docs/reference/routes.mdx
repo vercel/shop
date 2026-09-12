@@ -22,13 +22,14 @@ Storefront pages use the paths below without a language prefix. Customer account
 | `/pages/[handle]`                     | Shopify page                                              |
 | `/policies/[handle]`                  | Store policy                                              |
 
-## Cart, search, and webhooks
+## Service endpoints
 
 | Route                        | Description                                         |
 | ---------------------------- | --------------------------------------------------- |
 | `GET /api/cart`              | Read the current cart                               |
 | `POST /api/cart`             | Create a cart or change its contents                |
 | `GET /api/predictive-search` | Search suggestions                                  |
+| `POST /api/ucp/mcp`          | UCP MCP proxy                                       |
 | `POST /api/webhooks/shopify` | Receive signed Shopify webhooks for catalog updates |
 
 See [Cart](/docs/anatomy/cart) for shopper behavior and [Environment Variables](/docs/reference/env-vars) for webhook configuration.

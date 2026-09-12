@@ -117,6 +117,7 @@ export const config = {
     "/api/cart",
     "/api/predictive-search",
     "/api/mcp",
+    "/api/ucp/mcp",
     "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
     "/__shopify/:path*",
     "/agent/:action(handoff|buyer-claims).:format",
