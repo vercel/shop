@@ -1,36 +1,18 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { ProductPrice } from "@/components/product-detail/product-price";
 import { buildProductUrl } from "@/lib/product";
 import { ProductProvider, useProduct } from "@/lib/product/client";
-import {
-  type OptionGroupState,
-  type ProductFormInput,
-  type ProductFormSwatch,
-  type ProductFormVariant,
+import type {
+  OptionGroupState,
+  ProductFormInput,
+  ProductFormSwatch,
+  ProductFormVariant,
 } from "@/lib/product/types";
-
-const ProductHandleContext = createContext<string | null>(null);
-
-// The header price sits in the static shell above the form's Suspense boundary, so the
-// resolved form publishes its selection up through this bridge instead of owning the header.
-const SelectedVariantContext = createContext<{
-  publish: (variant: ProductFormVariant | null) => void;
-  variant: ProductFormVariant | null;
-} | null>(null);
-
-export function ProductInfoShell({ children }: { children: ReactNode }) {
-  const [variant, publish] = useState<ProductFormVariant | null>(null);
-  return (
-    <SelectedVariantContext.Provider value={{ publish, variant }}>
-      {children}
-    </SelectedVariantContext.Provider>
-  );
-}
 
 export function ProductForm({
   children,
@@ -42,73 +24,52 @@ export function ProductForm({
   const router = useRouter();
   const searchParams = useSearchParams();
   return (
-    <ProductHandleContext.Provider value={product.handle}>
-      <ProductProvider
-        product={product}
-        onSelect={(result) => {
-          const handle = result.selectedVariant?.product.handle ?? product.handle;
-          router.replace(buildProductUrl(handle, result.selectedOptions, searchParams), {
-            scroll: false,
-          });
-        }}
-      >
-        <SelectedVariantPublisher />
-        {children}
-      </ProductProvider>
-    </ProductHandleContext.Provider>
+    <ProductProvider
+      product={product}
+      onSelect={(result) => {
+        const handle = result.selectedVariant?.product.handle ?? product.handle;
+        router.replace(buildProductUrl(handle, result.selectedOptions, searchParams), {
+          scroll: false,
+        });
+      }}
+    >
+      {children}
+    </ProductProvider>
   );
 }
 
-function SelectedVariantPublisher() {
-  const bridge = useContext(SelectedVariantContext);
-  const { selectedVariant } = useProduct();
-  useEffect(() => {
-    bridge?.publish(selectedVariant);
-  }, [bridge, selectedVariant]);
-  return null;
+interface ProductFormOptionsProps {
+  handle: string;
 }
 
-function useProductFormState(): {
-  options: OptionGroupState[];
-  selectOption: (name: string, value: string) => void;
-  selectedVariant: ProductFormVariant | null;
-} {
-  const productHandle = useContext(ProductHandleContext);
-  const { options, selectOption, selectedVariant } = useProduct();
-  return {
-    options: options.map((option) => ({
-      name: option.name,
-      values: option.values.map((value) => {
-        const swatch = value.swatch as ProductFormSwatch | undefined;
-        return {
-          available: value.available,
-          crossProduct: value.handle !== productHandle,
-          exists: value.exists,
-          href: buildProductUrl(value.handle, value.selectedOptions),
-          image: swatch?.variantImage,
-          name: value.name,
-          selected: value.selected,
-          swatch: swatch ? { color: swatch.color, image: swatch.image } : undefined,
-        };
-      }),
-    })),
-    selectOption,
-    selectedVariant,
-  };
+export function ProductFormOptions({ handle }: ProductFormOptionsProps) {
+  const { options, selectOption } = useProduct();
+  const optionGroups: OptionGroupState[] = options.map((option) => ({
+    name: option.name,
+    values: option.values.map((value) => {
+      const swatch = value.swatch as ProductFormSwatch | undefined;
+      return {
+        available: value.available,
+        crossProduct: value.handle !== handle,
+        exists: value.exists,
+        href: buildProductUrl(value.handle, value.selectedOptions),
+        image: swatch?.variantImage,
+        name: value.name,
+        selected: value.selected,
+        swatch: swatch ? { color: swatch.color, image: swatch.image } : undefined,
+      };
+    }),
+  }));
+  return <ProductInfoOptions options={optionGroups} onSelectValue={selectOption} />;
 }
 
-export function ProductFormOptions() {
-  const { options, selectOption } = useProductFormState();
-  return <ProductInfoOptions options={options} onSelectValue={selectOption} />;
-}
-
-// Renders inside ProductInfoShell, not ProductForm; the server-resolved variant wins until the form publishes.
 export function ProductFormPrice({
   fallbackVariant,
 }: {
-  fallbackVariant: ProductFormVariant | undefined;
+  fallbackVariant: Pick<ProductFormVariant, "compareAtPrice" | "price"> | undefined;
 }) {
-  const variant = useContext(SelectedVariantContext)?.variant ?? fallbackVariant;
+  const { selectedVariant } = useProduct();
+  const variant = selectedVariant ?? fallbackVariant;
   if (!variant) return null;
   return (
     <ProductPrice
