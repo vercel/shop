@@ -4,9 +4,8 @@ import { useEveAgent } from "eve/react";
 import { MinusIcon, Trash2Icon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
-import { useScrollContain } from "@/hooks/use-scroll-contain";
 import { setAgentCartStatus, useAgentCartPending } from "@/lib/agent/cart/client";
-import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
+import { readStoredChat, useAgentScrollContain, writeStoredChat } from "@/lib/agent/chat/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
@@ -138,7 +137,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       document.removeEventListener("keydown", handleEscape);
     };
   }, [onOpenChange, open, triggerRef]);
-  useScrollContain(panelRef, open, "[data-slot=agent-messages]");
+  useAgentScrollContain(panelRef, open);
   const handleStop = () => {
     setControlError(null);
     void agent.cancel().catch(() => {

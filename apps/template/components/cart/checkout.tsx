@@ -3,7 +3,7 @@
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useCheckout } from "@/hooks/use-checkout";
+import { useCheckout } from "@/lib/cart/client";
 
 interface CartCheckoutProps {
   "aria-label"?: string;
