@@ -1,7 +1,6 @@
+import { getSearchResultUrl } from "@shopify/hydrogen";
 import { defineTool } from "eve/tools";
 import { z } from "zod";
-
-import { buildAgentPath } from "../../lib/agent/routes";
 
 export default defineTool({
   description:
@@ -20,10 +19,30 @@ export default defineTool({
     ]),
     identifier: z.string().max(255).optional(),
   }),
-  execute: ({ destination, identifier }) => ({
-    url: buildAgentPath(
-      destination,
-      destination === "search" ? identifier : identifier?.replace(/[^a-zA-Z0-9_-]/g, ""),
-    ),
-  }),
+  execute: ({ destination, identifier }) => {
+    const handle = identifier?.replace(/[^a-zA-Z0-9_-]/g, "");
+    switch (destination) {
+      case "account":
+        return { url: "/account/profile" };
+      case "addresses":
+        return { url: "/account/addresses" };
+      case "cart":
+      case "checkout":
+        return { url: "/cart" };
+      case "collection":
+        return { url: handle ? `/collections/${handle}` : "/collections" };
+      case "orders":
+        return { url: "/account/orders" };
+      case "product":
+        return { url: handle ? `/products/${handle}` : "/" };
+      case "search":
+        return {
+          url: identifier
+            ? getSearchResultUrl({ baseUrl: "/search", term: identifier })
+            : "/search",
+        };
+      default:
+        return { url: "/" };
+    }
+  },
 });
