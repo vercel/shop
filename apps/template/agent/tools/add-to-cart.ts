@@ -2,7 +2,6 @@ import { defineTool } from "eve/tools";
 import { z } from "zod";
 
 import { getSessionCartId, mutateCart } from "../lib/cart";
-import { runCommerce } from "../lib/commerce";
 
 export default defineTool({
   description:
@@ -12,7 +11,5 @@ export default defineTool({
     variantId: z.string().regex(/^gid:\/\/shopify\/ProductVariant\/[0-9]+$/),
   }),
   execute: ({ quantity, variantId }, ctx) =>
-    runCommerce(() =>
-      mutateCart(getSessionCartId(ctx), { lines: [{ merchandiseId: variantId, quantity }] }),
-    ),
+    mutateCart(getSessionCartId(ctx), { lines: [{ merchandiseId: variantId, quantity }] }),
 });

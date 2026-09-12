@@ -3,7 +3,6 @@ import { z } from "zod";
 
 import { fetchProductsByIds } from "../../lib/shopify/catalog/server";
 import { matchingProducts, productOptionsSchema } from "../lib/catalog";
-import { runCommerce } from "../lib/commerce";
 
 export default defineTool({
   description:
@@ -12,11 +11,7 @@ export default defineTool({
     ids: z.array(z.string().regex(/^gid:\/\/shopify\/Product\/[0-9]+$/)).max(12),
     options: productOptionsSchema,
   }),
-  execute: ({ ids, options }) =>
-    runCommerce(async () => ({
-      products: await matchingProducts(
-        ids.length ? await fetchProductsByIds({ ids }) : [],
-        options,
-      ),
-    })),
+  execute: async ({ ids, options }) => ({
+    products: await matchingProducts(ids.length ? await fetchProductsByIds({ ids }) : [], options),
+  }),
 });

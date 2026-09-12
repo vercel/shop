@@ -4,7 +4,6 @@ import { z } from "zod";
 import { toAgentProduct } from "../../lib/agent/products";
 import { fetchCollectionProducts } from "../../lib/shopify/catalog/server";
 import { productHandleSchema } from "../lib/catalog";
-import { runCommerce } from "../lib/commerce";
 
 export default defineTool({
   description: "Browse products by collection handle from list-collections or page context.",
@@ -14,9 +13,8 @@ export default defineTool({
       .enum(["best-matches", "price-low-to-high", "price-high-to-low", "BEST_SELLING", "CREATED"])
       .default("best-matches"),
   }),
-  execute: ({ collection, sortKey }) =>
-    runCommerce(async () => {
-      const { products } = await fetchCollectionProducts({ collection, limit: 12, sortKey });
-      return { products: products.map(toAgentProduct) };
-    }),
+  execute: async ({ collection, sortKey }) => {
+    const { products } = await fetchCollectionProducts({ collection, limit: 12, sortKey });
+    return { products: products.map(toAgentProduct) };
+  },
 });
