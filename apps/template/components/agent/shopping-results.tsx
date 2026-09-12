@@ -8,8 +8,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useState } from "react";
 
+import { CartCheckout } from "@/components/cart/checkout";
 import { useCartDrawer } from "@/components/cart/context";
 import { OverlayItem } from "@/components/cart/overlay-item";
+import { CartTotal } from "@/components/cart/total";
 import {
   ProductCard,
   ProductCardContent,
@@ -21,7 +23,6 @@ import {
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import { useCheckout } from "@/hooks/use-checkout";
 import { isCartMutation } from "@/lib/agent/cart";
 import type { AgentProduct, AgentProductDetails, AgentVariant } from "@/lib/agent/products/types";
 import type { Cart } from "@/lib/cart/types";
@@ -129,14 +130,14 @@ function MissingData({ children }: { children: string }) {
 
 function AgentCartSummary() {
   const cart = useCart<Cart, Cart>((state) => state.data);
-  const {
-    checkoutError,
-    checkoutErrorId,
-    handleCheckout,
-    isCheckingOut,
-    isCheckoutDisabled,
-    isUpdatingCart,
-  } = useCheckout();
+  const isLoading = useCart((state) => state.loading);
+  if (isLoading && cart.lines.nodes.length === 0)
+    return (
+      <div className="my-2 flex items-center gap-2.5 text-muted-foreground text-xs" role="status">
+        <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+        Loading cart…
+      </div>
+    );
   if (cart.lines.nodes.length === 0) return <MissingData>Your cart is empty</MissingData>;
   return (
     <div className="my-2 overflow-hidden rounded-lg border">
@@ -146,41 +147,10 @@ function AgentCartSummary() {
         ))}
       </ul>
       <div className="border-t bg-muted/50 px-2.5 py-2">
-        <div className="flex items-baseline justify-between font-medium text-sm">
-          <span>Estimated total</span>
-          {cart.cost.totalAmount.currencyCode ? (
-            <Price
-              amount={cart.cost.totalAmount.amount}
-              className="text-sm"
-              currencyCode={cart.cost.totalAmount.currencyCode}
-            />
-          ) : (
-            <span className="text-muted-foreground">Updating…</span>
-          )}
-        </div>
-        <p className="mt-1 text-muted-foreground text-xs">
-          Taxes and shipping calculated at checkout.
-        </p>
+        <CartTotal cart={cart} size="compact" />
       </div>
-      <div className="grid gap-2.5 border-t px-2.5 py-2">
-        <Button
-          aria-busy={isCheckingOut || isUpdatingCart || undefined}
-          aria-describedby={checkoutError ? checkoutErrorId : undefined}
-          className="h-12 w-full justify-center"
-          disabled={isCheckoutDisabled}
-          onClick={handleCheckout}
-          type="button"
-        >
-          {isCheckingOut || isUpdatingCart ? (
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-          ) : null}
-          {isCheckingOut ? "Redirecting..." : isUpdatingCart ? "Updating cart..." : "Checkout"}
-        </Button>
-        {checkoutError ? (
-          <p className="text-xs text-destructive" id={checkoutErrorId} role="alert">
-            {checkoutError}
-          </p>
-        ) : null}
+      <div className="border-t px-2.5 py-2">
+        <CartCheckout />
       </div>
       <span className="sr-only">This cart updates as you change it.</span>
     </div>
