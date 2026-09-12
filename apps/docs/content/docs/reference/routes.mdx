@@ -29,7 +29,7 @@ type: reference
 | `GET /api/cart`              | Current cart                                                                |
 | `POST /api/cart`             | Cart creation and updates                                                   |
 | `GET /api/predictive-search` | Search suggestions                                                          |
-| `POST /api/ucp/mcp`          | UCP MCP proxy; caller supplies authorization and agent profile              |
+| `POST /api/ucp/mcp`          | UCP MCP proxy                                                               |
 
 Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, and the app's webhook and chat endpoints.
 

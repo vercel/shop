@@ -37,6 +37,13 @@ export function GiftCardPurchaseForm() {
         },
       })}
       className="group grid gap-5"
+      onReset={(event) => {
+        if (pending) {
+          event.preventDefault();
+          return;
+        }
+        setMinimumSendDate("");
+      }}
     >
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: 1 })} />
@@ -54,7 +61,12 @@ export function GiftCardPurchaseForm() {
       />
       <fieldset disabled={pending} data-slot="gift-card-fields" className="grid gap-2.5">
         <div className="grid gap-2.5">
-          <Label htmlFor="gift-card-email">Recipient email</Label>
+          <div className="flex items-center justify-between gap-2.5">
+            <Label htmlFor="gift-card-email">Recipient email</Label>
+            <Button className="h-auto p-0 text-xs" disabled={pending} type="reset" variant="link">
+              Clear recipient details
+            </Button>
+          </div>
           <Input
             id="gift-card-email"
             {...register("attributeValue", { defaultValue: "", key: "Recipient email" })}
