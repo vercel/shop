@@ -19,8 +19,6 @@
   "dependencies": {
     "@base-ui/react": "1.8.0",
     "@graphql-codegen/cli": "7.4.0",
-    "@json-render/core": "0.20.0",
-    "@json-render/react": "0.20.0",
     "@shopify/api-codegen-preset": "3.0.0",
     "@shopify/hydrogen": "2026.10.0-preview.3",
     "@tailwindcss/turbopack": "4.3.3",
