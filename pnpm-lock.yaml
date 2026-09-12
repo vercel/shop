@@ -220,12 +220,6 @@ importers:
       '@graphql-codegen/cli':
         specifier: 7.4.0
         version: 7.4.0(@parcel/watcher@2.6.0)(@types/node@26.4.1)(crossws@0.4.12(srvx@1.0.4))(graphql@16.14.2)(supports-color@7.2.0)(typescript@7.0.2)
-      '@json-render/core':
-        specifier: 0.20.0
-        version: 0.20.0(zod@4.5.4)
-      '@json-render/react':
-        specifier: 0.20.0
-        version: 0.20.0(react@19.2.8)(zod@4.5.4)
       '@shopify/api-codegen-preset':
         specifier: 3.0.0
         version: 3.0.0(@types/node@26.4.1)(crossws@0.4.12(srvx@1.0.4))(supports-color@7.2.0)(typescript@7.0.2)
@@ -1720,16 +1714,6 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
-
-  '@json-render/core@0.20.0':
-    resolution: {integrity: sha512-cXAXn7h3QaylefQgh85AEGPuVq4C8SJ3k9JqigWLJhaBSozF1Fmsrm43DP16RmkqNiVgj5pBRdmB48lEO5qlow==}
-    peerDependencies:
-      zod: ^4.0.0
-
-  '@json-render/react@0.20.0':
-    resolution: {integrity: sha512-arRrlf7zeIJYM6i2JHcTBKW5Kl+ErBtoNR29h4i6rG4AtTzLmaWDgPTs35pr3MdSCTp0UxKwY4O3vWMdUihpRQ==}
-    peerDependencies:
-      react: ^19.2.3
 
   '@manypkg/find-root@3.1.0':
     resolution: {integrity: sha512-BcSqCyKhBVZ5YkSzOiheMCV41kqAFptW6xGqYSTjkVTl9XQpr+pqHhwgGCOHQtjDCv7Is6EFyA14Sm5GVbVABA==}
@@ -8771,17 +8755,6 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
-
-  '@json-render/core@0.20.0(zod@4.5.4)':
-    dependencies:
-      zod: 4.5.4
-
-  '@json-render/react@0.20.0(react@19.2.8)(zod@4.5.4)':
-    dependencies:
-      '@json-render/core': 0.20.0(zod@4.5.4)
-      react: 19.2.8
-    transitivePeerDependencies:
-      - zod
 
   '@manypkg/find-root@3.1.0':
     dependencies:

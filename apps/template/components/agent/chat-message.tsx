@@ -1,16 +1,13 @@
 "use client";
 
-import type { Spec } from "@json-render/core";
-import { JSONUIProvider, Renderer } from "@json-render/react";
 import type { EveMessage } from "eve/react";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import { getCartMutationResult, isCartMutation } from "@/lib/agent/cart";
+import { getCartMutationResult } from "@/lib/agent/cart";
 
-import { AgentProductProvider } from "./product-context";
-import { registry } from "./registry";
+import { ShoppingResults } from "./shopping-results";
 import { AgentThinking } from "./thinking";
 
 const linkSafety = {
@@ -22,73 +19,6 @@ const Markdown = memo(({ children }: { children: string }) => (
     {children}
   </Streamdown>
 ));
-
-function shoppingSpec(message: EveMessage, isStreaming: boolean): Spec | null {
-  const children: string[] = [];
-  const elements: Spec["elements"] = { response: { type: "AgentResponse", props: {}, children } };
-  const seen = new Set<string>();
-  const changesCart = message.parts.some(
-    (part) => part.type === "dynamic-tool" && isCartMutation(part.toolName),
-  );
-  for (const part of message.parts) {
-    if (part.type !== "dynamic-tool" || part.state !== "output-available" || part.partial) continue;
-    const output = part.output;
-    if (!output || typeof output !== "object" || "error" in output) continue;
-    const key = part.toolCallId;
-    if (
-      ["present-products", "search-products", "browse-collection", "get-recommendations"].includes(
-        part.toolName,
-      ) &&
-      "products" in output &&
-      Array.isArray(output.products)
-    ) {
-      const cards: string[] = [];
-      for (const [index, product] of output.products.entries()) {
-        if (
-          !product ||
-          typeof product !== "object" ||
-          typeof product.handle !== "string" ||
-          seen.has(product.handle)
-        )
-          continue;
-        seen.add(product.handle);
-        const card = `${key}-${index}`;
-        cards.push(card);
-        elements[card] = {
-          type: "AgentProductCard",
-          props: { handle: product.handle },
-          children: [],
-        };
-      }
-      if (cards.length) {
-        children.push(key);
-        elements[key] = { type: "AgentProductGrid", props: { title: null }, children: cards };
-      }
-    }
-    if (
-      !isStreaming &&
-      !changesCart &&
-      part.toolName === "get-product-details" &&
-      "product" in output &&
-      output.product &&
-      typeof output.product === "object" &&
-      "handle" in output.product &&
-      typeof output.product.handle === "string"
-    ) {
-      children.push(key);
-      elements[key] = {
-        type: "AgentVariantPicker",
-        props: { handle: output.product.handle },
-        children: [],
-      };
-    }
-    if (!isStreaming && !changesCart && part.toolName === "get-cart") {
-      if (!elements.cart) children.push("cart");
-      elements.cart = { type: "AgentCartSummary", props: {}, children: [] };
-    }
-  }
-  return children.length ? { root: "response", elements } : null;
-}
 
 export function ChatMessage({
   isStreaming,
@@ -108,7 +38,6 @@ export function ChatMessage({
         </Bubble>
       </div>
     ) : null;
-  const spec = shoppingSpec(message, isStreaming);
   const mutations = message.parts.flatMap((part) => {
     const result = getCartMutationResult(part);
     return result ? [result] : [];
@@ -141,13 +70,7 @@ export function ChatMessage({
           ))}
         </div>
       )}
-      {spec && (
-        <AgentProductProvider parts={message.parts}>
-          <JSONUIProvider registry={registry}>
-            <Renderer registry={registry} spec={spec} />
-          </JSONUIProvider>
-        </AgentProductProvider>
-      )}
+      <ShoppingResults isStreaming={isStreaming} message={message} />
     </div>
   );
 }
