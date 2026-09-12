@@ -1,7 +1,6 @@
 "use client";
 
-import type { UIMessage } from "ai";
-import { isToolUIPart } from "ai";
+import type { EveMessage } from "eve/react";
 import { createContext, type ReactNode, useContext, useMemo } from "react";
 
 import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/types";
@@ -19,11 +18,11 @@ function isAgentProduct(value: unknown): value is AgentProduct {
   );
 }
 
-function collectProducts(parts: UIMessage["parts"]): ProductMap {
+function collectProducts(parts: EveMessage["parts"]): ProductMap {
   const products: ProductMap = new Map();
 
   for (const part of parts) {
-    if (!isToolUIPart(part) || part.state !== "output-available") continue;
+    if (part.type !== "dynamic-tool" || part.state !== "output-available" || part.partial) continue;
     const output = part.output as { product?: unknown; products?: unknown } | undefined;
     if (!output) continue;
 
@@ -45,7 +44,7 @@ export function AgentProductProvider({
   parts,
 }: {
   children: ReactNode;
-  parts: UIMessage["parts"];
+  parts: EveMessage["parts"];
 }) {
   const products = useMemo(() => collectProducts(parts), [parts]);
   return <AgentProductContext.Provider value={products}>{children}</AgentProductContext.Provider>;

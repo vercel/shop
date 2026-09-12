@@ -35,7 +35,7 @@ Cart reads are memoized only within a request, never stored in the Next.js publi
 
 Browser forms use Hydrogen bindings and the `/api/cart` handlers registered by the proxy. The handler response commits cart cookies. The remaining checkout server action is not an alternative add/update/remove transport.
 
-Assistant tools invoke the same cart handlers through the server adapter without an internal HTTP round trip. The chat response owns first-cart cookie persistence before streaming. Tool results expose a mutation signal rather than full cart payloads; the client bridge refreshes Hydrogen's cart after new successful mutations and must not replay restored conversation history.
+Eve tools invoke Hydrogen cart handlers directly through `agent/lib/cart.ts`, without an internal HTTP round trip. Before sending a message, the browser calls `/api/agent/session` to prepare the cart and persist its cookie; Eve's channel binds that cookie-derived identity to tool context. Tool results expose a confirmed-mutation signal rather than full cart payloads. The client bridge refreshes Hydrogen after fresh confirmed mutations, including while a reply is streaming, and opens the drawer only after successful reconciliation. Restored results must not replay mutations or reopen the drawer. An interrupted write may still complete; do not automatically retry an uncertain mutation.
 
 Keep Shopify authoritative for inventory, discounts, buyer identity, delivery state, totals, warnings, and checkout URL. Use SDK pending/error state rather than locally reconstructing a confirmed cart. Preserve gift-card attributes, selling-plan identity, and bundle line restrictions. Keep checkout unavailable while cart changes are pending.
 

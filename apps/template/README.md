@@ -59,11 +59,13 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 - **Customer authentication** with Hydrogen and Shopify Customer Account API OIDC — opt-in via `lib/config/index.ts`
 - **Tailwind CSS 4** and shadcn/ui components
 - **Single-locale storefront** with explicit country, language, and display locale; optional skills add next-intl and multi-locale routing
-- **AI-ready** with opt-in Vercel AI SDK integration
+- **Optional Shop Agent** for product discovery, store questions, and cart updates
 - **Optimistic cart** with Hydrogen forms, shared cart state, and server handlers
 - **SEO** with structured data and dynamic metadata
 
-Customer authentication is disabled by default. To enable it, set `auth.isEnabled` in `lib/config/index.ts` and provide `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`, and a separate app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET`. Keep both secrets server-only. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure callback URLs and local HTTPS.
+Customer authentication is disabled by default. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure Shopify credentials and callback URLs before enabling `auth.isEnabled` in `lib/config/index.ts`.
+
+Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` and follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to configure AI Gateway access and review privacy and spending safeguards before enabling public chat.
 
 ## Skills
 

@@ -6,7 +6,17 @@ export const botIdProtectedRoutes = [
         {
           advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
           method: "POST",
-          path: "/api/chat",
+          path: "/api/agent/session",
+        },
+        {
+          advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
+          method: "*",
+          path: "/eve/v1/session",
+        },
+        {
+          advancedOptions: { checkLevel: shopConfig.botid.checkLevel },
+          method: "*",
+          path: "/eve/v1/session/*",
         },
       ]
     : []),

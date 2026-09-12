@@ -1,41 +1,52 @@
 ---
 title: Environment Variables
-description: Required and optional environment variables for Vercel Shop.
+description: Required storefront credentials and optional settings for customer accounts, chat, and integrations.
 type: reference
 ---
 
+Use `.env.local` for local development and your hosting platform's environment settings for deployments. Do not commit local credentials. Only browser-safe values belong in variables prefixed with `NEXT_PUBLIC_`.
+
 ## Required
 
-| Variable                                      | Description                                                                                                   |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`            | Shopify store domain, such as `your-store.myshopify.com`. Find it in **Settings → Domains** in Shopify admin. |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public, browser-safe Storefront API token. Find it in **Settings → Apps and sales channels → Headless**.      |
+These two values connect the storefront to your Shopify store.
+
+| Variable                                      | Description                                                                                           |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`            | Store domain, such as `your-store.myshopify.com`. Find it in **Settings → Domains** in Shopify admin. |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public, browser-safe Storefront API token from **Settings → Apps and sales channels → Headless**.     |
 
 ## Customer authentication
 
-These variables are required when `auth.isEnabled` is `true` in [`lib/config/index.ts`](/docs/reference/shop-config).
+Customer sign-in is **disabled by default**. These values are required when you enable `auth.isEnabled` in [Shop Configuration](/docs/reference/shop-config). Follow [Authentication](/docs/anatomy/authentication) to configure Shopify and its callback URLs.
 
-| Variable                                     | Description                                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `CUSTOMER_ACCOUNT_SESSION_SECRET`            | App-generated secret that encrypts customer session cookies. Shopify does not provide this value. |
-| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`     | Client ID from **Sales channels → Headless → Customer Account API** in Shopify admin.             |
-| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` | Server-only client secret for the confidential Customer Account API client.                       |
+| Variable                                     | Description                                                                                   |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `CUSTOMER_ACCOUNT_SESSION_SECRET`            | App-generated secret for encrypting customer session cookies. Shopify does not supply it.     |
+| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`     | Client ID from **Sales channels → Headless → Customer Account API** in Shopify admin.         |
+| `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` | Server-only client secret issued by Shopify for the confidential Customer Account API client. |
 
-Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Store one stable value in server-side environment variables across all deployment instances. Rotating it invalidates existing customer sessions.
+Generate `CUSTOMER_ACCOUNT_SESSION_SECRET` with `openssl rand -base64 32`. Keep the same value across all instances of a deployment. Rotating it signs out existing customers. Keep both the session secret and Shopify client secret server-only.
+
+## Shop Agent
+
+Shop Agent is **disabled by default** and needs no AI credentials while disabled. To enable it, follow [Shop Agent setup](/docs/anatomy/agent).
+
+| Variable                | When to set it                                                                                                                                                                                |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AI_GATEWAY_API_KEY`    | Set a server-only Gateway key when running Shop Agent without Vercel deployment identity authentication, including local development without that authentication.                             |
+| `UCP_AGENT_PROFILE_URL` | Override the public profile used for Shopify catalog search. Defaults to `/agent/ucp-profile.json` at `site.url`; local development and Vercel previews use Shopify's public example profile. |
 
 ## Optional
 
-| Variable                            | Description                                                                                                       |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `AI_GATEWAY_API_KEY`                | Server-only AI Gateway key for the shopping assistant when not using Vercel's deployment identity authentication. |
-| `UCP_AGENT_PROFILE_URL`             | Public agent profile URL sent with the assistant's Shopify MCP requests, when agent attribution is needed.        |
-| `DEBUG_SHOPIFY`                     | Set to `true` to log structured Storefront and Customer Account API operation timings.                            |
-| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Numeric storefront ID from the Headless channel, used for cart attribution and Shopify runtime configuration.     |
-| `SHOPIFY_API_VERSION`               | Storefront API version override. Defaults to `unstable`. Hydrogen selects the Customer Account API version.       |
-| `SHOPIFY_WEBHOOK_SECRET`            | Shared secret used to verify HMAC signatures for `POST /api/webhooks/shopify`.                                    |
+| Variable                            | When to set it                                                                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `DEBUG_SHOPIFY`                     | Set to `1` or `true` when troubleshooting Shopify API requests. Enables detailed operation and timing logs.         |
+| `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Set to the numeric ID of your Headless storefront when you need storefront-specific cart attribution.               |
+| `SHOPIFY_API_VERSION`               | Override the Storefront API version. Defaults to `unstable`; this does not select the Customer Account API version. |
+| `SHOPIFY_WEBHOOK_SECRET`            | Set when configuring Shopify webhooks. Used to verify signatures on `POST /api/webhooks/shopify`.                   |
 
 ## Platform-provided values
 
-`VERCEL_PROJECT_PRODUCTION_URL` supplies the default production origin on Vercel. For other hosts, set `site.url` in [Shop Configuration](/docs/reference/shop-config).
+Vercel supplies `VERCEL_PROJECT_PRODUCTION_URL`, which sets the default production origin. For another host or a custom origin, set `site.url` in [Shop Configuration](/docs/reference/shop-config).
 
-`V0_CALLBACK_URL` is a v0 preview value. When present, the template disables Next.js image optimization. It is not required for ordinary deployments.
+`V0_CALLBACK_URL` is supplied by v0 previews to disable image optimization there. You do not need to set it for ordinary development or deployment.

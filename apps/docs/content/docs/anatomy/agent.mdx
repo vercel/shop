@@ -1,50 +1,69 @@
 ---
 title: Agent
-description: The shopping assistant - AI-powered product discovery, cart management, and generative UI.
+description: Enable product discovery, store questions, and cart updates through conversation.
 type: guide
 prerequisites:
   - /docs/getting-started
 ---
 
-The storefront includes an opt-in AI shopping assistant built with [AI SDK](https://ai-sdk.dev). It helps shoppers discover products, browse collections, answer store-policy questions, manage their cart, and navigate the storefront through conversation.
+Shop Agent helps shoppers find products, choose options, ask store questions, and manage their cart through conversation.
 
-The assistant is disabled by default. When disabled, the chat control is hidden and `POST /api/chat` returns `404`.
+It is **disabled by default**. The storefront works without it, and the chat control stays hidden until you enable it. Customer sign-in is not required.
 
-## Enable the assistant
+## Enable Shop Agent
 
-Set `agent.isEnabled` to `true` in `lib/config/index.ts`, then deploy with access to the Vercel AI Gateway. The included assistant uses OpenAI GPT-5.6 Luna by default.
+Shop Agent uses your storefront's existing Shopify connection. It runs on [Eve](https://eve.dev) with OpenAI GPT-5.6 Luna through [Vercel AI Gateway](https://vercel.com/ai-gateway).
 
-The chat endpoint is public and each message can incur model usage. Bot protection is configured separately and is also disabled by default. Before production traffic, review [Shop Configuration](/docs/reference/shop-config) and add rate limits or spending controls that match your risk tolerance.
+1. Set `agent.isEnabled` to `true` in `lib/config/index.ts`.
+2. Configure AI Gateway access. Vercel deployments can use deployment identity authentication. For local development or other hosts without that authentication, set `AI_GATEWAY_API_KEY` in your server environment. Use `.env.local` for local values and keep the key server-only. See [Environment Variables](/docs/reference/env-vars#shop-agent).
+3. Run `pnpm dev`, open Shop Agent, and ask for a product from your store. The reply should show product cards you can open or ask about.
 
-Set `UCP_AGENT_PROFILE_URL` only if your store requires an agent profile for Shopify's hosted [Storefront MCP](https://shopify.dev/docs/apps/build/storefront-mcp). See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
+Before allowing public traffic, review [privacy and usage limits](#privacy-and-usage-limits). On Vercel, deploy the storefront with the setting and Gateway access configured; you do not need a separate agent deployment.
+
+### Local production
+
+For a local production build, run `pnpm build:agent && pnpm build`. Then run `pnpm exec eve start --port 4274` and `pnpm start` in separate terminals. Use `pnpm dev` for ordinary development.
 
 ## Shopper experience
 
-Out of the box, shoppers can:
+Shoppers can:
 
-- Search the catalog, including required options such as color or size
-- Browse collections and request related or complementary products
-- View current product details, prices, variants, images, and availability
-- Add products, change quantities, remove lines, and add a cart note
-- Ask about shipping, returns, payments, warranty, sizing, care, and other store policies
-- Open product, collection, search, cart, checkout, account, and order destinations
+- Search for products, narrow results by color or size, and browse collections.
+- View product details, prices, availability, and variant choices.
+- Ask for related or complementary products.
+- Add items, change quantities, remove items, and add an order note.
+- Ask about shipping, returns, payments, and other store policies.
 
-Product, availability, and policy answers come from Shopify data rather than the model's memory. If semantic search is unavailable, the assistant falls back to keyword search. Searches with a required option can return fewer results, or none, instead of showing near matches.
+Product and policy answers use Shopify data. Keep your catalog and store policies up to date so shoppers can get useful answers.
 
-Cart changes made in chat update the same cart used by the rest of the storefront. When customer accounts are enabled, a cart created by the assistant is associated with the signed-in customer if their session is usable or can be refreshed. Product cards, variant choices, and cart summaries can appear directly in the conversation.
+### One cart, with the shopper in control
 
-Checkout from a cart summary waits until cart updates have finished and confirms the checkout destination before leaving the storefront. If checkout cannot start, the shopper can retry without losing the conversation.
+Chat uses the same cart as the rest of the storefront. After a confirmed change, the assistant shows a short confirmation and opens the cart drawer. Shoppers complete their purchase through the storefront's checkout button; the assistant cannot place orders or process payments.
 
-The conversation and draft are saved in the shopper's browser and survive navigation and reloads. Sending a message also sends conversation history to the model provider. Clearing the chat removes the browser-local history, not data already sent to the provider.
+Checkout waits while the assistant is working or cart changes are being confirmed in that browser tab. If the cart cannot be refreshed, use **Refresh cart** in chat before continuing. This checks the cart without repeating the requested change. Wait for the response before checking out in another tab.
 
-When the assistant reads the cart, it receives an item summary, not the full cart or gift-card recipient details. Cart changes return an update confirmation and any Shopify warnings; the cart shown in chat stays live. Personal details that shoppers type into chat are still sent to the model provider.
+A cart change may still finish after a response is stopped or interrupted. A retry can also repeat a change. Check the cart before asking again, especially after a timeout or connection failure. See [Cart](/docs/anatomy/cart) for the rest of the cart experience.
 
-You can stop a response while it is loading or streaming and continue the conversation afterward. Stopping or clearing chat does not cancel a cart change already started: the cart keeps its pending state and updates when Shopify responds. Checkout stays unavailable while that change is pending. If a cart request fails or times out, check the cart before trying the change again.
+### Continue a conversation or start over
 
-The template enables request cancellation for chat on Vercel. Other hosts must propagate client disconnects to the server for Stop to cancel model generation.
+The conversation and draft can be restored when shoppers navigate or reload in the same browser. Returning shoppers can reopen their conversation without starting over.
+
+Use **Stop** to interrupt a response or **Clear chat** to start a new conversation. Clearing chat does not empty the cart.
+
+Conversations have a one-day lifetime and a usage limit. If a conversation expires or reaches its limit, clear it to start a new one.
+
+## Privacy and usage limits
+
+Once enabled, chat is publicly accessible and messages can incur model charges. Add deployment-level rate limits and Gateway spending controls appropriate to your traffic. The per-conversation usage limit is not a store-wide spending cap.
+
+Bot protection is also **disabled by default**. For Vercel deployments, you can enable `botid.isEnabled` in [Shop Configuration](/docs/reference/shop-config). Bot protection does not replace access controls or spending limits.
+
+Customer sign-in does not make chat history private. The default setup does not restrict a conversation to its original shopper: anyone with its conversation ID may be able to read or control it. Do not share conversation IDs. Add authenticated conversation ownership before using chat for private account or support data.
+
+Eve stores conversations on the server, and conversation content is sent to the model provider. Clearing chat or reaching the one-day expiry does not guarantee deletion of those records. Configure retention and access policies, and explain to shoppers how their messages are handled.
+
+The assistant receives a summary of cart items rather than gift-card recipient details. Personal information shoppers type into chat still reaches the model provider. Avoid requesting sensitive information that is not needed for shopping.
 
 ## What’s next
 
-You can change the model, response instructions, available actions, and rendered shopping experiences. Keep product facts grounded in Shopify and validate any new action before exposing it to shoppers. Custom cart actions must use the shopper's existing cart; do not let the model choose which cart to change.
-
-For production, consider durable chat history if shoppers need conversations across devices. Add rate limits and spending caps independently of bot detection.
+Adapt the tone, product presentation, and recommendations to your store. Add store-specific guidance while keeping Shopify as the source of prices and availability. Choose models and usage limits that balance response quality, speed, and cost.

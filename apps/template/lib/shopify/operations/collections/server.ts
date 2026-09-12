@@ -4,14 +4,12 @@ import { cacheLife, cacheTag } from "next/cache";
 import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
+import { fetchCollections } from "@/lib/shopify/catalog/server";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { COLLECTION_FIELDS_FRAGMENT } from "@/lib/shopify/fragments/collection";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import { storefront } from "@/lib/shopify/storefront/server";
-import {
-  transformShopifyCollection,
-  transformShopifyCollections,
-} from "@/lib/shopify/transforms/collection";
+import { transformShopifyCollection } from "@/lib/shopify/transforms/collection";
 
 function tagCollections(collections: Array<{ handle: string }>): void {
   for (const collection of collections) {
@@ -141,33 +139,4 @@ export async function getCollectionsListing({
         : null,
     };
   });
-}
-const GET_COLLECTIONS_QUERY = gql(
-  `#graphql
-  query getCollections($first: Int!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    collections(first: $first) {
-      edges {
-        node {
-          ...CollectionFields
-        }
-      }
-    }
-  }
-`,
-  [COLLECTION_FIELDS_FRAGMENT],
-);
-export async function fetchCollections({
-  limit = 250,
-  locale = shopConfig.localization,
-}: {
-  limit?: number;
-  locale?: CommerceLocale;
-} = {}): Promise<Collection[]> {
-  const response = await storefront.request(GET_COLLECTIONS_QUERY, {
-    locale,
-    variables: { first: limit },
-  });
-  assertStorefrontOk(response, "getCollections");
-
-  return transformShopifyCollections(flattenConnection(response.data.collections));
 }

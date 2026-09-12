@@ -1,6 +1,6 @@
 import { getSearchResultUrl } from "@shopify/hydrogen";
 
-import type { AgentDestination, PageContext } from "./types";
+import type { AgentDestination } from "./types";
 
 export function buildAgentPath(destination: AgentDestination, identifier?: string): string {
   switch (destination) {
@@ -8,7 +8,6 @@ export function buildAgentPath(destination: AgentDestination, identifier?: strin
       return "/account/profile";
     case "addresses":
       return "/account/addresses";
-    // Checkout lives on Shopify behind a cart-owned URL, so send shoppers to the cart to continue.
     case "cart":
     case "checkout":
       return "/cart";
@@ -23,46 +22,4 @@ export function buildAgentPath(destination: AgentDestination, identifier?: strin
     default:
       return "/";
   }
-}
-
-export function parsePageContext(url: string | null): {
-  page: PageContext;
-} {
-  if (!url)
-    return {
-      page: null,
-    };
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return {
-      page: null,
-    };
-  }
-  const [segment, handle] = parsed.pathname.split("/").filter(Boolean);
-  if (!segment)
-    return {
-      page: { type: "home" },
-    };
-  if (segment === "products" && handle)
-    return {
-      page: { handle, type: "product" },
-    };
-  if (segment === "collections" && handle)
-    return {
-      page: { handle, type: "collection" },
-    };
-  if (segment === "search") {
-    return {
-      page: { query: parsed.searchParams.get("q") ?? "", type: "search" },
-    };
-  }
-  if (segment === "cart")
-    return {
-      page: { type: "cart" },
-    };
-  return {
-    page: null,
-  };
 }

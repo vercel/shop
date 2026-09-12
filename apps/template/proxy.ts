@@ -122,7 +122,7 @@ export const config = {
     "/agent/:action(handoff|buyer-claims).:format",
     "/cart.:format(js|json)",
     "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/((?!api|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
+    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
     "/.well-known/:path*",
   ],
 };
