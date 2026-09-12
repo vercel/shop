@@ -38,6 +38,7 @@ function variantLabel(variant: AgentVariant): string {
 
 export const { registry } = defineRegistry(catalog, {
   components: {
+    AgentResponse: ({ children }) => <div className="grid gap-4">{children}</div>,
     AgentCartSummary: () => {
       const cart = useCart<Cart, Cart>((state) => state.data);
       const {

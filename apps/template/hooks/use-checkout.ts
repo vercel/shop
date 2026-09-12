@@ -3,12 +3,15 @@
 import { useCart } from "@shopify/hydrogen/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
+import { useAgentCartPending } from "@/lib/agent/cart/client";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 
 export function useCheckout() {
+  const agentPending = useAgentCartPending();
   const cartState = useCart((state) => state);
   const { data: cart, loading, pending, revalidating } = cartState;
   const isUpdatingCart = Boolean(
+    agentPending ||
     loading ||
     revalidating ||
     pending.attributes ||

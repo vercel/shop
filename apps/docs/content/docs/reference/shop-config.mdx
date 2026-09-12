@@ -1,55 +1,65 @@
 ---
 title: Shop Configuration
-description: Configure storefront identity, analytics, and cross-cutting feature availability.
+description: Choose optional storefront features and set your store's identity and locale.
 type: reference
 ---
 
-Edit `lib/config/index.ts` to set storefront-wide, secret-free options. Keep credentials in environment variables and merchandising data in Shopify.
+Edit `lib/config/index.ts` to choose which features your storefront offers. Keep credentials in [environment variables](/docs/reference/env-vars) and manage catalog content in Shopify.
+
+Customer accounts, Shop Agent, analytics, bot protection, and WebMCP are **disabled by default**. Enable only the features you intend to use and complete their setup before deploying.
 
 ## Settings
 
-| Setting                               | Default          | Behavior                                                                                        |
-| ------------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------- |
-| `agent.isEnabled`                     | `false`          | Shows the shopping assistant and enables `POST /api/chat`. The disabled endpoint returns `404`. |
-| `analytics.vercel.isEnabled`          | `false`          | Enables Vercel Web Analytics.                                                                   |
-| `analytics.speedInsights.isEnabled`   | `false`          | Enables Vercel Speed Insights.                                                                  |
-| `analytics.shopify.isEnabled`         | `false`          | Sends storefront browsing and cart events to Shopify analytics, subject to consent.             |
-| `analytics.shopify.consentMode`       | `default-banner` | Selects the Shopify consent experience described below.                                         |
-| `auth.isEnabled`                      | `false`          | Enables customer authentication.                                                                |
-| `botid.isEnabled`                     | `false`          | Protects `POST /api/chat` with [Vercel BotID](https://vercel.com/docs/botid).                   |
-| `botid.checkLevel`                    | `basic`          | Selects `basic` or `deepAnalysis` detection.                                                    |
-| `localization.country`                | `"US"`           | Sets the country sent to Shopify for commerce context.                                          |
-| `localization.language`               | `"EN"`           | Requests catalog content in this language from Shopify.                                         |
-| `localization.locale`                 | `"en-US"`        | Sets display formatting; does not translate labels or select currency.                          |
-| `pdp.bundles.isEnabled`               | `true`           | Shows product bundle relationships when Shopify provides them.                                  |
-| `pdp.buyWithShop.isEnabled`           | `true`           | Shows Buy with Shop.                                                                            |
-| `pdp.complementaryProducts.isEnabled` | `true`           | Shows complementary products when Shopify provides them.                                        |
-| `pdp.quantityPicker.isEnabled`        | `true`           | Shows the quantity picker.                                                                      |
-| `pdp.relatedProducts.isEnabled`       | `true`           | Shows related products when Shopify provides them.                                              |
-| `site.name`                           | `"Vercel Shop"`  | Sets the name used in navigation, metadata, structured data, the footer, and the assistant.     |
-| `site.url`                            | `defaultUrl`     | Sets the canonical base URL for sitemaps, structured data, and absolute links.                  |
-| `webmcp.isEnabled`                    | `false`          | Enables the experimental WebMCP integration in supported browsers.                              |
+| Setting                               | Default              | Behavior                                                                         |
+| ------------------------------------- | -------------------- | -------------------------------------------------------------------------------- |
+| `agent.isEnabled`                     | `false`              | Enables Shop Agent for product discovery, store questions, and cart updates.     |
+| `analytics.vercel.isEnabled`          | `false`              | Enables Vercel Web Analytics.                                                    |
+| `analytics.speedInsights.isEnabled`   | `false`              | Enables Vercel Speed Insights.                                                   |
+| `analytics.shopify.isEnabled`         | `false`              | Sends browsing and cart events to Shopify, subject to consent.                   |
+| `analytics.shopify.consentMode`       | `default-banner`     | Chooses how shoppers give analytics consent; see below.                          |
+| `auth.isEnabled`                      | `false`              | Enables customer sign-in and account pages.                                      |
+| `botid.isEnabled`                     | `false`              | Enables Vercel BotID checks for Shop Agent requests.                             |
+| `botid.checkLevel`                    | `basic`              | Chooses `basic` or `deepAnalysis` bot detection.                                 |
+| `localization.country`                | `"US"`               | Sets the country used for Shopify pricing and availability.                      |
+| `localization.language`               | `"EN"`               | Requests Shopify content in this language.                                       |
+| `localization.locale`                 | `"en-US"`            | Sets display formatting; does not translate interface text or select a currency. |
+| `pdp.bundles.isEnabled`               | `true`               | Shows bundle relationships when Shopify provides them.                           |
+| `pdp.buyWithShop.isEnabled`           | `true`               | Shows Buy with Shop.                                                             |
+| `pdp.complementaryProducts.isEnabled` | `true`               | Shows complementary products when Shopify provides them.                         |
+| `pdp.quantityPicker.isEnabled`        | `true`               | Shows the product quantity picker.                                               |
+| `pdp.relatedProducts.isEnabled`       | `true`               | Shows related products when Shopify provides them.                               |
+| `site.name`                           | `"Vercel Shop"`      | Sets the storefront name.                                                        |
+| `site.url`                            | Deployment-dependent | Sets the public origin used for canonical URLs, metadata, and discovery links.   |
+| `webmcp.isEnabled`                    | `false`              | Enables WebMCP in supported browsers.                                            |
 
-## Required constraints
+## Before enabling optional features
 
-Before enabling `auth.isEnabled`, set `CUSTOMER_ACCOUNT_SESSION_SECRET`, `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID`, and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` as described in [Environment Variables](/docs/reference/env-vars). Development startup and production builds fail if any of these variables are missing.
+**Shop Agent** requires AI Gateway access in addition to the storefront's Shopify connection. Customer sign-in is not required. Follow [Shop Agent setup](/docs/anatomy/agent), including its privacy and spending safeguards, before enabling public traffic.
 
-Enable `botid.isEnabled` with `agent.isEnabled`. BotID verification runs only on Vercel, so leave it disabled when self-hosting. Check [BotID pricing](https://vercel.com/docs/botid#pricing) before selecting `deepAnalysis`.
+**Customer accounts** require a Shopify client ID, Shopify client secret, and a separate app-generated session secret. Follow [Authentication](/docs/anatomy/authentication) to configure those values and register callback URLs before enabling `auth.isEnabled`.
 
-`site.url` resolves from the Vercel production URL and falls back to `http://localhost:3000` during local development. Set `site.url` directly when deploying elsewhere.
+**Bot protection** can be enabled separately for Shop Agent on Vercel. Review [BotID pricing](https://vercel.com/docs/botid#pricing) before choosing `deepAnalysis`. It does not make chat history private or cap AI spending.
+
+## Store identity and locale
+
+On Vercel, `site.url` uses the project's production domain. Elsewhere it defaults to `http://localhost:3000`; set it to your public storefront origin before deploying.
+
+Country and language control the Shopify context. The formatting locale controls how values are displayed. Changing these settings does not translate storefront interface text, and currency comes from Shopify's responses. See [Shopify Markets](/docs/skills/enable-shopify-markets) or [i18n](/docs/skills/enable-i18n) when adding localized storefronts.
 
 ## Shopify consent modes
+
+These modes apply when Shopify analytics is enabled.
 
 | Value            | Behavior                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------- |
 | `default-banner` | Uses Shopify's hosted privacy banner where consent is required.                              |
-| `custom-banner`  | Requires you to supply a consent interface and connect it to Shopify's Customer Privacy API. |
+| `custom-banner`  | Requires you to provide a consent interface connected to Shopify's Customer Privacy API.     |
 | `no-banner`      | Shows no consent interface. Where consent is required, analytics events cannot be delivered. |
 
 Only expose the public Storefront API token to the browser. Never use a private token for Shopify analytics or consent requests.
 
 ## Related configuration
 
-Navigation and footer menus are managed outside `shopConfig`. Use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to manage them in Shopify.
+Manage navigation and footer menus with [Shopify Menus](/docs/skills/enable-shopify-menus).
 
-WebMCP does not enable Shopify analytics. See [WebMCP](/docs/anatomy/webmcp) for testing instructions.
+[WebMCP](/docs/anatomy/webmcp) is independent of Shopify analytics. Enabling one does not enable the other.

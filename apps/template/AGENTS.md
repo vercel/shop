@@ -24,9 +24,25 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## The AI assistant uses AI SDK — read its bundled docs
+## The AI assistant uses Eve — read its bundled docs
 
-The opt-in assistant is served by `app/api/chat/route.ts` and built with AI SDK. Before changing the route, agent, tools, or `useChat` client, read the relevant guide in `node_modules/ai/docs/`.
+The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js only prepares the browser cart under `/api/agent/session`. Eve tools call Shopify directly using shared uncached catalog operations and Hydrogen cart handlers. Keep Next.js request/cache APIs out of Eve's runtime import graph.
+
+Tool definitions, input schemas, and tool-specific execution belong in `agent/tools/`. Share execution helpers in `agent/lib/`; keep `lib/agent/` for browser state, presentation helpers, and shared result types. Do not add a second tool-name dispatcher outside Eve.
+
+### Keep Eve work bounded
+
+- Before changing framework behavior, start with `node_modules/eve/docs/README.md` and read the page it routes the task to. Resolve the installed package from this app; package-manager links can hide files from recursive searches even when direct reads work.
+- Inspect public types or follow additional references only when that guide leaves a concrete question unanswered. Stop discovery once the file location, imports, and API shape are clear; implement the smallest complete change, then expand investigation only when a focused check fails.
+- For copy-only changes, edit the existing authored instructions. Preserve the selected model unless the user requests a model change.
+- Before adding an external integration, use `pnpm exec eve registry search <query> --json` and `pnpm exec eve registry view <item>`. Prefer a suitable native integration over a custom transport. Preserve this app's Next.js deployment through `withEve`; standalone Eve deployment instructions are not a replacement for it.
+
+### Verify shopper-visible behavior
+
+- For conversation or catalog changes, check multiple product-search turns in one browser session with real Shopify responses. Confirm visible cards, follow-up responses, and token usage; a successful build, HTTP status, or tool result does not establish that the shopper saw a result.
+- For session-control changes, check restoration, Stop/Clear recovery, failures, and usage-limit feedback. Pending approvals and session limits must not appear as successful empty responses or allow messages to disappear into a paused session.
+- When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering or raising budgets. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
+- Use the narrowest checks that establish the changed behavior. Distinguish mocked or replayed checks, local production-browser checks, and checks against the deployed preview; do not present one as proof of another. Keep diagnostic credentials out of source and output, and default to read-only probes.
 
 ## Critical Rules (Always Apply)
 
@@ -75,7 +91,7 @@ Use `/vercel-shop:build-shop` when the project plugin is installed for the full 
 Organize `lib/` by domain first, then execution context. Use only the files each domain needs:
 
 - `index.ts` — universal implementation safe for server and client imports; never a re-export barrel.
-- `server.ts` — server-only implementation. Use `import "server-only"` to guard runtime boundaries where appropriate.
+- `server.ts` — server-side implementation; keep it out of client import graphs.
 - `client.ts` — `"use client"` implementation.
 - `action.ts` — `"use server"` entry points, with verb + `Action` suffix on each export.
 - `types.ts` — named contracts owned by the domain, imported with `import type` directly from this file.
@@ -152,7 +168,7 @@ Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other 
 
 ## Overview
 
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with AI SDK.
+This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with Eve.
 
 The pinned `@shopify/hydrogen` dependency is the framework-agnostic preview SDK, not the Hydrogen React Router framework. Next.js owns routing, Server Component rendering, and public-data caching/invalidation. Hydrogen owns Shopify API clients, cart forms and store, predictive-search handlers, and Customer Account OAuth/session helpers. `proxy.ts` adapts Hydrogen's registered handlers to Next.js; the template supplies encrypted cookie storage and auth gates. Read the installed Hydrogen README and relevant bundled skills before changing an SDK integration; do not apply React Router loaders, actions, or Oxygen setup to this app.
 
@@ -172,8 +188,9 @@ pnpm format
 
 ## Directory Structure
 
-- `app/` for routes, including the guarded AI assistant endpoint at `app/api/chat/route.ts`
-- `lib/agent/` for the AI SDK agent, tools, and json-render catalog
+- `app/` for routes, including same-origin cart setup for the assistant
+- `agent/` for Eve instructions, tools, channels, and Shopify connections
+- `lib/agent/` for browser state, presentation helpers, and shared result types
 - `lib/shopify/` for Shopify operations, fragments, transforms, and types
 - `lib/<domain>/types.ts` for domain-owned models and contracts
 - `components/ui/` for presentational primitives
@@ -191,7 +208,7 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
-- Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart/client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
+- Eve cart tools bind the cart from the incoming browser cookie through channel auth context and call Hydrogen's handlers directly. Never let model arguments select the cart. The browser only refreshes Hydrogen after turns settle; never write cart IDs or replay mutations from restored messages. The default channel is public with optional BotID, not per-user session authorization. Completed Eve steps are durable, but interrupted writes have no application-owned deduplication; do not claim exactly-once behavior or automatically retry an uncertain mutation.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
 - Cart types are the deliberate domain-type exception: `lib/cart/types.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.
