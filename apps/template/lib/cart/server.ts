@@ -77,6 +77,7 @@ export async function getCartById(cartId: string): Promise<Cart | undefined> {
   const url = new URL("/api/cart", shopConfig.site.url);
   url.searchParams.set("cartId", cartId);
   const { data } = await handlers.get({ ...context, request: new Request(url) } as never);
+  if (data.errors?.length) throw new Error(data.errors[0].message);
   return data.cart ?? undefined;
 }
 
