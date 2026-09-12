@@ -2,6 +2,25 @@
 
 This is a monorepo for developing a template, docs site, and skills for using Next.js with Shopify and deploying to Vercel.
 
+## Three owners
+
+Every feature in this repo belongs to exactly one owner. Use this as the acceptance test for new work: if a change cannot name its owner, or needs to reach into another owner's territory, redesign it before shipping it.
+
+- **Shopify owns commerce.** Catalog, cart state and mutations, checkout, customer accounts, predictive search, policies, and analytics come from Shopify through the Hydrogen SDK. We do not reimplement commerce logic.
+- **Next.js owns the app.** Routing, Server Components, caching and invalidation, metadata, and the request boundary (`proxy.ts`) that adapts Hydrogen's handlers.
+- **Eve owns the agent.** Sessions, channels, tools, connections, and `/eve/v1/*`. Eve tools call Shopify directly; Next.js only prepares the browser for them.
+
+The template `apps/template/AGENTS.md` states the boundary rules between owners. Docs and skills describe the product in the same three-owner terms.
+
+## Describe the product, not the change
+
+Code, comments, docs, skills, commit messages, and pull requests describe current behavior in terms of the three owners. They do not narrate the work that produced it.
+
+- Pull requests are terse: what the shopper, merchant, or agent can now do, which owner it belongs to, and how it was verified. No rollout narrative or review history.
+- Docs add a detail only when a reader needs it to act or decide. A change touching a feature is not a reason to add implementation specifics about that change; add them only when asked.
+- Comments state a hidden constraint on one line or do not exist. Never reference the PR, issue, refactor, or "new" state.
+- Names and file placement carry the architecture. If a reader needs prose to find the owner of a module, fix the name or location instead.
+
 ## Docs
 
 The docs app is in apps/docs using the package-based Geistdocs architecture ([`@vercel/geistdocs`](https://www.npmjs.com/package/@vercel/geistdocs)). See apps/docs/AGENTS.md for editing conventions.

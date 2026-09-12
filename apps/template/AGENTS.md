@@ -1,10 +1,42 @@
 # Shop Template Guide
 
-This file provides guidance for agents working in the template.
+Guidance for agents working in the template. The monorepo `AGENTS.md` names the three owners and the rule to describe the product rather than the change. This file states the boundaries between those owners inside the storefront.
 
-## Recommended Project Plugins
+## Ownership map
 
-These project-scoped plugins are not required to run the template, but they make agent work in this codebase substantially better. If you're working with an agent that supports them, install with:
+Every module, route, and feature belongs to one owner. Place new work by owner first, then by domain.
+
+**Shopify owns commerce** through the framework-agnostic Hydrogen preview SDK (not the Hydrogen React Router framework).
+
+- Owns: Storefront and Customer Account API clients, catalog data, cart state and mutations, checkout, predictive search, Customer Account OAuth and sessions, policies, Shopify analytics.
+- Lives in: `lib/shopify/**` (operations, fragments, transforms, generated types), `lib/cart/**`, `lib/auth/server.ts`, the handlers registered in `proxy.ts`, `lib/<domain>/types.ts` for the domain models transforms produce.
+- Must not: be reimplemented in application code. Prices, availability, currency, cart totals, and customer identity always come from Shopify responses.
+
+**Next.js owns the app.**
+
+- Owns: routing and clean URLs, Server Component composition, caching and tag invalidation, metadata and SEO, Suspense and loading geometry, the request boundary that adapts Hydrogen's handlers.
+- Lives in: `app/`, `components/`, `lib/<domain>/{index,server,client,action}.ts`, `lib/config/`, `next.config.ts`, `proxy.ts`.
+- Must not: mutate the cart through Server Actions, refresh tokens in Server Components, invalidate public caches for cart changes, or reach into `agent/`.
+
+**Eve owns the agent.**
+
+- Owns: sessions, channels, tools, connections, instructions, model selection, `/eve/v1/*`.
+- Lives in: `agent/` (tool definitions and execution in `agent/tools/`, shared execution helpers in `agent/lib/`), `lib/agent/` (browser state, presentation helpers, shared result types), `components/agent/`, `app/api/agent/session` (the only Next.js route Eve needs; it prepares the browser cart).
+- Must not: import Next.js request or cache APIs, add a second tool-name dispatcher, recreate a chat API route, or let model arguments select the cart.
+
+## Boundary rules (always apply)
+
+1. **Commerce facts come from Shopify.** Never map locale to currency, hand-write Shopify response types, or guess schema fields. Use `shopify-ai-toolkit` for API facts and validation before adding or changing GraphQL, then `/vercel-shop:shopify-graphql-reference` for template placement.
+2. **Cart writes go through Hydrogen handlers.** `proxy.ts` serves `/api/cart`; components use `useProductForm` and `useCartForm`; Eve cart tools call the handlers directly with the cart bound from the browser cookie. No Server Actions, no cache-tag invalidation for carts.
+3. **Shopify fetches, Next.js caches.** `lib/shopify/operations/**/server.ts` exports uncached `fetch*` operations and never imports `next/cache`. `lib/<domain>/server.ts` exports `get*` wrappers that own `"use cache"`, `cacheLife`, and `cacheTag`. Rendered pages call `get*`; Eve tools call `fetch*`. Cursor-paginated browse, search results, and facets also call `fetch*` from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
+4. **Server Components read auth; they never refresh it.** Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API calls. Refresh happens only where Hydrogen can commit cookies.
+5. **`components/ui/` takes primitive props only.** No domain types, SDK types, or content helpers. Domain wrappers in `components/<domain>/` supply labels and data.
+6. **Copy is inline and server-first.** Keep labels beside their consuming component; reusable content functionality goes in `lib/content/index.ts`, not a string catalog. Server Components pass primitive labels to client leaves; never pass content functions across the Server/Client boundary. Do not add a `t()` runtime or next-intl to the default storefront; in an already localized installation, preserve next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
+7. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it.
+
+## Recommended project plugins
+
+Not required to run the template, but they make agent work substantially better:
 
 ```bash
 npx plugins add vercel/shop --scope project --yes
@@ -24,11 +56,86 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## The AI assistant uses Eve — read its bundled docs
+## Shopify layer
 
-The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve owns `/eve/v1/*`; do not recreate a chat API route. Next.js only prepares the browser cart under `/api/agent/session`. Eve tools call Shopify directly using shared uncached catalog operations and Hydrogen cart handlers. Keep Next.js request/cache APIs out of Eve's runtime import graph.
+Read the installed Hydrogen README and relevant bundled skills before changing an SDK integration. Do not apply React Router loaders, actions, or Oxygen setup to this app.
 
-Tool definitions, input schemas, and tool-specific execution belong in `agent/tools/`. Share execution helpers in `agent/lib/`; keep `lib/agent/` for browser state, presentation helpers, and shared result types. Do not add a second tool-name dispatcher outside Eve.
+### Catalog reads
+
+```text
+Request → Page → Operation → storefront.request(gql doc) → Shopify API → Transform → Domain type → Component
+```
+
+- Presentation uses domain models from `lib/product/types`, `lib/collections/types`, and `lib/customer/types`, never raw Shopify responses. Cross-domain primitives live in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`. SDK-specific contracts and inferred response types stay under `lib/shopify/`.
+- "Operation" in the flow above is the `get*` cached read in `lib/<domain>/server.ts` for pages, or the `fetch*` operation in `lib/shopify/operations/**` for uncached reads and Eve tools.
+- `storefront.request` injects `$country`/`$language` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`. This is the commerce context, not the formatting locale string.
+
+### GraphQL workflow
+
+- Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog, cart, and public storefront operations; Customer for authenticated customer data; custom-data first for metafields or metaobjects. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
+- Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>`.
+- Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents. `pnpm codegen` validates Storefront documents across `app/`, `components/`, and `lib/` against the configured live schema. Customer Account documents in the dedicated `.graphqlrc.ts` paths use Hydrogen's bundled schema; add new Customer Account paths to that project and exclude them from Storefront validation.
+- Type inference is not schema validation. The pinned Hydrogen `gql check` CLI requires a JavaScript TypeScript compiler API unavailable in TypeScript 7; the configured codegen projects gate build and typecheck instead. Live checks remain necessary for store-specific permissions, values, and schema drift.
+- Do not add repo-local schema snapshots or agent-specific folders to the template.
+
+### Cart
+
+- `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; updates reconcile through Hydrogen's store.
+- `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
+- Cart types are the deliberate domain-type exception: `lib/cart/types.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may use Hydrogen store/form types; `components/ui/` still may not.
+
+### Customer accounts
+
+Opt-in via `auth.isEnabled` in `lib/config/index.ts`. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage plus `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. All three are server-only; the session secret is not the Shopify client secret. Read `shopConfig.auth.isEnabled` directly to gate auth surfaces in server and client code alike.
+
+- `lib/auth/server.ts`: encrypted HttpOnly cookie adapter plus read-only login and token helpers.
+- `proxy.ts`: Hydrogen login, authorize, refresh, and logout handlers on the customer-account OAuth paths.
+- `app/account/(authenticated)/`: auth-gated pages. `components/nav/account.tsx`: read-only session state inside Suspense with a fixed `size-5` icon container. `components/account/sign-out-button.tsx`: same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
+- `requireCustomerAccessToken()` redirects refreshable sessions through `/account/refresh`, where Hydrogen rotates tokens and commits the cookie.
+
+## Next.js layer
+
+### Storefront architecture contract
+
+- Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates while rebuilding presentation. Change them only when the task explicitly changes behavior.
+- Routes orchestrate URL and correctness, Shopify operations own fetching and transforms, Server Components compose the shell, client leaves own interaction.
+- Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
+- Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits. Push request-time inputs to the smallest Suspense boundary that needs them.
+- Visible fallbacks match the resolved section's geometry; loading states must not introduce avoidable layout shift.
+- Server Components are the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
+- Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
+- Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
+
+Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
+
+### Localization default
+
+One deployment, clean unprefixed URLs (`/products/...`), inline component copy, and explicit `shopConfig.localization`: `{ country: "US", language: "EN", locale: "en-US" }`. Country and language configure Shopify context; locale controls display formatting. Changing commerce context does not translate storefront copy.
+
+The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()` in `lib/params.ts`. Operation locale arguments and cache inputs may remain intentionally; do not remove them because presentation no longer needs them. The i18n and Markets skills introduce localization from this baseline and must preserve already localized installations.
+
+### Configuration
+
+- `lib/config/index.ts`: `shopConfig` feature toggles and site settings, read directly in server and client code.
+- `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`; composes `withBotId` and `withEve` through `withShopConfig` when their toggles are enabled.
+- `.oxlintrc.json`, `.oxfmtrc.json`, `components.json`: lint, format, and shadcn/ui configuration.
+- Environment variables are documented in `.env.example`.
+
+```bash
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm format
+```
+
+## Eve layer
+
+The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve tools call Shopify directly through the uncached `fetch*` operations in `lib/shopify/operations/**` and Hydrogen cart handlers.
+
+### Cart ownership
+
+Eve cart tools bind the cart from the incoming browser cookie through channel auth context. The browser refreshes Hydrogen only after turns settle; never write cart IDs or replay mutations from restored messages. The default channel is public with optional BotID, not per-user session authorization. Completed Eve steps are durable, but interrupted writes have no application-owned deduplication; do not claim exactly-once behavior or automatically retry an uncertain mutation.
 
 ### Keep Eve work bounded
 
@@ -44,26 +151,19 @@ Tool definitions, input schemas, and tool-specific execution belong in `agent/to
 - When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering or raising budgets. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
 - Use the narrowest checks that establish the changed behavior. Distinguish mocked or replayed checks, local production-browser checks, and checks against the deployed preview; do not present one as proof of another. Keep diagnostic credentials out of source and output, and default to read-only probes.
 
-## Critical Rules (Always Apply)
+## Storefront skills (optional plugin)
 
-1. **Inline shopper-facing copy where it is used.** Keep labels and simple interpolation alongside their consuming components. Extract reusable content functionality into `lib/content/index.ts`, not a catalog of strings or one file per namespace. Do not add a custom `t()` parser, message-key runtime, or next-intl to the default storefront.
-2. **Keep copy server-first.** Server Components pass primitive labels to client leaves where appropriate; interactive copy can live in the leaf that uses it. Never pass ordinary content functions across the Server/Client Component boundary. In an already localized installation, preserve next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
-3. **Components in `ui/` must NOT import domain types or content helpers**. Accept primitive props only; domain wrappers supply labels.
-4. **Always use `shopify-ai-toolkit` for Shopify API facts and validation** before adding or changing GraphQL. Use `/vercel-shop:shopify-graphql-reference` afterward for this template's operation placement, transforms, cache role, locale flow, and invalidation. Never treat the Vercel Shop skill as a schema source or guess Shopify fields.
-5. **Every user-configurable `process.env.X` read needs a row in `.env.example`** with a short comment explaining when to set it. If you add a new env var that toggles a feature, document it there so a fresh clone has a complete env reference.
+With the `vercel-shop` plugin installed, these commands walk through common extensions:
 
-## Storefront Architecture Contract
+- `/vercel-shop:shopify-graphql-reference`: integrating Shopify-validated GraphQL into the template
+- `/vercel-shop:enable-shopify-markets`: Shopify Markets and multi-locale support
+- `/vercel-shop:enable-i18n`: locale-prefixed routing and i18n without Markets
+- `/vercel-shop:enable-shopify-menus`: navigation menus
+- `/vercel-shop:enable-analytics`: analytics
+- `/vercel-shop:build-shop`: storefront architecture, commerce behavior, and rendering performance
+- `/vercel-shop:update-shop`: keeping the storefront current with template changes
 
-- Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates while rebuilding presentation. Change them only when the task explicitly changes behavior.
-- Keep responsibilities layered: routes orchestrate URL and correctness, Shopify operations own public-data fetching/cache/transforms, Server Components compose the shell, and client leaves own interaction. Cart mutations use Hydrogen's server handlers, not Server Actions or public-cache invalidation.
-- Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
-- Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits it. Push request-time inputs to the smallest Suspense boundary that needs them.
-- Make visible fallbacks match the resolved section's geometry. A loading state must not introduce avoidable layout shift.
-- Keep Server Components as the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
-- Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
-- Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
-
-Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
+These are agent-side conveniences. The template runs and deploys without them.
 
 <!-- BEGIN:vercel-shop-style -->
 
@@ -165,108 +265,3 @@ Don't write:
 Keep `// eslint-disable-*`, `// @ts-expect-error`, `// biome-ignore`, and other tooling directives — those are not prose comments.
 
 <!-- END:vercel-shop-style -->
-
-## Overview
-
-This is a Next.js 16 storefront template integrated with Shopify. It uses the App Router, React 19, Server Components, Tailwind CSS 4, and pnpm. It also ships an opt-in AI shopping assistant built with Eve.
-
-The pinned `@shopify/hydrogen` dependency is the framework-agnostic preview SDK, not the Hydrogen React Router framework. Next.js owns routing, Server Component rendering, and public-data caching/invalidation. Hydrogen owns Shopify API clients, cart forms and store, predictive-search handlers, and Customer Account OAuth/session helpers. `proxy.ts` adapts Hydrogen's registered handlers to Next.js; the template supplies encrypted cookie storage and auth gates. Read the installed Hydrogen README and relevant bundled skills before changing an SDK integration; do not apply React Router loaders, actions, or Oxygen setup to this app.
-
-The default is one deployment with clean, unprefixed URLs (`/products/...`), inline component copy, and explicit `shopConfig.localization` settings: `{ country: "US", language: "EN", locale: "en-US" }`. Country and language configure Shopify context; locale controls display formatting. Currency always comes from Shopify responses, never from a locale-to-currency map. Changing commerce context does not translate storefront copy.
-
-The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()` in `lib/params.ts`. Operation locale arguments and cache inputs may remain intentionally; do not remove them just because presentation no longer needs locale plumbing. The i18n and Markets skills introduce localization from this baseline and must preserve already localized, customized installations.
-
-## Development Commands
-
-```bash
-pnpm dev
-pnpm build
-pnpm start
-pnpm lint
-pnpm format
-```
-
-## Directory Structure
-
-- `app/` for routes, including same-origin cart setup for the assistant
-- `agent/` for Eve instructions, tools, channels, and Shopify connections
-- `lib/agent/` for browser state, presentation helpers, and shared result types
-- `lib/shopify/` for Shopify operations, fragments, transforms, and types
-- `lib/<domain>/types.ts` for domain-owned models and contracts
-- `components/ui/` for presentational primitives
-- `components/product/` for domain-aware product wrappers
-- `lib/product/index.ts` for variant URL construction and selected-option parsing
-
-## Data Flow
-
-Catalog reads follow this flow:
-
-```text
-Request → Page → Operation → storefront.request(gql doc) → Shopify API → Transform → Domain type → Component
-```
-
-Cart interactions use Hydrogen's client store and server handlers:
-
-- Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
-- Eve cart tools bind the cart from the incoming browser cookie through channel auth context and call Hydrogen's handlers directly. Never let model arguments select the cart. The browser only refreshes Hydrogen after turns settle; never write cart IDs or replay mutations from restored messages. The default channel is public with optional BotID, not per-user session authorization. Completed Eve steps are durable, but interrupted writes have no application-owned deduplication; do not claim exactly-once behavior or automatically retry an uncertain mutation.
-- `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
-- `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
-- Cart types are the deliberate domain-type exception: `lib/cart/types.ts` derives `Cart`, `CartLine`, and seed data from Hydrogen's handlers. Cart integration components may also use Hydrogen store/form types. Keep SDK and domain types out of `components/ui/`; wrappers pass primitive props.
-
-## Storefront Skills (Optional Plugin)
-
-If the `vercel-shop` plugin is installed (see "Recommended Project Plugins" above), agents have access to slash commands that walk through common storefront extensions:
-
-- Integrating Shopify-validated GraphQL into the template: `/vercel-shop:shopify-graphql-reference`
-- Shopify Markets and multi-locale support: `/vercel-shop:enable-shopify-markets`
-- Locale-prefixed routing + i18n (no Markets): `/vercel-shop:enable-i18n`
-- Navigation menus: `/vercel-shop:enable-shopify-menus`
-- Analytics: `/vercel-shop:enable-analytics`
-- Storefront architecture, commerce behavior, and rendering performance: `/vercel-shop:build-shop`
-- Keeping the storefront current with template changes: `/vercel-shop:update-shop`
-
-These are agent-side conveniences. The template runs and deploys without them.
-
-## Authentication
-
-Customer authentication uses Hydrogen's Shopify Customer Account OAuth/session helpers. It is **opt-in**: set `auth.isEnabled` to `true` in `lib/config/index.ts` to enable it. When enabled, `next.config.ts` requires the app-generated `CUSTOMER_ACCOUNT_SESSION_SECRET` for encrypted cookie storage and both Shopify-issued credentials: `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`. Keep both secrets server-only; the session secret is not the Shopify client secret. Read `shopConfig.auth.isEnabled` directly from `lib/config/index.ts` to gate auth surfaces in server and client code alike.
-
-Key files:
-
-- `lib/auth/server.ts` — encrypted HttpOnly cookie adapter plus read-only login/token helpers
-- `proxy.ts` — Hydrogen login, authorize, refresh, and logout handlers on the customer-account OAuth paths
-- `app/account/(authenticated)/` — auth-gated account pages
-- `components/nav/account.tsx` — read-only nav session state inside Suspense
-- `components/account/sign-out-button.tsx` — same-origin POST logout form
-
-Server Components must not refresh tokens because they cannot commit cookies. Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API operations. The latter redirects refreshable sessions through `/account/refresh`, where Hydrogen can rotate tokens and commit the encrypted cookie.
-
-The nav reserves a fixed `size-5` icon container to avoid layout shift. The `(authenticated)` route group owns protected account UI, while `proxy.ts` owns the OAuth response boundaries via Hydrogen's registered handlers. Logout must remain a same-origin POST so Hydrogen can clear the local session and perform Shopify RP-initiated logout.
-
-## Shopify GraphQL Workflow
-
-- Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog/cart/public storefront operations, Customer for authenticated customer data, and custom-data first for metafields or metaobjects.
-- Let Shopify AI Toolkit search current documentation and validate the complete operation. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
-- Use `/vercel-shop:shopify-graphql-reference` afterward for template-specific operation placement, fragments, locale flow, cache role, transforms, invalidation, and route composition.
-- Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>` instead of hand-writing interfaces. `storefront.request` injects `$country`/`$language` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string.
-- Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents. `pnpm codegen` validates Storefront documents across `app/`, `components/`, and `lib/` against the configured live schema, including cart/search fragments. Customer Account documents in the dedicated `.graphqlrc.ts` paths use Hydrogen's bundled schema; add new Customer Account paths to that project and exclude them from Storefront validation.
-- Type inference is not schema validation. The pinned Hydrogen `gql check` CLI requires a JavaScript TypeScript compiler API unavailable in TypeScript 7; use the configured codegen projects instead. Build and typecheck gate on both projects. Live checks remain necessary for store-specific permissions, values, and schema/version drift.
-- Do not add repo-local schema snapshots or agent-specific folders to the template.
-
-## Key Patterns
-
-- Routes live under `app/` and use clean URLs like `/products/handle`.
-- Read `shopConfig.localization` for the deployment's explicit country, language, and formatting locale; use inline component copy for UI text.
-- Multi-locale URL routing is documented in `/vercel-shop:enable-i18n` and is intentionally not enabled by default.
-- Catalog and customer presentation uses domain models from `@/lib/product/types`, `@/lib/collections/types`, and `@/lib/customer/types`, not raw Shopify responses. Cart types come from `@/lib/cart/types` and Hydrogen's store/form APIs as described above; presentational primitives remain independent of both.
-- Prefer Tailwind data-attribute selectors over conditional class assembly.
-- Follow the `ui/` → `product/` wrapper pattern when adding reusable product UI.
-
-## Configuration
-
-- `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`
-- `.oxlintrc.json`: oxlint linting configuration
-- `.oxfmtrc.json`: oxfmt formatting configuration
-- `components.json`: shadcn/ui configuration
-
-Environment variables are documented in `.env.example`.
