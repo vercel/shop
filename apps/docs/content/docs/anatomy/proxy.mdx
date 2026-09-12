@@ -1,32 +1,29 @@
 ---
 title: Proxy
-description: How the storefront assigns Shopify-owned routes while leaving application routes available to Next.js.
+description: Add routing rules without interrupting Shopify services or storefront pages.
 type: guide
 ---
 
-The storefront uses a [Next.js proxy](https://nextjs.org/docs/app/getting-started/proxy), often called middleware, to direct requests before page routing. It protects Shopify-owned endpoints while leaving ordinary storefront and application routes available to Next.js.
+The storefront's [Next.js proxy](https://nextjs.org/docs/app/getting-started/proxy), also called middleware, keeps Shopify's service routes separate from storefront pages and custom APIs. The default routing works without additional setup.
 
-## Route ownership
+## What it handles
 
-Shopify handles its cart, Storefront API, Model Context Protocol (MCP), Ajax cart, agent, and customer-account endpoints. Storefront pages continue to Next.js with the Shopify request context needed for Storefront API calls, analytics, and safe caching.
+The proxy supports cart updates, search suggestions, Shopify API access, and Shopify-compatible commerce endpoints. This includes legacy cart URLs and Shopify's business profile at `/.well-known/ucp`.
 
-The proxy also forwards `/.well-known/ucp` to Shopify’s Universal Commerce Protocol (UCP) business profile.
+Customer sign-in routes are available only when you enable [customer authentication](/docs/anatomy/authentication). Shop Agent is enabled separately and uses `/eve/v1/` for conversations.
 
-Other application API routes bypass the proxy unless you explicitly assign them to an integration. This avoids collisions between Shopify endpoints and your own APIs.
+Ordinary pages continue to Next.js. Home, product, collection-detail, and search pages can also return Markdown for clients that request it. See [Routes](/docs/reference/routes) for page URLs and service endpoints.
 
-Authentication changes only cart and customer-account handling. When authentication is enabled, those requests can synchronize the shopper's identity with the cart. Other requests keep the guest-cart behavior. See [Environment Variables](/docs/reference/env-vars) for the authentication setting.
+Custom API routes are not intercepted unless they match a route explicitly reserved for an integration.
 
 ## Add routing without creating conflicts
 
-Assign only the exact route families an integration owns. Do not claim every API route for Shopify or locale handling, because that can intercept unrelated application APIs.
+When extending `proxy.ts`, match only the routes an integration needs. Do not redirect every `/api/` request or claim all `/agent/` paths: Shopify and Shop Agent serve different endpoints.
 
-Run Shopify routing before locale negotiation, experiments, or request-dependent redirects. This keeps Shopify protocol endpoints locale-neutral while allowing storefront pages to use those features.
+Keep Shopify routing ahead of locale negotiation, experiments, and request-dependent redirects. A cart update or Shopify API request should not be redirected to a language-prefixed page.
 
-Use static redirects for fixed URL changes. Use the proxy only when a decision depends on the incoming request.
+Use Next.js configuration for fixed redirects, such as moving an old page to a new URL. Use the proxy when the destination depends on the incoming request.
 
 ## What’s next
 
-- **Locale routing** — [Enable Shopify Markets](/docs/skills/enable-shopify-markets) and [Enable i18n](/docs/skills/enable-i18n) add locale handling after Shopify routing.
-- **Custom APIs** — application APIs remain outside the proxy unless explicitly claimed.
-- **Experiments and redirects** — request-dependent choices can run after Shopify declines the request.
-- **Location and bot signals** — coarse request signals are available here. Verified bot detection for assistant chat uses [Vercel BotID](https://vercel.com/docs/botid).
+Add locale routing with [Shopify Markets](/docs/skills/enable-shopify-markets) or [i18n](/docs/skills/enable-i18n), or introduce request-dependent experiments and redirects. Keep those rules scoped to storefront pages so cart, sign-in, and API requests continue to work.

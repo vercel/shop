@@ -5,9 +5,9 @@ import { ArticleCard } from "@/components/blog/article-card";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { getBlog } from "@/lib/blog/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getBlog } from "@/lib/shopify/operations/blogs/server";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
+import { getShopifySitemapPage } from "@/lib/seo/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

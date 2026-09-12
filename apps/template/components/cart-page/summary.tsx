@@ -5,7 +5,7 @@ import { useCart } from "@shopify/hydrogen/react";
 import { Loader2 } from "lucide-react";
 
 import { DiscountForm } from "@/components/cart/discount-form";
-import { useCheckout } from "@/hooks/use-checkout";
+import { useCheckout } from "@/lib/cart/client";
 import type { Cart } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 

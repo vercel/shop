@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
+import { getShopPolicies, getShopPolicy } from "@/lib/content/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getShopPolicies, getShopPolicy } from "@/lib/shopify/operations/policies/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

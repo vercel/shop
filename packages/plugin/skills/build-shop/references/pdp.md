@@ -6,6 +6,7 @@
 - Route: `apps/template/app/products/[handle]/page.tsx`
 - Product detail components: `apps/template/components/product-detail/`
 - Product card and recommendations: `apps/template/components/product-card/product-card.tsx`, `apps/template/components/product/related-products-section.tsx`
+- Cached reads: `apps/template/lib/product/server.ts`
 - Operations and transforms: `apps/template/lib/shopify/operations/products/server.ts`, `apps/template/lib/shopify/transforms/product/index.ts`, `apps/template/lib/product/index.ts`
 - Public source fallback: [PDP route source](https://github.com/vercel/shop/blob/main/apps/template/app/products/%5Bhandle%5D/page.tsx), [product detail source](https://github.com/vercel/shop/tree/main/apps/template/components/product-detail), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
@@ -36,7 +37,7 @@ Inspect the existing PDP boundaries before changing them. Render stable product 
 ## Variant interaction
 
 - Show the default or URL-selected option state without waiting for unrelated network work.
-- Keep option controls as a small client island. Product copy, shared media, schema, and recommendations do not need to enter that boundary.
+- Keep variant-dependent price, options, and purchase controls in one Hydrogen provider. Product copy, shared media, schema, and recommendations stay outside.
 - Preserve optimistic add-to-cart behavior and exact variant availability.
 - Reserve price and purchase-control space so variant resolution does not shift the page.
 - Avoid serial work: selected-option parsing should not wait on the variant request, and recommendations should not block the buy section.

@@ -38,24 +38,27 @@ export type CollectionProductsResult = {
   priceRange?: PriceRange;
   products: ProductCard[];
 };
+
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
-export type CatalogProductsResult = {
+
+export type ProductsResult = {
   pageInfo: PageInfo;
   products: ProductCard[];
 };
 
-export type CatalogProductsParams = {
+export type ProductsParams = {
   limit?: number;
   locale?: CommerceLocale;
 };
 
-export type FilteredCatalogProductsParams = CatalogProductsParams & {
+export type FilteredProductsParams = ProductsParams & {
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
   query?: string;
   sortKey?: string;
 };
+
 export type SearchFacetsParams = {
   activeFilters?: ActiveFilters;
   collection?: string;

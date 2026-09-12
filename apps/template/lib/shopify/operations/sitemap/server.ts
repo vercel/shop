@@ -1,6 +1,4 @@
 import { gql } from "@shopify/hydrogen";
-import type { SitemapType } from "@shopify/hydrogen/storefront-api-types";
-import { cacheLife, cacheTag } from "next/cache";
 
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import type { ShopifySitemapType, SitemapResource } from "@/lib/shopify/operations/sitemap/types";
@@ -49,27 +47,7 @@ const GET_SITEMAP_PAGE_QUERY = gql(`#graphql
   }
 `);
 
-function cacheTagsFor(type: ShopifySitemapType): string[] {
-  if (type === "ARTICLE") return ["articles", "articles-index"];
-  if (type === "BLOG") return ["blogs", "blogs-index"];
-  if (type === "COLLECTION") return ["collections", "collections-index"];
-  return type === "PAGE" ? ["pages"] : ["products", "products-index"];
-}
-
-function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResource[]): void {
-  if (type === "ARTICLE" || type === "PAGE") return;
-
-  const prefix = type === "BLOG" ? "blog" : type === "COLLECTION" ? "collection" : "product";
-  for (const resource of resources) {
-    cacheTag(`${prefix}-${resource.handle}`);
-  }
-}
-
-export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Promise<number> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag(...cacheTagsFor(type));
-
+export async function fetchSitemapPagesCount(type: ShopifySitemapType): Promise<number> {
   const response = await storefront.request(GET_SITEMAP_PAGES_COUNT_QUERY, {
     variables: { type },
   });
@@ -78,14 +56,10 @@ export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Pro
   return response.data.sitemap.pagesCount?.count ?? 0;
 }
 
-export async function getShopifySitemapPage(
+export async function fetchSitemapPage(
   type: ShopifySitemapType,
   page: number,
 ): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag(...cacheTagsFor(type));
-
   if (type === "ARTICLE") {
     let after: string | null = null;
     let articlePage: ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>["articles"] | undefined;
@@ -107,14 +81,12 @@ export async function getShopifySitemapPage(
     return {
       hasNextPage: articlePage?.pageInfo.hasNextPage ?? false,
       items:
-        articlePage?.nodes.map((article) => {
-          cacheTag(`article-${article.blog.handle}-${article.handle}`);
-          return {
-            handle: article.handle,
-            pathname: `/blogs/${article.blog.handle}/${article.handle}`,
-            updatedAt: article.publishedAt,
-          };
-        }) ?? [],
+        articlePage?.nodes.map((article) => ({
+          blogHandle: article.blog.handle,
+          handle: article.handle,
+          pathname: `/blogs/${article.blog.handle}/${article.handle}`,
+          updatedAt: article.publishedAt,
+        })) ?? [],
     };
   }
 
@@ -126,10 +98,8 @@ export async function getShopifySitemapPage(
   const resources = response.data.sitemap.resources;
   if (!resources) return { hasNextPage: false, items: [] };
 
-  const items = resources.items.map((item) => ({
-    handle: item.handle,
-    updatedAt: item.updatedAt,
-  }));
-  tagSitemapResources(type, items);
-  return { hasNextPage: resources.hasNextPage, items };
+  return {
+    hasNextPage: resources.hasNextPage,
+    items: resources.items.map((item) => ({ handle: item.handle, updatedAt: item.updatedAt })),
+  };
 }

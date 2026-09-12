@@ -5,52 +5,19 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { useCheckout } from "@/hooks/use-checkout";
 import type { Cart } from "@/lib/cart/types";
 
+import { CartCheckout } from "./checkout";
 import { useCartDrawer } from "./context";
+import { DiscountForm } from "./discount-form";
 import { OverlayItem } from "./overlay-item";
-import { OverlaySummary } from "./overlay-summary";
+import { CartTotal } from "./total";
 import { CartWarnings } from "./warnings";
-
-function CheckoutButtonContent({
-  isCheckingOut,
-  isUpdatingCart,
-}: {
-  isCheckingOut: boolean;
-  isUpdatingCart: boolean;
-}) {
-  if (isCheckingOut) {
-    return (
-      <span className="flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-        <span>Redirecting...</span>
-      </span>
-    );
-  }
-  if (isUpdatingCart) {
-    return (
-      <span className="flex items-center gap-2">
-        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-        <span>Updating cart...</span>
-      </span>
-    );
-  }
-  return <span>Go to Checkout</span>;
-}
 
 export function OverlayContent() {
   const router = useRouter();
   const displayCart = useCart<Cart, Cart>((state) => state.data);
   const isLoading = useCart((state) => state.loading);
-  const {
-    checkoutError,
-    checkoutErrorId,
-    handleCheckout,
-    isCheckingOut,
-    isCheckoutDisabled,
-    isUpdatingCart,
-  } = useCheckout();
   const { setOverlayOpen } = useCartDrawer();
   if (isLoading && displayCart.lines.nodes.length === 0) {
     return (
@@ -91,26 +58,12 @@ export function OverlayContent() {
       </div>
 
       <footer className="px-5 py-5 space-y-5">
-        <OverlaySummary cart={displayCart} />
-
         <div className="grid gap-2.5">
-          <Button
-            onClick={handleCheckout}
-            className="w-full h-12 justify-center"
-            disabled={isCheckoutDisabled}
-            aria-busy={isCheckingOut || isUpdatingCart || undefined}
-            aria-describedby={checkoutError ? checkoutErrorId : undefined}
-            aria-label="Proceed to Checkout"
-            type="button"
-          >
-            <CheckoutButtonContent isCheckingOut={isCheckingOut} isUpdatingCart={isUpdatingCart} />
-          </Button>
-          {checkoutError ? (
-            <p className="text-xs text-destructive" id={checkoutErrorId} role="alert">
-              {checkoutError}
-            </p>
-          ) : null}
+          <DiscountForm cart={displayCart} />
+          <CartTotal cart={displayCart} />
         </div>
+
+        <CartCheckout aria-label="Proceed to Checkout" label="Go to Checkout" />
       </footer>
     </div>
   );
