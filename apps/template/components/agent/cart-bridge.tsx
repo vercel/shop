@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { getCartMutationResult } from "@/lib/agent/cart";
-import { setAgentCartPending, useAgentCartPending } from "@/lib/agent/cart/client";
+import { setAgentCartStatus, useAgentCartStatus } from "@/lib/agent/cart/client";
 
 export function AgentCartBridge({
   messages,
@@ -24,11 +24,10 @@ export function AgentCartBridge({
   const observedLoading = useRef(false);
   const previousNetworkErrorAt = useRef(0);
   const shouldOpen = useRef(false);
-  const agentPending = useAgentCartPending();
+  const cartStatus = useAgentCartStatus();
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
-  const refreshFailed = !busy && agentPending && cart.errors.network.length > 0;
   useEffect(() => {
-    setAgentCartPending(true);
+    setAgentCartStatus("pending");
     let cartChanged = false;
     for (const message of messages)
       for (const part of message.parts) {
@@ -52,24 +51,34 @@ export function AgentCartBridge({
   useEffect(() => {
     if (!refreshing.current) return;
     if (cart.loading || cart.revalidating) {
+      setAgentCartStatus("pending");
       observedLoading.current = true;
       previousNetworkErrorAt.current = cart.errors.networkUpdatedAt;
       return;
     }
+    if (!observedLoading.current) return;
     // Hydrogen retains network errors from unrelated mutations across refreshes.
     if (
-      !observedLoading.current ||
-      (cart.errors.network.length && cart.errors.networkUpdatedAt > previousNetworkErrorAt.current)
-    )
+      cart.errors.network.length &&
+      cart.errors.networkUpdatedAt > previousNetworkErrorAt.current
+    ) {
+      setAgentCartStatus("failed");
       return;
+    }
     refreshing.current = false;
-    if (!busy) setAgentCartPending(false);
+    if (!busy) setAgentCartStatus("ready");
     if (shouldOpen.current) {
       shouldOpen.current = false;
       openOverlay();
     }
   }, [busy, cart, openOverlay]);
-  if (!refreshFailed) return null;
+  if (busy || cartStatus === "ready") return null;
+  if (cartStatus === "pending" || cart.loading || cart.revalidating)
+    return (
+      <p role="status" className="px-5 py-2 text-muted-foreground text-xs">
+        Confirming your cart…
+      </p>
+    );
   return (
     <div role="alert" className="grid gap-2.5 px-5 py-2 text-red-500 text-xs">
       <p>
@@ -79,7 +88,7 @@ export function AgentCartBridge({
         className="w-fit cursor-pointer underline underline-offset-4 disabled:cursor-not-allowed disabled:opacity-40"
         disabled={cart.loading || cart.revalidating}
         onClick={() => {
-          setAgentCartPending(true);
+          setAgentCartStatus("pending");
           refreshing.current = true;
           observedLoading.current = false;
           refresh();

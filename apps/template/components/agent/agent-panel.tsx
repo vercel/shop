@@ -5,7 +5,7 @@ import { MinusIcon, Trash2Icon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 import { useScrollContain } from "@/hooks/use-scroll-contain";
-import { setAgentCartPending } from "@/lib/agent/cart/client";
+import { setAgentCartStatus, useAgentCartPending } from "@/lib/agent/cart/client";
 import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
 
 import { AgentCartBridge } from "./cart-bridge";
@@ -26,9 +26,21 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const [input, setInput] = useState(stored.input);
   const snapshot = useRef(stored);
   const [clearing, setClearing] = useState(false);
+  const clearAttempt = useRef<{
+    reject: (error: Error) => void;
+    resolve: () => void;
+  } | null>(null);
+  const cartPending = useAgentCartPending();
   const [controlError, setControlError] = useState<string | null>(null);
   const agent = useEveAgent({
     initialSession: stored.session,
+    onError(cause) {
+      clearAttempt.current?.reject(cause);
+    },
+    onFinish(finished) {
+      if (finished.error) clearAttempt.current?.reject(finished.error);
+      else clearAttempt.current?.resolve();
+    },
     onSessionChange(session) {
       snapshot.current.session = session ? { ...session, streamIndex: 0 } : undefined;
       writeStoredChat(snapshot.current);
@@ -91,9 +103,12 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     return () => {
       window.removeEventListener("pagehide", flush);
       flush();
+      clearAttempt.current?.reject(new Error("Conversation closed"));
+      clearAttempt.current = null;
     };
   }, []);
   function clearChat() {
+    setAgentCartStatus("pending");
     agent.reset();
     setInput("");
     setClearing(false);
@@ -131,9 +146,9 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     });
   };
   const handleSend = (text: string) => {
-    if (busy || clearing || hasReachedLimit) return;
+    if (busy || clearing || cartPending || hasReachedLimit) return;
     pinnedRef.current = true;
-    setAgentCartPending(true);
+    setAgentCartStatus("pending");
     setControlError(null);
     void agent
       .send(text)
@@ -145,30 +160,38 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     setInput("");
   };
   const handleClear = async () => {
-    if (clearing) return;
+    if (clearAttempt.current) return;
     setClearing(true);
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    let couldNotStop = false;
+    setControlError(null);
+    const attempt = Promise.withResolvers<void>();
+    clearAttempt.current = attempt;
+    const timeout = setTimeout(
+      () => attempt.reject(new Error("Cancellation timed out")),
+      CANCEL_TIMEOUT_MS,
+    );
     try {
-      await Promise.race([
-        agent.cancel(),
-        new Promise<never>((_, reject) => {
-          timeout = setTimeout(
-            () => reject(new Error("Cancellation timed out")),
-            CANCEL_TIMEOUT_MS,
-          );
-        }),
-      ]);
+      void agent.cancel().then((result) => {
+        if (result.status === "no_active_turn") attempt.resolve();
+      }, attempt.reject);
+      await attempt.promise;
+      if (clearAttempt.current !== attempt) return;
+      clearChat();
+      if (busy || status === "error")
+        setControlError(
+          "Started a new chat. Check your cart before repeating an interrupted change.",
+        );
     } catch {
-      couldNotStop = true;
+      if (clearAttempt.current === attempt)
+        setControlError(
+          "Could not confirm the response stopped. Your conversation was kept. Try Stop or Clear again.",
+        );
     } finally {
       clearTimeout(timeout);
-      clearChat();
+      if (clearAttempt.current === attempt) {
+        clearAttempt.current = null;
+        setClearing(false);
+      }
     }
-    if (couldNotStop)
-      setControlError(
-        "Started a new chat, but the previous response may still finish. Check your cart before requesting another change.",
-      );
   };
   return (
     <div
@@ -234,7 +257,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       {(clearing || (status === "resuming" && messages.length > 0)) && (
         <p role="status" className="px-5 py-2 text-muted-foreground text-xs">
           {clearing
-            ? "Starting a new conversation…"
+            ? "Waiting for the response to stop…"
             : "Restoring your conversation… Clear chat to start fresh."}
         </p>
       )}
@@ -245,7 +268,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       )}
       <AgentCartBridge messages={messages} status={status} />
       <AgentComposer
-        disabled={clearing || hasReachedLimit}
+        disabled={!busy && (clearing || cartPending || hasReachedLimit)}
         onChange={setInput}
         onStop={handleStop}
         onSubmit={handleSend}
