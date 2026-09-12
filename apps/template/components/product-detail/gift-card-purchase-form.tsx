@@ -4,18 +4,18 @@ import { cn } from "cn";
 import { useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
-import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { useProductForm } from "@/lib/product/client";
 
 export function GiftCardPurchaseForm() {
   const { formProps, pending, register, selectedVariant } = useProductForm();
   const { openOverlay } = useCartDrawer();
-  const [error, setError] = useState<string | null>(null);
-  const [sendOnEnabled, setSendOnEnabled] = useState(false);
+  const [minimumSendDate, setMinimumSendDate] = useState("");
+  const sendOnEnabled = Boolean(minimumSendDate);
   const isUnavailable = !selectedVariant?.availableForSale;
 
   return (
@@ -26,33 +26,11 @@ export function GiftCardPurchaseForm() {
             event.preventDefault();
             return;
           }
-          setError(null);
-          const form = event.currentTarget;
-          const formData = new FormData(form);
-          const email = String(formData.get("attributes.Recipient email") ?? "").trim();
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            event.preventDefault();
-            setError("A valid recipient email is required");
-            return;
-          }
           if (sendOnEnabled) {
-            const sendOn = String(formData.get("attributes.Send on") ?? "");
-            const parsed = new Date(`${sendOn}T00:00:00`);
-            if (Number.isNaN(parsed.getTime()) || parsed < new Date(new Date().toDateString())) {
-              event.preventDefault();
-              setError("Send date must be today or later");
-              return;
-            }
             // Capture the browser offset at submission, not during server rendering.
-            const offset = form.elements.namedItem("attributes.__shopify_offset");
+            const offset = event.currentTarget.elements.namedItem("attributes.__shopify_offset");
             if (offset instanceof HTMLInputElement) {
               offset.value = String(new Date().getTimezoneOffset());
-            }
-          }
-          for (const key of ["Recipient email", "Recipient name", "Message"]) {
-            const input = form.elements.namedItem(`attributes.${key}`);
-            if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) {
-              input.value = input.value.trim();
             }
           }
           openOverlay();
@@ -115,7 +93,18 @@ export function GiftCardPurchaseForm() {
               id="gift-card-send-later"
               checked={sendOnEnabled}
               disabled={pending}
-              onCheckedChange={setSendOnEnabled}
+              onCheckedChange={(checked) => {
+                const today = new Date();
+                setMinimumSendDate(
+                  checked
+                    ? [
+                        today.getFullYear(),
+                        String(today.getMonth() + 1).padStart(2, "0"),
+                        String(today.getDate()).padStart(2, "0"),
+                      ].join("-")
+                    : "",
+                );
+              }}
             />
           </div>
           {sendOnEnabled ? (
@@ -125,18 +114,13 @@ export function GiftCardPurchaseForm() {
                 id="gift-card-send-on"
                 {...register("attributeValue", { defaultValue: "", key: "Send on" })}
                 type="date"
+                min={minimumSendDate}
                 required
               />
             </div>
           ) : null}
         </div>
       </fieldset>
-
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
 
       <Button
         {...register("addToCart", {})}

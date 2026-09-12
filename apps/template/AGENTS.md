@@ -191,7 +191,6 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 Cart interactions use Hydrogen's client store and server handlers:
 
 - Use `useProductForm` for standard product purchases and `useCartForm` for cart forms. `proxy.ts` serves `/api/cart` through Hydrogen's registered handlers.
-- Gift-card purchases use `useProductForm` with `register("attributeValue", ...)` for recipient and scheduling line attributes. Preserve Shopify's special attribute keys and capture the timezone offset in the browser at submission. Keep recipient fields filled after submission; Hydrogen owns cart pending state and errors.
 - Assistant cart mutations are client tools dispatched from `onToolCall` through `lib/agent/cart/client.ts` and Hydrogen's standard cart events. Their requests and store reconciliation outlive chat Stop/Clear; never execute mutations by scanning restored messages or attach the chat abort signal. The cart bridge only refreshes after cart reads.
 - `seedCartData` shares a per-request promise, not a Next.js data-cache entry. Keep carts out of public caches; cart updates reconcile through Hydrogen's store rather than cache-tag invalidation.
 - `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.

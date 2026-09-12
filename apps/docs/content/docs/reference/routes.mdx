@@ -22,14 +22,14 @@ type: reference
 
 ## API routes
 
-| Route                        | Description                                                                     |
-| ---------------------------- | ------------------------------------------------------------------------------- |
-| `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation                                  |
-| `POST /api/chat`             | Shopping-assistant stream; returns `404` unless `agent.isEnabled` is `true`     |
-| `GET /api/cart`              | Current cart                                                                    |
-| `POST /api/cart`             | Cart creation and updates                                                       |
-| `GET /api/predictive-search` | Search suggestions                                                              |
-| `POST /api/ucp/mcp`          | Shopify UCP MCP proxy; callers supply authorization and their UCP agent profile |
+| Route                        | Description                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/webhooks/shopify` | Shopify webhook handler for cache invalidation                              |
+| `POST /api/chat`             | Shopping-assistant stream; returns `404` unless `agent.isEnabled` is `true` |
+| `GET /api/cart`              | Current cart                                                                |
+| `POST /api/cart`             | Cart creation and updates                                                   |
+| `GET /api/predictive-search` | Search suggestions                                                          |
+| `POST /api/ucp/mcp`          | UCP MCP proxy; caller supplies authorization and agent profile              |
 
 Cart and predictive-search endpoints use the framework-agnostic Hydrogen preview SDK's registered handlers through the Next.js proxy. They are not App Router `route.ts` files. Next.js owns the page routes, rendering, and the app's webhook and chat endpoints.
 
