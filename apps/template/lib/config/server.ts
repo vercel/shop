@@ -5,14 +5,8 @@ import {
 } from "next/constants";
 
 import { shopConfig } from "./index";
-import type {
-  NextConfigContext,
-  NextConfigFactory,
-  NextConfigInput,
-  NextConfigPlugin,
-} from "./types";
 
-function assertRequiredEnv(phase: string) {
+export function assertRequiredEnv(phase: string) {
   if (![PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD, PHASE_PRODUCTION_SERVER].includes(phase))
     return;
   // Next typegen uses the production-build phase but does not need Shopify credentials.
@@ -43,23 +37,4 @@ function assertRequiredEnv(phase: string) {
       );
     }
   }
-}
-
-async function resolveConfig(config: NextConfigInput, phase: string, context: NextConfigContext) {
-  return typeof config === "function" ? config(phase, context) : config;
-}
-
-export function withShopConfig(
-  nextConfig: NextConfigInput,
-  plugins: readonly (NextConfigPlugin | false | null | undefined)[] = [],
-): NextConfigFactory {
-  return async (phase, context) => {
-    assertRequiredEnv(phase);
-
-    let config = await resolveConfig(nextConfig, phase, context);
-    for (const plugin of plugins) {
-      if (plugin) config = await resolveConfig(await plugin(config), phase, context);
-    }
-    return config;
-  };
 }

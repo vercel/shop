@@ -3,7 +3,7 @@ import { withEve } from "eve/next";
 import type { NextConfig } from "next";
 
 import { shopConfig } from "./lib/config";
-import { withShopConfig } from "./lib/config/server";
+import { assertRequiredEnv } from "./lib/config/server";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
@@ -31,7 +31,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withShopConfig(nextConfig, [
-  shopConfig.botid.isEnabled && withBotId,
-  shopConfig.agent.isEnabled && withEve,
-]);
+export default async function createNextConfig(
+  phase: string,
+  context: { defaultConfig: NextConfig },
+) {
+  assertRequiredEnv(phase);
+  const config = shopConfig.botid.isEnabled ? withBotId(nextConfig) : nextConfig;
+  return shopConfig.agent.isEnabled ? withEve(config)(phase, context) : config;
+}
