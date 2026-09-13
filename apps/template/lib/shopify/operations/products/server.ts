@@ -1,4 +1,5 @@
-import { flattenConnection, gql } from "@shopify/hydrogen";
+import { flattenConnection, gql, parseSortByValue } from "@shopify/hydrogen";
+import type { ProductFilter } from "@shopify/hydrogen";
 import type {
   ProductCollectionSortKeys,
   ProductSortKeys,
@@ -39,11 +40,11 @@ import type {
   SearchIndexProductsResult,
 } from "@/lib/shopify/operations/products/types";
 import { storefront } from "@/lib/shopify/storefront/server";
+import type { StorefrontVariables } from "@/lib/shopify/storefront/types";
 import {
   getSelectedColorFilterLabel,
   transformShopifyFilters,
 } from "@/lib/shopify/transforms/filters";
-import type { ProductFilter } from "@/lib/shopify/transforms/filters/types";
 import {
   transformFilteredShopifyProductCard,
   transformShopifyProductCard,
@@ -53,6 +54,22 @@ import {
 
 function escapeProductQuery(value: string): string {
   return value.replace(/'/g, "\\'");
+}
+
+type StorefrontProductFilter = NonNullable<
+  NonNullable<StorefrontVariables<typeof COLLECTION_PRODUCTS_QUERY>["filters"]>[number]
+>;
+
+// Hydrogen's ProductFilter folds the taxonomy namespace into `key`; the Storefront schema wants them apart.
+function toStorefrontFilters(filters: ProductFilter[]): StorefrontProductFilter[] | undefined {
+  if (filters.length === 0) return undefined;
+  return filters.map((filter) => {
+    if (!filter.taxonomyMetafield) return filter as StorefrontProductFilter;
+    const [namespace, ...key] = filter.taxonomyMetafield.key.split(".");
+    return {
+      taxonomyMetafield: { key: key.join("."), namespace, value: filter.taxonomyMetafield.value },
+    };
+  });
 }
 
 const GET_PRODUCT_BY_HANDLE_QUERY = gql(
@@ -255,25 +272,26 @@ const PRODUCTS_QUERY = gql(
   [PRODUCT_CARD_FRAGMENT],
 );
 
-const PRODUCTS_SORT_KEY_MAP: Record<string, { sortKey: ProductSortKeys; reverse: boolean }> = {
-  "best-matches": { sortKey: "RELEVANCE", reverse: false },
-  "best-selling": { sortKey: "BEST_SELLING", reverse: false },
-  "date-new-to-old": { sortKey: "CREATED_AT", reverse: true },
-  "date-old-to-new": { sortKey: "CREATED_AT", reverse: false },
-  "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
-  "product-name-ascending": { sortKey: "TITLE", reverse: false },
-  "product-name-descending": { sortKey: "TITLE", reverse: true },
-  BEST_SELLING: { sortKey: "BEST_SELLING", reverse: false },
-  CREATED_AT: { sortKey: "CREATED_AT", reverse: false },
-  ID: { sortKey: "ID", reverse: false },
-  PRICE: { sortKey: "PRICE", reverse: false },
-  PRODUCT_TYPE: { sortKey: "PRODUCT_TYPE", reverse: false },
-  RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
-  TITLE: { sortKey: "TITLE", reverse: false },
-  UPDATED_AT: { sortKey: "UPDATED_AT", reverse: false },
-  VENDOR: { sortKey: "VENDOR", reverse: false },
-};
+// QueryRoot.products sorts by CREATED_AT where collections sort by CREATED.
+function toProductsSort(
+  sortBy: string | undefined,
+  hasQuery: boolean,
+): { reverse: boolean; sortKey: ProductSortKeys } {
+  const parsed = sortBy ? parseSortByValue(sortBy) : undefined;
+  switch (parsed?.sortKey) {
+    case "BEST_SELLING":
+      return { reverse: parsed.reverse, sortKey: "BEST_SELLING" };
+    case "CREATED":
+      return { reverse: parsed.reverse, sortKey: "CREATED_AT" };
+    case "PRICE":
+      return { reverse: parsed.reverse, sortKey: "PRICE" };
+    case "TITLE":
+      return { reverse: parsed.reverse, sortKey: "TITLE" };
+    default:
+      // RELEVANCE is meaningless without a query; BEST_SELLING is the browse default.
+      return { reverse: false, sortKey: hasQuery ? "RELEVANCE" : "BEST_SELLING" };
+  }
+}
 
 function joinOr(field: string, values: string[]): string {
   const expressions = values.map((v) => `${field}:'${escapeProductQuery(v)}'`);
@@ -324,14 +342,10 @@ export async function fetchProducts({
   limit = 50,
   locale = shopConfig.localization,
   query,
-  sortKey: rawSortKey = "best-matches",
+  sortKey: sortBy,
 }: FilteredProductsParams): Promise<ProductsResult> {
-  const sortConfig = PRODUCTS_SORT_KEY_MAP[rawSortKey] ?? PRODUCTS_SORT_KEY_MAP["best-matches"];
   const productsQuery = buildProductsQuery({ query, collection, filters });
-
-  // RELEVANCE is meaningless without a query; fall back to BEST_SELLING for plain browse.
-  const sortKey =
-    sortConfig.sortKey === "RELEVANCE" && !productsQuery ? "BEST_SELLING" : sortConfig.sortKey;
+  const { reverse, sortKey } = toProductsSort(sortBy, Boolean(productsQuery));
 
   const response = await storefront.request(PRODUCTS_QUERY, {
     locale,
@@ -340,7 +354,7 @@ export async function fetchProducts({
       after: cursor,
       query: productsQuery || undefined,
       sortKey,
-      reverse: sortConfig.reverse,
+      reverse,
     },
   });
   assertStorefrontOk(response, "products");
@@ -352,14 +366,13 @@ export async function fetchProducts({
   };
 }
 
-// SearchSortKeys only supports PRICE and RELEVANCE.
-const SEARCH_SORT_KEY_MAP: Record<string, { sortKey: SearchSortKeys; reverse: boolean }> = {
-  "best-matches": { sortKey: "RELEVANCE", reverse: false },
-  "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
-  PRICE: { sortKey: "PRICE", reverse: false },
-  RELEVANCE: { sortKey: "RELEVANCE", reverse: false },
-};
+// Storefront search sorts by RELEVANCE or PRICE only.
+function toSearchSort(sortBy: string | undefined): { reverse: boolean; sortKey: SearchSortKeys } {
+  const parsed = sortBy ? parseSortByValue(sortBy) : undefined;
+  return parsed?.sortKey === "PRICE"
+    ? { reverse: parsed.reverse, sortKey: "PRICE" }
+    : { reverse: false, sortKey: "RELEVANCE" };
+}
 
 const PRODUCTS_SEARCH_QUERY = gql(
   `#graphql
@@ -413,25 +426,24 @@ export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
 ): Promise<SearchIndexProductsResult> {
   const {
-    activeFilters = {},
     collection,
     cursor,
     filters = [],
     limit = 50,
     locale = shopConfig.localization,
     query,
-    sortKey: rawSortKey = "best-matches",
+    sortKey: sortBy,
   } = params;
-  const sortConfig = SEARCH_SORT_KEY_MAP[rawSortKey] ?? SEARCH_SORT_KEY_MAP["best-matches"];
+  const sort = toSearchSort(sortBy);
   const response = await storefront.request(PRODUCTS_SEARCH_QUERY, {
     locale,
     variables: {
       query: buildSearchQuery(query, collection),
       first: limit,
       after: cursor,
-      productFilters: filters.length > 0 ? filters : undefined,
-      sortKey: sortConfig.sortKey,
-      reverse: sortConfig.reverse,
+      productFilters: toStorefrontFilters(filters),
+      sortKey: sort.sortKey,
+      reverse: sort.reverse,
     },
   });
   assertStorefrontOk(response, "searchProducts");
@@ -439,11 +451,7 @@ export async function fetchSearchIndexProducts(
   const shopifyProducts = data.search.edges.flatMap((edge) =>
     edge.node.__typename === "Product" ? [edge.node] : [],
   );
-  const selectedColor = getSelectedColorFilterLabel(
-    activeFilters,
-    filters,
-    data.search.productFilters,
-  );
+  const selectedColor = getSelectedColorFilterLabel(filters, data.search.productFilters);
   return {
     pageInfo: data.search.pageInfo,
     products: shopifyProducts.map((product) =>
@@ -483,18 +491,12 @@ const SEARCH_FACETS_QUERY = gql(
 );
 
 export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
-  const {
-    activeFilters = {},
-    collection,
-    filters = [],
-    locale = shopConfig.localization,
-    query,
-  } = params;
+  const { collection, filters = [], locale = shopConfig.localization, query } = params;
   const response = await storefront.request(SEARCH_FACETS_QUERY, {
     locale,
     variables: {
       query: buildSearchQuery(query, collection),
-      productFilters: filters.length > 0 ? filters : undefined,
+      productFilters: toStorefrontFilters(filters),
     },
   });
   assertStorefrontOk(response, "searchFacets");
@@ -503,7 +505,7 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
     node.__typename === "Product" ? [node.priceRange.minVariantPrice.currencyCode] : [],
   )[0];
   const transformed = transformShopifyFilters(data.search.productFilters, {
-    activeFilters,
+    activeFilters: filters,
     currencyCode,
   });
   return {
@@ -513,26 +515,16 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   };
 }
 
-const COLLECTION_SORT_KEY_MAP: Record<
-  string,
-  { sortKey: ProductCollectionSortKeys; reverse: boolean }
-> = {
-  "best-matches": { sortKey: "COLLECTION_DEFAULT", reverse: false },
-  "best-selling": { sortKey: "BEST_SELLING", reverse: false },
-  "price-low-to-high": { sortKey: "PRICE", reverse: false },
-  "price-high-to-low": { sortKey: "PRICE", reverse: true },
-  "product-name-ascending": { sortKey: "TITLE", reverse: false },
-  "product-name-descending": { sortKey: "TITLE", reverse: true },
-  "date-old-to-new": { sortKey: "CREATED", reverse: false },
-  "date-new-to-old": { sortKey: "CREATED", reverse: true },
-  TITLE: { sortKey: "TITLE", reverse: false },
-  PRICE: { sortKey: "PRICE", reverse: false },
-  BEST_SELLING: { sortKey: "BEST_SELLING", reverse: false },
-  CREATED: { sortKey: "CREATED", reverse: false },
-  ID: { sortKey: "ID", reverse: false },
-  MANUAL: { sortKey: "MANUAL", reverse: false },
-  COLLECTION_DEFAULT: { sortKey: "COLLECTION_DEFAULT", reverse: false },
-};
+// MANUAL is only valid for manual collections, so the merchant default covers both kinds.
+function toCollectionSort(sortBy: string | undefined): {
+  reverse: boolean;
+  sortKey: ProductCollectionSortKeys;
+} {
+  const parsed = sortBy ? parseSortByValue(sortBy) : undefined;
+  if (!parsed?.sortKey || parsed.sortKey === "MANUAL")
+    return { reverse: false, sortKey: "COLLECTION_DEFAULT" };
+  return { reverse: parsed.reverse, sortKey: parsed.sortKey };
+}
 
 const COLLECTION_PRODUCTS_QUERY = gql(
   `#graphql
@@ -565,24 +557,23 @@ export async function fetchCollectionProducts(
   params: CollectionProductsParams,
 ): Promise<CollectionProductsResult> {
   const {
-    activeFilters = {},
     collection,
     cursor,
     filters = [],
     limit = 50,
     locale = shopConfig.localization,
-    sortKey: rawSortKey = "best-matches",
+    sortKey: sortBy,
   } = params;
-  const sortConfig = COLLECTION_SORT_KEY_MAP[rawSortKey] ?? COLLECTION_SORT_KEY_MAP["best-matches"];
+  const sort = toCollectionSort(sortBy);
   const response = await storefront.request(COLLECTION_PRODUCTS_QUERY, {
     locale,
     variables: {
       handle: collection,
       first: limit,
       after: cursor,
-      sortKey: sortConfig.sortKey,
-      reverse: sortConfig.reverse,
-      filters: filters.length > 0 ? filters : undefined,
+      sortKey: sort.sortKey,
+      reverse: sort.reverse,
+      filters: toStorefrontFilters(filters),
     },
   });
   assertStorefrontOk(response, "collectionProducts");
@@ -595,16 +586,12 @@ export async function fetchCollectionProducts(
     };
   }
   const shopifyProducts = flattenConnection(data.collection.products);
-  const selectedColor = getSelectedColorFilterLabel(
-    activeFilters,
-    filters,
-    data.collection.products.filters,
-  );
+  const selectedColor = getSelectedColorFilterLabel(filters, data.collection.products.filters);
   const products = shopifyProducts.map((product) =>
     transformFilteredShopifyProductCard(product, selectedColor),
   );
   const transformed = transformShopifyFilters(data.collection.products.filters, {
-    activeFilters,
+    activeFilters: filters,
     currencyCode: products[0]?.price.currencyCode,
   });
   return {

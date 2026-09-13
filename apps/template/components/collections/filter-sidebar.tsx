@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { Swatch } from "@/components/ui/swatch";
-import { getActiveFilters, parseFilterInput } from "@/lib/collections";
+import { parseFilterInput } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
@@ -44,7 +44,6 @@ export function CollectionFilterSidebarClient({
 }: CollectionFilterSidebarClientProps) {
   const state = useCollection();
   const actions = useCollectionActions();
-  const activeFilters = getActiveFilters(state.filters);
   const priceFilter = state.filters.find((filter) => filter.price)?.price;
   const priceMin = priceFilter?.min ?? null;
   const priceMax = priceFilter?.max ?? null;
@@ -68,7 +67,7 @@ export function CollectionFilterSidebarClient({
   const setMaxInput = (max: string) => setPriceInputs((prev) => ({ ...prev, max }));
   const currentParams = serializeCollectionParams(state);
   const isPending = state.status === "loading";
-  const activeBadges = getActiveFilterBadges(filters, activeFilters);
+  const activeBadges = getActiveFilterBadges(filters, state.filters);
   const hasPriceFilter = priceFilter !== undefined;
   const totalActiveCount = activeBadges.length + (hasPriceFilter ? 1 : 0);
   const applyPrice = (min: number | null, max: number | null) => {

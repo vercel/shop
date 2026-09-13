@@ -1,13 +1,11 @@
+import type { ProductFilter } from "@shopify/hydrogen";
+
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import type { Image } from "@/lib/media/types";
 import type { SEO } from "@/lib/seo/types";
 import type { CollectionProductsResult } from "@/lib/shopify/operations/products/types";
-import type { ProductFilter } from "@/lib/shopify/transforms/filters/types";
-
-export type ActiveFilters = Record<string, string | string[] | undefined>;
 
 export interface BrowseParams {
-  activeFilters: ActiveFilters;
   filters: ProductFilter[];
   sort?: string;
 }

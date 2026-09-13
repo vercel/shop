@@ -1,12 +1,11 @@
-import type { ActiveFilters } from "@/lib/collections/types";
+import type { ProductFilter } from "@shopify/hydrogen";
+
 import type { CommerceLocale } from "@/lib/config/types";
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import type { PageInfo } from "@/lib/pagination/types";
 import type { ProductCard } from "@/lib/product/types";
-import type { ProductFilter } from "@/lib/shopify/transforms/filters/types";
 
 export type SearchIndexProductsParams = {
-  activeFilters?: ActiveFilters;
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -23,7 +22,6 @@ export type SearchIndexProductsResult = {
 };
 
 export type CollectionProductsParams = {
-  activeFilters?: ActiveFilters;
   collection: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -60,7 +58,6 @@ export type FilteredProductsParams = ProductsParams & {
 };
 
 export type SearchFacetsParams = {
-  activeFilters?: ActiveFilters;
   collection?: string;
   filters?: ProductFilter[];
   locale?: CommerceLocale;

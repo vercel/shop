@@ -1,3 +1,5 @@
+import type { ProductFilter } from "@shopify/hydrogen";
+
 import type { Collection } from "@/lib/collections/types";
 import { shopConfig } from "@/lib/config";
 import type { Filter, PriceRange } from "@/lib/filters/types";
@@ -26,7 +28,7 @@ export function collectionToMarkdown({
   products: ProductCard[];
   filters: Filter[];
   priceRange?: PriceRange;
-  activeFilters: Record<string, string | string[] | undefined>;
+  activeFilters: ProductFilter[];
   pageInfo: PageInfo;
   locale?: string;
   sort?: string;

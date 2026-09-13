@@ -31,7 +31,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         products: data.result.products,
         filters: data.result.filters,
         priceRange: data.result.priceRange,
-        activeFilters: data.activeFilters,
+        activeFilters: data.filters,
         pageInfo: data.result.pageInfo,
         sort: data.sort,
       });
@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       });
     }
     const cursor = url.searchParams.get("cursor") ?? undefined;
-    const { activeFilters, filters, sort } = searchState;
+    const { filters, sort } = searchState;
 
     // Same live read as the HTML page so agents and shoppers see one result set per URL.
     const [collection, result] = await Promise.all([
@@ -51,7 +51,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         handle,
       }),
       fetchCollectionProducts({
-        activeFilters,
         collection: handle,
         sortKey: sort,
         limit: PRODUCTS_PER_PAGE,
@@ -73,7 +72,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       products: result.products,
       filters: result.filters,
       priceRange: result.priceRange,
-      activeFilters,
+      activeFilters: filters,
       pageInfo: result.pageInfo,
       sort,
     });

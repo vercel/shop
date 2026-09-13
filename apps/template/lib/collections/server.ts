@@ -1,11 +1,9 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { getActiveFilters, getCollectionSortFromState } from "@/lib/collections";
-import { PRODUCTS_PER_PAGE } from "@/lib/collections";
+import { getBrowseSort, PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
 import type { CommerceLocale } from "@/lib/config/types";
-import { buildProductFiltersFromParams } from "@/lib/filters";
 import { tagProducts } from "@/lib/product/server";
 import {
   fetchCollection,
@@ -75,13 +73,10 @@ export function resolveBrowseParams(search: string | URLSearchParams): Collectio
   const state = parseCollectionParams(
     typeof search === "string" ? new URLSearchParams(search) : search,
   );
-  const activeFilters = getActiveFilters(state.filters);
-  const sort = getCollectionSortFromState(state.sortKey, state.reverse);
   return {
-    activeFilters,
     dataSearch: serializeCollectionParams(state).toString(),
-    filters: buildProductFiltersFromParams(activeFilters),
-    sort: sort === "best-matches" ? undefined : sort,
+    filters: state.filters,
+    sort: getBrowseSort(state),
   };
 }
 
@@ -113,16 +108,14 @@ export async function getCollectionResultsData({
   handle: string;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
+  const { dataSearch, filters, sort } = await searchStatePromise;
   const result = await fetchCollectionProducts({
-    activeFilters,
     collection: handle,
     sortKey: sort,
     limit: PRODUCTS_PER_PAGE,
     filters,
   });
   return {
-    activeFilters,
     collection: handle,
     dataSearch,
     sort,
@@ -151,21 +144,18 @@ export async function getAllProductsResultsData({
 }: {
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<CollectionResultsData> {
-  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
+  const { dataSearch, filters, sort } = await searchStatePromise;
   const [products, facets] = await Promise.all([
     fetchSearchIndexProducts({
-      activeFilters,
       sortKey: sort,
       limit: PRODUCTS_PER_PAGE,
       filters,
     }),
     fetchSearchFacets({
-      activeFilters,
       filters,
     }),
   ]);
   return {
-    activeFilters,
     collection: ALL_PRODUCTS_HANDLE,
     dataSearch,
     sort,
