@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
-import { getShopPolicies } from "@/lib/content/server";
+import { getShopPolicies } from "@/lib/policies/server";
 import { getShopifySitemapPage } from "@/lib/seo/server";
 import { type ShopifySitemapType } from "@/lib/shopify/operations/sitemap/types";
 

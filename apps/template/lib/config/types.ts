@@ -20,7 +20,6 @@ export type NextConfigPlugin = (config: NextConfig) => NextConfigInput | Promise
 export interface ShopConfig {
   agent: {
     isEnabled: boolean;
-    position: "fixed" | "inline";
   };
   analytics: {
     shopify: {
@@ -44,6 +43,11 @@ export interface ShopConfig {
       >["checkLevel"]
     >;
     isEnabled: boolean;
+  };
+  browserAgents: {
+    webmcp: {
+      isEnabled: boolean;
+    };
   };
   localization: CommerceLocale & {
     locale: string;
@@ -71,8 +75,5 @@ export interface ShopConfig {
   site: {
     name: string;
     url: string;
-  };
-  webmcp: {
-    isEnabled: boolean;
   };
 }

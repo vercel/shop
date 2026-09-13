@@ -105,12 +105,6 @@ function SliderHeader({ className, ...props }: ComponentProps<"div">) {
   );
 }
 
-function SliderTitle({ className, ...props }: ComponentProps<"h2">) {
-  return (
-    <h2 data-slot="slider-title" className={cn("text-2xl sm:text-3xl", className)} {...props} />
-  );
-}
-
 function SliderNav({ className, ...props }: ComponentProps<"div">) {
   const { canScrollLeft, canScrollRight, scroll } = useSlider();
   const hidden = !canScrollLeft && !canScrollRight;
@@ -163,4 +157,4 @@ function SliderItem({ className, ...props }: ComponentProps<"div">) {
   return <div data-slot="slider-item" className={cn("snap-start", className)} {...props} />;
 }
 
-export { Slider, SliderContent, SliderHeader, SliderItem, SliderNav, SliderTitle };
+export { Slider, SliderContent, SliderHeader, SliderItem, SliderNav };

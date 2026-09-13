@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
-import { getShopPolicies, getShopPolicy } from "@/lib/content/server";
+import { getShopPolicies, getShopPolicy } from "@/lib/policies/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";

@@ -1,20 +1,8 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { CommerceLocale } from "@/lib/config/types";
-import type { ContentPage, ShopPolicy } from "@/lib/content/types";
-import { fetchPage } from "@/lib/shopify/operations/pages/server";
+import type { ShopPolicy } from "@/lib/policies/types";
 import { fetchShopPolicies } from "@/lib/shopify/operations/policies/server";
-
-export async function getPage(params: {
-  handle: string;
-  locale?: CommerceLocale;
-}): Promise<ContentPage | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("pages", `page-${params.handle}`);
-
-  return fetchPage(params);
-}
 
 export async function getShopPolicies(
   params: { locale?: CommerceLocale } = {},

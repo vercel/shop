@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
-import { getPage } from "@/lib/content/server";
+import { getPage } from "@/lib/pages/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopifySitemapPage } from "@/lib/seo/server";
 
