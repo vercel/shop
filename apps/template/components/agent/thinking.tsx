@@ -12,7 +12,6 @@ export function AgentThinking({ active, tool }: { active: boolean; tool?: string
     "list-collections": "Looking at collections…",
     navigate: "Finding the page…",
     "present-products": "Preparing product cards…",
-    "search-products": "Searching products…",
     policies__search_shop_policies_and_faqs: "Checking store policies…",
     shopify__search_catalog: "Searching products…",
     "update-cart-item": "Updating your cart…",

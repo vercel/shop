@@ -68,9 +68,7 @@ export function ShoppingResults({ isStreaming, message }: ShoppingResultsProps) 
 
   for (const { output, part } of results) {
     if (
-      ["present-products", "search-products", "browse-collection", "get-recommendations"].includes(
-        part.toolName,
-      ) &&
+      ["present-products", "browse-collection", "get-recommendations"].includes(part.toolName) &&
       "products" in output &&
       Array.isArray(output.products)
     ) {

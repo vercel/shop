@@ -133,6 +133,10 @@ pnpm format
 
 The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve tools call Shopify directly through the uncached `fetch*` operations in `lib/shopify/operations/**` and Hydrogen cart handlers.
 
+### Catalog search
+
+Product discovery is Shopify's catalog MCP (`agent/connections/shopify.ts`, `search_catalog`), rendered through `present-products`. There is one search path; do not add a Storefront API search tool beside it. `browse-collection`, `list-collections`, `get-recommendations`, and `get-product-details` are navigation and detail reads, not search. The connection requires the public UCP agent profile served at `/agent/ucp-profile.json`; local and preview environments send Shopify's example profile because their URLs are unreachable.
+
 ### Cart ownership
 
 Eve cart tools bind the cart from the incoming browser cookie through channel auth context. The browser refreshes Hydrogen only after turns settle; never write cart IDs or replay mutations from restored messages. The default channel is public with optional BotID, not per-user session authorization. Completed Eve steps are durable, but interrupted writes have no application-owned deduplication; do not claim exactly-once behavior or automatically retry an uncertain mutation.
