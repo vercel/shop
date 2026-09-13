@@ -10,8 +10,8 @@ export default defineTool({
   inputSchema: z.strictObject({
     collection: productHandleSchema,
     sortKey: z
-      .enum(["best-matches", "price-low-to-high", "price-high-to-low", "BEST_SELLING", "CREATED"])
-      .default("best-matches"),
+      .enum(["manual", "best-selling", "created-descending", "price-ascending", "price-descending"])
+      .default("manual"),
   }),
   execute: async ({ collection, sortKey }) => {
     const { products } = await fetchCollectionProducts({ collection, limit: 12, sortKey });

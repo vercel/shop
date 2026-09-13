@@ -18,10 +18,9 @@ export async function getSearchResultsData({
   query?: string;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<SearchResultsData> {
-  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
+  const { dataSearch, filters, sort } = await searchStatePromise;
   const [results, facets] = await Promise.all([
     fetchSearchIndexProducts({
-      activeFilters,
       collection,
       filters,
       limit: PRODUCTS_PER_PAGE,
@@ -29,7 +28,6 @@ export async function getSearchResultsData({
       sortKey: sort,
     }),
     fetchSearchFacets({
-      activeFilters,
       collection,
       filters,
       query,
