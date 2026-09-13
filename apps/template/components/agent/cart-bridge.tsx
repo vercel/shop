@@ -4,7 +4,6 @@ import { useCart, useCartActions } from "@shopify/hydrogen/react";
 import type { EveMessage } from "eve/react";
 import { useEffect, useRef } from "react";
 
-import { useCartDrawer } from "@/components/cart/context";
 import { getCartMutationResult } from "@/lib/agent/cart";
 import { setAgentCartStatus, useAgentCartStatus } from "@/lib/agent/cart/client";
 
@@ -17,13 +16,11 @@ export function AgentCartBridge({
 }) {
   const { refresh } = useCartActions();
   const cart = useCart((state) => state);
-  const { openOverlay } = useCartDrawer();
   const seen = useRef(new Set<string>());
   const hydrated = useRef(false);
   const refreshing = useRef(false);
   const observedLoading = useRef(false);
   const previousNetworkErrorAt = useRef(0);
-  const shouldOpen = useRef(false);
   const cartStatus = useAgentCartStatus();
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
   useEffect(() => {
@@ -43,7 +40,6 @@ export function AgentCartBridge({
       }
     if (!busy) hydrated.current = true;
     if (busy && !cartChanged) return;
-    if (cartChanged) shouldOpen.current = true;
     refreshing.current = true;
     observedLoading.current = false;
     refresh();
@@ -67,20 +63,16 @@ export function AgentCartBridge({
     }
     refreshing.current = false;
     if (!busy) setAgentCartStatus("ready");
-    if (shouldOpen.current) {
-      shouldOpen.current = false;
-      openOverlay();
-    }
-  }, [busy, cart, openOverlay]);
+  }, [busy, cart]);
   if (busy || cartStatus === "ready") return null;
   if (cartStatus === "pending" || cart.loading || cart.revalidating)
     return (
-      <p role="status" className="px-5 py-2 text-muted-foreground text-xs">
+      <p role="status" className="px-2.5 py-2 text-muted-foreground text-xs">
         Confirming your cart…
       </p>
     );
   return (
-    <div role="alert" className="grid gap-2.5 px-5 py-2 text-red-500 text-xs">
+    <div role="alert" className="grid gap-2.5 px-2.5 py-2 text-red-500 text-xs">
       <p>
         We couldn't confirm your cart. Refresh it before checking out or requesting another change.
       </p>

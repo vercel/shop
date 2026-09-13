@@ -29,7 +29,7 @@ export function OverlayContent() {
   }
   if (displayCart.lines.nodes.length === 0) {
     return (
-      <div className="flex h-full flex-col gap-5 px-5">
+      <div className="flex h-full flex-col gap-5 px-2.5">
         <CartWarnings />
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <h3 className="mb-6 text-2xl">Your cart is empty</h3>
@@ -48,7 +48,7 @@ export function OverlayContent() {
   }
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div className="flex-1 overflow-y-auto px-2.5 py-5 space-y-5">
         <CartWarnings />
         <ul className="space-y-5" aria-label="Cart items">
           {displayCart.lines.nodes.map((item) => (
@@ -57,7 +57,7 @@ export function OverlayContent() {
         </ul>
       </div>
 
-      <footer className="px-5 py-5 space-y-5">
+      <footer className="px-2.5 pt-5 pb-2.5 space-y-5">
         <div className="grid gap-2.5">
           <DiscountForm cart={displayCart} />
           <CartTotal cart={displayCart} />

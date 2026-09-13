@@ -20,6 +20,7 @@ export type NextConfigPlugin = (config: NextConfig) => NextConfigInput | Promise
 export interface ShopConfig {
   agent: {
     isEnabled: boolean;
+    position: "fixed" | "inline";
   };
   analytics: {
     shopify: {
@@ -63,6 +64,9 @@ export interface ShopConfig {
     relatedProducts: {
       isEnabled: boolean;
     };
+  };
+  search: {
+    isEnabled: boolean;
   };
   site: {
     name: string;

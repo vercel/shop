@@ -1,11 +1,18 @@
 "use client";
 
 import { useEveAgent } from "eve/react";
-import { MinusIcon, Trash2Icon } from "lucide-react";
+import { Trash2Icon, XIcon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { setAgentCartStatus, useAgentCartPending } from "@/lib/agent/cart/client";
-import { readStoredChat, useAgentScrollContain, writeStoredChat } from "@/lib/agent/chat/client";
+import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
 
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
@@ -76,21 +83,45 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
+  const userScrollRef = useRef(false);
+  const pointerDownRef = useRef(false);
+  const scrollToBottom = useCallback(() => {
+    const element = scrollRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, []);
+  const markUserScroll = useCallback(() => {
+    userScrollRef.current = true;
+  }, []);
+  // Programmatic scrolls also fire scroll events; only user input may unpin from the bottom.
   const handleScroll = useCallback(() => {
     const element = scrollRef.current;
-    if (element)
-      pinnedRef.current = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
+    if (!element) return;
+    const atBottom = element.scrollHeight - element.scrollTop - element.clientHeight < 48;
+    if (atBottom) pinnedRef.current = true;
+    else if (userScrollRef.current || pointerDownRef.current) pinnedRef.current = false;
+    userScrollRef.current = false;
   }, []);
   useEffect(() => {
     const scroller = scrollRef.current;
     const content = contentRef.current;
     if (!scroller || !content) return;
     const observer = new ResizeObserver(() => {
-      if (pinnedRef.current) scroller.scrollTop = scroller.scrollHeight;
+      if (pinnedRef.current) scrollToBottom();
     });
     observer.observe(content);
+    observer.observe(scroller);
     return () => observer.disconnect();
-  }, []);
+  }, [scrollToBottom]);
+  useEffect(() => {
+    if (open) scrollToBottom();
+  }, [open, scrollToBottom]);
+  const [restoreDelayElapsed, setRestoreDelayElapsed] = useState(false);
+  useEffect(() => {
+    if (status !== "resuming") return;
+    const timer = setTimeout(() => setRestoreDelayElapsed(true), 400);
+    return () => clearTimeout(timer);
+  }, [status]);
+  const showRestoring = status === "resuming" && restoreDelayElapsed;
   useEffect(() => {
     snapshot.current.input = input;
     const timer = setTimeout(() => writeStoredChat(snapshot.current), 400);
@@ -115,29 +146,6 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     snapshot.current = { input: "" };
     writeStoredChat(snapshot.current);
   }
-  useEffect(() => {
-    if (!open) return;
-    panelRef.current?.querySelector("textarea")?.focus({ preventScroll: true });
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        panelRef.current &&
-        !panelRef.current.contains(event.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(event.target as Node)
-      )
-        onOpenChange(false);
-    }
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") onOpenChange(false);
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [onOpenChange, open, triggerRef]);
-  useAgentScrollContain(panelRef, open);
   const handleStop = () => {
     setControlError(null);
     void agent.cancel().catch(() => {
@@ -193,94 +201,114 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     }
   };
   return (
-    <div
-      ref={panelRef}
-      aria-label="Shop Agent"
-      data-state={open ? "open" : "closed"}
-      onTransitionEnd={(event) => {
-        if (event.target === event.currentTarget && event.propertyName === "opacity" && open) {
-          const element = scrollRef.current;
-          if (element) element.scrollTop = element.scrollHeight;
-        }
+    <Sheet
+      onOpenChange={(next) => onOpenChange(next)}
+      onOpenChangeComplete={(opened) => {
+        if (opened) scrollToBottom();
       }}
-      role="dialog"
-      className="fixed right-5 bottom-18.5 z-40 flex h-auto max-h-[min(40rem,80vh)] w-[calc(100vw-2rem)] max-w-160 flex-col overflow-hidden rounded-2xl bg-background/95 shadow-[0px_2px_4px_0px_rgba(90,90,90,0.30)] outline -outline-offset-1 outline-border/35 backdrop-blur-sm transition-[opacity,transform,display] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] transition-discrete data-[state=open]:opacity-100 data-[state=open]:translate-y-0 data-[state=closed]:opacity-0 data-[state=closed]:translate-y-2.5 data-[state=closed]:hidden starting:opacity-0 starting:translate-y-2.5"
+      open={open}
     >
-      <div className="flex shrink-0 items-center justify-between border-b border-border/35 px-5 py-2.5">
-        <span className="font-semibold text-sm">Shop Agent</span>
-        <div className="flex items-center gap-1">
-          <button
-            aria-label="Clear chat"
-            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={clearing || (!messages.length && !input.trim() && !agent.session && !busy)}
-            onClick={handleClear}
-            type="button"
-          >
-            <Trash2Icon className="size-4" />
-          </button>
-          <button
-            aria-label="Minimize Shop Agent"
-            className="flex size-7 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            onClick={() => onOpenChange(false)}
-            type="button"
-          >
-            <MinusIcon className="size-4" />
-          </button>
-        </div>
-      </div>
-      <div
-        ref={scrollRef}
-        data-slot="agent-messages"
-        onScroll={handleScroll}
-        className="min-h-0 flex-auto overflow-y-auto overscroll-contain"
+      <SheetContent
+        ref={panelRef}
+        className="gap-0 p-0"
+        closeButton={false}
+        finalFocus={triggerRef}
+        initialFocus={() => panelRef.current?.querySelector("textarea") ?? true}
+        keepMounted
+        overlay={false}
+        side="right"
       >
-        <div
-          ref={contentRef}
-          className="flex min-h-full flex-col justify-end gap-6 p-5 [&>*]:shrink-0"
-        >
-          {messages.length === 0 ? (
-            <p className="text-foreground text-sm">
-              {status === "resuming" ? "Restoring your conversation…" : "Hi, how can I help?"}
-            </p>
-          ) : (
-            messages.map((message, index) => (
-              <ChatMessage
-                key={message.id}
-                isStreaming={status === "streaming" && index === messages.length - 1}
-                message={message}
-              />
-            ))
-          )}
+        <div className="flex h-16 shrink-0 items-center justify-between gap-2 px-2.5">
+          <SheetTitle className="font-normal text-xl leading-4">Shop Agent</SheetTitle>
+          <div className="flex items-center gap-2.5">
+            <button
+              aria-label="Clear chat"
+              className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={clearing || (!messages.length && !input.trim() && !agent.session && !busy)}
+              onClick={handleClear}
+              type="button"
+            >
+              <Trash2Icon className="size-5" />
+            </button>
+            <SheetClose
+              aria-label="Close Shop Agent"
+              className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <XIcon className="size-5" />
+            </SheetClose>
+          </div>
         </div>
-      </div>
-      {(clearing || (status === "resuming" && messages.length > 0)) && (
-        <p role="status" className="px-5 py-2 text-muted-foreground text-xs">
-          {clearing
-            ? "Waiting for the response to stop…"
-            : "Restoring your conversation… Clear chat to start fresh."}
-        </p>
-      )}
-      {hasReachedLimit && (
-        <p role="alert" className="px-5 py-2 text-muted-foreground text-xs">
-          This conversation has reached its limit. Clear chat to start a new conversation.
-        </p>
-      )}
-      <AgentCartBridge messages={messages} status={status} />
-      <AgentComposer
-        disabled={!busy && (clearing || cartPending || hasReachedLimit)}
-        onChange={setInput}
-        onStop={handleStop}
-        onSubmit={handleSend}
-        placeholder="Ask anything…"
-        status={status}
-        value={input}
-      />
-      {(error || controlError) && (
-        <p role="alert" className="px-5 pb-2 text-red-500 text-xs">
-          {controlError ??
-            "The assistant is unavailable. Try again, or clear an expired conversation."}
-        </p>
-      )}
-    </div>
+        <SheetDescription className="sr-only">
+          Find products, ask store questions, and manage your cart.
+        </SheetDescription>
+        <div
+          ref={scrollRef}
+          data-slot="agent-messages"
+          onKeyDown={markUserScroll}
+          onPointerDown={() => {
+            pointerDownRef.current = true;
+          }}
+          onPointerUp={() => {
+            pointerDownRef.current = false;
+          }}
+          onScroll={handleScroll}
+          onTouchMove={markUserScroll}
+          onWheel={markUserScroll}
+          className="min-h-0 flex-auto overflow-x-hidden overflow-y-auto overscroll-contain"
+        >
+          <div
+            ref={contentRef}
+            className="flex min-h-full flex-col justify-end gap-6 px-2.5 py-5 [&>*]:shrink-0"
+          >
+            {messages.length === 0 ? (
+              status === "resuming" ? (
+                showRestoring && (
+                  <p className="text-muted-foreground text-sm">Restoring your conversation…</p>
+                )
+              ) : (
+                <p className="text-foreground text-sm">Hi, how can I help?</p>
+              )
+            ) : (
+              messages.map((message, index) => (
+                <ChatMessage
+                  key={message.id}
+                  isLatest={index === messages.length - 1}
+                  isStreaming={status === "streaming" && index === messages.length - 1}
+                  message={message}
+                />
+              ))
+            )}
+          </div>
+        </div>
+        {(clearing || (showRestoring && messages.length > 0)) && (
+          <p role="status" className="px-2.5 py-2 text-muted-foreground text-xs">
+            {clearing
+              ? "Waiting for the response to stop…"
+              : "Restoring your conversation… Clear chat to start fresh."}
+          </p>
+        )}
+        {hasReachedLimit && (
+          <p role="alert" className="px-2.5 py-2 text-muted-foreground text-xs">
+            This conversation has reached its limit. Clear chat to start a new conversation.
+          </p>
+        )}
+        <AgentCartBridge messages={messages} status={status} />
+        <AgentComposer
+          disabled={!busy && (clearing || cartPending || hasReachedLimit)}
+          onChange={setInput}
+          onStop={handleStop}
+          onSubmit={handleSend}
+          placeholder="Ask anything…"
+          status={status}
+          value={input}
+        />
+        {(error || controlError) && (
+          <p role="alert" className="px-2.5 pb-2 text-red-500 text-xs">
+            {controlError ??
+              "The assistant is unavailable. Try again, or clear an expired conversation."}
+          </p>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }

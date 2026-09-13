@@ -7,6 +7,7 @@ const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 export const shopConfig = {
   agent: {
     isEnabled: false,
+    position: "fixed" as ShopConfig["agent"]["position"],
   },
   analytics: {
     shopify: {
@@ -48,6 +49,9 @@ export const shopConfig = {
     relatedProducts: {
       isEnabled: true,
     },
+  },
+  search: {
+    isEnabled: true,
   },
   site: {
     name: "Vercel Shop",
