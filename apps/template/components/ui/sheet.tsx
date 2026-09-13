@@ -26,7 +26,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-60 bg-black/30 backdrop-blur-sm transition-opacity ease-in-out data-open:duration-500 data-closed:duration-300 data-starting-style:opacity-0 data-ending-style:opacity-0",
+        "fixed inset-0 z-60 bg-black/30 transition-opacity ease-in-out data-open:duration-500 data-closed:duration-300 data-starting-style:opacity-0 data-ending-style:opacity-0",
         className,
       )}
       {...props}
@@ -37,14 +37,20 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
 function SheetContent({
   className,
   children,
+  closeButton = true,
+  keepMounted = false,
+  overlay = true,
   side = "right",
   ...props
 }: SheetPrimitive.Popup.Props & {
+  closeButton?: boolean;
+  keepMounted?: boolean;
+  overlay?: boolean;
   side?: "top" | "right" | "bottom" | "left";
 }) {
   return (
-    <SheetPortal>
-      <SheetOverlay />
+    <SheetPortal keepMounted={keepMounted}>
+      {overlay && <SheetOverlay />}
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         data-side={side}
@@ -63,32 +69,14 @@ function SheetContent({
         {...props}
       >
         {children}
-        <SheetPrimitive.Close className="ring-offset-background focus-visible:ring-ring absolute top-3 right-2.5 flex size-10 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
-          <XIcon className="size-5" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+        {closeButton && (
+          <SheetPrimitive.Close className="ring-offset-background focus-visible:ring-ring absolute top-3 right-2.5 flex size-10 items-center justify-center rounded-full opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none">
+            <XIcon className="size-5" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        )}
       </SheetPrimitive.Popup>
     </SheetPortal>
-  );
-}
-
-function SheetHeader({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-5", className)}
-      {...props}
-    />
-  );
-}
-
-function SheetFooter({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-5", className)}
-      {...props}
-    />
   );
 }
 
@@ -112,13 +100,4 @@ function SheetDescription({ className, ...props }: SheetPrimitive.Description.Pr
   );
 }
 
-export {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-};
+export { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger };

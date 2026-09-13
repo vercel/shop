@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { searchIndexProducts } from "@/lib/shopify/operations/products/server";
+import { getSearchIndexProducts } from "@/lib/product/server";
 
 interface ProductsGridSkeletonProps {
   count: number;
@@ -55,7 +55,7 @@ async function ProductsGridContent({
   outOfStockText: string;
 }) {
   // Use the search index (not the products connection) so these match the first items on /collections/all.
-  const { products } = await searchIndexProducts({
+  const { products } = await getSearchIndexProducts({
     limit,
   });
   if (products.length === 0) return null;

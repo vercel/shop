@@ -4,8 +4,8 @@ import { CollectionCard } from "@/components/collections/collection-card";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
+import { getCollectionsListing } from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getCollectionsListing } from "@/lib/shopify/operations/collections/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Collections";

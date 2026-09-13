@@ -1,5 +1,4 @@
 import { gql } from "@shopify/hydrogen";
-import { cacheLife, cacheTag } from "next/cache";
 
 import type { Blog, BlogArticle } from "@/lib/blog/types";
 import { shopConfig } from "@/lib/config";
@@ -45,7 +44,7 @@ const GET_BLOG_ARTICLE_QUERY = gql(
   [ARTICLE_SUMMARY_FRAGMENT, BLOG_FRAGMENT],
 );
 
-export async function getBlog({
+export async function fetchBlog({
   handle,
   limit = 50,
   locale = shopConfig.localization,
@@ -54,10 +53,6 @@ export async function getBlog({
   limit?: number;
   locale?: CommerceLocale;
 }): Promise<Blog | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("articles", "blogs", `blog-${handle}`);
-
   const response = await storefront.request(GET_BLOG_QUERY, {
     locale,
     variables: { first: limit, handle },
@@ -78,7 +73,7 @@ export async function getBlog({
   };
 }
 
-export async function getBlogArticle({
+export async function fetchBlogArticle({
   articleHandle,
   blogHandle,
   locale = shopConfig.localization,
@@ -87,10 +82,6 @@ export async function getBlogArticle({
   blogHandle: string;
   locale?: CommerceLocale;
 }): Promise<BlogArticle | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("articles", "blogs", `article-${blogHandle}-${articleHandle}`, `blog-${blogHandle}`);
-
   const response = await storefront.request(GET_BLOG_ARTICLE_QUERY, {
     locale,
     variables: { articleHandle, blogHandle },

@@ -1,5 +1,4 @@
 import { gql } from "@shopify/hydrogen";
-import { cacheLife, cacheTag } from "next/cache";
 
 import type { ShopAnalyticsData } from "@/lib/analytics/types";
 import { shopConfig } from "@/lib/config";
@@ -22,15 +21,11 @@ const GET_SHOP_ANALYTICS_QUERY = gql(`#graphql
   }
 `);
 
-export async function getShopAnalytics({
+export async function fetchShopAnalytics({
   locale = shopConfig.localization,
 }: {
   locale?: CommerceLocale;
 } = {}): Promise<ShopAnalyticsData> {
-  "use cache";
-
-  cacheLife("max");
-  cacheTag("shop-analytics");
   const response = await storefront.request(GET_SHOP_ANALYTICS_QUERY, { locale });
   assertStorefrontOk(response, "getShopAnalytics");
   return {

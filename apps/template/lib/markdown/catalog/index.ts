@@ -1,4 +1,5 @@
 import { formatMoney } from "@shopify/hydrogen";
+import type { ProductFilter } from "@shopify/hydrogen";
 
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import { createTable, escapeMarkdown } from "@/lib/markdown";
@@ -6,25 +7,18 @@ import type { PageInfo } from "@/lib/pagination/types";
 import type { ProductCard } from "@/lib/product/types";
 import { getActiveFilterBadges } from "@/lib/shopify/transforms/filters";
 
+// Keys are Shopify `sort_by` parameters.
 const SORT_LABELS: Record<string, string> = {
-  "best-matches": "Best matches",
-  "price-low-to-high": "Price: low to high",
-  "price-high-to-low": "Price: high to low",
-  "product-name-ascending": "Product name: A to Z",
-  "product-name-descending": "Product name: Z to A",
-  BEST_SELLING: "Best selling",
-  COLLECTION_DEFAULT: "Collection default",
-  CREATED: "Newest first",
-  ID: "ID",
-  MANUAL: "Manual",
-  PRICE: "Price",
-  RELEVANCE: "Relevance",
-  TITLE: "Title",
+  "best-selling": "Best selling",
+  "created-ascending": "Date: old to new",
+  "created-descending": "Date: new to old",
+  "price-ascending": "Price: low to high",
+  "price-descending": "Price: high to low",
+  "title-ascending": "Product name: A to Z",
+  "title-descending": "Product name: Z to A",
+  manual: "Best matches",
+  relevance: "Best matches",
 };
-
-function getSingleValue(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
 
 function formatPriceRange(priceRange: PriceRange, locale: string): string {
   if (!priceRange.currencyCode) {
@@ -46,7 +40,7 @@ function formatPriceRange(priceRange: PriceRange, locale: string): string {
 }
 
 export function formatSortLabel(sort?: string): string {
-  if (!sort) return SORT_LABELS["best-matches"];
+  if (!sort) return SORT_LABELS.manual;
   return SORT_LABELS[sort] ?? sort;
 }
 
@@ -56,7 +50,7 @@ export function appendAppliedFiltersSection(
     activeFilters,
     filters,
   }: {
-    activeFilters: Record<string, string | string[] | undefined>;
+    activeFilters: ProductFilter[];
     filters: Filter[];
   },
 ): void {
@@ -64,19 +58,18 @@ export function appendAppliedFiltersSection(
     (badge) => `- **${escapeMarkdown(badge.filterLabel)}**: ${escapeMarkdown(badge.label)}`,
   );
 
-  const availability = getSingleValue(activeFilters["filter.v.availability"]);
-  if (availability === "1") {
+  const availability = activeFilters.find((filter) => filter.available !== undefined)?.available;
+  if (availability === true) {
     appliedFilters.push("- **Availability**: In stock");
-  } else if (availability === "0") {
+  } else if (availability === false) {
     appliedFilters.push("- **Availability**: Out of stock");
   }
 
-  const minPrice = getSingleValue(activeFilters["filter.v.price.gte"]);
-  const maxPrice = getSingleValue(activeFilters["filter.v.price.lte"]);
-  if (minPrice || maxPrice) {
+  const price = activeFilters.find((filter) => filter.price)?.price;
+  if (price && (price.min !== undefined || price.max !== undefined)) {
     const constraints: string[] = [];
-    if (minPrice) constraints.push(`min ${escapeMarkdown(minPrice)}`);
-    if (maxPrice) constraints.push(`max ${escapeMarkdown(maxPrice)}`);
+    if (price.min !== undefined) constraints.push(`min ${price.min}`);
+    if (price.max !== undefined) constraints.push(`max ${price.max}`);
     appliedFilters.push(`- **Price**: ${constraints.join(", ")}`);
   }
 

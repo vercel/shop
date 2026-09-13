@@ -31,13 +31,15 @@ export function Nav() {
         <QuickLinks items={items} />
 
         <div className="flex items-center gap-5 ml-auto">
-          <PredictiveSearchProvider
-            debounceInMs={300}
-            limit={3}
-            types={["PRODUCT", "COLLECTION", "QUERY"]}
-          >
-            <SearchModal />
-          </PredictiveSearchProvider>
+          {shopConfig.search.isEnabled && (
+            <PredictiveSearchProvider
+              debounceInMs={300}
+              limit={3}
+              types={["PRODUCT", "COLLECTION", "QUERY"]}
+            >
+              <SearchModal />
+            </PredictiveSearchProvider>
+          )}
           {shopConfig.auth.isEnabled && (
             <Suspense fallback={<NavAccountFallback />}>
               <NavAccount />

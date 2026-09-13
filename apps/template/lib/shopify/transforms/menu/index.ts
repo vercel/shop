@@ -30,7 +30,7 @@ export function transformShopifyMenu(
   };
 }
 
-export function transformShopifyMenuItemUrl(
+function transformShopifyMenuItemUrl(
   url: string | null,
   type: MenuItemType,
   storeDomain: string,

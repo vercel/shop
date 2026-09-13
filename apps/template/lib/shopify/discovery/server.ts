@@ -1,5 +1,3 @@
-import "server-only";
-
 const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string;
 
 let shopIdPromise: Promise<string> | undefined;

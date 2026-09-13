@@ -17,7 +17,7 @@ import {
 
 import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { usePredictiveSearch } from "@/hooks/use-predictive-search";
+import { usePredictiveSearch } from "@/lib/search/client";
 import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/search/types";
 
 export function SearchModal() {
