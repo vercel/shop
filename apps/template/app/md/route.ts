@@ -18,7 +18,7 @@ export async function GET(): Promise<Response> {
     return new Response(
       `# ${escapeMarkdown(name)}
 
-Agentic Infrastructure for Commerce. An agent-friendly Shopify storefront built with Next.js and Hydrogen.
+A Storefront Built on Vercel Shop. Agent-ready commerce, powered by Shopify, Next, and Eve.
 
 ## Browse
 
