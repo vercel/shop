@@ -21,9 +21,11 @@ const Markdown = memo(({ children }: { children: string }) => (
 ));
 
 export function ChatMessage({
+  isLatest,
   isStreaming,
   message,
 }: {
+  isLatest: boolean;
   isStreaming: boolean;
   message: EveMessage;
 }) {
@@ -32,7 +34,7 @@ export function ChatMessage({
     return text ? (
       <div className="flex justify-end">
         <Bubble className="max-w-[85%]" variant="default">
-          <BubbleContent className="rounded-2xl px-3.5">
+          <BubbleContent className="rounded-lg px-3.5">
             <Markdown>{text}</Markdown>
           </BubbleContent>
         </Bubble>
@@ -43,6 +45,10 @@ export function ChatMessage({
     return result ? [result] : [];
   });
   const warnings = [...new Set(mutations.flatMap((mutation) => mutation.warnings))];
+  const label = mutations.every((mutation) => mutation.toolName === "add-to-cart")
+    ? "Added to cart"
+    : "Cart updated";
+  const showsLiveCart = isLatest && mutations.length > 0;
   const active = message.parts.find(
     (part) =>
       part.type === "dynamic-tool" &&
@@ -56,21 +62,22 @@ export function ChatMessage({
         tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
       />
       {text && <Markdown>{text}</Markdown>}
-      {mutations.length > 0 && (
-        <div className="grid gap-2.5 rounded-lg border px-3.5 py-2.5">
-          <p role="status">
-            {mutations.every((mutation) => mutation.toolName === "add-to-cart")
-              ? "Added to cart"
-              : "Cart updated"}
-          </p>
+      {mutations.length > 0 && !showsLiveCart && (
+        <div className="grid gap-1 text-muted-foreground text-xs">
+          <p role="status">{label}</p>
           {warnings.map((warning) => (
-            <p key={warning} role="alert" className="text-muted-foreground text-xs">
+            <p key={warning} role="alert">
               {warning}
             </p>
           ))}
         </div>
       )}
-      <ShoppingResults isStreaming={isStreaming} message={message} />
+      <ShoppingResults
+        confirmation={showsLiveCart ? { label, warnings } : undefined}
+        isLatest={isLatest}
+        isStreaming={isStreaming}
+        message={message}
+      />
     </div>
   );
 }

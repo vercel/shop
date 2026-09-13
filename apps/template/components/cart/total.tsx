@@ -2,36 +2,14 @@
 
 import type { CartData } from "@shopify/hydrogen";
 import { useCart } from "@shopify/hydrogen/react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "cn";
 
 import { Price } from "@/components/product/price";
 
-const totalRowVariants = cva("flex items-baseline justify-between", {
-  defaultVariants: { size: "default" },
-  variants: {
-    size: {
-      compact: "font-medium text-sm",
-      default: "text-base text-muted-foreground",
-    },
-  },
-});
-
-const totalAmountVariants = cva("font-medium", {
-  defaultVariants: { size: "default" },
-  variants: {
-    size: {
-      compact: "text-sm",
-      default: "text-xl",
-    },
-  },
-});
-
-interface CartTotalProps extends VariantProps<typeof totalRowVariants> {
+interface CartTotalProps {
   cart: CartData;
 }
 
-export function CartTotal({ cart, size }: CartTotalProps) {
+export function CartTotal({ cart }: CartTotalProps) {
   const isCostPending = useCart((state) =>
     Boolean(state.loading || state.pending.cost || state.revalidating),
   );
@@ -43,21 +21,15 @@ export function CartTotal({ cart, size }: CartTotalProps) {
       className="grid gap-1"
       role="group"
     >
-      <div className={totalRowVariants({ size })}>
+      <div className="flex items-baseline justify-between text-base text-foreground">
         <span>Estimated total</span>
         {isCostPending || !currencyCode ? (
-          <span className={cn(totalAmountVariants({ size }), "text-muted-foreground")}>
-            Updating…
-          </span>
+          <span className="font-medium text-muted-foreground text-xl">Updating…</span>
         ) : (
-          <Price
-            amount={amount}
-            className={totalAmountVariants({ size })}
-            currencyCode={currencyCode}
-          />
+          <Price amount={amount} className="font-medium text-xl" currencyCode={currencyCode} />
         )}
       </div>
-      <p className="text-xs text-muted-foreground">Taxes and shipping calculated at checkout.</p>
+      <p className="text-muted-foreground text-xs">Taxes and shipping calculated at checkout.</p>
     </div>
   );
 }

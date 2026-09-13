@@ -1,45 +1,46 @@
 "use client";
 
+import { cn } from "cn";
 import { MessageCircle } from "lucide-react";
-import { useRef, useState, useSyncExternalStore } from "react";
-
-import { readStoredChat } from "@/lib/agent/chat/client";
+import { useEffect, useRef, useState } from "react";
 
 import { AgentPanel } from "./client";
 
-// The initial snapshot is fixed; the mounted panel owns subsequent storage updates.
-function subscribeToInitialSession() {
-  return () => {};
+interface AgentButtonProps {
+  position?: "fixed" | "inline";
 }
 
-export function AgentButton() {
+export function AgentButton({ position = "fixed" }: AgentButtonProps) {
   const [open, setOpen] = useState(false);
-  const [hasOpened, setHasOpened] = useState(false);
-  const [hasSavedSession] = useState(() => Boolean(readStoredChat().session));
-  const shouldRestore = useSyncExternalStore(
-    subscribeToInitialSession,
-    () => hasSavedSession,
-    () => false,
-  );
+  const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  // Mount the drawer closed once the page is idle so the first open is a plain slide-in.
+  useEffect(() => {
+    const idle =
+      window.requestIdleCallback ?? ((callback: () => void) => setTimeout(callback, 200));
+    const cancel = window.cancelIdleCallback ?? clearTimeout;
+    const handle = idle(() => setMounted(true));
+    return () => cancel(handle as number);
+  }, []);
   return (
     <>
       <button
         ref={triggerRef}
         aria-expanded={open}
-        className="flex cursor-pointer items-center gap-1.5 px-2 py-1"
+        className={cn(
+          "flex cursor-pointer items-center justify-center transition-colors",
+          position === "fixed" ? "gap-1.5 px-2 py-1" : "text-foreground hover:text-foreground/80",
+        )}
         onClick={() => {
-          setHasOpened(true);
+          setMounted(true);
           setOpen((previous) => !previous);
         }}
         type="button"
       >
-        <MessageCircle className="size-4 text-primary" />
+        <MessageCircle className={position === "fixed" ? "size-4 text-primary" : "size-5"} />
         <span className="sr-only">Open Shop Agent</span>
       </button>
-      {(hasOpened || shouldRestore) && (
-        <AgentPanel onOpenChange={setOpen} open={open} triggerRef={triggerRef} />
-      )}
+      {mounted && <AgentPanel onOpenChange={setOpen} open={open} triggerRef={triggerRef} />}
     </>
   );
 }

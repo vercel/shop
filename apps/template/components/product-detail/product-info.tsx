@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ComponentProps } from "react";
 
 import type { OptionGroupState } from "@/lib/product/types";
@@ -6,12 +7,14 @@ import { ColorPicker } from "./color-picker";
 import { OptionPicker } from "./option-picker";
 
 interface ProductInfoOptionsProps extends ComponentProps<"div"> {
+  compact?: boolean;
   hideImages?: boolean;
   onSelectValue?: (optionName: string, value: string) => void;
   options: OptionGroupState[];
 }
 
 function ProductInfoOptions({
+  compact = false,
   hideImages,
   onSelectValue,
   options,
@@ -33,7 +36,7 @@ function ProductInfoOptions({
   const otherOptions = renderable.filter((opt) => !isSingleValueOption(opt) && !isColorOption(opt));
   return (
     <div data-slot="product-info-options" className={className} {...props}>
-      <div className="grid gap-5">
+      <div className={cn("grid", compact ? "gap-2.5" : "gap-5")}>
         {singleValueOptions.map((option) => (
           <p key={option.name} className="text-sm font-medium text-foreground/70">
             {option.name}: <span className="text-foreground">{option.values[0]?.name}</span>
@@ -50,7 +53,12 @@ function ProductInfoOptions({
         ))}
 
         {otherOptions.map((option) => (
-          <OptionPicker key={option.name} onSelectValue={onSelectValue} option={option} />
+          <OptionPicker
+            compact={compact}
+            key={option.name}
+            onSelectValue={onSelectValue}
+            option={option}
+          />
         ))}
       </div>
     </div>

@@ -56,9 +56,9 @@ export function AgentComposer({
         e.preventDefault();
         submit();
       }}
-      className={cn("px-5 py-2.5", className)}
+      className={cn("px-2.5 py-2.5", className)}
     >
-      <InputGroup className="h-auto flex-row items-end rounded-2xl border-0 bg-input shadow-none">
+      <InputGroup className="h-auto flex-row items-end rounded-lg border-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-0">
         <InputGroupTextarea
           value={value}
           placeholder={placeholder}

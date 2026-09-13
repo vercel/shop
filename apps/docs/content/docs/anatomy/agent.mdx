@@ -12,9 +12,9 @@ It is **disabled by default**. The storefront works without it, and the chat con
 
 ## Enable Shop Agent
 
-Shop Agent uses your storefront's existing Shopify connection. It runs on [Eve](https://eve.dev) with OpenAI GPT-5.6 Luna through [Vercel AI Gateway](https://vercel.com/ai-gateway).
+Shop Agent uses your storefront's existing Shopify connection. It runs on [Eve](https://eve.dev) with OpenAI GPT-5.6 Luna (Fast) through [Vercel AI Gateway](https://vercel.com/ai-gateway).
 
-1. Set `agent.isEnabled` to `true` in `lib/config/index.ts`.
+1. Set `agent.isEnabled` to `true` in `lib/config/index.ts`. The chat button appears in a fixed corner control by default; set `agent.position` to `"inline"` to show it with the header icons instead.
 2. Configure AI Gateway access. Vercel deployments can use deployment identity authentication. For local development or other hosts without that authentication, set `AI_GATEWAY_API_KEY` in your server environment. Use `.env.local` for local values and keep the key server-only. See [Environment Variables](/docs/reference/env-vars#shop-agent).
 3. Run `pnpm dev`, open Shop Agent, and ask for a product from your store. The reply should show product cards you can open or ask about.
 
@@ -36,7 +36,7 @@ Product and policy answers use Shopify data. Keep your catalog and store policie
 
 ### One cart, with the shopper in control
 
-Chat shares the storefront's [cart](/docs/anatomy/cart). Confirmed changes open the cart drawer for review. The assistant cannot place orders or process payments; shoppers use the checkout button.
+Chat shares the storefront's [cart](/docs/anatomy/cart). Confirmed changes show the updated cart in the conversation. The assistant cannot place orders or process payments; shoppers use the checkout button.
 
 New messages and checkout wait while the assistant is working or confirming the cart in that browser tab. If confirmation fails, use **Refresh cart**. This checks the cart without repeating the change. Wait for the response before checking out in another tab.
 
