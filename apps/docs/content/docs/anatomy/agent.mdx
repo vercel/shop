@@ -14,7 +14,7 @@ It is **disabled by default**. The storefront works without it, and the chat con
 
 Shop Agent uses your storefront's existing Shopify connection. It runs on [Eve](https://eve.dev) with OpenAI GPT-5.6 Luna (Fast) through [Vercel AI Gateway](https://vercel.com/ai-gateway).
 
-1. Set `agent.isEnabled` to `true` in `lib/config/index.ts`. The chat button appears in a fixed corner control by default; set `agent.position` to `"inline"` to show it with the header icons instead.
+1. Set `agent.isEnabled` to `true` in `lib/config/index.ts`. The chat button floats in the bottom corner; move it by rendering `AgentButton` elsewhere in the layout.
 2. Configure AI Gateway access. Vercel deployments can use deployment identity authentication. For local development or other hosts without that authentication, set `AI_GATEWAY_API_KEY` in your server environment. Use `.env.local` for local values and keep the key server-only. See [Environment Variables](/docs/reference/env-vars#shop-agent).
 3. Run `pnpm dev`, open Shop Agent, and ask for a product from your store. The reply should show product cards you can open or ask about.
 

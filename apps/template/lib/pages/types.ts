@@ -7,9 +7,3 @@ export interface ContentPage {
   title: string;
   updatedAt: string;
 }
-
-export interface ShopPolicy {
-  body: string;
-  handle: string;
-  title: string;
-}

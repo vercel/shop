@@ -1,16 +1,11 @@
 "use client";
 
-import { cn } from "cn";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { AgentPanel } from "./client";
 
-interface AgentButtonProps {
-  position?: "fixed" | "inline";
-}
-
-export function AgentButton({ position = "fixed" }: AgentButtonProps) {
+export function AgentButton() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -27,17 +22,14 @@ export function AgentButton({ position = "fixed" }: AgentButtonProps) {
       <button
         ref={triggerRef}
         aria-expanded={open}
-        className={cn(
-          "flex cursor-pointer items-center justify-center transition-colors",
-          position === "fixed" ? "gap-1.5 px-2 py-1" : "text-foreground hover:text-foreground/80",
-        )}
+        className="flex cursor-pointer items-center gap-1.5 px-2 py-1"
         onClick={() => {
           setMounted(true);
           setOpen((previous) => !previous);
         }}
         type="button"
       >
-        <MessageCircle className={position === "fixed" ? "size-4 text-primary" : "size-5"} />
+        <MessageCircle className="size-4 text-primary" />
         <span className="sr-only">Open Shop Agent</span>
       </button>
       {mounted && <AgentPanel onOpenChange={setOpen} open={open} triggerRef={triggerRef} />}

@@ -11,7 +11,6 @@ import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
   fetchComplementaryProducts,
   fetchProduct,
-  fetchProductOptionValues,
   fetchProducts,
   fetchProductsByIds,
   fetchProductVariant,
@@ -20,7 +19,6 @@ import {
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
 import type {
-  ProductOptionValues,
   ProductsParams,
   ProductsResult,
   SearchIndexProductsParams,
@@ -81,16 +79,6 @@ export async function getProducts(params: ProductsParams): Promise<ProductsResul
   const result = await fetchProducts(params);
   tagProducts(result.products);
   return result;
-}
-
-export async function getProductOptionValues(params: {
-  ids: string[];
-}): Promise<ProductOptionValues> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  return fetchProductOptionValues(params.ids);
 }
 
 // Cursor-paginated browse reads stay uncached in lib/collections/server.ts; this serves fixed grids only.

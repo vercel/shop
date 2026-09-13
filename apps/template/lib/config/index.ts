@@ -7,7 +7,6 @@ const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
 export const shopConfig = {
   agent: {
     isEnabled: false,
-    position: "fixed" as ShopConfig["agent"]["position"],
   },
   analytics: {
     shopify: {
@@ -27,6 +26,11 @@ export const shopConfig = {
   botid: {
     checkLevel: "basic",
     isEnabled: false,
+  },
+  browserAgents: {
+    webmcp: {
+      isEnabled: false,
+    },
   },
   localization: {
     country: "US",
@@ -56,8 +60,5 @@ export const shopConfig = {
   site: {
     name: "Vercel Shop",
     url: defaultUrl,
-  },
-  webmcp: {
-    isEnabled: false,
   },
 } satisfies ShopConfig;

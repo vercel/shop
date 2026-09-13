@@ -2,7 +2,7 @@ import { gql } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
-import type { ContentPage } from "@/lib/content/types";
+import type { ContentPage } from "@/lib/pages/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { storefront } from "@/lib/shopify/storefront/server";
 

@@ -2,7 +2,6 @@ import { PredictiveSearchProvider } from "@shopify/hydrogen/react";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { AgentButton } from "@/components/agent/agent-button";
 import { Container } from "@/components/ui/container";
 import { shopConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
@@ -32,9 +31,6 @@ export function Nav() {
         <QuickLinks items={items} />
 
         <div className="flex items-center gap-5 ml-auto">
-          {shopConfig.agent.isEnabled && shopConfig.agent.position === "inline" && (
-            <AgentButton position="inline" />
-          )}
           {shopConfig.search.isEnabled && (
             <PredictiveSearchProvider
               debounceInMs={300}

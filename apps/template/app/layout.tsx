@@ -54,11 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Footer />
           <CartUI />
           <Suspense>
-            <ActionBar>
-              {shopConfig.agent.isEnabled && shopConfig.agent.position === "fixed" && (
-                <AgentButton />
-              )}
-            </ActionBar>
+            <ActionBar>{shopConfig.agent.isEnabled && <AgentButton />}</ActionBar>
           </Suspense>
           <Suspense>
             <AnalyticsComponents />
