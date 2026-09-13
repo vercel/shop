@@ -14,8 +14,8 @@ Every module, route, and feature belongs to one owner. Place new work by owner f
 
 **Next.js owns the app.**
 
-- Owns: routing and clean URLs, Server Component composition, caching and tag invalidation, metadata and SEO, Suspense and loading geometry, the request boundary that adapts Hydrogen's handlers.
-- Lives in: `app/`, `components/`, `lib/<domain>/{index,server,client,action}.ts`, `lib/config/`, `next.config.ts`, `proxy.ts`.
+- Owns: routing and clean URLs, Server Component composition, caching and tag invalidation, metadata and SEO, Suspense and loading geometry, the request boundary that adapts Hydrogen's handlers, and the answer-engine surface: `text/markdown` content negotiation, Markdown representations of home, product, collection, and search, `/llms.txt`, Schema.org data, sitemap, and robots.
+- Lives in: `app/`, `components/`, `lib/<domain>/{index,server,client,action}.ts`, `lib/config/`, `next.config.ts`, `proxy.ts`; the answer-engine surface in `lib/markdown/**`, `lib/seo/**`, `app/md/**`, `app/llms.txt/`, `app/sitemap*`, `app/robots.ts`, `components/schema/`.
 - Must not: mutate the cart through Server Actions, refresh tokens in Server Components, invalidate public caches for cart changes, or reach into `agent/`.
 
 **Eve owns the agent.**
@@ -32,7 +32,8 @@ Every module, route, and feature belongs to one owner. Place new work by owner f
 4. **Server Components read auth; they never refresh it.** Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API calls. Refresh happens only where Hydrogen can commit cookies.
 5. **`components/ui/` takes primitive props only.** No domain types, SDK types, or content helpers. Domain wrappers in `components/<domain>/` supply labels and data.
 6. **Copy is inline and server-first.** Keep labels beside their consuming component; reusable content functionality goes in `lib/content/index.ts`, not a string catalog. Server Components pass primitive labels to client leaves; never pass content functions across the Server/Client boundary. Do not add a `t()` runtime or next-intl to the default storefront; in an already localized installation, preserve next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
-7. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it.
+7. **Two outward-facing agent surfaces, two owners.** Next.js describes the storefront to outside agents through Markdown representations, `/llms.txt`, structured data, and the sitemap, built from the same domain types as the HTML pages. Shopify's own agent endpoints (`/api/mcp`, `/api/ucp/mcp`, `/.well-known/ucp`) are Shopify's; `proxy.ts` only forwards them. Do not reimplement either side in the other, and do not route Eve through the Markdown surface.
+8. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it.
 
 ## Recommended project plugins
 

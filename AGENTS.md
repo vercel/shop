@@ -7,7 +7,7 @@ This is a monorepo for developing a template, docs site, and skills for using Ne
 Every feature in this repo belongs to exactly one owner. Use this as the acceptance test for new work: if a change cannot name its owner, or needs to reach into another owner's territory, redesign it before shipping it.
 
 - **Shopify owns commerce.** Catalog, cart state and mutations, checkout, customer accounts, predictive search, policies, and analytics come from Shopify through the Hydrogen SDK. We do not reimplement commerce logic.
-- **Next.js owns the app.** Routing, Server Components, caching and invalidation, metadata, and the request boundary (`proxy.ts`) that adapts Hydrogen's handlers.
+- **Next.js owns the app.** Routing, Server Components, caching and invalidation, metadata, the request boundary (`proxy.ts`) that adapts Hydrogen's handlers, and the storefront's machine-readable surface for answer engines: Markdown representations, `/llms.txt`, structured data, sitemap, and crawl guidance.
 - **Eve owns the agent.** Sessions, channels, tools, connections, and `/eve/v1/*`. Eve tools call Shopify directly; Next.js only prepares the browser for them.
 
 The template `apps/template/AGENTS.md` states the boundary rules between owners. Docs and skills describe the product in the same three-owner terms.
