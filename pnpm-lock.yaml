@@ -257,8 +257,8 @@ importers:
         specifier: 0.2.6
         version: 0.2.6
       eve:
-        specifier: 0.54.0
-        version: 0.54.0(@opentelemetry/api@1.9.1)(ai@7.0.97(zod@4.6.2))
+        specifier: 0.54.3
+        version: 0.54.3(@opentelemetry/api@1.9.1)(ai@7.0.97(zod@4.6.2))
       lucide-react:
         specifier: 1.45.0
         version: 1.45.0(react@19.3.0)
@@ -3857,8 +3857,8 @@ packages:
   estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
 
-  eve@0.54.0:
-    resolution: {integrity: sha512-lxvAPh22HREPWMebIwV2stRPa70VvPIv3WYAbr0wPqAGkQOhY5lZ5DvNZcs9t4jBSbREyTYbIzLlJWSvTl3fVQ==}
+  eve@0.54.3:
+    resolution: {integrity: sha512-OOKmnmcyal5N+qaQcdpNbho+SpXBCZw11q9dSnqtN5f9ccIdcps53do4h49ZyefA/2xYSR8IOVnUB6vqUFtV4w==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -8959,7 +8959,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.9
 
-  eve@0.54.0(@opentelemetry/api@1.9.1)(ai@7.0.97(zod@4.6.2)):
+  eve@0.54.3(@opentelemetry/api@1.9.1)(ai@7.0.97(zod@4.6.2)):
     dependencies:
       ai: 7.0.97(zod@4.6.2)
       nitro: 3.0.260903-beta
