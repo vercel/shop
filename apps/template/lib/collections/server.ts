@@ -1,10 +1,10 @@
 import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
-import { getTranslations } from "next-intl/server";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { getBrowseSort, PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
 import type { Locale } from "@/lib/i18n";
+import { getTranslator } from "@/lib/i18n/translator";
 import { tagProducts } from "@/lib/product/server";
 import {
   fetchCollection,
@@ -169,8 +169,12 @@ export async function getCollectionResultsData({
   };
 }
 
-export async function getAllProductsCollection(): Promise<Collection> {
-  const t = await getTranslations("collections.all");
+export async function getAllProductsCollection({
+  locale,
+}: {
+  locale: Locale;
+}): Promise<Collection> {
+  const t = await getTranslator(locale, "collections.all");
   const title = t("title");
   const description = t("description");
   return {

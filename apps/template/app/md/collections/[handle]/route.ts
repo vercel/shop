@@ -24,7 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
     if (handle === ALL_PRODUCTS_HANDLE) {
       const searchStatePromise = Promise.resolve(searchState);
       const [collection, data] = await Promise.all([
-        getAllProductsCollection(),
+        getAllProductsCollection({ locale }),
         getAllProductsResultsData({ locale, searchStatePromise }),
       ]);
 

@@ -1,6 +1,5 @@
-import { getTranslations } from "next-intl/server";
-
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
+import { getTranslator } from "@/lib/i18n/translator";
 import { homeToMarkdown } from "@/lib/markdown/home";
 import { markdownHeaders } from "@/lib/markdown/representation";
 import { getSearchIndexProducts } from "@/lib/product/server";
@@ -11,7 +10,7 @@ export async function GET(request: Request): Promise<Response> {
   try {
     const [result, t] = await Promise.all([
       getSearchIndexProducts({ limit: 8, locale }),
-      getTranslations({ locale, namespace: "home" }),
+      getTranslator(locale, "home"),
     ]);
 
     return new Response(

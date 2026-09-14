@@ -49,7 +49,8 @@ const ALL_PRODUCTS_SORT_EXCLUDE = [
 export default async function AllProductsPage({
   searchParams,
 }: PageProps<"/[flags]/[locale]/collections/all">) {
-  const [locale, collection] = await Promise.all([getLocale(), getAllProductsCollection()]);
+  const locale = await getLocale();
+  const collection = await getAllProductsCollection({ locale });
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const searchStatePromise = getCollectionSearchState(searchParams);
