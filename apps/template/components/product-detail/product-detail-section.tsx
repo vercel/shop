@@ -1,18 +1,17 @@
 import { cn } from "cn";
 import { MinusIcon, PlusIcon } from "lucide-react";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { BundleComponents, BundleParents } from "@/components/product-detail/bundle-components";
-import { BuyButtons } from "@/components/product-detail/buy-buttons";
+import { BuyButtons, PurchaseOptions } from "@/components/product-detail/buy-buttons";
 import { BuyWithShopLogo } from "@/components/product-detail/buy-with-shop-logo";
 import { ComplementaryProducts } from "@/components/product-detail/complementary-products";
+import { GiftCardPurchaseForm } from "@/components/product-detail/gift-card-purchase-form";
 import { ProductOpenGraph } from "@/components/product-detail/open-graph";
 import {
   ProductForm,
-  ProductFormGiftCard,
   ProductFormOptions,
   ProductFormPrice,
-  ProductInfoShell,
 } from "@/components/product-detail/product-form";
 import {
   ProductInfoDescription,
@@ -31,11 +30,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { shopConfig } from "@/lib/config";
 import {
+  getProductPurchaseOptions,
   getSelectedColorImage,
   getSharedImages,
   hasColorImagePartitioning,
   toProductFormInput,
-  toProductFormVariant,
   toStaticOptionGroups,
 } from "@/lib/product";
 import { type SelectedOptions } from "@/lib/product/types";
@@ -172,7 +171,10 @@ function ProductInfoArea({
   const hasOptions = options.some((option) => option.values.length > 1);
   return (
     <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-      <ProductInfoShell>
+      <div
+        className="grid data-[uniform-price=true]:gap-10"
+        data-uniform-price={product.hasUniformPricing}
+      >
         <div data-slot="product-info-header">
           <h1 className="text-foreground text-3xl">{product.title}</h1>
           {product.hasUniformPricing ? (
@@ -181,16 +183,21 @@ function ProductInfoArea({
               currencyCode={product.priceRange.minVariantPrice.currencyCode}
               compareAtAmount={product.compareAtPriceRange?.minVariantPrice.amount}
             />
-          ) : (
-            // h-7 matches the resolved price's text-xl line-height (1.75rem) — keep in sync to avoid CLS
-            <Suspense fallback={<div className="h-7" aria-hidden />}>
-              <ResolvedProductPrice variantPromise={variantPromise} />
-            </Suspense>
-          )}
+          ) : null}
         </div>
 
         {singleVariant ? (
-          <ProductInfoContent product={product} selectedVariant={product.defaultVariant} />
+          <ProductInfoContent
+            priceSlot={
+              !product.hasUniformPricing ? (
+                <Suspense fallback={<div className="h-7" aria-hidden />}>
+                  <ResolvedProductPrice variantPromise={variantPromise} />
+                </Suspense>
+              ) : undefined
+            }
+            product={product}
+            selectedVariant={product.defaultVariant}
+          />
         ) : (
           <Suspense
             fallback={
@@ -205,7 +212,7 @@ function ProductInfoArea({
             <ResolvedProductInfo product={product} variantPromise={variantPromise} />
           </Suspense>
         )}
-      </ProductInfoShell>
+      </div>
 
       {!product.isGiftCard && shopConfig.pdp.bundles.isEnabled ? (
         <BundleRelationships variant={product.defaultVariant} />
@@ -226,7 +233,13 @@ async function ResolvedProductPrice({
   variantPromise: Promise<ProductVariant | undefined>;
 }) {
   const variant = await variantPromise;
-  return <ProductFormPrice fallbackVariant={variant ? toProductFormVariant(variant) : undefined} />;
+  return (
+    <ProductFormPrice
+      fallbackVariant={
+        variant ? { compareAtPrice: variant.compareAtPrice, price: variant.price } : undefined
+      }
+    />
+  );
 }
 
 async function ResolvedProductInfo({
@@ -241,33 +254,38 @@ async function ResolvedProductInfo({
 
 // The store is seeded from the URL-resolved variant so server HTML and client state agree on first paint.
 function ProductInfoContent({
+  priceSlot,
   product,
   selectedVariant,
 }: {
+  priceSlot?: ReactNode;
   product: ProductDetails;
   selectedVariant: ProductVariant | undefined;
 }) {
-  const fallbackVariant = selectedVariant ? toProductFormVariant(selectedVariant) : undefined;
+  const formProduct = toProductFormInput(product, selectedVariant);
+  const fallbackVariant = formProduct.selectedOrFirstAvailableVariant ?? undefined;
   const hasOptions = product.options.some((option) => option.values.length > 1);
 
   return (
-    <ProductForm product={toProductFormInput(product, selectedVariant)}>
-      {hasOptions ? <ProductFormOptions /> : null}
-      {product.isGiftCard ? (
-        <ProductFormGiftCard
-          fallbackVariant={fallbackVariant}
-          featuredImage={product.featuredImage}
-          handle={product.handle}
-          title={product.title}
-        />
-      ) : (
-        <BuyButtons
-          fallbackVariant={fallbackVariant}
-          availableForSale={product.availableForSale}
-          buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
-          quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
-        />
-      )}
+    <ProductForm product={formProduct}>
+      <div className="grid gap-10">
+        {!product.hasUniformPricing ? (
+          <div data-slot="product-info-price">
+            {priceSlot ?? <ProductFormPrice fallbackVariant={fallbackVariant} />}
+          </div>
+        ) : null}
+        {hasOptions ? <ProductFormOptions handle={product.handle} /> : null}
+        {product.isGiftCard ? (
+          <GiftCardPurchaseForm />
+        ) : (
+          <BuyButtons
+            fallbackVariant={fallbackVariant}
+            availableForSale={product.availableForSale}
+            buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+            quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
+          />
+        )}
+      </div>
     </ProductForm>
   );
 }
@@ -284,16 +302,21 @@ function ProductInfoFallback({
   showLabel: boolean;
 }) {
   return (
-    <>
+    <div className="grid gap-10">
+      {!product.hasUniformPricing ? <div className="h-7" aria-hidden /> : null}
       {hasOptions ? (
         <ProductInfoOptions options={toStaticOptionGroups(product)} hideImages />
       ) : null}
       {product.isGiftCard ? (
         <GiftCardPurchaseFormFallback />
       ) : (
-        <BuyButtonsFallback showLabel={showLabel} allInStock={allInStock} />
+        <BuyButtonsFallback
+          allInStock={allInStock}
+          showLabel={showLabel}
+          variant={product.defaultVariant}
+        />
       )}
-    </>
+    </div>
   );
 }
 
@@ -360,21 +383,33 @@ function QuantityPickerFallback() {
 }
 
 function BuyButtonsFallback({
-  showLabel,
   allInStock,
+  showLabel,
+  variant,
 }: {
   allInStock: boolean;
   showLabel: boolean;
+  variant: ProductVariant | undefined;
 }) {
+  const { plans, selectedPlan } = getProductPurchaseOptions(variant);
   return (
     <div className="grid gap-2.5">
+      {variant ? (
+        <PurchaseOptions
+          disabled
+          plans={plans}
+          price={variant.price}
+          requiresSellingPlan={variant.requiresSellingPlan}
+          selectedPlan={selectedPlan}
+        />
+      ) : null}
       <div className="flex gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
         <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
           {showLabel ? (allInStock ? "Add to Cart" : "Out of Stock") : null}
         </div>
       </div>
-      {shopConfig.pdp.buyWithShop.isEnabled ? (
+      {shopConfig.pdp.buyWithShop.isEnabled && !selectedPlan && !variant?.requiresSellingPlan ? (
         <div
           className={cn(
             "flex h-12 items-center justify-center rounded-lg bg-shop px-4 text-white",

@@ -1,6 +1,6 @@
+import { getCollections } from "@/lib/collections/server";
 import { shopConfig } from "@/lib/config";
 import { escapeMarkdown } from "@/lib/markdown";
-import { getCollections } from "@/lib/shopify/operations/collections/server";
 
 export async function GET(): Promise<Response> {
   const { name, url } = shopConfig.site;

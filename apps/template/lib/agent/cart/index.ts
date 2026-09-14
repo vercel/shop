@@ -1,13 +1,31 @@
-import { z } from "zod";
+import type { EveMessagePart } from "eve/client";
 
-export const addCartNoteInputSchema = z.strictObject({ note: z.string() });
+export function getCartMutationResult(part: EveMessagePart) {
+  if (
+    part.type !== "dynamic-tool" ||
+    part.state !== "output-available" ||
+    part.partial ||
+    !isCartMutation(part.toolName)
+  )
+    return undefined;
+  const output = part.output;
+  if (
+    !output ||
+    typeof output !== "object" ||
+    "error" in output ||
+    !("cartUpdated" in output) ||
+    output.cartUpdated !== true
+  )
+    return undefined;
+  return {
+    toolName: part.toolName,
+    warnings:
+      "warnings" in output && Array.isArray(output.warnings)
+        ? output.warnings.filter((warning): warning is string => typeof warning === "string")
+        : [],
+  };
+}
 
-export const addToCartInputSchema = z.strictObject({
-  quantity: z.number().int().min(1).max(99).default(1),
-  variantId: z.string().regex(/^gid:\/\/shopify\/ProductVariant\/[0-9]+$/),
-});
-
-export const updateCartItemInputSchema = z.strictObject({
-  lineId: z.string().regex(/^gid:\/\/shopify\/CartLine\/[^\s]+$/),
-  quantity: z.number().int().min(0).max(99),
-});
+export function isCartMutation(tool: string) {
+  return tool === "add-to-cart" || tool === "update-cart-item" || tool === "add-cart-note";
+}

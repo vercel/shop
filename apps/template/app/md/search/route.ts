@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const query = url.searchParams.get("q") ?? undefined;
   const collection = url.searchParams.get("collection") ?? undefined;
   const cursor = url.searchParams.get("cursor") ?? undefined;
-  const { activeFilters, filters, sort } = resolveBrowseParams(url.searchParams);
+  const { filters, sort } = resolveBrowseParams(url.searchParams);
   try {
     // Same live reads as the HTML page so agents and shoppers see one result set per URL.
     const [results, facets] = await Promise.all([
@@ -25,7 +25,6 @@ export async function GET(request: Request) {
         filters,
       }),
       fetchSearchFacets({
-        activeFilters,
         query,
         collection,
         filters,
@@ -38,7 +37,7 @@ export async function GET(request: Request) {
       total: facets.total,
       filters: facets.filters,
       priceRange: facets.priceRange,
-      activeFilters,
+      activeFilters: filters,
       pageInfo: results.pageInfo,
       sort,
     });

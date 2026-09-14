@@ -27,6 +27,11 @@ export const shopConfig = {
     checkLevel: "basic",
     isEnabled: false,
   },
+  browserAgents: {
+    webmcp: {
+      isEnabled: false,
+    },
+  },
   localization: {
     country: "US",
     language: "EN",
@@ -49,11 +54,11 @@ export const shopConfig = {
       isEnabled: true,
     },
   },
+  search: {
+    isEnabled: true,
+  },
   site: {
     name: "Vercel Shop",
     url: defaultUrl,
-  },
-  webmcp: {
-    isEnabled: false,
   },
 } satisfies ShopConfig;

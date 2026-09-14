@@ -1,7 +1,6 @@
 import { buildProductSelectionSearchParams, getSelectedProductOptions } from "@shopify/hydrogen";
 
 import type { Image } from "@/lib/media/types";
-import type { Money } from "@/lib/money/types";
 import type {
   ProductDetails,
   ProductOption,
@@ -10,7 +9,6 @@ import type {
 } from "@/lib/product/types";
 
 import type {
-  OptimisticProductInfo,
   OptionGroupState,
   ProductFormInput,
   ProductFormVariant,
@@ -54,8 +52,22 @@ export function toStaticOptionGroups(product: ProductDetails): OptionGroupState[
   }));
 }
 
+export function getProductPurchaseOptions(
+  variant: Pick<ProductVariant, "requiresSellingPlan" | "sellingPlanAllocations"> | undefined,
+  purchaseOption = "",
+) {
+  const plans =
+    variant?.sellingPlanAllocations.filter(
+      (allocation) => allocation.sellingPlan.recurringDeliveries,
+    ) ?? [];
+  const selectedPlan =
+    plans.find((allocation) => allocation.sellingPlan.id === purchaseOption) ??
+    (variant?.requiresSellingPlan ? plans[0] : undefined);
+  return { plans, selectedPlan };
+}
+
 // Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
-export function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
+function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
   return {
     availableForSale: variant.availableForSale,
     compareAtPrice: variant.compareAtPrice,
@@ -175,29 +187,4 @@ export function getSelectedColorImage(
       height: 0,
     }
   );
-}
-
-export function variantToOptimisticInfo(
-  variant: {
-    title: string;
-    price: Money;
-    image: Image | null;
-    selectedOptions: SelectedOption[];
-  },
-  product: { title: string; handle: string; featuredImage: Image | null },
-): OptimisticProductInfo {
-  return {
-    variantTitle: variant.title,
-    productTitle: product.title,
-    productHandle: product.handle,
-    price: variant.price,
-    image: variant.image ||
-      product.featuredImage || {
-        url: "",
-        altText: product.title,
-        width: 0,
-        height: 0,
-      },
-    selectedOptions: variant.selectedOptions,
-  };
 }

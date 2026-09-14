@@ -1,3 +1,5 @@
+import { isFilterInputActive, type ProductFilter } from "@shopify/hydrogen";
+
 import type {
   Filter,
   FilterPresentation,
@@ -8,7 +10,6 @@ import type {
 import type { OptionValueSwatch } from "@/lib/product/types";
 import type {
   ActiveFilterBadge,
-  ProductFilter,
   ShopifyFilter,
   ShopifyFilterPresentation,
   ShopifyFilterType,
@@ -22,7 +23,6 @@ function isColorKey(value: string): boolean {
 }
 
 export function getSelectedColorFilterLabel(
-  activeFilters: Record<string, string | string[] | undefined>,
   filters: ProductFilter[],
   shopifyFilters: Array<{
     values: Array<Pick<ShopifyFilterValue, "input" | "label">>;
@@ -44,12 +44,6 @@ export function getSelectedColorFilterLabel(
   const selectedValue = selectedValues.values().next().value;
   if (!selectedValue) return undefined;
 
-  const hasExactlyOneSelectedColor = Object.entries(activeFilters).some(([key, value]) => {
-    if (!key.startsWith("filter.") || !isColorKey(key)) return false;
-    return Array.isArray(value) ? value.length === 1 : Boolean(value);
-  });
-  if (!hasExactlyOneSelectedColor) return undefined;
-
   for (const filter of shopifyFilters) {
     for (const value of filter.values) {
       if (parseShopifyFilterValue(value.input) === selectedValue) return value.label;
@@ -63,10 +57,13 @@ function getParamKeyFromShopifyId(filterId: string): string {
   return filterId.toLowerCase();
 }
 
+// Hydrogen's ProductFilter folds the taxonomy namespace into `key`; Shopify's filter input keeps them apart.
 function normalizeShopifyFilterInput(inputJson: string): string {
   try {
-    const input = JSON.parse(inputJson) as ProductFilter;
-    if (input.taxonomyMetafield) {
+    const input = JSON.parse(inputJson) as {
+      taxonomyMetafield?: { key: string; namespace?: string; value: string };
+    };
+    if (input.taxonomyMetafield?.namespace) {
       return JSON.stringify({
         taxonomyMetafield: {
           key: `${input.taxonomyMetafield.namespace}.${input.taxonomyMetafield.key}`,
@@ -83,15 +80,15 @@ function normalizeShopifyFilterInput(inputJson: string): string {
 function parseShopifyFilterValue(inputJson: string): string | null {
   try {
     const input = JSON.parse(inputJson) as ProductFilter;
-    if (input.variantOption) return input.variantOption.value;
+    if (input.variantOption) return input.variantOption.value ?? null;
     if (input.productVendor) return input.productVendor;
     if (input.productType) return input.productType;
     if (input.available !== undefined) {
       return input.available ? "1" : "0";
     }
     if (input.tag) return input.tag;
-    if (input.productMetafield) return input.productMetafield.value;
-    if (input.taxonomyMetafield) return input.taxonomyMetafield.value;
+    if (input.productMetafield) return input.productMetafield.value ?? null;
+    if (input.taxonomyMetafield) return input.taxonomyMetafield.value ?? null;
     return null;
   } catch {
     return null;
@@ -185,20 +182,11 @@ function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): P
   return { ...(currencyCode ? { currencyCode } : {}), max: 1000, min: 0 };
 }
 
-function isFilterValueSelected(
-  activeFilters: Record<string, string | string[] | undefined>,
-  paramKey: string,
-  value: string,
-): boolean {
-  const current = activeFilters[paramKey];
-  return Array.isArray(current) ? current.includes(value) : current === value;
-}
-
 export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
 ): TransformedFilters {
-  const { activeFilters = {}, currencyCode, hideZeroCount = true } = options;
+  const { activeFilters = [], currencyCode, hideZeroCount = true } = options;
 
   const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");
   const listFilters = shopifyFilters.filter((f) => f.type === "LIST");
@@ -214,8 +202,7 @@ export function transformShopifyFilters(
       .map((filter) => ({
         ...filter,
         values: filter.values.filter(
-          (value) =>
-            value.count > 0 || isFilterValueSelected(activeFilters, filter.paramKey, value.value),
+          (value) => value.count > 0 || isFilterInputActive(activeFilters, value.input),
         ),
       }))
       .filter((filter) => filter.values.length > 0);
@@ -225,9 +212,7 @@ export function transformShopifyFilters(
   filters = filters.filter(
     (filter) =>
       filter.values.length > 1 ||
-      filter.values.some((value) =>
-        isFilterValueSelected(activeFilters, filter.paramKey, value.value),
-      ),
+      filter.values.some((value) => isFilterInputActive(activeFilters, value.input)),
   );
 
   return {
@@ -238,24 +223,17 @@ export function transformShopifyFilters(
 
 export function getActiveFilterBadges(
   filters: Filter[],
-  activeFilters: Record<string, string | string[] | undefined>,
+  activeFilters: ProductFilter[],
 ): ActiveFilterBadge[] {
   const badges: ActiveFilterBadge[] = [];
 
   for (const filter of filters) {
-    const currentValue = activeFilters[filter.paramKey];
-    if (!currentValue) continue;
-
-    const values = Array.isArray(currentValue) ? currentValue : [currentValue];
-
-    for (const value of values) {
-      const filterValue = filter.values.find((v) => v.value === value);
-      if (!filterValue) continue;
-
+    for (const value of filter.values) {
+      if (!isFilterInputActive(activeFilters, value.input)) continue;
       badges.push({
         paramKey: filter.paramKey,
-        value,
-        label: filterValue.label,
+        value: value.value,
+        label: value.label,
         filterLabel: filter.label,
       });
     }

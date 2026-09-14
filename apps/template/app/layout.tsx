@@ -1,3 +1,4 @@
+import { BotIdClient } from "botid/client";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
@@ -13,6 +14,7 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { botIdProtectedRoutes } from "@/lib/botid";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { buildAlternates } from "@/lib/seo";
@@ -32,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   const cartData = seedCartData();
   return (
     <html lang={shopConfig.localization.locale}>
-      <head />
+      <head>{shopConfig.botid.isEnabled && <BotIdClient protect={botIdProtectedRoutes} />}</head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >
