@@ -40,10 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
 // Storefront `search()` only supports RELEVANCE and PRICE sort keys.
 const ALL_PRODUCTS_SORT_EXCLUDE = [
   "best-selling",
-  "date-new-to-old",
-  "date-old-to-new",
-  "product-name-ascending",
-  "product-name-descending",
+  "created-ascending",
+  "created-descending",
+  "title-ascending",
+  "title-descending",
 ];
 
 export default async function AllProductsPage({

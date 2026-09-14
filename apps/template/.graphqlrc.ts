@@ -12,7 +12,6 @@ const customerDocuments = [
 const storefrontDocuments = [
   "app/**/*.{ts,tsx}",
   "components/**/*.{ts,tsx}",
-  "hooks/**/*.{ts,tsx}",
   "lib/**/*.{ts,tsx}",
   ...customerDocuments.map((path) => `!${path}`),
   "!lib/shopify/types/generated/**",

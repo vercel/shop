@@ -1,20 +1,12 @@
+import { cn } from "cn";
 import { getTranslations } from "next-intl/server";
 
 import { ProductCard } from "@/components/product-card/product-card";
 import Link from "@/components/ui/link";
-import {
-  Slider,
-  SliderContent,
-  SliderHeader,
-  SliderItem,
-  SliderNav,
-  SliderTitle,
-} from "@/components/ui/slider";
+import { Slider, SliderContent, SliderHeader, SliderItem, SliderNav } from "@/components/ui/slider";
+import { getInitialCollectionProducts } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import {
-  getCollectionProducts,
-  searchIndexProducts,
-} from "@/lib/shopify/operations/products/server";
+import { getSearchIndexProducts } from "@/lib/product/server";
 
 interface CollectionSliderProps {
   collection?: string;
@@ -33,15 +25,15 @@ export async function CollectionSlider({
 }: CollectionSliderProps) {
   const t = await getTranslations("product");
   const { products } = collection
-    ? await getCollectionProducts({ collection, limit, locale })
-    : await searchIndexProducts({ limit, locale, sortKey: "RELEVANCE" });
+    ? await getInitialCollectionProducts({ collection, limit, locale })
+    : await getSearchIndexProducts({ limit, locale });
 
   if (products.length === 0) return null;
 
   return (
-    <Slider>
+    <Slider className="sm:overflow-x-clip sm:contain-[paint]">
       <SliderHeader>
-        <SliderTitle className="font-normal tracking-normal">{title}</SliderTitle>
+        <h2 className="text-2xl sm:text-3xl">{title}</h2>
         <div className="flex items-center gap-5">
           {collectionUrl && (
             <Link
@@ -51,10 +43,16 @@ export async function CollectionSlider({
               {t("viewAll")}
             </Link>
           )}
-          <SliderNav />
+          <SliderNav className="hidden lg:flex" />
         </div>
       </SliderHeader>
-      <SliderContent>
+      <SliderContent
+        className={cn(
+          "relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen max-w-none auto-cols-[58.33vw] px-5 scroll-px-5",
+          "sm:left-auto sm:right-auto sm:mx-0 sm:w-full sm:max-w-full sm:auto-cols-[calc((100%-1.25rem)/2)] sm:px-0 sm:scroll-px-0",
+          "lg:auto-cols-[calc((100%-2.5rem)/3)] xl:auto-cols-[calc((100%-3.75rem)/4)] 2xl:auto-cols-[calc((100%-5rem)/5)] 3xl:auto-cols-[calc((100%-6.25rem)/6)] 4xl:auto-cols-[calc((100%-8.75rem)/8)]",
+        )}
+      >
         {products.map((product) => (
           <SliderItem key={product.id}>
             <ProductCard product={product} locale={locale} outOfStockText={t("outOfStock")} />

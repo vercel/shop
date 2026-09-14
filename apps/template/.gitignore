@@ -20,6 +20,12 @@ out/
 # production
 build
 
+# Eve
+.eve/
+.output/
+.nitro/
+dist/
+
 # misc
 .DS_Store
 *.pem

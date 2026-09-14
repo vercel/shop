@@ -3,13 +3,10 @@ import { getTranslations } from "next-intl/server";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import Link from "@/components/ui/link";
+import { getInitialCollectionProducts } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
+import { getProducts, getSearchIndexProducts } from "@/lib/product/server";
 import type { ProductCard as ProductCardData } from "@/lib/product/types";
-import {
-  getCollectionProducts,
-  getFilteredCatalogProducts,
-  searchIndexProducts,
-} from "@/lib/shopify/operations/products/server";
 
 export type ProductsGridColumns = 4 | 5;
 
@@ -82,8 +79,8 @@ function fetchFallbackProducts({
   locale: Locale;
 }) {
   return fallbackSortKey
-    ? getFilteredCatalogProducts({ limit, locale, sortKey: fallbackSortKey })
-    : searchIndexProducts({ limit, locale });
+    ? getProducts({ limit, locale, sortKey: fallbackSortKey })
+    : getSearchIndexProducts({ limit, locale });
 }
 
 interface ProductsGridProps {
@@ -115,7 +112,7 @@ export async function ProductsGrid({
   const t = await getTranslations("product");
 
   const { products } = collection
-    ? await getCollectionProducts({ collection, limit, locale })
+    ? await getInitialCollectionProducts({ collection, limit, locale })
     : await fetchFallbackProducts({ fallbackSortKey, limit, locale });
 
   if (products.length === 0) return null;

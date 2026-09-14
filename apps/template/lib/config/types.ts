@@ -1,9 +1,23 @@
 import type { ConsentConfig, I18nConfig } from "@shopify/hydrogen";
 import type { initBotId } from "botid/client/core";
+import type { NextConfig } from "next";
 
 import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 export type CommerceLocale = Pick<I18nConfig, "country" | "language">;
+
+export interface NextConfigContext {
+  defaultConfig: NextConfig;
+}
+
+export type NextConfigFactory = (
+  phase: string,
+  context: NextConfigContext,
+) => NextConfig | Promise<NextConfig>;
+
+export type NextConfigInput = NextConfig | NextConfigFactory;
+
+export type NextConfigPlugin = (config: NextConfig) => NextConfigInput | Promise<NextConfigInput>;
 
 export interface ShopConfig {
   agent: {
@@ -32,6 +46,11 @@ export interface ShopConfig {
     >;
     isEnabled: boolean;
   };
+  browserAgents: {
+    webmcp: {
+      isEnabled: boolean;
+    };
+  };
   localization: CommerceLocale & {
     locale: string;
   };
@@ -56,13 +75,13 @@ export interface ShopConfig {
       isEnabled: boolean;
     };
   };
+  search: {
+    isEnabled: boolean;
+  };
   site: {
     name: string;
     socialLinks: SocialLink[];
     url: string;
-  };
-  webmcp: {
-    isEnabled: boolean;
   };
 }
 

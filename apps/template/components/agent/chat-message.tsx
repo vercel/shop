@@ -1,96 +1,85 @@
 "use client";
 
-import type { Spec } from "@json-render/core";
-import { JSONUIProvider, Renderer, useJsonRenderMessage } from "@json-render/react";
-import type { UIMessage } from "ai";
-import { isToolUIPart } from "ai";
+import type { EveMessage } from "eve/react";
+import { useTranslations } from "next-intl";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { getCartMutationResult } from "@/lib/agent/cart";
 
-import { AgentProductProvider } from "./product-context";
-import { registry } from "./registry";
+import { ShoppingResults } from "./shopping-results";
 import { AgentThinking } from "./thinking";
 
 const linkSafety = {
   enabled: true,
-  onLinkCheck: (url: string) => url.startsWith("/"),
+  onLinkCheck: (url: string) => url.startsWith("/") && !url.startsWith("//"),
 };
-
-const Markdown = memo(
-  ({ children }: { children: string }) => (
-    <Streamdown linkSafety={linkSafety} className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-      {children}
-    </Streamdown>
-  ),
-  (previous, next) => previous.children === next.children,
-);
-Markdown.displayName = "Markdown";
-
-/**
- * Models sometimes name the root key something that was never added to `elements`
- * (e.g. root "hoodies" alongside a "hoodie-grid" element), which renders nothing.
- * Repoint the root at the element no other element claims as a child.
- */
-function withResolvedRoot(spec: Spec): Spec {
-  if (spec.root && spec.elements[spec.root]) return spec;
-
-  const keys = Object.keys(spec.elements);
-  if (keys.length === 0) return spec;
-
-  const claimed = new Set(
-    keys
-      .flatMap((key) => spec.elements[key]?.children ?? [])
-      .filter((child) => child !== spec.root),
-  );
-  const orphans = keys.filter((key) => !claimed.has(key));
-  const root = orphans.length === 1 ? orphans[0] : undefined;
-  return root ? { ...spec, root } : spec;
-}
-
-function activeToolName(parts: UIMessage["parts"]): string | undefined {
-  for (const part of parts) {
-    if (isToolUIPart(part) && part.state !== "output-available" && part.state !== "output-error") {
-      return part.type === "dynamic-tool" ? part.toolName : part.type.slice(5);
-    }
-  }
-  return undefined;
-}
+const Markdown = memo(({ children }: { children: string }) => (
+  <Streamdown linkSafety={linkSafety} className="[&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+    {children}
+  </Streamdown>
+));
 
 export function ChatMessage({
+  isLatest,
   isStreaming,
   message,
 }: {
+  isLatest: boolean;
   isStreaming: boolean;
-  message: UIMessage;
+  message: EveMessage;
 }) {
-  const { hasSpec, spec, text } = useJsonRenderMessage(message.parts);
-
-  if (message.role === "user") {
-    if (!text) return null;
-    return (
+  const t = useTranslations("agent");
+  const text = message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
+  if (message.role === "user")
+    return text ? (
       <div className="flex justify-end">
         <Bubble className="max-w-[85%]" variant="default">
-          <BubbleContent className="rounded-2xl px-3.5">
+          <BubbleContent className="rounded-lg px-3.5">
             <Markdown>{text}</Markdown>
           </BubbleContent>
         </Bubble>
       </div>
-    );
-  }
-
+    ) : null;
+  const mutations = message.parts.flatMap((part) => {
+    const result = getCartMutationResult(part);
+    return result ? [result] : [];
+  });
+  const warnings = [...new Set(mutations.flatMap((mutation) => mutation.warnings))];
+  const label = mutations.every((mutation) => mutation.toolName === "add-to-cart")
+    ? t("addedToCart")
+    : t("cartUpdated");
+  const showsLiveCart = isLatest && mutations.length > 0;
+  const active = message.parts.find(
+    (part) =>
+      part.type === "dynamic-tool" &&
+      part.state !== "output-available" &&
+      part.state !== "output-error",
+  );
   return (
-    <div className="space-y-2.5 text-foreground text-sm">
-      <AgentThinking active={isStreaming && !text} tool={activeToolName(message.parts)} />
+    <div className="grid gap-2.5 text-foreground text-sm">
+      <AgentThinking
+        active={isStreaming && !text}
+        tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
+      />
       {text && <Markdown>{text}</Markdown>}
-      {hasSpec && spec && (
-        <AgentProductProvider parts={message.parts}>
-          <JSONUIProvider registry={registry}>
-            <Renderer registry={registry} spec={withResolvedRoot(spec)} />
-          </JSONUIProvider>
-        </AgentProductProvider>
+      {mutations.length > 0 && !showsLiveCart && (
+        <div className="grid gap-1 text-muted-foreground text-xs">
+          <p role="status">{label}</p>
+          {warnings.map((warning) => (
+            <p key={warning} role="alert">
+              {warning}
+            </p>
+          ))}
+        </div>
       )}
+      <ShoppingResults
+        confirmation={showsLiveCart ? { label, warnings } : undefined}
+        isLatest={isLatest}
+        isStreaming={isStreaming}
+        message={message}
+      />
     </div>
   );
 }

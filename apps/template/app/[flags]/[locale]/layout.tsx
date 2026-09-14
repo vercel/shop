@@ -1,4 +1,5 @@
 import "../../globals.css";
+import { BotIdClient } from "botid/client";
 import { generatePermutations } from "flags/next";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
@@ -16,6 +17,7 @@ import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
 import { Toaster } from "@/components/ui/sonner";
+import { botIdProtectedRoutes } from "@/lib/botid";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { precomputedFlags } from "@/lib/flags";
@@ -55,7 +57,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
 
   return (
     <html lang={locale}>
-      <head />
+      <head>{shopConfig.botid.isEnabled && <BotIdClient protect={botIdProtectedRoutes} />}</head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >

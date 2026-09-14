@@ -12,9 +12,8 @@ export async function loadMoreCollectionProductsAction(params: {
   locale: string;
   search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
-  const { activeFilters, filters, sort } = resolveBrowseParams(params.search);
+  const { filters, sort } = resolveBrowseParams(params.search);
   const result = await fetchCollectionProducts({
-    activeFilters,
     collection: params.collection,
     cursor: params.cursor,
     sortKey: sort,

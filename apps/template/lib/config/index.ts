@@ -32,6 +32,11 @@ export const shopConfig = {
     footer: enterpriseFooterItems,
     nav: enterpriseNavItems,
   },
+  browserAgents: {
+    webmcp: {
+      isEnabled: false,
+    },
+  },
   localization: {
     country: "US",
     language: "EN",
@@ -54,12 +59,12 @@ export const shopConfig = {
       isEnabled: true,
     },
   },
+  search: {
+    isEnabled: true,
+  },
   site: {
     name: process.env.NEXT_PUBLIC_SITE_NAME ?? "Ship Things",
     socialLinks,
     url: defaultUrl,
-  },
-  webmcp: {
-    isEnabled: false,
   },
 } satisfies ShopConfig;

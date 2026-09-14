@@ -8,11 +8,9 @@ import {
   ProductsGridSection,
   ProductsGridSkeleton,
 } from "@/components/product/products-grid";
+import { getInitialCollectionProducts } from "@/lib/collections/server";
 import type { Locale } from "@/lib/i18n";
-import {
-  getCollectionProducts,
-  getFilteredCatalogProducts,
-} from "@/lib/shopify/operations/products/server";
+import { getProducts } from "@/lib/product/server";
 
 // A ?utm_campaign= value selects a collection only when it's in the caller's allowlist;
 // anything else (missing, unknown, multi-valued) falls through to the regular resolution.
@@ -100,8 +98,8 @@ async function PickedForYouContent({
     const collection = (await cookies()).get(rememberedCollectionCookie)?.value;
     const handle = campaign ?? collection ?? defaultCollection;
     const { products } = handle
-      ? await getCollectionProducts({ collection: handle, limit, locale })
-      : await getFilteredCatalogProducts({ limit, locale, sortKey: fallbackSortKey });
+      ? await getInitialCollectionProducts({ collection: handle, limit, locale })
+      : await getProducts({ limit, locale, sortKey: fallbackSortKey });
 
     return {
       collection,

@@ -6,7 +6,7 @@
 - Collection routes: `apps/template/app/collections/page.tsx`, `apps/template/app/collections/all/page.tsx`, `apps/template/app/collections/[handle]/page.tsx`
 - Search route: `apps/template/app/search/page.tsx`
 - Components: `apps/template/components/collections/`, `apps/template/components/search/results.tsx`, `apps/template/components/product-card/product-card.tsx`
-- Browse state: `apps/template/lib/collections/{index,server,action}.ts`, `apps/template/lib/search/action.ts`
+- Browse state and cache decisions: `apps/template/lib/collections/{index,server,action}.ts`, `apps/template/lib/search/{server,action}.ts`, `apps/template/lib/product/server.ts`
 - Operations and transforms: `apps/template/lib/shopify/operations/collections/server.ts`, `apps/template/lib/shopify/operations/products/server.ts`, `apps/template/lib/shopify/transforms/collection/index.ts`, `apps/template/lib/shopify/transforms/filters/index.ts`
 - Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/apps/template/app/collections), [search route source](https://github.com/vercel/shop/blob/main/apps/template/app/search/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
 
@@ -22,7 +22,7 @@ Search is different: its query and results are request inputs. The search route 
 
 Collections and `/search` share the same Hydrogen collection store. `CollectionBrowseProvider` wraps `CollectionProvider` from `@shopify/hydrogen/react`; filters, sort, badges, and load-more all read from `useCollection()` and mutate through `useCollectionActions()`. Do not reintroduce a parallel `URLSearchParams`-driven path for search.
 
-- URL vocabulary is Hydrogen's Liquid-compatible `filter.*` and `sort_by` (`price-descending`, `best-selling`). `resolveBrowseParams` in `lib/collections/server.ts` is the only place that turns a search string into Storefront `ProductFilter[]` and the template's sort label; routes, `/md` handlers, and load-more server actions all call it.
+- URL vocabulary is Hydrogen's Liquid-compatible `filter.*` and `sort_by` (`price-descending`, `best-selling`). `resolveBrowseParams` in `lib/collections/server.ts` is the only place that turns a search string into Hydrogen's `ProductFilter[]` and `sort_by` value; routes, `/md` handlers, and load-more server actions all call it. Selected state, badges, and facet pruning use Hydrogen's `isFilterInputActive`; there is no parallel `filter.*` record. Hydrogen folds the taxonomy metafield namespace into `key`, so the Shopify operations split it back out at the query boundary.
 - Search mounts the store with `handle={\`search:${q}\`}` so a new term rebuilds state and drops stale filters. `q` and `collection` are not store-owned, so the reconciler preserves them across filter and sort changes.
 - Search only sorts by relevance and price. Pass `SEARCH_SORT_EXCLUDE` to `CollectionsSortSelect`; no `sort_by` means `RELEVANCE`.
 - Filter links and active-filter badges render real `href`s built with `serializeCollectionParams` and `getFilterRemovalUrl`, then `preventDefault` into the store action so no-JS navigation still works.

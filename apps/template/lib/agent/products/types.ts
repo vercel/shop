@@ -1,4 +1,5 @@
 import type { Money } from "@/lib/money/types";
+import type { OptionValueSwatch } from "@/lib/product/types";
 
 export interface AgentProduct {
   available: boolean;
@@ -10,8 +11,15 @@ export interface AgentProduct {
   vendor: string | null;
 }
 
+export interface AgentOptionValue {
+  image?: string;
+  name: string;
+  swatch?: OptionValueSwatch;
+}
+
 export interface AgentVariant {
   available: boolean;
+  compareAtPrice: Money | null;
   id: string;
   options: { name: string; value: string }[];
   price: Money;
@@ -22,6 +30,6 @@ export interface AgentVariant {
 export interface AgentProductDetails extends AgentProduct {
   description: string;
   images: string[];
-  options: { name: string; values: string[] }[];
+  options: { name: string; values: AgentOptionValue[] }[];
   variants: AgentVariant[];
 }

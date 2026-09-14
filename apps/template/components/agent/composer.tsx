@@ -7,31 +7,33 @@ import type { KeyboardEvent } from "react";
 
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
 
-type AgentStatus = "error" | "ready" | "streaming" | "submitted";
+type AgentStatus = "error" | "ready" | "resuming" | "streaming" | "submitted";
 
 interface AgentComposerProps {
-  value: string;
+  className?: string;
+  disabled?: boolean;
   onChange: (value: string) => void;
   onStop: () => void;
   onSubmit: (text: string) => void;
-  status: AgentStatus;
   placeholder?: string;
-  className?: string;
+  status: AgentStatus;
+  value: string;
 }
 
 export function AgentComposer({
-  value,
+  className,
+  disabled = false,
   onChange,
   onStop,
   onSubmit,
-  status,
   placeholder,
-  className,
+  status,
+  value,
 }: AgentComposerProps) {
   const t = useTranslations("agent");
   const isBusy = status === "submitted" || status === "streaming";
-
   const submit = () => {
+    if (disabled || status === "resuming") return;
     if (isBusy) {
       onStop();
       return;
@@ -40,13 +42,11 @@ export function AgentComposer({
     if (!text) return;
     onSubmit(text);
   };
-
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) return;
     e.preventDefault();
     submit();
   };
-
   let icon = <CornerDownLeftIcon className="size-4" />;
   if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
   else if (status === "streaming") icon = <SquareIcon className="size-4" />;
@@ -58,11 +58,10 @@ export function AgentComposer({
         e.preventDefault();
         submit();
       }}
-      className={cn("px-5 py-2.5", className)}
+      className={cn("px-2.5 py-2.5", className)}
     >
-      <InputGroup className="h-auto flex-row items-end rounded-2xl border-0 bg-input shadow-none">
+      <InputGroup className="h-auto flex-row items-end rounded-lg border-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-0">
         <InputGroupTextarea
-          autoFocus
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
@@ -74,7 +73,7 @@ export function AgentComposer({
           size="icon-sm"
           variant="default"
           aria-label={isStopping ? t("stop") : t("send")}
-          disabled={!value.trim() && !isStopping}
+          disabled={disabled || status === "resuming" || (!value.trim() && !isStopping)}
           className="mr-1.5 mb-1.5"
         >
           {icon}

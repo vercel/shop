@@ -85,7 +85,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
   if (shopifyRoute) return shopifyRoute;
 
   const first = pathname.split("/")[1];
-  if (isLocale(first)) {
+  // Well-known routes Hydrogen did not claim (e.g. /.well-known/vercel/flags) are served as-is.
+  if (isLocale(first) || first === ".well-known") {
     const response = NextResponse.next({
       request: { headers: requestContext.getForwardedRequestHeaders() },
     });
@@ -144,11 +145,13 @@ export const config = {
     "/api/cart",
     "/api/predictive-search",
     "/api/mcp",
+    "/api/ucp/mcp",
     "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
     "/__shopify/:path*",
     "/agent/:action(handoff|buyer-claims).:format",
     "/cart.:format(js|json)",
     "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/((?!api|md|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\..*).*)",
+    "/((?!api|md|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|llms.txt|.*\\..*).*)",
+    "/.well-known/:path*",
   ],
 };
