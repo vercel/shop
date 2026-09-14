@@ -47,10 +47,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# shopify codegen
-# Validation output is not imported by app code.
-lib/shopify/types/generated/
-
 # next dev --experimental-https
 certificates
 

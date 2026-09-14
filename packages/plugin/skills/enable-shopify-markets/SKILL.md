@@ -380,7 +380,6 @@ Never put internal `/[locale]/...` rewrite targets into metadata or sitemap XML.
 Run focused checks from `apps/template`:
 
 ```bash
-pnpm codegen
 pnpm lint
 pnpm build
 ```
