@@ -76,7 +76,7 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 - Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog, cart, and public storefront operations; Customer for authenticated customer data; custom-data first for metafields or metaobjects. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
 - Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>`.
 - Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents.
-- Type inference is not schema validation: an unknown field types as `unknown` and only fails where it is consumed. Validate new or changed documents with the Shopify AI Toolkit before relying on them; Hydrogen's `gql check` CLI needs a JavaScript TypeScript compiler API that TypeScript 7 does not provide.
+- Type inference is not schema validation; validate new or changed documents with the Shopify AI Toolkit. Do not run `hydrogen gql check`: it needs the TypeScript JavaScript compiler API, which TypeScript 7 does not ship.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ### Cart

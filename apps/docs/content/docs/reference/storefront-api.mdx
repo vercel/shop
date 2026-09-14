@@ -44,10 +44,6 @@ const response = await storefront.request(GET_PRODUCT_QUERY, {
 
 Validate current field names, arguments, and types with Shopify AI Toolkit. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for template integration conventions. The skill is not a schema source.
 
-## Schema validation
-
-Hydrogen's `gql()` infers result types from the Storefront API schema bundled with the SDK. Inference is not validation: a field that does not exist, or exists only in the newer `SHOPIFY_API_VERSION` the template queries, types as `unknown` and fails only where it is consumed. Validate new or changed documents with Shopify AI Toolkit before relying on them, and exercise the operation against your store once. Invalid documents surface at runtime through `assertStorefrontOk()`.
-
 ## Caching
 
 Public-data operations use Next.js Cache Components and cache tags; the Hydrogen client does not replace that cache layer. Choose caching by data sensitivity and behavior:

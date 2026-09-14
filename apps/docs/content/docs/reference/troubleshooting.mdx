@@ -64,7 +64,7 @@ images: {
 
 **Symptom:** `assertStorefrontOk()` throws, or the response reports an invalid GraphQL field, argument, type, or enum value.
 
-**Check:** Validate the operation against the live Storefront API schema for the configured `SHOPIFY_API_VERSION` using Shopify AI Toolkit. A field that exists only in a newer API version types as `unknown` under Hydrogen's inference, so typecheck does not catch it.
+**Check:** Validate the operation against the live Storefront API schema for the configured `SHOPIFY_API_VERSION` using Shopify AI Toolkit; typecheck does not catch invalid fields.
 
 **Fix:** Correct the operation and load the affected route again.
 
