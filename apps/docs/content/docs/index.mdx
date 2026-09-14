@@ -4,7 +4,7 @@ title: Introduction
 type: overview
 ---
 
-Vercel Shop is an enterprise-ready Shopify storefront built with Next.js. Shopify runs your catalog, checkout, and payments. Vercel Shop gives you the storefront in front of them: product pages, collections, search, and a cart, all backed by the Shopify Storefront API and ready to customize. It's the Next.js storefront template for Shopify's new Hydrogen.
+Vercel Shop is an enterprise-ready headless Shopify storefront built with Next.js. Shopify runs your catalog, checkout, and payments. Vercel Shop gives you the storefront in front of them: product pages, category pages, search, and a cart, all backed by the Shopify Storefront API and ready to customize. It's the Next.js storefront template for Shopify's new Hydrogen.
 
 Vercel Shop is open source. Extend it directly with your team or with coding agents. Vercel, Shopify, and third-party partners maintain skills that package common workflows, giving agents a repeatable, best-practice-driven way to implement new features and functionality on your site. It deploys to Vercel and uses Vercel's agentic infrastructure and best practices to power the fastest headless storefront experience on Shopify.
 
@@ -12,11 +12,11 @@ Vercel Shop is open source. Extend it directly with your team or with coding age
 
 Going headless usually means rebuilding the same foundation before you can ship. Vercel Shop includes that foundation and gives you everything Shopify's default Liquid theme, Horizon, has out of the box:
 
-- Product, collection, and search pages backed by the Shopify Storefront API.
+- Product, category, and search pages backed by the Shopify Storefront API.
 - A server-backed cart and checkout handoff to Shopify.
 - Navigation and footer, with optional Shopify-managed menus.
 - SEO, sitemaps, and structured data for product and collection pages.
-- Machine-readable content for AI answer engines. See [AEO and GEO](/docs/anatomy/aeo-geo).
+- Machine-readable content for LLMs. See [AEO and GEO](/docs/anatomy/aeo-geo).
 - Webhook-driven revalidation, so edits in Shopify Admin refresh the storefront.
 - Optional customer accounts and an AI shopping assistant.
 
@@ -24,7 +24,7 @@ Going headless usually means rebuilding the same foundation before you can ship.
 
 - **Scale.** Static generation, streaming, and caching on Vercel handles traffic spikes and large catalogs.
 - **Security.** Shopify owns checkout and payment data, so card details never touch your storefront. Customer sessions are encrypted, and API secrets stay server-side. A managed firewall and DDoS mitigation protect the site on Vercel, and you can optionally turn on [BotID](https://vercel.com/docs/botid) for invisible bot detection in your [shop configuration](/docs/reference/shop-config).
-- **Composability.** The storefront is a standard Next.js app that talks to Shopify's APIs. Bring your own CMS, search, analytics, or payment services, and add custom routes, pages, and integrations alongside the commerce foundation. You compose the stack around your needs in your own codebase, with no proprietary framework to work around.
+- **Composability.** The storefront is a standard Next.js app that talks to Shopify's APIs. Bring your own CMS, search, or analytics, and add custom routes, pages, and integrations alongside the commerce foundation. You compose the stack around your needs in your own codebase, with no proprietary framework to work around.
 
 ## Built for agentic development
 
