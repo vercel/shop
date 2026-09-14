@@ -60,17 +60,13 @@ images: {
 
 **Expected result:** Shopify CDN images render through Next.js Image.
 
-## The build fails with GraphQL errors
+## A Storefront request fails with GraphQL errors
 
-**Symptom:** Codegen or the production build reports an invalid GraphQL field, argument, type, or enum value.
+**Symptom:** `assertStorefrontOk()` throws, or the response reports an invalid GraphQL field, argument, type, or enum value.
 
-**Check:** Validate the operation against the live Storefront API schema for the configured `SHOPIFY_API_VERSION` using Shopify AI Toolkit.
+**Check:** Validate the operation against the live Storefront API schema for the configured `SHOPIFY_API_VERSION` using Shopify AI Toolkit. A field that exists only in a newer API version types as `unknown` under Hydrogen's inference, so typecheck does not catch it.
 
-**Fix:** Correct the operation, then run:
-
-```bash
-pnpm codegen
-```
+**Fix:** Correct the operation and load the affected route again.
 
 If Shopify AI Toolkit is unavailable, install the project plugin:
 
@@ -80,7 +76,7 @@ npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
 
 Use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) only for template integration conventions.
 
-**Expected result:** Codegen exits successfully and the production build passes its GraphQL validation gate.
+**Expected result:** The route renders and the Storefront response carries no `errors`.
 
 ## Shopify changes do not appear
 
