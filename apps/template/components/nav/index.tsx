@@ -34,13 +34,15 @@ export async function Nav({ locale }: { locale: string }) {
           </Link>
 
           <div className="flex flex-1 items-center justify-end gap-5">
-            <PredictiveSearchProvider
-              debounceInMs={300}
-              limit={3}
-              types={["PRODUCT", "COLLECTION", "QUERY"]}
-            >
-              <SearchModal />
-            </PredictiveSearchProvider>
+            {shopConfig.search.isEnabled && (
+              <PredictiveSearchProvider
+                debounceInMs={300}
+                limit={3}
+                types={["PRODUCT", "COLLECTION", "QUERY"]}
+              >
+                <SearchModal />
+              </PredictiveSearchProvider>
+            )}
             {shopConfig.auth.isEnabled && (
               <Suspense fallback={<NavAccountFallback />}>
                 <NavAccount />

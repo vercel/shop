@@ -5,8 +5,8 @@ import { Suspense } from "react";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
+import { getComplementaryProducts } from "@/lib/product/server";
 import type { ProductCard } from "@/lib/product/types";
-import { getComplementaryProducts } from "@/lib/shopify/operations/products/server";
 
 interface ComplementaryProductsProps {
   handle: string;

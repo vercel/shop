@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
+import { getPage } from "@/lib/pages/server";
 import { getLocale } from "@/lib/params";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getPage } from "@/lib/shopify/operations/pages/server";
-import { getShopifySitemapPage } from "@/lib/shopify/operations/sitemap/server";
+import { getShopifySitemapPage } from "@/lib/seo/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

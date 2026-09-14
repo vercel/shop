@@ -7,10 +7,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
-import { useProductForm } from "@/components/product-detail/product-form";
 import { Button } from "@/components/ui/button";
 import type { Money } from "@/lib/money/types";
 import { getProductPurchaseOptions } from "@/lib/product";
+import { useProductForm } from "@/lib/product/client";
 import type { ProductFormVariant, SellingPlanAllocation } from "@/lib/product/types";
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";

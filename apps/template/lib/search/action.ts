@@ -13,10 +13,9 @@ export async function loadMoreSearchProductsAction(params: {
   query?: string;
   search: string;
 }): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
-  const { activeFilters, filters, sort } = resolveBrowseParams(params.search);
+  const { filters, sort } = resolveBrowseParams(params.search);
   // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
   const result = await fetchSearchIndexProducts({
-    activeFilters,
     query: params.query,
     collection: params.collection,
     cursor: params.cursor,

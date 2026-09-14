@@ -1,7 +1,6 @@
 import { createHash, randomBytes, createCipheriv, createDecipheriv } from "node:crypto";
 
 import { createShopifyRequestContext, type ShopifyRequestContext } from "@shopify/hydrogen";
-import "server-only";
 import {
   createCustomerSession,
   type ReadonlyCustomerSessionManager,

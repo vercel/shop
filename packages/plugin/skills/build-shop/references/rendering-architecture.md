@@ -14,7 +14,7 @@ Vercel Shop enables `cacheComponents`, `partialPrefetching`, and the React Compi
 | Data operation      | GraphQL, cache policy, tags, locale flow, transforms into domain types                   | React loading UI                                         |
 | Server composition  | Static shell, section composition, Suspense placement                                    | Browser effects or duplicated data fetching              |
 | Client island       | Local interaction, optimistic UI, browser APIs                                           | Initial public reads, secrets, or broad page composition |
-| Server action       | Mutation, authorization, invalidation, canonical result                                  | Long-lived client state                                  |
+| Mutation boundary   | Authorization, canonical result, applicable invalidation                                 | Long-lived client state                                  |
 
 Do not call internal Route Handlers from Server Components. Call the operation directly so there is no avoidable HTTP hop. Do not let presentation import raw Shopify response types.
 
@@ -33,87 +33,15 @@ A Suspense boundary exposes an async dependency; it does not remove it. If the p
 
 ## Pass request-time work down to a resolved leaf
 
-The request-time promise shape is the pattern most often written wrong. Verify it against `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx`; the distilled shape below imports `shopConfig` from `@/lib/config` and keeps intentional operation locale inputs. The simplified baseline has no `getLocale()` helper. In a localized installation, preserve its validated request locale and commerce context instead of replacing them with deployment defaults:
+Inspect `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx` for the request-time promise boundaries. Preserve intentional operation locale inputs and validated commerce context in localized installations.
 
-```tsx
-// 1. Route: await the stable, cacheable read → static shell. Leave searchParams
-//    UNAWAITED; derive request-time promises from it, split by cost, pass DOWN.
-export default async function ProductPage({
-  params,
-  searchParams,
-}: PageProps<"/products/[handle]">) {
-  const { handle } = await params;
-  const locale = shopConfig.localization;
-  const product = await getProduct({ handle, locale }); // cacheable → lives in the shell
-  if (!product) notFound();
+Preserve these boundaries:
 
-  // Cheap URL parse and the network variant query ride SEPARATE promises, so the
-  // picker highlight never waits on the round-trip that only price + buy need.
-  const selectedOptionsPromise = searchParams.then((sp) => resolveOptions(product, sp));
-  const variantPromise = selectedOptionsPromise.then((options) =>
-    getProductVariant({ handle, locale, selectedOptions: toSelectedOptionList(options) }),
-  );
-
-  return (
-    <ProductDetailSection
-      product={product} // stable props render immediately
-      selectedOptionsPromise={selectedOptionsPromise}
-      variantPromise={variantPromise}
-    />
-  );
-}
-
-// 2. Composition is a SYNCHRONOUS component. It only places boundaries — never awaits.
-//    The h1 stays in the shell, outside every Suspense, so streamed HTML never carries two of them.
-function ProductInfoArea({ product, variantPromise }: ProductInfoAreaProps) {
-  return (
-    <>
-      <ProductTitle title={product.title} /> {/* stable — no Suspense */}
-      <Suspense fallback={<div className="h-7" aria-hidden />}>
-        {" "}
-        {/* fallback matches resolved height */}
-        <ResolvedProductPrice variantPromise={variantPromise} />
-      </Suspense>
-      <Suspense fallback={<ProductInfoFallback product={product} />}>
-        {" "}
-        {/* static pickers + disabled buy */}
-        <ResolvedProductInfo product={product} variantPromise={variantPromise} />
-      </Suspense>
-    </>
-  );
-}
-
-// 3. The resolved leaf is ASYNC, awaits exactly ONE promise, and sits inside its own boundary.
-async function ResolvedProductPrice({
-  variantPromise,
-}: {
-  variantPromise: Promise<ProductVariant | undefined>;
-}) {
-  const variant = await variantPromise;
-  return <ProductPrice amount={variant?.price} />;
-}
-
-// 4. The interactive island is seeded from the resolved variant so server HTML and the
-//    client store agree on first paint. Later selections update the store, then
-//    router.replace() syncs the URL without a second server round-trip for the picker.
-async function ResolvedProductInfo({ product, variantPromise }: ResolvedProductInfoProps) {
-  const selectedVariant = await variantPromise;
-  return (
-    <ProductForm product={toProductFormInput(product, selectedVariant)}>
-      <ProductFormOptions />
-      <BuyButtons fallbackVariant={toProductFormVariant(selectedVariant)} />
-    </ProductForm>
-  );
-}
-```
-
-Invariants the shape enforces:
-
-- Await stable, cacheable reads at the route so they enter the shell; never `await searchParams` (or any request input) at the route.
-- Promises flow through synchronous composition untouched. Only a resolved leaf awaits, and it awaits one promise — so a slow read suspends only its own leaf, not its siblings.
-- Every resolved leaf has its own `Suspense` whose fallback matches the resolved geometry, so streaming does not shift the shell.
+- Await stable, cacheable reads for the public shell. Pass request-input promises to smaller boundaries rather than blocking the shell.
+- Await dependencies where they are consumed so slow reads do not block unrelated siblings.
+- Place `Suspense` around independent request-time UI, with fallbacks that match the resolved geometry.
 - Split one request input into multiple promises when their costs differ, so cheap UI never waits on a network round-trip it does not need.
-- Headings and other content that must appear exactly once in the document live in the shell, never inside a fallback that is later replaced by the resolved leaf. Verify with a production build: dev mode resolves promises before the first flush and hides the duplicate.
+- Keep stable headings in the shell rather than duplicating them in fallbacks.
 - Client stores that own interaction state (variant selection, quantity) are seeded from the server-resolved value inside the resolved leaf, not hydrated from the URL on the client, so there is no first-paint mismatch.
 
 ## Choose cache ownership deliberately
@@ -142,7 +70,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 
 ## Define client and mutation boundaries
 
-- Keep pages, layouts, data fetchers, grids, cards, prices, and static media as Server Components.
+- Keep pages, layouts, data fetchers, grids, cards, static prices, and static media as Server Components.
 - Isolate search dialogs, filters, variant controls, cart controls, galleries, and forms into leaf client components.
 - Pass primitives or narrow serializable view models rather than complete domain objects.
 - Keep optimistic state close to the mutation it predicts, then reconcile with the canonical server result.

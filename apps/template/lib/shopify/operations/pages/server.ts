@@ -1,8 +1,7 @@
 import { gql } from "@shopify/hydrogen";
-import { cacheLife, cacheTag } from "next/cache";
 
-import type { ContentPage } from "@/lib/content/types";
 import { defaultLocale } from "@/lib/i18n";
+import type { ContentPage } from "@/lib/pages/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { storefront } from "@/lib/shopify/storefront/server";
 import type { ShopifyLocale } from "@/lib/shopify/storefront/types";
@@ -23,17 +22,13 @@ const GET_PAGE_QUERY = gql(`#graphql
   }
 `);
 
-export async function getPage({
+export async function fetchPage({
   handle,
   locale = defaultLocale,
 }: {
   handle: string;
   locale?: ShopifyLocale;
 }): Promise<ContentPage | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("pages", `page-${handle}`);
-
   const response = await storefront.request(GET_PAGE_QUERY, { locale, variables: { handle } });
   assertStorefrontOk(response, "getPage");
 

@@ -13,13 +13,9 @@ import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getLocale } from "@/lib/params";
 import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
+import { getProduct, getProducts, getProductVariant } from "@/lib/product/server";
 import type { ProductVariant, SelectedOptions } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import {
-  getCatalogProducts,
-  getProduct,
-  getProductVariant,
-} from "@/lib/shopify/operations/products/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
@@ -64,7 +60,7 @@ async function buildProductMetadata(
 
 export async function generateStaticParams() {
   try {
-    const { products } = await getCatalogProducts({ limit: 1 });
+    const { products } = await getProducts({ limit: 1 });
     const first = products[0];
     return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
   } catch {

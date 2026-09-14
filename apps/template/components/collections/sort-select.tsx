@@ -1,29 +1,30 @@
 "use client";
 
+import { getSortByValue } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useTranslations } from "next-intl";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
-import { getCollectionSortByValue, getCollectionSortFromState } from "@/lib/collections";
 
+// Values are Shopify `sort_by` parameters; "manual" means the collection's own order.
 const SORT_OPTIONS = [
-  { value: "best-matches", key: "bestMatches" },
+  { value: "manual", key: "bestMatches" },
   { value: "best-selling", key: "bestSelling" },
-  { value: "product-name-ascending", key: "nameAscending" },
-  { value: "product-name-descending", key: "nameDescending" },
-  { value: "price-low-to-high", key: "priceLowToHigh" },
-  { value: "price-high-to-low", key: "priceHighToLow" },
-  { value: "date-old-to-new", key: "dateOldToNew" },
-  { value: "date-new-to-old", key: "dateNewToOld" },
+  { value: "title-ascending", key: "nameAscending" },
+  { value: "title-descending", key: "nameDescending" },
+  { value: "price-ascending", key: "priceLowToHigh" },
+  { value: "price-descending", key: "priceHighToLow" },
+  { value: "created-ascending", key: "dateOldToNew" },
+  { value: "created-descending", key: "dateNewToOld" },
 ] as const;
 
 // Storefront `search` only sorts by RELEVANCE and PRICE.
 export const SEARCH_SORT_EXCLUDE: string[] = [
   "best-selling",
-  "date-new-to-old",
-  "date-old-to-new",
-  "product-name-ascending",
-  "product-name-descending",
+  "created-ascending",
+  "created-descending",
+  "title-ascending",
+  "title-descending",
 ];
 
 export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {
@@ -37,8 +38,8 @@ export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) 
 
   return (
     <Select
-      value={getCollectionSortFromState(sortKey, reverse)}
-      onValueChange={(value) => setSortByValue(getCollectionSortByValue(value ?? "") ?? "manual")}
+      value={sortKey ? getSortByValue(sortKey, reverse) : "manual"}
+      onValueChange={(value) => setSortByValue(value ?? "manual")}
       disabled={status === "loading"}
     >
       <SelectTrigger className="border-0 shadow-none bg-transparent px-0">

@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
 import type { Locale } from "@/lib/i18n";
-import { getRelatedProducts } from "@/lib/shopify/operations/products/server";
+import { getRelatedProducts } from "@/lib/product/server";
 
 function RelatedProductsSectionSkeleton({ limit, title }: { limit: number; title: string }) {
   return (

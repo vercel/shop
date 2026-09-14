@@ -1,3 +1,5 @@
+import type { ProductFilter } from "@shopify/hydrogen";
+
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import { escapeMarkdown } from "@/lib/markdown";
 import {
@@ -28,7 +30,7 @@ export function searchResultsToMarkdown({
   total: number;
   filters: Filter[];
   priceRange?: PriceRange;
-  activeFilters: Record<string, string | string[] | undefined>;
+  activeFilters: ProductFilter[];
   pageInfo: PageInfo;
   locale: string;
   sort?: string;

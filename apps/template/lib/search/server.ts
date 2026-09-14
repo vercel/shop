@@ -1,8 +1,6 @@
 import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import "server-only";
-
 import type { CollectionSearchState } from "@/lib/collections/types";
 import type { Locale } from "@/lib/i18n";
 import {
@@ -23,10 +21,9 @@ export async function getSearchResultsData({
   query?: string;
   searchStatePromise: Promise<CollectionSearchState>;
 }): Promise<SearchResultsData> {
-  const { activeFilters, dataSearch, filters, sort } = await searchStatePromise;
+  const { dataSearch, filters, sort } = await searchStatePromise;
   const [results, facets] = await Promise.all([
     fetchSearchIndexProducts({
-      activeFilters,
       collection,
       locale,
       filters,
@@ -35,7 +32,6 @@ export async function getSearchResultsData({
       sortKey: sort,
     }),
     fetchSearchFacets({
-      activeFilters,
       collection,
       locale,
       filters,

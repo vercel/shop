@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 
 import { RichTextPage } from "@/components/content/rich-text-page";
 import { getLocale } from "@/lib/params";
+import { getShopPolicies, getShopPolicy } from "@/lib/policies/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-import { getShopPolicies, getShopPolicy } from "@/lib/shopify/operations/policies/server";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
 

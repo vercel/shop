@@ -1,5 +1,4 @@
 import { createShopifyRequestContext } from "@shopify/hydrogen";
-import "server-only";
 import {
   type AnyCustomerAccountDocument,
   type CustomerAccountClient,

@@ -1,12 +1,11 @@
-import type { ActiveFilters } from "@/lib/collections/types";
+import type { ProductFilter } from "@shopify/hydrogen";
+
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import type { PageInfo } from "@/lib/pagination/types";
 import type { ProductCard } from "@/lib/product/types";
 import type { ShopifyLocale } from "@/lib/shopify/storefront/types";
-import type { ProductFilter } from "@/lib/shopify/transforms/filters/types";
 
 export type SearchIndexProductsParams = {
-  activeFilters?: ActiveFilters;
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -23,7 +22,6 @@ export type SearchIndexProductsResult = {
 };
 
 export type CollectionProductsParams = {
-  activeFilters?: ActiveFilters;
   collection: string;
   cursor?: string;
   filters?: ProductFilter[];
@@ -38,26 +36,28 @@ export type CollectionProductsResult = {
   priceRange?: PriceRange;
   products: ProductCard[];
 };
+
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
-export type CatalogProductsResult = {
+
+export type ProductsResult = {
   pageInfo: PageInfo;
   products: ProductCard[];
 };
 
-export type CatalogProductsParams = {
+export type ProductsParams = {
   limit?: number;
   locale?: ShopifyLocale;
 };
 
-export type FilteredCatalogProductsParams = CatalogProductsParams & {
+export type FilteredProductsParams = ProductsParams & {
   collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
   query?: string;
   sortKey?: string;
 };
+
 export type SearchFacetsParams = {
-  activeFilters?: ActiveFilters;
   collection?: string;
   filters?: ProductFilter[];
   locale?: ShopifyLocale;

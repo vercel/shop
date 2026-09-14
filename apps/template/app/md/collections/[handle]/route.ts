@@ -5,11 +5,11 @@ import {
   getAllProductsResultsData,
   resolveBrowseParams,
 } from "@/lib/collections/server";
+import { getCollection } from "@/lib/collections/server";
 import { defaultLocale, resolveLocale } from "@/lib/i18n";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { markdownHeaders } from "@/lib/markdown/representation";
-import { getCollection } from "@/lib/shopify/operations/collections/server";
 import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
 
 export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         products: data.result.products,
         filters: data.result.filters,
         priceRange: data.result.priceRange,
-        activeFilters: data.activeFilters,
+        activeFilters: data.filters,
         pageInfo: data.result.pageInfo,
         locale,
         sort: data.sort,
@@ -48,13 +48,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
     }
 
     const cursor = url.searchParams.get("cursor") ?? undefined;
-    const { activeFilters, filters, sort } = searchState;
+    const { filters, sort } = searchState;
 
     // Same live read as the HTML page so agents and shoppers see one result set per URL.
     const [collection, result] = await Promise.all([
       getCollection({ handle, locale }),
       fetchCollectionProducts({
-        activeFilters,
         collection: handle,
         sortKey: sort,
         limit: PRODUCTS_PER_PAGE,
@@ -79,7 +78,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
       products: result.products,
       filters: result.filters,
       priceRange: result.priceRange,
-      activeFilters,
+      activeFilters: filters,
       pageInfo: result.pageInfo,
       locale,
       sort,

@@ -3,11 +3,9 @@ import {
   createCartServerHandlers,
   createShopifyRequestContext,
   getCartId,
-  gql,
   type ShopifyRequestContext,
   type I18nConfig,
 } from "@shopify/hydrogen";
-import "server-only";
 import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
 import { io } from "next/cache";
 import { headers } from "next/headers";
@@ -17,51 +15,8 @@ import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@
 import type { Cart, CartSeedData } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 import { getCountryCode, getLanguageCode, getRequestLocale } from "@/lib/i18n";
+import { CART_FRAGMENT } from "@/lib/shopify/fragments/cart";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
-
-// The default Hydrogen fragment omits analytics timestamps, catalog prices, and line discounts.
-const CART_FRAGMENT = gql(/* GraphQL */ `
-  fragment CartFragment on Cart {
-    updatedAt
-    lines(first: 250) {
-      nodes {
-        sellingPlanAllocation {
-          sellingPlan {
-            name
-          }
-        }
-        discountAllocations {
-          __typename
-          discountedAmount {
-            amount
-            currencyCode
-          }
-          ... on CartCodeDiscountAllocation {
-            code
-          }
-          ... on CartAutomaticDiscountAllocation {
-            title
-          }
-          ... on CartCustomDiscountAllocation {
-            title
-          }
-        }
-        merchandise {
-          ... on ProductVariant {
-            price {
-              amount
-              currencyCode
-            }
-            compareAtPrice {
-              amount
-              currencyCode
-            }
-          }
-        }
-      }
-    }
-  }
-`);
 
 export const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
 
@@ -127,6 +82,7 @@ export async function getCartById(cartId: string, locale?: string): Promise<Cart
   const url = new URL("/api/cart", shopConfig.site.url);
   url.searchParams.set("cartId", cartId);
   const { data } = await handlers.get({ ...context, request: new Request(url) } as never);
+  if (data.errors?.length) throw new Error(data.errors[0].message);
   return data.cart ?? undefined;
 }
 
