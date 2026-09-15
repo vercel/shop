@@ -5,11 +5,6 @@ import { catalogMiddleware } from "./lib/catalog-middleware";
 
 export default defineAgent({
   defaultTools: false,
-  limits: {
-    maxInputTokensPerSession: 100_000,
-    maxOutputTokensPerSession: 10_000,
-    sessionTimeoutMs: 86_400_000,
-  },
   model: wrapLanguageModel({
     middleware: catalogMiddleware,
     model: gateway("openai/gpt-5.6-luna-fast"),

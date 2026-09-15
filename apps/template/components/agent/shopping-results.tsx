@@ -33,7 +33,6 @@ import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/typ
 import type { Cart } from "@/lib/cart/types";
 
 interface CartConfirmation {
-  label: string;
   warnings: string[];
 }
 
@@ -136,16 +135,14 @@ export function ShoppingResults({
         />,
       );
     }
-    if (part.toolName === "get-cart" && !hasCart) {
+    if (part.toolName === "get-cart" && !hasCart && isLatest) {
       hasCart = true;
       children.push(<AgentCartSummary key="cart" />);
     }
   }
-  // The live cart renders once, on the latest turn; older turns keep their text confirmation.
+  // Only the latest turn renders the editable cart; older turns rely on the assistant's text.
   if (confirmation && !hasCart)
-    children.push(
-      <AgentCartSummary key="cart" title={confirmation.label} warnings={confirmation.warnings} />,
-    );
+    children.push(<AgentCartSummary key="cart" warnings={confirmation.warnings} />);
 
   return children.length ? <div className="grid gap-4">{children}</div> : null;
 }
@@ -155,13 +152,16 @@ function MissingData({ children }: { children: string }) {
 }
 
 interface AgentCartSummaryProps {
-  title?: string;
   warnings?: string[];
 }
 
-function AgentCartSummary({ title, warnings = [] }: AgentCartSummaryProps) {
+function AgentCartSummary({ warnings = [] }: AgentCartSummaryProps) {
   const cart = useCart<Cart, Cart>((state) => state.data);
   const isLoading = useCart((state) => state.loading);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.scrollIntoView({ block: "nearest" });
+  }, []);
   if (isLoading && cart.lines.nodes.length === 0)
     return (
       <div className="my-2 flex items-center gap-2.5 text-muted-foreground text-xs" role="status">
@@ -171,10 +171,9 @@ function AgentCartSummary({ title, warnings = [] }: AgentCartSummaryProps) {
     );
   if (cart.lines.nodes.length === 0) return <MissingData>Your cart is empty</MissingData>;
   return (
-    <div className="my-2 grid gap-5 rounded-lg border p-2.5">
-      {title && (
-        <div className="grid gap-1 text-sm">
-          <p role="status">{title}</p>
+    <div ref={ref} className="my-2 grid gap-5 rounded-lg border p-2.5">
+      {warnings.length > 0 && (
+        <div className="grid gap-1">
           {warnings.map((warning) => (
             <p key={warning} role="alert" className="text-muted-foreground text-xs">
               {warning}
@@ -336,12 +335,7 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
           </form>
         </div>
       </div>
-      {result === "added" && isLatest && <AgentCartSummary title="Added to cart" />}
-      {result === "added" && !isLatest && (
-        <p role="status" className="text-muted-foreground text-xs">
-          Added to cart
-        </p>
-      )}
+      {result === "added" && isLatest && <AgentCartSummary />}
       {result === "failed" && (
         <p role="alert" className="text-red-500 text-xs">
           We couldn't add this to your cart. Check the cart before trying again.

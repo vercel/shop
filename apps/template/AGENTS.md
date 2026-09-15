@@ -75,8 +75,8 @@ Request → Page → Operation → storefront.request(gql doc) → Shopify API �
 
 - Use the API-specific Shopify AI Toolkit skill first: Storefront GraphQL for catalog, cart, and public storefront operations; Customer for authenticated customer data; custom-data first for metafields or metaobjects. If it is unavailable, use official Shopify documentation and validation tooling; never guess.
 - Write documents with `gql()` from `@shopify/hydrogen` (Storefront) or `@shopify/hydrogen/customer-account` (Customer Account), compose fragments through the second `gql()` argument, and derive raw response types with `ResultOf<typeof DOC>`.
-- Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents. `pnpm codegen` validates Storefront documents across `app/`, `components/`, and `lib/` against the configured live schema. Customer Account documents in the dedicated `.graphqlrc.ts` paths use Hydrogen's bundled schema; add new Customer Account paths to that project and exclude them from Storefront validation.
-- Type inference is not schema validation. The pinned Hydrogen `gql check` CLI requires a JavaScript TypeScript compiler API unavailable in TypeScript 7; the configured codegen projects gate build and typecheck instead. Live checks remain necessary for store-specific permissions, values, and schema drift.
+- Keep the `#graphql` marker or `/* GraphQL */` annotation on static documents.
+- Type inference is not schema validation; validate new or changed documents with the Shopify AI Toolkit. Do not run `hydrogen gql check`: it needs the TypeScript JavaScript compiler API, which TypeScript 7 does not ship.
 - Do not add repo-local schema snapshots or agent-specific folders to the template.
 
 ### Cart
@@ -134,6 +134,10 @@ pnpm format
 
 The assistant uses `agent/`, `withEve`, and `useEveAgent`. Eve tools call Shopify directly through the uncached `fetch*` operations in `lib/shopify/operations/**` and Hydrogen cart handlers.
 
+### Public traffic
+
+The Eve channel is public and every message can incur model charges. Mitigate abuse and cost at the edge: `shopConfig.botid` runs BotID on the channel, and deployments add rate limits and AI Gateway spending controls. Do not add per-session token caps or shrink `modelContextWindowTokens` in `agent/agent.ts`: those cut shopping conversations short mid-task, and Eve's compaction already keeps long sessions inside the model's context window. Eve's framework-default session budget and the panel's `session-limit` handling remain as the last-resort safety net.
+
 ### Catalog search
 
 Product discovery is Shopify's catalog MCP (`agent/connections/shopify.ts`, `search_catalog`), rendered through `present-products`. There is one search path; do not add a Storefront API search tool beside it. `browse-collection`, `list-collections`, `get-recommendations`, and `get-product-details` are navigation and detail reads, not search. The connection requires the public UCP agent profile served at `/agent/ucp-profile.json`; local and preview environments send Shopify's example profile because their URLs are unreachable.
@@ -152,8 +156,8 @@ Eve cart tools bind the cart from the incoming browser cookie through channel au
 ### Verify shopper-visible behavior
 
 - For conversation or catalog changes, check multiple product-search turns in one browser session with real Shopify responses. Confirm visible cards, follow-up responses, and token usage; a successful build, HTTP status, or tool result does not establish that the shopper saw a result.
-- For session-control changes, check restoration, Stop/Clear recovery, failures, and usage-limit feedback. Pending approvals and session limits must not appear as successful empty responses or allow messages to disappear into a paused session.
-- When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering or raising budgets. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
+- For session-control changes, check restoration, Stop/Clear recovery, and failures. Pending input requests must not appear as successful empty responses or allow messages to disappear into a paused session.
+- When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
 - Use the narrowest checks that establish the changed behavior. Distinguish mocked or replayed checks, local production-browser checks, and checks against the deployed preview; do not present one as proof of another. Keep diagnostic credentials out of source and output, and default to read-only probes.
 
 ## Storefront skills (optional plugin)
