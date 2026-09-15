@@ -48,20 +48,20 @@ The conversation and draft can be restored after navigation or reload in the sam
 
 Use **Stop** to interrupt a response or **Clear chat** to start over. Clear waits for an active response to stop; if it cannot confirm that, it keeps the conversation for retry. Clearing chat does not empty the cart.
 
-Conversations have a one-day lifetime and a usage limit. If a conversation expires or reaches its limit, clear it to start a new one.
+Long conversations are summarized automatically so they stay within the model's context. Conversations expire after 30 days; if one has expired, clear it to start a new one.
 
 ## Privacy and usage limits
 
-Once enabled, chat is publicly accessible and messages can incur model charges. Add deployment-level rate limits and Gateway spending controls appropriate to your traffic. The per-conversation usage limit is not a store-wide spending cap.
+Once enabled, chat is publicly accessible and messages can incur model charges. The template does not cap tokens per conversation; control cost where traffic enters instead. Add deployment-level rate limits and Gateway spending controls appropriate to your traffic.
 
-Bot protection is also **disabled by default**. For Vercel deployments, you can enable `botid.isEnabled` in [Shop Configuration](/docs/reference/shop-config). Bot protection does not replace access controls or spending limits.
+Bot protection is **disabled by default**. For Vercel deployments, enable `botid.isEnabled` in [Shop Configuration](/docs/reference/shop-config) so automated traffic is rejected before it reaches the model. Bot protection does not replace access controls or spending limits.
 
 Customer sign-in does not make chat history private. The default setup does not restrict a conversation to its original shopper: anyone with its conversation ID may be able to read or control it. Do not share conversation IDs. Add authenticated conversation ownership before using chat for private account or support data.
 
-Eve stores conversations on the server, and conversation content is sent to the model provider. Clearing chat or reaching the one-day expiry does not guarantee deletion of those records. Configure retention and access policies, and explain to shoppers how their messages are handled.
+Eve stores conversations on the server, and conversation content is sent to the model provider. Clearing chat or conversation expiry does not guarantee deletion of those records. Configure retention and access policies, and explain to shoppers how their messages are handled.
 
 The assistant receives a summary of cart items rather than gift-card recipient details. Personal information shoppers type into chat still reaches the model provider. Avoid requesting sensitive information that is not needed for shopping.
 
 ## What’s next
 
-Adapt the tone, product presentation, and recommendations to your store. Add store-specific guidance while keeping Shopify as the source of prices and availability. Choose models and usage limits that balance response quality, speed, and cost.
+Adapt the tone, product presentation, and recommendations to your store. Add store-specific guidance while keeping Shopify as the source of prices and availability. Choose a model that balances response quality, speed, and cost.
