@@ -1,7 +1,6 @@
 "use client";
 
 import type { EveMessage } from "eve/react";
-import { useTranslations } from "next-intl";
 import { memo } from "react";
 import { Streamdown } from "streamdown";
 
@@ -30,7 +29,6 @@ export function ChatMessage({
   isStreaming: boolean;
   message: EveMessage;
 }) {
-  const t = useTranslations("agent");
   const text = message.parts.flatMap((part) => (part.type === "text" ? [part.text] : [])).join("");
   if (message.role === "user")
     return text ? (
@@ -47,9 +45,6 @@ export function ChatMessage({
     return result ? [result] : [];
   });
   const warnings = [...new Set(mutations.flatMap((mutation) => mutation.warnings))];
-  const label = mutations.every((mutation) => mutation.toolName === "add-to-cart")
-    ? t("addedToCart")
-    : t("cartUpdated");
   const showsLiveCart = isLatest && mutations.length > 0;
   const active = message.parts.find(
     (part) =>
@@ -64,18 +59,8 @@ export function ChatMessage({
         tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
       />
       {text && <Markdown>{text}</Markdown>}
-      {mutations.length > 0 && !showsLiveCart && (
-        <div className="grid gap-1 text-muted-foreground text-xs">
-          <p role="status">{label}</p>
-          {warnings.map((warning) => (
-            <p key={warning} role="alert">
-              {warning}
-            </p>
-          ))}
-        </div>
-      )}
       <ShoppingResults
-        confirmation={showsLiveCart ? { label, warnings } : undefined}
+        confirmation={showsLiveCart ? { warnings } : undefined}
         isLatest={isLatest}
         isStreaming={isStreaming}
         message={message}

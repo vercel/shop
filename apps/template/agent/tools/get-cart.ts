@@ -4,7 +4,8 @@ import { z } from "zod";
 import { getCart, getSessionCartId } from "../lib/cart";
 
 export default defineTool({
-  description: "Read a minimal summary of the current cart before editing a line.",
+  description:
+    "Read a minimal summary of the current cart before editing a line. Not needed after a successful change; the confirmation already shows the cart.",
   inputSchema: z.strictObject({}),
   execute: async (_input, ctx) => {
     const cart = await getCart(getSessionCartId(ctx));

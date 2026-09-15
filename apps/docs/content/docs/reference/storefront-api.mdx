@@ -44,18 +44,6 @@ const response = await storefront.request(GET_PRODUCT_QUERY, {
 
 Validate current field names, arguments, and types with Shopify AI Toolkit. Then use the [`shopify-graphql-reference` skill](/docs/skills/shopify-graphql-reference) for template integration conventions. The skill is not a schema source.
 
-## Codegen
-
-Run the schema checks from your project root after editing operations. The template uses [`@shopify/api-codegen-preset`](https://www.npmjs.com/package/@shopify/api-codegen-preset) to validate Storefront documents across the app and Customer Account documents in a separate project:
-
-```bash
-pnpm codegen
-```
-
-The Storefront check reads `SHOPIFY_API_VERSION` from the command's environment and uses Shopify's live schema. If you override the API version, pass the same value when running codegen. The Customer Account check uses the schema bundled with the pinned Hydrogen SDK, not the Storefront schema.
-
-The development command runs these checks before starting Next.js but continues if they fail; the production build stops on failure. Generated validation files are gitignored.
-
 ## Caching
 
 Public-data operations use Next.js Cache Components and cache tags; the Hydrogen client does not replace that cache layer. Choose caching by data sensitivity and behavior:

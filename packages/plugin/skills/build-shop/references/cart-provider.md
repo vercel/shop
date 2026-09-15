@@ -20,7 +20,7 @@ Use Hydrogen's `CartProvider`, `useCart`, `useCartForm`, and cart actions for ca
 
 Cart types derive from `CartDataFromHandlers<typeof cartHandlers>` in `lib/cart/types.ts`, including the additive cart fragment. They are not transformed into a separate provider-independent cart model. Generic `ui/` primitives still receive primitive presentation props.
 
-Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through a custom fragment. Validate extensions with the template's codegen command rather than guessing fields or editing SDK queries.
+Hydrogen owns the base cart operations. The template adds selections needed for prices, discounts, and analytics through a custom fragment. Validate extensions with the Shopify AI Toolkit rather than guessing fields or editing SDK queries.
 
 ## Bootstrap and live reads
 

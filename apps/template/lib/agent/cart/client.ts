@@ -7,6 +7,10 @@ type AgentCartStatus = "failed" | "pending" | "ready";
 let status: AgentCartStatus = "ready";
 const listeners = new Set<() => void>();
 
+export function getAgentCartStatus() {
+  return status;
+}
+
 export function setAgentCartStatus(value: AgentCartStatus) {
   if (status === value) return;
   status = value;

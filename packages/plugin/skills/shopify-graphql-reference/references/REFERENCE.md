@@ -15,7 +15,6 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `lib/shopify/storefront/server.ts`          | Shared `@shopify/hydrogen` storefront client wrapper and typed `storefront.request`                    |
 | `lib/shopify/errors/server.ts`              | `assertStorefrontOk()` response contract                                                              |
-| `.graphqlrc.ts` + `pnpm codegen`         | Validates Storefront documents against the live schema and Customer Account documents against Hydrogen's bundled schema |
 | `lib/shopify/customer-account/server.ts`   | Separate Customer Account API transport                                                               |
 | `lib/shopify/fragments/customer/index.ts`, `lib/shopify/fragments/customer-address/index.ts`, `lib/shopify/fragments/customer-order/index.ts` | Shared Customer Account selections |
 | `lib/shopify/fragments/<resource>/index.ts` | Shared Storefront selections grouped by resource                                                      |
@@ -24,7 +23,6 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/shopify/transforms/*/index.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
 | `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
 | `lib/shopify/transforms/filters/types.ts`, `lib/shopify/transforms/menu/types.ts` | Resource-owned filter inputs and menu contracts                     |
-| `lib/shopify/types/generated/`             | Generator-owned validation output                                                                     |
 | `lib/product/types.ts`, `lib/collections/types.ts`, `lib/customer/types.ts` | Domain-owned models consumed by transforms and presentation |
 | `lib/cart/server.ts`                        | Cart cookie helpers and server-side cart read seeding                                                 |
 | `app/api/webhooks/shopify/route.ts`         | Public-content invalidation entry point                                                               |
@@ -38,18 +36,16 @@ Route → lib/<domain>/server.ts get* (cache) → lib/shopify/operations fetch* 
 
 Do not add an internal HTTP hop between a Server Component and `lib/shopify/operations/`. Catalog and account presentation use transformed domain types. Cart state is intentionally different: derive its types from Hydrogen handlers through `lib/cart/types.ts`, rather than maintaining a second cart model. Product selection adapts catalog models to Hydrogen's `ProductInput`; generic `ui/` primitives still accept primitive presentation props.
 
-## Documents and codegen
+## Documents
 
-- Wrap every Storefront query, mutation, and fragment in `gql()` from `@shopify/hydrogen`; Customer Account documents use `gql()` from `@shopify/hydrogen/customer-account`. Keep the leading `#graphql` comment so codegen plucks the document.
+- Wrap every Storefront query, mutation, and fragment in `gql()` from `@shopify/hydrogen`; Customer Account documents use `gql()` from `@shopify/hydrogen/customer-account`. Keep the leading `#graphql` comment so editors and tooling recognize the document.
 - Compose fragments by passing them as the second `gql(source, [FRAGMENT_A, FRAGMENT_B])` argument. Never interpolate a fragment string into another document.
 - Do not add a separate `MoneyFields` or `ImageFields` fragment. Inline `amount currencyCode` and `url altText width height`; two fragments that both embed the same leaf fragment would emit it twice in one document.
 - Keep documents static. Pass dynamic values as GraphQL variables or choose between separate static documents at the call site.
 - Call `storefront.request(QUERY, { variables })` for deployment defaults, or pass `locale: { country, language }` for explicit commerce context, then `assertStorefrontOk(response, operationName)`. `locale` is a `CommerceLocale` object from `lib/config/types.ts`, not the formatting locale string. Result and variable types come from the document; do not write a response type. Omit `country` and `language` from `variables` — the wrapper injects them from that context.
 - Derive raw Shopify types for transforms with `ResultOf<typeof FRAGMENT>` (Storefront) or `CustomerAccountResultOf<typeof FRAGMENT>` (Customer Account), imported from `lib/shopify/types.ts`, instead of hand-writing interfaces. Keep named resource contracts in the owning domain's `types.ts`; do not import shared types from a transport or operation's `server.ts`.
 - Select `__typename` on union or interface fields (`node`, `nodes`, `search` results) and narrow with `node.__typename === "Product"`.
-- Run `pnpm codegen` from the storefront project after changing any document. It checks Storefront operations and additive cart/search fragments against the configured live schema, then Customer Account documents against Hydrogen's bundled schema. Keep Customer Account documents in the dedicated paths configured in `.graphqlrc.ts`; extend those paths when adding a new Customer Account module. Generated validation output is gitignored.
-
-Shopify AI Toolkit validates Shopify correctness; local codegen validates integrated documents; inference is not validation. TypeScript 7 lacks the JavaScript compiler API required by the pinned Hydrogen `gql check` tooling, so the template uses GraphQL Code Generator instead. The production build and typecheck command gate on both schemas. Live API checks are still needed for store-specific permissions, values, and Customer Account schema/version drift.
+Shopify AI Toolkit validates documents; there is no local schema gate, and typecheck does not catch invalid fields. Exercise a new or changed operation against the store once.
 
 ## Choose cache behavior from the consumer
 
@@ -94,7 +90,7 @@ Country/language scope Shopify commerce data; the formatting locale and translat
 ## Completion checklist
 
 - Shopify AI Toolkit validated the final document against the intended API version.
-- Local codegen passes for the integrated static document.
+- The integrated document has been exercised against the store or validated with the toolkit after its final edit.
 - The operation lives in the closest domain file and uses existing transport.
 - Cache behavior follows render role, not a blanket default.
 - Locale variables flow through existing helpers when applicable.

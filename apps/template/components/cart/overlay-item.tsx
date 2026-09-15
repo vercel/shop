@@ -8,7 +8,6 @@ import Image from "next/image";
 
 import { CartLineForm } from "@/components/cart/line-form";
 import { CartWarnings } from "@/components/cart/warnings";
-import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import Link from "@/components/ui/link";
 import type { CartLine } from "@/lib/cart/types";
@@ -155,17 +154,15 @@ export function OverlayItem({ item, locale }: OverlayItemProps) {
                   <PlusIcon className="size-3 shrink-0" />
                 </button>
               </div>
-              <Button
+              <button
                 {...register("remove")}
                 type="submit"
-                variant="ghost"
-                size="icon"
-                className="size-7 text-muted-foreground hover:text-foreground"
+                className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={isOptimistic || !canRemove}
                 aria-label={t("removeItem")}
               >
                 <Trash2Icon className="size-4" />
-              </Button>
+              </button>
             </>
           )}
         </CartLineForm>
