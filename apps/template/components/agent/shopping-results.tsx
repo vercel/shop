@@ -136,12 +136,12 @@ export function ShoppingResults({
         />,
       );
     }
-    if (part.toolName === "get-cart" && !hasCart) {
+    if (part.toolName === "get-cart" && !hasCart && isLatest) {
       hasCart = true;
       children.push(<AgentCartSummary key="cart" />);
     }
   }
-  // The live cart renders once, on the latest turn; older turns keep their text confirmation.
+  // Only the latest turn renders the editable cart; older turns keep their text confirmation.
   if (confirmation && !hasCart)
     children.push(
       <AgentCartSummary key="cart" title={confirmation.label} warnings={confirmation.warnings} />,
