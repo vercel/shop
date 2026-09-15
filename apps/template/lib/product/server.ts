@@ -51,7 +51,8 @@ export async function getProductVariant(params: {
   locale?: CommerceLocale;
   selectedOptions: SelectedOption[];
 }): Promise<ProductVariant | undefined> {
-  "use cache";
+  // Resolved from searchParams at request time, outside the stored shell.
+  "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${params.handle}`);
 
@@ -62,7 +63,8 @@ export async function getProductWithVariants(params: {
   handle: string;
   locale?: CommerceLocale;
 }): Promise<ProductDetails | undefined> {
-  "use cache";
+  // Served from the Markdown route handler, which has no stored shell in front of it.
+  "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${params.handle}`);
 
