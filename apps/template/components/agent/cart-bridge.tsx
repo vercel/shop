@@ -2,10 +2,14 @@
 
 import { useCart, useCartActions } from "@shopify/hydrogen/react";
 import type { EveMessage } from "eve/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
-import { getCartMutationResult } from "@/lib/agent/cart";
-import { setAgentCartStatus, useAgentCartStatus } from "@/lib/agent/cart/client";
+import { getCartMutationResult, isCartMutation } from "@/lib/agent/cart";
+import {
+  getAgentCartStatus,
+  setAgentCartStatus,
+  useAgentCartStatus,
+} from "@/lib/agent/cart/client";
 
 export function AgentCartBridge({
   messages,
@@ -17,31 +21,36 @@ export function AgentCartBridge({
   const { refresh } = useCartActions();
   const cart = useCart((state) => state);
   const seen = useRef(new Set<string>());
+  const touched = useRef(new Set<string>());
   const hydrated = useRef(false);
   const refreshing = useRef(false);
   const observedLoading = useRef(false);
   const previousNetworkErrorAt = useRef(0);
   const cartStatus = useAgentCartStatus();
   const busy = status === "submitted" || status === "streaming" || status === "resuming";
-  useEffect(() => {
-    setAgentCartStatus("pending");
-    let cartChanged = false;
+  // Interrupted or errored cart writes may have landed, so any cart tool call forces a refresh at settle.
+  useLayoutEffect(() => {
+    let confirmed = false;
     for (const message of messages)
       for (const part of message.parts) {
-        if (
-          part.type !== "dynamic-tool" ||
-          part.state !== "output-available" ||
-          part.partial ||
-          seen.current.has(part.toolCallId)
-        )
-          continue;
-        seen.current.add(part.toolCallId);
-        if (hydrated.current && getCartMutationResult(part)) cartChanged = true;
+        if (part.type !== "dynamic-tool" || seen.current.has(part.toolCallId)) continue;
+        const settled =
+          (part.state === "output-available" && !part.partial) || part.state === "output-error";
+        if (settled) seen.current.add(part.toolCallId);
+        if (!isCartMutation(part.toolName) || (!hydrated.current && !busy)) continue;
+        touched.current.add(part.toolCallId);
+        if (settled && getCartMutationResult(part)) confirmed = true;
       }
     if (!busy) hydrated.current = true;
-    if (busy && !cartChanged) return;
+    if (!confirmed && (busy || !touched.current.size)) {
+      if (!busy && !refreshing.current && getAgentCartStatus() === "pending")
+        setAgentCartStatus("ready");
+      return;
+    }
+    touched.current.clear();
     refreshing.current = true;
     observedLoading.current = false;
+    setAgentCartStatus("pending");
     refresh();
   }, [busy, messages, refresh]);
   useEffect(() => {
