@@ -8,6 +8,9 @@ minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
+  # Track Next 16.4 canaries on the release-next-16-4 branch.
+  - "next"
+  - "@next/*"
 
 packages:
   - "apps/*"
