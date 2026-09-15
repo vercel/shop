@@ -70,7 +70,7 @@ For assistant changes, read the installed Eve docs starting at `node_modules/eve
 
 Eve owns `/eve/v1/*`. Next.js prepares the browser cart through `/api/agent/session`; do not add another chat route or internal commerce HTTP bridge. Tool schemas and execution belong in `agent/tools/`, shared execution helpers in `agent/lib/`, and browser state, presentation helpers, and shared result types in `lib/agent/`. Keep Next.js request/cache APIs out of Eve's runtime imports. Use shared uncached catalog operations and Hydrogen cart handlers directly, with cart identity bound from the browser cookie rather than model arguments.
 
-Preserve confirmed-mutation signals and Hydrogen reconciliation; restored messages must not replay cart writes or reopen the drawer. Do not claim exactly-once writes, conversation ownership, or server-history deletion on Clear. For conversation changes, check multiple search turns, visible results, and cumulative usage. For session controls, check restoration, Stop/Clear recovery, failures, and usage-limit feedback. Distinguish browser/live-store evidence from mocks and build checks.
+Preserve confirmed-mutation signals and Hydrogen reconciliation; restored messages must not replay cart writes or reopen the drawer. Do not claim exactly-once writes, conversation ownership, or server-history deletion on Clear. For conversation changes, check multiple search turns, visible results, and cumulative usage. For session controls, check restoration, Stop/Clear recovery, and failures. Mitigate abuse and cost with BotID, rate limits, and Gateway spending controls rather than per-session token caps. Distinguish browser/live-store evidence from mocks and build checks.
 
 ## Route the work
 

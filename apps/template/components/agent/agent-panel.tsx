@@ -17,8 +17,20 @@ import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
 import { AgentCartBridge } from "./cart-bridge";
 import { ChatMessage } from "./chat-message";
 import { AgentComposer } from "./composer";
+import { AgentThinking } from "./thinking";
 
 const CANCEL_TIMEOUT_MS = 10_000;
+const SESSION_PREP_TTL_MS = 60_000;
+
+function prepareAgentSession() {
+  return fetch("/api/agent/session", {
+    credentials: "same-origin",
+    method: "POST",
+    redirect: "error",
+  }).then((response) => {
+    if (!response.ok) throw new Error("Could not prepare the assistant. Please try again.");
+  });
+}
 
 export interface AgentPanelProps {
   onOpenChange: (open: boolean) => void;
@@ -38,12 +50,28 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   } | null>(null);
   const cartPending = useAgentCartPending();
   const [controlError, setControlError] = useState<string | null>(null);
+  const [pendingSend, setPendingSend] = useState(false);
+  const sessionPrep = useRef<{ at: number; promise: Promise<void> } | null>(null);
+  // Warm the cart cookie ahead of send so the turn dispatches without a round trip.
+  const prepareSession = useCallback(() => {
+    const now = Date.now();
+    const current = sessionPrep.current;
+    if (current && now - current.at < SESSION_PREP_TTL_MS) return current.promise;
+    const promise = prepareAgentSession();
+    sessionPrep.current = { at: now, promise };
+    promise.catch(() => {
+      if (sessionPrep.current?.promise === promise) sessionPrep.current = null;
+    });
+    return promise;
+  }, []);
   const agent = useEveAgent({
     initialSession: stored.session,
     onError(cause) {
+      setPendingSend(false);
       clearAttempt.current?.reject(cause);
     },
     onFinish(finished) {
+      setPendingSend(false);
       if (finished.error) clearAttempt.current?.reject(finished.error);
       else clearAttempt.current?.resolve();
     },
@@ -52,12 +80,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
       writeStoredChat(snapshot.current);
     },
     async prepareSend(turn) {
-      const response = await fetch("/api/agent/session", {
-        credentials: "same-origin",
-        method: "POST",
-        redirect: "error",
-      });
-      if (!response.ok) throw new Error("Could not prepare the assistant. Please try again.");
+      await prepareSession();
       return {
         ...turn,
         clientContext: { pathname: location.pathname, search: location.search },
@@ -71,7 +94,16 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     error,
     status,
   } = agent;
-  const busy = status === "submitted" || status === "streaming" || status === "resuming";
+  const dispatching = pendingSend && status === "ready";
+  const busy =
+    dispatching || status === "submitted" || status === "streaming" || status === "resuming";
+  const awaitingReply =
+    dispatching ||
+    status === "submitted" ||
+    (status === "streaming" && messages.at(-1)?.role === "user");
+  useEffect(() => {
+    if (open) void prepareSession().catch(() => {});
+  }, [open, prepareSession]);
   const hasReachedLimit = messages.some((message) =>
     message.parts.some(
       (part) =>
@@ -141,6 +173,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     setAgentCartStatus("pending");
     agent.reset();
     setInput("");
+    setPendingSend(false);
     setClearing(false);
     setControlError(null);
     snapshot.current = { input: "" };
@@ -155,15 +188,13 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const handleSend = (text: string) => {
     if (busy || clearing || cartPending || hasReachedLimit) return;
     pinnedRef.current = true;
+    setPendingSend(true);
     setAgentCartStatus("pending");
     setControlError(null);
-    void agent
-      .send(text)
-      .catch(() =>
-        setControlError(
-          "Could not send your message. Try again, or clear an expired conversation.",
-        ),
-      );
+    void agent.send(text).catch(() => {
+      setPendingSend(false);
+      setControlError("Could not send your message. Try again, or clear an expired conversation.");
+    });
     setInput("");
   };
   const handleClear = async () => {
@@ -260,24 +291,21 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
             ref={contentRef}
             className="flex min-h-full flex-col justify-end gap-6 px-2.5 py-5 [&>*]:shrink-0"
           >
-            {messages.length === 0 ? (
-              status === "resuming" ? (
-                showRestoring && (
-                  <p className="text-muted-foreground text-sm">Restoring your conversation…</p>
-                )
-              ) : (
-                <p className="text-foreground text-sm">Hi, how can I help?</p>
-              )
-            ) : (
-              messages.map((message, index) => (
-                <ChatMessage
-                  key={message.id}
-                  isLatest={index === messages.length - 1}
-                  isStreaming={status === "streaming" && index === messages.length - 1}
-                  message={message}
-                />
-              ))
-            )}
+            {messages.length === 0
+              ? status === "resuming"
+                ? showRestoring && (
+                    <p className="text-muted-foreground text-sm">Restoring your conversation…</p>
+                  )
+                : !awaitingReply && <p className="text-foreground text-sm">Hi, how can I help?</p>
+              : messages.map((message, index) => (
+                  <ChatMessage
+                    key={message.id}
+                    isLatest={index === messages.length - 1}
+                    isStreaming={status === "streaming" && index === messages.length - 1}
+                    message={message}
+                  />
+                ))}
+            {awaitingReply && <AgentThinking active />}
           </div>
         </div>
         {(clearing || (showRestoring && messages.length > 0)) && (
@@ -295,11 +323,14 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         <AgentCartBridge messages={messages} status={status} />
         <AgentComposer
           disabled={!busy && (clearing || cartPending || hasReachedLimit)}
-          onChange={setInput}
+          onChange={(value) => {
+            setInput(value);
+            void prepareSession().catch(() => {});
+          }}
           onStop={handleStop}
           onSubmit={handleSend}
           placeholder="Ask anything…"
-          status={status}
+          status={dispatching ? "submitted" : status}
           value={input}
         />
         {(error || controlError) && (
