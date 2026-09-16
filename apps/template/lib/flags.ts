@@ -24,5 +24,16 @@ export const pdpGallery = flag<boolean>({
   ],
 });
 
+export const showAgent = flag<boolean>({
+  adapter: vercelAdapter<boolean, unknown>(),
+  defaultValue: false,
+  description: "Show the Shop Agent trigger in the action bar",
+  key: "show-agent",
+  options: [
+    { label: "Hidden", value: false },
+    { label: "Shown", value: true },
+  ],
+});
+
 // Precomputed in proxy.ts and encoded into the hidden [flags] segment.
-export const precomputedFlags = [ctaColor, pdpGallery] as const;
+export const precomputedFlags = [ctaColor, pdpGallery, showAgent] as const;

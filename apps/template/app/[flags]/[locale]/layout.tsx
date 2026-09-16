@@ -20,9 +20,9 @@ import { Toaster } from "@/components/ui/sonner";
 import { botIdProtectedRoutes } from "@/lib/botid";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
-import { precomputedFlags } from "@/lib/flags";
+import { precomputedFlags, showAgent } from "@/lib/flags";
 import { enabledLocales } from "@/lib/i18n";
-import { getLocale } from "@/lib/params";
+import { getFlagsCode, getLocale } from "@/lib/params";
 import { buildAlternates } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -41,10 +41,12 @@ export const generateStaticParams = async () => {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/[flags]/[locale]">) {
-  const [locale, messages, t] = await Promise.all([
+  const flagsCode = await getFlagsCode();
+  const [locale, messages, t, showAgentTrigger] = await Promise.all([
     getLocale(),
     getMessages(),
     getTranslations("accessibility"),
+    showAgent(flagsCode, precomputedFlags),
   ]);
   const agentMessages = {
     agent: messages.agent,
@@ -79,7 +81,7 @@ export default async function RootLayout({ children }: LayoutProps<"/[flags]/[lo
             <CartUI />
             <Suspense>
               <ActionBar>
-                {shopConfig.agent.isEnabled && (
+                {showAgentTrigger && (
                   <NextIntlClientProvider messages={agentMessages}>
                     <AgentButton />
                   </NextIntlClientProvider>
