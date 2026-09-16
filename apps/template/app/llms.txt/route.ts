@@ -23,8 +23,8 @@ export async function GET(): Promise<Response> {
 Use this storefront to discover, compare, and purchase its products.
 
 - Search when a shopper describes what they need.
-- Fetch product and collection URLs as Markdown to compare prices, variants, availability, and product details.
-- Use a browser-capable flow for cart and checkout actions.
+- Fetch product and collection URLs as Markdown to learn what a product is, what it costs, and which options exist.
+- Use the UCP profile at \`${url}/.well-known/ucp\` for live per-variant availability, cart, and checkout.
 - Do not treat this storefront as developer documentation or a general-purpose public API.
 
 ## Browse
@@ -36,6 +36,7 @@ ${collectionLinks.length > 0 ? `\n## Collections\n\n${collectionLinks.join("\n")
 
 - [Sitemap](${url}/sitemap.xml): Complete index of product and collection URLs.
 - [Robots](${url}/robots.txt): Crawl policy.
+- [UCP profile](${url}/.well-known/ucp): Agent commerce endpoints for availability, cart, and checkout.
 
 ---
 

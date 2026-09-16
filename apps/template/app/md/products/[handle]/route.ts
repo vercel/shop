@@ -2,14 +2,18 @@ import { shopConfig } from "@/lib/config";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { productToMarkdown } from "@/lib/markdown/product";
 import { markdownHeaders } from "@/lib/markdown/representation";
-import { getProductWithVariants } from "@/lib/product/server";
+import { getProduct } from "@/lib/product/server";
 
-export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
+// Opts the handler into the stored-output model; every handle renders on demand and is kept until its tag is invalidated.
+export function generateStaticParams(): Array<{ handle: string }> {
+  return [];
+}
+
+export async function GET(_request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
-  const url = new URL(request.url);
   const pathname = `/products/${handle}`;
   try {
-    const product = await getProductWithVariants({
+    const product = await getProduct({
       handle,
     });
     if (!product) {
