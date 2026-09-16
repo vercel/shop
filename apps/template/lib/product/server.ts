@@ -14,7 +14,6 @@ import {
   fetchProducts,
   fetchProductsByIds,
   fetchProductVariant,
-  fetchProductWithVariants,
   fetchRelatedProducts,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
@@ -51,24 +50,8 @@ export async function getProductVariant(params: {
   locale?: CommerceLocale;
   selectedOptions: SelectedOption[];
 }): Promise<ProductVariant | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product-${params.handle}`);
-
+  // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
   return fetchProductVariant(params);
-}
-
-export async function getProductWithVariants(params: {
-  handle: string;
-  locale?: CommerceLocale;
-}): Promise<ProductDetails | undefined> {
-  "use cache";
-  cacheLife("max");
-  cacheTag("products", `product-${params.handle}`);
-
-  const product = await fetchProductWithVariants(params);
-  if (product) tagProducts([product]);
-  return product;
 }
 
 export async function getProducts(params: ProductsParams): Promise<ProductsResult> {
