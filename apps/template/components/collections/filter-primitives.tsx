@@ -2,10 +2,10 @@
 
 import { cn } from "cn";
 import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
-import Link from "next/link";
 import type { ComponentProps, MouseEventHandler, ReactNode } from "react";
 
 import { Input } from "@/components/ui/input";
+import Link from "@/components/ui/link";
 
 function FilterSidebar({ className, children, ...props }: ComponentProps<"aside">) {
   return (

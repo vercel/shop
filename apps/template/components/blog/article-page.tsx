@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";

@@ -1,10 +1,10 @@
 import { formatMoney } from "@shopify/hydrogen";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { formatOrderDate, OrderStatusBadge } from "@/components/account/order-display";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
+import Link from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
 import { getCustomerOrders } from "@/lib/shopify/operations/customer/server";

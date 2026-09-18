@@ -4,11 +4,11 @@ import { type CartLine as HydrogenCartLine, formatMoney } from "@shopify/hydroge
 import { useCart } from "@shopify/hydrogen/react";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
 import { CartLineForm } from "@/components/cart/line-form";
 import { CartWarnings } from "@/components/cart/warnings";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import Link from "@/components/ui/link";
 import type { CartLine } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 
