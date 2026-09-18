@@ -24,6 +24,20 @@ Keep Shopify routing ahead of locale negotiation, experiments, and request-depen
 
 Use Next.js configuration for fixed redirects, such as moving an old page to a new URL. Use the proxy when the destination depends on the incoming request.
 
+## Shopify redirects on missing pages
+
+Shopify's redirect fallback is disabled by default. Set `notFound.shopifyRedirects.isEnabled` to `true` in `lib/config/index.ts` to enable Hydrogen's handler on the storefront's not-found page.
+
+When a page is not found, Hydrogen can:
+
+- Send `/admin` to your store's Shopify admin.
+- Follow a same-origin destination from a `return_to` or `redirect` query parameter.
+- Look up URL redirects saved in Shopify and send shoppers to the configured destination.
+
+Existing storefront pages are not overridden. If no redirect matches or the Shopify lookup fails, the shopper stays on the not-found page. To use a saved redirect, create the old-path-to-new-path mapping in Shopify, then visit the old URL and confirm the destination.
+
+Saved redirects require an additional Shopify request for missing pages, including visits from bots. The not-found page can appear while the lookup runs. Next.js may stream the redirect inside an HTTP `404` response rather than preserving Hydrogen's `301`, so clients that only read the HTTP status can still see a missing page. Use fixed redirects in Next.js configuration when you need a permanent HTTP redirect before rendering.
+
 ## What’s next
 
 Add locale routing with [Shopify Markets](/docs/skills/enable-shopify-markets) or [i18n](/docs/skills/enable-i18n), or introduce request-dependent experiments and redirects. Keep those rules scoped to storefront pages so cart, sign-in, and API requests continue to work.

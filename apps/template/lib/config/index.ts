@@ -37,6 +37,11 @@ export const shopConfig = {
     language: "EN",
     locale: "en-US" as const,
   },
+  notFound: {
+    shopifyRedirects: {
+      isEnabled: false,
+    },
+  },
   pdp: {
     bundles: {
       isEnabled: true,
