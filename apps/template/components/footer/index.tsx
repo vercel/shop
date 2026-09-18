@@ -1,8 +1,8 @@
 import { cn } from "cn";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/policies/server";
