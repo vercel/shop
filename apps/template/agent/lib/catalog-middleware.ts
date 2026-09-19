@@ -16,13 +16,20 @@ export const catalogMiddleware = {
             )
               return part;
             const output = part.output.value;
-            if (!output || typeof output !== "object" || Array.isArray(output) || output.isError)
+            if (
+              !output ||
+              typeof output !== "object" ||
+              Array.isArray(output) ||
+              !("structuredContent" in output) ||
+              output.isError
+            )
               return part;
             const catalog = output.structuredContent;
             if (
               !catalog ||
               typeof catalog !== "object" ||
               Array.isArray(catalog) ||
+              !("products" in catalog) ||
               !Array.isArray(catalog.products)
             )
               return part;
