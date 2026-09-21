@@ -8,18 +8,6 @@ minimumReleaseAge: 2880
 minimumReleaseAgeExclude:
   - "@vercel/agent-readability"
   - "@vercel/geistdocs"
-  # Temporary exceptions until the 48-hour window closes at 2026-09-20T22:32:26Z.
-  - "@ai-sdk/gateway@4.0.87"
-  - "@ai-sdk/provider-utils@5.0.45"
-  - "@turbo/darwin-64@2.11.2"
-  - "@turbo/darwin-arm64@2.11.2"
-  - "@turbo/linux-64@2.11.2"
-  - "@turbo/linux-arm64@2.11.2"
-  - "@turbo/windows-64@2.11.2"
-  - "@turbo/windows-arm64@2.11.2"
-  - "ai@7.0.107"
-  - "eve@0.61.1"
-  - "turbo@2.11.2"
 
 packages:
   - "apps/*"
