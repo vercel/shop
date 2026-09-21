@@ -6,32 +6,33 @@ type: reference
 
 Edit `lib/config/index.ts` to choose which features your storefront offers. Keep credentials in [environment variables](/docs/reference/env-vars) and manage catalog content in Shopify.
 
-Customer accounts, Shop Agent, analytics, bot protection, and WebMCP are **disabled by default**. Enable only the features you intend to use and complete their setup before deploying.
+Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify redirects on missing pages are **disabled by default**. Enable only the features you intend to use and complete their setup before deploying.
 
 ## Settings
 
-| Setting                               | Default              | Behavior                                                                         |
-| ------------------------------------- | -------------------- | -------------------------------------------------------------------------------- |
-| `agent.isEnabled`                     | `false`              | Enables Shop Agent for product discovery, store questions, and cart updates.     |
-| `analytics.vercel.isEnabled`          | `false`              | Enables Vercel Web Analytics.                                                    |
-| `analytics.speedInsights.isEnabled`   | `false`              | Enables Vercel Speed Insights.                                                   |
-| `analytics.shopify.isEnabled`         | `false`              | Sends browsing and cart events to Shopify, subject to consent.                   |
-| `analytics.shopify.consentMode`       | `default-banner`     | Chooses how shoppers give analytics consent; see below.                          |
-| `auth.isEnabled`                      | `false`              | Enables customer sign-in and account pages.                                      |
-| `botid.isEnabled`                     | `false`              | Enables Vercel BotID checks for Shop Agent requests.                             |
-| `botid.checkLevel`                    | `basic`              | Chooses `basic` or `deepAnalysis` bot detection.                                 |
-| `browserAgents.webmcp.isEnabled`      | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.      |
-| `localization.country`                | `"US"`               | Sets the country used for Shopify pricing and availability.                      |
-| `localization.language`               | `"EN"`               | Requests Shopify content in this language.                                       |
-| `localization.locale`                 | `"en-US"`            | Sets display formatting; does not translate interface text or select a currency. |
-| `pdp.bundles.isEnabled`               | `true`               | Shows bundle relationships when Shopify provides them.                           |
-| `pdp.buyWithShop.isEnabled`           | `true`               | Shows Buy with Shop.                                                             |
-| `pdp.complementaryProducts.isEnabled` | `true`               | Shows complementary products when Shopify provides them.                         |
-| `pdp.quantityPicker.isEnabled`        | `true`               | Shows the product quantity picker.                                               |
-| `pdp.relatedProducts.isEnabled`       | `true`               | Shows related products when Shopify provides them.                               |
-| `search.isEnabled`                    | `true`               | Shows the header search button and predictive search dialog.                     |
-| `site.name`                           | `"Vercel Shop"`      | Sets the storefront name.                                                        |
-| `site.url`                            | Deployment-dependent | Sets the public origin used for canonical URLs, metadata, and discovery links.   |
+| Setting                               | Default              | Behavior                                                                                                                       |
+| ------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `agent.isEnabled`                     | `false`              | Enables Shop Agent for product discovery, store questions, and cart updates.                                                   |
+| `analytics.vercel.isEnabled`          | `false`              | Enables Vercel Web Analytics.                                                                                                  |
+| `analytics.speedInsights.isEnabled`   | `false`              | Enables Vercel Speed Insights.                                                                                                 |
+| `analytics.shopify.isEnabled`         | `false`              | Sends browsing and cart events to Shopify, subject to consent.                                                                 |
+| `analytics.shopify.consentMode`       | `default-banner`     | Chooses how shoppers give analytics consent; see below.                                                                        |
+| `auth.isEnabled`                      | `false`              | Enables customer sign-in and account pages.                                                                                    |
+| `botid.isEnabled`                     | `false`              | Enables Vercel BotID checks for Shop Agent requests.                                                                           |
+| `botid.checkLevel`                    | `basic`              | Chooses `basic` or `deepAnalysis` bot detection.                                                                               |
+| `browserAgents.webmcp.isEnabled`      | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.                                                    |
+| `localization.country`                | `"US"`               | Sets the country used for Shopify pricing and availability.                                                                    |
+| `localization.language`               | `"EN"`               | Requests Shopify content in this language.                                                                                     |
+| `localization.locale`                 | `"en-US"`            | Sets display formatting; does not translate interface text or select a currency.                                               |
+| `pdp.bundles.isEnabled`               | `true`               | Shows bundle relationships when Shopify provides them.                                                                         |
+| `pdp.buyWithShop.isEnabled`           | `true`               | Shows Buy with Shop.                                                                                                           |
+| `pdp.complementaryProducts.isEnabled` | `true`               | Shows complementary products when Shopify provides them.                                                                       |
+| `pdp.quantityPicker.isEnabled`        | `true`               | Shows the product quantity picker.                                                                                             |
+| `pdp.relatedProducts.isEnabled`       | `true`               | Shows related products when Shopify provides them.                                                                             |
+| `redirects.shopifyNotFound.isEnabled` | `false`              | Enables [Shopify redirect lookup](/docs/anatomy/proxy#shopify-redirects-on-missing-pages) when a storefront page is not found. |
+| `search.isEnabled`                    | `true`               | Shows the header search button and predictive search dialog.                                                                   |
+| `site.name`                           | `"Vercel Shop"`      | Sets the storefront name.                                                                                                      |
+| `site.url`                            | Deployment-dependent | Sets the public origin used for canonical URLs, metadata, and discovery links.                                                 |
 
 ## Before enabling optional features
 

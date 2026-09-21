@@ -8,6 +8,7 @@ import { type ReactNode, useSyncExternalStore } from "react";
 import { PageViewedTracker } from "@/components/analytics/trackers";
 import type { ShopAnalyticsData } from "@/lib/analytics/types";
 import { shopConfig } from "@/lib/config";
+import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";
 
 interface ShopifyScriptsTrackerProps {
   shop: ShopAnalyticsData;
@@ -57,6 +58,7 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
         consent={{ mode: shopConfig.analytics.shopify.consentMode }}
         i18n={i18n}
         navigate={(url) => router.push(url)}
+        routes={SHOPIFY_ROUTE_TEMPLATES}
         shop={shopifyShop}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.browserAgents.webmcp.isEnabled}

@@ -12,7 +12,9 @@ Use Shopify's built-in content tools to publish editorial and policy pages witho
 - Store policies appear at `/policies/[handle]`.
 - Blogs appear at `/blogs/[blogHandle]`, with articles at `/blogs/[blogHandle]/[articleHandle]`.
 
-Unknown handles return a not-found page. There is no combined `/blogs` page, so navigation should link to a specific blog such as `/blogs/news`.
+Unknown handles return a not-found page by default. You can opt into [Shopify redirects](/docs/anatomy/proxy#shopify-redirects-on-missing-pages) for missing pages.
+
+There is no combined `/blogs` page, so navigation should link to a specific blog such as `/blogs/news`.
 
 While content loads, a placeholder shows the shape of the page, article, or blog listing.
 

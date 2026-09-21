@@ -69,6 +69,11 @@ export interface ShopConfig {
       isEnabled: boolean;
     };
   };
+  redirects: {
+    shopifyNotFound: {
+      isEnabled: boolean;
+    };
+  };
   search: {
     isEnabled: boolean;
   };
