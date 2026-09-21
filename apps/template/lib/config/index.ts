@@ -54,6 +54,11 @@ export const shopConfig = {
       isEnabled: true,
     },
   },
+  redirects: {
+    shopifyNotFound: {
+      isEnabled: false,
+    },
+  },
   search: {
     isEnabled: true,
   },

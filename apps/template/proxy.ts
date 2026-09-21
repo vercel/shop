@@ -19,6 +19,7 @@ import { shopConfig } from "@/lib/config";
 import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/representation";
 import { getMarkdownPath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
+import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 
 const AUTH_PATHS = new Set<string>([
@@ -72,6 +73,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
     handlers,
     request,
     requestContext,
+    routeTemplates: SHOPIFY_ROUTE_TEMPLATES,
     sessionManager: usesCustomerCart ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
     storefrontClient: createRequestStorefrontClient(requestContext),
   });
