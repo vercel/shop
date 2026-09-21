@@ -2,7 +2,6 @@ import { createShopifyRequestContext, handleShopifyRedirects } from "@shopify/hy
 import { headers } from "next/headers";
 import Link from "next/link";
 import { permanentRedirect, redirect } from "next/navigation";
-import { connection } from "next/server";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
@@ -38,7 +37,6 @@ export default function NotFoundError() {
 }
 
 async function ShopifyNotFoundRedirect() {
-  await connection();
   const requestHeaders = await headers();
   const url = requestHeaders.get("x-storefront-url");
   if (!url) return null;
