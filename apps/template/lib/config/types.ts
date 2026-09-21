@@ -52,11 +52,6 @@ export interface ShopConfig {
   localization: CommerceLocale & {
     locale: string;
   };
-  notFound: {
-    shopifyRedirects: {
-      isEnabled: boolean;
-    };
-  };
   pdp: {
     bundles: {
       isEnabled: boolean;
@@ -71,6 +66,11 @@ export interface ShopConfig {
       isEnabled: boolean;
     };
     relatedProducts: {
+      isEnabled: boolean;
+    };
+  };
+  redirects: {
+    shopifyNotFound: {
       isEnabled: boolean;
     };
   };

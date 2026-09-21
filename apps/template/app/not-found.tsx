@@ -13,7 +13,7 @@ import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
 export default function NotFoundError() {
   return (
     <Page className="flex flex-1 flex-col">
-      {shopConfig.notFound.shopifyRedirects.isEnabled ? (
+      {shopConfig.redirects.shopifyNotFound.isEnabled ? (
         <Suspense fallback={null}>
           <ShopifyNotFoundRedirect />
         </Suspense>

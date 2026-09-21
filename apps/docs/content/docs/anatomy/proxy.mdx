@@ -26,7 +26,9 @@ Use Next.js configuration for fixed redirects, such as moving an old page to a n
 
 ## Shopify redirects on missing pages
 
-Shopify's redirect fallback is disabled by default. Set `notFound.shopifyRedirects.isEnabled` to `true` in `lib/config/index.ts` to enable Hydrogen's handler on the storefront's not-found page.
+Shopify's redirect fallback is disabled by default. Set `redirects.shopifyNotFound.isEnabled` to `true` in `lib/config/index.ts` to enable Hydrogen's handler on the storefront's not-found page.
+
+[Variant-ID links](/docs/reference/routes#variant-urls) work independently of this setting.
 
 When a page is not found, Hydrogen can:
 
