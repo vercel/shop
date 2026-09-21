@@ -1,18 +1,5 @@
 {
-  "dependencies": {
-    "@changesets/changelog-github": "1.0.1",
-    "@changesets/cli": "3.0.2",
-    "turbo": "2.10.12"
-  },
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "onFail": "download",
-      "version": "24.x"
-    }
-  },
   "name": "@vercel/shop",
-  "packageManager": "pnpm@12.3.4",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -24,5 +11,18 @@
     "start": "turbo run start",
     "test": "turbo run test",
     "version": "changeset version"
-  }
+  },
+  "dependencies": {
+    "@changesets/changelog-github": "1.0.1",
+    "@changesets/cli": "3.0.3",
+    "turbo": "2.11.2"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "24.x",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.5.1"
 }
