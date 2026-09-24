@@ -70,3 +70,8 @@ export const shopConfig = {
     url: defaultUrl,
   },
 } satisfies ShopConfig;
+
+export const isShopifyScriptsEnabled =
+  shopConfig.analytics.shopify.isEnabled ||
+  shopConfig.analytics.shopify.consent.isEnabled ||
+  shopConfig.shopify.webmcp.isEnabled;
