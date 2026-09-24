@@ -8,7 +8,7 @@ export async function getPage(params: {
   handle: string;
   locale?: CommerceLocale;
 }): Promise<ContentPage | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("pages", `page-${params.handle}`);
 

@@ -43,8 +43,7 @@ export async function getCollection(params: {
   handle: string;
   locale?: CommerceLocale;
 }): Promise<Collection | undefined> {
-  // Plain cache is required to bake the collection into the PLP shell.
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("collections", `collection-${params.handle}`);
 
@@ -54,7 +53,7 @@ export async function getCollection(params: {
 export async function getCollectionsListing(
   params: { limit?: number; locale?: CommerceLocale } = {},
 ): Promise<CollectionWithThumbnail[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("collections", "collections-index");
 
