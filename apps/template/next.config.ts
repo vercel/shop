@@ -7,6 +7,13 @@ import { withShopConfig } from "./lib/config/server";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  cacheLife: {
+    max: {
+      expire: 60 * 60 * 24 * 365,
+      revalidate: 60 * 60 * 24 * 30,
+      stale: 60 * 60,
+    },
+  },
   images: {
     deviceSizes: [1080],
     imageSizes: [],
