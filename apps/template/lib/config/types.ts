@@ -23,7 +23,10 @@ export interface ShopConfig {
   };
   analytics: {
     shopify: {
-      consentMode: NonNullable<ConsentConfig["mode"]>;
+      consent: {
+        isEnabled: boolean;
+        mode: NonNullable<ConsentConfig["mode"]>;
+      };
       isEnabled: boolean;
     };
     speedInsights: {
@@ -43,11 +46,6 @@ export interface ShopConfig {
       >["checkLevel"]
     >;
     isEnabled: boolean;
-  };
-  browserAgents: {
-    webmcp: {
-      isEnabled: boolean;
-    };
   };
   localization: CommerceLocale & {
     locale: string;
@@ -76,6 +74,11 @@ export interface ShopConfig {
   };
   search: {
     isEnabled: boolean;
+  };
+  shopify: {
+    webmcp: {
+      isEnabled: boolean;
+    };
   };
   site: {
     name: string;
