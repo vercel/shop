@@ -10,7 +10,7 @@ export async function AnalyticsComponents() {
   const useShopifyScripts =
     shopConfig.analytics.shopify.isEnabled ||
     shopConfig.analytics.shopify.consent.isEnabled ||
-    shopConfig.browserAgents.webmcp.isEnabled;
+    shopConfig.shopify.webmcp.isEnabled;
 
   return (
     <>

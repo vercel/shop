@@ -47,11 +47,6 @@ export interface ShopConfig {
     >;
     isEnabled: boolean;
   };
-  browserAgents: {
-    webmcp: {
-      isEnabled: boolean;
-    };
-  };
   localization: CommerceLocale & {
     locale: string;
   };
@@ -79,6 +74,11 @@ export interface ShopConfig {
   };
   search: {
     isEnabled: boolean;
+  };
+  shopify: {
+    webmcp: {
+      isEnabled: boolean;
+    };
   };
   site: {
     name: string;

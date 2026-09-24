@@ -61,7 +61,7 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
         routes={SHOPIFY_ROUTE_TEMPLATES}
         shop={shopifyShop}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
-        webMcp={shopConfig.browserAgents.webmcp.isEnabled}
+        webMcp={shopConfig.shopify.webmcp.isEnabled}
       />
       <AnalyticsReady>
         <PageViewedTracker />

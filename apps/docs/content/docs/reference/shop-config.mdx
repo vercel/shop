@@ -21,7 +21,6 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 | `auth.isEnabled`                      | `false`              | Enables customer sign-in and account pages.                                                                                    |
 | `botid.isEnabled`                     | `false`              | Enables Vercel BotID checks for Shop Agent requests.                                                                           |
 | `botid.checkLevel`                    | `basic`              | Chooses `basic` or `deepAnalysis` bot detection.                                                                               |
-| `browserAgents.webmcp.isEnabled`      | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.                                                    |
 | `localization.country`                | `"US"`               | Sets the country used for Shopify pricing and availability.                                                                    |
 | `localization.language`               | `"EN"`               | Requests Shopify content in this language.                                                                                     |
 | `localization.locale`                 | `"en-US"`            | Sets display formatting; does not translate interface text or select a currency.                                               |
@@ -32,6 +31,7 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 | `pdp.relatedProducts.isEnabled`       | `true`               | Shows related products when Shopify provides them.                                                                             |
 | `redirects.shopifyNotFound.isEnabled` | `false`              | Enables [Shopify redirect lookup](/docs/anatomy/proxy#shopify-redirects-on-missing-pages) when a storefront page is not found. |
 | `search.isEnabled`                    | `true`               | Shows the header search button and predictive search dialog.                                                                   |
+| `shopify.webmcp.isEnabled`            | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.                                                    |
 | `site.name`                           | `"Vercel Shop"`      | Sets the storefront name.                                                                                                      |
 | `site.url`                            | Deployment-dependent | Sets the public origin used for canonical URLs, metadata, and discovery links.                                                 |
 
