@@ -43,13 +43,16 @@ If the storefront has `analytics` configuration in `lib/config/index.ts`, enable
 
 ```ts
 analytics: {
-  shopify: { consentMode: "default-banner", isEnabled: false },
+  shopify: {
+    consent: { isEnabled: false, mode: "default-banner" },
+    isEnabled: false,
+  },
   speedInsights: { isEnabled: false },
   vercel: { isEnabled: false },
 },
 ```
 
-The `shopify` gate is separate: it controls Shopify storefront analytics, which the storefront already ships. Leave it alone unless the user asked about Shopify analytics, and see Part D.
+The `shopify` gate is separate: it controls Shopify storefront analytics and its consent integration. Standalone consent can be enabled separately through `shopify.consent.isEnabled`. Leave these settings alone unless the user asked about Shopify analytics or consent, and see Part D.
 
 ### A1. Install dependencies
 
@@ -101,7 +104,7 @@ Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_G
 
 ### C1. Update `components/analytics/index.tsx`
 
-Extend the existing root analytics component. Do not create a sibling `components/analytics.tsx`, which would shadow the directory import. Preserve `ShopifyScriptsTracker`, its shop data, and the existing consent integration while adding the selected providers:
+Extend the existing root analytics component. Do not create a sibling `components/analytics.tsx`, which would shadow the directory import. Preserve the Shopify scripts gate: Shopify analytics, standalone consent, and WebMCP each require `ShopifyScriptsTracker` and its shop data. When all three are off, do not fetch shop analytics data:
 
 ```tsx
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -115,16 +118,22 @@ import { ShopifyScriptsTracker } from "./shopify-client";
 
 export async function AnalyticsComponents() {
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
+  const useShopifyScripts =
+    shopConfig.analytics.shopify.isEnabled ||
+    shopConfig.analytics.shopify.consent.isEnabled ||
+    shopConfig.browserAgents.webmcp.isEnabled;
 
   return (
     <>
       {shopConfig.analytics.vercel.isEnabled ? <Analytics /> : null}
       {shopConfig.analytics.speedInsights.isEnabled ? <SpeedInsights /> : null}
       {gtmId ? <GoogleTagManager gtmId={gtmId} /> : null}
-      <ShopifyScriptsTracker
-        shop={await getShopAnalytics({})}
-        storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? ""}
-      />
+      {useShopifyScripts && (
+        <ShopifyScriptsTracker
+          shop={await getShopAnalytics({})}
+          storefrontId={process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? ""}
+        />
+      )}
     </>
   );
 }
@@ -153,17 +162,17 @@ Do not add next-intl or a root message catalog for analytics. In a customized lo
 
 ## Part D: Shopify storefront analytics
 
-Only make changes here if the user asked about Shopify analytics.
+Only make changes here if the user asked about Shopify analytics or consent.
 
-The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus. It is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn Shopify's built-in analytics destination on, set `analytics.shopify.isEnabled` to `true` in `lib/config/index.ts`.
+The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus when Shopify scripts are enabled. Shopify analytics is disabled by default and requires no credentials beyond the Storefront API variables the storefront already needs. To turn Shopify's built-in analytics destination and consent integration on, set `analytics.shopify.isEnabled` to `true` in `lib/config/index.ts`. To load Shopify consent without its analytics destination, set `analytics.shopify.consent.isEnabled` to `true`. WebMCP also loads Shopify scripts and consent without enabling the analytics destination.
 
-Consent mode is set by `analytics.shopify.consentMode` in `lib/config/index.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
+Consent mode is set by `analytics.shopify.consent.mode` in `lib/config/index.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 
 Third-party analytics can subscribe through the same destination API, so consent gating and buffered replay remain centralized. Register destinations with `addAnalyticsDestination()` from `lib/analytics/client.ts`; do not publish cart-change events manually.
 
 ## Guardrails
 
-- Keep root analytics providers and their gates in `components/analytics/index.tsx`; preserve the existing Shopify scripts and consent integration.
+- Keep root analytics providers and their gates in `components/analytics/index.tsx`; mount Shopify scripts when Shopify analytics, consent, or WebMCP is enabled.
 - Always mount `<AnalyticsComponents />` from the root layout, even when every provider is disabled.
 - The GTM container ID must come from `NEXT_PUBLIC_GTM_ID`, never hardcoded. The provider renders nothing if the env var is missing.
 - Use `@next/third-parties/google` for GTM, not a manual `<script>` tag. The Next.js component handles script loading and performance optimization.

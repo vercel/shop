@@ -23,7 +23,10 @@ export interface ShopConfig {
   };
   analytics: {
     shopify: {
-      consentMode: NonNullable<ConsentConfig["mode"]>;
+      consent: {
+        isEnabled: boolean;
+        mode: NonNullable<ConsentConfig["mode"]>;
+      };
       isEnabled: boolean;
     };
     speedInsights: {

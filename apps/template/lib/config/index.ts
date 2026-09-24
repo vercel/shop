@@ -10,7 +10,10 @@ export const shopConfig = {
   },
   analytics: {
     shopify: {
-      consentMode: "default-banner",
+      consent: {
+        isEnabled: false,
+        mode: "default-banner",
+      },
       isEnabled: false,
     },
     speedInsights: {
