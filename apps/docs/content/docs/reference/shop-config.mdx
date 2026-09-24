@@ -15,12 +15,12 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 | `agent.isEnabled`                     | `false`              | Enables Shop Agent for product discovery, store questions, and cart updates.                                                   |
 | `analytics.vercel.isEnabled`          | `false`              | Enables Vercel Web Analytics.                                                                                                  |
 | `analytics.speedInsights.isEnabled`   | `false`              | Enables Vercel Speed Insights.                                                                                                 |
-| `analytics.shopify.isEnabled`         | `false`              | Sends browsing and cart events to Shopify, subject to consent.                                                                 |
-| `analytics.shopify.consentMode`       | `default-banner`     | Chooses how shoppers give analytics consent; see below.                                                                        |
+| `analytics.shopify.isEnabled`         | `false`              | Enables Shopify analytics and its consent integration.                                                                         |
+| `analytics.shopify.consent.isEnabled` | `false`              | Enables Shopify consent without enabling Shopify analytics.                                                                    |
+| `analytics.shopify.consent.mode`      | `default-banner`     | Chooses how shoppers give consent; see below.                                                                                  |
 | `auth.isEnabled`                      | `false`              | Enables customer sign-in and account pages.                                                                                    |
 | `botid.isEnabled`                     | `false`              | Enables Vercel BotID checks for Shop Agent requests.                                                                           |
 | `botid.checkLevel`                    | `basic`              | Chooses `basic` or `deepAnalysis` bot detection.                                                                               |
-| `browserAgents.webmcp.isEnabled`      | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.                                                    |
 | `localization.country`                | `"US"`               | Sets the country used for Shopify pricing and availability.                                                                    |
 | `localization.language`               | `"EN"`               | Requests Shopify content in this language.                                                                                     |
 | `localization.locale`                 | `"en-US"`            | Sets display formatting; does not translate interface text or select a currency.                                               |
@@ -31,6 +31,7 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 | `pdp.relatedProducts.isEnabled`       | `true`               | Shows related products when Shopify provides them.                                                                             |
 | `redirects.shopifyNotFound.isEnabled` | `false`              | Enables [Shopify redirect lookup](/docs/anatomy/proxy#shopify-redirects-on-missing-pages) when a storefront page is not found. |
 | `search.isEnabled`                    | `true`               | Shows the header search button and predictive search dialog.                                                                   |
+| `shopify.webmcp.isEnabled`            | `false`              | Registers Shopify catalog and cart tools with WebMCP in supported browsers.                                                    |
 | `site.name`                           | `"Vercel Shop"`      | Sets the storefront name.                                                                                                      |
 | `site.url`                            | Deployment-dependent | Sets the public origin used for canonical URLs, metadata, and discovery links.                                                 |
 
@@ -50,7 +51,7 @@ Country and language control the Shopify context. The formatting locale controls
 
 ## Shopify consent modes
 
-These modes apply when Shopify analytics is enabled.
+Shopify consent loads when Shopify analytics, standalone consent, or WebMCP is enabled. If all three are off, the storefront still loads Shopify cart actions, but skips the analytics and consent scripts and their shop-data lookup. These modes apply whenever Shopify consent loads.
 
 | Value            | Behavior                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------- |

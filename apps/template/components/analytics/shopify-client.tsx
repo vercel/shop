@@ -55,13 +55,13 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
       </script>
       <ShopifyScripts
         analytics={{ channel: "headless" }}
-        consent={{ mode: shopConfig.analytics.shopify.consentMode }}
+        consent={{ mode: shopConfig.analytics.shopify.consent.mode }}
         i18n={i18n}
         navigate={(url) => router.push(url)}
         routes={SHOPIFY_ROUTE_TEMPLATES}
         shop={shopifyShop}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
-        webMcp={shopConfig.browserAgents.webmcp.isEnabled}
+        webMcp={shopConfig.shopify.webmcp.isEnabled}
       />
       <AnalyticsReady>
         <PageViewedTracker />

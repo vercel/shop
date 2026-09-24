@@ -6,7 +6,7 @@ type: guide
 
 Shopify webhooks make supported Admin changes appear on the storefront without waiting for cached data to expire. The template accepts Shopify notifications at `POST /api/webhooks/shopify` and refreshes the affected product, collection, recommendation, sitemap, or metaobject content.
 
-Webhooks are disabled by default. Without `SHOPIFY_WEBHOOK_SECRET`, the endpoint returns `404` and Shopify changes appear only after cache expiry or a redeploy.
+Webhooks are disabled by default. Without `SHOPIFY_WEBHOOK_SECRET`, the endpoint returns `404`. Edits appear when cached content refreshes or the site is redeployed; cache eviction can make them appear sooner.
 
 ## Set up Shopify webhooks
 
@@ -26,7 +26,7 @@ Register these supported topics:
 - `collections/create`, `collections/update`, and `collections/delete`
 - Metaobject create, update, and delete topics
 
-You can register only the topics your store uses. An unregistered topic simply means those changes wait for normal cache expiry.
+You can register only the topics your store uses. Changes without a registered topic have no event-driven refresh.
 
 See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 
@@ -42,9 +42,9 @@ Metaobject notifications refresh metaobject-backed content only when your custom
 
 ## Limits
 
-The included handler does not refresh inventory-level changes. Stock updates therefore appear at cache expiry unless another supported product webhook arrives or you add a live inventory strategy.
+The included handler does not refresh inventory-level changes. Stock shown for the default variant can lag until the product cache refreshes; selecting a variant reads its current availability from Shopify.
 
-This handler does not refresh Online Store pages, blogs, articles, or store policies. Those edits wait for cache revalidation unless you arrange a separate refresh. See [Content pages](/docs/anatomy/pages/content) for publishing guidance.
+This handler does not refresh Online Store pages, blogs, articles, or store policies. Those edits appear when cached content refreshes unless you arrange a separate refresh. See [Content pages](/docs/anatomy/pages/content) for publishing guidance.
 
 Navigation menu edits are also outside this handler.
 

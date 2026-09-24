@@ -24,7 +24,7 @@ import type {
   SearchIndexProductsResult,
 } from "@/lib/shopify/operations/products/types";
 
-// Only valid inside a "use cache" scope.
+// Only valid inside a cache directive scope.
 export function tagProducts(products: Array<{ id: string }>): void {
   for (const product of products) {
     const numericId = getNumericShopifyId(product.id);
@@ -36,7 +36,7 @@ export async function getProduct(params: {
   handle: string;
   locale?: CommerceLocale;
 }): Promise<ProductDetails | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("products", `product-${params.handle}`);
 

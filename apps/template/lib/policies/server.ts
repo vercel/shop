@@ -7,7 +7,7 @@ import { fetchShopPolicies } from "@/lib/shopify/operations/policies/server";
 export async function getShopPolicies(
   params: { locale?: CommerceLocale } = {},
 ): Promise<ShopPolicy[]> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("policies");
 

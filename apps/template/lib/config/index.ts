@@ -10,7 +10,10 @@ export const shopConfig = {
   },
   analytics: {
     shopify: {
-      consentMode: "default-banner",
+      consent: {
+        isEnabled: false,
+        mode: "default-banner",
+      },
       isEnabled: false,
     },
     speedInsights: {
@@ -26,11 +29,6 @@ export const shopConfig = {
   botid: {
     checkLevel: "basic",
     isEnabled: false,
-  },
-  browserAgents: {
-    webmcp: {
-      isEnabled: false,
-    },
   },
   localization: {
     country: "US",
@@ -62,8 +60,18 @@ export const shopConfig = {
   search: {
     isEnabled: true,
   },
+  shopify: {
+    webmcp: {
+      isEnabled: false,
+    },
+  },
   site: {
     name: "Vercel Shop",
     url: defaultUrl,
   },
 } satisfies ShopConfig;
+
+export const isShopifyScriptsEnabled =
+  shopConfig.analytics.shopify.isEnabled ||
+  shopConfig.analytics.shopify.consent.isEnabled ||
+  shopConfig.shopify.webmcp.isEnabled;

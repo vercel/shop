@@ -14,7 +14,7 @@ Enable WebMCP only for active testing. When enabled in a supporting browser, Sho
 
 Shopify defines and hosts the available tools. The template cannot select or change individual tools, and Shopify may update them independently.
 
-WebMCP and Shopify analytics are separate choices. Enabling WebMCP does not enable Shopify page-view reporting.
+WebMCP and Shopify analytics are separate choices. Enabling WebMCP loads Shopify's browser scripts, including consent, but does not enable Shopify page-view reporting.
 
 ## Test locally
 
@@ -23,7 +23,7 @@ For local testing, use a Chrome build that exposes the WebMCP testing flag:
 1. Check that your Chrome build supports WebMCP testing.
 2. Open `chrome://flags/#enable-webmcp-testing`.
 3. Enable **WebMCP for testing**, then relaunch Chrome.
-4. Set `browserAgents.webmcp.isEnabled` to `true` in `lib/config/index.ts`, then load the site.
+4. Set `shopify.webmcp.isEnabled` to `true` in `lib/config/index.ts`, then load the site.
 5. Use a WebMCP inspector or a connected browser agent to list and invoke the registered tools.
 6. Confirm that search returns structured catalog results and cart actions update the shopper's cart.
 

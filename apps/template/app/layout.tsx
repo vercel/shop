@@ -10,6 +10,7 @@ import { AgentButton } from "@/components/agent/agent-button";
 import { AnalyticsComponents } from "@/components/analytics";
 import { CartUI } from "@/components/cart/cart-ui";
 import { CartProviderWrapper } from "@/components/cart/context";
+import { CartStandardActionsScript } from "@/components/cart/standard-actions";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   const cartData = seedCartData();
   return (
     <html lang={shopConfig.localization.locale}>
-      <head>{shopConfig.botid.isEnabled && <BotIdClient protect={botIdProtectedRoutes} />}</head>
+      <head>
+        {shopConfig.botid.isEnabled && <BotIdClient protect={botIdProtectedRoutes} />}
+        <CartStandardActionsScript />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}
       >
