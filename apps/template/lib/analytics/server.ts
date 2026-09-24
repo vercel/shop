@@ -7,7 +7,7 @@ import { fetchShopAnalytics } from "@/lib/shopify/operations/shop/server";
 export async function getShopAnalytics(
   params: { locale?: CommerceLocale } = {},
 ): Promise<ShopAnalyticsData> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("shop-analytics");
 
