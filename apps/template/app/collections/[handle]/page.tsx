@@ -10,6 +10,8 @@ import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collec
 import { getCollection, getCollections } from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
+export const unstable_ensureStatic = "shell";
+
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
 export async function generateStaticParams() {
