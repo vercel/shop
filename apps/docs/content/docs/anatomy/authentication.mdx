@@ -14,6 +14,7 @@ Set `auth.isEnabled` to `true` in `lib/config/index.ts` and configure these envi
 
 ```bash
 CUSTOMER_ACCOUNT_SESSION_SECRET="your-session-secret-here"
+NEXT_PUBLIC_SHOP_ID="123456789"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID="shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET="your-customer-account-client-secret-here"
 ```
@@ -24,7 +25,7 @@ Shopify provides the confidential client ID and client secret. Generate the sess
 openssl rand -base64 32
 ```
 
-Keep both secrets server-only and identical across every instance of a deployment. Rotating the session secret signs out all customers. A build with authentication enabled fails when the session secret, client ID, or client secret is missing.
+Keep both secrets server-only and identical across every instance of a deployment. Rotating the session secret signs out all customers. Use the numeric shop ID for `NEXT_PUBLIC_SHOP_ID`, not the Headless storefront ID. A build with authentication enabled fails when the shop ID, session secret, client ID, or client secret is missing.
 
 Customer Account OAuth requires a public HTTPS origin. For local testing, open the storefront through a public HTTPS tunnel.
 
@@ -38,7 +39,8 @@ In Shopify Admin:
 6. Add `https://YOUR_DOMAIN/account/authorize` as the callback URI.
 7. Add `https://YOUR_DOMAIN/` as the logout URI.
 8. Set `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET` to the copied values.
-9. Confirm `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` identifies the same store.
+9. Set `NEXT_PUBLIC_SHOP_ID` to the shop ID shown in Shopify's default customer accounts URL.
+10. Confirm `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN` identifies the same store.
 
 Shopify does not support wildcard callback or logout URIs. Register every production, preview, and tunnel origin that needs authentication. See [Environment Variables](/docs/reference/env-vars) for the full variable reference.
 

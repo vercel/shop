@@ -41,9 +41,12 @@ Shop Agent is **disabled by default** and needs no AI credentials while disabled
 | Variable                            | When to set it                                                                                                      |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `DEBUG_SHOPIFY`                     | Set to `1` or `true` when troubleshooting Shopify API requests. Enables detailed operation and timing logs.         |
+| `NEXT_PUBLIC_SHOP_ID`               | Required when Shopify analytics, consent, WebMCP, or customer authentication is enabled. Use the numeric shop ID.   |
 | `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID` | Set to the numeric ID of your Headless storefront when you need storefront-specific cart attribution.               |
 | `SHOPIFY_API_VERSION`               | Override the Storefront API version. Defaults to `unstable`; this does not select the Customer Account API version. |
 | `SHOPIFY_WEBHOOK_SECRET`            | Set when configuring Shopify webhooks. Used to verify signatures on `POST /api/webhooks/shopify`.                   |
+
+The numeric shop ID is distinct from the Headless storefront ID. Shopify's default customer accounts URL has the form `https://shopify.com/123456789/account`, where `123456789` is the shop ID. Builds fail if a feature needs `NEXT_PUBLIC_SHOP_ID` and the value is missing or not numeric.
 
 ## Platform-provided values
 

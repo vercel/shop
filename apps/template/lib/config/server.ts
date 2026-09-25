@@ -4,7 +4,7 @@ import {
   PHASE_PRODUCTION_SERVER,
 } from "next/constants";
 
-import { shopConfig } from "./index";
+import { isShopifyScriptsEnabled, shopConfig } from "./index";
 import type {
   NextConfigContext,
   NextConfigFactory,
@@ -27,6 +27,14 @@ function assertRequiredEnv(phase: string) {
     throw new Error(
       `Missing required Shopify environment variables: ${missingShopify.join(", ")}. See .env.example.`,
     );
+  }
+
+  if (shopConfig.auth.isEnabled || isShopifyScriptsEnabled) {
+    if (!/^\d+$/.test(process.env.NEXT_PUBLIC_SHOP_ID ?? "")) {
+      throw new Error(
+        "NEXT_PUBLIC_SHOP_ID must be a numeric Shopify shop ID when auth, Shopify analytics, consent, or WebMCP is enabled. See .env.example.",
+      );
+    }
   }
 
   if (shopConfig.auth.isEnabled) {
