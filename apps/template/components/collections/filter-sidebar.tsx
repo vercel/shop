@@ -9,9 +9,9 @@ import {
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
-import Link from "next/link";
 import { useState } from "react";
 
+import Link from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import { parseFilterInput } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";

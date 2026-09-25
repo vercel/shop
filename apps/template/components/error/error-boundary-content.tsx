@@ -1,9 +1,9 @@
 "use client";
 
 import { AlertCircleIcon } from "lucide-react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import Link from "@/components/ui/link";
 
 export function ErrorBoundaryContent({ reset }: { reset: () => void }) {
   return (

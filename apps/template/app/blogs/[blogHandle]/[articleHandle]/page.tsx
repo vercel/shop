@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { ArticlePage } from "@/components/blog/article-page";
+import { ArticlePage, ArticlePageSkeleton } from "@/components/blog/article-page";
 import { getBlog, getBlogArticle } from "@/lib/blog/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopifySitemapPage } from "@/lib/seo/server";
@@ -69,9 +70,19 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogArticlePage({
+export default function BlogArticlePage({
   params,
 }: PageProps<"/blogs/[blogHandle]/[articleHandle]">) {
+  return (
+    <Suspense fallback={<ArticlePageSkeleton />}>
+      <BlogArticlePageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function BlogArticlePageContent({
+  params,
+}: Pick<PageProps<"/blogs/[blogHandle]/[articleHandle]">, "params">) {
   const { blogHandle, articleHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE || articleHandle === PLACEHOLDER_HANDLE) notFound();
   const article = await getBlogArticle({

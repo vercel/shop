@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { RichTextPage } from "@/components/content/rich-text-page";
+import { RichTextPage, RichTextPageSkeleton } from "@/components/content/rich-text-page";
 import { getPage } from "@/lib/pages/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopifySitemapPage } from "@/lib/seo/server";
@@ -41,9 +42,15 @@ export async function generateMetadata({
   };
 }
 
-export const instant = false;
+export default function ShopifyPage({ params }: PageProps<"/pages/[handle]">) {
+  return (
+    <Suspense fallback={<RichTextPageSkeleton />}>
+      <ShopifyPageContent params={params} />
+    </Suspense>
+  );
+}
 
-export default async function ShopifyPage({ params }: PageProps<"/pages/[handle]">) {
+async function ShopifyPageContent({ params }: Pick<PageProps<"/pages/[handle]">, "params">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const page = await getPage({

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
@@ -8,6 +7,7 @@ import { SEARCH_SORT_EXCLUDE } from "@/components/collections/sort-select";
 import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
 import { SearchResultsGrid } from "@/components/search/results";
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";

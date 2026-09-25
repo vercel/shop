@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { unstable_navigation } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ProductViewedTracker } from "@/components/analytics/trackers";
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
+import { ProductDetailSkeleton } from "@/components/product-detail/product-detail-skeleton";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -71,12 +73,24 @@ export async function generateMetadata({
   return buildProductMetadata(handle, `/products/${handle}`);
 }
 
-export const instant = false;
+export default function ProductPage({ params, searchParams }: PageProps<"/products/[handle]">) {
+  return (
+    <Page className="pt-0">
+      <Container className="bg-background">
+        <Sections>
+          <Suspense fallback={<ProductDetailSkeleton />}>
+            <ProductPageContent params={params} searchParams={searchParams} />
+          </Suspense>
+        </Sections>
+      </Container>
+    </Page>
+  );
+}
 
-export default async function ProductPage({
+async function ProductPageContent({
   params,
   searchParams,
-}: PageProps<"/products/[handle]">) {
+}: Pick<PageProps<"/products/[handle]">, "params" | "searchParams">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const product = await getProduct({
@@ -92,12 +106,13 @@ export default async function ProductPage({
     }),
   );
   const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
-    (resolvedSearchParams) => {
+    async (resolvedSearchParams) => {
       if (
         Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
       ) {
         return product.defaultVariant;
       }
+      await unstable_navigation();
       return getProductVariant({
         handle,
         selectedOptions: toSelectedOptionList({
@@ -120,20 +135,14 @@ export default async function ProductPage({
           variantPromise={variantPromise}
         />
       </Suspense>
-      <Page className="pt-0">
-        <Container className="bg-background">
-          <Sections>
-            <ProductDetailSection
-              product={product}
-              selectedOptionsPromise={selectedOptionsPromise}
-              variantPromise={variantPromise}
-            />
-            {shopConfig.pdp.relatedProducts.isEnabled ? (
-              <RelatedProductsSection handle={handle} limit={4} />
-            ) : null}
-          </Sections>
-        </Container>
-      </Page>
+      <ProductDetailSection
+        product={product}
+        selectedOptionsPromise={selectedOptionsPromise}
+        variantPromise={variantPromise}
+      />
+      {shopConfig.pdp.relatedProducts.isEnabled ? (
+        <RelatedProductsSection handle={handle} limit={4} />
+      ) : null}
     </>
   );
 }

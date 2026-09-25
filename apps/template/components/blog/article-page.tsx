@@ -1,15 +1,38 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { BlogArticle } from "@/lib/blog/types";
 import { shopConfig } from "@/lib/config";
 
 export interface ArticlePageProps {
   article: BlogArticle;
+}
+
+export function ArticlePageSkeleton() {
+  return (
+    <Page aria-busy="true">
+      <Container className="max-w-4xl">
+        <Sections className="gap-5">
+          <div className="grid justify-items-center gap-4">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-9 w-3/4 sm:h-10 md:h-12" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <Skeleton className="aspect-3/2 w-full rounded-xl" />
+          <div className="mx-auto grid w-full max-w-2xl gap-2.5">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+        </Sections>
+      </Container>
+    </Page>
+  );
 }
 
 export function ArticlePage({ article }: ArticlePageProps) {

@@ -1,10 +1,10 @@
 import { createShopifyRequestContext, handleShopifyRedirects } from "@shopify/hydrogen";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { permanentRedirect, redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
+import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { shopConfig } from "@/lib/config";
 import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";

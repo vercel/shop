@@ -1,6 +1,6 @@
 import { UserRoundCheckIcon, UserRoundIcon } from "lucide-react";
-import Link from "next/link";
 
+import Link from "@/components/ui/link";
 import { isCustomerLoggedIn } from "@/lib/auth/server";
 
 export async function NavAccount() {
