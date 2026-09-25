@@ -20,6 +20,8 @@ import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { buildAlternates } from "@/lib/seo";
 
+export const unstable_ensureStatic = "shell";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
