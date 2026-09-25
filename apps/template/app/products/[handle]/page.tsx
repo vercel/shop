@@ -17,8 +17,6 @@ import { type SelectedOptions } from "@/lib/product/types";
 import type { ProductVariant } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
-export const unstable_ensureStatic = "shell";
-
 const PLACEHOLDER_HANDLE = "__placeholder__";
 
 async function buildProductMetadata(handle: string, canonicalPath: string): Promise<Metadata> {
