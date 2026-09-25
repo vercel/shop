@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { unstable_navigation } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -105,12 +106,13 @@ async function ProductPageContent({
     }),
   );
   const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
-    (resolvedSearchParams) => {
+    async (resolvedSearchParams) => {
       if (
         Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
       ) {
         return product.defaultVariant;
       }
+      await unstable_navigation();
       return getProductVariant({
         handle,
         selectedOptions: toSelectedOptionList({
