@@ -4,6 +4,9 @@ const defaultUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
   ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
   : "http://localhost:3000";
 
+// TODO(shopify): Remove the fallback and restore build validation when Shopify supplies the shop ID automatically.
+export const SHOPIFY_SHOP_ID = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID || "123456789";
+
 export const shopConfig = {
   agent: {
     isEnabled: false,

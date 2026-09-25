@@ -6,13 +6,12 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useSyncExternalStore } from "react";
 
 import { PageViewedTracker } from "@/components/analytics/trackers";
-import type { ShopAnalyticsData } from "@/lib/analytics/types";
 import { shopConfig } from "@/lib/config";
 import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";
 
 interface ShopifyScriptsTrackerProps {
-  shop: ShopAnalyticsData;
-  storefrontId: string;
+  i18n: ShopifyScriptsI18n;
+  shop: ShopifyScriptsShop;
 }
 
 const subscribeNoop = () => () => {};
@@ -32,18 +31,8 @@ function CartAnalyticsTracker() {
   return null;
 }
 
-export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrackerProps) {
+export function ShopifyScriptsTracker({ i18n, shop }: ShopifyScriptsTrackerProps) {
   const router = useRouter();
-  const i18n: ShopifyScriptsI18n = {
-    country: shop.country,
-    currency: shop.currency,
-    language: shop.acceptedLanguage,
-  };
-  const shopifyShop: ShopifyScriptsShop = {
-    myshopifyDomain: shop.storeDomain,
-    shopId: shop.shopId,
-    storefrontId,
-  };
 
   return (
     <>
@@ -59,7 +48,7 @@ export function ShopifyScriptsTracker({ shop, storefrontId }: ShopifyScriptsTrac
         i18n={i18n}
         navigate={(url) => router.push(url)}
         routes={SHOPIFY_ROUTE_TEMPLATES}
-        shop={shopifyShop}
+        shop={shop}
         shopifyAnalytics={shopConfig.analytics.shopify.isEnabled}
         webMcp={shopConfig.shopify.webmcp.isEnabled}
       />
