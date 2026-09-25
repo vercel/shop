@@ -39,7 +39,7 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 
 **Shop Agent** requires AI Gateway access in addition to the storefront's Shopify connection. Customer sign-in is not required. Follow [Shop Agent setup](/docs/anatomy/agent), including its privacy and spending safeguards, before enabling public traffic.
 
-**Customer accounts** require a Shopify client ID, Shopify client secret, and a separate app-generated session secret. Follow [Authentication](/docs/anatomy/authentication) to configure those values and register callback URLs before enabling `auth.isEnabled`.
+**Customer accounts** require a Shopify client ID, Shopify client secret, and a separate app-generated session secret in addition to the shop ID required for every build. Follow [Authentication](/docs/anatomy/authentication) to configure those values and register callback URLs before enabling `auth.isEnabled`.
 
 **Bot protection** can be enabled separately for Shop Agent on Vercel. Review [BotID pricing](https://vercel.com/docs/botid#pricing) before choosing `deepAnalysis`. It does not make chat history private or cap AI spending.
 
@@ -47,11 +47,13 @@ Customer accounts, Shop Agent, analytics, bot protection, WebMCP, and Shopify re
 
 On Vercel, `site.url` uses the project's production domain. Elsewhere it defaults to `http://localhost:3000`; set it to your public storefront origin before deploying.
 
+Set the required `NEXT_PUBLIC_SHOPIFY_SHOP_ID` to the numeric shop ID, not the Headless storefront ID.
+
 Country and language control the Shopify context. The formatting locale controls how values are displayed. Changing these settings does not translate storefront interface text, and currency comes from Shopify's responses. See [Shopify Markets](/docs/skills/enable-shopify-markets) or [i18n](/docs/skills/enable-i18n) when adding localized storefronts.
 
 ## Shopify consent modes
 
-Shopify consent loads when Shopify analytics, standalone consent, or WebMCP is enabled. If all three are off, the storefront still loads Shopify cart actions, but skips the analytics and consent scripts and their shop-data lookup. These modes apply whenever Shopify consent loads.
+Shopify consent loads when Shopify analytics, standalone consent, or WebMCP is enabled. If all three are off, the storefront still loads Shopify cart actions but skips the analytics and consent scripts. These modes apply whenever Shopify consent loads.
 
 | Value            | Behavior                                                                                     |
 | ---------------- | -------------------------------------------------------------------------------------------- |
