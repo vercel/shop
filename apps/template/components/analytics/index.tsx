@@ -13,7 +13,7 @@ export function AnalyticsComponents() {
   };
   const shop: ShopifyScriptsShop = {
     myshopifyDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,
-    shopId: process.env.NEXT_PUBLIC_SHOP_ID as string,
+    shopId: process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string,
     storefrontId: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? "",
   };
 

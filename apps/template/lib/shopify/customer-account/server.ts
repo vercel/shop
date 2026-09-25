@@ -16,7 +16,7 @@ export async function customerAccountFetch<Doc extends AnyCustomerAccountDocumen
   operation,
   variables,
 }: CustomerAccountFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
-  const shopId = process.env.NEXT_PUBLIC_SHOP_ID as string;
+  const shopId = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string;
   const client: CustomerAccountClient = createCustomerAccountClient({
     shopId,
     requestContext: createShopifyRequestContext({

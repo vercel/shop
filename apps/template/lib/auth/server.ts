@@ -174,7 +174,7 @@ export function getHydrogenCustomerSession() {
   if (!shopConfig.auth.isEnabled) notFound();
 
   if (!shopifyCustomerSession) {
-    const shopId = process.env.NEXT_PUBLIC_SHOP_ID as string;
+    const shopId = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string;
     const clientId = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string;
     const clientSecret = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET as string;
     const tokenUrl = `https://shopify.com/authentication/${shopId}/oauth/token`;

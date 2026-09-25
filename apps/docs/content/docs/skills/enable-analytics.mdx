@@ -104,7 +104,7 @@ Import `GoogleTagManager` from `@next/third-parties/google`. Read `NEXT_PUBLIC_G
 
 ### C1. Update `components/analytics/index.tsx`
 
-Extend the existing root analytics component. Do not create a sibling `components/analytics.tsx`, which would shadow the directory import. Preserve the Shopify scripts gate: Shopify analytics, standalone consent, and WebMCP each require a numeric `NEXT_PUBLIC_SHOP_ID`. Build the ShopifyScripts props from configuration rather than making a shop-data request:
+Extend the existing root analytics component. Do not create a sibling `components/analytics.tsx`, which would shadow the directory import. Preserve the Shopify scripts gate: Shopify analytics, standalone consent, and WebMCP use the required numeric `NEXT_PUBLIC_SHOPIFY_SHOP_ID`. Build the ShopifyScripts props from configuration rather than making a shop-data request:
 
 ```tsx
 import type { ShopifyScriptsI18n, ShopifyScriptsShop } from "@shopify/hydrogen";
@@ -124,7 +124,7 @@ export function AnalyticsComponents() {
   };
   const shop: ShopifyScriptsShop = {
     myshopifyDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string,
-    shopId: process.env.NEXT_PUBLIC_SHOP_ID as string,
+    shopId: process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string,
     storefrontId: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID ?? "",
   };
 
@@ -164,7 +164,7 @@ Do not add next-intl or a root message catalog for analytics. In a customized lo
 
 Only make changes here if the user asked about Shopify analytics or consent.
 
-The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus when Shopify scripts are enabled. Shopify analytics is disabled by default. Set the numeric `NEXT_PUBLIC_SHOP_ID` before enabling Shopify analytics, standalone consent, or WebMCP; the build fails without it. To turn Shopify's built-in analytics destination and consent integration on, set `analytics.shopify.isEnabled` to `true` in `lib/config/index.ts`. To load Shopify consent without its analytics destination, set `analytics.shopify.consent.isEnabled` to `true`. WebMCP also loads Shopify scripts and consent without enabling the analytics destination.
+The storefront sends page, product, collection, search, cart-view, and confirmed cart-change events through Hydrogen's analytics bus when Shopify scripts are enabled. Shopify analytics is disabled by default. Set the required `NEXT_PUBLIC_SHOPIFY_SHOP_ID` before building the storefront. Use the numeric Shopify shop ID, not the Headless storefront ID. To turn Shopify's built-in analytics destination and consent integration on, set `analytics.shopify.isEnabled` to `true` in `lib/config/index.ts`. To load Shopify consent without its analytics destination, set `analytics.shopify.consent.isEnabled` to `true`. WebMCP also loads Shopify scripts and consent without enabling the analytics destination.
 
 Consent mode is set by `analytics.shopify.consent.mode` in `lib/config/index.ts` and defaults to `default-banner`, which renders Shopify's hosted privacy banner for visitors in regions that require consent. Use `custom-banner` when the storefront supplies its own consent UI. Do not ship `no-banner` in production unless consent is handled elsewhere, because visitors in those regions can never grant consent and their events are dropped.
 
