@@ -8,7 +8,7 @@ import { absoluteUrl } from "@/lib/geistdocs/site-url";
 import { source } from "@/lib/geistdocs/source";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
 
   const url = (path: string) => absoluteUrl(getPublicPath(path, config.basePath));

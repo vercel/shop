@@ -12,7 +12,7 @@ const sitePath = getPublicPath("/", config.basePath);
 const siteUrl = absoluteUrl(sitePath);
 
 const getFeed = async (lang: string) => {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
 
   const feed = new Feed({

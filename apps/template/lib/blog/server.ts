@@ -9,7 +9,7 @@ export async function getBlog(params: {
   limit?: number;
   locale?: CommerceLocale;
 }): Promise<Blog | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag("articles", "blogs", `blog-${params.handle}`);
 
@@ -21,7 +21,7 @@ export async function getBlogArticle(params: {
   blogHandle: string;
   locale?: CommerceLocale;
 }): Promise<BlogArticle | undefined> {
-  "use cache";
+  "use cache: remote";
   cacheLife("max");
   cacheTag(
     "articles",
