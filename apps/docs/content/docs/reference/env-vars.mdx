@@ -8,12 +8,15 @@ Use `.env.local` for local development and your hosting platform's environment s
 
 ## Required
 
-These two values connect the storefront to your Shopify store.
+These three values identify your Shopify store and connect the storefront.
 
 | Variable                                      | Description                                                                                           |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`            | Store domain, such as `your-store.myshopify.com`. Find it in **Settings → Domains** in Shopify admin. |
 | `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public, browser-safe Storefront API token from **Settings → Apps and sales channels → Headless**.     |
+| `NEXT_PUBLIC_SHOPIFY_SHOP_ID`                 | Numeric Shopify shop ID, distinct from the Headless storefront ID.                                    |
+
+Shopify's default customer accounts URL has the form `https://shopify.com/123456789/account`, where `123456789` is the shop ID. Builds fail if `NEXT_PUBLIC_SHOPIFY_SHOP_ID` is missing.
 
 ## Customer authentication
 

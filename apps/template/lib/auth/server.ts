@@ -11,8 +11,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
-import { shopConfig } from "@/lib/config";
-import { resolveShopId } from "@/lib/shopify/discovery/server";
+import { shopConfig, SHOPIFY_SHOP_ID } from "@/lib/config";
 
 import type { SessionData } from "./types";
 
@@ -169,38 +168,37 @@ function createSessionManager(
   };
 }
 
-let customerSessionPromise: Promise<ReturnType<typeof createCustomerSession>> | undefined;
+let shopifyCustomerSession: ReturnType<typeof createCustomerSession> | undefined;
 
 export function getHydrogenCustomerSession() {
   if (!shopConfig.auth.isEnabled) notFound();
 
-  if (!customerSessionPromise) {
-    customerSessionPromise = resolveShopId().then((shopId) => {
-      const clientId = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string;
-      const clientSecret = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET as string;
-      const tokenUrl = `https://shopify.com/authentication/${shopId}/oauth/token`;
-      const authenticatedFetch: typeof fetch = (input, init) => {
-        const requestUrl = input instanceof Request ? input.url : String(input);
-        if (requestUrl !== tokenUrl) return fetch(input, init);
+  if (!shopifyCustomerSession) {
+    const shopId = SHOPIFY_SHOP_ID;
+    const clientId = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string;
+    const clientSecret = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET as string;
+    const tokenUrl = `https://shopify.com/authentication/${shopId}/oauth/token`;
+    const authenticatedFetch: typeof fetch = (input, init) => {
+      const requestUrl = input instanceof Request ? input.url : String(input);
+      if (requestUrl !== tokenUrl) return fetch(input, init);
 
-        const requestHeaders = new Headers(input instanceof Request ? input.headers : undefined);
-        new Headers(init?.headers).forEach((value, name) => requestHeaders.set(name, value));
-        requestHeaders.set(
-          "Authorization",
-          `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
-        );
-        return fetch(input, { ...init, headers: requestHeaders });
-      };
+      const requestHeaders = new Headers(input instanceof Request ? input.headers : undefined);
+      new Headers(init?.headers).forEach((value, name) => requestHeaders.set(name, value));
+      requestHeaders.set(
+        "Authorization",
+        `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+      );
+      return fetch(input, { ...init, headers: requestHeaders });
+    };
 
-      return createCustomerSession({
-        customerAccountApiClientId: clientId,
-        fetch: authenticatedFetch,
-        shopId,
-      });
+    shopifyCustomerSession = createCustomerSession({
+      customerAccountApiClientId: clientId,
+      fetch: authenticatedFetch,
+      shopId,
     });
   }
 
-  return customerSessionPromise;
+  return shopifyCustomerSession;
 }
 
 export function getCustomerRequestOrigin(request: Request): string {

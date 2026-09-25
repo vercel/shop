@@ -5,9 +5,8 @@ import {
   createCustomerAccountClient,
 } from "@shopify/hydrogen/customer-account";
 
-import { shopConfig } from "@/lib/config";
+import { shopConfig, SHOPIFY_SHOP_ID } from "@/lib/config";
 import type { CustomerAccountFetchOptions } from "@/lib/shopify/customer-account/types";
-import { resolveShopId } from "@/lib/shopify/discovery/server";
 import { logShopifyDebug, shopifyLogger } from "@/lib/shopify/logging/server";
 import type { CustomerAccountResultOf } from "@/lib/shopify/types";
 
@@ -17,7 +16,7 @@ export async function customerAccountFetch<Doc extends AnyCustomerAccountDocumen
   operation,
   variables,
 }: CustomerAccountFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
-  const shopId = await resolveShopId();
+  const shopId = SHOPIFY_SHOP_ID;
   const client: CustomerAccountClient = createCustomerAccountClient({
     shopId,
     requestContext: createShopifyRequestContext({
