@@ -10,6 +10,7 @@ import type { CommerceLocale } from "@/lib/config/types";
 import type {
   ProductCard,
   ProductDetails,
+  ProductPage,
   ProductVariant,
   SelectedOption,
 } from "@/lib/product/types";
@@ -34,7 +35,6 @@ import type {
   SearchFacetsParams,
   SearchFacetsResult,
   SearchIndexProductsParams,
-  SearchIndexProductsResult,
 } from "@/lib/shopify/operations/products/types";
 import { storefront } from "@/lib/shopify/storefront/server";
 import type { StorefrontVariables } from "@/lib/shopify/storefront/types";
@@ -298,7 +298,7 @@ function buildSearchQuery(query: string | undefined, collection: string | undefi
 // `products` drops variant/metafield filters, so /search must use the `search` field.
 export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
-): Promise<SearchIndexProductsResult> {
+): Promise<ProductPage> {
   const {
     collection,
     cursor,
@@ -377,13 +377,11 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   const currencyCode = data.search.nodes.flatMap((node) =>
     node.__typename === "Product" ? [node.priceRange.minVariantPrice.currencyCode] : [],
   )[0];
-  const transformed = transformShopifyFilters(data.search.productFilters, {
-    activeFilters: filters,
-    currencyCode,
-  });
   return {
-    filters: transformed.filters,
-    priceRange: transformed.priceRange,
+    facets: transformShopifyFilters(data.search.productFilters, {
+      activeFilters: filters,
+      currencyCode,
+    }),
     total: data.search.totalCount,
   };
 }
@@ -453,7 +451,7 @@ export async function fetchCollectionProducts(
   const { data } = response;
   if (!data.collection) {
     return {
-      filters: [],
+      facets: { filters: [] },
       pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
       products: [],
     };
@@ -463,14 +461,12 @@ export async function fetchCollectionProducts(
   const products = shopifyProducts.map((product) =>
     transformFilteredShopifyProductCard(product, selectedColor),
   );
-  const transformed = transformShopifyFilters(data.collection.products.filters, {
-    activeFilters: filters,
-    currencyCode: products[0]?.price.currencyCode,
-  });
   return {
-    filters: transformed.filters,
+    facets: transformShopifyFilters(data.collection.products.filters, {
+      activeFilters: filters,
+      currencyCode: products[0]?.price.currencyCode,
+    }),
     pageInfo: data.collection.products.pageInfo,
-    priceRange: transformed.priceRange,
     products,
   };
 }

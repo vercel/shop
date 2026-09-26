@@ -2,25 +2,35 @@
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import { resolveBrowseParams } from "@/lib/collections/server";
-import type { PageInfo } from "@/lib/pagination/types";
-import type { ProductCard } from "@/lib/product/types";
-import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
+import type { BrowseSource } from "@/lib/collections/types";
+import type { ProductPage } from "@/lib/product/types";
+import {
+  fetchCollectionProducts,
+  fetchSearchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
-export async function loadMoreCollectionProductsAction(params: {
-  collection: string;
+export async function loadMoreBrowseProductsAction({
+  cursor,
+  search,
+  source,
+}: {
   cursor: string;
   search: string;
-}): Promise<{ products: ProductCard[]; pageInfo: PageInfo }> {
-  const { filters, sort } = resolveBrowseParams(params.search);
-  const result = await fetchCollectionProducts({
-    collection: params.collection,
-    cursor: params.cursor,
-    sortKey: sort,
-    limit: PRODUCTS_PER_PAGE,
-    filters,
+  source: BrowseSource;
+}): Promise<ProductPage> {
+  const { filters, sort } = resolveBrowseParams(search);
+  const page = { cursor, filters, limit: PRODUCTS_PER_PAGE, sortKey: sort };
+  if (source.type === "search") {
+    // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
+    return fetchSearchIndexProducts({
+      ...page,
+      collection: source.collection,
+      query: source.query,
+    });
+  }
+  const { pageInfo, products } = await fetchCollectionProducts({
+    ...page,
+    collection: source.collection,
   });
-  return {
-    products: result.products,
-    pageInfo: result.pageInfo,
-  };
+  return { pageInfo, products };
 }

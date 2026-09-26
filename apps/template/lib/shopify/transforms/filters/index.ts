@@ -1,6 +1,7 @@
 import { isFilterInputActive, type ProductFilter } from "@shopify/hydrogen";
 
 import type {
+  Facets,
   Filter,
   FilterPresentation,
   FilterType,
@@ -15,7 +16,6 @@ import type {
   ShopifyFilterType,
   ShopifyFilterValue,
   TransformFiltersOptions,
-  TransformedFilters,
 } from "@/lib/shopify/transforms/filters/types";
 
 function isColorKey(value: string): boolean {
@@ -185,7 +185,7 @@ function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): P
 export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
-): TransformedFilters {
+): Facets {
   const { activeFilters = [], currencyCode } = options;
 
   const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");

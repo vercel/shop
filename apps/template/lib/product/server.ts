@@ -4,6 +4,7 @@ import type { CommerceLocale } from "@/lib/config/types";
 import type {
   ProductCard,
   ProductDetails,
+  ProductPage,
   ProductVariant,
   SelectedOption,
 } from "@/lib/product/types";
@@ -15,10 +16,7 @@ import {
   fetchRelatedProducts,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
-import type {
-  SearchIndexProductsParams,
-  SearchIndexProductsResult,
-} from "@/lib/shopify/operations/products/types";
+import type { SearchIndexProductsParams } from "@/lib/shopify/operations/products/types";
 
 // Only valid inside a cache directive scope.
 export function tagProducts(products: Array<{ id: string }>): void {
@@ -53,7 +51,7 @@ export async function getProductVariant(params: {
 // Cursor-paginated browse reads stay uncached in lib/collections/server.ts; this serves fixed grids only.
 export async function getSearchIndexProducts(
   params: SearchIndexProductsParams,
-): Promise<SearchIndexProductsResult> {
+): Promise<ProductPage> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products");

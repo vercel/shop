@@ -2,6 +2,7 @@ import type { ProductInput } from "@shopify/hydrogen";
 
 import type { Image, Video } from "@/lib/media/types";
 import type { Money } from "@/lib/money/types";
+import type { PageInfo } from "@/lib/pagination/types";
 import type { SEO } from "@/lib/seo/types";
 
 export type SelectedOptions = Record<string, string>;
@@ -66,6 +67,11 @@ export interface ProductCard {
   price: Money;
   title: string;
   vendor?: string;
+}
+
+export interface ProductPage {
+  pageInfo: PageInfo;
+  products: ProductCard[];
 }
 
 export interface ProductDetails extends ProductCard {
