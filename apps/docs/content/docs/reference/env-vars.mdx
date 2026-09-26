@@ -16,7 +16,7 @@ These three values identify your Shopify store and connect the storefront.
 | `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN` | Public, browser-safe Storefront API token from **Settings → Apps and sales channels → Headless**.     |
 | `NEXT_PUBLIC_SHOPIFY_SHOP_ID`                 | Numeric Shopify shop ID, distinct from the Headless storefront ID.                                    |
 
-Shopify's default customer accounts URL has the form `https://shopify.com/123456789/account`, where `123456789` is the shop ID. Builds fail if `NEXT_PUBLIC_SHOPIFY_SHOP_ID` is missing.
+Shopify's default customer accounts URL has the form `https://shopify.com/123456789/account`, where `123456789` is the shop ID. The dev server and builds fail if any of the three values is missing.
 
 ## Customer authentication
 
