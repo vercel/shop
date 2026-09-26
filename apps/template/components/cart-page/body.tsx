@@ -3,7 +3,7 @@
 import { OverlayItem } from "@/components/cart/overlay-item";
 import { CartWarnings } from "@/components/cart/warnings";
 import { Container } from "@/components/ui/container";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { useSuspenseCart } from "@/lib/cart/client";

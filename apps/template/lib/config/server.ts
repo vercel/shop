@@ -19,6 +19,7 @@ function assertRequiredEnv(phase: string) {
   if (process.argv.includes("typegen")) return;
 
   const missingShopify = [
+    "NEXT_PUBLIC_SHOPIFY_SHOP_ID",
     "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
     "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
   ].filter((key) => !process.env[key]);

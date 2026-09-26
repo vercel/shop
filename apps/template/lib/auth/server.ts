@@ -11,7 +11,7 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 
-import { shopConfig, SHOPIFY_SHOP_ID } from "@/lib/config";
+import { shopConfig } from "@/lib/config";
 
 import type { SessionData } from "./types";
 
@@ -22,6 +22,10 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60;
 const COOKIE_MAX_CHUNKS = 4;
 
 const COOKIE_NAME = "shop_customer_session";
+
+const REFRESH_ATTEMPT_HEADER = "x-customer-refresh-attempted";
+
+const REFRESH_ATTEMPT_PARAM = "refreshed";
 
 function parseCookies(cookieHeader: string | null): Map<string, string> {
   const cookies = new Map<string, string>();
@@ -72,10 +76,7 @@ function decryptSession(value: string): SessionData {
   }
 }
 
-function readSession(cookieHeader: string | null): {
-  chunkCount: number;
-  data: SessionData;
-} {
+function readSession(cookieHeader: string | null): SessionData {
   const cookies = parseCookies(cookieHeader);
   const chunks: string[] = [];
 
@@ -85,10 +86,7 @@ function readSession(cookieHeader: string | null): {
     chunks.push(chunk);
   }
 
-  return {
-    chunkCount: chunks.length,
-    data: chunks.length > 0 ? decryptSession(chunks.join("")) : {},
-  };
+  return chunks.length > 0 ? decryptSession(chunks.join("")) : {};
 }
 
 function serializeCookie(name: string, value: string, origin: string, maxAge: number): string {
@@ -113,8 +111,7 @@ function createSessionManager(
   origin: string,
   writable: boolean,
 ): ReadonlyCustomerSessionManager | WritableCustomerSessionManager {
-  const initialSession = readSession(cookieHeader);
-  const data = { ...initialSession.data };
+  const data = { ...readSession(cookieHeader) };
   let dirty = false;
 
   const readonlyManager: ReadonlyCustomerSessionManager = {
@@ -174,7 +171,7 @@ export function getHydrogenCustomerSession() {
   if (!shopConfig.auth.isEnabled) notFound();
 
   if (!shopifyCustomerSession) {
-    const shopId = SHOPIFY_SHOP_ID;
+    const shopId = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string;
     const clientId = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID as string;
     const clientSecret = process.env.SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET as string;
     const tokenUrl = `https://shopify.com/authentication/${shopId}/oauth/token`;
@@ -276,14 +273,29 @@ export async function requireCustomerSession(): Promise<void> {
   if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
 }
 
+// Server Components cannot read the URL, so the proxy forwards the one-shot refresh marker as a request header.
+export function forwardCustomerRefreshAttempt(url: URL, requestHeaders: Headers): Headers {
+  requestHeaders.delete(REFRESH_ATTEMPT_HEADER);
+  if (url.searchParams.has(REFRESH_ATTEMPT_PARAM)) requestHeaders.set(REFRESH_ATTEMPT_HEADER, "1");
+  return requestHeaders;
+}
+
+function withRefreshAttempt(path: string): string {
+  const url = new URL(path, shopConfig.site.url);
+  url.searchParams.set(REFRESH_ATTEMPT_PARAM, "1");
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export async function requireCustomerAccessToken(returnTo = "/account"): Promise<string> {
   if (!shopConfig.auth.isEnabled) notFound();
 
   const accessToken = await getCustomerAccessToken();
   if (accessToken) return accessToken;
 
-  if (await isCustomerLoggedIn()) {
-    redirect(`/account/refresh?return_to=${encodeURIComponent(returnTo)}`);
+  // Hydrogen returns to the page unchanged after a transient refresh failure, so a second refresh would loop.
+  const refreshAttempted = (await headers()).has(REFRESH_ATTEMPT_HEADER);
+  if (!refreshAttempted && (await isCustomerLoggedIn())) {
+    redirect(`/account/refresh?return_to=${encodeURIComponent(withRefreshAttempt(returnTo))}`);
   }
 
   redirect(`/account/login?return_to=${encodeURIComponent(returnTo)}`);

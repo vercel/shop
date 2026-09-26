@@ -2,7 +2,7 @@ import { PredictiveSearchProvider } from "@shopify/hydrogen/react";
 import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { shopConfig } from "@/lib/config";
 import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 

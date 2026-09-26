@@ -16,10 +16,9 @@ function RelatedProductsSectionSkeleton({ limit }: { limit: number }) {
   );
 }
 
-async function Render({ handle, limit }: { handle: string | Promise<string>; limit: number }) {
-  const resolvedHandle = await handle;
+async function Render({ handle, limit }: { handle: string; limit: number }) {
   const related = await getRelatedProducts({
-    handle: resolvedHandle,
+    handle,
   });
   if (related.length === 0) return null;
   return (
@@ -34,13 +33,7 @@ async function Render({ handle, limit }: { handle: string | Promise<string>; lim
   );
 }
 
-export function RelatedProductsSection({
-  handle,
-  limit,
-}: {
-  handle: string | Promise<string>;
-  limit: number;
-}) {
+export function RelatedProductsSection({ handle, limit }: { handle: string; limit: number }) {
   return (
     <Suspense fallback={<RelatedProductsSectionSkeleton limit={limit} />}>
       <Render handle={handle} limit={limit} />

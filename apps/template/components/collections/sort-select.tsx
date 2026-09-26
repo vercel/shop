@@ -17,15 +17,6 @@ const SORT_OPTIONS = [
   { value: "created-descending", label: "Date: New to Old" },
 ] as const;
 
-// Storefront `search` only sorts by RELEVANCE and PRICE.
-export const SEARCH_SORT_EXCLUDE: string[] = [
-  "best-selling",
-  "created-ascending",
-  "created-descending",
-  "title-ascending",
-  "title-descending",
-];
-
 export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {
   const { reverse, sortKey, status } = useCollection();
   const { setSortByValue } = useCollectionActions();

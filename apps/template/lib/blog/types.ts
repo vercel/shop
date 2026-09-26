@@ -18,6 +18,5 @@ export interface BlogArticle {
   image: Image | null;
   publishedAt: string;
   seo: SEO;
-  tags: string[];
   title: string;
 }

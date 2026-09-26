@@ -10,8 +10,6 @@ import { useCallback, useState } from "react";
 import type { PredictiveSearchResult } from "@/lib/search/types";
 
 type HydrogenProduct = PredictiveSearchData["items"]["products"][number] & {
-  availableForSale: boolean;
-  compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } } | null;
   featuredImage: {
     altText?: string | null;
     height: number;
@@ -19,7 +17,6 @@ type HydrogenProduct = PredictiveSearchData["items"]["products"][number] & {
     width: number;
   } | null;
   priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
-  vendor?: string | null;
 };
 
 type HydrogenQuery = PredictiveSearchData["items"]["queries"][number] & {
@@ -41,10 +38,7 @@ export function usePredictiveSearch() {
     state.status !== "success"
       ? null
       : {
-          collections: state.result.items.collections,
           products: state.result.items.products.map((product) => ({
-            availableForSale: product.availableForSale,
-            compareAtPrice: product.compareAtPriceRange?.minVariantPrice ?? undefined,
             featuredImage: product.featuredImage
               ? {
                   altText: product.featuredImage.altText ?? "",
@@ -57,7 +51,6 @@ export function usePredictiveSearch() {
             id: product.id,
             price: product.priceRange.minVariantPrice,
             title: product.title,
-            vendor: product.vendor || undefined,
           })),
           queries: state.result.items.queries,
         };
@@ -83,9 +76,5 @@ export function usePredictiveSearch() {
     results,
     setActiveIndex,
     setQuery,
-    totalItems:
-      (results?.collections.length ?? 0) +
-      (results?.products.length ?? 0) +
-      (results?.queries.length ?? 0),
   };
 }

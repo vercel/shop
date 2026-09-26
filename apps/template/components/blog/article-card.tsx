@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import type { BlogArticle } from "@/lib/blog/types";
 import { shopConfig } from "@/lib/config";
 

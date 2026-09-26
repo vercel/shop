@@ -11,7 +11,7 @@ import {
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useState } from "react";
 
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import { parseFilterInput } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";
@@ -134,6 +134,14 @@ export function CollectionFilterSidebarClient({
             <FilterSectionHeader title="Price" />
             <FilterSectionContent>
               <FilterPriceRange
+                currencySymbol={
+                  priceRange.currencyCode
+                    ? formatMoney(
+                        { amount: "0", currencyCode: priceRange.currencyCode },
+                        { locale: shopConfig.localization.locale },
+                      ).currencySymbol
+                    : undefined
+                }
                 fromPlaceholder="From"
                 maxValue={maxInput}
                 minValue={minInput}

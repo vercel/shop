@@ -1,25 +1,23 @@
 import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
 
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { CollectionSearchState } from "@/lib/collections/types";
+import type { BrowseResults, BrowseState } from "@/lib/collections/types";
 import {
   fetchSearchFacets,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
 
-import type { SearchResultsData } from "./types";
-
-export async function getSearchResultsData({
+export async function fetchSearchResults({
   collection,
   query,
-  searchStatePromise,
+  statePromise,
 }: {
   collection?: string;
   query?: string;
-  searchStatePromise: Promise<CollectionSearchState>;
-}): Promise<SearchResultsData> {
-  const { dataSearch, filters, sort } = await searchStatePromise;
-  const [results, facets] = await Promise.all([
+  statePromise: Promise<BrowseState>;
+}): Promise<BrowseResults> {
+  const { dataSearch, filters, sort } = await statePromise;
+  const [{ pageInfo, products }, { facets, total }] = await Promise.all([
     fetchSearchIndexProducts({
       collection,
       filters,
@@ -34,25 +32,17 @@ export async function getSearchResultsData({
     }),
   ]);
   return {
-    collection,
     dataSearch,
-    pageInfo: results.pageInfo,
-    products: results.products,
-    query,
-    total: facets.total,
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
+    facets,
+    pageInfo,
+    products,
+    source: { collection, query, type: "search" },
+    total,
   };
 }
 
 const PRODUCT_FRAGMENT = gql(/* GraphQL */ `
   fragment PredictiveSearchProductFragment on Product {
-    availableForSale
-    compareAtPriceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
     featuredImage {
       altText
       height
@@ -65,14 +55,6 @@ const PRODUCT_FRAGMENT = gql(/* GraphQL */ `
         currencyCode
       }
     }
-    vendor
-  }
-`);
-
-const COLLECTION_FRAGMENT = gql(/* GraphQL */ `
-  fragment PredictiveSearchCollectionFragment on Collection {
-    handle
-    title
   }
 `);
 
@@ -85,10 +67,9 @@ const QUERY_FRAGMENT = gql(/* GraphQL */ `
 
 export const predictiveSearchHandlers = createPredictiveSearchServerHandlers({
   fragments: {
-    collection: COLLECTION_FRAGMENT,
     product: PRODUCT_FRAGMENT,
     query: QUERY_FRAGMENT,
   },
   limit: 3,
-  types: ["PRODUCT", "COLLECTION", "QUERY"],
+  types: ["PRODUCT", "QUERY"],
 });

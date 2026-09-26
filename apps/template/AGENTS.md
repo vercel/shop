@@ -103,9 +103,11 @@ Opt-in via `auth.isEnabled` in `lib/config/index.ts`. When enabled, `next.config
 - Model data dependencies before composing the page. Start independent work together and block rendering only where one result is genuinely required by another.
 - Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits. Push request-time inputs to the smallest Suspense boundary that needs them.
 - Visible fallbacks match the resolved section's geometry; loading states must not introduce avoidable layout shift.
+- Routes with runtime params (products, collections, blogs, articles, pages, policies) render a synchronous page that wraps an async content component in `Suspense` with a route skeleton, so client navigations show an instant fallback. Keep this inline boundary instead of `loading.tsx`, which serializes the skeleton twice in every document's RSC payload. Export the skeleton beside the component whose layout it mirrors and mark its root `aria-busy="true"`. Do not opt out with `export const instant = false`.
+- Put `await unstable_navigation()` before per-request work that a link prefetch should not render, such as the URL-selected variant on the product page; the default variant comes from the cached product.
 - Server Components are the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
-- Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
-- Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
+- Use `next/image` with reserved dimensions and the shared `sizes="100vw"`. Do not tune `sizes` per breakpoint or surface: one optimized asset reused across grids, product pages, cart, and the agent beats smaller layout-specific variants on cache hits and image-optimization cost. Preload only the actual LCP image; keep product grids lazy by default.
+- Link internally with `Link` from `@/components/ui/link`, never `next/link`: it keeps the default App Shell prefetch and upgrades to a full prefetch only on hover or keyboard focus, so product grids never prefetch every card. Treat any other prefetch change as a production-measured traffic-versus-latency choice.
 
 Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
 

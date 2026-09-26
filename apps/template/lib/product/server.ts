@@ -4,6 +4,7 @@ import type { CommerceLocale } from "@/lib/config/types";
 import type {
   ProductCard,
   ProductDetails,
+  ProductPage,
   ProductVariant,
   SelectedOption,
 } from "@/lib/product/types";
@@ -11,18 +12,11 @@ import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
   fetchComplementaryProducts,
   fetchProduct,
-  fetchProducts,
-  fetchProductsByIds,
   fetchProductVariant,
   fetchRelatedProducts,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
-import type {
-  ProductsParams,
-  ProductsResult,
-  SearchIndexProductsParams,
-  SearchIndexProductsResult,
-} from "@/lib/shopify/operations/products/types";
+import type { SearchIndexProductsParams } from "@/lib/shopify/operations/products/types";
 
 // Only valid inside a cache directive scope.
 export function tagProducts(products: Array<{ id: string }>): void {
@@ -54,23 +48,13 @@ export async function getProductVariant(params: {
   return fetchProductVariant(params);
 }
 
-export async function getProducts(params: ProductsParams): Promise<ProductsResult> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  const result = await fetchProducts(params);
-  tagProducts(result.products);
-  return result;
-}
-
 // Cursor-paginated browse reads stay uncached in lib/collections/server.ts; this serves fixed grids only.
 export async function getSearchIndexProducts(
   params: SearchIndexProductsParams,
-): Promise<SearchIndexProductsResult> {
+): Promise<ProductPage> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products");
+  cacheTag("products", "products-index");
 
   const result = await fetchSearchIndexProducts(params);
   tagProducts(result.products);
@@ -99,19 +83,6 @@ export async function getRelatedProducts(params: {
   cacheTag("products", `recommendations-${params.handle}`);
 
   const products = await fetchRelatedProducts(params);
-  tagProducts(products);
-  return products;
-}
-
-export async function getProductsByIds(params: {
-  ids: string[];
-  locale?: CommerceLocale;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products");
-
-  const products = await fetchProductsByIds(params);
   tagProducts(products);
   return products;
 }

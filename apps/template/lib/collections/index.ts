@@ -7,6 +7,15 @@ import {
 
 export const PRODUCTS_PER_PAGE = 40;
 
+// Storefront `search` only sorts by RELEVANCE and PRICE.
+export const SEARCH_SORT_EXCLUDE = [
+  "best-selling",
+  "created-ascending",
+  "created-descending",
+  "title-ascending",
+  "title-descending",
+];
+
 export function getBrowseSort(
   state: Pick<CollectionState, "reverse" | "sortKey">,
 ): string | undefined {

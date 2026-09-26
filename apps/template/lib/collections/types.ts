@@ -1,24 +1,26 @@
 import type { ProductFilter } from "@shopify/hydrogen";
 
-import type { Filter, PriceRange } from "@/lib/filters/types";
+import type { Facets } from "@/lib/filters/types";
 import type { Image } from "@/lib/media/types";
+import type { ProductPage } from "@/lib/product/types";
 import type { SEO } from "@/lib/seo/types";
-import type { CollectionProductsResult } from "@/lib/shopify/operations/products/types";
 
-export interface BrowseParams {
+export interface BrowseState {
+  dataSearch: string;
   filters: ProductFilter[];
   sort?: string;
 }
 
-export interface CollectionSearchState extends BrowseParams {
-  dataSearch: string;
-}
+// Collection products and the search index paginate with different Storefront cursors.
+export type BrowseSource =
+  | { collection: string; type: "collection" }
+  | { collection?: string; query?: string; type: "search" };
 
-export interface CollectionResultsData extends BrowseParams {
-  collection: string;
+export interface BrowseResults extends ProductPage {
   dataSearch: string;
-  result: CollectionProductsResult;
-  transformedFilters: { filters: Filter[]; priceRange?: PriceRange };
+  facets: Facets;
+  source: BrowseSource;
+  total?: number;
 }
 
 export interface Collection {

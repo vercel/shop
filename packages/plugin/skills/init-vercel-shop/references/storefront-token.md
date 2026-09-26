@@ -11,11 +11,12 @@ Use the installed Shopify AI Toolkit and Shopify CLI. The template sends `X-Shop
 
 ## Reuse or create a token
 
-First query the shop name and existing public tokens with `shopify store execute --store <handle>.myshopify.com --query '...'`:
+First query the shop ID, shop name, and existing public tokens with `shopify store execute --store <handle>.myshopify.com --query '...'`:
 
 ```graphql
 query VercelShopStorefrontTokens {
   shop {
+    id
     name
     storefrontAccessTokens(first: 100) {
       nodes {
@@ -48,6 +49,7 @@ Pass `{ "input": { "title": "Vercel Shop" } }` through `--variables`.
 
 Do not print the token in the final response. Write these values to `.env.local`:
 
+- `NEXT_PUBLIC_SHOPIFY_SHOP_ID`: numeric part of `shop.id` (`gid://shopify/Shop/123456789` becomes `123456789`)
 - `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`: normalized `.myshopify.com` domain
 - `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`: reused or created public token
 
@@ -59,4 +61,5 @@ The authenticated connector might not be allowed to read or create Storefront to
 
 1. Direct the user to **Shopify admin → Sales channels → Headless**.
 2. Ask them to create or select a storefront and copy its public Storefront API token directly into `.env.local` as `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
-3. Never ask them to paste the token into chat.
+3. If `shop.id` was not read, ask them to set `NEXT_PUBLIC_SHOPIFY_SHOP_ID` to the number in the store's customer accounts URL, `https://shopify.com/<shop-id>/account`.
+4. Never ask them to paste the token into chat.
