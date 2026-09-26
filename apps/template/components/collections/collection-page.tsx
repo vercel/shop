@@ -53,10 +53,10 @@ export function CollectionDetailPage({
 
 export function CollectionDetailSkeleton() {
   return (
-    <Page className="pt-2.5 md:pt-10">
+    <Page aria-busy="true" className="pt-2.5 md:pt-10">
       <Container>
         <Sections className="gap-5">
-          <div aria-busy="true" className="grid gap-2.5">
+          <div className="grid gap-2.5">
             <Skeleton className="h-9 w-64 sm:h-10 md:h-12 md:w-80" />
             <Skeleton className="h-4 w-full max-w-xl" />
           </div>

@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { ProductViewedTracker } from "@/components/analytics/trackers";
-import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
-import { ProductDetailSkeleton } from "@/components/product-detail/product-detail-skeleton";
+import {
+  ProductDetailSection,
+  ProductDetailSkeleton,
+} from "@/components/product-detail/product-detail-section";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";

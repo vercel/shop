@@ -26,9 +26,9 @@ export function RichTextPage({ body, title }: RichTextPageProps) {
 
 export function RichTextPageSkeleton() {
   return (
-    <Page>
+    <Page aria-busy="true">
       <Container className="max-w-2xl">
-        <div aria-busy="true" className="grid gap-5">
+        <div className="grid gap-5">
           <Skeleton className="h-10 w-3/4" />
           <div className="grid gap-2.5">
             <Skeleton className="h-4 w-full" />
