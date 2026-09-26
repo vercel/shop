@@ -23,6 +23,10 @@ const COOKIE_MAX_CHUNKS = 4;
 
 const COOKIE_NAME = "shop_customer_session";
 
+const REFRESH_ATTEMPT_HEADER = "x-customer-refresh-attempted";
+
+const REFRESH_ATTEMPT_PARAM = "refreshed";
+
 function parseCookies(cookieHeader: string | null): Map<string, string> {
   const cookies = new Map<string, string>();
 
@@ -276,14 +280,29 @@ export async function requireCustomerSession(): Promise<void> {
   if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
 }
 
+// Server Components cannot read the URL, so the proxy forwards the one-shot refresh marker as a request header.
+export function forwardCustomerRefreshAttempt(url: URL, requestHeaders: Headers): Headers {
+  requestHeaders.delete(REFRESH_ATTEMPT_HEADER);
+  if (url.searchParams.has(REFRESH_ATTEMPT_PARAM)) requestHeaders.set(REFRESH_ATTEMPT_HEADER, "1");
+  return requestHeaders;
+}
+
+function withRefreshAttempt(path: string): string {
+  const url = new URL(path, shopConfig.site.url);
+  url.searchParams.set(REFRESH_ATTEMPT_PARAM, "1");
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 export async function requireCustomerAccessToken(returnTo = "/account"): Promise<string> {
   if (!shopConfig.auth.isEnabled) notFound();
 
   const accessToken = await getCustomerAccessToken();
   if (accessToken) return accessToken;
 
-  if (await isCustomerLoggedIn()) {
-    redirect(`/account/refresh?return_to=${encodeURIComponent(returnTo)}`);
+  // Hydrogen returns to the page unchanged after a transient refresh failure, so a second refresh would loop.
+  const refreshAttempted = (await headers()).has(REFRESH_ATTEMPT_HEADER);
+  if (!refreshAttempted && (await isCustomerLoggedIn())) {
+    redirect(`/account/refresh?return_to=${encodeURIComponent(withRefreshAttempt(returnTo))}`);
   }
 
   redirect(`/account/login?return_to=${encodeURIComponent(returnTo)}`);
