@@ -70,7 +70,7 @@ export async function getSearchIndexProducts(
 ): Promise<SearchIndexProductsResult> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products");
+  cacheTag("products", "products-index");
 
   const result = await fetchSearchIndexProducts(params);
   tagProducts(result.products);
