@@ -2,7 +2,12 @@ import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydro
 import { cacheLife, cacheTag } from "next/cache";
 
 import { getBrowseSort, PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Collection, CollectionWithThumbnail } from "@/lib/collections/types";
+import type {
+  BrowseResults,
+  BrowseState,
+  Collection,
+  CollectionWithThumbnail,
+} from "@/lib/collections/types";
 import type { CommerceLocale } from "@/lib/config/types";
 import { tagProducts } from "@/lib/product/server";
 import {
@@ -10,13 +15,7 @@ import {
   fetchCollections,
   fetchCollectionsListing,
 } from "@/lib/shopify/operations/collections/server";
-import {
-  fetchCollectionProducts,
-  fetchSearchFacets,
-  fetchSearchIndexProducts,
-} from "@/lib/shopify/operations/products/server";
-
-import type { CollectionResultsData, CollectionSearchState } from "./types";
+import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
@@ -68,7 +67,7 @@ export async function getCollectionsListing(
   return collections;
 }
 
-export function resolveBrowseParams(search: string | URLSearchParams): CollectionSearchState {
+export function resolveBrowseParams(search: string | URLSearchParams): BrowseState {
   const state = parseCollectionParams(
     typeof search === "string" ? new URLSearchParams(search) : search,
   );
@@ -79,9 +78,9 @@ export function resolveBrowseParams(search: string | URLSearchParams): Collectio
   };
 }
 
-export async function getCollectionSearchState(
+export async function readBrowseState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
-): Promise<CollectionSearchState> {
+): Promise<BrowseState> {
   return resolveBrowseParams(recordToSearchParams(await searchParamsPromise));
 }
 
@@ -100,27 +99,26 @@ function recordToSearchParams(
 }
 
 // Browse pages and facets stay uncached: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
-export async function getCollectionResultsData({
+export async function fetchCollectionResults({
   handle,
-  searchStatePromise,
+  statePromise,
 }: {
   handle: string;
-  searchStatePromise: Promise<CollectionSearchState>;
-}): Promise<CollectionResultsData> {
-  const { dataSearch, filters, sort } = await searchStatePromise;
-  const result = await fetchCollectionProducts({
+  statePromise: Promise<BrowseState>;
+}): Promise<BrowseResults> {
+  const { dataSearch, filters, sort } = await statePromise;
+  const { facets, pageInfo, products } = await fetchCollectionProducts({
     collection: handle,
-    sortKey: sort,
-    limit: PRODUCTS_PER_PAGE,
     filters,
+    limit: PRODUCTS_PER_PAGE,
+    sortKey: sort,
   });
   return {
-    collection: handle,
     dataSearch,
-    sort,
-    filters,
-    result,
-    transformedFilters: { filters: result.filters, priceRange: result.priceRange },
+    facets,
+    pageInfo,
+    products,
+    source: { collection: handle, type: "collection" },
   };
 }
 
@@ -135,36 +133,5 @@ export async function getAllProductsCollection(): Promise<Collection> {
     path: `/collections/${ALL_PRODUCTS_HANDLE}`,
     updatedAt: new Date(0).toISOString(),
     seo: { title, description },
-  };
-}
-
-export async function getAllProductsResultsData({
-  searchStatePromise,
-}: {
-  searchStatePromise: Promise<CollectionSearchState>;
-}): Promise<CollectionResultsData> {
-  const { dataSearch, filters, sort } = await searchStatePromise;
-  const [products, facets] = await Promise.all([
-    fetchSearchIndexProducts({
-      sortKey: sort,
-      limit: PRODUCTS_PER_PAGE,
-      filters,
-    }),
-    fetchSearchFacets({
-      filters,
-    }),
-  ]);
-  return {
-    collection: ALL_PRODUCTS_HANDLE,
-    dataSearch,
-    sort,
-    filters,
-    result: {
-      products: products.products,
-      pageInfo: products.pageInfo,
-      filters: facets.filters,
-      priceRange: facets.priceRange,
-    },
-    transformedFilters: { filters: facets.filters, priceRange: facets.priceRange },
   };
 }

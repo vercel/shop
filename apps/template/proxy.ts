@@ -11,6 +11,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   createCustomerRequestContext,
   createCustomerSessionManager,
+  forwardCustomerRefreshAttempt,
   getCustomerRequestOrigin,
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
@@ -107,7 +108,12 @@ export async function proxy(request: NextRequest): Promise<Response> {
   }
 
   const response = NextResponse.next({
-    request: { headers: requestContext.getForwardedRequestHeaders() },
+    request: {
+      headers: forwardCustomerRefreshAttempt(
+        request.nextUrl,
+        requestContext.getForwardedRequestHeaders(),
+      ),
+    },
   });
   if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);

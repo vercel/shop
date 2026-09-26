@@ -226,7 +226,7 @@ function GridItem({
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
       ) : (
-        <LightboxTrigger item={item}>
+        <LightboxTrigger image={item.image}>
           <MediaImage item={item} title={title} idx={idx} sizes={GRID_SIZES} priority={priority} />
         </LightboxTrigger>
       )}

@@ -1,5 +1,5 @@
 import type { Money } from "@/lib/money/types";
-import { buildProductUrl, toSelectedOptionList } from "@/lib/product";
+import { buildProductUrl, requiresBundleConfiguration, toSelectedOptionList } from "@/lib/product";
 import type {
   OptionGroupState,
   ProductCard,
@@ -38,7 +38,8 @@ function toAgentVariant(variant: ProductVariant): AgentVariant {
       value: option.value,
     })),
     price: variant.price,
-    requiresComponents: variant.requiresComponents,
+    requiresBundleConfiguration: requiresBundleConfiguration(variant),
+    requiresSellingPlan: variant.requiresSellingPlan,
     title: variant.title,
   };
 }

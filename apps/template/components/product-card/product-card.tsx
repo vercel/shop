@@ -15,30 +15,15 @@ import {
 
 export interface ProductCardProps {
   product: ProductCardType;
-  variant?: "default" | "featured";
   outOfStockText?: string;
-  className?: string;
 }
 
-export function ProductCard({
-  product,
-  variant = "default",
-  outOfStockText,
-  className,
-}: ProductCardProps) {
-  const isFeatured = variant === "featured";
+export function ProductCard({ product, outOfStockText }: ProductCardProps) {
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
   return (
-    <Link href={href} className={className}>
-      <ProductCardRoot variant={variant}>
-        {isFeatured && (
-          <div data-slot="product-card-badge">
-            <span className="inline-flex self-start items-center pl-2 pr-5 py-0.5 bg-primary rounded-tl-lg not-supports-[clip-path:shape(from_0_0)]:rounded-tr-lg clip-featured-badge text-xs text-primary-foreground font-medium">
-              Assistant's pick
-            </span>
-          </div>
-        )}
-        <ProductCardImageContainer variant={variant}>
+    <Link href={href}>
+      <ProductCardRoot>
+        <ProductCardImageContainer>
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
@@ -53,7 +38,6 @@ export function ProductCard({
               maxAmount={product.maxPrice.amount}
               compareAtAmount={product.compareAtPrice?.amount}
               compareAtCurrencyCode={product.compareAtPrice?.currencyCode}
-              discountVariant={isFeatured ? "blue" : "green"}
             />
           </ProductCardContent>
         </ProductCardImageContainer>

@@ -16,8 +16,8 @@ The ${kind.toLowerCase()} \`${escapeMarkdown(value)}\` could not be found.
 
 ## Continue browsing
 
-- [Search products](${url}/search)
 - [Browse all products](${url}/collections/all)
+- [UCP profile](${url}/.well-known/ucp): Live catalog search, availability, cart, and checkout
 - [Storefront guide](${url}/llms.txt)
 - [Sitemap](${url}/sitemap.xml)
 `;

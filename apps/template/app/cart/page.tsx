@@ -17,11 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function CartPage() {
   return (
-    <main>
+    <>
       <CartViewedTracker />
       <Suspense fallback={<PageSkeleton />}>
         <CartPageBody />
       </Suspense>
-    </main>
+    </>
   );
 }

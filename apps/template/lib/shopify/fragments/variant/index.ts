@@ -52,9 +52,6 @@ export const PRODUCT_VARIANT_FRAGMENT = gql(
           recurringDeliveries
         }
       }
-      pageInfo {
-        hasNextPage
-      }
     }
   }
 `,

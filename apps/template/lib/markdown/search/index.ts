@@ -1,66 +1,21 @@
-import type { ProductFilter } from "@shopify/hydrogen";
+import { getSearchResultUrl } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
-import type { Filter, PriceRange } from "@/lib/filters/types";
 import { escapeMarkdown } from "@/lib/markdown";
-import {
-  appendAppliedFiltersSection,
-  appendAvailableFiltersSection,
-  appendPaginationSection,
-  appendProductsSection,
-  formatSortLabel,
-} from "@/lib/markdown/catalog";
-import type { PageInfo } from "@/lib/pagination/types";
-import type { ProductCard } from "@/lib/product/types";
 
-export function searchResultsToMarkdown({
-  query,
-  collection,
-  products,
-  total,
-  filters,
-  priceRange,
-  activeFilters,
-  pageInfo,
-  locale = shopConfig.localization.locale,
-  sort,
-}: {
-  query?: string;
-  collection?: string;
-  products: ProductCard[];
-  total: number;
-  filters: Filter[];
-  priceRange?: PriceRange;
-  activeFilters: ProductFilter[];
-  pageInfo: PageInfo;
-  locale?: string;
-  sort?: string;
-}): string {
-  const sections: string[] = [];
+export function searchToMarkdown(query: string | undefined): string {
+  const siteUrl = shopConfig.site.url;
+  const term = query?.trim();
+  const shopPath = term ? getSearchResultUrl({ baseUrl: "/search", term }) : "/search";
 
-  const title = query ? `Search Results for "${escapeMarkdown(query)}"` : "Search Results";
-  sections.push(`# ${title}`);
-  sections.push("");
-
-  sections.push("## Search Information");
-  sections.push("");
-  sections.push(`- **Query**: ${query ? escapeMarkdown(query) : "None"}`);
-  if (collection) {
-    sections.push(`- **Collection Filter**: ${escapeMarkdown(collection)}`);
-  }
-  sections.push(`- **Sort**: ${escapeMarkdown(formatSortLabel(sort))}`);
-  sections.push(`- **Total Matching Products**: ${total}`);
-  sections.push(`- **Products In This Page**: ${products.length}`);
-  sections.push("");
-
-  appendAppliedFiltersSection(sections, { activeFilters, filters });
-  appendAvailableFiltersSection(sections, { filters, priceRange, locale });
-  appendProductsSection(sections, { products, locale });
-  appendPaginationSection(sections, pageInfo);
-
-  sections.push("---");
-  sections.push("");
-  sections.push(`*Locale: ${locale}*`);
-
-  return sections.join("\n");
+  return [
+    term ? `# Search: ${escapeMarkdown(term)}` : "# Search",
+    "",
+    "Search results change with the live catalog, so this page does not list products.",
+    "",
+    "## Search",
+    "",
+    `- Shop: ${new URL(shopPath, siteUrl)}`,
+    `- Live products, prices, and availability: UCP catalog search at ${new URL("/.well-known/ucp", siteUrl)}`,
+  ].join("\n");
 }

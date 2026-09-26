@@ -1,6 +1,5 @@
 "use client";
 
-import { cn } from "cn";
 import { CornerDownLeftIcon, Loader2Icon, SquareIcon, XIcon } from "lucide-react";
 import type { KeyboardEvent } from "react";
 
@@ -9,7 +8,6 @@ import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/u
 type AgentStatus = "error" | "ready" | "resuming" | "streaming" | "submitted";
 
 interface AgentComposerProps {
-  className?: string;
   disabled?: boolean;
   onChange: (value: string) => void;
   onStop: () => void;
@@ -20,7 +18,6 @@ interface AgentComposerProps {
 }
 
 export function AgentComposer({
-  className,
   disabled = false,
   onChange,
   onStop,
@@ -49,14 +46,13 @@ export function AgentComposer({
   if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
   else if (status === "streaming") icon = <SquareIcon className="size-4" />;
   else if (status === "error") icon = <XIcon className="size-4" />;
-  const isStopping = isBusy;
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
         submit();
       }}
-      className={cn("px-2.5 py-2.5", className)}
+      className="px-2.5 py-2.5"
     >
       <InputGroup className="h-auto flex-row items-end rounded-lg border-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-0">
         <InputGroupTextarea
@@ -70,8 +66,8 @@ export function AgentComposer({
           type="submit"
           size="icon-sm"
           variant="default"
-          aria-label={isStopping ? "Stop" : "Send"}
-          disabled={disabled || status === "resuming" || (!value.trim() && !isStopping)}
+          aria-label={isBusy ? "Stop" : "Send"}
+          disabled={disabled || status === "resuming" || (!value.trim() && !isBusy)}
           className="mr-1.5 mb-1.5"
         >
           {icon}

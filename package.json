@@ -15,7 +15,7 @@
   "dependencies": {
     "@changesets/changelog-github": "1.0.1",
     "@changesets/cli": "3.0.3",
-    "turbo": "2.11.2"
+    "turbo": "2.11.3"
   },
   "devEngines": {
     "runtime": {

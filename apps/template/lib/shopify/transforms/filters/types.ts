@@ -1,18 +1,11 @@
 import type { ProductFilter } from "@shopify/hydrogen";
 
-import type { Filter, PriceRange } from "@/lib/filters/types";
 import type { FILTER_FRAGMENT } from "@/lib/shopify/fragments/filters";
 import type { ResultOf } from "@/lib/shopify/types";
 
 export interface TransformFiltersOptions {
   activeFilters?: ProductFilter[];
   currencyCode?: string;
-  hideZeroCount?: boolean;
-}
-
-export interface TransformedFilters {
-  filters: Filter[];
-  priceRange?: PriceRange;
 }
 
 export interface ActiveFilterBadge {

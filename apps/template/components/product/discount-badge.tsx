@@ -3,21 +3,13 @@ import type { ComponentProps } from "react";
 
 interface DiscountBadgeProps extends ComponentProps<"span"> {
   percent: number;
-  variant?: "green" | "blue";
 }
 
-export function DiscountBadge({
-  percent,
-  variant = "green",
-  className,
-  ...props
-}: DiscountBadgeProps) {
+export function DiscountBadge({ percent, className, ...props }: DiscountBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums",
-        variant === "green" && "bg-positive/15 text-positive",
-        variant === "blue" && "bg-blue-500/15 text-blue-600",
+        "inline-flex items-center rounded-full px-2 py-0.5 font-mono text-xs font-medium tabular-nums bg-positive/15 text-positive",
         className,
       )}
       {...props}

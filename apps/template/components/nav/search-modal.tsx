@@ -80,7 +80,6 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     navigate(getSearchResultUrl({ baseUrl: "/search", term: q }));
   }
 
-  // Only queries and products are rendered — exclude collections from keyboard nav
   const visibleItems = (results?.queries.length ?? 0) + (results?.products.length ?? 0);
   function navigateToActiveItem() {
     if (!results || activeIndex < 0) return;
@@ -212,13 +211,11 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                       </div>
                     )}
 
-                    {results.products.length === 0 &&
-                      results.collections.length === 0 &&
-                      results.queries.length === 0 && (
-                        <div className="px-4 py-6 text-center text-sm text-foreground/50">
-                          {`No results for "${query}"`}
-                        </div>
-                      )}
+                    {results.products.length === 0 && results.queries.length === 0 && (
+                      <div className="px-4 py-6 text-center text-sm text-foreground/50">
+                        {`No results for "${query}"`}
+                      </div>
+                    )}
 
                     {visibleItems > 0 && (
                       <div className="px-4 py-3 flex justify-center">

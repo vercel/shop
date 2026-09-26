@@ -6,15 +6,10 @@ import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 
-interface ProductCardProps extends ComponentProps<"article"> {
-  variant?: "default" | "featured";
-}
-
-function ProductCard({ variant = "default", className, children, ...props }: ProductCardProps) {
+function ProductCard({ className, children, ...props }: ComponentProps<"article">) {
   return (
     <article
       data-slot="product-card"
-      data-variant={variant}
       className={cn("flex flex-col h-full overflow-hidden", className)}
       {...props}
     >
@@ -23,25 +18,11 @@ function ProductCard({ variant = "default", className, children, ...props }: Pro
   );
 }
 
-interface ProductCardImageContainerProps extends ComponentProps<"div"> {
-  variant?: "default" | "featured";
-}
-
-function ProductCardImageContainer({
-  variant = "default",
-  className,
-  children,
-  ...props
-}: ProductCardImageContainerProps) {
+function ProductCardImageContainer({ className, children, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="product-card-image-container"
-      data-variant={variant}
-      className={cn(
-        "flex flex-col",
-        "data-[variant=featured]:-mt-px data-[variant=featured]:bg-linear-to-b/oklch data-[variant=featured]:from-primary data-[variant=featured]:from-0% data-[variant=featured]:to-45% data-[variant=featured]:to-primary/10",
-        className,
-      )}
+      className={cn("flex flex-col", className)}
       {...props}
     >
       {children}
@@ -115,7 +96,6 @@ interface ProductCardPriceProps {
   maxAmount?: string;
   compareAtAmount?: string;
   compareAtCurrencyCode?: string;
-  discountVariant?: "green" | "blue";
   className?: string;
 }
 
@@ -130,7 +110,6 @@ function ProductCardPrice({
   maxAmount,
   compareAtAmount,
   compareAtCurrencyCode,
-  discountVariant = "green",
   className,
 }: ProductCardPriceProps) {
   const priceNum = parseFloat(amount);
@@ -161,7 +140,7 @@ function ProductCardPrice({
               currencyCode={compareAtCurrencyCode}
               className="text-xs text-muted-foreground line-through"
             />
-            <DiscountBadge percent={discountPercent} variant={discountVariant} />
+            <DiscountBadge percent={discountPercent} />
           </>
         )}
       </div>

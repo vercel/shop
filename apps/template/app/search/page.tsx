@@ -3,18 +3,17 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
-import { CollectionBrowseProvider } from "@/components/collections/collection-browse-provider";
-import { SEARCH_SORT_EXCLUDE } from "@/components/collections/sort-select";
-import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
-import { SearchResultsGrid } from "@/components/search/results";
+import { Browse } from "@/components/collections/browse";
+import { BrowseFallback } from "@/components/collections/toolbar";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCollectionSearchState } from "@/lib/collections/server";
+import { SEARCH_SORT_EXCLUDE } from "@/lib/collections";
+import { readBrowseState } from "@/lib/collections/server";
+import type { BrowseResults, BrowseState } from "@/lib/collections/types";
 import { formatCount } from "@/lib/content";
-import { getSearchResultsData } from "@/lib/search/server";
-import { type SearchResultsData } from "@/lib/search/types";
+import { fetchSearchResults } from "@/lib/search/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 type SearchParams = Record<string, string | string[] | undefined>;
@@ -60,15 +59,14 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
 
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   // Don't await searchParams here — it would force the route fully dynamic.
-  const searchStatePromise = getCollectionSearchState(searchParams);
-  const searchResultsDataPromise = (async () => {
-    const resolved = await searchParams;
-    return getSearchResultsData({
+  const statePromise = readBrowseState(searchParams);
+  const resultsPromise = searchParams.then((resolved) =>
+    fetchSearchResults({
       collection: getParam(resolved, "collection"),
       query: getParam(resolved, "q"),
-      searchStatePromise,
-    });
-  })();
+      statePromise,
+    }),
+  );
   return (
     <Page className="pt-2.5 md:pt-10">
       <Container>
@@ -86,9 +84,9 @@ export default function SearchPage({ searchParams }: PageProps<"/search">) {
           </div>
           <Suspense fallback={<BrowseFallback resultCount={<Skeleton className="h-4 w-20" />} />}>
             <SearchBrowse
+              resultsPromise={resultsPromise}
               searchParamsPromise={searchParams}
-              searchResultsDataPromise={searchResultsDataPromise}
-              searchStatePromise={searchStatePromise}
+              statePromise={statePromise}
             />
           </Suspense>
         </Sections>
@@ -98,30 +96,29 @@ export default function SearchPage({ searchParams }: PageProps<"/search">) {
 }
 
 async function SearchBrowse({
+  resultsPromise,
   searchParamsPromise,
-  searchResultsDataPromise,
-  searchStatePromise,
+  statePromise,
 }: {
+  resultsPromise: Promise<BrowseResults>;
   searchParamsPromise: PageProps<"/search">["searchParams"];
-  searchResultsDataPromise: Promise<SearchResultsData>;
-  searchStatePromise: Promise<Awaited<ReturnType<typeof getCollectionSearchState>>>;
+  statePromise: Promise<BrowseState>;
 }) {
   const query = getParam(await searchParamsPromise, "q") ?? "";
 
   // A new term rebuilds the browse store so stale filters never carry across searches.
   return (
-    <CollectionBrowseProvider handle={`search:${query}`} searchStatePromise={searchStatePromise}>
-      <BrowseToolbar
-        facetsPromise={searchResultsDataPromise.then((data) => data.transformedFilters)}
-        resultCount={
-          <Suspense fallback={<Skeleton className="h-4 w-20" />}>
-            <SearchResultCount dataPromise={searchResultsDataPromise} />
-          </Suspense>
-        }
-        sortExclude={SEARCH_SORT_EXCLUDE}
-      />
-      <SearchResultsGrid searchResultsDataPromise={searchResultsDataPromise} />
-    </CollectionBrowseProvider>
+    <Browse
+      resultCount={
+        <Suspense fallback={<Skeleton className="h-4 w-20" />}>
+          <SearchResultCount resultsPromise={resultsPromise} />
+        </Suspense>
+      }
+      resultsPromise={resultsPromise}
+      sortExclude={SEARCH_SORT_EXCLUDE}
+      statePromise={statePromise}
+      storeKey={`search:${query}`}
+    />
   );
 }
 
@@ -145,8 +142,8 @@ async function SearchQueryLabel({
   return ` for "${query}"`;
 }
 
-async function SearchResultCount({ dataPromise }: { dataPromise: Promise<SearchResultsData> }) {
-  const data = await dataPromise;
-  if (data.total === 0) return null;
-  return formatCount(data.total, "Item");
+async function SearchResultCount({ resultsPromise }: { resultsPromise: Promise<BrowseResults> }) {
+  const { total } = await resultsPromise;
+  if (!total) return null;
+  return formatCount(total, "Item");
 }
