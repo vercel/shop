@@ -29,7 +29,6 @@ export function ProductCard({ product, outOfStockText }: ProductCardProps) {
             alt={product.featuredImage?.altText || product.title}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
-            sizes="(min-width: 1024px) 25vw, 50vw"
           />
           <ProductCardContent>
             <ProductCardTitle>{product.title}</ProductCardTitle>

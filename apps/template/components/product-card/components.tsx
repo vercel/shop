@@ -35,7 +35,6 @@ interface ProductCardImageProps {
   alt: string;
   outOfStock?: boolean;
   outOfStockText?: string;
-  sizes: string;
   className?: string;
 }
 
@@ -44,7 +43,6 @@ function ProductCardImage({
   alt,
   outOfStock = false,
   outOfStockText,
-  sizes,
   className,
 }: ProductCardImageProps) {
   return (
@@ -53,7 +51,7 @@ function ProductCardImage({
       className={cn("relative aspect-square overflow-hidden", className)}
     >
       {src ? (
-        <Image src={src} alt={alt} fill className="object-cover" sizes={sizes} />
+        <Image src={src} alt={alt} fill className="object-cover" sizes="100vw" />
       ) : (
         <ImagePlaceholder className="size-full" />
       )}
