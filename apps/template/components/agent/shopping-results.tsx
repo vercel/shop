@@ -31,6 +31,7 @@ import {
 } from "@/lib/agent/products";
 import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/types";
 import type { Cart } from "@/lib/cart/types";
+import { buildProductUrl } from "@/lib/product";
 
 interface CartConfirmation {
   warnings: string[];
@@ -265,14 +266,15 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
   const variant = findAgentVariant(product, selected);
   const price = variant?.price ?? product.price;
   const compareAtPrice = variant ? variant.compareAtPrice : product.compareAtPrice;
-  const canAdd = variant?.available && !variant.requiresComponents && !submitted;
+  const choosePlan = variant?.available && variant.requiresSellingPlan;
+  const canAdd = variant?.available && !variant.requiresBundleConfiguration && !submitted;
   const buttonText = submitted
     ? "Adding to Cart..."
     : !variant
       ? "Add to Cart"
       : !variant.available
         ? "Out of Stock"
-        : variant.requiresComponents
+        : variant.requiresBundleConfiguration
           ? "Choose bundle items"
           : "Add to Cart";
   return (
@@ -315,24 +317,32 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
             }
             options={toAgentOptionGroups(product, selected)}
           />
-          <form
-            {...formProps({
-              beforeSubmit: () => {
-                setErrorsAtSubmit({
-                  lines: cartErrors.linesUpdatedAt,
-                  network: cartErrors.networkUpdatedAt,
-                });
-                setResult(null);
-                setSubmitted(true);
-              },
-            })}
-          >
-            <input type="hidden" {...register("merchandiseId", { value: variant?.id ?? "" })} />
-            <input type="hidden" {...register("quantity", { value: 1 })} />
-            <Button {...register("add")} className="w-full" disabled={!canAdd} type="submit">
-              {buttonText}
+          {choosePlan ? (
+            <Button asChild className="w-full">
+              <Link href={buildProductUrl(product.handle, variant.options)}>
+                Choose a subscription
+              </Link>
             </Button>
-          </form>
+          ) : (
+            <form
+              {...formProps({
+                beforeSubmit: () => {
+                  setErrorsAtSubmit({
+                    lines: cartErrors.linesUpdatedAt,
+                    network: cartErrors.networkUpdatedAt,
+                  });
+                  setResult(null);
+                  setSubmitted(true);
+                },
+              })}
+            >
+              <input type="hidden" {...register("merchandiseId", { value: variant?.id ?? "" })} />
+              <input type="hidden" {...register("quantity", { value: 1 })} />
+              <Button {...register("add")} className="w-full" disabled={!canAdd} type="submit">
+                {buttonText}
+              </Button>
+            </form>
+          )}
         </div>
       </div>
       {result === "added" && isLatest && <AgentCartSummary />}

@@ -136,6 +136,7 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = gql(
       edges {
         node {
           ...ProductVariantFields
+          ...BundleRelationshipFields
         }
       }
     }

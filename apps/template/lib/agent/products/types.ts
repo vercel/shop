@@ -23,7 +23,8 @@ export interface AgentVariant {
   id: string;
   options: { name: string; value: string }[];
   price: Money;
-  requiresComponents: boolean;
+  requiresBundleConfiguration: boolean;
+  requiresSellingPlan: boolean;
   title: string;
 }
 

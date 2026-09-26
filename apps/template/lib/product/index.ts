@@ -66,7 +66,14 @@ export function getProductPurchaseOptions(
   return { plans, selectedPlan };
 }
 
-// Customized bundle parents have no fixed components; only their gating boolean crosses the client boundary.
+// Customized bundle parents have no fixed components, so they cannot be added without a bundle builder.
+export function requiresBundleConfiguration(
+  variant: Pick<ProductVariant, "components" | "requiresComponents">,
+): boolean {
+  return variant.requiresComponents && variant.components.length === 0;
+}
+
+// Only the bundle gating boolean crosses the client boundary.
 function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
   return {
     availableForSale: variant.availableForSale,
@@ -75,7 +82,7 @@ function toProductFormVariant(variant: ProductVariant): ProductFormVariant {
     image: variant.image,
     price: variant.price,
     product: { handle: variant.productHandle, title: variant.productTitle },
-    requiresBundleConfiguration: variant.requiresComponents && variant.components.length === 0,
+    requiresBundleConfiguration: requiresBundleConfiguration(variant),
     requiresSellingPlan: variant.requiresSellingPlan,
     selectedOptions: variant.selectedOptions,
     sellingPlanAllocations: variant.sellingPlanAllocations,
