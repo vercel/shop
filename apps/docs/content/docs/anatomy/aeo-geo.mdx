@@ -10,9 +10,9 @@ type: guide
 
 The home page, product, collection, and search URLs return structured Markdown when a client requests `text/markdown`. Normal browser requests continue to receive HTML from the same URLs. No setup is required.
 
-The storefront also publishes `/llms.txt`, a concise index for AI agents. It links to search, up to 50 collections, the sitemap, crawl guidance, and the storefront's UCP profile rather than duplicating the full catalog. The [sitemap](/docs/anatomy/sitemap) remains the complete URL inventory.
+The storefront also publishes `/llms.txt`, a concise index for AI agents. It links to up to 50 collections, the sitemap, crawl guidance, and the storefront's UCP profile rather than duplicating the full catalog. The [sitemap](/docs/anatomy/sitemap) remains the complete URL inventory.
 
-Markdown explains a product; it does not sell it. Live per-variant availability, cart, and checkout for agents come from Shopify's Universal Commerce Protocol (UCP) endpoints, which the storefront forwards at `/.well-known/ucp` and `/api/ucp/mcp`. Product Markdown points agents there instead of repeating per-variant stock.
+Markdown explains what a product or collection is; it does not list or sell inventory. Catalog search, live per-variant availability, cart, and checkout for agents come from Shopify's Universal Commerce Protocol (UCP) endpoints, which the storefront forwards at `/.well-known/ucp` and `/api/ucp/mcp`. Markdown responses point agents there instead of repeating product listings or per-variant stock.
 
 Markdown content uses the deployment's configured Shopify country and language. If you add [Shopify Markets](/docs/skills/enable-shopify-markets), make sure AI-readable content uses the same market as the corresponding shopper page.
 
@@ -20,7 +20,7 @@ Markdown content uses the deployment's configured Shopify country and language. 
 
 | Surface                          | Outcome                                                                        |
 | -------------------------------- | ------------------------------------------------------------------------------ |
-| Markdown responses               | Gives AI clients clean product, collection, and search content                 |
+| Markdown responses               | Describes products and collections and points AI clients to UCP                |
 | Schema.org data                  | Describes products, breadcrumbs, and the organization                          |
 | [Sitemap](/docs/anatomy/sitemap) | Lists storefront content for crawlers                                          |
 | Crawl guidance                   | Points crawlers to the sitemap and blocks faceted collection URLs              |
@@ -30,8 +30,8 @@ Markdown content uses the deployment's configured Shopify country and language. 
 Markdown responses include the facts needed to interpret each page:
 
 - **Products** — brand, category, a one-line summary, price or price range with compare-at price, product-level availability, description, options, images, and links to the shopper page and UCP profile.
-- **Collections** — description, active and available filters, products, pagination, image, and SEO metadata.
-- **Search** — query, collection scope, filters, products, and pagination.
+- **Collections** — title, description, image, and links to the shopper page and UCP catalog search. Collection contents change often, so products are not listed.
+- **Search** — the query and links to the shopper results page and UCP catalog search.
 
 ## What’s next
 
