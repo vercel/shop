@@ -37,7 +37,6 @@ const GET_SITEMAP_PAGE_QUERY = gql(`#graphql
   query getSitemapPage($type: SitemapType!, $page: Int!) {
     sitemap(type: $type) {
       resources(page: $page) {
-        hasNextPage
         items {
           handle
           updatedAt
@@ -59,7 +58,7 @@ export async function fetchSitemapPagesCount(type: ShopifySitemapType): Promise<
 export async function fetchSitemapPage(
   type: ShopifySitemapType,
   page: number,
-): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
+): Promise<{ items: SitemapResource[] }> {
   if (type === "ARTICLE") {
     let after: string | null = null;
     let articlePage: ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>["articles"] | undefined;
@@ -74,12 +73,11 @@ export async function fetchSitemapPage(
       after = articlePage.pageInfo.endCursor ?? null;
 
       if (!articlePage.pageInfo.hasNextPage && currentPage < page) {
-        return { hasNextPage: false, items: [] };
+        return { items: [] };
       }
     }
 
     return {
-      hasNextPage: articlePage?.pageInfo.hasNextPage ?? false,
       items:
         articlePage?.nodes.map((article) => ({
           blogHandle: article.blog.handle,
@@ -96,10 +94,9 @@ export async function fetchSitemapPage(
   assertStorefrontOk(response, "getSitemapPage");
 
   const resources = response.data.sitemap.resources;
-  if (!resources) return { hasNextPage: false, items: [] };
+  if (!resources) return { items: [] };
 
   return {
-    hasNextPage: resources.hasNextPage,
     items: resources.items.map((item) => ({ handle: item.handle, updatedAt: item.updatedAt })),
   };
 }

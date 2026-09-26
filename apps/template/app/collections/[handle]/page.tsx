@@ -6,8 +6,12 @@ import {
   CollectionDetailPage,
   CollectionDetailSkeleton,
 } from "@/components/collections/collection-page";
-import { getCollectionResultsData, getCollectionSearchState } from "@/lib/collections/server";
-import { getCollection, getCollections } from "@/lib/collections/server";
+import {
+  fetchCollectionResults,
+  getCollection,
+  getCollections,
+  readBrowseState,
+} from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 const PLACEHOLDER_HANDLE = "__placeholder__";
@@ -101,17 +105,13 @@ async function CollectionPageContent({
   if (!collection) notFound();
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
-  const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getCollectionResultsData({
-    handle,
-    searchStatePromise,
-  });
+  const statePromise = readBrowseState(searchParams);
   return (
     <CollectionDetailPage
       collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
       handle={handle}
-      searchStatePromise={searchStatePromise}
+      resultsPromise={fetchCollectionResults({ handle, statePromise })}
+      statePromise={statePromise}
     />
   );
 }

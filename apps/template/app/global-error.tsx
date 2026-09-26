@@ -5,10 +5,10 @@ import { AlertCircleIcon } from "lucide-react";
 import "./globals.css";
 
 export default function GlobalError({
-  reset,
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
   return (
     <html lang="en">
@@ -25,7 +25,7 @@ export default function GlobalError({
           </p>
           <button
             type="button"
-            onClick={reset}
+            onClick={() => retry()}
             className="inline-flex items-center justify-center h-12 rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Try again

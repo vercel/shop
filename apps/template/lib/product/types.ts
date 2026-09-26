@@ -2,6 +2,7 @@ import type { ProductInput } from "@shopify/hydrogen";
 
 import type { Image, Video } from "@/lib/media/types";
 import type { Money } from "@/lib/money/types";
+import type { PageInfo } from "@/lib/pagination/types";
 import type { SEO } from "@/lib/seo/types";
 
 export type SelectedOptions = Record<string, string>;
@@ -38,7 +39,7 @@ export type ProductFormInput = ProductInput<ProductFormVariant> & {
   }>;
 };
 
-export interface OptionValueState {
+interface OptionValueState {
   available: boolean;
   crossProduct: boolean;
   exists: boolean;
@@ -68,13 +69,16 @@ export interface ProductCard {
   vendor?: string;
 }
 
+export interface ProductPage {
+  pageInfo: PageInfo;
+  products: ProductCard[];
+}
+
 export interface ProductDetails extends ProductCard {
   /** Sparse variant cache around the default variant; feeds Hydrogen's product form store. */
   adjacentVariants: ProductVariant[];
   allVariantsInStock: boolean;
   category?: Category | null;
-  categoryId?: string;
-  collectionHandles: string[];
   compareAtPriceRange?: {
     maxVariantPrice: Money;
     minVariantPrice: Money;
@@ -93,7 +97,6 @@ export interface ProductDetails extends ProductCard {
     minVariantPrice: Money;
   };
   seo: SEO;
-  tags: string[];
   updatedAt: string;
   /** Only populated by fetchProductWithVariants for Eve; the PDP and Markdown omit it. */
   variants?: ProductVariant[];
@@ -115,7 +118,7 @@ export interface ProductVariant {
   requiresComponents: boolean;
   requiresSellingPlan: boolean;
   selectedOptions: SelectedOption[];
-  // Only the first 100 allocations are loaded, even when Shopify reports another page.
+  // Only the first 100 allocations are loaded.
   sellingPlanAllocations: SellingPlanAllocation[];
   title: string;
 }

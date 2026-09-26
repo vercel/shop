@@ -4,14 +4,12 @@ import { CollectionProvider, useCollection } from "@shopify/hydrogen/react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { use, type ReactNode } from "react";
 
-import type { CollectionSearchState } from "@/lib/collections/types";
-
-import { FilterTransitionProvider, useFilterTransition } from "./filter-pending-context";
+import type { BrowseState } from "@/lib/collections/types";
 
 interface CollectionBrowseProviderProps {
   children: ReactNode;
   handle: string;
-  searchStatePromise: Promise<CollectionSearchState>;
+  statePromise: Promise<BrowseState>;
 }
 
 export function CollectionActiveFilterCountBadge() {
@@ -24,34 +22,21 @@ export function CollectionActiveFilterCountBadge() {
   );
 }
 
-export function CollectionBrowseProvider(props: CollectionBrowseProviderProps) {
-  return (
-    <FilterTransitionProvider>
-      <CollectionBrowseProviderInner {...props} />
-    </FilterTransitionProvider>
-  );
-}
-
-function CollectionBrowseProviderInner({
+export function CollectionBrowseProvider({
   children,
   handle,
-  searchStatePromise,
+  statePromise,
 }: CollectionBrowseProviderProps) {
-  const { dataSearch } = use(searchStatePromise);
+  const { dataSearch } = use(statePromise);
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const startTransition = useFilterTransition();
 
   return (
     <CollectionProvider
       data={{ dataSearch, handle }}
       urlSearch={searchParams.toString()}
-      onChange={(search) => {
-        startTransition(() => {
-          router.push(`${pathname}${search}`, { scroll: false });
-        });
-      }}
+      onChange={(search) => router.push(`${pathname}${search}`, { scroll: false })}
     >
       {children}
     </CollectionProvider>

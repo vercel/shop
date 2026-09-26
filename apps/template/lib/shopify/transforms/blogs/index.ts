@@ -22,7 +22,6 @@ export function transformArticle(article: ShopifyArticle, blog: ShopifyBlog): Bl
       description: article.seo?.description ?? article.excerpt ?? article.content,
       title: article.seo?.title ?? article.title,
     },
-    tags: article.tags ?? [],
     title: article.title,
   };
 }

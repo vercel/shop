@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { SEARCH_SORT_EXCLUDE } from "@/lib/collections";
 import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
-  getAllProductsResultsData,
-  getCollectionSearchState,
+  readBrowseState,
 } from "@/lib/collections/server";
+import { fetchSearchResults } from "@/lib/search/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,30 +34,18 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-// Storefront `search()` only supports RELEVANCE and PRICE sort keys.
-const ALL_PRODUCTS_SORT_EXCLUDE = [
-  "best-selling",
-  "created-ascending",
-  "created-descending",
-  "title-ascending",
-  "title-descending",
-];
-
 export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
   const collection = await getAllProductsCollection();
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
-  const searchStatePromise = getCollectionSearchState(searchParams);
-  const collectionResultsDataPromise = getAllProductsResultsData({
-    searchStatePromise,
-  });
+  const statePromise = readBrowseState(searchParams);
   return (
     <CollectionDetailPage
       collection={collection}
-      collectionResultsDataPromise={collectionResultsDataPromise}
       handle={ALL_PRODUCTS_HANDLE}
-      searchStatePromise={searchStatePromise}
-      sortExclude={ALL_PRODUCTS_SORT_EXCLUDE}
+      resultsPromise={fetchSearchResults({ statePromise })}
+      sortExclude={SEARCH_SORT_EXCLUDE}
+      statePromise={statePromise}
     />
   );
 }

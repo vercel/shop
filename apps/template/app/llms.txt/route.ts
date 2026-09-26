@@ -22,21 +22,19 @@ export async function GET(): Promise<Response> {
 
 Use this storefront to discover, compare, and purchase its products.
 
-- Search when a shopper describes what they need.
-- Fetch product and collection URLs as Markdown to learn what a product is, what it costs, and which options exist.
-- Use the UCP profile at \`${url}/.well-known/ucp\` for live per-variant availability, cart, and checkout.
+- Fetch product and collection URLs as Markdown to learn what they are. Product Markdown includes price, options, and images; collection Markdown describes the collection without listing products.
+- Use the UCP profile at \`${url}/.well-known/ucp\` to search the live catalog, check per-variant availability, build a cart, and check out.
 - Do not treat this storefront as developer documentation or a general-purpose public API.
 
 ## Browse
 
 - [All products](${url}/collections/all): The full product catalog.
-- [Search](${url}/search): Full-text product search; append \`?q=<query>\`.
 ${collectionLinks.length > 0 ? `\n## Collections\n\n${collectionLinks.join("\n")}\n` : ""}
 ## Discovery
 
 - [Sitemap](${url}/sitemap.xml): Complete index of product and collection URLs.
 - [Robots](${url}/robots.txt): Crawl policy.
-- [UCP profile](${url}/.well-known/ucp): Agent commerce endpoints for availability, cart, and checkout.
+- [UCP profile](${url}/.well-known/ucp): Agent commerce endpoints for catalog search, availability, cart, and checkout.
 
 ---
 

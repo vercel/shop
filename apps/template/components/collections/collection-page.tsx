@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
-import { CollectionResultsGrid } from "@/components/collections/results-grid";
-import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
+import { BrowseFallback } from "@/components/collections/toolbar";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -10,27 +9,22 @@ import Link from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import type {
-  CollectionResultsData,
-  CollectionSearchState,
-  Collection,
-} from "@/lib/collections/types";
+import type { BrowseResults, BrowseState, Collection } from "@/lib/collections/types";
 
-import { CollectionBrowseProvider } from "./collection-browse-provider";
-import { FilterPendingScope } from "./filter-pending-context";
+import { Browse } from "./browse";
 
 export function CollectionDetailPage({
   collection,
-  collectionResultsDataPromise,
   handle,
-  searchStatePromise,
+  resultsPromise,
   sortExclude,
+  statePromise,
 }: {
   collection: Collection;
-  collectionResultsDataPromise: Promise<CollectionResultsData>;
   handle: string;
-  searchStatePromise: Promise<CollectionSearchState>;
+  resultsPromise: Promise<BrowseResults>;
   sortExclude?: string[];
+  statePromise: Promise<BrowseState>;
 }) {
   return (
     <>
@@ -43,20 +37,12 @@ export function CollectionDetailPage({
             <CollectionHeader collection={collection} handle={handle} homeLabel="Home" />
 
             <Suspense fallback={<BrowseFallback />}>
-              <CollectionBrowseProvider handle={handle} searchStatePromise={searchStatePromise}>
-                <BrowseToolbar
-                  facetsPromise={collectionResultsDataPromise.then(
-                    (data) => data.transformedFilters,
-                  )}
-                  sortExclude={sortExclude}
-                />
-
-                <FilterPendingScope>
-                  <CollectionResultsGrid
-                    collectionResultsDataPromise={collectionResultsDataPromise}
-                  />
-                </FilterPendingScope>
-              </CollectionBrowseProvider>
+              <Browse
+                resultsPromise={resultsPromise}
+                sortExclude={sortExclude}
+                statePromise={statePromise}
+                storeKey={handle}
+              />
             </Suspense>
           </Sections>
         </Container>

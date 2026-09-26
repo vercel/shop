@@ -19,7 +19,7 @@ Inspect how the route starts its catalog and marketing reads. Preserve useful pr
 
 - Decide whether the LCP candidate is text, an image, or a video poster before choosing the hero implementation.
 - Keep primary copy outside the catalog boundary.
-- For a hero image, reserve its aspect ratio, provide truthful responsive `sizes`, and preload it only when it is the clear LCP candidate.
+- For a hero image, reserve its aspect ratio, keep the shared `sizes="100vw"` rather than layout breakpoints, and preload it only when it is the clear LCP candidate.
 - For a video hero, server-render a poster and copy first. Load playback code and video bytes without blocking the initial image and text.
 - Avoid competing eager hero, logo, and first-grid image requests.
 

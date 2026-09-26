@@ -6,5 +6,4 @@ export type ShopifyBlog = ResultOf<typeof BLOG_FRAGMENT>;
 export type ShopifyArticle = ResultOf<typeof ARTICLE_SUMMARY_FRAGMENT> & {
   contentHtml?: string;
   seo?: { description: string | null; title: string | null } | null;
-  tags?: string[];
 };
