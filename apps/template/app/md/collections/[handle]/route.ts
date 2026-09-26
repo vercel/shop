@@ -1,63 +1,25 @@
-import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
-  getAllProductsResultsData,
-  resolveBrowseParams,
+  getCollection,
 } from "@/lib/collections/server";
-import { getCollection } from "@/lib/collections/server";
 import { collectionToMarkdown } from "@/lib/markdown/collection";
 import { notFoundMarkdown } from "@/lib/markdown/not-found";
 import { markdownHeaders } from "@/lib/markdown/representation";
-import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
 
-export async function GET(request: Request, { params }: { params: Promise<{ handle: string }> }) {
+// Opts the handler into the stored-output model; every handle renders on demand and is kept until its tag is invalidated.
+export function generateStaticParams(): Array<{ handle: string }> {
+  return [];
+}
+
+export async function GET(_request: Request, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params;
-  const url = new URL(request.url);
   const pathname = `/collections/${handle}`;
-  const searchState = resolveBrowseParams(url.searchParams);
   try {
-    // /collections/all is local-only, so markdown must mirror the HTML data path.
-    if (handle === ALL_PRODUCTS_HANDLE) {
-      const searchStatePromise = Promise.resolve(searchState);
-      const [collection, data] = await Promise.all([
-        getAllProductsCollection(),
-        getAllProductsResultsData({
-          searchStatePromise,
-        }),
-      ]);
-      const markdown = collectionToMarkdown({
-        collection,
-        products: data.result.products,
-        filters: data.result.filters,
-        priceRange: data.result.priceRange,
-        activeFilters: data.filters,
-        pageInfo: data.result.pageInfo,
-        sort: data.sort,
-      });
-      return new Response(markdown, {
-        headers: markdownHeaders({
-          cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
-          pathname,
-        }),
-      });
-    }
-    const cursor = url.searchParams.get("cursor") ?? undefined;
-    const { filters, sort } = searchState;
-
-    // Same live read as the HTML page so agents and shoppers see one result set per URL.
-    const [collection, result] = await Promise.all([
-      getCollection({
-        handle,
-      }),
-      fetchCollectionProducts({
-        collection: handle,
-        sortKey: sort,
-        limit: PRODUCTS_PER_PAGE,
-        cursor,
-        filters,
-      }),
-    ]);
+    const collection =
+      handle === ALL_PRODUCTS_HANDLE
+        ? await getAllProductsCollection()
+        : await getCollection({ handle });
     if (!collection) {
       return new Response(notFoundMarkdown({ kind: "Collection", value: handle }), {
         status: 404,
@@ -67,16 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ hand
         }),
       });
     }
-    const markdown = collectionToMarkdown({
-      collection,
-      products: result.products,
-      filters: result.filters,
-      priceRange: result.priceRange,
-      activeFilters: filters,
-      pageInfo: result.pageInfo,
-      sort,
-    });
-    return new Response(markdown, {
+    return new Response(collectionToMarkdown(collection), {
       headers: markdownHeaders({
         cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
         pathname,
