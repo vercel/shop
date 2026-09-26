@@ -104,7 +104,7 @@ Opt-in via `auth.isEnabled` in `lib/config/index.ts`. When enabled, `next.config
 - Keep stable headings, primary media, and likely LCP content in the static shell when the data contract permits. Push request-time inputs to the smallest Suspense boundary that needs them.
 - Visible fallbacks match the resolved section's geometry; loading states must not introduce avoidable layout shift.
 - Server Components are the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
-- Use `next/image` with reserved dimensions and truthful `sizes`. Preload only the actual LCP image; keep product grids lazy by default.
+- Use `next/image` with reserved dimensions and the shared `sizes="100vw"`. Do not tune `sizes` per breakpoint or surface: one optimized asset reused across grids, product pages, cart, and the agent beats smaller layout-specific variants on cache hits and image-optimization cost. Preload only the actual LCP image; keep product grids lazy by default.
 - Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
 
 Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.

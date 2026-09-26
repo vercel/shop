@@ -39,7 +39,7 @@ Collections and `/search` share the same Hydrogen collection store. `CollectionB
 
 ## Images and pagination
 
-- Provide product-card `sizes` that match the actual column count at each breakpoint.
+- Keep product-card images at the shared `sizes="100vw"` so grids, product pages, cart, and the agent reuse one optimized asset. Do not tune `sizes` to the column count.
 - Keep grid images lazy by default. A dense grid magnifies every eager-loading or prefetch decision.
 - Bound the initial query and payload. Fetch later pages only when requested or near the viewport.
 - Deduplicate appended products and stop observers when `hasNextPage` is false.
