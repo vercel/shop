@@ -11,7 +11,7 @@ import {
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { useState } from "react";
 
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import { parseFilterInput } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";

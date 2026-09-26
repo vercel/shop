@@ -1,7 +1,7 @@
 import { cn } from "cn";
 import type { ComponentProps } from "react";
 
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { Swatch } from "@/components/ui/swatch";
 import type { OptionGroupState } from "@/lib/product/types";
 

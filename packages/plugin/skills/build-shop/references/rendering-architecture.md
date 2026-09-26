@@ -48,14 +48,14 @@ Preserve these boundaries:
 
 | Data                                                                          | Default treatment                                                                                                                   |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Public content that belongs in the prerendered shell                          | Plain `"use cache"` with the existing `cacheLife` and `cacheTag` policy                                                             |
-| Public results resolved after request inputs such as filters or search params | `"use cache: remote"` when a shared runtime cache is justified                                                                      |
+| Public catalog and content reads, including static shell content              | `"use cache: remote"` in the domain `get*` wrapper with the existing `cacheLife` and `cacheTag` policy                              |
+| Cursor-paginated browse, search results, and facets                           | Uncached `fetch*` reads; cached cursor pages drift apart, and Search & Discovery changes must appear immediately                    |
 | Customer, session, cart, or authorization-dependent data                      | Uncached or private per-session handling; never place it in a shared remote cache                                                   |
 | Mutation results                                                              | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |
 
 Keep cache directives in the data layer. Do not add a second cache in presentation code.
 
-Plain `"use cache"` and `"use cache: remote"` are not interchangeable. Plain cacheable reads can be included in a static shell. Remote cached reads are useful after request-time inputs but may resolve outside that shell. Changing the directive can change route coherence even when the returned data is identical.
+The `get*` reads use `"use cache: remote"` so every instance shares one cache in front of Shopify instead of revalidating separately. Remote reads still render into a static shell when the route prerenders. Changing a directive, or moving a read behind request-time inputs, can change route coherence and Shopify request volume even when the returned data is identical.
 
 ## Shape the shell and streaming boundaries
 
@@ -89,9 +89,9 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 
 ## Treat navigation as part of the architecture
 
-With partial prefetching, visible links receive a reusable App Shell by default. `prefetch={true}` requests more cached destination content. A route exporting `prefetch = "allow-runtime"` can cause a server invocation for each eligible link.
+With partial prefetching, visible links receive a reusable App Shell by default. `prefetch={true}` requests per-link destination content, one server request per link. The template's `Link` from `@/components/ui/link` makes that upgrade only on hover or keyboard focus. `await unstable_prefetch()` keeps a subtree out of the App Shell but in per-link prefetches; `await unstable_navigation()` keeps it out of both until the navigation.
 
-- Leave low-intent or high-fanout links at the default.
+- Use the template `Link` for every internal link, and leave high-fanout links on its intent upgrade.
 - Consider fuller prefetching for a small number of high-intent links.
 - Use runtime prefetching only when it resolves meaningful request-dependent UI before the click.
 - Pair runtime prefetching with instant-navigation validation where supported.

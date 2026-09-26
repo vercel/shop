@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { getComplementaryProducts } from "@/lib/product/server";
 import type { ProductCard } from "@/lib/product/types";
 

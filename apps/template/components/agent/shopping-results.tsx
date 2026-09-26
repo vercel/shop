@@ -20,7 +20,7 @@ import {
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import { Slider, SliderContent, SliderHeader, SliderItem, SliderNav } from "@/components/ui/slider";
 import { isCartMutation } from "@/lib/agent/cart";
 import {

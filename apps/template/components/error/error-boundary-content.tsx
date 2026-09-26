@@ -3,7 +3,7 @@
 import { AlertCircleIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 
 export function ErrorBoundaryContent({ retry }: { retry: () => void }) {
   return (

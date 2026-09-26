@@ -148,5 +148,3 @@ export function Link({
     />
   );
 }
-
-export default Link;

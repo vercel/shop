@@ -2,7 +2,7 @@ import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 const MAX_COLUMNS = 5;

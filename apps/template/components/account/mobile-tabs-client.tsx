@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import { usePathname } from "next/navigation";
 
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 
 interface AccountTab {
   href: string;

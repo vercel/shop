@@ -8,7 +8,7 @@ import Image from "next/image";
 import { CartLineForm } from "@/components/cart/line-form";
 import { CartWarnings } from "@/components/cart/warnings";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import type { CartLine } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 

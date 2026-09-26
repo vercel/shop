@@ -2,7 +2,7 @@ import { cn } from "cn";
 import Image from "next/image";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import Link from "@/components/ui/link";
+import { Link } from "@/components/ui/link";
 import type { CollectionWithThumbnail } from "@/lib/collections/types";
 
 export interface CollectionCardProps {
