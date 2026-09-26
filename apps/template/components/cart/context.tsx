@@ -18,7 +18,7 @@ interface CartDrawerContextValue {
 
 const CartDrawerContext = createContext<CartDrawerContextValue | null>(null);
 
-export function CartDrawerProvider({ children }: { children: ReactNode }) {
+function CartDrawerProvider({ children }: { children: ReactNode }) {
   const [isOverlayOpen, setOverlayOpen] = useState(false);
   const openOverlay = useCallback(() => setOverlayOpen(true), []);
 

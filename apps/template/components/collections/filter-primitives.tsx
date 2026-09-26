@@ -182,12 +182,14 @@ function FilterSwatchGrid({ className, children, ...props }: ComponentProps<"div
   );
 }
 
-interface FilterOptionProps extends ComponentProps<"button"> {
-  label: string;
+interface FilterOptionProps {
+  className?: string;
   count?: number;
-  selected?: boolean;
-  href?: string;
+  href: string;
+  label: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
   pending?: boolean;
+  selected?: boolean;
 }
 
 function FilterOption({
@@ -198,21 +200,25 @@ function FilterOption({
   pending = false,
   className,
   onClick,
-  ...props
 }: FilterOptionProps) {
-  const sharedClassName = cn(
-    "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
-    "data-[selected=true]:font-medium",
-    className,
-  );
   const trailingIcon = pending ? (
     <LoaderCircleIcon className="size-3.5 animate-spin text-muted-foreground" />
   ) : selected ? (
     <CheckIcon className="size-3.5 text-muted-foreground" />
   ) : null;
 
-  const content = (
-    <>
+  return (
+    <Link
+      href={href}
+      data-slot="filter-option"
+      data-selected={selected}
+      className={cn(
+        "flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground",
+        "data-[selected=true]:font-medium",
+        className,
+      )}
+      onClick={onClick}
+    >
       <span>
         {label}
         {count !== undefined && <span className="text-muted-foreground"> ({count})</span>}
@@ -222,34 +228,7 @@ function FilterOption({
           {trailingIcon}
         </span>
       )}
-    </>
-  );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        data-slot="filter-option"
-        data-selected={selected}
-        className={sharedClassName}
-        onClick={onClick as unknown as MouseEventHandler<HTMLAnchorElement>}
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      data-slot="filter-option"
-      data-selected={selected}
-      className={sharedClassName}
-      onClick={onClick}
-      {...props}
-    >
-      {content}
-    </button>
+    </Link>
   );
 }
 
@@ -270,7 +249,7 @@ function FilterPriceRange({
   onMinChange,
   onMaxChange,
   onApply,
-  currencySymbol = "$",
+  currencySymbol,
   fromPlaceholder = "From",
   toPlaceholder = "To",
   className,

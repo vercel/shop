@@ -73,7 +73,7 @@ These routes require `auth.isEnabled` to be `true` and the [customer authenticat
 | `/md`                      | Home page in Markdown                                |
 | `/md/products/[handle]`    | Product in Markdown                                  |
 | `/md/collections/[handle]` | Collection in Markdown                               |
-| `/md/search`               | Search results in Markdown                           |
+| `/md/search`               | Search query in Markdown, pointing agents to UCP     |
 | `/.well-known/ucp`         | Shopify's business profile for commerce integrations |
 
 The home, product, collection-detail, and search URLs also return Markdown when requested with `Accept: text/markdown`. See [Proxy](/docs/anatomy/proxy) when adding custom routing or integrations.

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 
 import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Filter, PriceRange } from "@/lib/filters/types";
+import type { Facets } from "@/lib/filters/types";
 
 function CollectionFilterSidebarSkeleton() {
   return (
@@ -21,20 +21,12 @@ function CollectionFilterSidebarSkeleton() {
   );
 }
 
-async function Render({
-  facetsPromise,
-}: {
-  facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
-}) {
+async function Render({ facetsPromise }: { facetsPromise: Promise<Facets> }) {
   const { filters, priceRange } = await facetsPromise;
   return <CollectionFilterSidebarClient filters={filters} priceRange={priceRange} />;
 }
 
-export function CollectionFilters({
-  facetsPromise,
-}: {
-  facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
-}) {
+export function CollectionFilters({ facetsPromise }: { facetsPromise: Promise<Facets> }) {
   return (
     <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
       <Render facetsPromise={facetsPromise} />

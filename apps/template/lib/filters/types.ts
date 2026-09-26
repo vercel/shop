@@ -13,6 +13,11 @@ export interface FilterValue {
   value: string;
 }
 
+export interface Facets {
+  filters: Filter[];
+  priceRange?: PriceRange;
+}
+
 export interface Filter {
   id: string;
   label: string;

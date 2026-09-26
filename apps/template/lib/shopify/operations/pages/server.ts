@@ -17,7 +17,6 @@ const GET_PAGE_QUERY = gql(`#graphql
         title
       }
       title
-      updatedAt
     }
   }
 `);
@@ -43,6 +42,5 @@ export async function fetchPage({
       title: page.seo?.title ?? page.title,
     },
     title: page.title,
-    updatedAt: page.updatedAt,
   };
 }

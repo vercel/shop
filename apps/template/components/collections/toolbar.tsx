@@ -3,16 +3,15 @@ import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { Filter, PriceRange } from "@/lib/filters/types";
+import type { Facets } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
-import { FilterPendingScope } from "./filter-pending-context";
 import { FilterSidebarSheet } from "./filter-sidebar-sheet";
 import { CollectionFilters } from "./filters";
 import { CollectionsSortSelect } from "./sort-select";
 
 interface BrowseToolbarProps {
-  facetsPromise: Promise<{ filters: Filter[]; priceRange?: PriceRange }>;
+  facetsPromise: Promise<Facets>;
   resultCount?: ReactNode;
   sortExclude?: string[];
 }
@@ -34,9 +33,7 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
             </button>
           }
         >
-          <FilterPendingScope>
-            <CollectionFilters facetsPromise={facetsPromise} />
-          </FilterPendingScope>
+          <CollectionFilters facetsPromise={facetsPromise} />
         </FilterSidebarSheet>
       }
       resultCount={resultCount}

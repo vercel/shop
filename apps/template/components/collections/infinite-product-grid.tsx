@@ -6,46 +6,47 @@ import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "rea
 
 import { ProductCard } from "@/components/product-card/product-card";
 import { getBrowseSearch } from "@/lib/collections";
+import { loadMoreBrowseProductsAction } from "@/lib/collections/action";
+import type { BrowseSource } from "@/lib/collections/types";
 import type { PageInfo } from "@/lib/pagination/types";
 import type { ProductCard as ProductCardType } from "@/lib/product/types";
 
-interface InfiniteProductGridProps<TParams> {
-  initialProducts: ProductCardType[];
-  initialPageInfo: PageInfo;
-  outOfStockText: string;
-  // Top-level "use server" action; passed by reference, no closure encryption.
-  loadMore: (
-    params: TParams & { cursor: string; search: string },
-  ) => Promise<{ products: ProductCardType[]; pageInfo: PageInfo }>;
-  loadMoreParams: TParams;
+interface InfiniteProductGridProps {
   children: ReactNode;
+  initialPageInfo: PageInfo;
+  initialProductIds: string[];
+  source: BrowseSource;
 }
 
-export function InfiniteProductGrid<TParams>({
-  initialProducts,
-  initialPageInfo,
-  outOfStockText,
-  loadMore,
-  loadMoreParams,
+export function InfiniteProductGrid({
   children,
-}: InfiniteProductGridProps<TParams>) {
+  initialPageInfo,
+  initialProductIds,
+  source,
+}: InfiniteProductGridProps) {
   // The store, not a server snapshot, is the single source of truth for filters and sort mid-scroll.
   const search = useCollection(getBrowseSearch);
+  const isPending = useCollection((state) => state.status === "loading");
   const [additionalProducts, setAdditionalProducts] = useState<ProductCardType[]>([]);
   const [pageInfo, setPageInfo] = useState<PageInfo>(initialPageInfo);
   const [isLoading, setIsLoading] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
   const loadMorePage = useEffectEvent(async () => {
-    if (loadingRef.current || !pageInfo.hasNextPage || !pageInfo.endCursor) return;
+    // This grid's cursor belongs to the settled browse state; the next state remounts the grid.
+    if (isPending || loadingRef.current || !pageInfo.hasNextPage || !pageInfo.endCursor) return;
     loadingRef.current = true;
     setIsLoading(true);
 
     try {
-      const result = await loadMore({ ...loadMoreParams, cursor: pageInfo.endCursor, search });
+      const result = await loadMoreBrowseProductsAction({
+        cursor: pageInfo.endCursor,
+        search,
+        source,
+      });
       // Live cursor pages can re-emit a boundary product if the ranking shifts mid-scroll; skip ids already shown.
       setAdditionalProducts((prev) => {
-        const seen = new Set([...initialProducts, ...prev].map((product) => product.id));
+        const seen = new Set([...initialProductIds, ...prev.map((product) => product.id)]);
         return [...prev, ...result.products.filter((product) => !seen.has(product.id))];
       });
       setPageInfo(result.pageInfo);
@@ -72,11 +73,14 @@ export function InfiniteProductGrid<TParams>({
     return () => observer.disconnect();
   }, [endCursor, hasNextPage]);
   return (
-    <>
+    <div
+      className="transition-opacity duration-200 data-[pending=true]:pointer-events-none data-[pending=true]:opacity-50"
+      data-pending={isPending}
+    >
       <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {children}
         {additionalProducts.map((product) => (
-          <ProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
+          <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
         ))}
       </div>
 
@@ -85,6 +89,6 @@ export function InfiniteProductGrid<TParams>({
           {isLoading && <LoaderCircleIcon className="size-6 animate-spin text-muted-foreground" />}
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import { isFilterInputActive, type ProductFilter } from "@shopify/hydrogen";
 
 import type {
+  Facets,
   Filter,
   FilterPresentation,
   FilterType,
@@ -15,7 +16,6 @@ import type {
   ShopifyFilterType,
   ShopifyFilterValue,
   TransformFiltersOptions,
-  TransformedFilters,
 } from "@/lib/shopify/transforms/filters/types";
 
 function isColorKey(value: string): boolean {
@@ -185,28 +185,22 @@ function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): P
 export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
-): TransformedFilters {
-  const { activeFilters = [], currencyCode, hideZeroCount = true } = options;
+): Facets {
+  const { activeFilters = [], currencyCode } = options;
 
   const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");
   const listFilters = shopifyFilters.filter((f) => f.type === "LIST");
 
   let filters = listFilters
     .map(transformFilter)
-    .filter(
-      (filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"),
-    );
-
-  if (hideZeroCount) {
-    filters = filters
-      .map((filter) => ({
-        ...filter,
-        values: filter.values.filter(
-          (value) => value.count > 0 || isFilterInputActive(activeFilters, value.input),
-        ),
-      }))
-      .filter((filter) => filter.values.length > 0);
-  }
+    .filter((filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"))
+    .map((filter) => ({
+      ...filter,
+      values: filter.values.filter(
+        (value) => value.count > 0 || isFilterInputActive(activeFilters, value.input),
+      ),
+    }))
+    .filter((filter) => filter.values.length > 0);
 
   // Keep an active singleton facet so the shopper can still clear it.
   filters = filters.filter(

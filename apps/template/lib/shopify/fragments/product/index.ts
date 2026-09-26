@@ -15,7 +15,6 @@ export const PRODUCT_FRAGMENT = gql(
     description
     descriptionHtml
     vendor
-    tags
     updatedAt
     availableForSale
     isGiftCard
@@ -29,7 +28,6 @@ export const PRODUCT_FRAGMENT = gql(
       edges {
         node {
           __typename
-          mediaContentType
           ... on MediaImage {
             image {
               url
@@ -88,7 +86,6 @@ export const PRODUCT_FRAGMENT = gql(
       name
       values
       optionValues {
-        id
         name
         swatch {
           color
@@ -113,13 +110,6 @@ export const PRODUCT_FRAGMENT = gql(
     category {
       ...TaxonomyCategoryFields
     }
-    collections(first: 10) {
-      edges {
-        node {
-          handle
-        }
-      }
-    }
   }
 `,
   [PRODUCT_VARIANT_FRAGMENT, TAXONOMY_CATEGORY_FRAGMENT],
@@ -136,6 +126,7 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = gql(
       edges {
         node {
           ...ProductVariantFields
+          ...BundleRelationshipFields
         }
       }
     }
@@ -176,14 +167,6 @@ export const PRODUCT_CARD_FRAGMENT = gql(
       }
     }
     selectedOrFirstAvailableVariant {
-      id
-      availableForSale
-      image {
-        url
-        altText
-        width
-        height
-      }
       selectedOptions {
         name
         value
