@@ -134,6 +134,14 @@ export function CollectionFilterSidebarClient({
             <FilterSectionHeader title="Price" />
             <FilterSectionContent>
               <FilterPriceRange
+                currencySymbol={
+                  priceRange.currencyCode
+                    ? formatMoney(
+                        { amount: "0", currencyCode: priceRange.currencyCode },
+                        { locale: shopConfig.localization.locale },
+                      ).currencySymbol
+                    : undefined
+                }
                 fromPlaceholder="From"
                 maxValue={maxInput}
                 minValue={minInput}

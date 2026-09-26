@@ -249,7 +249,7 @@ function FilterPriceRange({
   onMinChange,
   onMaxChange,
   onApply,
-  currencySymbol = "$",
+  currencySymbol,
   fromPlaceholder = "From",
   toPlaceholder = "To",
   className,

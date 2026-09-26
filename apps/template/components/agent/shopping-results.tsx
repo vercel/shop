@@ -213,6 +213,7 @@ function AgentProductCard({ product }: AgentProductCardProps) {
               alt={product.title}
               outOfStock={!product.available}
               outOfStockText="Out of Stock"
+              sizes="224px"
               src={product.image}
             />
             <ProductCardContent>
