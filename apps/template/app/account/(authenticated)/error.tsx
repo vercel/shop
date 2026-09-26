@@ -2,6 +2,6 @@
 
 import { ErrorBoundaryContent } from "@/components/error/error-boundary-content";
 
-export default function AccountError({ reset }: { reset: () => void }) {
-  return <ErrorBoundaryContent reset={reset} />;
+export default function AccountError({ retry }: { retry: () => void }) {
+  return <ErrorBoundaryContent retry={retry} />;
 }

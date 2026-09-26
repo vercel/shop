@@ -2,11 +2,11 @@
 
 import { ErrorBoundaryContent } from "@/components/error/error-boundary-content";
 
-export default function LocaleError({
-  reset,
+export default function RootError({
+  retry,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 }) {
-  return <ErrorBoundaryContent reset={reset} />;
+  return <ErrorBoundaryContent retry={retry} />;
 }
