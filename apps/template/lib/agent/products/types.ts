@@ -11,7 +11,7 @@ export interface AgentProduct {
   vendor: string | null;
 }
 
-export interface AgentOptionValue {
+interface AgentOptionValue {
   image?: string;
   name: string;
   swatch?: OptionValueSwatch;

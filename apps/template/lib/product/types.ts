@@ -38,7 +38,7 @@ export type ProductFormInput = ProductInput<ProductFormVariant> & {
   }>;
 };
 
-export interface OptionValueState {
+interface OptionValueState {
   available: boolean;
   crossProduct: boolean;
   exists: boolean;
@@ -73,8 +73,6 @@ export interface ProductDetails extends ProductCard {
   adjacentVariants: ProductVariant[];
   allVariantsInStock: boolean;
   category?: Category | null;
-  categoryId?: string;
-  collectionHandles: string[];
   compareAtPriceRange?: {
     maxVariantPrice: Money;
     minVariantPrice: Money;
@@ -93,7 +91,6 @@ export interface ProductDetails extends ProductCard {
     minVariantPrice: Money;
   };
   seo: SEO;
-  tags: string[];
   updatedAt: string;
   /** Only populated by fetchProductWithVariants for Eve; the PDP and Markdown omit it. */
   variants?: ProductVariant[];
@@ -115,7 +112,7 @@ export interface ProductVariant {
   requiresComponents: boolean;
   requiresSellingPlan: boolean;
   selectedOptions: SelectedOption[];
-  // Only the first 100 allocations are loaded, even when Shopify reports another page.
+  // Only the first 100 allocations are loaded.
   sellingPlanAllocations: SellingPlanAllocation[];
   title: string;
 }

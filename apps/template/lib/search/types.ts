@@ -15,14 +15,11 @@ export interface SearchResultsData {
 }
 
 export interface PredictiveSearchProduct {
-  availableForSale: boolean;
-  compareAtPrice?: Money;
   featuredImage: Image | null;
   handle: string;
   id: string;
   price: Money;
   title: string;
-  vendor?: string;
 }
 
 export interface SearchSuggestion {
@@ -30,13 +27,7 @@ export interface SearchSuggestion {
   text: string;
 }
 
-interface PredictiveSearchCollection {
-  handle: string;
-  title: string;
-}
-
 export interface PredictiveSearchResult {
-  collections: PredictiveSearchCollection[];
   products: PredictiveSearchProduct[];
   queries: SearchSuggestion[];
 }

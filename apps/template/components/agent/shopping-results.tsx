@@ -207,8 +207,8 @@ function AgentProductCard({ product }: AgentProductCardProps) {
   return (
     <SliderItem>
       <Link href={`/products/${product.handle}`} className="block">
-        <ProductCard variant="default">
-          <ProductCardImageContainer variant="default">
+        <ProductCard>
+          <ProductCardImageContainer>
             <ProductCardImage
               alt={product.title}
               outOfStock={!product.available}

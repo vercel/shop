@@ -18,7 +18,6 @@ export type SearchIndexProductsParams = {
 export type SearchIndexProductsResult = {
   pageInfo: PageInfo;
   products: ProductCard[];
-  total: number;
 };
 
 export type CollectionProductsParams = {
@@ -38,24 +37,6 @@ export type CollectionProductsResult = {
 };
 
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
-
-export type ProductsResult = {
-  pageInfo: PageInfo;
-  products: ProductCard[];
-};
-
-export type ProductsParams = {
-  limit?: number;
-  locale?: CommerceLocale;
-};
-
-export type FilteredProductsParams = ProductsParams & {
-  collection?: string;
-  cursor?: string;
-  filters?: ProductFilter[];
-  query?: string;
-  sortKey?: string;
-};
 
 export type SearchFacetsParams = {
   collection?: string;

@@ -7,7 +7,6 @@ import type { ResultOf } from "@/lib/shopify/types";
 export interface TransformFiltersOptions {
   activeFilters?: ProductFilter[];
   currencyCode?: string;
-  hideZeroCount?: boolean;
 }
 
 export interface TransformedFilters {

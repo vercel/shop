@@ -5,7 +5,7 @@ import type { Image } from "@/lib/media/types";
 import type { SEO } from "@/lib/seo/types";
 import type { CollectionProductsResult } from "@/lib/shopify/operations/products/types";
 
-export interface BrowseParams {
+interface BrowseParams {
   filters: ProductFilter[];
   sort?: string;
 }

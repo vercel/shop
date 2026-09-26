@@ -72,10 +72,7 @@ function decryptSession(value: string): SessionData {
   }
 }
 
-function readSession(cookieHeader: string | null): {
-  chunkCount: number;
-  data: SessionData;
-} {
+function readSession(cookieHeader: string | null): SessionData {
   const cookies = parseCookies(cookieHeader);
   const chunks: string[] = [];
 
@@ -85,10 +82,7 @@ function readSession(cookieHeader: string | null): {
     chunks.push(chunk);
   }
 
-  return {
-    chunkCount: chunks.length,
-    data: chunks.length > 0 ? decryptSession(chunks.join("")) : {},
-  };
+  return chunks.length > 0 ? decryptSession(chunks.join("")) : {};
 }
 
 function serializeCookie(name: string, value: string, origin: string, maxAge: number): string {
@@ -113,8 +107,7 @@ function createSessionManager(
   origin: string,
   writable: boolean,
 ): ReadonlyCustomerSessionManager | WritableCustomerSessionManager {
-  const initialSession = readSession(cookieHeader);
-  const data = { ...initialSession.data };
+  const data = { ...readSession(cookieHeader) };
   let dirty = false;
 
   const readonlyManager: ReadonlyCustomerSessionManager = {

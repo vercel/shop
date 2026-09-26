@@ -46,13 +46,6 @@ export async function getSearchResultsData({
 
 const PRODUCT_FRAGMENT = gql(/* GraphQL */ `
   fragment PredictiveSearchProductFragment on Product {
-    availableForSale
-    compareAtPriceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
     featuredImage {
       altText
       height
@@ -65,14 +58,6 @@ const PRODUCT_FRAGMENT = gql(/* GraphQL */ `
         currencyCode
       }
     }
-    vendor
-  }
-`);
-
-const COLLECTION_FRAGMENT = gql(/* GraphQL */ `
-  fragment PredictiveSearchCollectionFragment on Collection {
-    handle
-    title
   }
 `);
 
@@ -85,10 +70,9 @@ const QUERY_FRAGMENT = gql(/* GraphQL */ `
 
 export const predictiveSearchHandlers = createPredictiveSearchServerHandlers({
   fragments: {
-    collection: COLLECTION_FRAGMENT,
     product: PRODUCT_FRAGMENT,
     query: QUERY_FRAGMENT,
   },
   limit: 3,
-  types: ["PRODUCT", "COLLECTION", "QUERY"],
+  types: ["PRODUCT", "QUERY"],
 });

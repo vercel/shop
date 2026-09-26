@@ -36,7 +36,6 @@ const GET_BLOG_ARTICLE_QUERY = gql(
           description
           title
         }
-        tags
       }
     }
   }

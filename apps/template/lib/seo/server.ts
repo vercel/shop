@@ -37,7 +37,7 @@ export async function getShopifySitemapPagesCount(type: ShopifySitemapType): Pro
 export async function getShopifySitemapPage(
   type: ShopifySitemapType,
   page: number,
-): Promise<{ hasNextPage: boolean; items: SitemapResource[] }> {
+): Promise<{ items: SitemapResource[] }> {
   "use cache: remote";
   cacheLife("max");
   cacheTag(...sitemapCacheTags(type));

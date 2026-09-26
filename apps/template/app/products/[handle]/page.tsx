@@ -10,7 +10,7 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
-import { getProducts, getProduct, getProductVariant } from "@/lib/product/server";
+import { getProduct, getProductVariant, getSearchIndexProducts } from "@/lib/product/server";
 import { type SelectedOptions } from "@/lib/product/types";
 import type { ProductVariant } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
@@ -55,7 +55,7 @@ async function buildProductMetadata(handle: string, canonicalPath: string): Prom
 
 export async function generateStaticParams() {
   try {
-    const { products } = await getProducts({ limit: 1 });
+    const { products } = await getSearchIndexProducts({ limit: 1 });
     const first = products[0];
     return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
   } catch {

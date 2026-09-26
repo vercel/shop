@@ -9,11 +9,10 @@ export function humanizeStatus(status: string): string {
     .join(" ");
 }
 
-export function formatOrderDate(
-  iso: string,
-  locale: string = shopConfig.localization.locale,
-): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
+export function formatOrderDate(iso: string): string {
+  return new Intl.DateTimeFormat(shopConfig.localization.locale, { dateStyle: "medium" }).format(
+    new Date(iso),
+  );
 }
 
 export function OrderStatusBadge({ status }: { status: string }) {

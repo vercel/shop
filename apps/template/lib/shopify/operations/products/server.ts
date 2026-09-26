@@ -2,7 +2,6 @@ import { flattenConnection, gql, parseSortByValue } from "@shopify/hydrogen";
 import type { ProductFilter } from "@shopify/hydrogen";
 import type {
   ProductCollectionSortKeys,
-  ProductSortKeys,
   SearchSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
 
@@ -31,9 +30,7 @@ import { decodeShopifyId } from "@/lib/shopify/id/server";
 import type {
   CollectionProductsParams,
   CollectionProductsResult,
-  FilteredProductsParams,
   ProductOptionValues,
-  ProductsResult,
   SearchFacetsParams,
   SearchFacetsResult,
   SearchIndexProductsParams,
@@ -244,128 +241,6 @@ export async function fetchProductsByIds({
     .map(transformShopifyProductCard);
 }
 
-const PRODUCTS_QUERY = gql(
-  `#graphql
-  query products($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    products(
-      first: $first
-      after: $after
-      query: $query
-      sortKey: $sortKey
-      reverse: $reverse
-    ) {
-      edges {
-        cursor
-        node {
-          ...ProductCardFields
-        }
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`,
-  [PRODUCT_CARD_FRAGMENT],
-);
-
-// QueryRoot.products sorts by CREATED_AT where collections sort by CREATED.
-function toProductsSort(
-  sortBy: string | undefined,
-  hasQuery: boolean,
-): { reverse: boolean; sortKey: ProductSortKeys } {
-  const parsed = sortBy ? parseSortByValue(sortBy) : undefined;
-  switch (parsed?.sortKey) {
-    case "BEST_SELLING":
-      return { reverse: parsed.reverse, sortKey: "BEST_SELLING" };
-    case "CREATED":
-      return { reverse: parsed.reverse, sortKey: "CREATED_AT" };
-    case "PRICE":
-      return { reverse: parsed.reverse, sortKey: "PRICE" };
-    case "TITLE":
-      return { reverse: parsed.reverse, sortKey: "TITLE" };
-    default:
-      // RELEVANCE is meaningless without a query; BEST_SELLING is the browse default.
-      return { reverse: false, sortKey: hasQuery ? "RELEVANCE" : "BEST_SELLING" };
-  }
-}
-
-function joinOr(field: string, values: string[]): string {
-  const expressions = values.map((v) => `${field}:'${escapeProductQuery(v)}'`);
-  return expressions.length > 1 ? `(${expressions.join(" OR ")})` : expressions[0];
-}
-
-// QueryRoot.products has no productFilters arg, so filters are encoded into the query string; variantOption/productMetafield are dropped.
-function buildProductsQuery(args: {
-  collection?: string;
-  filters: ProductFilter[];
-  query?: string;
-}): string {
-  const parts: string[] = [];
-
-  if (args.query?.trim()) parts.push(args.query.trim());
-  if (args.collection) parts.push(`collection:'${escapeProductQuery(args.collection)}'`);
-
-  const vendors: string[] = [];
-  const types: string[] = [];
-  const tags: string[] = [];
-  let available: boolean | undefined;
-  let priceMin: number | undefined;
-  let priceMax: number | undefined;
-
-  for (const f of args.filters) {
-    if (f.productVendor) vendors.push(f.productVendor);
-    if (f.productType) types.push(f.productType);
-    if (f.tag) tags.push(f.tag);
-    if (f.available !== undefined) available = f.available;
-    if (f.price?.min !== undefined) priceMin = f.price.min;
-    if (f.price?.max !== undefined) priceMax = f.price.max;
-  }
-
-  if (vendors.length) parts.push(joinOr("vendor", vendors));
-  if (types.length) parts.push(joinOr("product_type", types));
-  if (tags.length) parts.push(joinOr("tag", tags));
-  if (available !== undefined) parts.push(`available_for_sale:${available}`);
-  if (priceMin !== undefined) parts.push(`variants.price:>=${priceMin}`);
-  if (priceMax !== undefined) parts.push(`variants.price:<=${priceMax}`);
-
-  return parts.join(" AND ");
-}
-
-export async function fetchProducts({
-  collection,
-  cursor,
-  filters = [],
-  limit = 50,
-  locale = shopConfig.localization,
-  query,
-  sortKey: sortBy,
-}: FilteredProductsParams): Promise<ProductsResult> {
-  const productsQuery = buildProductsQuery({ query, collection, filters });
-  const { reverse, sortKey } = toProductsSort(sortBy, Boolean(productsQuery));
-
-  const response = await storefront.request(PRODUCTS_QUERY, {
-    locale,
-    variables: {
-      first: limit,
-      after: cursor,
-      query: productsQuery || undefined,
-      sortKey,
-      reverse,
-    },
-  });
-  assertStorefrontOk(response, "products");
-  const { data } = response;
-
-  return {
-    pageInfo: data.products.pageInfo,
-    products: flattenConnection(data.products).map(transformShopifyProductCard),
-  };
-}
-
 // Storefront search sorts by RELEVANCE or PRICE only.
 function toSearchSort(sortBy: string | undefined): { reverse: boolean; sortKey: SearchSortKeys } {
   const parsed = sortBy ? parseSortByValue(sortBy) : undefined;
@@ -386,7 +261,6 @@ const PRODUCTS_SEARCH_QUERY = gql(
       reverse: $reverse
       types: PRODUCT
     ) {
-      totalCount
       edges {
         cursor
         node {
@@ -457,7 +331,6 @@ export async function fetchSearchIndexProducts(
     products: shopifyProducts.map((product) =>
       transformFilteredShopifyProductCard(product, selectedColor),
     ),
-    total: data.search.totalCount,
   };
 }
 

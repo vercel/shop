@@ -247,7 +247,6 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     ...extractMediaFromProduct(product),
     variants,
     options: product.options.map(transformOption),
-    tags: product.tags,
     seo: {
       title: product.seo.title || product.title,
       description: product.seo.description || product.description,
@@ -257,7 +256,5 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     priceRange: product.priceRange,
     compareAtPriceRange: product.compareAtPriceRange,
     currencyCode: product.priceRange.minVariantPrice.currencyCode,
-    categoryId: product.category?.id,
-    collectionHandles: flattenConnection(product.collections).map((c) => c.handle),
   };
 }

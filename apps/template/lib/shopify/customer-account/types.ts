@@ -4,7 +4,7 @@ import type {
 } from "@shopify/hydrogen/customer-account";
 
 // Hydrogen auto-injects `$language`; the app owns `country` in the request context.
-export type CustomerAccountVariables<Doc extends AnyCustomerAccountDocument> = Omit<
+type CustomerAccountVariables<Doc extends AnyCustomerAccountDocument> = Omit<
   Doc extends CustomerAccountDocument<unknown, infer Variables, string> ? Variables : never,
   "language"
 >;

@@ -5,5 +5,4 @@ export interface ContentPage {
   handle: string;
   seo: SEO;
   title: string;
-  updatedAt: string;
 }
