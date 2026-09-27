@@ -4,7 +4,7 @@ interface CollectionSchemaData {
   handle: string;
   title: string;
   description: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export function CollectionSchema({ collection }: { collection: CollectionSchemaData }) {

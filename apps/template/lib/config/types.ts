@@ -81,6 +81,7 @@ export interface ShopConfig {
     };
   };
   site: {
+    description: string;
     name: string;
     url: string;
   };

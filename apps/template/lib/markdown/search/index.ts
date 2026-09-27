@@ -1,17 +1,27 @@
 import { getSearchResultUrl } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
+import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
 
 export function searchToMarkdown(query: string | undefined): string {
   const siteUrl = shopConfig.site.url;
   const term = query?.trim();
   const shopPath = term ? getSearchResultUrl({ baseUrl: "/search", term }) : "/search";
 
+  const title = term ? `Search: ${term}` : "Search";
+  const description =
+    "Search results change with the live catalog, so this page does not list products.";
+
   return [
-    term ? `# Search: ${escapeMarkdown(term)}` : "# Search",
+    markdownFrontmatter({
+      canonicalUrl: new URL(shopPath, siteUrl).toString(),
+      description,
+      title,
+    }),
     "",
-    "Search results change with the live catalog, so this page does not list products.",
+    `# ${escapeMarkdown(title)}`,
+    "",
+    description,
     "",
     "## Search",
     "",

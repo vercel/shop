@@ -1,14 +1,16 @@
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
+import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
 import { markdownHeaders } from "@/lib/markdown/representation";
 
 export function GET(): Response {
-  const { name, url } = shopConfig.site;
+  const { description, name, url } = shopConfig.site;
 
   return new Response(
-    `# ${escapeMarkdown(name)}
+    `${markdownFrontmatter({ canonicalUrl: new URL("/", url).toString(), description, title: name })}
 
-A Storefront Built on Vercel Shop. Agent-ready commerce, powered by Shopify, Next, and Eve.
+# ${escapeMarkdown(name)}
+
+${escapeMarkdown(description)}
 
 ## Browse
 
