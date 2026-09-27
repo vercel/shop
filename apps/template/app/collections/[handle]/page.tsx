@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { describeCollection } from "@/lib/collections";
 import {
   fetchCollectionResults,
   getCollection,
@@ -56,7 +57,7 @@ export async function generateMetadata({
     };
   }
   const title = collection.seo.title;
-  const description = collection.seo.description;
+  const description = describeCollection(collection);
   return {
     title,
     description,

@@ -1,12 +1,14 @@
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
+import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
 import { markdownHeaders } from "@/lib/markdown/representation";
 
 export function GET(): Response {
   const { description, name, url } = shopConfig.site;
 
   return new Response(
-    `# ${escapeMarkdown(name)}
+    `${markdownFrontmatter({ canonicalUrl: new URL("/", url).toString(), description, title: name })}
+
+# ${escapeMarkdown(name)}
 
 ${escapeMarkdown(description)}
 
