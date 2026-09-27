@@ -296,20 +296,32 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 ```
 
-Preserve the template's Shopify-owned API and protocol matchers, then add locale-prefixed Shopify endpoints now that locale routing is enabled:
+Update the matcher. The template's single broad matcher is safe only while the proxy does nothing but Shopify dispatch; with locale negotiation, every request Hydrogen declines is localized, including app Route Handlers, webhooks, `robots.txt`, sitemaps, `llms.txt`, and static files. Replace it with Shopify's exact route families, locale-prefixed Shopify endpoints, and a catch-all that skips `/api`, Eve, Next.js and Vercel internals, and paths with a file extension:
 
 ```ts
 export const config = {
   matcher: [
-    // Keep every matcher already present in the template.
+    "/api/cart",
+    "/api/predictive-search",
+    "/api/mcp",
+    "/api/ucp/mcp",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/__shopify/:path*",
+    "/.well-known/:path*",
+    "/agent/:action(handoff|buyer-claims).:format",
+    "/cart.:format(js|json)",
+    "/cart/:operation(add|update|change|clear).:format(js|json)",
+    "/:page(index|search).md",
+    "/:resource(collections|products)/:handle.md",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/agent/:action(handoff|buyer-claims).:format",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart.:format(js|json)",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart/:operation(add|update|change|clear).:format(js|json)",
+    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|.*\\..*).*)",
   ],
 };
 ```
 
-Do not replace the explicit entries with `/api/:path*`: downstream applications must be able to add Route Handlers such as `/api/webhooks` or `/api/custom` without sending them through Shopify dispatch or locale middleware. If a new Hydrogen feature claims another reserved route, add that exact route family.
+Downstream applications must be able to add Route Handlers such as `/api/webhooks` or `/api/custom` without sending them through Shopify dispatch or locale middleware. If a new Hydrogen feature claims another reserved route, add that exact route family.
 
 Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside Shopify dispatch and locale negotiation. Keep `/api/agent/session` and `/agent/ucp-profile.json` unlocalized. If Shop Agent is enabled, carry and validate the copy locale explicitly for conversation context and navigation outputs without changing the deployment's Shopify country/language or allowing client context to select a cart. Keep Next.js request/cache APIs out of Eve's runtime imports.
 
