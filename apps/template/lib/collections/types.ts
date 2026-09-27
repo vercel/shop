@@ -31,7 +31,7 @@ export interface Collection {
   path: string;
   seo: SEO;
   title: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface CollectionWithThumbnail extends Collection {

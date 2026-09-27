@@ -1,12 +1,8 @@
 import { getCollections } from "@/lib/collections/server";
 import { shopConfig } from "@/lib/config";
+import { summarizeText } from "@/lib/content";
 import { escapeMarkdown } from "@/lib/markdown";
 import { getShopPolicies } from "@/lib/policies/server";
-
-function summarize(text: string): string {
-  const description = text.replace(/\s+/g, " ").trim();
-  return description.length > 200 ? `${description.slice(0, 199).trimEnd()}…` : description;
-}
 
 export async function GET(): Promise<Response> {
   const { description, name, url } = shopConfig.site;
@@ -17,7 +13,7 @@ export async function GET(): Promise<Response> {
   ]);
   const collectionLinks = collections.map((collection) => {
     const link = `[${escapeMarkdown(collection.title)}](${url}${collection.path})`;
-    const summary = summarize(collection.description);
+    const summary = summarizeText(collection.description);
     return summary ? `- ${link}: ${escapeMarkdown(summary)}` : `- ${link}`;
   });
   const policyLinks = policies.map(
@@ -27,7 +23,7 @@ export async function GET(): Promise<Response> {
   return new Response(
     `# ${escapeMarkdown(name)}
 
-> ${escapeMarkdown(summarize(description))}
+> ${escapeMarkdown(summarizeText(description))}
 
 Home, product, collection, and search pages return Markdown with an \`Accept: text/markdown\` header or at the page URL with \`.md\` appended (\`/index.md\` for the home page). Prices and availability use Shopify country \`${country}\` and language \`${language}\`.
 

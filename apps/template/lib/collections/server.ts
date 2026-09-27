@@ -8,6 +8,7 @@ import type {
   Collection,
   CollectionWithThumbnail,
 } from "@/lib/collections/types";
+import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { tagProducts } from "@/lib/product/server";
 import {
@@ -131,7 +132,9 @@ export async function getAllProductsCollection(): Promise<Collection> {
     description,
     image: null,
     path: `/collections/${ALL_PRODUCTS_HANDLE}`,
-    updatedAt: new Date(0).toISOString(),
-    seo: { title, description },
+    seo: {
+      description: `Browse every product at ${shopConfig.site.name}: compare prices and check availability.`,
+      title,
+    },
   };
 }

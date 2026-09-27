@@ -27,7 +27,7 @@ Markdown content uses the deployment's configured Shopify country and language. 
 | `/llms.txt`                      | Gives AI agents a concise storefront index                                     |
 | Social metadata                  | Supplies route-specific titles, descriptions, images, prices, and availability |
 
-Markdown responses include the facts needed to interpret each page:
+Markdown responses start with frontmatter listing the page title, description, and canonical URL, plus when Shopify last updated the product or collection. They include the facts needed to interpret each page:
 
 - **Products** — brand, category, a one-line summary, price or price range with compare-at price, product-level availability, description, options, images, and links to the shopper page and UCP profile.
 - **Collections** — title, description, image, and links to the shopper page and UCP catalog search. Collection contents change often, so products are not listed.

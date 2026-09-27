@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CollectionDetailPage } from "@/components/collections/collection-page";
-import { SEARCH_SORT_EXCLUDE } from "@/lib/collections";
+import { describeCollection, SEARCH_SORT_EXCLUDE } from "@/lib/collections";
 import {
   ALL_PRODUCTS_HANDLE,
   getAllProductsCollection,
@@ -12,7 +12,7 @@ import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Products";
-  const description = "";
+  const description = describeCollection(await getAllProductsCollection());
   return {
     title,
     description,
