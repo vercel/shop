@@ -133,18 +133,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
 
 export const config = {
   matcher: [
-    "/api/cart",
-    "/api/predictive-search",
-    "/api/mcp",
-    "/api/ucp/mcp",
-    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
-    "/__shopify/:path*",
-    "/agent/:action(handoff|buyer-claims).:format",
-    "/cart.:format(js|json)",
-    "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/:page(index|search).md",
-    "/:resource(collections|products)/:handle.md",
-    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
-    "/.well-known/:path*",
+    "/((?!_next/static|_next/image|_next/data|_vercel|eve(?:/|$)|_eve_internal(?:/|$)|favicon.ico).*)",
   ],
 };
