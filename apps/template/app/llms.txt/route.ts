@@ -16,7 +16,7 @@ export async function GET(): Promise<Response> {
   return new Response(
     `# ${escapeMarkdown(name)}
 
-> Online store. The homepage, product, collection, and search pages serve clean Markdown when fetched with an \`Accept: text/markdown\` header.
+> Online store. The homepage, product, collection, and search pages serve clean Markdown when fetched with an \`Accept: text/markdown\` header or at the page URL with \`.md\` appended (\`/index.md\` for the homepage).
 
 ## When to use this storefront
 

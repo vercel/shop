@@ -8,7 +8,7 @@ type: guide
 
 ## Make storefront content readable to AI
 
-The home page, product, collection, and search URLs return structured Markdown when a client requests `text/markdown`. Normal browser requests continue to receive HTML from the same URLs. No setup is required.
+The home page, product, collection, and search URLs return structured Markdown when a client requests `text/markdown` or appends `.md` to the URL, such as `/products/[handle].md`. The home page's Markdown URL is `/index.md`. Normal browser requests continue to receive HTML from the same URLs. No setup is required.
 
 The storefront also publishes `/llms.txt`, a concise index for AI agents. It links to up to 50 collections, the sitemap, crawl guidance, and the storefront's UCP profile rather than duplicating the full catalog. The [sitemap](/docs/anatomy/sitemap) remains the complete URL inventory.
 

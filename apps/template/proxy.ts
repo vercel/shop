@@ -18,7 +18,7 @@ import {
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/representation";
-import { getMarkdownPath } from "@/lib/markdown/representation";
+import { getMarkdownMirrorPath, getMarkdownPath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
 import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
@@ -81,6 +81,17 @@ export async function proxy(request: NextRequest): Promise<Response> {
   if (shopifyRoute) return shopifyRoute;
 
   const isDocumentRequest = request.method === "GET" || request.method === "HEAD";
+  const markdownMirrorPath = isDocumentRequest ? getMarkdownMirrorPath(pathname) : null;
+  if (markdownMirrorPath) {
+    const url = request.nextUrl.clone();
+    url.pathname = markdownMirrorPath;
+    const response = NextResponse.rewrite(url, {
+      request: { headers: requestContext.getForwardedRequestHeaders() },
+    });
+    requestContext.applyResponseHeaders(response.headers);
+    return response;
+  }
+
   const markdownPath = isDocumentRequest ? getMarkdownPath(pathname) : null;
   if (markdownPath) {
     const representation = negotiateRepresentation(request.headers.get("Accept"));
@@ -122,16 +133,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
 
 export const config = {
   matcher: [
-    "/api/cart",
-    "/api/predictive-search",
-    "/api/mcp",
-    "/api/ucp/mcp",
-    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
-    "/__shopify/:path*",
-    "/agent/:action(handoff|buyer-claims).:format",
-    "/cart.:format(js|json)",
-    "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)",
-    "/.well-known/:path*",
+    "/((?!_next/static|_next/image|_next/data|_vercel|eve(?:/|$)|_eve_internal(?:/|$)|favicon.ico).*)",
   ],
 };

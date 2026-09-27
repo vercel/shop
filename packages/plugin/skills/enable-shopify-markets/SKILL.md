@@ -283,20 +283,34 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 ```
 
-Preserve the complete Shopify options from the current proxy rather than copying the abbreviated example literally. Keep its existing Shopify-owned API and protocol matchers, then add locale-prefixed Shopify endpoints now that locale routing is enabled:
+Preserve the complete Shopify options from the current proxy rather than copying the abbreviated example literally.
+
+Update the matcher. The template's single broad matcher is safe only while the proxy does nothing but Shopify dispatch; with locale negotiation, every request Hydrogen declines is localized, including app Route Handlers, webhooks, `robots.txt`, sitemaps, `llms.txt`, and static files. Replace it with Shopify's exact route families, locale-prefixed Shopify endpoints, and a catch-all that skips `/api`, Eve, Next.js and Vercel internals, and paths with a file extension:
 
 ```ts
 export const config = {
   matcher: [
-    // Keep every matcher already present in the template.
+    "/api/cart",
+    "/api/predictive-search",
+    "/api/mcp",
+    "/api/ucp/mcp",
+    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
+    "/__shopify/:path*",
+    "/.well-known/:path*",
+    "/agent/:action(handoff|buyer-claims).:format",
+    "/cart.:format(js|json)",
+    "/cart/:operation(add|update|change|clear).:format(js|json)",
+    "/:page(index|search).md",
+    "/:resource(collections|products)/:handle.md",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/agent/:action(handoff|buyer-claims).:format",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart.:format(js|json)",
     "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart/:operation(add|update|change|clear).:format(js|json)",
+    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|.*\\..*).*)",
   ],
 };
 ```
 
-Never widen the matcher to `/api/:path*`: application Route Handlers such as `/api/webhooks/shopify`, `/api/agent/session`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
+Application Route Handlers such as `/api/webhooks/shopify`, `/api/agent/session`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
 
 For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
 
@@ -334,7 +348,7 @@ Agent tools, Shopify connections, product context, cart creation, and navigation
 
 ### Markdown negotiation
 
-After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update content-negotiation rewrites so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
+After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update content-negotiation and `.md` URL rewrites so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
 
 ## 9. Switch locale and synchronize cart country
 
