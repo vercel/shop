@@ -41,7 +41,7 @@ export function ArticlePage({ article }: ArticlePageProps) {
                 className="object-cover"
                 fill
                 priority
-                sizes="(max-width: 896px) 100vw, 896px"
+                sizes="100vw"
                 src={article.image.url}
               />
             </div>

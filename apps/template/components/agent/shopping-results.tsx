@@ -290,7 +290,7 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
                 alt={product.title}
                 className="object-cover"
                 fill
-                sizes="48px"
+                sizes="100vw"
                 src={product.image}
               />
             ) : (

@@ -97,7 +97,7 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
             alt={item.image.altText}
             fill
             className="object-cover"
-            sizes="56px"
+            sizes="100vw"
           />
         ) : null}
       </div>

@@ -8,7 +8,7 @@ import { withShopConfig } from "./lib/config/server";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   images: {
-    deviceSizes: [1080],
+    deviceSizes: [1320, 1920],
     imageSizes: [],
     minimumCacheTTL: 31536000,
     remotePatterns: [

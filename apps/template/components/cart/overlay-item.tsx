@@ -52,7 +52,7 @@ export function OverlayItem({ item }: OverlayItemProps) {
       alt={image.altText || title}
       fill
       className="object-cover"
-      sizes="72px"
+      sizes="100vw"
     />
   ) : (
     <ImagePlaceholder className="size-full" />
