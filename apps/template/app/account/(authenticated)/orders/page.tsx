@@ -1,4 +1,3 @@
-import { formatMoney } from "@shopify/hydrogen";
 import { Suspense } from "react";
 
 import { formatOrderDate, OrderStatusBadge } from "@/components/account/order-display";
@@ -6,8 +5,8 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
-import { shopConfig } from "@/lib/config";
-import { getCustomerOrders } from "@/lib/shopify/operations/customer/server";
+import { formatPrice } from "@/lib/money";
+import { fetchCustomerOrders } from "@/lib/shopify/operations/customer/server";
 
 export default function OrdersPage({
   searchParams,
@@ -30,7 +29,7 @@ async function OrdersContent({
   searchParams: Promise<{ after?: string; before?: string }>;
 }) {
   const params = await searchParams;
-  const { orders, pageInfo } = await getCustomerOrders({
+  const { orders, pageInfo } = await fetchCustomerOrders({
     after: params.after,
     before: params.before,
   });
@@ -58,13 +57,7 @@ async function OrdersContent({
               </div>
               <div className="flex items-center gap-3">
                 <OrderStatusBadge status={order.fulfillmentStatus} />
-                <span className="text-sm tabular-nums">
-                  {
-                    formatMoney(order.totalPrice, {
-                      locale: shopConfig.localization.locale,
-                    }).localizedString
-                  }
-                </span>
+                <span className="text-sm tabular-nums">{formatPrice(order.totalPrice)}</span>
               </div>
             </Link>
           </li>

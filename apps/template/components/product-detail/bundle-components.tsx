@@ -72,6 +72,7 @@ function BundleProductList({ items, title }: BundleProductListProps) {
                   alt={item.image.altText || item.title}
                   width={48}
                   height={48}
+                  sizes="100vw"
                   className="size-12 rounded-md object-cover"
                 />
               ) : (

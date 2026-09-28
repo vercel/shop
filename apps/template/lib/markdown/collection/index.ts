@@ -1,11 +1,22 @@
+import { describeCollection } from "@/lib/collections";
 import type { Collection } from "@/lib/collections/types";
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
+import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
 
 export function collectionToMarkdown(collection: Collection): string {
   const siteUrl = shopConfig.site.url;
   const description = collection.description || collection.seo.description;
-  const sections: string[] = [`# ${escapeMarkdown(collection.title)}`, ""];
+  const sections: string[] = [
+    markdownFrontmatter({
+      canonicalUrl: new URL(collection.path, siteUrl).toString(),
+      description: describeCollection(collection),
+      lastUpdated: collection.updatedAt,
+      title: collection.title,
+    }),
+    "",
+    `# ${escapeMarkdown(collection.title)}`,
+    "",
+  ];
 
   if (description) sections.push(escapeMarkdown(description), "");
 

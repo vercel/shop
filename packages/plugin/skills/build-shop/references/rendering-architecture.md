@@ -80,7 +80,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 ## Architect media and third parties
 
 - Use `next/image`; reserve space with intrinsic dimensions or an aspect-ratio container.
-- Give responsive and `fill` images the shared `sizes="100vw"` instead of tuning `sizes` to layout breakpoints. One optimized asset reused across surfaces costs fewer optimizations and hits the cache more often than smaller per-layout variants.
+- Give every image, including `fill` images and fixed-size thumbnails, the shared `sizes="100vw"` instead of tuning `sizes` to layout breakpoints. The template ships two widths, `deviceSizes: [1320, 1920]`: the screen picks one, and every surface reuses it, which costs fewer optimizations and hits the cache more often than per-layout variants.
 - Preload only the clear LCP image. Keep product grids and off-screen gallery media lazy.
 - Keep the LCP resource discoverable in initial server output, not behind a client effect.
 - Use `next/font` and load only required families, subsets, styles, and weights.

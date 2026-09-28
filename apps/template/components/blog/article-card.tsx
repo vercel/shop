@@ -22,7 +22,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
             alt={article.image.altText}
             className="object-cover transition-transform duration-300 hover:scale-105"
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            sizes="100vw"
             src={article.image.url}
           />
         ) : (

@@ -4,25 +4,24 @@ import { getSortByValue } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
+import { SORT_VALUES } from "@/lib/collections";
+import type { SortValue } from "@/lib/collections/types";
 
-// Values are Shopify `sort_by` parameters; "manual" means the collection's own order.
-const SORT_OPTIONS = [
-  { value: "manual", label: "Best Matches" },
-  { value: "best-selling", label: "Best Selling" },
-  { value: "title-ascending", label: "Name: A-Z" },
-  { value: "title-descending", label: "Name: Z-A" },
-  { value: "price-ascending", label: "Price: Low to High" },
-  { value: "price-descending", label: "Price: High to Low" },
-  { value: "created-ascending", label: "Date: Old to New" },
-  { value: "created-descending", label: "Date: New to Old" },
-] as const;
+const SORT_LABELS: Record<SortValue, string> = {
+  "best-selling": "Best Selling",
+  "created-ascending": "Date: Old to New",
+  "created-descending": "Date: New to Old",
+  manual: "Best Matches",
+  "price-ascending": "Price: Low to High",
+  "price-descending": "Price: High to Low",
+  "title-ascending": "Name: A-Z",
+  "title-descending": "Name: Z-A",
+};
 
-export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) {
+export function CollectionsSortSelect({ exclude = [] }: { exclude?: SortValue[] } = {}) {
   const { reverse, sortKey, status } = useCollection();
   const { setSortByValue } = useCollectionActions();
-  const options = exclude
-    ? SORT_OPTIONS.filter((option) => !exclude.includes(option.value))
-    : SORT_OPTIONS;
+  const options = SORT_VALUES.filter((value) => !exclude.includes(value));
   return (
     <Select
       value={sortKey ? getSortByValue(sortKey, reverse) : "manual"}
@@ -33,9 +32,9 @@ export function CollectionsSortSelect({ exclude }: { exclude?: string[] } = {}) 
         <span>Sort</span>
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
+        {options.map((value) => (
+          <SelectItem key={value} value={value}>
+            {SORT_LABELS[value]}
           </SelectItem>
         ))}
       </SelectContent>

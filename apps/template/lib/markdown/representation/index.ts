@@ -95,6 +95,12 @@ export function getMarkdownPath(pathname: string): string | null {
   return null;
 }
 
+export function getMarkdownMirrorPath(pathname: string): string | null {
+  if (!pathname.endsWith(".md")) return null;
+  const pagePath = pathname.slice(0, -".md".length);
+  return getMarkdownPath(pagePath === "/index" ? "/" : pagePath);
+}
+
 export function markdownHeaders({
   cacheControl,
   pathname,

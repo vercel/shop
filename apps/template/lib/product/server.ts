@@ -1,19 +1,12 @@
+import type { ProductRecommendationIntent } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { CommerceLocale } from "@/lib/config/types";
-import type {
-  ProductCard,
-  ProductDetails,
-  ProductPage,
-  ProductVariant,
-  SelectedOption,
-} from "@/lib/product/types";
+import type { ProductCard, ProductDetails, ProductPage } from "@/lib/product/types";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
-  fetchComplementaryProducts,
   fetchProduct,
-  fetchProductVariant,
-  fetchRelatedProducts,
+  fetchProductRecommendations,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
 import type { SearchIndexProductsParams } from "@/lib/shopify/operations/products/types";
@@ -39,15 +32,6 @@ export async function getProduct(params: {
   return product;
 }
 
-export async function getProductVariant(params: {
-  handle: string;
-  locale?: CommerceLocale;
-  selectedOptions: SelectedOption[];
-}): Promise<ProductVariant | undefined> {
-  // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
-  return fetchProductVariant(params);
-}
-
 // Cursor-paginated browse reads stay uncached in lib/collections/server.ts; this serves fixed grids only.
 export async function getSearchIndexProducts(
   params: SearchIndexProductsParams,
@@ -61,28 +45,16 @@ export async function getSearchIndexProducts(
   return result;
 }
 
-export async function getComplementaryProducts(params: {
+export async function getProductRecommendations(params: {
   handle: string;
+  intent: ProductRecommendationIntent;
   locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", `recommendations-${params.handle}`);
 
-  const products = await fetchComplementaryProducts(params);
-  tagProducts(products);
-  return products;
-}
-
-export async function getRelatedProducts(params: {
-  handle: string;
-  locale?: CommerceLocale;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `recommendations-${params.handle}`);
-
-  const products = await fetchRelatedProducts(params);
+  const products = await fetchProductRecommendations(params);
   tagProducts(products);
   return products;
 }

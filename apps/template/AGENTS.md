@@ -106,7 +106,7 @@ Opt-in via `auth.isEnabled` in `lib/config/index.ts`. When enabled, `next.config
 - Routes with runtime params (products, collections, blogs, articles, pages, policies) render a synchronous page that wraps an async content component in `Suspense` with a route skeleton, so client navigations show an instant fallback. Keep this inline boundary instead of `loading.tsx`, which serializes the skeleton twice in every document's RSC payload. Export the skeleton beside the component whose layout it mirrors and mark its root `aria-busy="true"`. Do not opt out with `export const instant = false`.
 - Put `await unstable_navigation()` before per-request work that a link prefetch should not render, such as the URL-selected variant on the product page; the default variant comes from the cached product.
 - Server Components are the default. Isolate state, effects, browser APIs, and event handlers in leaf client components.
-- Use `next/image` with reserved dimensions and the shared `sizes="100vw"`. Do not tune `sizes` per breakpoint or surface: one optimized asset reused across grids, product pages, cart, and the agent beats smaller layout-specific variants on cache hits and image-optimization cost. Preload only the actual LCP image; keep product grids lazy by default.
+- Use `next/image` with reserved dimensions and the shared `sizes="100vw"` on every image, including fixed-size thumbnails. `next.config.ts` ships two assets, `deviceSizes: [1320, 1920]`: the screen picks the small or large one, and grids, product pages, cart, search, and the agent reuse it. Do not tune `sizes` per breakpoint or surface or add widths; layout-specific variants cost more image optimizations and cache misses. Preload only the actual LCP image; keep product grids lazy by default.
 - Link internally with `Link` from `@/components/ui/link`, never `next/link`: it keeps the default App Shell prefetch and upgrades to a full prefetch only on hover or keyboard focus, so product grids never prefetch every card. Treat any other prefetch change as a production-measured traffic-versus-latency choice.
 
 Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
@@ -123,6 +123,7 @@ The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()`
 - `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`; composes `withBotId` and `withEve` through `withShopConfig` when their toggles are enabled.
 - `.oxlintrc.json`, `.oxfmtrc.json`, `components.json`: lint, format, and shadcn/ui configuration.
 - Environment variables are documented in `.env.example`.
+- `pnpm dev:portless` serves local HTTPS through a global [Portless](https://portless.sh) install; keep Portless out of `package.json` dependencies.
 
 ```bash
 pnpm dev

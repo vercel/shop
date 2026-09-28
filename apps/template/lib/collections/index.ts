@@ -5,10 +5,34 @@ import {
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 
+import type { Collection, SortValue } from "@/lib/collections/types";
+import { shopConfig } from "@/lib/config";
+import { summarizeText } from "@/lib/content";
+
 export const PRODUCTS_PER_PAGE = 40;
 
+export function describeCollection(collection: Collection): string {
+  return (
+    summarizeText(collection.seo.description) ||
+    summarizeText(collection.description) ||
+    `Shop ${collection.title} at ${shopConfig.site.name}: browse products, compare prices, and check availability.`
+  );
+}
+
 // Storefront `search` only sorts by RELEVANCE and PRICE.
-export const SEARCH_SORT_EXCLUDE = [
+// Shopify `sort_by` values; "manual" means the collection's own order.
+export const SORT_VALUES = [
+  "manual",
+  "best-selling",
+  "title-ascending",
+  "title-descending",
+  "price-ascending",
+  "price-descending",
+  "created-ascending",
+  "created-descending",
+] as const;
+
+export const SEARCH_SORT_EXCLUDE: SortValue[] = [
   "best-selling",
   "created-ascending",
   "created-descending",

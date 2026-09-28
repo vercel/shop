@@ -11,11 +11,12 @@ Use the installed Shopify AI Toolkit and Shopify CLI. The template sends `X-Shop
 
 ## Reuse or create a token
 
-First query the shop ID, shop name, and existing public tokens with `shopify store execute --store <handle>.myshopify.com --query '...'`:
+First query the shop ID, name, description, and existing public tokens with `shopify store execute --store <handle>.myshopify.com --query '...'`:
 
 ```graphql
 query VercelShopStorefrontTokens {
   shop {
+    description
     id
     name
     storefrontAccessTokens(first: 100) {
@@ -53,7 +54,7 @@ Do not print the token in the final response. Write these values to `.env.local`
 - `NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN`: normalized `.myshopify.com` domain
 - `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`: reused or created public token
 
-The storefront display name is not an environment variable. If `shop.name` differs from the default, set it as the `site.name` literal in `lib/config/index.ts`.
+The storefront display name and description are not environment variables. If `shop.name` differs from the default, set it as the `site.name` literal in `lib/config/index.ts`. If `shop.description` is set, use it as the `site.description` literal.
 
 ## Fallback
 

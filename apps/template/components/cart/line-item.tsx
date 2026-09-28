@@ -1,22 +1,23 @@
 "use client";
 
-import { type CartLine as HydrogenCartLine, formatMoney } from "@shopify/hydrogen";
+import type { CartLine as HydrogenCartLine } from "@shopify/hydrogen";
 import { useCart } from "@shopify/hydrogen/react";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 
-import { CartLineForm } from "@/components/cart/line-form";
-import { CartWarnings } from "@/components/cart/warnings";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { Link } from "@/components/ui/link";
 import type { CartLine } from "@/lib/cart/types";
-import { shopConfig } from "@/lib/config";
+import { formatPrice } from "@/lib/money";
 
-interface OverlayItemProps {
+import { CartLineForm } from "./line-form";
+import { CartWarnings } from "./warnings";
+
+interface CartLineItemProps {
   item: CartLine;
 }
 
-export function OverlayItem({ item }: OverlayItemProps) {
+export function CartLineItem({ item }: CartLineItemProps) {
   const isPending = useCart((state) => state.pending.lines.has(item.id));
   const isCostPending = useCart((state) =>
     Boolean(state.pending.cost || state.revalidating || state.pending.lines.has(item.id)),
@@ -52,16 +53,12 @@ export function OverlayItem({ item }: OverlayItemProps) {
       alt={image.altText || title}
       fill
       className="object-cover"
-      sizes="72px"
+      sizes="100vw"
     />
   ) : (
     <ImagePlaceholder className="size-full" />
   );
-  const price = (amount: number) =>
-    formatMoney(
-      { amount: String(amount), currencyCode },
-      { locale: shopConfig.localization.locale },
-    ).localizedString;
+  const price = (amount: number) => formatPrice({ amount: String(amount), currencyCode });
 
   return (
     <li className="flex gap-2.5" aria-busy={isPending || undefined} aria-label={title}>

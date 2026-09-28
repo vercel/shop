@@ -293,6 +293,7 @@ function ProductResult({
           alt={product.featuredImage.altText}
           width={56}
           height={56}
+          sizes="100vw"
           className="size-14 object-cover bg-muted shrink-0"
         />
       ) : (

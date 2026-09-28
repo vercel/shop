@@ -14,12 +14,12 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
-import { getProduct, getProductVariant, getSearchIndexProducts } from "@/lib/product/server";
+import { getProduct, getSearchIndexProducts } from "@/lib/product/server";
 import { type SelectedOptions } from "@/lib/product/types";
 import type { ProductVariant } from "@/lib/product/types";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-
-const PLACEHOLDER_HANDLE = "__placeholder__";
+import { fetchProductVariant } from "@/lib/shopify/operations/products/server";
+import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
 async function buildProductMetadata(handle: string, canonicalPath: string): Promise<Metadata> {
   const product = await getProduct({
@@ -115,7 +115,8 @@ async function ProductPageContent({
         return product.defaultVariant;
       }
       await unstable_navigation();
-      return getProductVariant({
+      // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
+      return fetchProductVariant({
         handle,
         selectedOptions: toSelectedOptionList({
           ...defaultSelectedOptions(product),

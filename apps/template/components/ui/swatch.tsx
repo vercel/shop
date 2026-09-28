@@ -35,6 +35,7 @@ export function Swatch({
           src={image}
           width={200}
           height={200}
+          sizes="100vw"
           alt={label}
           className="size-full object-cover"
         />

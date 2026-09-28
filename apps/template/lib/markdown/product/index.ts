@@ -1,7 +1,8 @@
-import { formatMoney } from "@shopify/hydrogen";
-
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
+import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
+import { formatPrice } from "@/lib/money";
+import type { Money } from "@/lib/money/types";
+import { isMarkedDown } from "@/lib/product";
 import type { ProductDetails } from "@/lib/product/types";
 
 const SUMMARY_MAX_LENGTH = 200;
@@ -26,8 +27,7 @@ function summarize(product: ProductDetails): string {
 }
 
 function priceLine(product: ProductDetails, locale: string): string {
-  const format = (money: { amount: string; currencyCode: string }) =>
-    formatMoney(money, { locale }).localizedString;
+  const format = (money: Money) => formatPrice(money, locale);
   const { maxVariantPrice, minVariantPrice } = product.priceRange;
   const parts: string[] = [];
 
@@ -39,10 +39,7 @@ function priceLine(product: ProductDetails, locale: string): string {
     );
   }
 
-  if (
-    product.compareAtPrice &&
-    Number.parseFloat(product.compareAtPrice.amount) > Number.parseFloat(product.price.amount)
-  ) {
+  if (product.compareAtPrice && isMarkedDown(product.price.amount, product.compareAtPrice.amount)) {
     parts.push(`Was ${format(product.compareAtPrice)}`);
   }
 
@@ -53,8 +50,19 @@ function priceLine(product: ProductDetails, locale: string): string {
 export function productToMarkdown(product: ProductDetails, locale: string): string {
   const sections: string[] = [];
   const siteUrl = shopConfig.site.url;
+  const summary = summarize(product);
 
-  sections.push(`# ${escapeMarkdown(product.title)}`, "");
+  sections.push(
+    markdownFrontmatter({
+      canonicalUrl: new URL(`/products/${product.handle}`, siteUrl).toString(),
+      description: summary,
+      lastUpdated: product.updatedAt,
+      title: product.title,
+    }),
+    "",
+    `# ${escapeMarkdown(product.title)}`,
+    "",
+  );
 
   const attribution: string[] = [];
   if (product.vendor) attribution.push(escapeMarkdown(product.vendor));
@@ -67,7 +75,6 @@ export function productToMarkdown(product: ProductDetails, locale: string): stri
   }
   if (attribution.length > 0) sections.push(attribution.join(" · "), "");
 
-  const summary = summarize(product);
   if (summary) sections.push(`> ${escapeMarkdown(summary)}`, "");
 
   sections.push(priceLine(product, locale), "");

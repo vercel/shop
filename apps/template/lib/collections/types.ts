@@ -1,5 +1,6 @@
 import type { ProductFilter } from "@shopify/hydrogen";
 
+import type { SORT_VALUES } from "@/lib/collections";
 import type { Facets } from "@/lib/filters/types";
 import type { Image } from "@/lib/media/types";
 import type { ProductPage } from "@/lib/product/types";
@@ -31,10 +32,12 @@ export interface Collection {
   path: string;
   seo: SEO;
   title: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export interface CollectionWithThumbnail extends Collection {
   thumbnail: Image | null;
   thumbnailProductId: string | null;
 }
+
+export type SortValue = (typeof SORT_VALUES)[number];

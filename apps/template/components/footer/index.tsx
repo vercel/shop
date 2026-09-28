@@ -1,12 +1,12 @@
 import { cn } from "cn";
-import type { ReactNode } from "react";
 
+import { MenuLink } from "@/components/nav/menu-link";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/components/ui/link";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
+import type { MenuItem } from "@/lib/menu/types";
 import { getShopPolicies } from "@/lib/policies/server";
-import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 import { SocialLinks } from "./social-links";
 import type { SocialLink } from "./social-links";
@@ -41,27 +41,6 @@ export async function Footer() {
         </Sections>
       </Container>
     </footer>
-  );
-}
-
-interface MenuLinkProps {
-  children: ReactNode;
-  className?: string;
-  url: string;
-}
-
-function MenuLink({ url, children, className }: MenuLinkProps) {
-  if (url.startsWith("http")) {
-    return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
-        {children}
-      </a>
-    );
-  }
-  return (
-    <Link href={url} className={className}>
-      {children}
-    </Link>
   );
 }
 

@@ -2,6 +2,7 @@ import { buildProductSelectionSearchParams, getSelectedProductOptions } from "@s
 
 import type { Image } from "@/lib/media/types";
 import type {
+  OptionValueSwatch,
   ProductDetails,
   ProductOption,
   ProductVariant,
@@ -152,12 +153,26 @@ function isOptionParam(key: string, selectedOptions: readonly SelectedOption[]):
   return selectedOptions.some((option) => option.name.toLowerCase() === lower);
 }
 
-function findColorOption(options: ProductOption[]): ProductOption | undefined {
-  return options.find(
-    (option) =>
-      option.values.some((value) => value.swatch?.color || value.swatch?.image) ||
-      option.name.toLowerCase().includes("color"),
+export function isColorOption(option: {
+  name: string;
+  values: ReadonlyArray<{ swatch?: OptionValueSwatch }>;
+}): boolean {
+  return (
+    option.values.some((value) => value.swatch?.color || value.swatch?.image) ||
+    option.name.toLowerCase().includes("color")
   );
+}
+
+// Shopify returns a zero-amount compare-at for undiscounted products; only a real markdown counts.
+export function isMarkedDown(
+  amount: string,
+  compareAtAmount: string | undefined,
+): compareAtAmount is string {
+  return compareAtAmount !== undefined && Number(compareAtAmount) > Number(amount);
+}
+
+function findColorOption(options: ProductOption[]): ProductOption | undefined {
+  return options.find(isColorOption);
 }
 
 // Only color partitions the gallery; other option axes share imagery.

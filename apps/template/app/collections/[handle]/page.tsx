@@ -6,6 +6,7 @@ import {
   CollectionDetailPage,
   CollectionDetailSkeleton,
 } from "@/components/collections/collection-page";
+import { describeCollection } from "@/lib/collections";
 import {
   fetchCollectionResults,
   getCollection,
@@ -13,8 +14,7 @@ import {
   readBrowseState,
 } from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-
-const PLACEHOLDER_HANDLE = "__placeholder__";
+import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
 export async function generateStaticParams() {
   try {
@@ -60,7 +60,7 @@ export async function generateMetadata({
     };
   }
   const title = collection.seo.title;
-  const description = collection.seo.description;
+  const description = describeCollection(collection);
   return {
     title,
     description,

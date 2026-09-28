@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
-import { getRelatedProducts } from "@/lib/product/server";
+import { getProductRecommendations } from "@/lib/product/server";
 
 function RelatedProductsSectionSkeleton({ limit }: { limit: number }) {
   return (
@@ -17,9 +17,7 @@ function RelatedProductsSectionSkeleton({ limit }: { limit: number }) {
 }
 
 async function Render({ handle, limit }: { handle: string; limit: number }) {
-  const related = await getRelatedProducts({
-    handle,
-  });
+  const related = await getProductRecommendations({ handle, intent: "RELATED" });
   if (related.length === 0) return null;
   return (
     <div className="grid gap-4">

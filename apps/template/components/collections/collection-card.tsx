@@ -8,14 +8,12 @@ import type { CollectionWithThumbnail } from "@/lib/collections/types";
 export interface CollectionCardProps {
   className?: string;
   collection: CollectionWithThumbnail;
-  sizes?: string;
   viewCollectionLabel: string;
 }
 
 export function CollectionCard({
   className,
   collection,
-  sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw",
   viewCollectionLabel,
 }: CollectionCardProps) {
   const { handle, thumbnail, title } = collection;
@@ -32,7 +30,7 @@ export function CollectionCard({
             alt={thumbnail.altText || title}
             className="object-cover"
             fill
-            sizes={sizes}
+            sizes="100vw"
             src={thumbnail.url}
           />
         ) : (
