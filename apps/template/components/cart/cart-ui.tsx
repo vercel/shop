@@ -1,11 +1,11 @@
 import { CartNotifications } from "./notifications";
-import { CartOverlayBridge } from "./overlay-bridge";
+import { CartOverlay } from "./overlay";
 
 export function CartUI() {
   return (
     <>
       <CartNotifications />
-      <CartOverlayBridge />
+      <CartOverlay description="Review your cart items and proceed to checkout" title="Cart" />
     </>
   );
 }

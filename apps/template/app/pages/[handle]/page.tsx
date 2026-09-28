@@ -6,8 +6,7 @@ import { RichTextPage, RichTextPageSkeleton } from "@/components/content/rich-te
 import { getPage } from "@/lib/pages/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopifySitemapPage } from "@/lib/seo/server";
-
-const PLACEHOLDER_HANDLE = "__placeholder__";
+import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
 export async function generateStaticParams() {
   try {

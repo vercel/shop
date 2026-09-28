@@ -176,7 +176,7 @@ export const getCustomerProfile = cache(async (): Promise<CustomerProfile | null
   return transformCustomerProfile(data.customer);
 });
 
-export async function getCustomerOrders(cursor?: {
+export async function fetchCustomerOrders(cursor?: {
   after?: string;
   before?: string;
 }): Promise<CustomerOrdersPage> {
@@ -222,7 +222,7 @@ export async function getCustomerOrders(cursor?: {
   };
 }
 
-export async function getCustomerOrder(id: string): Promise<CustomerOrder | null> {
+export async function fetchCustomerOrder(id: string): Promise<CustomerOrder | null> {
   const data = await customerFetch({
     document: GET_CUSTOMER_ORDER_QUERY,
     operation: "getCustomerOrder",
@@ -235,7 +235,7 @@ export async function getCustomerOrder(id: string): Promise<CustomerOrder | null
   return transformOrder(data.order);
 }
 
-export async function getCustomerAddresses(): Promise<CustomerAddress[]> {
+export async function fetchCustomerAddresses(): Promise<CustomerAddress[]> {
   const data = await customerFetch({
     document: GET_CUSTOMER_ADDRESSES_QUERY,
     operation: "getCustomerAddresses",

@@ -44,7 +44,7 @@ export function Lightbox({ label, children }: { label: string; children: ReactNo
                   alt={activeImage.altText || `${label} enlarged`}
                   fill
                   className="object-contain"
-                  sizes="90vw"
+                  sizes="100vw"
                   fetchPriority="high"
                   loading="eager"
                 />

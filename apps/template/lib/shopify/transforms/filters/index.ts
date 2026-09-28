@@ -10,7 +10,6 @@ import type {
 } from "@/lib/filters/types";
 import type { OptionValueSwatch } from "@/lib/product/types";
 import type {
-  ActiveFilterBadge,
   ShopifyFilter,
   ShopifyFilterPresentation,
   ShopifyFilterType,
@@ -213,25 +212,4 @@ export function transformShopifyFilters(
     filters,
     priceRange: priceFilter ? extractPriceRange(priceFilter, currencyCode) : undefined,
   };
-}
-
-export function getActiveFilterBadges(
-  filters: Filter[],
-  activeFilters: ProductFilter[],
-): ActiveFilterBadge[] {
-  const badges: ActiveFilterBadge[] = [];
-
-  for (const filter of filters) {
-    for (const value of filter.values) {
-      if (!isFilterInputActive(activeFilters, value.input)) continue;
-      badges.push({
-        paramKey: filter.paramKey,
-        value: value.value,
-        label: value.label,
-        filterLabel: filter.label,
-      });
-    }
-  }
-
-  return badges;
 }

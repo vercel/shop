@@ -3,7 +3,7 @@ import { type ReactNode, Suspense } from "react";
 import { ProductCard } from "@/components/product-card/product-card";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import type { BrowseResults, BrowseState } from "@/lib/collections/types";
+import type { BrowseResults, BrowseState, SortValue } from "@/lib/collections/types";
 
 import { CollectionBrowseProvider } from "./collection-browse-provider";
 import { InfiniteProductGrid } from "./infinite-product-grid";
@@ -12,7 +12,7 @@ import { BrowseToolbar } from "./toolbar";
 interface BrowseProps {
   resultCount?: ReactNode;
   resultsPromise: Promise<BrowseResults>;
-  sortExclude?: string[];
+  sortExclude?: SortValue[];
   statePromise: Promise<BrowseState>;
   storeKey: string;
 }

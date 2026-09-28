@@ -1,5 +1,10 @@
 import type { Money } from "@/lib/money/types";
-import { buildProductUrl, requiresBundleConfiguration, toSelectedOptionList } from "@/lib/product";
+import {
+  buildProductUrl,
+  isMarkedDown,
+  requiresBundleConfiguration,
+  toSelectedOptionList,
+} from "@/lib/product";
 import type {
   OptionGroupState,
   ProductCard,
@@ -10,10 +15,10 @@ import type {
 
 import type { AgentProduct, AgentProductDetails, AgentVariant } from "./types";
 
-// Shopify returns a zero-amount compare-at for undiscounted products; only a real markdown counts.
 function toDiscountPrice(price: Money, compareAtPrice: Money | undefined): Money | null {
-  if (!compareAtPrice) return null;
-  return Number(compareAtPrice.amount) > Number(price.amount) ? compareAtPrice : null;
+  return compareAtPrice && isMarkedDown(price.amount, compareAtPrice.amount)
+    ? compareAtPrice
+    : null;
 }
 
 export function toAgentProduct(product: ProductCard): AgentProduct {

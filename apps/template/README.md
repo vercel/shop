@@ -84,15 +84,15 @@ Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/confi
 
 Vercel Shop includes a `vercel-shop` plugin with skills for extending the storefront with common commerce patterns. In Claude Code, these are exposed as `/vercel-shop:<skill>` commands:
 
-| Skill                       | Description                                                                |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `build-shop`                | Build or adapt storefront routes with Vercel Shop patterns                 |
-| `shopify-graphql-reference` | Add Shopify-validated GraphQL operations in the template's layout          |
-| `enable-analytics`          | Add Vercel Analytics, Speed Insights, and Google Tag Manager               |
-| `enable-i18n`               | Locale-prefixed URL routing + next-intl message catalogs (no Markets)      |
-| `enable-shopify-markets`    | Multi-locale support with Shopify Markets and next-intl                    |
-| `enable-shopify-menus`      | Replace hardcoded nav/footer with Shopify-powered menus, optional megamenu |
-| `update-shop`               | Keep a storefront current with template changes                            |
+| Skill                       | Description                                                           |
+| --------------------------- | --------------------------------------------------------------------- |
+| `build-shop`                | Build or adapt storefront routes with Vercel Shop patterns            |
+| `shopify-graphql-reference` | Add Shopify-validated GraphQL operations in the template's layout     |
+| `enable-analytics`          | Add Vercel Analytics, Speed Insights, and Google Tag Manager          |
+| `enable-i18n`               | Locale-prefixed URL routing + next-intl message catalogs (no Markets) |
+| `enable-shopify-markets`    | Multi-locale support with Shopify Markets and next-intl               |
+| `enable-shopify-menus`      | Replace hardcoded nav/footer links with Shopify-managed menus         |
+| `update-shop`               | Keep a storefront current with template changes                       |
 
 ## Documentation
 

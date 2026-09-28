@@ -32,3 +32,10 @@ export interface PriceRange {
   max: number;
   min: number;
 }
+
+export interface ActiveFilterBadge {
+  filterLabel: string;
+  label: string;
+  paramKey: string;
+  value: string;
+}

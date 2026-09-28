@@ -1,18 +1,11 @@
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { CommerceLocale } from "@/lib/config/types";
-import type {
-  ProductCard,
-  ProductDetails,
-  ProductPage,
-  ProductVariant,
-  SelectedOption,
-} from "@/lib/product/types";
+import type { ProductCard, ProductDetails, ProductPage } from "@/lib/product/types";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
   fetchComplementaryProducts,
   fetchProduct,
-  fetchProductVariant,
   fetchRelatedProducts,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
@@ -37,15 +30,6 @@ export async function getProduct(params: {
   const product = await fetchProduct(params);
   if (product) tagProducts([product]);
   return product;
-}
-
-export async function getProductVariant(params: {
-  handle: string;
-  locale?: CommerceLocale;
-  selectedOptions: SelectedOption[];
-}): Promise<ProductVariant | undefined> {
-  // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
-  return fetchProductVariant(params);
 }
 
 // Cursor-paginated browse reads stay uncached in lib/collections/server.ts; this serves fixed grids only.

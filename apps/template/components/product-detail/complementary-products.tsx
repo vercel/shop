@@ -35,6 +35,7 @@ export async function ComplementaryProducts({
                   alt={product.featuredImage.altText || product.title}
                   width={48}
                   height={48}
+                  sizes="100vw"
                   className="size-12 rounded-md object-cover"
                 />
               ) : (

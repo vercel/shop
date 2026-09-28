@@ -16,13 +16,11 @@ interface AutoPlayVideoProps extends Omit<
   previewImage?: AutoPlayVideoPreviewImage | null;
   previewImageFetchPriority?: "auto" | "high" | "low";
   previewImageLoading?: "eager" | "lazy";
-  sizes?: string;
 }
 export function AutoPlayVideo({
   previewImage,
   previewImageFetchPriority,
   previewImageLoading,
-  sizes,
   className,
   ...props
 }: AutoPlayVideoProps) {
@@ -59,7 +57,7 @@ export function AutoPlayVideo({
           alt={previewImage.alt}
           fill
           className={cn("object-cover", className)}
-          sizes={sizes}
+          sizes="100vw"
           fetchPriority={previewImageFetchPriority}
           loading={previewImageLoading}
           draggable={false}

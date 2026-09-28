@@ -28,7 +28,6 @@ const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
 
 const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
 
-const GRID_SIZES = "(min-width: 1024px) 25vw, 50vw";
 // Tailwind `lg`, where the 2x2 grid replaces the carousel.
 const DESKTOP_MEDIA = "(min-width: 1024px)";
 // The 2x2 desktop grid is entirely above the fold. Its non-LCP tiles stay `loading="lazy"` on the
@@ -42,7 +41,7 @@ function preloadDesktopGridImage(image: ImageType) {
     src: image.url,
     alt: "",
     fill: true,
-    sizes: GRID_SIZES,
+    sizes: "100vw",
   });
   preload(props.src, {
     as: "image",
@@ -56,14 +55,12 @@ function MediaImage({
   item,
   title,
   idx,
-  sizes,
   priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "image" }>;
   title: string;
   idx: number;
-  sizes: string;
   priority: boolean;
   className?: string;
 }) {
@@ -73,7 +70,7 @@ function MediaImage({
       alt={item.image.altText || `${title} image ${idx + 1}`}
       fill
       className={cn("object-cover", className)}
-      sizes={sizes}
+      sizes="100vw"
       {...(priority ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
       draggable={false}
     />
@@ -82,12 +79,10 @@ function MediaImage({
 
 function MediaVideo({
   item,
-  sizes,
   priority,
   className,
 }: {
   item: Extract<MediaItem, { type: "video" }>;
-  sizes: string;
   priority: boolean;
   className?: string;
 }) {
@@ -102,7 +97,6 @@ function MediaVideo({
             }
           : null
       }
-      sizes={sizes}
       previewImageFetchPriority={priority ? "high" : "auto"}
       previewImageLoading={priority ? "eager" : "lazy"}
       className={cn("h-full w-full scale-[1.04] object-cover", className)}
@@ -176,11 +170,11 @@ function Carousel({
               className="relative shrink-0 w-full snap-start snap-always overflow-hidden aspect-square"
             >
               {item.type === "video" ? (
-                <MediaVideo item={item} sizes="100vw" priority={priority} />
+                <MediaVideo item={item} priority={priority} />
               ) : item.type === "placeholder" ? (
                 <ImagePlaceholder className="size-full" />
               ) : (
-                <MediaImage item={item} title={title} idx={idx} sizes="100vw" priority={priority} />
+                <MediaImage item={item} title={title} idx={idx} priority={priority} />
               )}
             </div>
           );
@@ -222,12 +216,12 @@ function GridItem({
   return (
     <div className="relative w-full overflow-hidden aspect-square">
       {item.type === "video" ? (
-        <MediaVideo item={item} sizes={GRID_SIZES} priority={priority} />
+        <MediaVideo item={item} priority={priority} />
       ) : item.type === "placeholder" ? (
         <ImagePlaceholder className="size-full" />
       ) : (
         <LightboxTrigger image={item.image}>
-          <MediaImage item={item} title={title} idx={idx} sizes={GRID_SIZES} priority={priority} />
+          <MediaImage item={item} title={title} idx={idx} priority={priority} />
         </LightboxTrigger>
       )}
     </div>

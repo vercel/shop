@@ -8,13 +8,6 @@ export interface TransformFiltersOptions {
   currencyCode?: string;
 }
 
-export interface ActiveFilterBadge {
-  paramKey: string;
-  value: string;
-  label: string;
-  filterLabel: string;
-}
-
 export type ShopifyFilter = ResultOf<typeof FILTER_FRAGMENT>;
 export type ShopifyFilterValue = ShopifyFilter["values"][number];
 export type ShopifyFilterType = ShopifyFilter["type"];

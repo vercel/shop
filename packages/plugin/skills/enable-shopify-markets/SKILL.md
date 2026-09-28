@@ -321,7 +321,7 @@ Audit definitions and real callers. Under the opted-in regional-locale model, lo
 This includes:
 
 - products, collections, search, recommendations, and complementary products
-- navigation menus and any megamenu added by `enable-shopify-menus`
+- navigation menus added by `enable-shopify-menus`
 - cart creation and cart reads that depend on buyer country
 - sitemap and markdown catalog/product output
 - agent tools and Storefront MCP calls
@@ -332,7 +332,7 @@ Keep locale defaults only at compatibility boundaries where the base single-loca
 
 ### Menus
 
-Inspect `getMenu` and its callers; where needed, extend `getMenu({ handle })` to receive the validated commerce context, add localized Storefront context to the validated query, and update every caller. Without this, navigation remains pinned to the default market.
+If `enable-shopify-menus` has added `getMenu`, pass the validated commerce context as `getMenu({ handle, locale })` from every caller; its query already carries `@inContext`. Without this, navigation remains pinned to the default market.
 
 ### Customer Account auth
 
