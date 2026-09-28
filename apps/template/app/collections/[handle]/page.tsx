@@ -10,8 +10,7 @@ import {
   readBrowseState,
 } from "@/lib/collections/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-
-const PLACEHOLDER_HANDLE = "__placeholder__";
+import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
 export async function generateStaticParams() {
   try {

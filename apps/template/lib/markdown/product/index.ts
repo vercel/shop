@@ -2,6 +2,7 @@ import { formatMoney } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
 import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
+import { isMarkedDown } from "@/lib/product";
 import type { ProductDetails } from "@/lib/product/types";
 
 const SUMMARY_MAX_LENGTH = 200;
@@ -39,10 +40,7 @@ function priceLine(product: ProductDetails, locale: string): string {
     );
   }
 
-  if (
-    product.compareAtPrice &&
-    Number.parseFloat(product.compareAtPrice.amount) > Number.parseFloat(product.price.amount)
-  ) {
+  if (product.compareAtPrice && isMarkedDown(product.price.amount, product.compareAtPrice.amount)) {
     parts.push(`Was ${format(product.compareAtPrice)}`);
   }
 

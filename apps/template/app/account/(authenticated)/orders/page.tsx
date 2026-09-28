@@ -7,7 +7,7 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
-import { getCustomerOrders } from "@/lib/shopify/operations/customer/server";
+import { fetchCustomerOrders } from "@/lib/shopify/operations/customer/server";
 
 export default function OrdersPage({
   searchParams,
@@ -30,7 +30,7 @@ async function OrdersContent({
   searchParams: Promise<{ after?: string; before?: string }>;
 }) {
   const params = await searchParams;
-  const { orders, pageInfo } = await getCustomerOrders({
+  const { orders, pageInfo } = await fetchCustomerOrders({
     after: params.after,
     before: params.before,
   });

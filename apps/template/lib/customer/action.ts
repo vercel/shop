@@ -68,6 +68,21 @@ function validateAddress(input: CustomerAddressInput): string | null {
   return null;
 }
 
+async function runCustomerMutation(
+  mutate: () => Promise<CustomerUserError[]>,
+  failureMessage: string,
+): Promise<AccountActionResult> {
+  try {
+    const result = mapUserErrors(await mutate());
+    if (result.success) refresh();
+    return result;
+  } catch (error) {
+    unstable_rethrow(error);
+    console.error(`${failureMessage}:`, error);
+    return { success: false, error: error instanceof Error ? error.message : failureMessage };
+  }
+}
+
 export async function createAddressAction(
   raw: CustomerAddressInput,
   isDefault: boolean,
@@ -76,18 +91,10 @@ export async function createAddressAction(
   const validationError = validateAddress(input);
   if (validationError) return { success: false, error: validationError };
 
-  try {
-    const result = mapUserErrors(await createCustomerAddress(input, isDefault));
-    if (result.success) refresh();
-    return result;
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error("Create address failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create address",
-    };
-  }
+  return runCustomerMutation(
+    () => createCustomerAddress(input, isDefault),
+    "Failed to create address",
+  );
 }
 
 export async function updateAddressAction(
@@ -101,35 +108,16 @@ export async function updateAddressAction(
   const validationError = validateAddress(input);
   if (validationError) return { success: false, error: validationError };
 
-  try {
-    const result = mapUserErrors(await updateCustomerAddress(addressId, input, isDefault));
-    if (result.success) refresh();
-    return result;
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error("Update address failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update address",
-    };
-  }
+  return runCustomerMutation(
+    () => updateCustomerAddress(addressId, input, isDefault),
+    "Failed to update address",
+  );
 }
 
 export async function deleteAddressAction(addressId: string): Promise<AccountActionResult> {
   if (!addressId) return { success: false, error: "Invalid address ID" };
 
-  try {
-    const result = mapUserErrors(await deleteCustomerAddress(addressId));
-    if (result.success) refresh();
-    return result;
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error("Delete address failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete address",
-    };
-  }
+  return runCustomerMutation(() => deleteCustomerAddress(addressId), "Failed to delete address");
 }
 
 export async function updateProfileAction(raw: {
@@ -141,16 +129,5 @@ export async function updateProfileAction(raw: {
     lastName: raw.lastName.trim().slice(0, MAX_NAME_LENGTH),
   };
 
-  try {
-    const result = mapUserErrors(await updateCustomerProfile(input));
-    if (result.success) refresh();
-    return result;
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error("Update profile failed:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update profile",
-    };
-  }
+  return runCustomerMutation(() => updateCustomerProfile(input), "Failed to update profile");
 }

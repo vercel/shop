@@ -1,32 +1,11 @@
 import { cn } from "cn";
 import { ChevronDown } from "lucide-react";
-import Link from "next/link";
-import type { ReactNode } from "react";
 
 import type { MenuItem } from "@/lib/menu/types";
 
+import { MenuLink } from "./menu-link";
+
 const MAX_COLUMNS = 5;
-
-interface MenuLinkProps {
-  url: string;
-  children: ReactNode;
-  className?: string;
-}
-
-function MenuLink({ url, children, className }: MenuLinkProps) {
-  if (url.startsWith("http")) {
-    return (
-      <a href={url} target="_blank" rel="noopener noreferrer" className={className}>
-        {children}
-      </a>
-    );
-  }
-  return (
-    <Link href={url} className={className}>
-      {children}
-    </Link>
-  );
-}
 
 export function QuickLinks({ items }: { items: MenuItem[] }) {
   return (

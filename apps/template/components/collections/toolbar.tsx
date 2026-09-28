@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
+import type { SortValue } from "@/lib/collections/types";
 import type { Facets } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
@@ -13,7 +14,7 @@ import { CollectionsSortSelect } from "./sort-select";
 interface BrowseToolbarProps {
   facetsPromise: Promise<Facets>;
   resultCount?: ReactNode;
-  sortExclude?: string[];
+  sortExclude?: SortValue[];
 }
 
 export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: BrowseToolbarProps) {

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { AddressBook } from "@/components/account/address-book";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getCustomerAddresses } from "@/lib/shopify/operations/customer/server";
+import { fetchCustomerAddresses } from "@/lib/shopify/operations/customer/server";
 
 export default function AddressesPage() {
   return (
@@ -17,7 +17,7 @@ export default function AddressesPage() {
 }
 
 async function AddressesContent() {
-  const addresses = await getCustomerAddresses();
+  const addresses = await fetchCustomerAddresses();
   return <AddressBook addresses={addresses} />;
 }
 

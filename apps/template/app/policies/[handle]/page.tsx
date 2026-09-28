@@ -4,8 +4,7 @@ import { notFound } from "next/navigation";
 import { RichTextPage } from "@/components/content/rich-text-page";
 import { getShopPolicies, getShopPolicy } from "@/lib/policies/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
-
-const PLACEHOLDER_HANDLE = "__placeholder__";
+import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
 export async function generateStaticParams() {
   try {

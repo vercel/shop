@@ -1,8 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import Link from "next/link";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 
 import {
   Accordion,
@@ -13,33 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { MenuItem } from "@/lib/menu/types";
 
-interface MenuLinkProps {
-  url: string;
-  children: ReactNode;
-  className?: string;
-  onClick?: () => void;
-}
-
-function MenuLink({ url, children, className, onClick }: MenuLinkProps) {
-  if (url.startsWith("http")) {
-    return (
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={className}
-        onClick={onClick}
-      >
-        {children}
-      </a>
-    );
-  }
-  return (
-    <Link href={url} className={className} onClick={onClick}>
-      {children}
-    </Link>
-  );
-}
+import { MenuLink } from "./menu-link";
 
 export function MobileMenu({ items }: { items: MenuItem[] }) {
   const [open, setOpen] = useState(false);

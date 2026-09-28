@@ -8,7 +8,7 @@ import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
-import type { BrowseResults, BrowseState, Collection } from "@/lib/collections/types";
+import type { BrowseResults, BrowseState, Collection, SortValue } from "@/lib/collections/types";
 
 import { Browse } from "./browse";
 
@@ -22,7 +22,7 @@ export function CollectionDetailPage({
   collection: Collection;
   handle: string;
   resultsPromise: Promise<BrowseResults>;
-  sortExclude?: string[];
+  sortExclude?: SortValue[];
   statePromise: Promise<BrowseState>;
 }) {
   return (

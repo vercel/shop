@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
 import type { OrderLineItem } from "@/lib/customer/types";
 import type { Money } from "@/lib/money/types";
-import { getCustomerOrder } from "@/lib/shopify/operations/customer/server";
+import { fetchCustomerOrder } from "@/lib/shopify/operations/customer/server";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
@@ -28,7 +28,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
 async function OrderDetailContent({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!id) notFound();
-  const order = await getCustomerOrder(id);
+  const order = await fetchCustomerOrder(id);
   if (!order) notFound();
   return (
     <>

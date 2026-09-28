@@ -1,6 +1,7 @@
 import { cn } from "cn";
 import type { ComponentProps } from "react";
 
+import { isColorOption } from "@/lib/product";
 import type { OptionGroupState } from "@/lib/product/types";
 
 import { ColorPicker } from "./color-picker";
@@ -21,9 +22,6 @@ function ProductInfoOptions({
   className,
   ...props
 }: ProductInfoOptionsProps) {
-  const isColorOption = (opt: OptionGroupState) =>
-    opt.values.some((v) => v.swatch?.color || v.swatch?.image) ||
-    opt.name.toLowerCase().includes("color");
   // Shopify emits a synthetic Title/Default Title option for products with no variant axes — hide it.
   const isShopifyDefaultOption = (opt: OptionGroupState) =>
     opt.name === "Title" && opt.values.length === 1 && opt.values[0]?.name === "Default Title";
