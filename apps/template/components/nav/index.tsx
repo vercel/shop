@@ -4,7 +4,7 @@ import { Suspense } from "react";
 
 import { Container } from "@/components/ui/container";
 import { shopConfig } from "@/lib/config";
-import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
+import type { MenuItem } from "@/lib/menu/types";
 
 import { NavAccount, NavAccountFallback } from "./account";
 import { CartIcon, CartIconFallback } from "./cart";
@@ -14,7 +14,7 @@ import { SearchModal } from "./search-modal";
 
 export function Nav() {
   const items: MenuItem[] = [
-    { id: "default-nav-shop", title: "Shop", url: "/collections/all", type: "HTTP", items: [] },
+    { id: "default-nav-shop", items: [], title: "Shop", url: "/collections/all" },
   ];
   return (
     <nav

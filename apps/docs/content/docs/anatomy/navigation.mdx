@@ -20,6 +20,8 @@ The default storefront includes a single Shop link. This is suitable for a small
 
 Use the [`enable-shopify-menus`](/docs/skills/enable-shopify-menus) skill to let merchants manage desktop links, mobile links, and footer columns through Shopify Navigation. Menus can contain up to three levels.
 
+Shopify does not notify the storefront when a menu changes, so menus stay cached until they are refreshed. The skill adds a protected `POST /api/revalidate/menus` endpoint; call it with `MENUS_REVALIDATE_SECRET` after editing menus in Shopify admin.
+
 An optional mobile bottom bar appears only when you add an action, such as an agent button.
 
 ## What’s next

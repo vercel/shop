@@ -5,8 +5,8 @@ import type { ReactNode } from "react";
 import { Container } from "@/components/ui/container";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
+import type { MenuItem } from "@/lib/menu/types";
 import { getShopPolicies } from "@/lib/policies/server";
-import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
 
 import { SocialLinks } from "./social-links";
 import type { SocialLink } from "./social-links";

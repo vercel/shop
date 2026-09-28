@@ -11,7 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import type { MenuItem } from "@/lib/shopify/transforms/menu/types";
+import type { MenuItem } from "@/lib/menu/types";
 
 interface MenuLinkProps {
   url: string;
