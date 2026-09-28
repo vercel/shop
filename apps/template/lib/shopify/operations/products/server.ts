@@ -2,6 +2,7 @@ import { flattenConnection, gql, parseSortByValue } from "@shopify/hydrogen";
 import type { ProductFilter } from "@shopify/hydrogen";
 import type {
   ProductCollectionSortKeys,
+  ProductRecommendationIntent,
   SearchSortKeys,
 } from "@shopify/hydrogen/storefront-api-types";
 
@@ -471,10 +472,10 @@ export async function fetchCollectionProducts(
   };
 }
 
-const COMPLEMENTARY_PRODUCTS_QUERY = gql(
+const PRODUCT_RECOMMENDATIONS_QUERY = gql(
   `#graphql
-  query complementaryProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productRecommendations(productHandle: $handle, intent: COMPLEMENTARY) {
+  query productRecommendations($handle: String!, $intent: ProductRecommendationIntent!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    productRecommendations(productHandle: $handle, intent: $intent) {
       ...ProductCardFields
     }
   }
@@ -482,45 +483,20 @@ const COMPLEMENTARY_PRODUCTS_QUERY = gql(
   [PRODUCT_CARD_FRAGMENT],
 );
 
-const RELATED_PRODUCTS_QUERY = gql(
-  `#graphql
-  query relatedProducts($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productRecommendations(productHandle: $handle, intent: RELATED) {
-      ...ProductCardFields
-    }
-  }
-`,
-  [PRODUCT_CARD_FRAGMENT],
-);
-
-export async function fetchComplementaryProducts({
+export async function fetchProductRecommendations({
   handle,
+  intent,
   locale = shopConfig.localization,
 }: {
   handle: string;
+  intent: ProductRecommendationIntent;
   locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
-  const response = await storefront.request(COMPLEMENTARY_PRODUCTS_QUERY, {
+  const response = await storefront.request(PRODUCT_RECOMMENDATIONS_QUERY, {
     locale,
-    variables: { handle },
+    variables: { handle, intent },
   });
-  assertStorefrontOk(response, "complementaryProducts");
-
-  return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
-}
-
-export async function fetchRelatedProducts({
-  handle,
-  locale = shopConfig.localization,
-}: {
-  handle: string;
-  locale?: CommerceLocale;
-}): Promise<ProductCard[]> {
-  const response = await storefront.request(RELATED_PRODUCTS_QUERY, {
-    locale,
-    variables: { handle },
-  });
-  assertStorefrontOk(response, "relatedProducts");
+  assertStorefrontOk(response, "productRecommendations");
 
   return (response.data.productRecommendations ?? []).map(transformShopifyProductCard);
 }

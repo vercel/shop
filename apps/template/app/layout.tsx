@@ -14,7 +14,6 @@ import { CartStandardActionsScript } from "@/components/cart/standard-actions";
 import { Footer } from "@/components/footer";
 import { Nav } from "@/components/nav";
 import { SiteSchema } from "@/components/schema/site-schema";
-import { Toaster } from "@/components/ui/sonner";
 import { botIdProtectedRoutes } from "@/lib/botid";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
@@ -64,7 +63,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AnalyticsComponents />
           </Suspense>
         </CartProviderWrapper>
-        <Toaster closeButton />
       </body>
     </html>
   );

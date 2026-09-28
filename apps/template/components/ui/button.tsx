@@ -58,4 +58,4 @@ function Button({ asChild = false, className, render, size, variant, ...props }:
   });
 }
 
-export { Button, buttonVariants };
+export { Button };

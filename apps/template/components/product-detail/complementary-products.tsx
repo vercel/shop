@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
-import { getComplementaryProducts } from "@/lib/product/server";
+import { getProductRecommendations } from "@/lib/product/server";
 import type { ProductCard } from "@/lib/product/types";
 
 export async function ComplementaryProducts({
@@ -15,9 +15,7 @@ export async function ComplementaryProducts({
   limit: number;
   title: string;
 }) {
-  const complementary = await getComplementaryProducts({
-    handle,
-  });
+  const complementary = await getProductRecommendations({ handle, intent: "COMPLEMENTARY" });
   if (complementary.length === 0) return null;
   return (
     <div className="grid gap-2.5" data-slot="complementary-products">
