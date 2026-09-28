@@ -1,12 +1,12 @@
+import type { ProductRecommendationIntent } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
 import type { CommerceLocale } from "@/lib/config/types";
 import type { ProductCard, ProductDetails, ProductPage } from "@/lib/product/types";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
-  fetchComplementaryProducts,
   fetchProduct,
-  fetchRelatedProducts,
+  fetchProductRecommendations,
   fetchSearchIndexProducts,
 } from "@/lib/shopify/operations/products/server";
 import type { SearchIndexProductsParams } from "@/lib/shopify/operations/products/types";
@@ -45,28 +45,16 @@ export async function getSearchIndexProducts(
   return result;
 }
 
-export async function getComplementaryProducts(params: {
+export async function getProductRecommendations(params: {
   handle: string;
+  intent: ProductRecommendationIntent;
   locale?: CommerceLocale;
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
   cacheTag("products", `recommendations-${params.handle}`);
 
-  const products = await fetchComplementaryProducts(params);
-  tagProducts(products);
-  return products;
-}
-
-export async function getRelatedProducts(params: {
-  handle: string;
-  locale?: CommerceLocale;
-}): Promise<ProductCard[]> {
-  "use cache: remote";
-  cacheLife("max");
-  cacheTag("products", `recommendations-${params.handle}`);
-
-  const products = await fetchRelatedProducts(params);
+  const products = await fetchProductRecommendations(params);
   tagProducts(products);
   return products;
 }
