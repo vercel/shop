@@ -1,13 +1,13 @@
 "use client";
 
-import { formatMoney, getShopPayButtonUrl } from "@shopify/hydrogen";
+import { getShopPayButtonUrl } from "@shopify/hydrogen";
 import { cn } from "cn";
 import { Loader2, MinusIcon, PlusIcon } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 import { useCartDrawer } from "@/components/cart/context";
 import { Button } from "@/components/ui/button";
-import { shopConfig } from "@/lib/config";
+import { formatPrice } from "@/lib/money";
 import type { Money } from "@/lib/money/types";
 import { getProductPurchaseOptions } from "@/lib/product";
 import { useProductForm } from "@/lib/product/client";
@@ -219,12 +219,7 @@ export function PurchaseOptions({
           />
           <span className="flex flex-1 flex-wrap items-center justify-between gap-2.5 text-sm">
             <span>{option.name}</span>
-            <span className="tabular-nums">
-              {
-                formatMoney(option.price, { locale: shopConfig.localization.locale })
-                  .localizedString
-              }
-            </span>
+            <span className="tabular-nums">{formatPrice(option.price)}</span>
           </span>
         </label>
       ))}

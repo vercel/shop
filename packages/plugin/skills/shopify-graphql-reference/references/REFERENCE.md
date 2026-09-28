@@ -22,8 +22,8 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/<domain>/server.ts`                    | Cached `get*` wrappers owning `"use cache"`, `cacheLife`, and `cacheTag` for rendered pages         |
 | `lib/shopify/transforms/*/index.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
 | `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
-| `lib/shopify/transforms/filters/types.ts`, `lib/shopify/transforms/menu/types.ts` | Resource-owned filter inputs and menu contracts                     |
-| `lib/product/types.ts`, `lib/collections/types.ts`, `lib/customer/types.ts` | Domain-owned models consumed by transforms and presentation |
+| `lib/shopify/transforms/filters/types.ts`  | Fragment-derived filter response types and transform options                                          |
+| `lib/product/types.ts`, `lib/collections/types.ts`, `lib/customer/types.ts`, `lib/filters/types.ts`, `lib/menu/types.ts` | Domain-owned models consumed by transforms and presentation |
 | `lib/cart/server.ts`                        | Cart cookie helpers and server-side cart read seeding                                                 |
 | `app/api/webhooks/shopify/route.ts`         | Public-content invalidation entry point                                                               |
 

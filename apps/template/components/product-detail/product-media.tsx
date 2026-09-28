@@ -2,7 +2,7 @@
 
 import { cn } from "cn";
 import Image, { getImageProps } from "next/image";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { preload } from "react-dom";
 
 import { AutoPlayVideo } from "@/components/ui/auto-play-video";
