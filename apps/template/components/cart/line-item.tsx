@@ -6,17 +6,18 @@ import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { CartLineForm } from "@/components/cart/line-form";
-import { CartWarnings } from "@/components/cart/warnings";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
 
-interface OverlayItemProps {
+import { CartLineForm } from "./line-form";
+import { CartWarnings } from "./warnings";
+
+interface CartLineItemProps {
   item: CartLine;
 }
 
-export function OverlayItem({ item }: OverlayItemProps) {
+export function CartLineItem({ item }: CartLineItemProps) {
   const isPending = useCart((state) => state.pending.lines.has(item.id));
   const isCostPending = useCart((state) =>
     Boolean(state.pending.cost || state.revalidating || state.pending.lines.has(item.id)),

@@ -9,7 +9,7 @@ Use this contract when changing cart bootstrap, badges, overlays, cart pages, fo
 - Handler-derived types and typed suspense hook: `apps/template/lib/cart/{types,client}.ts`
 - Form bindings: `apps/template/components/cart/{line-form,discount-form}.tsx`
 - Root bootstrap: `apps/template/app/layout.tsx`
-- Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart-page/`
+- Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart/cart-page.tsx`
 - Assistant synchronization: `apps/template/components/agent/cart-bridge.tsx`
 - HTTP and cookie boundary: `apps/template/proxy.ts`
 - Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
@@ -26,7 +26,7 @@ Hydrogen owns the base cart operations. The template adds selections needed for 
 
 1. Start the request-memoized `seedCartData()` in the root layout and pass its promise as `CartProvider` initial data without awaiting it in the shell.
 2. Resolve cart-dependent UI under narrow Suspense boundaries with the typed `useSuspenseCart` hook. Keep navigation and static headings outside those boundaries.
-3. Read the provider's live cart in cart-page and overlay leaves so empty/populated transitions follow mutations without a route refresh.
+3. Read the provider's live cart in the cart page and overlay leaves so empty/populated transitions follow mutations without a route refresh.
 4. Preserve Hydrogen's bootstrap-versus-mutation ordering. Do not publish a second server seed into an initialized provider.
 
 Cart reads are memoized only within a request, never stored in the Next.js public data cache. Cart mutations do not invalidate public cache tags.

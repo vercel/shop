@@ -7,9 +7,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import { CartCheckout } from "@/components/cart/checkout";
-import { OverlayItem } from "@/components/cart/overlay-item";
-import { CartTotal } from "@/components/cart/total";
+import { CartLineItem } from "@/components/cart/line-item";
+import { CartCheckout, CartTotal } from "@/components/cart/summary";
 import {
   ProductCard,
   ProductCardContent,
@@ -184,7 +183,7 @@ function AgentCartSummary({ warnings = [] }: AgentCartSummaryProps) {
       )}
       <ul className="grid gap-5" aria-label="Cart items">
         {cart.lines.nodes.map((line) => (
-          <OverlayItem key={line.id} item={line} />
+          <CartLineItem key={line.id} item={line} />
         ))}
       </ul>
       <CartTotal cart={cart} />
