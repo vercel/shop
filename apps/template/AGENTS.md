@@ -121,6 +121,7 @@ The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()`
 - `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`; composes `withBotId` and `withEve` through `withShopConfig` when their toggles are enabled.
 - `.oxlintrc.json`, `.oxfmtrc.json`, `components.json`: lint, format, and shadcn/ui configuration.
 - Environment variables are documented in `.env.example`.
+- `pnpm dev:portless` serves local HTTPS through a global [Portless](https://portless.sh) install; keep Portless out of `package.json` dependencies.
 
 ```bash
 pnpm dev

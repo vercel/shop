@@ -1,35 +1,38 @@
 import { Suspense } from "react";
 
-import { CollectionFilterSidebarClient } from "@/components/collections/filter-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Facets } from "@/lib/filters/types";
 
-function CollectionFilterSidebarSkeleton() {
+import { CollectionFilterSidebar } from "./filters-client";
+
+interface CollectionFiltersProps {
+  facetsPromise: Promise<Facets>;
+}
+
+export function CollectionFilters({ facetsPromise }: CollectionFiltersProps) {
   return (
-    <div className="flex flex-col gap-5">
-      {[0, 1, 2].map((section) => (
-        <div key={section} className="space-y-2.5">
-          <Skeleton className="h-5 w-24" />
-          <div className="space-y-2.5">
-            {[0, 1, 2, 3].map((option) => (
-              <Skeleton key={option} className="h-4 w-full" />
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Suspense fallback={<CollectionFiltersSkeleton />}>
+      <ResolvedCollectionFilters facetsPromise={facetsPromise} />
+    </Suspense>
   );
 }
 
-async function Render({ facetsPromise }: { facetsPromise: Promise<Facets> }) {
+async function ResolvedCollectionFilters({ facetsPromise }: CollectionFiltersProps) {
   const { filters, priceRange } = await facetsPromise;
-  return <CollectionFilterSidebarClient filters={filters} priceRange={priceRange} />;
+  return <CollectionFilterSidebar filters={filters} priceRange={priceRange} />;
 }
 
-export function CollectionFilters({ facetsPromise }: { facetsPromise: Promise<Facets> }) {
+function CollectionFiltersSkeleton() {
   return (
-    <Suspense fallback={<CollectionFilterSidebarSkeleton />}>
-      <Render facetsPromise={facetsPromise} />
-    </Suspense>
+    <div aria-busy="true" className="flex flex-col gap-5">
+      {[0, 1, 2].map((section) => (
+        <div key={section} className="grid gap-2.5">
+          <Skeleton className="h-5 w-24" />
+          {[0, 1, 2, 3].map((option) => (
+            <Skeleton key={option} className="h-4 w-full" />
+          ))}
+        </div>
+      ))}
+    </div>
   );
 }

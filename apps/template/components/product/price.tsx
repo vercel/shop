@@ -1,8 +1,7 @@
-import { formatMoney } from "@shopify/hydrogen";
 import { cn } from "cn";
 import type { ComponentProps } from "react";
 
-import { shopConfig } from "@/lib/config";
+import { formatPrice } from "@/lib/money";
 
 interface PriceProps extends ComponentProps<"span"> {
   amount: string;
@@ -10,18 +9,12 @@ interface PriceProps extends ComponentProps<"span"> {
 }
 
 export function Price({ amount, currencyCode, className, ...props }: PriceProps) {
-  const price = formatMoney(
-    { amount, currencyCode },
-    {
-      locale: shopConfig.localization.locale,
-    },
-  ).localizedString;
   return (
     <span
       className={cn("font-mono text-xl text-foreground tabular-nums tracking-tight", className)}
       {...props}
     >
-      {price}
+      {formatPrice({ amount, currencyCode })}
     </span>
   );
 }

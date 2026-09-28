@@ -1,4 +1,3 @@
-import { formatMoney } from "@shopify/hydrogen";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -12,8 +11,8 @@ import { AccountPageHeader } from "@/components/account/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { shopConfig } from "@/lib/config";
 import type { OrderLineItem } from "@/lib/customer/types";
+import { formatPrice } from "@/lib/money";
 import type { Money } from "@/lib/money/types";
 import { fetchCustomerOrder } from "@/lib/shopify/operations/customer/server";
 
@@ -53,13 +52,7 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
         <SummaryRow label="Tax" money={order.totalTax} />
         <div className="flex items-center justify-between border-t pt-2 font-medium">
           <dt>Total</dt>
-          <dd className="font-mono tabular-nums">
-            {
-              formatMoney(order.totalPrice, {
-                locale: shopConfig.localization.locale,
-              }).localizedString
-            }
-          </dd>
+          <dd className="font-mono tabular-nums">{formatPrice(order.totalPrice)}</dd>
         </div>
       </dl>
 
@@ -109,13 +102,7 @@ function OrderLineItemRow({ item }: { item: OrderLineItem }) {
         <p className="text-xs text-muted-foreground">× {item.quantity}</p>
       </div>
       {item.totalPrice ? (
-        <span className="font-mono text-sm tabular-nums">
-          {
-            formatMoney(item.totalPrice, {
-              locale: shopConfig.localization.locale,
-            }).localizedString
-          }
-        </span>
+        <span className="font-mono text-sm tabular-nums">{formatPrice(item.totalPrice)}</span>
       ) : null}
     </li>
   );
@@ -126,13 +113,7 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
   return (
     <div className="flex items-center justify-between">
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-mono tabular-nums">
-        {
-          formatMoney(money, {
-            locale: shopConfig.localization.locale,
-          }).localizedString
-        }
-      </dd>
+      <dd className="font-mono tabular-nums">{formatPrice(money)}</dd>
     </div>
   );
 }

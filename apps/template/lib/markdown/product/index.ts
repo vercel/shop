@@ -1,7 +1,7 @@
-import { formatMoney } from "@shopify/hydrogen";
-
 import { shopConfig } from "@/lib/config";
 import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
+import { formatPrice } from "@/lib/money";
+import type { Money } from "@/lib/money/types";
 import { isMarkedDown } from "@/lib/product";
 import type { ProductDetails } from "@/lib/product/types";
 
@@ -27,8 +27,7 @@ function summarize(product: ProductDetails): string {
 }
 
 function priceLine(product: ProductDetails, locale: string): string {
-  const format = (money: { amount: string; currencyCode: string }) =>
-    formatMoney(money, { locale }).localizedString;
+  const format = (money: Money) => formatPrice(money, locale);
   const { maxVariantPrice, minVariantPrice } = product.priceRange;
   const parts: string[] = [];
 

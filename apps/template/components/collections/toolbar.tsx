@@ -7,8 +7,8 @@ import type { SortValue } from "@/lib/collections/types";
 import type { Facets } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
-import { FilterSidebarSheet } from "./filter-sidebar-sheet";
 import { CollectionFilters } from "./filters";
+import { FilterSheet } from "./filters-client";
 import { CollectionsSortSelect } from "./sort-select";
 
 interface BrowseToolbarProps {
@@ -21,7 +21,7 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
   return (
     <ToolbarLayout
       filterSheet={
-        <FilterSidebarSheet
+        <FilterSheet
           label="Filters"
           trigger={
             <button
@@ -35,7 +35,7 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
           }
         >
           <CollectionFilters facetsPromise={facetsPromise} />
-        </FilterSidebarSheet>
+        </FilterSheet>
       }
       resultCount={resultCount}
       sortSelect={<CollectionsSortSelect exclude={sortExclude} />}

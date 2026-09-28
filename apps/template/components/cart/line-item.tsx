@@ -1,6 +1,6 @@
 "use client";
 
-import { type CartLine as HydrogenCartLine, formatMoney } from "@shopify/hydrogen";
+import type { CartLine as HydrogenCartLine } from "@shopify/hydrogen";
 import { useCart } from "@shopify/hydrogen/react";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
@@ -8,7 +8,7 @@ import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import type { CartLine } from "@/lib/cart/types";
-import { shopConfig } from "@/lib/config";
+import { formatPrice } from "@/lib/money";
 
 import { CartLineForm } from "./line-form";
 import { CartWarnings } from "./warnings";
@@ -58,11 +58,7 @@ export function CartLineItem({ item }: CartLineItemProps) {
   ) : (
     <ImagePlaceholder className="size-full" />
   );
-  const price = (amount: number) =>
-    formatMoney(
-      { amount: String(amount), currencyCode },
-      { locale: shopConfig.localization.locale },
-    ).localizedString;
+  const price = (amount: number) => formatPrice({ amount: String(amount), currencyCode });
 
   return (
     <li className="flex gap-2.5" aria-busy={isPending || undefined} aria-label={title}>
