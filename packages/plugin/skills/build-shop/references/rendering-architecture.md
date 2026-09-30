@@ -89,7 +89,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 
 ## Treat navigation as part of the architecture
 
-With partial prefetching, visible links receive a reusable App Shell by default. `prefetch={true}` requests per-link destination content, one server request per link. The template's `Link` from `@/components/ui/link` makes that upgrade only on hover or keyboard focus. `await unstable_prefetch()` keeps a subtree out of the App Shell but in per-link prefetches; `await unstable_navigation()` keeps it out of both until the navigation.
+With partial prefetching, visible links receive a reusable App Shell by default. `prefetch={true}` requests per-link destination content, one server request per link. The template's `Link` from `@/components/ui/link` makes that upgrade only on hover or keyboard focus. `await prefetch()` keeps a subtree out of the App Shell but in per-link prefetches; `await navigation()` keeps it out of both until the navigation.
 
 - Use the template `Link` for every internal link, and leave high-fanout links on its intent upgrade.
 - Consider fuller prefetching for a small number of high-intent links.

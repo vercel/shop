@@ -20,7 +20,7 @@ Keep these coupled decisions together:
 - keep the route's only outer Suspense boundary around the params-dependent body, with `ProductDetailSkeleton` matching the resolved layout; do not add request-time boundaries around stable body content;
 - keep `searchParams` unawaited for selected-option state;
 - keep the selected-options promise separate from the slower exact-variant query — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`;
-- keep `await unstable_navigation()` ahead of the URL-selected variant query so link prefetches never render per-variant data; the default variant comes from the cached product.
+- keep `await navigation()` ahead of the URL-selected variant query so link prefetches never render per-variant data; the default variant comes from the cached product.
 
 Inspect the existing PDP boundaries before changing them. Render stable product content immediately where the data contract permits, then suspend only variant-dependent media, price, availability, option state, and purchase controls. Keep a broader boundary only when those concerns genuinely share one blocking dependency.
 
