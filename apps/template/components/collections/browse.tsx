@@ -66,7 +66,12 @@ async function BrowseResultsGrid({ resultsPromise }: { resultsPromise: Promise<B
       source={source}
     >
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
+        <ProductCard
+          key={product.id}
+          product={product}
+          outOfStockText="Out of Stock"
+          quickShopText="Choose"
+        />
       ))}
     </InfiniteProductGrid>
   );
