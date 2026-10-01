@@ -32,7 +32,7 @@ export const agentProfile = {
       "dev.shopify.catalog": [
         {
           extends: ["dev.ucp.shopping.catalog.lookup", "dev.ucp.shopping.catalog.search"],
-          schema: "https://shopify.dev/ucp/schemas/2026-04-08/shopify_catalog.json",
+          schema: "https://shopify.dev/ucp/schemas/2026-08-25/shopify_catalog.json",
           spec: "https://shopify.dev/docs/agents/catalog/storefront-catalog",
           version: "2026-08-25",
         },
