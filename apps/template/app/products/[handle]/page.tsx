@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { navigation } from "next/cache";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -114,7 +113,6 @@ async function ProductPageContent({
       ) {
         return product.defaultVariant;
       }
-      await navigation();
       // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
       return fetchProductVariant({
         handle,

@@ -47,4 +47,4 @@ Collections and `/search` share the same Hydrogen collection store. `CollectionB
 
 ## Prefetch traffic
 
-Product grids are high fanout. Cards link through the shared `Link` from `@/components/ui/link`, which keeps the App Shell prefetch for every visible card and upgrades only a hovered or focused card to a full prefetch. Do not set `prefetch={true}` on cards or swap in `next/link`. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.
+Product grids are high fanout. Cards link through the shared `Link` from `@/components/ui/link`, which keeps the App Shell prefetch for every visible card and upgrades only a hovered or focused card to its static per-link prefetch. Do not set `prefetch={true}` on cards or swap in `next/link`. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.

@@ -19,7 +19,7 @@ import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 import { buildAlternates } from "@/lib/seo";
 
-export const ensureStatic = "shell";
+export const ensureStatic = "prefetch";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
