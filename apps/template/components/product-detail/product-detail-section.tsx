@@ -429,7 +429,10 @@ export function ProductDetailSkeleton() {
     <div aria-busy="true" className="grid gap-10 lg:grid-cols-10 lg:items-start lg:gap-5">
       <div className="lg:col-span-6">
         {/* Media blocks stay static; a pulsing skeleton in the LCP slot flashes harder than an empty image canvas. */}
-        <div className="aspect-square w-full bg-accent lg:hidden" />
+        <div className="grid gap-5 lg:hidden">
+          <div className="-mx-5 aspect-square w-[calc(100%+2.5rem)] bg-accent" />
+          <div aria-hidden="true" className="h-1.5" />
+        </div>
         <div className="hidden grid-cols-2 gap-2.5 lg:grid">
           <div className="aspect-square w-full bg-accent" />
           <div className="aspect-square w-full bg-accent" />
@@ -438,20 +441,31 @@ export function ProductDetailSkeleton() {
         </div>
       </div>
       <div className="grid gap-10 lg:sticky lg:top-20 lg:col-span-4">
-        <div className="grid gap-5">
-          <div className="grid gap-2.5">
+        <div className="grid gap-10">
+          <div>
             <Skeleton className="h-9 w-3/4" />
             <Skeleton className="h-7 w-24" />
           </div>
-          <div className="grid gap-2.5">
-            <Skeleton className="h-4 w-16" />
-            <div className="flex gap-2.5">
-              <Skeleton className="h-10 w-16" />
-              <Skeleton className="h-10 w-16" />
-              <Skeleton className="h-10 w-16" />
+          <div className="grid gap-10">
+            <div className="grid gap-5">
+              <Skeleton className="h-5 w-32" />
+              <div className="grid gap-2.5">
+                <Skeleton className="h-5 w-16" />
+                <div className="flex flex-wrap gap-2">
+                  {["w-15", "w-16", "w-16", "w-15", "w-15"].map((width, index) => (
+                    <Skeleton key={index} className={cn("h-9.5 rounded-lg", width)} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-2.5">
+              <div className="flex gap-2.5">
+                {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
+                <Skeleton className="h-12 min-w-0 flex-1" />
+              </div>
+              {shopConfig.pdp.buyWithShop.isEnabled ? <Skeleton className="h-12 w-full" /> : null}
             </div>
           </div>
-          <Skeleton className="h-12 w-full" />
         </div>
         <div className="grid gap-4">
           <Skeleton className="h-6 w-40" />
