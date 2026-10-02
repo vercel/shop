@@ -1,9 +1,11 @@
 "use client";
 
 import { useCollection } from "@shopify/hydrogen/react";
+import { cn } from "cn";
 import { LoaderCircleIcon } from "lucide-react";
 import { type ReactNode, useEffect, useEffectEvent, useRef, useState } from "react";
 
+import { BROWSE_GRID_COLUMNS } from "@/components/collections/collection-browse-provider";
 import { ProductCard } from "@/components/product-card/product-card";
 import { getBrowseSearch } from "@/lib/collections";
 import { loadMoreBrowseProductsAction } from "@/lib/collections/action";
@@ -77,7 +79,7 @@ export function InfiniteProductGrid({
       className="transition-opacity duration-200 data-[pending=true]:pointer-events-none data-[pending=true]:opacity-50"
       data-pending={isPending}
     >
-      <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className={cn("grid gap-5", BROWSE_GRID_COLUMNS)}>
         {children}
         {additionalProducts.map((product) => (
           <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />

@@ -1,15 +1,18 @@
 import { ChevronDownIcon, SlidersHorizontalIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { ProductsGridSkeleton } from "@/components/product/products-grid";
-import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { SortValue } from "@/lib/collections/types";
 import type { Facets } from "@/lib/filters/types";
 
-import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
+import {
+  BrowseDensityToggle,
+  CollectionActiveFilterCountBadge,
+} from "./collection-browse-provider";
 import { CollectionFilters } from "./filters";
 import { FilterSheet } from "./filters-client";
 import { CollectionsSortSelect } from "./sort-select";
+
+const FILTER_TRIGGER_CLASS = "flex cursor-pointer items-center gap-2 text-sm font-medium lg:hidden";
 
 interface BrowseToolbarProps {
   facetsPromise: Promise<Facets>;
@@ -20,14 +23,12 @@ interface BrowseToolbarProps {
 export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: BrowseToolbarProps) {
   return (
     <ToolbarLayout
+      densityToggle={<BrowseDensityToggle />}
       filterSheet={
         <FilterSheet
           label="Filters"
           trigger={
-            <button
-              type="button"
-              className="flex cursor-pointer items-center gap-2 text-sm font-medium"
-            >
+            <button type="button" className={FILTER_TRIGGER_CLASS}>
               <SlidersHorizontalIcon className="size-4" />
               <span>Filters</span>
               <CollectionActiveFilterCountBadge />
@@ -43,46 +44,43 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
   );
 }
 
-interface BrowseFallbackProps {
+interface BrowseToolbarFallbackProps {
   resultCount?: ReactNode;
 }
 
-export function BrowseFallback({ resultCount }: BrowseFallbackProps) {
+export function BrowseToolbarFallback({ resultCount }: BrowseToolbarFallbackProps) {
   return (
-    <>
-      <ToolbarLayout
-        filterSheet={
-          <button
-            type="button"
-            className="flex cursor-pointer items-center gap-2 text-sm font-medium"
-          >
-            <SlidersHorizontalIcon className="size-4" />
-            <span>Filters</span>
-          </button>
-        }
-        resultCount={resultCount}
-        sortSelect={
-          <div className="flex h-9 w-fit items-center justify-between gap-2 rounded-md bg-transparent px-0 py-2 text-sm whitespace-nowrap">
-            <span>Sort</span>
-            <ChevronDownIcon className="size-4 text-muted-foreground opacity-50" />
-          </div>
-        }
-      />
-      <ProductsGridSkeleton
-        count={PRODUCTS_PER_PAGE}
-        className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
-      />
-    </>
+    <ToolbarLayout
+      filterSheet={
+        <button type="button" className={FILTER_TRIGGER_CLASS}>
+          <SlidersHorizontalIcon className="size-4" />
+          <span>Filters</span>
+        </button>
+      }
+      resultCount={resultCount}
+      sortSelect={
+        <div className="flex h-9 w-fit items-center justify-between gap-2 rounded-md bg-transparent px-0 py-2 text-sm whitespace-nowrap">
+          <span>Sort</span>
+          <ChevronDownIcon className="size-4 text-muted-foreground opacity-50" />
+        </div>
+      }
+    />
   );
 }
 
 interface ToolbarLayoutProps {
+  densityToggle?: ReactNode;
   filterSheet: ReactNode;
   resultCount?: ReactNode;
   sortSelect: ReactNode;
 }
 
-function ToolbarLayout({ filterSheet, resultCount, sortSelect }: ToolbarLayoutProps) {
+function ToolbarLayout({
+  densityToggle,
+  filterSheet,
+  resultCount,
+  sortSelect,
+}: ToolbarLayoutProps) {
   return (
     <div className="flex items-center gap-5">
       {filterSheet}
@@ -92,6 +90,7 @@ function ToolbarLayout({ filterSheet, resultCount, sortSelect }: ToolbarLayoutPr
             {resultCount}
           </div>
         )}
+        {densityToggle}
         {sortSelect}
       </div>
     </div>

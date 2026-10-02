@@ -5,7 +5,7 @@ export type FilterPresentation = "image" | "swatch" | "text";
 export type FilterType = "boolean" | "list" | "price";
 
 export interface FilterValue {
-  count: number;
+  count?: number;
   id: string;
   input: string;
   label: string;
