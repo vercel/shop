@@ -70,10 +70,18 @@ function getClient(
   country: CommerceLocale["country"],
   language: CommerceLocale["language"],
 ): StorefrontClient {
+  // A very bad random ID to avoid hydrogen's `crypto.randomUUID()`
+  const requestId =
+    `${performance.timeOrigin}-${(performance.now() * 10_000).toFixed(20)}`.replace(
+      ".",
+      "-",
+    );
   return createRequestStorefrontClient(
     createShopifyRequestContext({
       i18n: { country, language },
-      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`),
+      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`, {
+        headers: { "x-request-id": requestId },
+      }),
     }),
   );
 }
