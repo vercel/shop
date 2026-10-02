@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 
 import { Container } from "@/components/ui/container";
+import { Link } from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";

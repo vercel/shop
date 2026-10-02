@@ -9,10 +9,10 @@ import {
 } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
-import Link from "next/link";
 import { type MouseEventHandler, type ReactElement, type ReactNode, useState } from "react";
 
 import { Input } from "@/components/ui/input";
+import { Link } from "@/components/ui/link";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Swatch } from "@/components/ui/swatch";
 import { parseFilterInput } from "@/lib/collections";

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { CollectionDetailPage } from "@/components/collections/collection-page";
+import {
+  CollectionDetailPage,
+  CollectionDetailSkeleton,
+} from "@/components/collections/collection-page";
 import { describeCollection } from "@/lib/collections";
 import {
   fetchCollectionResults,
@@ -78,12 +82,21 @@ export async function generateMetadata({
   };
 }
 
-export const instant = false;
-
-export default async function CollectionPage({
+export default function CollectionPage({
   params,
   searchParams,
 }: PageProps<"/collections/[handle]">) {
+  return (
+    <Suspense fallback={<CollectionDetailSkeleton />}>
+      <CollectionPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function CollectionPageContent({
+  params,
+  searchParams,
+}: Pick<PageProps<"/collections/[handle]">, "params" | "searchParams">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const collection = await getCollection({

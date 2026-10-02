@@ -1,5 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+
+import { Link } from "@/components/ui/link";
 
 export interface MenuLinkProps {
   children: ReactNode;

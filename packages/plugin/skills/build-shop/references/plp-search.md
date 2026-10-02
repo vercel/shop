@@ -14,9 +14,9 @@
 
 Collection identity, title, description, and other cacheable header content belong in the static shell. The route intentionally resolves the collection before rendering and keeps `searchParams` unawaited for filters, sort, pagination, and results.
 
-Do not move the collection header into the results boundary. Do not change `getCollection` from plain `"use cache"` to remote caching without re-evaluating shell coherence.
+Do not move the collection header into the results boundary or give `getCollection` request-time inputs. The route wraps its params-dependent content in `Suspense` with `CollectionDetailSkeleton`, which reuses the browse toolbar and grid fallback.
 
-Search is different: its query and results are request inputs. The search route may use runtime prefetching because a prefetched query can materially improve the destination. Preserve its `instant` and `prefetch` pairing unless production request volume or navigation evidence justifies a change.
+Search is different: its query and results are request inputs. Keep its heading in the shell and stream results, facets, and counts behind their own boundaries.
 
 ## One browse store for collections and search
 
@@ -47,4 +47,4 @@ Collections and `/search` share the same Hydrogen collection store. `CollectionB
 
 ## Prefetch traffic
 
-Product grids are high fanout. Do not add `prefetch={true}` to every card by reflex. Shell-only prefetching is the safe default when dozens of product links are visible. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.
+Product grids are high fanout. Cards link through the shared `Link` from `@/components/ui/link`, which keeps the App Shell prefetch for every visible card and upgrades only a hovered or focused card to its static per-link prefetch. Do not set `prefetch={true}` on cards or swap in `next/link`. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.

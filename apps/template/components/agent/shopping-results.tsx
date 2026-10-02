@@ -4,7 +4,6 @@ import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import type { EveMessage } from "eve/react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { CartLineItem } from "@/components/cart/line-item";
@@ -20,6 +19,7 @@ import {
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { Link } from "@/components/ui/link";
 import { Slider, SliderContent, SliderHeader, SliderItem, SliderNav } from "@/components/ui/slider";
 import { isCartMutation } from "@/lib/agent/cart";
 import {

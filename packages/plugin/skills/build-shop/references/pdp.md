@@ -12,15 +12,15 @@
 
 ## Preserve shell coherence
 
-The PDP deliberately resolves `getProduct()` before rendering. Product identity, title, description, shared media, and other stable body content are baked into one static shell.
+The PDP resolves `getProduct()` before rendering its body. Product identity, title, description, shared media, and other stable body content render together from the cached product.
 
 Keep these coupled decisions together:
 
-- keep `getProduct()` on plain `"use cache"`;
-- keep the stable product body out of a request-time outer Suspense boundary;
-- do not add `prefetch = "allow-runtime"` to the PDP without proving that the body is not rendered again as a divergent request-time flight;
+- keep `getProduct()` a cached `get*` read (`"use cache: remote"` with its `cacheLife` and tags);
+- keep the route's only outer Suspense boundary around the params-dependent body, with `ProductDetailSkeleton` matching the resolved layout; do not add request-time boundaries around stable body content;
 - keep `searchParams` unawaited for selected-option state;
-- keep the selected-options promise separate from the slower exact-variant query — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`.
+- keep the selected-options promise separate from the slower exact-variant query — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`;
+- keep the URL-selected variant query behind `searchParams`, which the root layout's `ensureStatic = "prefetch"` defers to navigation, so link prefetches never render per-variant data; the default variant comes from the cached product.
 
 Inspect the existing PDP boundaries before changing them. Render stable product content immediately where the data contract permits, then suspend only variant-dependent media, price, availability, option state, and purchase controls. Keep a broader boundary only when those concerns genuinely share one blocking dependency.
 

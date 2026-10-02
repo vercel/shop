@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
 import { Browse } from "@/components/collections/browse";
 import { BrowseFallback } from "@/components/collections/toolbar";
 import { Container } from "@/components/ui/container";
+import { Link } from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
