@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { SearchViewedTracker } from "@/components/analytics/trackers";
-import { Browse } from "@/components/collections/browse";
-import { BrowseFallback } from "@/components/collections/toolbar";
+import { Browse, BrowseFallback } from "@/components/collections/browse";
 import { Container } from "@/components/ui/container";
 import { Link } from "@/components/ui/link";
 import { Page } from "@/components/ui/page";

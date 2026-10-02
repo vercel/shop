@@ -6,20 +6,33 @@ import type { Facets } from "@/lib/filters/types";
 import { CollectionFilterSidebar } from "./filters-client";
 
 interface CollectionFiltersProps {
+  className?: string;
   facetsPromise: Promise<Facets>;
 }
 
-export function CollectionFilters({ facetsPromise }: CollectionFiltersProps) {
+export function CollectionFilters({ className, facetsPromise }: CollectionFiltersProps) {
   return (
-    <Suspense fallback={<CollectionFiltersSkeleton />}>
-      <ResolvedCollectionFilters facetsPromise={facetsPromise} />
+    <Suspense
+      fallback={
+        <div className={className}>
+          <CollectionFiltersSkeleton />
+        </div>
+      }
+    >
+      <ResolvedCollectionFilters className={className} facetsPromise={facetsPromise} />
     </Suspense>
   );
 }
 
-async function ResolvedCollectionFilters({ facetsPromise }: CollectionFiltersProps) {
+// Merchants without Search & Discovery facets get no sidebar at all rather than an empty column.
+async function ResolvedCollectionFilters({ className, facetsPromise }: CollectionFiltersProps) {
   const { filters, priceRange } = await facetsPromise;
-  return <CollectionFilterSidebar filters={filters} priceRange={priceRange} />;
+  if (filters.length === 0 && !priceRange) return null;
+  return (
+    <div className={className}>
+      <CollectionFilterSidebar filters={filters} priceRange={priceRange} />
+    </div>
+  );
 }
 
 function CollectionFiltersSkeleton() {

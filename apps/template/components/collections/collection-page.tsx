@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
-import { BrowseFallback } from "@/components/collections/toolbar";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -10,22 +9,30 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BrowseResults, BrowseState, Collection, SortValue } from "@/lib/collections/types";
+import { formatCount } from "@/lib/content";
 
-import { Browse } from "./browse";
+import { Browse, BrowseFallback } from "./browse";
 
 export function CollectionDetailPage({
   collection,
+  countPromise,
   handle,
   resultsPromise,
   sortExclude,
   statePromise,
 }: {
   collection: Collection;
+  countPromise?: Promise<number | undefined>;
   handle: string;
   resultsPromise: Promise<BrowseResults>;
   sortExclude?: SortValue[];
   statePromise: Promise<BrowseState>;
 }) {
+  const resultCount = countPromise ? (
+    <Suspense fallback={<Skeleton className="h-4 w-20" />}>
+      <CollectionResultCount countPromise={countPromise} />
+    </Suspense>
+  ) : undefined;
   return (
     <>
       {collection.id ? (
@@ -36,8 +43,9 @@ export function CollectionDetailPage({
           <Sections className="gap-5">
             <CollectionHeader collection={collection} handle={handle} homeLabel="Home" />
 
-            <Suspense fallback={<BrowseFallback />}>
+            <Suspense fallback={<BrowseFallback resultCount={resultCount} />}>
               <Browse
+                resultCount={resultCount}
                 resultsPromise={resultsPromise}
                 sortExclude={sortExclude}
                 statePromise={statePromise}
@@ -65,6 +73,16 @@ export function CollectionDetailSkeleton() {
       </Container>
     </Page>
   );
+}
+
+async function CollectionResultCount({
+  countPromise,
+}: {
+  countPromise: Promise<number | undefined>;
+}) {
+  const total = await countPromise;
+  if (!total) return null;
+  return formatCount(total, "Item");
 }
 
 function CollectionHeader({

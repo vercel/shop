@@ -39,11 +39,13 @@ export default async function AllProductsPage({ searchParams }: PageProps<"/coll
 
   // Keep searchParams unawaited so the collection header stays in the static shell.
   const statePromise = readBrowseState(searchParams);
+  const resultsPromise = fetchSearchResults({ statePromise });
   return (
     <CollectionDetailPage
       collection={collection}
+      countPromise={resultsPromise.then((results) => results.total).catch(() => undefined)}
       handle={ALL_PRODUCTS_HANDLE}
-      resultsPromise={fetchSearchResults({ statePromise })}
+      resultsPromise={resultsPromise}
       sortExclude={SEARCH_SORT_EXCLUDE}
       statePromise={statePromise}
     />
