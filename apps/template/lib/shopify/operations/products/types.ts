@@ -5,7 +5,6 @@ import type { Facets } from "@/lib/filters/types";
 import type { ProductPage } from "@/lib/product/types";
 
 export type SearchIndexProductsParams = {
-  collection?: string;
   cursor?: string;
   filters?: ProductFilter[];
   limit?: number;
@@ -30,7 +29,6 @@ export interface CollectionProductsResult extends ProductPage {
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
 
 export type SearchFacetsParams = {
-  collection?: string;
   filters?: ProductFilter[];
   locale?: CommerceLocale;
   query?: string;
