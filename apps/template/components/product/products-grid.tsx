@@ -22,11 +22,12 @@ export function ProductsGridSkeleton({ count, className }: ProductsGridSkeletonP
 
 interface ProductsGridProps {
   collectionUrl?: string;
+  eagerCount?: number;
   limit: number;
   title: string;
 }
 
-export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps) {
+export function ProductsGrid({ collectionUrl, eagerCount = 0, limit, title }: ProductsGridProps) {
   return (
     <div className="grid gap-4">
       <div className="flex items-center justify-between">
@@ -41,16 +42,18 @@ export function ProductsGrid({ collectionUrl, limit, title }: ProductsGridProps)
         )}
       </div>
       <Suspense fallback={<ProductsGridSkeleton count={limit} />}>
-        <ProductsGridContent limit={limit} outOfStockText="Out of Stock" />
+        <ProductsGridContent eagerCount={eagerCount} limit={limit} outOfStockText="Out of Stock" />
       </Suspense>
     </div>
   );
 }
 
 async function ProductsGridContent({
+  eagerCount,
   limit,
   outOfStockText,
 }: {
+  eagerCount: number;
   limit: number;
   outOfStockText: string;
 }) {
@@ -61,8 +64,13 @@ async function ProductsGridContent({
   if (products.length === 0) return null;
   return (
     <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-      {products.map((product) => (
-        <ProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
+      {products.map((product, index) => (
+        <ProductCard
+          key={product.id}
+          loading={index < eagerCount ? "eager" : "lazy"}
+          product={product}
+          outOfStockText={outOfStockText}
+        />
       ))}
     </div>
   );

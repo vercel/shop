@@ -14,11 +14,12 @@ import {
 } from "./components";
 
 export interface ProductCardProps {
-  product: ProductCardType;
+  loading?: "eager" | "lazy";
   outOfStockText?: string;
+  product: ProductCardType;
 }
 
-export function ProductCard({ product, outOfStockText }: ProductCardProps) {
+export function ProductCard({ loading, outOfStockText, product }: ProductCardProps) {
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
   return (
     <Link href={href}>
@@ -27,8 +28,11 @@ export function ProductCard({ product, outOfStockText }: ProductCardProps) {
           <ProductCardImage
             src={product.featuredImage?.url}
             alt={product.featuredImage?.altText || product.title}
+            height={product.featuredImage?.height}
+            loading={loading}
             outOfStock={!product.availableForSale}
             outOfStockText={outOfStockText}
+            width={product.featuredImage?.width}
           />
           <ProductCardContent>
             <ProductCardTitle>{product.title}</ProductCardTitle>

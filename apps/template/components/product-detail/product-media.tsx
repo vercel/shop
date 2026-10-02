@@ -24,7 +24,7 @@ function mediaKey(item: MediaItem) {
 
 // The LCP image gets a preload link + eager + fetchpriority=high (`preload` alone no longer implies high).
 // Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
-const LCP_IMAGE_PROPS = { preload: true, fetchPriority: "high" } as const;
+const LCP_IMAGE_PROPS = { fetchPriority: "high", loading: "eager", preload: true } as const;
 
 const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
 
@@ -68,8 +68,9 @@ function MediaImage({
     <Image
       src={item.image.url}
       alt={item.image.altText || `${title} image ${idx + 1}`}
-      fill
-      className={cn("object-cover", className)}
+      height={item.image.height}
+      width={item.image.width}
+      className={cn("absolute inset-0 size-full object-cover", className)}
       sizes="100vw"
       {...(priority ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
       draggable={false}
@@ -289,8 +290,9 @@ export function ColorImageCarouselItems({ images, title }: { images: ImageType[]
       <Image
         src={image.url}
         alt={image.altText || `${title} image ${idx + 1}`}
-        fill
-        className="object-cover"
+        height={image.height}
+        width={image.width}
+        className="absolute inset-0 size-full object-cover"
         sizes="100vw"
         {...(idx === 0 ? LCP_IMAGE_PROPS : LAZY_IMAGE_PROPS)}
         draggable={false}
