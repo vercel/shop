@@ -6,7 +6,6 @@ import {
   type ShopifyRequestContext,
 } from "@shopify/hydrogen";
 import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-account";
-import { io } from "next/cache";
 import { headers } from "next/headers";
 import { cache } from "react";
 
@@ -32,18 +31,20 @@ export async function getCartIdFromCookie(): Promise<string | undefined> {
   return getCartId({ cookie }) ?? undefined;
 }
 
-const getRequestContext = cache(async () => {
-  // Hydrogen's createShopifyRequestContext calls crypto.randomUUID(); exclude it from the static shell.
-  await io();
+const getRequestContext = cache(() => {
   const i18n = {
     country: shopConfig.localization.country,
     language: shopConfig.localization.language,
   };
-  return createShopifyRequestContext({ i18n, request: { headers: await headers() } });
+  // An empty request ID suppresses Hydrogen's synchronous UUID fallback.
+  return createShopifyRequestContext({
+    i18n,
+    request: { headers: new Headers({ "x-request-id": "" }) },
+  });
 });
 
 async function getHandlerContext() {
-  const requestContext = await getRequestContext();
+  const requestContext = getRequestContext();
   const storefrontClient = createRequestStorefrontClient(requestContext);
   if (!shopConfig.auth.isEnabled) return { handlers: cartHandlers, storefrontClient };
 
@@ -59,11 +60,17 @@ async function getHandlerContext() {
   };
 }
 
+async function getCartData(cartId: string | undefined): Promise<CartSeedData> {
+  const { handlers, ...context } = await getHandlerContext();
+  const url = new URL("/api/cart", shopConfig.site.url);
+  if (cartId) url.searchParams.set("cartId", cartId);
+  const { data } = await handlers.get({ ...context, request: new Request(url) } as never);
+  return data;
+}
+
 // Carts are never put in the Next.js data cache — layout and page share only this per-request promise.
 export const seedCartData = cache(async (): Promise<CartSeedData> => {
-  const { handlers, ...context } = await getHandlerContext();
-  const { data } = await handlers.get(context as never);
-  return data;
+  return getCartData(await getCartIdFromCookie());
 });
 
 export async function getCart(): Promise<Cart | undefined> {
@@ -71,12 +78,8 @@ export async function getCart(): Promise<Cart | undefined> {
   return cart ?? undefined;
 }
 
-// Hydrogen's GET handler reads `?cartId=` before the cookie, which covers carts created mid-request.
 export async function getCartById(cartId: string): Promise<Cart | undefined> {
-  const { handlers, ...context } = await getHandlerContext();
-  const url = new URL("/api/cart", shopConfig.site.url);
-  url.searchParams.set("cartId", cartId);
-  const { data } = await handlers.get({ ...context, request: new Request(url) } as never);
+  const data = await getCartData(cartId);
   if (data.errors?.length) throw new Error(data.errors[0].message);
   return data.cart ?? undefined;
 }
