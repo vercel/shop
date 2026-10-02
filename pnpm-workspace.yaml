@@ -5,5 +5,34 @@ allowBuilds:
 
 minimumReleaseAge: 2880
 
+# These exact-version exemptions can be removed after 2026-10-04 18:00 America/Chicago.
+minimumReleaseAgeExclude:
+  - "@ai-sdk/gateway@4.0.103"
+  - "@ai-sdk/provider-utils@5.0.53"
+  - "@ai-sdk/provider@4.0.21"
+  - "@next/env@16.3.8"
+  - "@next/swc-darwin-arm64@16.3.8"
+  - "@next/swc-darwin-x64@16.3.8"
+  - "@next/swc-linux-arm64-gnu@16.3.8"
+  - "@next/swc-linux-arm64-musl@16.3.8"
+  - "@next/swc-linux-x64-gnu@16.3.8"
+  - "@next/swc-linux-x64-musl@16.3.8"
+  - "@next/swc-win32-arm64-msvc@16.3.8"
+  - "@next/swc-win32-x64-msvc@16.3.8"
+  - "@turbo/darwin-64@2.11.6"
+  - "@turbo/darwin-arm64@2.11.6"
+  - "@turbo/linux-64@2.11.6"
+  - "@turbo/linux-arm64@2.11.6"
+  - "@turbo/windows-64@2.11.6"
+  - "@turbo/windows-arm64@2.11.6"
+  - "@types/node@26.6.4"
+  - "ai@7.0.127"
+  - "eve@0.70.0"
+  - "lucide-react@1.50.0"
+  - "next@16.3.8"
+  - "remend@1.4.0"
+  - "streamdown@2.7.0"
+  - "turbo@2.11.6"
+
 packages:
   - "apps/*"
