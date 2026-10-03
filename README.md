@@ -2,12 +2,19 @@
 
 Monorepo for the [Vercel Shop](https://vercel.shop) storefront template and supporting tooling.
 
-| App | Description |
-|-----|-------------|
+| Path            | Description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
 | `apps/template` | The Next.js storefront template — see its [README](apps/template/README.md) |
-| `apps/cli` | `create-vercel-shop` scaffolding CLI |
+| `apps/cli`      | `create-vercel-shop` scaffolding CLI                                        |
+| `skills`        | Agent skills for setting up and extending Vercel Shop storefronts           |
 
 Built with [Turborepo](https://turbo.build/) and pnpm.
+
+Install the Shop skills in your project:
+
+```sh
+npx skills add vercel/shop --skill '*' --yes
+```
 
 ## License
 

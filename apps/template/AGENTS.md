@@ -26,7 +26,7 @@ Every module, route, and feature belongs to one owner. Place new work by owner f
 
 ## Boundary rules (always apply)
 
-1. **Commerce facts come from Shopify.** Never map locale to currency, hand-write Shopify response types, or guess schema fields. Use `shopify-ai-toolkit` for API facts and validation before adding or changing GraphQL, then `/vercel-shop:shopify-graphql-reference` for template placement.
+1. **Commerce facts come from Shopify.** Never map locale to currency, hand-write Shopify response types, or guess schema fields. Use `shopify-ai-toolkit` for API facts and validation before adding or changing GraphQL, then `shopify-graphql-reference` for template placement.
 2. **Cart writes go through Hydrogen handlers.** `proxy.ts` serves `/api/cart`; components use `useProductForm` and `useCartForm`; Eve cart tools call the handlers directly with the cart bound from the browser cookie. No Server Actions, no cache-tag invalidation for carts.
 3. **Shopify fetches, Next.js caches.** `lib/shopify/operations/**/server.ts` exports uncached `fetch*` operations and never imports `next/cache`. `lib/<domain>/server.ts` exports `get*` wrappers that own `"use cache"`, `cacheLife`, and `cacheTag`. Rendered pages call `get*`; Eve tools call `fetch*`. Cursor-paginated browse, search results, and facets also call `fetch*` from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
 4. **Server Components read auth; they never refresh it.** Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API calls. Refresh happens only where Hydrogen can commit cookies.
@@ -35,19 +35,17 @@ Every module, route, and feature belongs to one owner. Place new work by owner f
 7. **Two outward-facing agent surfaces, two owners.** Next.js describes the storefront to outside agents through Markdown representations, `/llms.txt`, structured data, and the sitemap, built from the same domain types as the HTML pages. Shopify's own agent endpoints (`/api/mcp`, `/api/ucp/mcp`, `/.well-known/ucp`) are Shopify's; `proxy.ts` only forwards them. Do not reimplement either side in the other, and do not route Eve through the Markdown surface.
 8. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it.
 
-## Recommended project plugins
+## Agent skills and Shopify tooling
 
-Not required to run the template, but they make agent work substantially better:
+Shop skills are optional agent guidance for setting up and extending the storefront:
 
 ```bash
-npx plugins add vercel/shop --scope project --yes
-npx plugins add vercel/vercel-plugin --scope project --yes
-npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
+npx skills add vercel/shop --skill '*' --yes
 ```
 
-- `vercel-shop` provides storefront-specific skills and commands such as `/vercel-shop:enable-shopify-markets`.
-- `vercel-plugin` provides generic Vercel and Next.js skills.
-- `shopify-ai-toolkit` is authoritative for current Shopify documentation, API schemas, operation validation, and store execution.
+Use plain skill names such as `enable-shopify-markets`.
+
+`shopify-ai-toolkit` is separate external tooling, authoritative for current Shopify documentation, API schemas, operation validation, and store execution. Installing Shop skills does not install it.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -107,7 +105,7 @@ Opt-in via `auth.isEnabled` in `lib/config/index.ts`. When enabled, `next.config
 - Use `next/image` with reserved dimensions and the shared `sizes="100vw"` on every image, including fixed-size thumbnails. `next.config.ts` ships two assets, `deviceSizes: [1320, 1920]`: the screen picks the small or large one, and grids, product pages, cart, search, and the agent reuse it. Do not tune `sizes` per breakpoint or surface or add widths; layout-specific variants cost more image optimizations and cache misses. Preload only the actual LCP image; keep product grids lazy by default.
 - Treat prefetching as a production-measured traffic-versus-latency choice, especially for high-fanout product grids.
 
-Use `/vercel-shop:build-shop` when the project plugin is installed for the full route-specific workflow and audit guidance.
+Use the `build-shop` skill for the full route-specific workflow and audit guidance.
 
 ### Localization default
 
@@ -161,17 +159,18 @@ Eve cart tools bind the cart from the incoming browser cookie through channel au
 - When responses are empty, inspect the complete event stream, pending input requests, tool outputs, and cumulative usage before changing rendering. Keep model-facing catalog data compact without dropping requested constraints, pagination, or error information.
 - Use the narrowest checks that establish the changed behavior. Distinguish mocked or replayed checks, local production-browser checks, and checks against the deployed preview; do not present one as proof of another. Keep diagnostic credentials out of source and output, and default to read-only probes.
 
-## Storefront skills (optional plugin)
+## Storefront skills (optional)
 
-With the `vercel-shop` plugin installed, these commands walk through common extensions:
+These skills walk through setup and common extensions:
 
-- `/vercel-shop:shopify-graphql-reference`: integrating Shopify-validated GraphQL into the template
-- `/vercel-shop:enable-shopify-markets`: Shopify Markets and multi-locale support
-- `/vercel-shop:enable-i18n`: locale-prefixed routing and i18n without Markets
-- `/vercel-shop:enable-shopify-menus`: navigation menus
-- `/vercel-shop:enable-analytics`: analytics
-- `/vercel-shop:build-shop`: storefront architecture, commerce behavior, and rendering performance
-- `/vercel-shop:update-shop`: keeping the storefront current with template changes
+- `init-vercel-shop`: scaffolding and Shopify credentials
+- `shopify-graphql-reference`: integrating Shopify-validated GraphQL into the template
+- `enable-shopify-markets`: Shopify Markets and multi-locale support
+- `enable-i18n`: locale-prefixed routing and i18n without Markets
+- `enable-shopify-menus`: navigation menus
+- `enable-analytics`: analytics
+- `build-shop`: storefront architecture, commerce behavior, and rendering performance
+- `update-shop`: keeping the storefront current with template changes
 
 These are agent-side conveniences. The template runs and deploys without them.
 
