@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
 import { realpathSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir } from 'node:fs/promises';
 import { get } from 'node:https';
-import { join, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { pathToFileURL } from 'node:url';
 
@@ -20,12 +20,6 @@ const PACKAGE_MANAGER_FLAGS = {
   '--use-yarn': 'yarn',
 };
 const INTERNAL_FLAGS = new Set([NO_TEMPLATE_FLAG, ...Object.keys(PACKAGE_MANAGER_FLAGS)]);
-
-const pluginInstalls = [
-  ['vercel/shop', '--scope', 'project', '--yes'],
-  ['vercel/vercel-plugin', '--scope', 'project', '--yes'],
-  ['Shopify/shopify-ai-toolkit', '--scope', 'project', '--yes'],
-];
 
 export function explicitPackageManager(args) {
   for (const arg of args) {
@@ -77,21 +71,10 @@ export function createExecutionPlan({
 } = {}) {
   const noTemplate = cliArgs.includes(NO_TEMPLATE_FLAG);
   const packageManager =
-    explicitPackageManager(cliArgs) ??
-    detectPackageManager({ userAgent, execPath }) ??
-    'npm';
-  const positionalName = findPositionalName(
-    cliArgs.filter((arg) => !INTERNAL_FLAGS.has(arg)),
-  );
+    explicitPackageManager(cliArgs) ?? detectPackageManager({ userAgent, execPath }) ?? 'npm';
+  const positionalName = findPositionalName(cliArgs.filter((arg) => !INTERNAL_FLAGS.has(arg)));
 
   return { cwd, noTemplate, packageManager, positionalName };
-}
-
-export async function readTemplateVersion(importMetaUrl = import.meta.url) {
-  const packageJson = new URL('./package.json', importMetaUrl);
-  const raw = await readFile(packageJson, 'utf8');
-  const pkg = JSON.parse(raw);
-  return pkg.shopTemplateVersion;
 }
 
 export function runCommand(command, args, options = {}) {
@@ -162,22 +145,6 @@ export async function ensureProjectDir(projectDir) {
   await mkdir(projectDir, { recursive: true });
 }
 
-export async function writeBootstrapMetadata(
-  projectDir,
-  templateVersion,
-  scaffoldedAt = new Date().toISOString(),
-) {
-  const metadataDir = join(projectDir, '.vercel-shop');
-  const metadataPath = join(metadataDir, 'bootstrap.json');
-
-  await mkdir(metadataDir, { recursive: true });
-  await writeFile(
-    metadataPath,
-    `${JSON.stringify({ scaffoldedAt, templateVersion }, null, 2)}\n`,
-    'utf8',
-  );
-}
-
 export function installDependencies(projectDir, packageManager, run = runCommand) {
   return run(packageManager, ['install'], { cwd: projectDir });
 }
@@ -186,40 +153,27 @@ export function initGit(projectDir, run = runCommand) {
   return run('git', ['init', '--quiet'], { cwd: projectDir });
 }
 
-export async function installProjectPlugins(projectDir, run = runCommand) {
-  const failures = [];
-
-  for (const args of pluginInstalls) {
-    const code = await run('npx', ['plugins', 'add', ...args], {
-      cwd: projectDir,
-    });
-
-    if (code !== 0) {
-      failures.push(args[0]);
-    }
-  }
-
-  return failures;
+export function installProjectSkills(projectDir, run = runCommand) {
+  return run('npx', ['skills', 'add', 'vercel/shop', '--skill', '*', '--yes'], {
+    cwd: projectDir,
+  });
 }
 
-export function printRetryCommands(projectDir, { scaffolded = true } = {}) {
+export function printRetryCommand(projectDir, { scaffolded = true } = {}) {
   if (scaffolded) {
-    console.warn('\nVercel Shop scaffolded successfully, but one or more plugin installs failed.');
+    console.warn('\nVercel Shop scaffolded successfully, but skill installation failed.');
   } else {
-    console.warn('\nProject plugin installation failed.');
+    console.warn('\nShop skill installation failed.');
   }
 
   console.warn(`Retry from ${projectDir}:`);
-  console.warn('  npx plugins add vercel/shop --scope project --yes');
-  console.warn('  npx plugins add vercel/vercel-plugin --scope project --yes');
-  console.warn('  npx plugins add Shopify/shopify-ai-toolkit --scope project --yes');
+  console.warn("  npx skills add vercel/shop --skill '*' --yes");
 }
 
 export async function main({
   cliArgs = process.argv.slice(2),
   cwd = process.cwd(),
   execPath = process.env.npm_execpath ?? '',
-  importMetaUrl = import.meta.url,
   isTTY = Boolean(process.stdin.isTTY),
   prompt = promptProjectName,
   run = runCommand,
@@ -252,14 +206,6 @@ export async function main({
       return 1;
     }
 
-    try {
-      const templateVersion = await readTemplateVersion(importMetaUrl);
-      await writeBootstrapMetadata(projectDir, templateVersion);
-    } catch (error) {
-      console.warn('\nScaffold completed, but bootstrap metadata could not be written.');
-      console.warn(error instanceof Error ? error.message : String(error));
-    }
-
     const installCode = await installDependencies(projectDir, plan.packageManager, run);
     if (installCode !== 0) {
       console.warn(
@@ -270,10 +216,10 @@ export async function main({
     await initGit(projectDir, run);
   }
 
-  const failedPlugins = await installProjectPlugins(projectDir, run);
+  const skillInstallCode = await installProjectSkills(projectDir, run);
 
-  if (failedPlugins.length > 0) {
-    printRetryCommands(projectDir, { scaffolded: !plan.noTemplate });
+  if (skillInstallCode !== 0) {
+    printRetryCommand(projectDir, { scaffolded: !plan.noTemplate });
   }
 
   return 0;

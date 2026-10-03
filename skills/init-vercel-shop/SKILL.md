@@ -15,14 +15,13 @@ Ask for the target directory if the user did not provide one. Always pass it exp
    ```
 
    Preserve an explicitly requested package manager with `--use-pnpm`, `--use-npm`, `--use-yarn`, or `--use-bun`.
-3. Confirm the generated project contains `.vercel-shop/bootstrap.json`, `AGENTS.md`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
+
+3. Confirm the generated project contains `AGENTS.md`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
 4. Read the generated `AGENTS.md` before making further changes.
-5. If the CLI reports a plugin installation failure, keep the generated project and show the matching retry command:
+5. If the CLI reports a skill installation failure, keep the generated project and show the retry command to run from its root:
 
    ```bash
-   npx plugins add vercel/shop --scope project --yes
-   npx plugins add vercel/vercel-plugin --scope project --yes
-   npx plugins add Shopify/shopify-ai-toolkit --scope project --yes
+   npx skills add vercel/shop --skill '*' --yes
    ```
 
 6. Ask one optional follow-up: **Connect an existing Shopify store now?**
@@ -31,4 +30,4 @@ Ask for the target directory if the user did not provide one. Always pass it exp
 
    If no, finish with the normal environment setup as the next step.
 
-Return the generated project path, whether a Shopify store was connected, and whether plugin installation needs a retry.
+Return the generated project path, whether a Shopify store was connected, and whether skill installation needs a retry.

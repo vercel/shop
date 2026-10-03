@@ -6,15 +6,10 @@
     "dev": "turbo run dev",
     "format": "turbo run format",
     "lint": "turbo run lint",
-    "plugin:install:local": "npx plugins add ./packages/plugin --scope project --yes",
-    "release": "changeset publish",
     "start": "turbo run start",
-    "test": "turbo run test",
-    "version": "changeset version"
+    "test": "turbo run test"
   },
   "dependencies": {
-    "@changesets/changelog-github": "1.0.1",
-    "@changesets/cli": "3.0.3",
     "turbo": "2.11.3"
   },
   "devEngines": {

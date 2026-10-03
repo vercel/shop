@@ -1,17 +1,16 @@
 {
-	"bin": {
-		"create-vercel-shop": "index.mjs"
-	},
-	"name": "create-vercel-shop",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/vercel/shop.git",
-		"directory": "apps/cli"
-	},
-	"shopTemplateVersion": "0.1.0",
-	"scripts": {
-		"test": "node --test index.test.mjs"
-	},
-	"type": "module",
-	"version": "0.3.1"
+  "name": "create-vercel-shop",
+  "version": "0.3.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vercel/shop.git",
+    "directory": "apps/cli"
+  },
+  "bin": {
+    "create-vercel-shop": "index.mjs"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "node --test index.test.mjs"
+  }
 }
