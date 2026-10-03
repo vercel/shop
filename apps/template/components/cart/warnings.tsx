@@ -1,9 +1,10 @@
 "use client";
 
 import type { CartErrorGroup } from "@shopify/hydrogen";
-import { useCart } from "@shopify/hydrogen/react";
 import { AlertTriangle, X } from "lucide-react";
 import { useState } from "react";
+
+import { useCart } from "@/lib/cart/client";
 
 interface CartWarningsProps {
   lineId?: string;

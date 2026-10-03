@@ -10,7 +10,7 @@
     "test": "turbo run test"
   },
   "dependencies": {
-    "turbo": "2.11.3"
+    "turbo": "2.11.6"
   },
   "devEngines": {
     "runtime": {
@@ -19,5 +19,5 @@
       "onFail": "download"
     }
   },
-  "packageManager": "pnpm@12.5.1"
+  "packageManager": "pnpm@12.8.2"
 }

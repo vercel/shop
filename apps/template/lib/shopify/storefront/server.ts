@@ -73,7 +73,10 @@ function getClient(
   return createRequestStorefrontClient(
     createShopifyRequestContext({
       i18n: { country, language },
-      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`),
+      // An empty request ID suppresses Hydrogen's synchronous UUID fallback.
+      request: new Request(`https://${SHOPIFY_STORE_DOMAIN}`, {
+        headers: { "x-request-id": "" },
+      }),
     }),
   );
 }

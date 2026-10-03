@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import type { EveMessage } from "eve/react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -29,7 +28,7 @@ import {
   toAgentOptionGroups,
 } from "@/lib/agent/products";
 import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/types";
-import type { Cart } from "@/lib/cart/types";
+import { useCart, useCartForm } from "@/lib/cart/client";
 import { buildProductUrl } from "@/lib/product";
 
 interface CartConfirmation {
@@ -156,7 +155,7 @@ interface AgentCartSummaryProps {
 }
 
 function AgentCartSummary({ warnings = [] }: AgentCartSummaryProps) {
-  const cart = useCart<Cart, Cart>((state) => state.data);
+  const cart = useCart((state) => state.data);
   const isLoading = useCart((state) => state.loading);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

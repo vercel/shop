@@ -1,9 +1,9 @@
 "use client";
 
-import { useCart } from "@shopify/hydrogen/react";
 import { HandbagIcon } from "lucide-react";
 
 import { useCartDrawer } from "@/components/cart/context";
+import { useCart } from "@/lib/cart/client";
 
 interface CartIconClientProps {
   cartLabel: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { createCartComponents, useCart } from "@shopify/hydrogen/react";
+import { createCartComponents } from "@shopify/hydrogen/react";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
 import { useAgentCartPending } from "@/lib/agent/cart/client";
@@ -8,7 +8,8 @@ import { prepareCheckoutAction } from "@/lib/cart/action";
 
 import type { cartHandlers } from "./server";
 
-export const { useSuspenseCart } = createCartComponents<typeof cartHandlers>();
+export const { CartProvider, useCart, useCartActions, useCartForm, useSuspenseCart } =
+  createCartComponents<typeof cartHandlers>();
 
 export function useCheckout() {
   const agentPending = useAgentCartPending();
