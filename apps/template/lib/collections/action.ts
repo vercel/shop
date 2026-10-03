@@ -22,11 +22,7 @@ export async function loadMoreBrowseProductsAction({
   const page = { cursor, filters, limit: PRODUCTS_PER_PAGE, sortKey: sort };
   if (source.type === "search") {
     // Storefront `search` cursor is anchored to the original `first`; using a different page size returns count=0.
-    return fetchSearchIndexProducts({
-      ...page,
-      collection: source.collection,
-      query: source.query,
-    });
+    return fetchSearchIndexProducts({ ...page, query: source.query });
   }
   const { pageInfo, products } = await fetchCollectionProducts({
     ...page,
