@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
-    "@shopify/hydrogen": "2026.10.0-preview.3",
+    "@shopify/hydrogen": "2026.10.0-preview.4",
     "@tailwindcss/turbopack": "4.3.3",
     "@tailwindcss/typography": "0.5.20",
     "@types/node": "26.6.4",

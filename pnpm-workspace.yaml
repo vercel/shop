@@ -19,6 +19,7 @@ minimumReleaseAgeExclude:
   - "@next/swc-linux-x64-musl@16.3.8"
   - "@next/swc-win32-arm64-msvc@16.3.8"
   - "@next/swc-win32-x64-msvc@16.3.8"
+  - "@shopify/hydrogen@2026.10.0-preview.4"
   - "@turbo/darwin-64@2.11.6"
   - "@turbo/darwin-arm64@2.11.6"
   - "@turbo/linux-64@2.11.6"

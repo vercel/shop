@@ -1,12 +1,12 @@
 "use client";
 
 import type { CartLine as HydrogenCartLine } from "@shopify/hydrogen";
-import { useCart } from "@shopify/hydrogen/react";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { useCart } from "@/lib/cart/client";
 import type { CartLine } from "@/lib/cart/types";
 import { formatPrice } from "@/lib/money";
 

@@ -1,8 +1,9 @@
 "use client";
 
 import { sanitizeQuantity, type CartFormRegister } from "@shopify/hydrogen";
-import { useCartForm } from "@shopify/hydrogen/react";
 import type { ComponentProps, ReactNode } from "react";
+
+import { useCartForm } from "@/lib/cart/client";
 
 interface CartLineFormProps extends Omit<ComponentProps<"form">, "action" | "children" | "method"> {
   children: (register: CartFormRegister) => ReactNode;

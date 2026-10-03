@@ -1,8 +1,9 @@
 "use client";
 
-import { useCart } from "@shopify/hydrogen/react";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { useCart } from "@/lib/cart/client";
 
 const DISMISS_AFTER_MS = 5000;
 

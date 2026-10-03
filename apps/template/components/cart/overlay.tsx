@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart } from "@shopify/hydrogen/react";
 import { Loader2, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -12,7 +11,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
-import type { Cart } from "@/lib/cart/types";
+import { useCart } from "@/lib/cart/client";
 
 import { useCartDrawer } from "./context";
 import { CartLineItem } from "./line-item";
@@ -61,7 +60,7 @@ export function CartOverlay({ description, title }: CartOverlayProps) {
 
 function OverlayContent() {
   const router = useRouter();
-  const cart = useCart<Cart, Cart>((state) => state.data);
+  const cart = useCart((state) => state.data);
   const isLoading = useCart((state) => state.loading);
   const { setOverlayOpen } = useCartDrawer();
   if (isLoading && cart.lines.nodes.length === 0) {
