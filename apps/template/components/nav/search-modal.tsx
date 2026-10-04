@@ -17,6 +17,7 @@ import {
 
 import { Price } from "@/components/product/price";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useRecentlyViewedProducts } from "@/lib/product/client";
 import { usePredictiveSearch } from "@/lib/search/client";
 import type { PredictiveSearchProduct, SearchSuggestion } from "@/lib/search/types";
 
@@ -37,7 +38,7 @@ export function SearchModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <SearchTrigger />
-      <SearchDialogContent onClose={() => setOpen(false)} />
+      <SearchDialogContent open={open} onClose={() => setOpen(false)} />
     </Dialog>
   );
 }
@@ -58,11 +59,16 @@ function SearchTrigger() {
   );
 }
 
-function SearchDialogContent({ onClose }: { onClose: () => void }) {
+function SearchDialogContent({ onClose, open }: { onClose: () => void; open: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const { query, setQuery, results, isLoading, activeIndex, setActiveIndex, reset } =
     usePredictiveSearch();
+  const recentlyViewed = useRecentlyViewedProducts(open);
+  const hasQuery = query.trim().length > 0;
+  // An empty query falls back to recently viewed, so both states drive one keyboard list.
+  const suggestions = hasQuery ? (results?.queries ?? []) : [];
+  const products = hasQuery ? (results?.products ?? []) : recentlyViewed;
   useEffect(() => {
     requestAnimationFrame(() => inputRef.current?.focus());
   }, []);
@@ -80,20 +86,18 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
     navigate(getSearchResultUrl({ baseUrl: "/search", term: q }));
   }
 
-  const visibleItems = (results?.queries.length ?? 0) + (results?.products.length ?? 0);
+  const visibleItems = suggestions.length + products.length;
   function navigateToActiveItem() {
-    if (!results || activeIndex < 0) return;
+    if (activeIndex < 0) return;
 
-    const queriesLen = results.queries.length;
-
-    if (activeIndex < queriesLen) {
-      const suggestion = results.queries[activeIndex];
+    if (activeIndex < suggestions.length) {
+      const suggestion = suggestions[activeIndex];
       if (inputRef.current) inputRef.current.value = suggestion.text;
       setQuery(suggestion.text);
       return;
     }
 
-    const product = results.products[activeIndex - queriesLen];
+    const product = products[activeIndex - suggestions.length];
     if (product) {
       navigate(`/products/${product.handle}`);
     }
@@ -114,7 +118,7 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
       navigateToActiveItem();
     }
   }
-  const show = query.trim().length > 0 && (results !== null || isLoading);
+  const show = hasQuery ? results !== null || isLoading : products.length > 0;
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop className="data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 fixed inset-0 z-60 bg-black/30 backdrop-blur-sm" />
@@ -175,13 +179,13 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                 role="listbox"
                 className="border-t border-border/30 max-h-[60vh] overflow-y-auto overscroll-contain"
               >
-                {isLoading && !results && <LoadingSkeleton />}
+                {hasQuery && isLoading && !results && <LoadingSkeleton />}
 
-                {results && (
+                {(!hasQuery || results) && (
                   <>
-                    {results.queries.length > 0 && (
+                    {suggestions.length > 0 && (
                       <div className="px-4 pt-3 pb-2 flex flex-wrap gap-2">
-                        {results.queries.map((suggestion, i) => (
+                        {suggestions.map((suggestion, i) => (
                           <SuggestionChip
                             key={suggestion.text}
                             suggestion={suggestion}
@@ -195,29 +199,29 @@ function SearchDialogContent({ onClose }: { onClose: () => void }) {
                       </div>
                     )}
 
-                    {results.products.length > 0 && (
+                    {products.length > 0 && (
                       <div>
                         <div className="px-4 pt-3 pb-1.5 text-xs font-medium text-foreground/50 uppercase tracking-wider">
-                          Products
+                          {hasQuery ? "Products" : "Recently viewed"}
                         </div>
-                        {results.products.map((product, i) => (
+                        {products.map((product, i) => (
                           <ProductResult
                             key={product.id}
                             product={product}
-                            active={activeIndex === results.queries.length + i}
+                            active={activeIndex === suggestions.length + i}
                             onNavigate={navigate}
                           />
                         ))}
                       </div>
                     )}
 
-                    {results.products.length === 0 && results.queries.length === 0 && (
+                    {hasQuery && visibleItems === 0 && (
                       <div className="px-4 py-6 text-center text-sm text-foreground/50">
                         {`No results for "${query}"`}
                       </div>
                     )}
 
-                    {visibleItems > 0 && (
+                    {hasQuery && visibleItems > 0 && (
                       <div className="px-4 py-3 flex justify-center">
                         <button
                           type="button"

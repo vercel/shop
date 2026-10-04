@@ -77,6 +77,14 @@ export interface QuickShopProduct {
   title: string;
 }
 
+export interface RecentlyViewedProduct {
+  featuredImage: Image | null;
+  handle: string;
+  id: string;
+  price: Money;
+  title: string;
+}
+
 export interface ProductPage {
   pageInfo: PageInfo;
   products: ProductCard[];
