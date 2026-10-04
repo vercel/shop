@@ -42,7 +42,12 @@ export default function HomePage() {
         </section>
 
         <Container>
-          <ProductsGrid title="Products" limit={8} collectionUrl="/collections/all" />
+          <ProductsGrid
+            title="Products"
+            eagerCount={4}
+            limit={8}
+            collectionUrl="/collections/all"
+          />
         </Container>
       </Sections>
     </Page>

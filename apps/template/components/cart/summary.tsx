@@ -1,12 +1,11 @@
 "use client";
 
 import type { CartData } from "@shopify/hydrogen";
-import { useCart } from "@shopify/hydrogen/react";
 import { Loader2 } from "lucide-react";
 
 import { Price } from "@/components/product/price";
 import { Button } from "@/components/ui/button";
-import { useCheckout } from "@/lib/cart/client";
+import { useCart, useCheckout } from "@/lib/cart/client";
 
 import { DiscountForm } from "./discount-form";
 

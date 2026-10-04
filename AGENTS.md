@@ -23,10 +23,9 @@ Code, comments, docs, skills, commit messages, and pull requests describe curren
 
 ## Template
 
-* The main app in this monorepo is apps/template, which is a template/reference architecture for using Shopify and Next.js. Learn more by reading the AGENTS.md in the directory.
-* Template rollout changelog entries are paused. Do not require or add an entry to `packages/plugin/template-rollout-log/` for pull requests.
-* Keep the `allowBuilds` values in sync between the root pnpm-workspace.yaml and the one in apps/template.
-* Run `pnpm install` from the monorepo root, never from `apps/template`. Its nested `pnpm-workspace.yaml` supports standalone use and causes pnpm to treat that directory as a separate workspace when installing there.
+- The main app in this monorepo is apps/template, which is a template/reference architecture for using Shopify and Next.js. Learn more by reading the AGENTS.md in the directory.
+- Keep the `allowBuilds` values in sync between the root pnpm-workspace.yaml and the one in apps/template.
+- Run `pnpm install` from the monorepo root, never from `apps/template`. Its nested `pnpm-workspace.yaml` supports standalone use and causes pnpm to treat that directory as a separate workspace when installing there.
 
 ## Testing (temporary policy)
 
@@ -36,7 +35,7 @@ Continue to verify changes with existing relevant checks, such as lint, formatti
 
 ## Skills
 
-Skills to be used by the template are written to `packages/plugin/skills`.
+Skills to be used by the template are written to `skills/`.
 
 ## Environment files
 

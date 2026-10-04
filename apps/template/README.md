@@ -20,13 +20,9 @@ Vercel prompts for the three required Shopify values before the first deployment
 npx create-vercel-shop@latest my-store
 ```
 
-The scaffold also installs these project-scoped agent plugins:
+The scaffold also installs the Shop skills for your agent.
 
-- `vercel-shop`
-- `vercel-plugin`
-- `shopify-ai-toolkit`
-
-To install only the agent plugins into an existing project, run this from that project's root:
+To install only the Shop skills into an existing project, run this from that project's root:
 
 ```sh
 npx create-vercel-shop@latest --no-template
@@ -84,10 +80,17 @@ Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/confi
 
 ## Skills
 
-Vercel Shop includes a `vercel-shop` plugin with skills for extending the storefront with common commerce patterns. In Claude Code, these are exposed as `/vercel-shop:<skill>` commands:
+Shop skills guide agents through storefront setup and common commerce patterns. Install them from your project's root:
+
+```sh
+npx skills add vercel/shop --skill '*' --yes
+```
+
+Use the plain skill names below. Shopify AI Toolkit is separate external tooling for authoritative Shopify documentation, API schemas, and operation validation; the CLI does not install it. If it is unavailable, use official Shopify documentation and validation tooling.
 
 | Skill                       | Description                                                           |
 | --------------------------- | --------------------------------------------------------------------- |
+| `init-vercel-shop`          | Scaffold a storefront and configure Shopify credentials               |
 | `build-shop`                | Build or adapt storefront routes with Vercel Shop patterns            |
 | `shopify-graphql-reference` | Add Shopify-validated GraphQL operations in the template's layout     |
 | `enable-analytics`          | Add Vercel Analytics, Speed Insights, and Google Tag Manager          |

@@ -16,7 +16,7 @@ Read `references/REFERENCE.md` before editing.
    - Use its Customer skill for profiles, orders, addresses, and other authenticated customer data.
    - Use its custom-data skill first for metafields or metaobjects.
 2. Search current Shopify documentation and validate the complete operation with that skill.
-3. Do not copy schema snapshots, field catalogs, or generated API reference into this plugin.
+3. Do not copy schema snapshots, field catalogs, or generated API reference into this skill.
 4. If Shopify AI Toolkit is unavailable, use official Shopify documentation and validation tooling; do not guess.
 
 ## Apply the Vercel Shop conventions

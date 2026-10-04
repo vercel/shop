@@ -1,6 +1,5 @@
 "use client";
 
-import { CartProvider } from "@shopify/hydrogen/react";
 import {
   type ComponentProps,
   createContext,
@@ -9,6 +8,8 @@ import {
   useContext,
   useState,
 } from "react";
+
+import { CartProvider } from "@/lib/cart/client";
 
 interface CartDrawerContextValue {
   isOverlayOpen: boolean;

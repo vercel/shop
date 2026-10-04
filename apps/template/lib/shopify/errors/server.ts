@@ -1,4 +1,4 @@
-import { type GraphQLFormattedError, StorefrontApiError } from "@shopify/hydrogen";
+import type { GraphQLFormattedError } from "@shopify/hydrogen";
 
 import { shopifyLogger } from "@/lib/shopify/logging/server";
 import type { StorefrontResponse } from "@/lib/shopify/types";
@@ -8,15 +8,10 @@ export function assertStorefrontOk<T>(
   operation: string,
 ): asserts response is { data: T; errors?: GraphQLFormattedError[] } {
   if (response.errors?.length && !response.data) {
-    const [firstError, ...additionalErrors] = response.errors;
-    throw new StorefrontApiError(`Shopify ${operation} failed: ${firstError.message}`, {
-      extensions: {
-        ...firstError.extensions,
-        additionalErrors,
-        operation,
-      },
-      locations: firstError.locations,
-      path: firstError.path,
+    const [firstError] = response.errors;
+    // StorefrontApiError represents transport failures, not returned GraphQL errors.
+    throw new Error(`Shopify ${operation} failed: ${firstError.message}`, {
+      cause: { errors: response.errors, operation },
     });
   }
   if (response.errors?.length) {
@@ -27,9 +22,7 @@ export function assertStorefrontOk<T>(
     });
   }
   if (!response.data) {
-    throw new StorefrontApiError(`Shopify ${operation}: no data returned`, {
-      extensions: { operation },
-    });
+    throw new Error(`Shopify ${operation}: no data returned`);
   }
 }
 

@@ -82,7 +82,12 @@ export function InfiniteProductGrid({
       <div className={cn("grid gap-5", BROWSE_GRID_COLUMNS)}>
         {children}
         {additionalProducts.map((product) => (
-          <ProductCard key={product.id} product={product} outOfStockText="Out of Stock" />
+          <ProductCard
+            key={product.id}
+            product={product}
+            outOfStockText="Out of Stock"
+            quickShopText="Choose"
+          />
         ))}
       </div>
 

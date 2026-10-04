@@ -1,11 +1,11 @@
 "use client";
 
 import type { AnalyticsCart, CollectionViewPayload, ProductPayload } from "@shopify/hydrogen";
-import { useCart } from "@shopify/hydrogen/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { use, useEffect, useRef } from "react";
 
 import { AnalyticsEvent, getAnalytics } from "@/lib/analytics/client";
+import { useCart } from "@/lib/cart/client";
 import type { ProductDetails, ProductVariant } from "@/lib/product/types";
 
 export function CartViewedTracker() {
