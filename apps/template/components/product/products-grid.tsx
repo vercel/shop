@@ -62,7 +62,12 @@ async function ProductsGridContent({
   return (
     <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} outOfStockText={outOfStockText} />
+        <ProductCard
+          key={product.id}
+          product={product}
+          outOfStockText={outOfStockText}
+          quickShopText="Choose"
+        />
       ))}
     </div>
   );
