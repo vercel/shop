@@ -9,12 +9,14 @@ export const { ProductProvider, useProduct, useProductForm } =
   createProductComponents<ProductFormInput>();
 
 const RECENTLY_VIEWED_KEY = "template-recently-viewed-v1";
-const RECENTLY_VIEWED_LIMIT = 8;
+const RECENTLY_VIEWED_LIMIT = 4;
 
 function readRecentlyViewedProducts(): RecentlyViewedProduct[] {
   try {
     const stored: unknown = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_KEY) ?? "null");
-    return Array.isArray(stored) ? (stored as RecentlyViewedProduct[]) : [];
+    return Array.isArray(stored)
+      ? (stored as RecentlyViewedProduct[]).slice(0, RECENTLY_VIEWED_LIMIT)
+      : [];
   } catch {
     return [];
   }
