@@ -404,9 +404,9 @@ function BuyButtonsFallback({
           selectedPlan={selectedPlan}
         />
       ) : null}
-      <div className="flex gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
         {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
-        <div className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
+        <div className="flex h-12 min-w-40 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground">
           {showLabel ? (allInStock ? "Add to Cart" : "Out of Stock") : null}
         </div>
       </div>
@@ -459,9 +459,9 @@ export function ProductDetailSkeleton() {
               </div>
             </div>
             <div className="grid gap-2.5">
-              <div className="flex gap-2.5">
+              <div className="flex flex-wrap gap-2.5">
                 {shopConfig.pdp.quantityPicker.isEnabled ? <QuantityPickerFallback /> : null}
-                <Skeleton className="h-12 min-w-0 flex-1" />
+                <Skeleton className="h-12 min-w-40 flex-1" />
               </div>
               {shopConfig.pdp.buyWithShop.isEnabled ? <Skeleton className="h-12 w-full" /> : null}
             </div>

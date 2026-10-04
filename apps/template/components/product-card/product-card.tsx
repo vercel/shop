@@ -32,7 +32,13 @@ export function ProductCard({ outOfStockText, product, quickShopText }: ProductC
           outOfStockText={outOfStockText}
         >
           {quickShopText && product.availableForSale && !product.isGiftCard ? (
-            <QuickShop handle={product.handle} label={quickShopText} />
+            <QuickShop
+              handle={product.handle}
+              href={href}
+              image={product.featuredImage?.url ?? null}
+              label={quickShopText}
+              title={product.title}
+            />
           ) : null}
         </ProductCardImage>
         <ProductCardContent>

@@ -15,17 +15,21 @@ import type { ProductFormVariant, SellingPlanAllocation } from "@/lib/product/ty
 
 import { BuyWithShopLogo } from "./buy-with-shop-logo";
 
+interface BuyButtonsProps {
+  availableForSale?: boolean;
+  buyWithShop?: boolean;
+  fallbackVariant: ProductFormVariant | undefined;
+  onAddToCart?: () => void;
+  quantityPicker?: boolean;
+}
+
 export function BuyButtons({
   availableForSale = true,
   buyWithShop = true,
   fallbackVariant,
+  onAddToCart,
   quantityPicker = true,
-}: {
-  availableForSale?: boolean;
-  buyWithShop?: boolean;
-  fallbackVariant: ProductFormVariant | undefined;
-  quantityPicker?: boolean;
-}) {
+}: BuyButtonsProps) {
   const { formProps, pending, register, selectedVariant: storeVariant } = useProductForm();
   const selectedVariant = storeVariant ?? fallbackVariant;
   const isSelectionUnresolved = !storeVariant;
@@ -50,7 +54,7 @@ export function BuyButtons({
   const isOutOfStock = !selectedVariant.availableForSale;
   // Keep href while buying: removing it during the click cancels the anchor's navigation.
   const buyNowUrl = getShopPayButtonUrl({
-    disabled: isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration,
+    disabled: isSelectionUnresolved || isOutOfStock || requiresBundleConfiguration || pending,
     variants: [{ id: selectedVariant.id, quantity }],
   });
   const getButtonText = () => {
@@ -75,6 +79,7 @@ export function BuyButtons({
             event.preventDefault();
             return;
           }
+          onAddToCart?.();
           openOverlay();
         },
       })}
@@ -91,7 +96,7 @@ export function BuyButtons({
       <input type="hidden" name="sellingPlanId" value={selectedPlan?.sellingPlan.id ?? ""} />
       <input type="hidden" {...register("merchandiseId", {})} />
       <input type="hidden" {...register("quantity", { value: quantity })} />
-      <div className="flex gap-2.5">
+      <div className="flex flex-wrap gap-2.5">
         {quantityPicker ? (
           <div
             aria-label="Item quantity"
@@ -135,7 +140,7 @@ export function BuyButtons({
             missingRequiredPlan ||
             pending
           }
-          className="h-12 min-w-0 flex-1 justify-center data-[selection-unresolved=true]:disabled:opacity-100"
+          className="h-12 min-w-40 flex-1 justify-center data-[selection-unresolved=true]:disabled:opacity-100"
         >
           {getButtonText()}
         </Button>
@@ -144,6 +149,7 @@ export function BuyButtons({
         <a
           aria-busy={isBuyingNow || undefined}
           aria-disabled={buyNowUrl ? undefined : true}
+          aria-label="Buy with Shop Pay"
           className={cn(
             "flex h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-shop px-4 text-white transition-colors hover:bg-shop/85 aria-busy:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 data-[selection-unresolved=true]:aria-disabled:opacity-100",
             !availableForSale && "invisible",

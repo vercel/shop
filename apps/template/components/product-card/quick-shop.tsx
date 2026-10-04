@@ -1,105 +1,252 @@
 "use client";
 
-import { LoaderCircleIcon, PlusIcon } from "lucide-react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { PlusIcon, XIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import { ProductFormOptions, ProductFormPrice } from "@/components/product-detail/product-form";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { Link } from "@/components/ui/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import { shopConfig } from "@/lib/config";
+import { buildProductUrl } from "@/lib/product";
 import { loadQuickShopProductAction } from "@/lib/product/action";
 import { ProductProvider, useProduct } from "@/lib/product/client";
 import type { QuickShopProduct } from "@/lib/product/types";
 
-export function QuickShop({ handle, label }: { handle: string; label: string }) {
+type QuickShopStatus = "failed" | "idle" | "loading" | "unavailable";
+
+interface QuickShopProps {
+  handle: string;
+  href: string;
+  image: string | null;
+  label: string;
+  title: string;
+}
+
+export function QuickShop({ handle, href, image, label, title }: QuickShopProps) {
   const [open, setOpen] = useState(false);
   const [product, setProduct] = useState<QuickShopProduct | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [status, setStatus] = useState<QuickShopStatus>("idle");
+  const [cartHandoff, setCartHandoff] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   async function load() {
-    setOpen(true);
-    if (product || failed) return;
+    if (product || status === "loading") return;
+    setStatus("loading");
     try {
       const loaded = await loadQuickShopProductAction(handle);
-      if (loaded) setProduct(loaded);
-      else setFailed(true);
+      setProduct(loaded);
+      setStatus(loaded ? "idle" : "unavailable");
     } catch {
-      setFailed(true);
+      setStatus("failed");
     }
   }
 
+  function closeForCart() {
+    setCartHandoff(true);
+    setOpen(false);
+  }
+
   return (
-    <>
-      <button
-        type="button"
-        aria-label={label}
-        onClick={load}
-        className="absolute right-2.5 bottom-2.5 z-10 hidden size-9 cursor-pointer items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background lg:flex"
+    <Dialog
+      onOpenChange={(nextOpen) => {
+        if (nextOpen) setCartHandoff(false);
+        setOpen(nextOpen);
+      }}
+      open={open}
+    >
+      <DialogTrigger
+        render={
+          <button
+            aria-label={`${label}: ${title}`}
+            className="absolute right-2.5 bottom-2.5 z-10 hidden size-9 cursor-pointer items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm backdrop-blur-sm transition-colors hover:bg-background lg:flex"
+            onClick={load}
+            type="button"
+          >
+            <PlusIcon className="size-4" />
+          </button>
+        }
+      />
+      {/* Hidden overflow is programmatically scrollable, which can displace the close button. */}
+      <DialogContent
+        aria-describedby={undefined}
+        className="flex max-h-[calc(100dvh-2.5rem)] w-[calc(100%-2.5rem)] max-w-3xl flex-col gap-0 overflow-clip p-0 sm:max-w-3xl"
+        finalFocus={cartHandoff ? false : undefined}
+        initialFocus={closeButtonRef}
+        showCloseButton={false}
       >
-        <PlusIcon className="size-4" />
-      </button>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
-          {failed ? (
-            <>
-              <DialogTitle className="text-xl">{label}</DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                This product needs its full page. Open it to continue.
-              </p>
-            </>
-          ) : product ? (
+        <div className="min-h-0 overflow-y-auto overscroll-contain">
+          {product ? (
             <ProductProvider product={product.form}>
-              <div className="grid gap-5">
-                <QuickShopHeader fallbackImage={product.image} title={product.title} />
-                <ProductFormPrice
-                  fallbackVariant={product.form.selectedOrFirstAvailableVariant ?? undefined}
-                />
-                {product.hasOptions ? <ProductFormOptions handle={handle} /> : null}
-                <BuyButtons
-                  availableForSale={product.availableForSale}
-                  buyWithShop={false}
-                  fallbackVariant={product.form.selectedOrFirstAvailableVariant ?? undefined}
-                  quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
-                />
-              </div>
+              <QuickShopDetails
+                handle={handle}
+                onAddToCart={closeForCart}
+                onNavigate={() => setOpen(false)}
+                product={product}
+              />
             </ProductProvider>
           ) : (
-            <>
-              <DialogTitle className="text-xl">{label}</DialogTitle>
-              <div className="flex h-40 items-center justify-center" role="status">
-                <LoaderCircleIcon className="size-5 animate-spin text-muted-foreground" />
-                <span className="sr-only">Loading product options</span>
-              </div>
-            </>
+            <QuickShopLayout
+              image={image}
+              price={
+                status === "failed" || status === "unavailable" ? null : (
+                  <Skeleton className="h-7 w-24" />
+                )
+              }
+              title={title}
+            >
+              {status === "failed" || status === "unavailable" ? (
+                <div className="grid gap-4">
+                  <p className="text-sm text-muted-foreground" role="status">
+                    {status === "failed"
+                      ? "We couldn’t load the purchase options. Try again or open the product page."
+                      : "Quick shop is unavailable for this product."}
+                  </p>
+                  {status === "failed" ? (
+                    <Button className="h-12 w-full" onClick={load} type="button" variant="outline">
+                      Try again
+                    </Button>
+                  ) : null}
+                </div>
+              ) : (
+                <QuickShopSkeleton />
+              )}
+              <QuickShopDetailsLink href={href} onNavigate={() => setOpen(false)} />
+            </QuickShopLayout>
           )}
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+        <DialogPrimitive.Close
+          aria-label="Close quick shop"
+          className="absolute top-2.5 right-2.5 z-10 flex size-11 cursor-pointer items-center justify-center rounded-full bg-background/90 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+          ref={closeButtonRef}
+        >
+          <XIcon className="size-5" />
+        </DialogPrimitive.Close>
+      </DialogContent>
+    </Dialog>
   );
 }
 
-// Reads the store so the image follows the shopper's colour choice, as the product page does.
-function QuickShopHeader({
-  fallbackImage,
-  title,
-}: {
-  fallbackImage: string | null;
-  title: string;
-}) {
-  const { selectedVariant } = useProduct();
-  const src = selectedVariant?.image?.url ?? fallbackImage;
+interface QuickShopDetailsProps {
+  handle: string;
+  onAddToCart: () => void;
+  onNavigate: () => void;
+  product: QuickShopProduct;
+}
+
+function QuickShopDetails({ handle, onAddToCart, onNavigate, product }: QuickShopDetailsProps) {
+  const { options, selectedVariant } = useProduct();
+  const fallbackVariant = product.form.selectedOrFirstAvailableVariant ?? undefined;
+  const selectedOptions = options.flatMap((option) =>
+    option.values
+      .filter((value) => value.selected)
+      .map((value) => ({ name: option.name, value: value.name })),
+  );
+  const href = buildProductUrl(selectedVariant?.product.handle ?? handle, selectedOptions);
+
   return (
-    <div className="flex items-start gap-4">
-      <div className="relative size-24 shrink-0 overflow-hidden rounded-lg bg-accent">
-        {src ? (
-          <Image src={src} alt={title} fill className="object-cover" sizes="100vw" />
-        ) : (
-          <ImagePlaceholder className="size-full" />
-        )}
+    <QuickShopLayout
+      image={selectedVariant?.image?.url ?? product.image}
+      price={<ProductFormPrice fallbackVariant={fallbackVariant} />}
+      title={product.title}
+    >
+      {product.hasOptions ? <ProductFormOptions handle={handle} /> : null}
+      <BuyButtons
+        availableForSale={product.availableForSale}
+        buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+        fallbackVariant={fallbackVariant}
+        onAddToCart={onAddToCart}
+        quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
+      />
+      <QuickShopDetailsLink href={href} onNavigate={onNavigate} />
+    </QuickShopLayout>
+  );
+}
+
+interface QuickShopLayoutProps {
+  children: ReactNode;
+  image: string | null;
+  price: ReactNode;
+  title: string;
+}
+
+function QuickShopLayout({ children, image, price, title }: QuickShopLayoutProps) {
+  return (
+    <div className="grid sm:grid-cols-2">
+      <div className="bg-accent">
+        <div className="relative aspect-square max-h-60 overflow-hidden sm:sticky sm:top-0 sm:max-h-none">
+          {image ? (
+            <Image
+              alt={title}
+              className="object-contain sm:object-cover"
+              fill
+              sizes="100vw"
+              src={image}
+            />
+          ) : (
+            <ImagePlaceholder className="size-full" />
+          )}
+        </div>
       </div>
-      <DialogTitle className="text-xl leading-tight">{title}</DialogTitle>
+      <div className="grid min-w-0 content-center gap-5 p-5">
+        <div className="grid gap-2.5">
+          <DialogTitle className="pr-9 text-2xl leading-snug font-normal break-words">
+            {title}
+          </DialogTitle>
+          {price}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+interface QuickShopDetailsLinkProps {
+  href: string;
+  onNavigate: () => void;
+}
+
+function QuickShopDetailsLink({ href, onNavigate }: QuickShopDetailsLinkProps) {
+  return (
+    <Link
+      className="w-fit cursor-pointer text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+      href={href}
+      onNavigate={onNavigate}
+    >
+      View full details
+    </Link>
+  );
+}
+
+function QuickShopSkeleton() {
+  return (
+    <div aria-busy="true" className="grid gap-5" role="status">
+      <span className="sr-only">Loading purchase options</span>
+      <div aria-hidden="true" className="grid gap-5">
+        <Skeleton className="h-5 w-24" />
+        <div className="grid gap-2.5">
+          <Skeleton className="h-5 w-12" />
+          <div className="flex flex-wrap gap-2.5">
+            {[0, 1, 2, 3, 4].map((value) => (
+              <Skeleton className="h-9.5 w-15 rounded-lg" key={value} />
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-2.5">
+          <div className="flex flex-wrap gap-2.5">
+            {shopConfig.pdp.quantityPicker.isEnabled ? (
+              <Skeleton className="h-12 w-32 shrink-0" />
+            ) : null}
+            <Skeleton className="h-12 min-w-40 flex-1" />
+          </div>
+          {shopConfig.pdp.buyWithShop.isEnabled ? <Skeleton className="h-12 w-full" /> : null}
+        </div>
+      </div>
     </div>
   );
 }
