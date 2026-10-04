@@ -1,14 +1,10 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
-import {
-  createExecutionPlan,
-  main,
-  readTemplateVersion,
-} from './index.mjs';
+import { createExecutionPlan, main } from './index.mjs';
 
 test('createExecutionPlan parses --no-template and an explicit package manager', () => {
   const plan = createExecutionPlan({
@@ -45,7 +41,7 @@ test('createExecutionPlan falls back to npm when nothing is detected', () => {
   assert.equal(plan.positionalName, null);
 });
 
-test('main skips scaffolding and only installs plugins with --no-template', async () => {
+test('main skips scaffolding and only installs skills with --no-template', async () => {
   const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
   const projectDir = join(tempRoot, 'existing-project');
   const calls = [];
@@ -66,10 +62,13 @@ test('main skips scaffolding and only installs plugins with --no-template', asyn
 
     assert.equal(exitCode, 0);
     assert.equal(scaffoldCalls, 0);
-    assert.equal(calls.length, 3);
-    assert.ok(calls.every(({ command }) => command === 'npx'));
-    assert.ok(calls.every(({ args }) => args[0] === 'plugins' && args[1] === 'add'));
-    assert.ok(calls.every(({ options }) => options.cwd === projectDir));
+    assert.deepEqual(calls, [
+      {
+        args: ['skills', 'add', 'vercel/shop', '--skill', '*', '--yes'],
+        command: 'npx',
+        options: { cwd: projectDir },
+      },
+    ]);
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }
@@ -105,9 +104,9 @@ test('main prompts for a project name when none is given and stdin is a TTY', as
     assert.equal(promptCalls, 1);
     assert.deepEqual(scaffoldDirs, [projectDir]);
 
-    const pluginCalls = calls.filter(({ args }) => args[0] === 'plugins');
-    assert.equal(pluginCalls.length, 3);
-    assert.ok(pluginCalls.every(({ options }) => options.cwd === projectDir));
+    const skillCalls = calls.filter(({ args }) => args[0] === 'skills');
+    assert.equal(skillCalls.length, 1);
+    assert.ok(skillCalls.every(({ options }) => options.cwd === projectDir));
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }
@@ -141,7 +140,7 @@ test('main requires an explicit target when stdin is not a TTY', async () => {
   }
 });
 
-test('main scaffolds, installs deps, inits git, and writes bootstrap metadata', async () => {
+test('main scaffolds, installs deps, inits git, and installs skills', async () => {
   const tempRoot = await mkdtemp(join(tmpdir(), 'create-vercel-shop-'));
   const projectName = 'my-store';
   const projectDir = join(tempRoot, projectName);
@@ -174,15 +173,10 @@ test('main scaffolds, installs deps, inits git, and writes bootstrap metadata', 
     assert.deepEqual(gitCall.args, ['init', '--quiet']);
     assert.equal(gitCall.options.cwd, projectDir);
 
-    const pluginCalls = calls.filter(({ args }) => args[0] === 'plugins');
-    assert.equal(pluginCalls.length, 3);
-    assert.ok(pluginCalls.every(({ options }) => options.cwd === projectDir));
-
-    const bootstrapMetadata = JSON.parse(
-      await readFile(join(projectDir, '.vercel-shop', 'bootstrap.json'), 'utf8'),
-    );
-    assert.equal(bootstrapMetadata.templateVersion, await readTemplateVersion());
-    assert.ok(Number.isFinite(Date.parse(bootstrapMetadata.scaffoldedAt)));
+    const skillCalls = calls.filter(({ args }) => args[0] === 'skills');
+    assert.equal(skillCalls.length, 1);
+    assert.deepEqual(skillCalls[0].args, ['skills', 'add', 'vercel/shop', '--skill', '*', '--yes']);
+    assert.equal(skillCalls[0].options.cwd, projectDir);
   } finally {
     await rm(tempRoot, { force: true, recursive: true });
   }

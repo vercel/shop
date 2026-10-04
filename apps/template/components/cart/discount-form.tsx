@@ -1,13 +1,13 @@
 "use client";
 
 import type { CartData } from "@shopify/hydrogen";
-import { useCart, useCartForm } from "@shopify/hydrogen/react";
 import { cn } from "cn";
 import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useCart, useCartForm } from "@/lib/cart/client";
 
 interface DiscountFormProps {
   cart: CartData;

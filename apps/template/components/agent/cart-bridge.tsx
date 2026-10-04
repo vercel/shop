@@ -1,6 +1,5 @@
 "use client";
 
-import { useCart, useCartActions } from "@shopify/hydrogen/react";
 import type { EveMessage } from "eve/react";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
@@ -10,6 +9,7 @@ import {
   setAgentCartStatus,
   useAgentCartStatus,
 } from "@/lib/agent/cart/client";
+import { useCart, useCartActions } from "@/lib/cart/client";
 
 export function AgentCartBridge({
   messages,

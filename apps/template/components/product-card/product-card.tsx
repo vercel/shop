@@ -14,12 +14,13 @@ import {
 import { QuickShop } from "./quick-shop";
 
 export interface ProductCardProps {
+  loading?: "eager" | "lazy";
   outOfStockText?: string;
   product: ProductCardType;
   quickShopText?: string;
 }
 
-export function ProductCard({ outOfStockText, product, quickShopText }: ProductCardProps) {
+export function ProductCard({ loading, outOfStockText, product, quickShopText }: ProductCardProps) {
   const href = buildProductUrl(product.handle, product.defaultVariantSelectedOptions ?? []);
   // The link is stretched rather than wrapping the card so Quick Shop isn't a button inside an anchor.
   return (
@@ -28,8 +29,11 @@ export function ProductCard({ outOfStockText, product, quickShopText }: ProductC
         <ProductCardImage
           src={product.featuredImage?.url}
           alt={product.featuredImage?.altText || product.title}
+          height={product.featuredImage?.height}
+          loading={loading}
           outOfStock={!product.availableForSale}
           outOfStockText={outOfStockText}
+          width={product.featuredImage?.width}
         >
           {quickShopText && product.availableForSale && !product.isGiftCard ? (
             <QuickShop
