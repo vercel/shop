@@ -75,12 +75,12 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
       {/* Hidden overflow is programmatically scrollable, which can displace the close button. */}
       <DialogContent
         aria-describedby={undefined}
-        className="flex max-h-[calc(100dvh-2.5rem)] w-[calc(100%-2.5rem)] max-w-3xl flex-col gap-0 overflow-clip p-0 sm:max-w-3xl"
+        className="flex max-h-[calc(100dvh-2.5rem)] w-[calc(100%-2.5rem)] max-w-3xl flex-col gap-0 overflow-clip p-0 sm:max-w-[min(48rem,calc(200dvh-5rem-2px))]"
         finalFocus={cartHandoff ? false : undefined}
         initialFocus={closeButtonRef}
         showCloseButton={false}
       >
-        <div className="min-h-0 overflow-y-auto overscroll-contain">
+        <div className="min-h-0 overflow-y-auto overscroll-contain sm:overflow-visible">
           {product ? (
             <ProductProvider product={product.form}>
               <QuickShopDetails
@@ -122,7 +122,7 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
         </div>
         <DialogPrimitive.Close
           aria-label="Close quick shop"
-          className="absolute top-2.5 right-2.5 z-10 flex size-11 cursor-pointer items-center justify-center rounded-full bg-background/90 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="absolute top-6.5 right-5 z-10 flex size-5 cursor-pointer items-center justify-center text-foreground transition-colors hover:text-foreground/80 focus-visible:outline-2 focus-visible:outline-offset-2"
           ref={closeButtonRef}
         >
           <XIcon className="size-5" />
@@ -177,29 +177,23 @@ interface QuickShopLayoutProps {
 
 function QuickShopLayout({ children, image, price, title }: QuickShopLayoutProps) {
   return (
-    <div className="grid sm:grid-cols-2">
-      <div className="bg-accent">
-        <div className="relative aspect-square max-h-60 overflow-hidden sm:sticky sm:top-0 sm:max-h-none">
-          {image ? (
-            <Image
-              alt={title}
-              className="object-contain sm:object-cover"
-              fill
-              sizes="100vw"
-              src={image}
-            />
-          ) : (
-            <ImagePlaceholder className="size-full" />
-          )}
-        </div>
+    <div className="grid min-h-0 sm:aspect-[2/1] sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,1fr)]">
+      <div className="relative aspect-square overflow-hidden bg-accent sm:row-span-2">
+        {image ? (
+          <Image alt={title} className="object-cover" fill sizes="100vw" src={image} />
+        ) : (
+          <ImagePlaceholder className="size-full" />
+        )}
       </div>
-      <div className="grid min-w-0 content-center gap-5 p-5">
-        <div className="grid gap-2.5">
-          <DialogTitle className="pr-9 text-2xl leading-snug font-normal break-words">
+      <div className="sticky top-0 z-10 order-first grid min-w-0 grid-cols-[minmax(0,1fr)_1.25rem] gap-2.5 bg-background p-5 pb-2.5 sm:static sm:order-none">
+        <div className="min-w-0">
+          <DialogTitle className="text-2xl leading-snug font-normal break-words">
             {title}
           </DialogTitle>
           {price}
         </div>
+      </div>
+      <div className="grid min-h-0 min-w-0 content-start gap-4 px-5 pb-5 sm:overflow-y-auto sm:overscroll-contain">
         {children}
       </div>
     </div>
