@@ -7,6 +7,7 @@ import {
   ProductDetailSection,
   ProductDetailSkeleton,
 } from "@/components/product-detail/product-detail-section";
+import { RecentlyViewedRecorder } from "@/components/product-detail/recently-viewed";
 import { RelatedProductsSection } from "@/components/product/related-products-section";
 import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
@@ -136,6 +137,15 @@ async function ProductPageContent({
           variantPromise={variantPromise}
         />
       </Suspense>
+      <RecentlyViewedRecorder
+        product={{
+          featuredImage: product.featuredImage,
+          handle: product.handle,
+          id: product.id,
+          price: product.price,
+          title: product.title,
+        }}
+      />
       <ProductDetailSection
         product={product}
         selectedOptionsPromise={selectedOptionsPromise}
