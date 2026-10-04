@@ -33,6 +33,7 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
   const [product, setProduct] = useState<QuickShopProduct | null>(null);
   const [status, setStatus] = useState<QuickShopStatus>("idle");
   const [cartHandoff, setCartHandoff] = useState(false);
+  const [imageUrl, setImageUrl] = useState(image);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   async function load() {
@@ -41,6 +42,9 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
     try {
       const loaded = await loadQuickShopProductAction(handle);
       setProduct(loaded);
+      if (loaded) {
+        setImageUrl(loaded.form.selectedOrFirstAvailableVariant?.image?.url ?? loaded.image);
+      }
       setStatus(loaded ? "idle" : "unavailable");
     } catch {
       setStatus("failed");
@@ -57,6 +61,15 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
       onOpenChange={(nextOpen) => {
         if (nextOpen) setCartHandoff(false);
         setOpen(nextOpen);
+      }}
+      onOpenChangeComplete={(nextOpen) => {
+        if (!nextOpen) {
+          setImageUrl(
+            product
+              ? (product.form.selectedOrFirstAvailableVariant?.image?.url ?? product.image)
+              : image,
+          );
+        }
       }}
       open={open}
     >
@@ -81,44 +94,55 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
         showCloseButton={false}
       >
         <div className="min-h-0 overflow-y-auto overscroll-contain sm:overflow-visible">
-          {product ? (
-            <ProductProvider product={product.form}>
-              <QuickShopDetails
-                handle={handle}
-                onAddToCart={closeForCart}
-                onNavigate={() => setOpen(false)}
-                product={product}
-              />
-            </ProductProvider>
-          ) : (
-            <QuickShopLayout
-              image={image}
-              price={
-                status === "failed" || status === "unavailable" ? null : (
-                  <Skeleton className="h-7 w-24" />
-                )
-              }
-              title={title}
-            >
-              {status === "failed" || status === "unavailable" ? (
-                <div className="grid gap-4">
-                  <p className="text-sm text-muted-foreground" role="status">
-                    {status === "failed"
-                      ? "We couldn’t load the purchase options. Try again or open the product page."
-                      : "Quick shop is unavailable for this product."}
-                  </p>
-                  {status === "failed" ? (
-                    <Button className="h-12 w-full" onClick={load} type="button" variant="outline">
-                      Try again
-                    </Button>
-                  ) : null}
-                </div>
-              ) : (
-                <QuickShopSkeleton />
-              )}
-              <QuickShopDetailsLink href={href} onNavigate={() => setOpen(false)} />
-            </QuickShopLayout>
-          )}
+          <QuickShopLayout image={imageUrl} title={product?.title ?? title}>
+            {product ? (
+              <ProductProvider
+                onSelect={(result) =>
+                  setImageUrl(result.selectedVariant?.image?.url ?? product.image)
+                }
+                product={product.form}
+              >
+                <QuickShopDetails
+                  handle={handle}
+                  onAddToCart={closeForCart}
+                  onNavigate={() => setOpen(false)}
+                  product={product}
+                />
+              </ProductProvider>
+            ) : (
+              <QuickShopPurchasePanel
+                price={
+                  status === "failed" || status === "unavailable" ? null : (
+                    <Skeleton className="h-7 w-24" />
+                  )
+                }
+                title={title}
+              >
+                {status === "failed" || status === "unavailable" ? (
+                  <div className="grid gap-4">
+                    <p className="text-sm text-muted-foreground" role="status">
+                      {status === "failed"
+                        ? "We couldn’t load the purchase options. Try again or open the product page."
+                        : "Quick shop is unavailable for this product."}
+                    </p>
+                    {status === "failed" ? (
+                      <Button
+                        className="h-12 w-full"
+                        onClick={load}
+                        type="button"
+                        variant="outline"
+                      >
+                        Try again
+                      </Button>
+                    ) : null}
+                  </div>
+                ) : (
+                  <QuickShopSkeleton />
+                )}
+                <QuickShopDetailsLink href={href} onNavigate={() => setOpen(false)} />
+              </QuickShopPurchasePanel>
+            )}
+          </QuickShopLayout>
         </div>
         <DialogPrimitive.Close
           aria-label="Close quick shop"
@@ -150,8 +174,7 @@ function QuickShopDetails({ handle, onAddToCart, onNavigate, product }: QuickSho
   const href = buildProductUrl(selectedVariant?.product.handle ?? handle, selectedOptions);
 
   return (
-    <QuickShopLayout
-      image={selectedVariant?.image?.url ?? product.image}
+    <QuickShopPurchasePanel
       price={<ProductFormPrice fallbackVariant={fallbackVariant} />}
       title={product.title}
     >
@@ -164,18 +187,17 @@ function QuickShopDetails({ handle, onAddToCart, onNavigate, product }: QuickSho
         quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
       />
       <QuickShopDetailsLink href={href} onNavigate={onNavigate} />
-    </QuickShopLayout>
+    </QuickShopPurchasePanel>
   );
 }
 
 interface QuickShopLayoutProps {
   children: ReactNode;
   image: string | null;
-  price: ReactNode;
   title: string;
 }
 
-function QuickShopLayout({ children, image, price, title }: QuickShopLayoutProps) {
+function QuickShopLayout({ children, image, title }: QuickShopLayoutProps) {
   return (
     <div className="grid min-h-0 sm:aspect-[2/1] sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,1fr)]">
       <div className="relative aspect-square overflow-hidden bg-accent sm:row-span-2">
@@ -185,6 +207,20 @@ function QuickShopLayout({ children, image, price, title }: QuickShopLayoutProps
           <ImagePlaceholder className="size-full" />
         )}
       </div>
+      {children}
+    </div>
+  );
+}
+
+interface QuickShopPurchasePanelProps {
+  children: ReactNode;
+  price: ReactNode;
+  title: string;
+}
+
+function QuickShopPurchasePanel({ children, price, title }: QuickShopPurchasePanelProps) {
+  return (
+    <div className="contents">
       <div className="sticky top-0 z-10 order-first grid min-w-0 grid-cols-[minmax(0,1fr)_1.25rem] gap-2.5 bg-background p-5 pb-2.5 sm:static sm:order-none">
         <div className="min-w-0">
           <DialogTitle className="text-2xl leading-snug font-normal break-words">
