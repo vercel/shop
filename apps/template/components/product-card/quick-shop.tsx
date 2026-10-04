@@ -1,9 +1,10 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import type { ValidProductSelectionResult } from "@shopify/hydrogen/react";
 import { PlusIcon, XIcon } from "lucide-react";
 import Image from "next/image";
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 import { BuyButtons } from "@/components/product-detail/buy-buttons";
 import { ProductFormOptions, ProductFormPrice } from "@/components/product-detail/product-form";
@@ -16,7 +17,12 @@ import { shopConfig } from "@/lib/config";
 import { buildProductUrl } from "@/lib/product";
 import { loadQuickShopProductAction } from "@/lib/product/action";
 import { ProductProvider, useProduct } from "@/lib/product/client";
-import type { QuickShopProduct } from "@/lib/product/types";
+import type {
+  ProductFormInput,
+  ProductFormVariant,
+  QuickShopProduct,
+  SelectedOption,
+} from "@/lib/product/types";
 
 type QuickShopStatus = "failed" | "idle" | "loading" | "unavailable";
 
@@ -34,7 +40,74 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
   const [status, setStatus] = useState<QuickShopStatus>("idle");
   const [cartHandoff, setCartHandoff] = useState(false);
   const [imageUrl, setImageUrl] = useState(image);
+  const [confirmedVariant, setConfirmedVariant] = useState<ProductFormVariant>();
+  const [resolvedForm, setResolvedForm] = useState<ProductFormInput | null>(null);
+  const [selectionStatus, setSelectionStatus] = useState<QuickShopStatus>("idle");
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const selectionRequest = useRef<{ selectedOptions: SelectedOption[] } | null>(null);
+
+  useEffect(
+    () => () => {
+      selectionRequest.current = null;
+    },
+    [],
+  );
+
+  async function resolveSelection(selectedOptions: SelectedOption[]) {
+    const request = {
+      selectedOptions: selectedOptions.map(({ name, value }) => ({ name, value })),
+    };
+    selectionRequest.current = request;
+    setSelectionStatus("loading");
+    try {
+      const loaded = await loadQuickShopProductAction(handle, request.selectedOptions);
+      if (selectionRequest.current !== request) return;
+      if (!loaded) {
+        setSelectionStatus("unavailable");
+        return;
+      }
+      const variant = loaded.form.selectedOrFirstAvailableVariant ?? undefined;
+      setResolvedForm(loaded.form);
+      setConfirmedVariant(variant);
+      setImageUrl(variant?.image?.url ?? loaded.image);
+      setSelectionStatus("idle");
+      selectionRequest.current = null;
+    } catch {
+      if (selectionRequest.current === request) setSelectionStatus("failed");
+    }
+  }
+
+  function selectVariant(result: ValidProductSelectionResult<ProductFormInput>) {
+    selectionRequest.current = null;
+    setSelectionStatus("idle");
+    if (!product) return;
+    if (result.status === "resolved") {
+      setConfirmedVariant(result.selectedVariant);
+      setImageUrl(result.selectedVariant.image?.url ?? product.image);
+    } else if (
+      (resolvedForm ?? product.form).options.every((option) =>
+        result.selectedOptions.some(({ name }) => name === option.name),
+      )
+    ) {
+      void resolveSelection(result.selectedOptions);
+    }
+  }
+
+  function changeOpen(nextOpen: boolean) {
+    if (nextOpen) {
+      setCartHandoff(false);
+      if (selectionStatus === "loading" && selectionRequest.current) {
+        void resolveSelection(selectionRequest.current.selectedOptions);
+      }
+    } else if (selectionRequest.current) {
+      selectionRequest.current = { selectedOptions: selectionRequest.current.selectedOptions };
+    }
+    setOpen(nextOpen);
+  }
+
+  function retrySelection() {
+    if (selectionRequest.current) void resolveSelection(selectionRequest.current.selectedOptions);
+  }
 
   async function load() {
     if (product || status === "loading") return;
@@ -43,6 +116,7 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
       const loaded = await loadQuickShopProductAction(handle);
       setProduct(loaded);
       if (loaded) {
+        setConfirmedVariant(loaded.form.selectedOrFirstAvailableVariant ?? undefined);
         setImageUrl(loaded.form.selectedOrFirstAvailableVariant?.image?.url ?? loaded.image);
       }
       setStatus(loaded ? "idle" : "unavailable");
@@ -53,17 +127,18 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
 
   function closeForCart() {
     setCartHandoff(true);
-    setOpen(false);
+    changeOpen(false);
   }
 
   return (
     <Dialog
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) setCartHandoff(false);
-        setOpen(nextOpen);
-      }}
+      onOpenChange={changeOpen}
       onOpenChangeComplete={(nextOpen) => {
         if (!nextOpen) {
+          selectionRequest.current = null;
+          setSelectionStatus("idle");
+          setResolvedForm(null);
+          setConfirmedVariant(product?.form.selectedOrFirstAvailableVariant ?? undefined);
           setImageUrl(
             product
               ? (product.form.selectedOrFirstAvailableVariant?.image?.url ?? product.image)
@@ -96,17 +171,15 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
         <div className="min-h-0 overflow-y-auto overscroll-contain sm:overflow-visible">
           <QuickShopLayout image={imageUrl} title={product?.title ?? title}>
             {product ? (
-              <ProductProvider
-                onSelect={(result) =>
-                  setImageUrl(result.selectedVariant?.image?.url ?? product.image)
-                }
-                product={product.form}
-              >
+              <ProductProvider onSelect={selectVariant} product={resolvedForm ?? product.form}>
                 <QuickShopDetails
+                  confirmedVariant={confirmedVariant}
                   handle={handle}
                   onAddToCart={closeForCart}
-                  onNavigate={() => setOpen(false)}
+                  onNavigate={() => changeOpen(false)}
+                  onRetrySelection={retrySelection}
                   product={product}
+                  selectionStatus={selectionStatus}
                 />
               </ProductProvider>
             ) : (
@@ -139,7 +212,7 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
                 ) : (
                   <QuickShopSkeleton />
                 )}
-                <QuickShopDetailsLink href={href} onNavigate={() => setOpen(false)} />
+                <QuickShopDetailsLink href={href} onNavigate={() => changeOpen(false)} />
               </QuickShopPurchasePanel>
             )}
           </QuickShopLayout>
@@ -157,15 +230,27 @@ export function QuickShop({ handle, href, image, label, title }: QuickShopProps)
 }
 
 interface QuickShopDetailsProps {
+  confirmedVariant: ProductFormVariant | undefined;
   handle: string;
   onAddToCart: () => void;
   onNavigate: () => void;
+  onRetrySelection: () => void;
   product: QuickShopProduct;
+  selectionStatus: QuickShopStatus;
 }
 
-function QuickShopDetails({ handle, onAddToCart, onNavigate, product }: QuickShopDetailsProps) {
+function QuickShopDetails({
+  confirmedVariant,
+  handle,
+  onAddToCart,
+  onNavigate,
+  onRetrySelection,
+  product,
+  selectionStatus,
+}: QuickShopDetailsProps) {
   const { options, selectedVariant } = useProduct();
-  const fallbackVariant = product.form.selectedOrFirstAvailableVariant ?? undefined;
+  const isUnconfirmed =
+    !selectedVariant || selectedVariant.id !== confirmedVariant?.id || selectionStatus !== "idle";
   const selectedOptions = options.flatMap((option) =>
     option.values
       .filter((value) => value.selected)
@@ -175,17 +260,45 @@ function QuickShopDetails({ handle, onAddToCart, onNavigate, product }: QuickSho
 
   return (
     <QuickShopPurchasePanel
-      price={<ProductFormPrice fallbackVariant={fallbackVariant} />}
+      price={
+        <div
+          aria-busy={isUnconfirmed || undefined}
+          className="data-[unconfirmed=true]:opacity-50"
+          data-unconfirmed={isUnconfirmed}
+        >
+          <ProductFormPrice fallbackVariant={confirmedVariant} />
+        </div>
+      }
       title={product.title}
     >
       {product.hasOptions ? <ProductFormOptions handle={handle} /> : null}
-      <BuyButtons
-        availableForSale={product.availableForSale}
-        buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
-        fallbackVariant={fallbackVariant}
-        onAddToCart={onAddToCart}
-        quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
-      />
+      {selectionStatus !== "idle" ? (
+        <div className="grid gap-2.5">
+          <p className="text-sm text-muted-foreground" role="status">
+            {selectionStatus === "loading"
+              ? "Loading selected options…"
+              : selectionStatus === "failed"
+                ? "We couldn’t load these options. Try again or choose another option."
+                : "These options are unavailable. Choose another option or open the product page."}
+          </p>
+          {selectionStatus === "failed" ? (
+            <Button onClick={onRetrySelection} type="button" variant="outline">
+              Try again
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+      <fieldset className="min-w-0" disabled={isUnconfirmed}>
+        <div inert={isUnconfirmed || undefined}>
+          <BuyButtons
+            availableForSale={product.availableForSale}
+            buyWithShop={shopConfig.pdp.buyWithShop.isEnabled}
+            fallbackVariant={confirmedVariant}
+            onAddToCart={onAddToCart}
+            quantityPicker={shopConfig.pdp.quantityPicker.isEnabled}
+          />
+        </div>
+      </fieldset>
       <QuickShopDetailsLink href={href} onNavigate={onNavigate} />
     </QuickShopPurchasePanel>
   );
