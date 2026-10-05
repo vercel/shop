@@ -17,7 +17,7 @@ Vercel prompts for the three required Shopify values before the first deployment
 1. Create a new project with pnpm 12 and Node.js 24:
 
 ```sh
-npx create-next-app@latest my-store --example https://github.com/vercel/shop --use-pnpm
+pnpm create next-app@latest my-store --example https://github.com/vercel/shop
 ```
 
 The project includes the Shop skills for your agent in `.agents/skills/`.
@@ -74,7 +74,7 @@ Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/confi
 Shop skills guide agents through storefront setup and common commerce patterns. They ship in `.agents/skills/`, and Claude Code reads them through the `.claude/skills` symlink. To add them to an existing storefront, run this from its root:
 
 ```sh
-npx skills add vercel/shop --skill '*' --yes
+pnpm dlx skills add vercel/shop --skill '*' --yes
 ```
 
 Use the plain skill names below. Shopify AI Toolkit is separate external tooling for authoritative Shopify documentation, API schemas, and operation validation; the Shop skills do not include it. If it is unavailable, use official Shopify documentation and validation tooling.
