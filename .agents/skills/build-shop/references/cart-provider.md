@@ -4,14 +4,14 @@ Use this contract when changing cart bootstrap, badges, overlays, cart pages, fo
 
 ## Reference implementation
 
-- Provider: `apps/template/components/cart/context.tsx`
-- Server seed and handler extensions: `apps/template/lib/cart/server.ts`
-- Handler-derived types and typed suspense hook: `apps/template/lib/cart/{types,client}.ts`
-- Form bindings: `apps/template/components/cart/{line-form,discount-form}.tsx`
-- Root bootstrap: `apps/template/app/layout.tsx`
-- Cart page: `apps/template/app/cart/page.tsx`, `apps/template/components/cart/cart-page.tsx`
-- Assistant synchronization: `apps/template/components/agent/cart-bridge.tsx`
-- HTTP and cookie boundary: `apps/template/proxy.ts`
+- Provider: `components/cart/context.tsx`
+- Server seed and handler extensions: `lib/cart/server.ts`
+- Handler-derived types and typed suspense hook: `lib/cart/{types,client}.ts`
+- Form bindings: `components/cart/{line-form,discount-form}.tsx`
+- Root bootstrap: `app/layout.tsx`
+- Cart page: `app/cart/page.tsx`, `components/cart/cart-page.tsx`
+- Assistant synchronization: `components/agent/cart-bridge.tsx`
+- HTTP and cookie boundary: `proxy.ts`
 - Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart)
 
 ## Ownership

@@ -3,12 +3,12 @@
 ## Reference implementation
 
 - Docs: [PLP anatomy](https://vercel.shop/docs/anatomy/pages/plp), [route reference](https://vercel.shop/docs/reference/routes)
-- Collection routes: `apps/template/app/collections/page.tsx`, `apps/template/app/collections/all/page.tsx`, `apps/template/app/collections/[handle]/page.tsx`
-- Search route: `apps/template/app/search/page.tsx`
-- Components: `apps/template/components/collections/`, `apps/template/components/product-card/product-card.tsx`
-- Browse state and cache decisions: `apps/template/lib/collections/{index,server,action,types}.ts`, `apps/template/lib/search/server.ts`, `apps/template/lib/product/server.ts`
-- Operations and transforms: `apps/template/lib/shopify/operations/collections/server.ts`, `apps/template/lib/shopify/operations/products/server.ts`, `apps/template/lib/shopify/transforms/collection/index.ts`, `apps/template/lib/shopify/transforms/filters/index.ts`
-- Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/apps/template/app/collections), [search route source](https://github.com/vercel/shop/blob/main/apps/template/app/search/page.tsx), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+- Collection routes: `app/collections/page.tsx`, `app/collections/all/page.tsx`, `app/collections/[handle]/page.tsx`
+- Search route: `app/search/page.tsx`
+- Components: `components/collections/`, `components/product-card/product-card.tsx`
+- Browse state and cache decisions: `lib/collections/{index,server,action,types}.ts`, `lib/search/server.ts`, `lib/product/server.ts`
+- Operations and transforms: `lib/shopify/operations/collections/server.ts`, `lib/shopify/operations/products/server.ts`, `lib/shopify/transforms/collection/index.ts`, `lib/shopify/transforms/filters/index.ts`
+- Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/app/collections), [search route source](https://github.com/vercel/shop/blob/main/app/search/page.tsx), [template source](https://github.com/vercel/shop)
 
 ## Preserve the static header
 

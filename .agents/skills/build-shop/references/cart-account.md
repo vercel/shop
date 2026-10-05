@@ -3,11 +3,11 @@
 ## Reference implementation
 
 - Docs: [cart anatomy](https://vercel.shop/docs/anatomy/cart), [authentication anatomy](https://vercel.shop/docs/anatomy/authentication)
-- Cart route and components: `apps/template/app/cart/page.tsx`, `apps/template/components/cart/`
-- Cart data and mutations: `apps/template/lib/cart/` (Hydrogen handlers own reads and mutations; the template supplies an additive fragment and uses Hydrogen's cart-create query to establish a cookie before assistant streaming)
-- Account routes and components: `apps/template/app/account/`, `apps/template/components/account/`
-- Auth and Customer Account API: `apps/template/lib/auth/`, `apps/template/lib/customer/action.ts`, `apps/template/lib/shopify/customer-account/server.ts`, `apps/template/lib/shopify/operations/customer/server.ts`
-- Public source fallback: [cart source](https://github.com/vercel/shop/tree/main/apps/template/components/cart), [account source](https://github.com/vercel/shop/tree/main/apps/template/app/account), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+- Cart route and components: `app/cart/page.tsx`, `components/cart/`
+- Cart data and mutations: `lib/cart/` (Hydrogen handlers own reads and mutations; the template supplies an additive fragment and uses Hydrogen's cart-create query to establish a cookie before assistant streaming)
+- Account routes and components: `app/account/`, `components/account/`
+- Auth and Customer Account API: `lib/auth/`, `lib/customer/action.ts`, `lib/shopify/customer-account/server.ts`, `lib/shopify/operations/customer/server.ts`
+- Public source fallback: [cart source](https://github.com/vercel/shop/tree/main/components/cart), [account source](https://github.com/vercel/shop/tree/main/app/account), [template source](https://github.com/vercel/shop)
 
 ## Never share personalized data
 
