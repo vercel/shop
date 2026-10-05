@@ -6,6 +6,8 @@ import type { Image } from "@/lib/media/types";
 import type { ProductPage } from "@/lib/product/types";
 import type { SEO } from "@/lib/seo/types";
 
+export type BrowseDensity = "comfortable" | "compact";
+
 export interface BrowseState {
   dataSearch: string;
   filters: ProductFilter[];

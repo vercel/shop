@@ -7,6 +7,7 @@ import type { BrowseResults, BrowseState, SortValue } from "@/lib/collections/ty
 
 import {
   BROWSE_GRID_COLUMNS,
+  BrowseDensityArea,
   BrowseGridArea,
   CollectionBrowseProvider,
 } from "./collection-browse-provider";
@@ -70,7 +71,9 @@ export function BrowseFallback({ resultCount }: BrowseFallbackProps) {
     <>
       <BrowseToolbarFallback resultCount={resultCount} />
       <BrowseLayout facets={<div className={FACETS_SIDEBAR_CLASS} />}>
-        <ProductsGridSkeleton count={PRODUCTS_PER_PAGE} className={BROWSE_GRID_COLUMNS} />
+        <BrowseDensityArea>
+          <ProductsGridSkeleton count={PRODUCTS_PER_PAGE} className={BROWSE_GRID_COLUMNS} />
+        </BrowseDensityArea>
       </BrowseLayout>
     </>
   );
