@@ -14,7 +14,7 @@ import {
 import { useCart } from "@/lib/cart/client";
 
 import { useCartDrawer } from "./context";
-import { CartLineItem } from "./line-item";
+import { CartLineItems } from "./line-item";
 import { CartSummary } from "./summary";
 import { CartWarnings } from "./warnings";
 
@@ -94,11 +94,7 @@ function OverlayContent() {
     <div className="flex h-full flex-col">
       <div className="grid flex-1 content-start gap-5 overflow-y-auto px-2.5 py-5">
         <CartWarnings />
-        <ul className="grid gap-5" aria-label="Cart items">
-          {cart.lines.nodes.map((item) => (
-            <CartLineItem key={item.id} item={item} />
-          ))}
-        </ul>
+        <CartLineItems lines={cart.lines.nodes} />
       </div>
       <footer className="px-2.5 pt-5 pb-2.5">
         <CartSummary cart={cart} />
