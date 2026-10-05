@@ -20,6 +20,12 @@ out/
 # production
 build
 
+# Eve
+.eve/
+.output/
+.nitro/
+dist/
+
 # generated archives
 /*.zip
 
@@ -43,7 +49,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-.env*.local
+
+# next dev --experimental-https
+certificates
+
+# turborepo
+.turbo
 
 tmp/
 
@@ -52,13 +63,5 @@ PLAN.md
 progress.txt
 .figma-cache
 
-certificates
-
-# turborepo
-.turbo
-
 # opensrc - source code for packages
 opensrc/
-
-# The template installs from the monorepo root; a nested lockfile is an artifact of a local install.
-apps/template/pnpm-lock.yaml

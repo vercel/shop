@@ -2,7 +2,7 @@
 
 ## Reference implementation
 
-Inspect the source files listed in the skill's "Ground the work in source" step before applying the rules below. Prefer local files when this repository or a generated Vercel Shop project is available; otherwise fall back to [apps/template](https://github.com/vercel/shop/tree/main/apps/template).
+Inspect the source files listed in the skill's "Ground the work in source" step before applying the rules below. Prefer local files when this repository or a generated Vercel Shop project is available; otherwise fall back to [the template source](https://github.com/vercel/shop).
 
 ## Keep responsibilities in layers
 
@@ -33,7 +33,7 @@ A Suspense boundary exposes an async dependency; it does not remove it. If the p
 
 ## Pass request-time work down to a resolved leaf
 
-Inspect `apps/template/app/products/[handle]/page.tsx` and `apps/template/components/product-detail/product-detail-section.tsx` for the request-time promise boundaries. Preserve intentional operation locale inputs and validated commerce context in localized installations.
+Inspect `app/products/[handle]/page.tsx` and `components/product-detail/product-detail-section.tsx` for the request-time promise boundaries. Preserve intentional operation locale inputs and validated commerce context in localized installations.
 
 Preserve these boundaries:
 

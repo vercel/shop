@@ -9,6 +9,3 @@ minimumReleaseAgeExclude:
   # Track Next 16.4 canaries on the release-next-16-4 branch.
   - "next"
   - "@next/*"
-
-packages:
-  - "apps/*"
