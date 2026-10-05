@@ -52,7 +52,7 @@ Every module, route, and feature belongs to one owner. Place new work by owner f
 5. **`components/ui/` takes primitive props only.** No domain types, SDK types, or content helpers. Domain wrappers in `components/<domain>/` supply labels and data.
 6. **Copy is inline and server-first.** Keep labels beside their consuming component; reusable content functionality goes in `lib/content/index.ts`, not a string catalog. Server Components pass primitive labels to client leaves; never pass content functions across the Server/Client boundary. Do not add a `t()` runtime or next-intl to the default storefront; in an already localized installation, preserve next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
 7. **Two outward-facing agent surfaces, two owners.** Next.js describes the storefront to outside agents through Markdown representations, `/llms.txt`, structured data, and the sitemap, built from the same domain types as the HTML pages. Shopify's own agent endpoints (`/api/mcp`, `/api/ucp/mcp`, `/.well-known/ucp`) are Shopify's; `proxy.ts` only forwards them. Do not reimplement either side in the other, and do not route Eve through the Markdown surface.
-8. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it.
+8. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it, and every `process.env.X` read is listed in `turbo.json` `globalEnv`: Turborepo's strict mode hides undeclared variables from tasks and leaves them out of cache keys.
 
 ## Agent skills and Shopify tooling
 
@@ -131,6 +131,7 @@ The default has no next-intl dependency, `lib/i18n/` machinery, or `getLocale()`
 - `lib/config/index.ts`: `shopConfig` feature toggles and site settings, read directly in server and client code.
 - `next.config.ts`: `cacheComponents: true`, `reactCompiler: true`; composes `withBotId` and `withEve` through `withShopConfig` when their toggles are enabled.
 - `.oxlintrc.json`, `.oxfmtrc.json`, `components.json`: lint, format, and shadcn/ui configuration.
+- `turbo.json`: Turborepo tasks for local and Vercel Remote Caching of `package.json` scripts.
 - Environment variables are documented in `.env.example`.
 - `pnpm dev:portless` serves local HTTPS through a global [Portless](https://portless.sh) install; keep Portless out of `package.json` dependencies.
 
