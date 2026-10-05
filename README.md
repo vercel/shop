@@ -5,7 +5,6 @@ Monorepo for the [Vercel Shop](https://vercel.shop) storefront template and supp
 | Path            | Description                                                                 |
 | --------------- | --------------------------------------------------------------------------- |
 | `apps/template` | The Next.js storefront template — see its [README](apps/template/README.md) |
-| `apps/cli`      | `create-vercel-shop` scaffolding CLI                                        |
 | `skills`        | Agent skills for setting up and extending Vercel Shop storefronts           |
 
 Built with [Turborepo](https://turbo.build/) and pnpm.
