@@ -391,7 +391,7 @@ Never put internal `/[locale]/...` rewrite targets into metadata or sitemap XML.
 
 ## 11. Verification
 
-Run focused checks from `apps/template`:
+Run focused checks from the storefront root:
 
 ```bash
 pnpm lint

@@ -1,6 +1,6 @@
 ---
 name: init-vercel-shop
-description: Initialize a new Vercel Shop storefront with the official create-vercel-shop CLI. Use when the user wants to create, scaffold, start, or initialize a Vercel Shop project from a coding agent.
+description: Initialize a new Vercel Shop storefront from the vercel/shop template with create-next-app. Use when the user wants to create, scaffold, start, or initialize a Vercel Shop project from a coding agent.
 ---
 
 # Initialize Vercel Shop
@@ -11,17 +11,17 @@ Ask for the target directory if the user did not provide one. Always pass it exp
 2. Run:
 
    ```bash
-   npx create-vercel-shop@latest <target-directory>
+   npx create-next-app@latest <target-directory> --example https://github.com/vercel/shop --use-pnpm
    ```
 
-   Preserve an explicitly requested package manager with `--use-pnpm`, `--use-npm`, `--use-yarn`, or `--use-bun`.
+   The template pins pnpm 12 and Node.js 24.
 
-3. Confirm the generated project contains `AGENTS.md`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
+3. Confirm the generated project contains `AGENTS.md`, `.agents/skills/`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
 4. Read the generated `AGENTS.md` before making further changes.
-5. If the CLI reports a skill installation failure, keep the generated project and show the retry command to run from its root:
+5. If dependency installation fails, keep the generated project and show the retry command to run from its root:
 
    ```bash
-   npx skills add vercel/shop --skill '*' --yes
+   pnpm install
    ```
 
 6. Ask one optional follow-up: **Connect an existing Shopify store now?**
@@ -30,4 +30,4 @@ Ask for the target directory if the user did not provide one. Always pass it exp
 
    If no, finish with the normal environment setup as the next step.
 
-Return the generated project path, whether a Shopify store was connected, and whether skill installation needs a retry.
+Return the generated project path, whether a Shopify store was connected, and whether dependency installation needs a retry.

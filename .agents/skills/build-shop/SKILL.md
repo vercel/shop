@@ -11,12 +11,12 @@ Build the shop around commerce truth first: what product or collection is being 
 
 1. Read the project's `AGENTS.md`, the target route, its view contract, and every operation it calls.
 2. If the Vercel Shop template source is available, inspect it before relying on this prose:
-   - Template rules: `apps/template/AGENTS.md`
-   - Route/layout shell: `apps/template/app/layout.tsx`, `apps/template/app/page.tsx`
-   - Shopify boundary: `apps/template/lib/shopify/storefront/server.ts`, `apps/template/lib/shopify/operations/`, `apps/template/lib/shopify/transforms/`, `apps/template/lib/product/types.ts`, `apps/template/lib/customer/types.ts`
-   - Next.js cache boundary: `apps/template/lib/<domain>/server.ts` cached `get*` wrappers around the uncached `fetch*` operations
-   - Shared UI layout primitives: `apps/template/components/ui/container.tsx`, `apps/template/components/ui/page.tsx`, `apps/template/components/ui/sections.tsx`
-   - Public source fallback: [apps/template source](https://github.com/vercel/shop/tree/main/apps/template)
+   - Template rules: `AGENTS.md`
+   - Route/layout shell: `app/layout.tsx`, `app/page.tsx`
+   - Shopify boundary: `lib/shopify/storefront/server.ts`, `lib/shopify/operations/`, `lib/shopify/transforms/`, `lib/product/types.ts`, `lib/customer/types.ts`
+   - Next.js cache boundary: `lib/<domain>/server.ts` cached `get*` wrappers around the uncached `fetch*` operations
+   - Shared UI layout primitives: `components/ui/container.tsx`, `components/ui/page.tsx`, `components/ui/sections.tsx`
+   - Public source fallback: [template source](https://github.com/vercel/shop)
 3. Use the docs to orient before editing unfamiliar areas:
    - [Architecture docs](https://vercel.shop/docs/anatomy)
    - [Route reference](https://vercel.shop/docs/reference/routes)

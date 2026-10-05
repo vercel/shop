@@ -3,12 +3,12 @@
 ## Reference implementation
 
 - Docs: [PDP anatomy](https://vercel.shop/docs/anatomy/pages/pdp), [Shopify PDP data](https://vercel.shop/docs/shopify/pdp)
-- Route: `apps/template/app/products/[handle]/page.tsx`
-- Product detail components: `apps/template/components/product-detail/`
-- Product card and recommendations: `apps/template/components/product-card/product-card.tsx`, `apps/template/components/product/related-products-section.tsx`
-- Cached reads: `apps/template/lib/product/server.ts`
-- Operations and transforms: `apps/template/lib/shopify/operations/products/server.ts`, `apps/template/lib/shopify/transforms/product/index.ts`, `apps/template/lib/product/index.ts`
-- Public source fallback: [PDP route source](https://github.com/vercel/shop/blob/main/apps/template/app/products/%5Bhandle%5D/page.tsx), [product detail source](https://github.com/vercel/shop/tree/main/apps/template/components/product-detail), [template source](https://github.com/vercel/shop/tree/main/apps/template)
+- Route: `app/products/[handle]/page.tsx`
+- Product detail components: `components/product-detail/`
+- Product card and recommendations: `components/product-card/product-card.tsx`, `components/product/related-products-section.tsx`
+- Cached reads: `lib/product/server.ts`
+- Operations and transforms: `lib/shopify/operations/products/server.ts`, `lib/shopify/transforms/product/index.ts`, `lib/product/index.ts`
+- Public source fallback: [PDP route source](https://github.com/vercel/shop/blob/main/app/products/%5Bhandle%5D/page.tsx), [product detail source](https://github.com/vercel/shop/tree/main/components/product-detail), [template source](https://github.com/vercel/shop)
 
 ## Preserve shell coherence
 

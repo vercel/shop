@@ -5,7 +5,7 @@ description: Update an existing Vercel Shop storefront with newer template chang
 
 # Update Vercel Shop
 
-Compare the working storefront with current upstream `apps/template` in `vercel/shop`. The template is a reference, not a replacement for downstream code. Base decisions on implemented behavior, not scaffold age or version metadata.
+Compare the working storefront with the current upstream `vercel/shop` repository. The template is a reference, not a replacement for downstream code. Base decisions on implemented behavior, not scaffold age or version metadata.
 
 ## Pick a mode
 
@@ -17,7 +17,7 @@ Infer the mode from the user's request:
 
 ## Inspect the project
 
-Read applicable `AGENTS.md` instructions, project structure, dependency versions, scripts, configuration, and relevant source. Inspect git status and staged/unstaged diffs, including untracked files, before proposing edits. Identify the storefront root; upstream `apps/template/` maps to that root, not necessarily the repository root.
+Read applicable `AGENTS.md` instructions, project structure, dependency versions, scripts, configuration, and relevant source. Inspect git status and staged/unstaged diffs, including untracked files, before proposing edits. Identify the storefront root; the upstream repository root maps to that root, which is not necessarily the downstream repository root.
 
 Preserve dirty state, merchant design, custom features, integrations, and intentional departures from the template. Never overwrite custom code with template files or reset, stash, commit, or push without explicit permission. Stop if selected work cannot be separated safely from existing edits.
 
@@ -36,8 +36,8 @@ Prefer public GitHub inspection with `gh`. Resolve the default branch to a commi
 ```bash
 branch=$(gh api repos/vercel/shop --jq .default_branch) &&
 ref=$(gh api "repos/vercel/shop/commits/$branch" --jq .sha) &&
-gh api "repos/vercel/shop/contents/apps/template?ref=$ref" --jq '.[].path' &&
-gh api "repos/vercel/shop/contents/apps/template/AGENTS.md?ref=$ref" \
+gh api "repos/vercel/shop/contents?ref=$ref" --jq '.[].path' &&
+gh api "repos/vercel/shop/contents/AGENTS.md?ref=$ref" \
   -H 'Accept: application/vnd.github.raw+json'
 ```
 
@@ -47,12 +47,11 @@ If `gh` is unavailable or cannot read the public repository, use a temporary sha
 
 ```bash
 upstream=$(mktemp -d) &&
-git clone --depth 1 --filter=blob:none --sparse https://github.com/vercel/shop.git "$upstream" &&
-git -C "$upstream" sparse-checkout set apps/template &&
+git clone --depth 1 --filter=blob:none https://github.com/vercel/shop.git "$upstream" &&
 git -C "$upstream" rev-parse HEAD
 ```
 
-Inspect `$upstream/apps/template` and record the resolved commit in the report. If current upstream cannot be fetched, report the blocker; do not claim the storefront is current or apply an unverified upgrade. Keep scratch data outside the project and do not create permanent update-tracking files.
+Inspect `$upstream` and record the resolved commit in the report. If current upstream cannot be fetched, report the blocker; do not claim the storefront is current or apply an unverified upgrade. Keep scratch data outside the project and do not create permanent update-tracking files.
 
 ## Audit and plan
 

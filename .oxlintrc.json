@@ -8,6 +8,7 @@
     ".next/**",
     "dist/**",
     "build/**",
+    ".agents/**",
     ".claude/**",
     "app/.well-known/**",
     "components/ai-elements/**"
