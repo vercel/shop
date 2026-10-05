@@ -2,10 +2,3 @@ allowBuilds:
   "@parcel/watcher": false
   "@swc/core": false
   esbuild: false
-
-minimumReleaseAge: 2880
-
-minimumReleaseAgeExclude:
-  # Track Next 16.4 canaries on the release-next-16-4 branch.
-  - "next"
-  - "@next/*"
