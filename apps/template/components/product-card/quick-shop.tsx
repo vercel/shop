@@ -313,7 +313,7 @@ interface QuickShopLayoutProps {
 function QuickShopLayout({ children, image, title }: QuickShopLayoutProps) {
   return (
     <div className="grid min-h-0 sm:aspect-[2/1] sm:grid-cols-2 sm:grid-rows-[auto_minmax(0,1fr)]">
-      <div className="relative aspect-square overflow-hidden bg-accent sm:row-span-2">
+      <div className="relative aspect-square overflow-hidden sm:row-span-2">
         {image ? (
           <Image alt={title} className="object-cover" fill sizes="100vw" src={image} />
         ) : (
