@@ -13,11 +13,40 @@ import { formatPrice } from "@/lib/money";
 import { CartLineForm } from "./line-form";
 import { CartWarnings } from "./warnings";
 
+interface CartLineItemsProps {
+  lines: CartLine[];
+}
+
+export function CartLineItems({ lines }: CartLineItemsProps) {
+  const keys = getLineRowKeys(lines);
+  return (
+    <ul className="grid gap-5" aria-label="Cart items">
+      {lines.map((line, index) => (
+        <CartLineItem key={keys[index]} item={line} />
+      ))}
+    </ul>
+  );
+}
+
+// Shopify replaces a new line's `optimistic:` ID on confirmation, so rows key by the identity Hydrogen matches lines on.
+function getLineRowKeys(lines: CartLine[]) {
+  const keys = lines.map((line) =>
+    JSON.stringify([
+      line.merchandise?.id ?? line.id,
+      line.sellingPlanAllocation?.sellingPlan.id ?? null,
+      (line.attributes ?? []).map(({ key, value }) => JSON.stringify([key, value])).sort(),
+    ]),
+  );
+  return keys.map((key, index) =>
+    keys.indexOf(key) === keys.lastIndexOf(key) ? key : lines[index].id,
+  );
+}
+
 interface CartLineItemProps {
   item: CartLine;
 }
 
-export function CartLineItem({ item }: CartLineItemProps) {
+function CartLineItem({ item }: CartLineItemProps) {
   const isPending = useCart((state) => state.pending.lines.has(item.id));
   const isCostPending = useCart((state) =>
     Boolean(state.pending.cost || state.revalidating || state.pending.lines.has(item.id)),

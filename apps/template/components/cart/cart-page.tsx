@@ -9,7 +9,7 @@ import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSuspenseCart } from "@/lib/cart/client";
 
-import { CartLineItem } from "./line-item";
+import { CartLineItems } from "./line-item";
 import { CartSummary } from "./summary";
 import { CartWarnings } from "./warnings";
 
@@ -40,11 +40,7 @@ export function CartPageContent() {
       summary={<CartSummary cart={cart} />}
       warnings={<CartWarnings />}
     >
-      <ul className="grid gap-5" aria-label="Cart items">
-        {cart.lines.nodes.map((item) => (
-          <CartLineItem key={item.id} item={item} />
-        ))}
-      </ul>
+      <CartLineItems lines={cart.lines.nodes} />
     </CartPageLayout>
   );
 }

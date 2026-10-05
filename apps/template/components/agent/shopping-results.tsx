@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import { CartLineItem } from "@/components/cart/line-item";
+import { CartLineItems } from "@/components/cart/line-item";
 import { CartCheckout, CartTotal } from "@/components/cart/summary";
 import {
   ProductCard,
@@ -180,11 +180,7 @@ function AgentCartSummary({ warnings = [] }: AgentCartSummaryProps) {
           ))}
         </div>
       )}
-      <ul className="grid gap-5" aria-label="Cart items">
-        {cart.lines.nodes.map((line) => (
-          <CartLineItem key={line.id} item={line} />
-        ))}
-      </ul>
+      <CartLineItems lines={cart.lines.nodes} />
       <CartTotal cart={cart} />
       <CartCheckout />
       <span className="sr-only">This cart updates as you change it.</span>
