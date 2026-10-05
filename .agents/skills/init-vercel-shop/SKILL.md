@@ -11,7 +11,7 @@ Ask for the target directory if the user did not provide one. Always pass it exp
 2. Run:
 
    ```bash
-   npx create-next-app@latest <target-directory> --example https://github.com/vercel/shop --use-pnpm
+   pnpm create next-app@latest <target-directory> --example https://github.com/vercel/shop
    ```
 
    The template pins pnpm 12 and Node.js 24.
