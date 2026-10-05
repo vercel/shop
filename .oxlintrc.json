@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "warn",
+    "suspicious": "warn"
+  },
+  "ignorePatterns": [
+    ".next/**",
+    "dist/**",
+    "build/**",
+    ".agents/**",
+    ".claude/**",
+    "app/.well-known/**",
+    "components/ai-elements/**"
+  ],
+  "plugins": ["typescript", "react", "nextjs"],
+  "rules": {
+    "no-underscore-dangle": ["warn", { "allow": ["__typename"] }],
+    "no-unused-vars": "off",
+    "react/react-in-jsx-scope": "off"
+  },
+  "settings": {
+    "jsx-a11y": {
+      "components": {
+        "Link": "a",
+        "Image": "img"
+      }
+    }
+  }
+}

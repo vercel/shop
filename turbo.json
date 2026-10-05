@@ -1,8 +1,11 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": [".env*"],
   "globalEnv": [
+    "AI_GATEWAY_API_KEY",
     "CUSTOMER_ACCOUNT_SESSION_SECRET",
     "DEBUG_SHOPIFY",
+    "EVE_DEV",
     "NEXT_PUBLIC_SHOPIFY_SHOP_ID",
     "NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN",
     "NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
@@ -13,28 +16,25 @@
     "SHOPIFY_WEBHOOK_SECRET",
     "UCP_AGENT_PROFILE_URL",
     "V0_CALLBACK_URL",
-    "VERCEL_BRANCH_URL",
     "VERCEL_ENV",
-    "VERCEL_PROJECT_PRODUCTION_URL",
-    "VERCEL_URL"
+    "VERCEL_PROJECT_PRODUCTION_URL"
   ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
     "dev": {
-      "persistent": true,
+      "cache": false,
+      "persistent": true
+    },
+    "format": {
       "cache": false
     },
-    "lint": {
-      "dependsOn": []
+    "lint": {},
+    "start": {
+      "cache": false,
+      "persistent": true
     },
-    "test": {
-      "dependsOn": []
-    }
+    "typecheck": {}
   }
 }

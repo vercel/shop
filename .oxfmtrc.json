@@ -1,0 +1,17 @@
+{
+  "ignorePatterns": [
+    "app/globals.css",
+    ".next/**",
+    "dist/**",
+    "build/**",
+    ".agents/**",
+    ".claude/**",
+    "app/.well-known/**"
+  ],
+  "semi": true,
+  "singleQuote": false,
+  "sortImports": {},
+  "tabWidth": 2,
+  "trailingComma": "all",
+  "useTabs": false
+}
