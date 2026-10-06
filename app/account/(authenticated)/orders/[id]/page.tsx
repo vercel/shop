@@ -120,7 +120,7 @@ function SummaryRow({ label, money }: { label: string; money: Money | null }) {
 
 function OrderDetailSkeleton() {
   return (
-    <div className="grid gap-4">
+    <div aria-busy="true" className="grid gap-4">
       <Skeleton className="h-8 w-40" />
       <Skeleton className="h-24 w-full rounded-lg" />
       <Skeleton className="h-32 w-full rounded-lg" />
