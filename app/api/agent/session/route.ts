@@ -1,7 +1,6 @@
 import { createCartCookie } from "@shopify/hydrogen";
 import { checkBotId } from "botid/server";
 
-import { createAgentBrowserCookie, readAgentBrowserId } from "@/lib/agent/browser/server";
 import { createCustomerRequestContext, createCustomerSessionManager } from "@/lib/auth/server";
 import { createEmptyCart, getCartById, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
@@ -35,11 +34,6 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
-  if (!readAgentBrowserId(request.headers.get("cookie")))
-    response.headers.append(
-      "Set-Cookie",
-      createAgentBrowserCookie(new URL(request.url).protocol === "https:"),
-    );
   const sessionHeaders = await sessionManager?.commit?.();
   if (sessionHeaders)
     for (const cookie of new Headers(sessionHeaders).getSetCookie())
