@@ -74,14 +74,13 @@ pnpm add @next/third-parties
 
 ### B2. Add environment variable
 
-Add to `.env.example`:
+Add this row to the `# Optional` block of `.env.example`, keeping it alphabetical:
 
-```
-# Google Tag Manager (optional)
-NEXT_PUBLIC_GTM_ID="GTM-XXXXXX"
+```bash
+# NEXT_PUBLIC_GTM_ID="GTM-XXXXXX" # Set to load Google Tag Manager; leave unset to skip it.
 ```
 
-Set the actual value in `.env.local` or in the Vercel dashboard under Environment Variables.
+Add `NEXT_PUBLIC_GTM_ID` to `turbo.json` `globalEnv`, keeping it alphabetical; Turborepo's strict mode hides undeclared variables from tasks and leaves them out of cache keys. Set the actual value in `.env.local` or in the Vercel dashboard under Environment Variables.
 
 ### B3. Add GTM to `components/analytics/index.tsx`
 

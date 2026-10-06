@@ -169,6 +169,8 @@ Add this row to the `# Optional` block of `.env.example`, keeping it alphabetica
 # MENUS_REVALIDATE_SECRET="your-menus-revalidate-secret-here" # Set when Shopify menus are enabled; send it as a Bearer token to POST /api/revalidate/menus after editing menus.
 ```
 
+Add `MENUS_REVALIDATE_SECRET` to `turbo.json` `globalEnv`, keeping it alphabetical; Turborepo's strict mode hides undeclared variables from tasks.
+
 Tell the user to set `MENUS_REVALIDATE_SECRET` in the deployment's environment variables, then refresh menus after editing them in Shopify admin:
 
 ```bash

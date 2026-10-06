@@ -19,7 +19,7 @@ Never duplicate Shopify API reference material here. Re-run Shopify validation w
 | `lib/shopify/fragments/customer/index.ts`, `lib/shopify/fragments/customer-address/index.ts`, `lib/shopify/fragments/customer-order/index.ts` | Shared Customer Account selections |
 | `lib/shopify/fragments/<resource>/index.ts` | Shared Storefront selections grouped by resource                                                      |
 | `lib/shopify/operations/*/server.ts`               | Uncached `fetch*` Storefront operations and mutations; no `next/cache` imports                        |
-| `lib/<domain>/server.ts`                    | Cached `get*` wrappers owning `"use cache"`, `cacheLife`, and `cacheTag` for rendered pages         |
+| `lib/<domain>/server.ts`                    | Cached `get*` wrappers owning `"use cache: remote"`, `cacheLife`, and `cacheTag` for rendered pages |
 | `lib/shopify/transforms/*/index.ts`               | Shopify response to domain mapping; input types derive from fragment documents                        |
 | `lib/shopify/types.ts`                     | Shared SDK-derived `ResultOf<Doc>`, `CustomerAccountResultOf<Doc>`, and response contracts               |
 | `lib/shopify/transforms/filters/types.ts`  | Fragment-derived filter response types and transform options                                          |
@@ -51,8 +51,8 @@ Shopify AI Toolkit validates documents; there is no local schema gate, and typec
 
 | Render role                                                                                                    | Treatment                                                             |
 | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Public identity/body that must be included coherently in a prerendered shell                                   | Plain `"use cache"` with the established lifetime and tags            |
-| Public, reusable results resolved after request inputs such as filters, search, cursor, or runtime composition | `"use cache: remote"` when shared Runtime Cache is justified          |
+| Public catalog and content reads, including static shell content                                               | `"use cache: remote"` in the domain `get*` wrapper with the established `cacheLife` and tags |
+| Cursor-paginated browse, search results, and facets                                                            | Uncached `fetch*` operations; no read-cache directive                 |
 | Cart, session, authorization, or Customer Account data                                                         | Uncached or private/request-scoped; never public remote cache         |
 | Mutation                                                                                                       | No read-cache directive; invalidate the affected domain after success |
 
@@ -60,8 +60,7 @@ Follow the closest existing operation with the same render role. Do not choose a
 
 Current examples of intent:
 
-- Product and collection identity/body reads use plain `"use cache"` when their stable content belongs in the PDP or PLP shell.
-- Fixed grids and recommendations use `"use cache: remote"` through `lib/product/server.ts`.
+- Product, collection, recommendation, blog, page, policy, and sitemap reads use `"use cache: remote"` in their `lib/<domain>/server.ts` wrapper, so every instance shares one cache in front of Shopify; remote reads still render into the static shell when the route prerenders.
 - Filtered collection browse, search results, facets, and cursor pages call the uncached `fetch*` operations directly from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
 - Customer Account operations and cart reads remain customer/request scoped.
 
