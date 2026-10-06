@@ -7,6 +7,7 @@ const STORAGE_KEY = "template-eve-chat-v1";
 interface StoredChat {
   input: string;
   session?: ClientSessionState;
+  turnActive?: boolean;
 }
 
 export function readStoredChat(): StoredChat {
@@ -18,6 +19,7 @@ export function readStoredChat(): StoredChat {
         typeof stored?.session?.sessionId === "string"
           ? { sessionId: stored.session.sessionId, streamIndex: 0 }
           : undefined,
+      turnActive: stored?.turnActive === true,
     };
   } catch {
     return { input: "" };

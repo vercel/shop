@@ -17,7 +17,7 @@ export function AgentThinking({ active, tool }: { active: boolean; tool?: string
     "update-cart-item": "Updating your cart…",
   };
   return (
-    <p className="shimmer w-fit text-muted-foreground text-sm">
+    <p className="shimmer w-fit text-muted-foreground text-sm" role="status">
       {(tool ? toolLabels[tool] : undefined) ?? "Thinking…"}
     </p>
   );
