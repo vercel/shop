@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { toAgentProductDetails } from "../../lib/agent/products";
 import { fetchProductWithVariants } from "../../lib/shopify/operations/products/server";
-import { productHandleSchema } from "../lib/catalog";
+import { productHandleSchema, toModelProductDetails } from "../lib/catalog";
 
 export default defineTool({
   description:
@@ -13,4 +13,5 @@ export default defineTool({
     const product = await fetchProductWithVariants({ handle });
     return product ? { product: toAgentProductDetails(product) } : { error: "Product not found." };
   },
+  toModelOutput: toModelProductDetails,
 });

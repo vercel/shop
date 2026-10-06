@@ -56,11 +56,12 @@ export function AgentComposer({
     >
       <InputGroup className="h-auto flex-row items-end rounded-lg border-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-foreground has-[[data-slot=input-group-control]:focus-visible]:ring-0">
         <InputGroupTextarea
+          aria-label="Message Shop Agent"
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="field-sizing-content max-h-48 min-h-11 py-2.5 text-sm"
+          className="field-sizing-content max-h-48 min-h-11 py-2.5"
         />
         <InputGroupButton
           type="submit"

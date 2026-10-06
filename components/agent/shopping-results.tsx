@@ -37,6 +37,7 @@ interface CartConfirmation {
 
 interface ShoppingResultsProps {
   confirmation?: CartConfirmation;
+  fallback?: ReactNode;
   isLatest: boolean;
   isStreaming: boolean;
   message: EveMessage;
@@ -55,6 +56,7 @@ function isAgentProduct(value: unknown): value is AgentProduct | AgentProductDet
 
 export function ShoppingResults({
   confirmation,
+  fallback = null,
   isLatest,
   isStreaming,
   message,
@@ -143,7 +145,7 @@ export function ShoppingResults({
   if (confirmation && !hasCart)
     children.push(<AgentCartSummary key="cart" warnings={confirmation.warnings} />);
 
-  return children.length ? <div className="grid gap-4">{children}</div> : null;
+  return children.length ? <div className="grid gap-4">{children}</div> : fallback;
 }
 
 function MissingData({ children }: { children: string }) {
