@@ -62,8 +62,10 @@ export function ArticlePage({ article }: ArticlePageProps) {
               <Image
                 alt={article.image.altText}
                 className="object-cover"
+                fetchPriority="high"
                 fill
-                priority
+                loading="eager"
+                preload
                 sizes="100vw"
                 src={article.image.url}
               />

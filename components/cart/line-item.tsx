@@ -166,7 +166,7 @@ function CartLineItem({ item }: CartLineItemProps) {
                   key={quantity}
                   {...register("quantity", { interactive: true, value: quantity })}
                   aria-label="Item quantity"
-                  className="h-6 w-6 bg-transparent text-center text-xs font-medium tabular-nums outline-none disabled:cursor-not-allowed"
+                  className="h-6 w-6 rounded-full bg-transparent text-center text-xs font-medium tabular-nums outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed"
                   disabled={isOptimistic || !canUpdateQuantity}
                   max={99}
                   min={canRemove ? 0 : 1}
