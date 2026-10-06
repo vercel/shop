@@ -268,9 +268,22 @@ export const getCustomerAccessToken = cache(async (): Promise<string | undefined
   return customerSession.getAccessToken(sessionManager, requestContext);
 });
 
+export function redirectToCustomerLogin(returnTo: string): never {
+  redirect(`/account/login?return_to=${encodeURIComponent(returnTo)}`);
+}
+
+async function getRequestedPath(fallback: string): Promise<string> {
+  const url = (await headers()).get("x-storefront-url");
+  if (!url) return fallback;
+  const requested = new URL(url);
+  requested.searchParams.delete("_rsc");
+  requested.searchParams.delete(REFRESH_ATTEMPT_PARAM);
+  return `${requested.pathname}${requested.search}`;
+}
+
 export async function requireCustomerSession(): Promise<void> {
   if (!shopConfig.auth.isEnabled) notFound();
-  if (!(await isCustomerLoggedIn())) redirect("/account/login?return_to=/account");
+  if (!(await isCustomerLoggedIn())) redirectToCustomerLogin(await getRequestedPath("/account"));
 }
 
 // Server Components cannot read the URL, so the proxy forwards the one-shot refresh marker as a request header.
@@ -298,5 +311,5 @@ export async function requireCustomerAccessToken(returnTo = "/account"): Promise
     redirect(`/account/refresh?return_to=${encodeURIComponent(withRefreshAttempt(returnTo))}`);
   }
 
-  redirect(`/account/login?return_to=${encodeURIComponent(returnTo)}`);
+  redirectToCustomerLogin(returnTo);
 }

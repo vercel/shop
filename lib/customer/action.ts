@@ -79,7 +79,7 @@ async function runCustomerMutation(
   } catch (error) {
     unstable_rethrow(error);
     console.error(`${failureMessage}:`, error);
-    return { success: false, error: error instanceof Error ? error.message : failureMessage };
+    return { success: false, error: failureMessage };
   }
 }
 
