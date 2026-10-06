@@ -211,7 +211,7 @@ import { routing } from "@/lib/i18n/routing";
 export const { usePathname, useRouter } = createNavigation(routing);
 ```
 
-Do not replace every `next/link` import in the Server Component tree. Pass explicit strategy-aware hrefs from the server so ordinary links preserve the selected locale without request-context reads in link components. Keep public paths clean in invisible-cookie mode.
+Keep `Link` from `@/components/ui/link` for internal links; do not replace it with next-intl's `Link`. Pass explicit strategy-aware hrefs from the server so ordinary links preserve the selected locale without request-context reads in link components. Keep public paths clean in invisible-cookie mode.
 
 ## 5. Move page routes under `app/[locale]/`
 
@@ -227,11 +227,12 @@ Keep these unlocalized at `app/`:
 - `api/`
 - the assistant's public profile under `agent/`
 - markdown route handlers under `md/`
+- `llms.txt/`
 - `robots.ts`
 - `sitemap.xml/` and `sitemap/`
 - `globals.css`, `global-error.tsx`, and static metadata files
 
-Update typed route generics to include `[locale]`, fix the moved `globals.css` import, and add locale values to every `instant.unstable_samples[].params` object. Export `generateStaticParams` from the locale root layout using `enabledLocales.map((locale) => ({ locale }))`; Cache Components requires at least one root-param value. Preserve any existing generation logic and restart dev after route moves to regenerate root-param types.
+Update typed route generics to include `[locale]`, fix the moved `globals.css` import, and keep every export of the moved layout, including `export const ensureStatic = "prefetch"`. Export `generateStaticParams` from the locale root layout using `enabledLocales.map((locale) => ({ locale }))`; Cache Components requires at least one root-param value. Keep request reads behind Suspense, and do not add pages outside `app/[locale]/`; `enable-i18n` "Cache Components compatibility" and Step 10 list the resulting build errors and bare-`/` behavior. Preserve any existing generation logic and restart dev after route moves to regenerate root-param types.
 
 Do not call `setRequestLocale` with Cache Components. Resolve locale through the root param so locale becomes an explicit route/cache input.
 
@@ -259,14 +260,18 @@ Do not call this root-param getter from Route Handlers or Server Actions: use ro
 
 ## 7. Extend the proxy
 
-Compose next-intl after the existing Shopify route dispatch. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
+Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/server.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale in the proxy before Shopify dispatch (`resolveRequestLocale` below): from the validated locale prefix when the path has one, otherwise from the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
+
+Compose next-intl after the existing Shopify route dispatch and Markdown negotiation, where the template returns `NextResponse.next(...)`. Keep the `/.well-known/ucp` rewrite before dispatch. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
 
 ```ts
 const handleI18n = createMiddleware(routing);
 
 // Keep the existing imports and add NextRequest as a runtime import.
 export async function proxy(request: NextRequest): Promise<Response> {
-  const requestContext = createCustomerRequestContext(request);
+  // Keep the template's UCP rewrite here, unchanged.
+  const locale = resolveRequestLocale(request);
+  const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
   const shopifyRoute = handleShopifyRoutes({
     // Preserve the template's handlers, session manager, and storefront client.
     request,
@@ -274,10 +279,16 @@ export async function proxy(request: NextRequest): Promise<Response> {
   });
   if (shopifyRoute) return shopifyRoute;
 
+  // Keep the template's Markdown negotiation here, unchanged.
+
   const i18nRequest = new NextRequest(request, {
-    headers: requestContext.getForwardedRequestHeaders(),
+    headers: forwardCustomerRefreshAttempt(
+      request.nextUrl,
+      requestContext.getForwardedRequestHeaders(),
+    ),
   });
   const response = handleI18n(i18nRequest);
+  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
 }
@@ -348,21 +359,21 @@ Agent tools, Shopify connections, product context, cart creation, and navigation
 
 ### Markdown negotiation
 
-After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update content-negotiation and `.md` URL rewrites so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
+After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update `getMarkdownPath()` and `getMarkdownMirrorPath()` in `lib/markdown/representation/index.ts` and the proxy's negotiation so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
 
-## 9. Switch locale and synchronize cart country
+## 9. Switch locale and carry the market to the cart
 
-Switching language within the same country must not mutate buyer identity:
+Cart writes stay in Hydrogen's `/api/cart` handler; never mutate the cart from a Server Action or a custom route. Because the proxy builds the handler's request context from the selected locale (section 7), the next cart read or write after a switch runs in the new market:
 
-- `fr-CA` to `en-CA`: set locale; no cart country update
-- `en-CA` to `en-US`: set locale and update buyer country to `US`
+- `fr-CA` to `en-CA`: copy and Shopify language change; the country stays `CA`.
+- `en-CA` to `en-US`: the cart's next Hydrogen operation runs with country `US`.
 
-Validate both locales in a server action and read the cart ID from the shared cookie, never from client input. When the country changes, confirm the existing cart's buyer-country update before saving the locale cookie. On failure, keep the current locale and show the error. Refresh Hydrogen's cart after a country change so prices and checkout use the confirmed cart; do not invalidate public cache tags.
+Use Shopify AI Toolkit to confirm how the store's cart buyer country and pricing follow `@inContext` on cart operations. If the store requires an explicit buyer-country update, the installed Hydrogen SDK exposes no cart intent for it: report that gap instead of adding a cart mutation outside Hydrogen's handlers.
 
-The selector remains a leaf Client Component.
+The selector remains a leaf Client Component. A Server Action in `lib/i18n/action.ts` may validate the requested locale and set the locale cookie; it never reads or writes the cart. After a country change, call `refresh()` from `useCartActions()` so prices and checkout reflect Shopify's response for the new market; do not invalidate public cache tags.
 
-- **Sub-path/per-domain:** call the action, then use next-intl's client router to replace the current pathname with `{ locale: nextLocale }`.
-- **Invisible cookie:** call the action, then call `router.refresh()`. The pathname must not change.
+- **Sub-path/per-domain:** use next-intl's client router to replace the current pathname with `{ locale: nextLocale }`, then refresh the cart.
+- **Invisible cookie:** call the action, then call `router.refresh()` and refresh the cart. The pathname must not change.
 
 Do not offer a separate currency selector unless the store has a Shopify-backed currency choice independent of country. Display currency from cart/product responses.
 
@@ -409,8 +420,8 @@ Then run the app and verify the selected strategy.
 - Every enabled regional locale produces the expected Shopify country/language context.
 - Product and cart currency codes come from Shopify responses.
 - Public caches separate localized products, prices, and menus; carts remain uncached.
-- `fr-CA` to `en-CA` does not update buyer country.
-- `en-CA` to `en-US` updates buyer country and confirms the refreshed cart.
+- `fr-CA` to `en-CA` keeps Shopify country `CA` for the cart.
+- `en-CA` to `en-US` refreshes the cart with Shopify's `US` context, and every cart write still goes through `/api/cart`.
 - Chat/agent operations receive the explicit validated locale.
 - Markdown responses use the same locale as HTML responses.
 - Variant and filter query parameters survive switching and rewrites.

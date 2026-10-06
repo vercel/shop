@@ -50,10 +50,6 @@ import {
   transformVariant,
 } from "@/lib/shopify/transforms/product";
 
-function escapeProductQuery(value: string): string {
-  return value.replace(/'/g, "\\'");
-}
-
 type StorefrontProductFilter = NonNullable<
   NonNullable<StorefrontVariables<typeof COLLECTION_PRODUCTS_QUERY>["filters"]>[number]
 >;
@@ -289,11 +285,9 @@ const PRODUCTS_SEARCH_QUERY = gql(
   [FILTERABLE_PRODUCT_CARD_FRAGMENT],
 );
 
-function buildSearchQuery(query: string | undefined, collection: string | undefined): string {
-  const parts: string[] = [];
-  if (query?.trim()) parts.push(query.trim());
-  if (collection) parts.push(`collection:'${escapeProductQuery(collection)}'`);
-  return parts.length > 0 ? parts.join(" AND ") : "*";
+// `search` takes a free-text term, not a filter DSL; structured narrowing goes through `productFilters`.
+function buildSearchQuery(query: string | undefined): string {
+  return query?.trim() || "*";
 }
 
 // `products` drops variant/metafield filters, so /search must use the `search` field.
@@ -301,7 +295,6 @@ export async function fetchSearchIndexProducts(
   params: SearchIndexProductsParams,
 ): Promise<ProductPage> {
   const {
-    collection,
     cursor,
     filters = [],
     limit = 50,
@@ -313,7 +306,7 @@ export async function fetchSearchIndexProducts(
   const response = await storefront.request(PRODUCTS_SEARCH_QUERY, {
     locale,
     variables: {
-      query: buildSearchQuery(query, collection),
+      query: buildSearchQuery(query),
       first: limit,
       after: cursor,
       productFilters: toStorefrontFilters(filters),
@@ -365,11 +358,11 @@ const SEARCH_FACETS_QUERY = gql(
 );
 
 export async function fetchSearchFacets(params: SearchFacetsParams): Promise<SearchFacetsResult> {
-  const { collection, filters = [], locale = shopConfig.localization, query } = params;
+  const { filters = [], locale = shopConfig.localization, query } = params;
   const response = await storefront.request(SEARCH_FACETS_QUERY, {
     locale,
     variables: {
-      query: buildSearchQuery(query, collection),
+      query: buildSearchQuery(query),
       productFilters: toStorefrontFilters(filters),
     },
   });

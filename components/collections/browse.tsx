@@ -71,6 +71,7 @@ async function BrowseResultsGrid({ resultsPromise }: { resultsPromise: Promise<B
           loading={index < 5 ? "eager" : "lazy"}
           product={product}
           outOfStockText="Out of Stock"
+          quickShopText="Choose"
         />
       ))}
     </InfiniteProductGrid>

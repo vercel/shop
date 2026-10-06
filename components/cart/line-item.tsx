@@ -3,9 +3,9 @@
 import type { CartLine as HydrogenCartLine } from "@shopify/hydrogen";
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { Link } from "@/components/ui/link";
 import { useCart } from "@/lib/cart/client";
 import type { CartLine } from "@/lib/cart/types";
 import { formatPrice } from "@/lib/money";
@@ -13,11 +13,40 @@ import { formatPrice } from "@/lib/money";
 import { CartLineForm } from "./line-form";
 import { CartWarnings } from "./warnings";
 
+interface CartLineItemsProps {
+  lines: CartLine[];
+}
+
+export function CartLineItems({ lines }: CartLineItemsProps) {
+  const keys = getLineRowKeys(lines);
+  return (
+    <ul className="grid gap-5" aria-label="Cart items">
+      {lines.map((line, index) => (
+        <CartLineItem key={keys[index]} item={line} />
+      ))}
+    </ul>
+  );
+}
+
+// Shopify replaces a new line's `optimistic:` ID on confirmation, so rows key by the identity Hydrogen matches lines on.
+function getLineRowKeys(lines: CartLine[]) {
+  const keys = lines.map((line) =>
+    JSON.stringify([
+      line.merchandise?.id ?? line.id,
+      line.sellingPlanAllocation?.sellingPlan.id ?? null,
+      (line.attributes ?? []).map(({ key, value }) => JSON.stringify([key, value])).sort(),
+    ]),
+  );
+  return keys.map((key, index) =>
+    keys.indexOf(key) === keys.lastIndexOf(key) ? key : lines[index].id,
+  );
+}
+
 interface CartLineItemProps {
   item: CartLine;
 }
 
-export function CartLineItem({ item }: CartLineItemProps) {
+function CartLineItem({ item }: CartLineItemProps) {
   const isPending = useCart((state) => state.pending.lines.has(item.id));
   const isCostPending = useCart((state) =>
     Boolean(state.pending.cost || state.revalidating || state.pending.lines.has(item.id)),
@@ -137,7 +166,7 @@ export function CartLineItem({ item }: CartLineItemProps) {
                   key={quantity}
                   {...register("quantity", { interactive: true, value: quantity })}
                   aria-label="Item quantity"
-                  className="h-6 w-6 bg-transparent text-center text-xs font-medium tabular-nums outline-none disabled:cursor-not-allowed"
+                  className="h-6 w-6 rounded-full bg-transparent text-center text-xs font-medium tabular-nums outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed"
                   disabled={isOptimistic || !canUpdateQuantity}
                   max={99}
                   min={canRemove ? 0 : 1}

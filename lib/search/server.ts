@@ -8,25 +8,21 @@ import {
 } from "@/lib/shopify/operations/products/server";
 
 export async function fetchSearchResults({
-  collection,
   query,
   statePromise,
 }: {
-  collection?: string;
   query?: string;
   statePromise: Promise<BrowseState>;
 }): Promise<BrowseResults> {
   const { dataSearch, filters, sort } = await statePromise;
   const [{ pageInfo, products }, { facets, total }] = await Promise.all([
     fetchSearchIndexProducts({
-      collection,
       filters,
       limit: PRODUCTS_PER_PAGE,
       query,
       sortKey: sort,
     }),
     fetchSearchFacets({
-      collection,
       filters,
       query,
     }),
@@ -36,7 +32,7 @@ export async function fetchSearchResults({
     facets,
     pageInfo,
     products,
-    source: { collection, query, type: "search" },
+    source: { query, type: "search" },
     total,
   };
 }

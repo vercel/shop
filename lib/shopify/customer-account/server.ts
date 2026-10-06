@@ -2,6 +2,8 @@ import { createShopifyRequestContext } from "@shopify/hydrogen";
 import {
   type AnyCustomerAccountDocument,
   type CustomerAccountClient,
+  CustomerAccountApiError,
+  CustomerAccountAuthenticationError,
   createCustomerAccountClient,
 } from "@shopify/hydrogen/customer-account";
 
@@ -9,6 +11,15 @@ import { shopConfig } from "@/lib/config";
 import type { CustomerAccountFetchOptions } from "@/lib/shopify/customer-account/types";
 import { logShopifyDebug, shopifyLogger } from "@/lib/shopify/logging/server";
 import type { CustomerAccountResultOf } from "@/lib/shopify/types";
+
+const REQUEST_TIMEOUT_MS = 10_000;
+
+export function isCustomerAccountUnauthorized(error: unknown): boolean {
+  return (
+    error instanceof CustomerAccountAuthenticationError ||
+    (error instanceof CustomerAccountApiError && error.status === 401)
+  );
+}
 
 export async function customerAccountFetch<Doc extends AnyCustomerAccountDocument>({
   accessToken,
@@ -18,6 +29,7 @@ export async function customerAccountFetch<Doc extends AnyCustomerAccountDocumen
 }: CustomerAccountFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
   const shopId = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string;
   const client: CustomerAccountClient = createCustomerAccountClient({
+    defaultTimeoutInMs: REQUEST_TIMEOUT_MS,
     shopId,
     requestContext: createShopifyRequestContext({
       i18n: {

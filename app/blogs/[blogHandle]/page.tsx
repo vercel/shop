@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { ArticleCard } from "@/components/blog/article-card";
-import { Container } from "@/components/ui/container";
-import { Page } from "@/components/ui/page";
-import { Sections } from "@/components/ui/sections";
+import { BlogIndex, BlogIndexSkeleton } from "@/components/blog/blog-index";
 import { getBlog } from "@/lib/blog/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { getShopifySitemapPage } from "@/lib/seo/server";
@@ -43,29 +41,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function BlogPage({ params }: PageProps<"/blogs/[blogHandle]">) {
+export default function BlogPage({ params }: PageProps<"/blogs/[blogHandle]">) {
+  return (
+    <Suspense fallback={<BlogIndexSkeleton />}>
+      <BlogPageContent params={params} />
+    </Suspense>
+  );
+}
+
+async function BlogPageContent({ params }: Pick<PageProps<"/blogs/[blogHandle]">, "params">) {
   const { blogHandle } = await params;
   if (blogHandle === PLACEHOLDER_HANDLE) notFound();
   const blog = await getBlog({
     handle: blogHandle,
   });
   if (!blog) notFound();
-  return (
-    <Page className="pt-2.5 md:pt-10">
-      <Container>
-        <Sections className="gap-5">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl">{blog.title}</h1>
-          {blog.articles.length > 0 ? (
-            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {blog.articles.map((article) => (
-                <ArticleCard article={article} key={article.handle} />
-              ))}
-            </div>
-          ) : (
-            <p className="text-muted-foreground">No articles found.</p>
-          )}
-        </Sections>
-      </Container>
-    </Page>
-  );
+  return <BlogIndex blog={blog} />;
 }

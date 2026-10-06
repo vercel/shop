@@ -7,13 +7,13 @@ interface ProductSchemaData {
   currencyCode: string;
   description: string;
   handle: string;
-  id: string;
   images: Image[];
   offerCount: number;
   priceRange: {
     maxVariantPrice: Money;
     minVariantPrice: Money;
   };
+  sku?: string;
   title: string;
   vendor?: string;
 }
@@ -24,6 +24,10 @@ interface ProductSchemaProps {
 
 export function ProductSchema({ product }: ProductSchemaProps) {
   const url = `${shopConfig.site.url}/products/${product.handle}`;
+  const availability = product.availableForSale
+    ? "https://schema.org/InStock"
+    : "https://schema.org/OutOfStock";
+  const singleOffer = product.offerCount === 1;
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -36,18 +40,24 @@ export function ProductSchema({ product }: ProductSchemaProps) {
           name: product.vendor,
         }
       : undefined,
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: product.currencyCode,
-      lowPrice: product.priceRange.minVariantPrice.amount,
-      highPrice: product.priceRange.maxVariantPrice.amount,
-      offerCount: product.offerCount,
-      availability: product.availableForSale
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      url,
-    },
-    sku: product.id,
+    offers: singleOffer
+      ? {
+          "@type": "Offer",
+          availability,
+          price: product.priceRange.minVariantPrice.amount,
+          priceCurrency: product.currencyCode,
+          url,
+        }
+      : {
+          "@type": "AggregateOffer",
+          availability,
+          highPrice: product.priceRange.maxVariantPrice.amount,
+          lowPrice: product.priceRange.minVariantPrice.amount,
+          offerCount: product.offerCount,
+          priceCurrency: product.currencyCode,
+          url,
+        },
+    sku: singleOffer ? product.sku : undefined,
   };
 
   return <script type="application/ld+json">{JSON.stringify(schema)}</script>;

@@ -1,8 +1,8 @@
 import { cn } from "cn";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { ProductCard, ProductCardSkeleton } from "@/components/product-card/product-card";
+import { Link } from "@/components/ui/link";
 import { getSearchIndexProducts } from "@/lib/product/server";
 
 interface ProductsGridSkeletonProps {
@@ -70,6 +70,7 @@ async function ProductsGridContent({
           loading={index < eagerCount ? "eager" : "lazy"}
           product={product}
           outOfStockText={outOfStockText}
+          quickShopText="Choose"
         />
       ))}
     </div>

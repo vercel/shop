@@ -1,7 +1,34 @@
 import type { wrapLanguageModel } from "ai";
 
+function isCatalogSearch(input: unknown): boolean {
+  return (
+    !!input &&
+    typeof input === "object" &&
+    "connection" in input &&
+    input.connection === "shopify" &&
+    "tool" in input &&
+    input.tool === "search_catalog"
+  );
+}
+
 export const catalogMiddleware = {
   async transformParams({ params }) {
+    // Eve runs every connection tool as connection_execute, so only the paired call input names the catalog tool.
+    const catalogSearchCallIds = new Set(
+      params.prompt.flatMap((message) =>
+        message.role === "assistant"
+          ? message.content.flatMap((part) =>
+              part.type === "tool-call" &&
+              part.toolName === "connection_execute" &&
+              isCatalogSearch(part.input)
+                ? [part.toolCallId]
+                : [],
+            )
+          : [],
+      ),
+    );
+    if (!catalogSearchCallIds.size) return params;
+
     return {
       ...params,
       prompt: params.prompt.map((message) => {
@@ -11,20 +38,11 @@ export const catalogMiddleware = {
           content: message.content.map((part) => {
             if (
               part.type !== "tool-result" ||
-              part.toolName !== "shopify__search_catalog" ||
+              !catalogSearchCallIds.has(part.toolCallId) ||
               part.output.type !== "json"
             )
               return part;
-            const output = part.output.value;
-            if (
-              !output ||
-              typeof output !== "object" ||
-              Array.isArray(output) ||
-              !("structuredContent" in output) ||
-              output.isError
-            )
-              return part;
-            const catalog = output.structuredContent;
+            const catalog = part.output.value;
             if (
               !catalog ||
               typeof catalog !== "object" ||

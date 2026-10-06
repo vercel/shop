@@ -1,6 +1,6 @@
 import { cn } from "cn";
 import Image from "next/image";
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
@@ -10,7 +10,7 @@ function ProductCard({ className, children, ...props }: ComponentProps<"article"
   return (
     <article
       data-slot="product-card"
-      className={cn("flex flex-col h-full overflow-hidden", className)}
+      className={cn("relative flex flex-col h-full overflow-hidden", className)}
       {...props}
     >
       {children}
@@ -32,6 +32,7 @@ function ProductCardImageContainer({ className, children, ...props }: ComponentP
 
 interface ProductCardImageProps {
   alt: string;
+  children?: ReactNode;
   className?: string;
   height?: number;
   loading?: "eager" | "lazy";
@@ -43,6 +44,7 @@ interface ProductCardImageProps {
 
 function ProductCardImage({
   alt,
+  children,
   className,
   height,
   loading = "lazy",
@@ -75,6 +77,7 @@ function ProductCardImage({
           </span>
         </div>
       )}
+      {children}
     </div>
   );
 }

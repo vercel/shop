@@ -60,7 +60,7 @@ The storefront display name and description are not environment variables. If `s
 
 The authenticated connector might not be allowed to read or create Storefront tokens. If Shopify returns `ACCESS_DENIED`, reports that the app is not extendable, or lacks the required unauthenticated scopes:
 
-1. Direct the user to **Shopify admin → Sales channels → Headless**.
+1. Direct the user to **Shopify admin → Settings → Apps and sales channels → Headless**.
 2. Ask them to create or select a storefront and copy its public Storefront API token directly into `.env.local` as `NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN`.
 3. If `shop.id` was not read, ask them to set `NEXT_PUBLIC_SHOPIFY_SHOP_ID` to the number in the store's customer accounts URL, `https://shopify.com/<shop-id>/account`.
 4. Never ask them to paste the token into chat.

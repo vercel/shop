@@ -69,6 +69,22 @@ export interface ProductCard {
   vendor?: string;
 }
 
+export interface QuickShopProduct {
+  availableForSale: boolean;
+  form: ProductFormInput;
+  hasOptions: boolean;
+  image: string | null;
+  title: string;
+}
+
+export interface RecentlyViewedProduct {
+  featuredImage: Image | null;
+  handle: string;
+  id: string;
+  price: Money;
+  title: string;
+}
+
 export interface ProductPage {
   pageInfo: PageInfo;
   products: ProductCard[];
@@ -85,6 +101,7 @@ export interface ProductDetails extends ProductCard {
   };
   currencyCode: string;
   defaultVariant?: ProductVariant;
+  defaultVariantSku?: string;
   description: string;
   descriptionHtml: string;
   encodedVariantAvailability?: string;

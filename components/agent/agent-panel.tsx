@@ -1,6 +1,6 @@
 "use client";
 
-import { useEveAgent } from "eve/react";
+import { openConversationInputs, useEveAgent } from "eve/react";
 import { Trash2Icon, XIcon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
@@ -41,6 +41,8 @@ export interface AgentPanelProps {
 export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [stored] = useState(readStoredChat);
+  // Idle stored sessions replay on first open; an interrupted turn resumes at once so its cart writes reconcile.
+  const [resumePending, setResumePending] = useState(Boolean(stored.session && !stored.turnActive));
   const [input, setInput] = useState(stored.input);
   const snapshot = useRef(stored);
   const [clearing, setClearing] = useState(false);
@@ -87,31 +89,31 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         turnPolicy: "queue",
       };
     },
-    resume: Boolean(stored.session),
+    resume: Boolean(stored.session && stored.turnActive),
   });
-  const {
-    data: { messages },
-    error,
-    status,
-  } = agent;
+  const { data, error, status } = agent;
+  const { messages } = data;
+  // A session-limit prompt holds its turn open, so the stream stays "streaming" while it waits.
+  const hasReachedLimit = openConversationInputs(data).some(
+    (pending) => pending.request.kind === "session-limit",
+  );
+  const restoring = resumePending || status === "resuming";
   const dispatching = pendingSend && status === "ready";
   const busy =
-    dispatching || status === "submitted" || status === "streaming" || status === "resuming";
+    !hasReachedLimit &&
+    (dispatching || status === "submitted" || status === "streaming" || status === "resuming");
   const awaitingReply =
-    dispatching ||
-    status === "submitted" ||
-    (status === "streaming" && messages.at(-1)?.role === "user");
+    !hasReachedLimit &&
+    (dispatching ||
+      status === "submitted" ||
+      (status === "streaming" && messages.at(-1)?.role === "user"));
   useEffect(() => {
     if (open) void prepareSession().catch(() => {});
   }, [open, prepareSession]);
-  const hasReachedLimit = messages.some((message) =>
-    message.parts.some(
-      (part) =>
-        part.type === "dynamic-tool" &&
-        part.state === "approval-requested" &&
-        part.toolMetadata?.eve?.inputRequest?.kind === "session-limit",
-    ),
-  );
+  useEffect(() => {
+    snapshot.current.turnActive = busy;
+    writeStoredChat(snapshot.current);
+  }, [busy]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
@@ -172,6 +174,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   function clearChat() {
     setAgentCartStatus("pending");
     agent.reset();
+    setResumePending(false);
     setInput("");
     setPendingSend(false);
     setClearing(false);
@@ -186,8 +189,10 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     });
   };
   const handleSend = (text: string) => {
-    if (busy || clearing || cartPending || hasReachedLimit) return;
+    if (busy || restoring || clearing || cartPending || hasReachedLimit) return;
     pinnedRef.current = true;
+    snapshot.current.turnActive = true;
+    writeStoredChat(snapshot.current);
     setPendingSend(true);
     setAgentCartStatus("pending");
     setControlError(null);
@@ -235,7 +240,11 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     <Sheet
       onOpenChange={(next) => onOpenChange(next)}
       onOpenChangeComplete={(opened) => {
-        if (opened) scrollToBottom();
+        if (!opened) return;
+        scrollToBottom();
+        if (!resumePending) return;
+        setResumePending(false);
+        void agent.resume().catch(() => {});
       }}
       open={open}
     >
@@ -289,10 +298,13 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
         >
           <div
             ref={contentRef}
+            aria-busy={busy}
+            aria-label="Conversation"
             className="flex min-h-full flex-col justify-end gap-6 px-2.5 py-5 [&>*]:shrink-0"
+            role="log"
           >
             {messages.length === 0
-              ? status === "resuming"
+              ? restoring
                 ? showRestoring && (
                     <p className="text-muted-foreground text-sm">Restoring your conversation…</p>
                   )
@@ -301,7 +313,9 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
                   <ChatMessage
                     key={message.id}
                     isLatest={index === messages.length - 1}
-                    isStreaming={status === "streaming" && index === messages.length - 1}
+                    isStreaming={
+                      status === "streaming" && !hasReachedLimit && index === messages.length - 1
+                    }
                     message={message}
                   />
                 ))}
@@ -330,7 +344,15 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           onStop={handleStop}
           onSubmit={handleSend}
           placeholder="Ask anything…"
-          status={dispatching ? "submitted" : status}
+          status={
+            dispatching
+              ? "submitted"
+              : hasReachedLimit
+                ? "ready"
+                : resumePending
+                  ? "resuming"
+                  : status
+          }
           value={input}
         />
         {(error || controlError) && (

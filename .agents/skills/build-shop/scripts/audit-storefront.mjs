@@ -30,13 +30,20 @@ function walk(directory) {
 for (const directory of sourceRoots) walk(directory);
 
 const findings = [];
+const sharedLinkFiles = ["components/ui/link.tsx", "src/components/ui/link.tsx"].filter((path) =>
+  existsSync(join(root, path)),
+);
 
 function report(level, file, message) {
   findings.push({ level, file: relative(root, file), message });
 }
 
+function stripComments(source) {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
 for (const file of files) {
-  const source = readFileSync(file, "utf8");
+  const source = stripComments(readFileSync(file, "utf8"));
   const normalized = relative(root, file);
 
   if (/<img\b/.test(source)) {
@@ -55,11 +62,32 @@ for (const file of files) {
     );
   }
 
+  if (/export\s+const\s+instant\s*=\s*false\b/.test(source)) {
+    report(
+      "review",
+      file,
+      "instant = false opts out of instant-navigation and static-shell validation; fix the blocking read with Suspense or cache instead.",
+    );
+  }
+
+  if (/(^|\/)app\/(.*\/)?loading\.[jt]sx$/.test(normalized)) {
+    report(
+      "review",
+      file,
+      "Route skeleton lives in loading.tsx; keep an inline Suspense boundary with an aria-busy skeleton instead.",
+    );
+  }
+
   if (
-    /export\s+const\s+prefetch\s*=\s*["']allow-runtime["']/.test(source) &&
-    !/export\s+const\s+instant\s*=\s*true/.test(source)
+    sharedLinkFiles.length > 0 &&
+    !sharedLinkFiles.includes(normalized) &&
+    /from\s+["']next\/link["']/.test(source)
   ) {
-    report("review", file, "Runtime prefetching is enabled without instant-navigation validation.");
+    report(
+      "review",
+      file,
+      "Imports next/link directly; internal links use the shared Link from components/ui/link.",
+    );
   }
 
   for (const tag of source.matchAll(/<Image\b[\s\S]*?>/g)) {
@@ -67,7 +95,7 @@ for (const file of files) {
     if (/\bfill\b/.test(value) && !/\bsizes\s*=/.test(value)) {
       report("review", file, "An <Image fill> tag has no sizes prop.");
     }
-    if (/\bpriority(?:\s|=|\/|>)/.test(value)) {
+    if (/\spriority(?=\s*(?:=|\/?>|[A-Za-z{]))/.test(value)) {
       report(
         "review",
         file,

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
-import { RichTextPage } from "@/components/content/rich-text-page";
+import { RichTextPage, RichTextPageSkeleton } from "@/components/content/rich-text-page";
 import { getShopPolicies, getShopPolicy } from "@/lib/policies/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
@@ -34,9 +35,15 @@ export async function generateMetadata({
   };
 }
 
-export const instant = false;
+export default function PolicyPage({ params }: PageProps<"/policies/[handle]">) {
+  return (
+    <Suspense fallback={<RichTextPageSkeleton />}>
+      <PolicyPageContent params={params} />
+    </Suspense>
+  );
+}
 
-export default async function PolicyPage({ params }: PageProps<"/policies/[handle]">) {
+async function PolicyPageContent({ params }: Pick<PageProps<"/policies/[handle]">, "params">) {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) notFound();
   const policy = await getShopPolicy({

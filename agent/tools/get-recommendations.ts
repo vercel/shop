@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { toAgentProduct } from "../../lib/agent/products";
 import { fetchProductRecommendations } from "../../lib/shopify/operations/products/server";
-import { productHandleSchema } from "../lib/catalog";
+import { productHandleSchema, toModelProducts } from "../lib/catalog";
 
 export default defineTool({
   description: "Show related and complementary products for a product handle.",
@@ -21,4 +21,5 @@ export default defineTool({
         .map(toAgentProduct),
     };
   },
+  toModelOutput: toModelProducts,
 });

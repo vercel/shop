@@ -3,10 +3,9 @@
 import type { EveMessage } from "eve/react";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-import { CartLineItem } from "@/components/cart/line-item";
+import { CartLineItems } from "@/components/cart/line-item";
 import { CartCheckout, CartTotal } from "@/components/cart/summary";
 import {
   ProductCard,
@@ -19,6 +18,7 @@ import {
 import { ProductInfoOptions } from "@/components/product-detail/product-info";
 import { Button } from "@/components/ui/button";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { Link } from "@/components/ui/link";
 import { Slider, SliderContent, SliderHeader, SliderItem, SliderNav } from "@/components/ui/slider";
 import { isCartMutation } from "@/lib/agent/cart";
 import {
@@ -37,6 +37,7 @@ interface CartConfirmation {
 
 interface ShoppingResultsProps {
   confirmation?: CartConfirmation;
+  fallback?: ReactNode;
   isLatest: boolean;
   isStreaming: boolean;
   message: EveMessage;
@@ -55,6 +56,7 @@ function isAgentProduct(value: unknown): value is AgentProduct | AgentProductDet
 
 export function ShoppingResults({
   confirmation,
+  fallback = null,
   isLatest,
   isStreaming,
   message,
@@ -143,7 +145,7 @@ export function ShoppingResults({
   if (confirmation && !hasCart)
     children.push(<AgentCartSummary key="cart" warnings={confirmation.warnings} />);
 
-  return children.length ? <div className="grid gap-4">{children}</div> : null;
+  return children.length ? <div className="grid gap-4">{children}</div> : fallback;
 }
 
 function MissingData({ children }: { children: string }) {
@@ -180,11 +182,7 @@ function AgentCartSummary({ warnings = [] }: AgentCartSummaryProps) {
           ))}
         </div>
       )}
-      <ul className="grid gap-5" aria-label="Cart items">
-        {cart.lines.nodes.map((line) => (
-          <CartLineItem key={line.id} item={line} />
-        ))}
-      </ul>
+      <CartLineItems lines={cart.lines.nodes} />
       <CartTotal cart={cart} />
       <CartCheckout />
       <span className="sr-only">This cart updates as you change it.</span>

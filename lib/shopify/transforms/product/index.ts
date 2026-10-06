@@ -240,6 +240,7 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     variantsCount: product.variantsCount?.count ?? variants?.length ?? 0,
     defaultVariant,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
+    defaultVariantSku: product.selectedOrFirstAvailableVariant?.sku || undefined,
     description: product.description,
     descriptionHtml: product.descriptionHtml,
     encodedVariantAvailability: product.encodedVariantAvailability ?? undefined,
