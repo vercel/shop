@@ -209,8 +209,8 @@ importers:
         specifier: 0.4.0
         version: 0.4.0
       eve:
-        specifier: 0.70.0
-        version: 0.70.0(ai@7.0.127(zod@4.6.5))
+        specifier: 0.71.2
+        version: 0.71.2(ai@7.0.127(zod@4.6.5))
       lucide-react:
         specifier: 1.50.0
         version: 1.50.0(@types/react@19.3.0)(react@19.3.0)
@@ -1455,8 +1455,8 @@ packages:
   estree-util-is-identifier-name@3.0.0:
     resolution: {integrity: sha512-hFtqIDZTIUZ9BXLb8y4pYGyk6+wekIivNVTcmvk8NoOh+VeRn5y6cEHzbURrWbfp1fIqdVipilzj+lfaadNZmg==}
 
-  eve@0.70.0:
-    resolution: {integrity: sha512-qhWy8jOMIERFJZIlUeErcKp9SuFVvlymsQgdBvv1sDtLGiTXiz8+ueE1sal4rblCV8Esbijh2VFgWjuixR2byQ==}
+  eve@0.71.2:
+    resolution: {integrity: sha512-1JYtSScSYevikoDVowtZdMS83LGzdw3hmgf6kriZyclpRsmmW3+Yb9byFtJ4P4lZ2JLfSSLgUMoBuTSqmFCsUg==}
     engines: {node: '>=24'}
     hasBin: true
     peerDependencies:
@@ -2987,7 +2987,7 @@ snapshots:
 
   estree-util-is-identifier-name@3.0.0: {}
 
-  eve@0.70.0(ai@7.0.127(zod@4.6.5)):
+  eve@0.71.2(ai@7.0.127(zod@4.6.5)):
     dependencies:
       ai: 7.0.127(zod@4.6.5)
       nitro: 3.0.260903-beta
