@@ -8,6 +8,8 @@ import { shopConfig } from "../../lib/config";
 
 const anonymous = none<Request>();
 const browserAuth: AuthFn<Request> = async (request) => {
+  // Agent info exposes compiled instructions and tool config, so only operators may read it.
+  if (new URL(request.url).pathname.endsWith("/eve/v1/info")) return null;
   if (
     shopConfig.botid.isEnabled &&
     (
