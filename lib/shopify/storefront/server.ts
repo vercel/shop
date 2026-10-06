@@ -19,6 +19,8 @@ const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
 
 const SHOPIFY_STOREFRONT_ID = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID;
 
+const REQUEST_TIMEOUT_MS = 10_000;
+
 function operationName(body: RequestInit["body"]): string {
   if (typeof body !== "string") return "anonymous";
   try {
@@ -56,6 +58,7 @@ export function createRequestStorefrontClient(
   return createStorefrontClient({
     config: {
       apiVersion: SHOPIFY_API_VERSION,
+      defaultTimeoutInMs: REQUEST_TIMEOUT_MS,
       fetch: customFetchApi,
       publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,
       storeDomain: SHOPIFY_STORE_DOMAIN,

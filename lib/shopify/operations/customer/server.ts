@@ -1,7 +1,7 @@
 import { type AnyCustomerAccountDocument, gql } from "@shopify/hydrogen/customer-account";
 import { cache } from "react";
 
-import { requireCustomerAccessToken } from "@/lib/auth/server";
+import { redirectToCustomerLogin, requireCustomerAccessToken } from "@/lib/auth/server";
 import type {
   CustomerAddress,
   CustomerAddressInput,
@@ -9,7 +9,10 @@ import type {
   CustomerOrdersPage,
   CustomerProfile,
 } from "@/lib/customer/types";
-import { customerAccountFetch } from "@/lib/shopify/customer-account/server";
+import {
+  customerAccountFetch,
+  isCustomerAccountUnauthorized,
+} from "@/lib/shopify/customer-account/server";
 import { CUSTOMER_PROFILE_FRAGMENT } from "@/lib/shopify/fragments/customer";
 import { ADDRESS_FRAGMENT } from "@/lib/shopify/fragments/customer-address";
 import { ORDER_FRAGMENT, ORDER_SUMMARY_FRAGMENT } from "@/lib/shopify/fragments/customer-order";
@@ -151,7 +154,13 @@ async function customerFetch<const Doc extends AnyCustomerAccountDocument>({
   ...options
 }: CustomerFetchOptions<Doc>): Promise<CustomerAccountResultOf<Doc>> {
   const accessToken = await requireCustomerAccessToken(returnTo);
-  return customerAccountFetch<Doc>({ accessToken, ...options } as never);
+  try {
+    return await customerAccountFetch<Doc>({ accessToken, ...options } as never);
+  } catch (error) {
+    // Shopify can revoke an access token before the stored session expires.
+    if (isCustomerAccountUnauthorized(error)) redirectToCustomerLogin(returnTo);
+    throw error;
+  }
 }
 
 function toUserErrors(
