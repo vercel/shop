@@ -18,7 +18,7 @@ Build the shop around commerce truth first: what product or collection is being 
    - Shared UI layout primitives: `components/ui/container.tsx`, `components/ui/page.tsx`, `components/ui/sections.tsx`
    - Public source fallback: [template source](https://github.com/vercel/shop)
 3. Use the docs to orient before editing unfamiliar areas:
-   - [Architecture docs](https://vercel.shop/docs/anatomy)
+   - [Documentation index](https://vercel.shop/llms.txt)
    - [Route reference](https://vercel.shop/docs/reference/routes)
    - [Shopify integration docs](https://vercel.shop/docs/shopify)
    - [API boundary docs](https://vercel.shop/docs/reference/storefront-api)
