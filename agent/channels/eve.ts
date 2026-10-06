@@ -4,6 +4,7 @@ import { disableRoute } from "eve/channels";
 import { type AuthFn, ForbiddenError, localDev, none, vercelOidc } from "eve/channels/auth";
 import { eveChannel } from "eve/channels/eve";
 
+import { readAgentBrowserId, toAgentBrowserPrincipalId } from "../../lib/agent/browser/server";
 import { shopConfig } from "../../lib/config";
 
 const anonymous = none<Request>();
@@ -22,7 +23,14 @@ const browserAuth: AuthFn<Request> = async (request) => {
     ).isBot
   )
     throw new ForbiddenError();
-  return anonymous(request);
+  const browserId = readAgentBrowserId(request.headers.get("cookie"));
+  if (!browserId) return anonymous(request);
+  return {
+    attributes: {},
+    authenticator: "shop-browser",
+    principalId: toAgentBrowserPrincipalId(browserId),
+    principalType: "anonymous",
+  };
 };
 
 export default shopConfig.agent.isEnabled
