@@ -340,7 +340,7 @@ Pass the active validated commerce context into the Shopify/Hydrogen request con
 
 ### Chat and agent API
 
-Shop Agent is disabled by default. Preserve that setting; enabling Markets must not enable chat. When chat is enabled, inspect `agent/channels/eve.ts`, `agent/tools/`, `agent/lib/`, and the Shopify connections rather than adding an app-owned chat route or commerce HTTP bridge.
+Preserve the installation's Shop Agent setting; enabling Markets must not toggle chat. When chat is enabled, inspect `agent/channels/eve.ts`, `agent/tools/`, `agent/lib/`, and the Shopify connections rather than adding an app-owned chat route or commerce HTTP bridge.
 
 Eve's session routes live outside `[locale]`, and invisible URLs do not reveal locale in the referer. Carry the selected locale explicitly, validate it against the installed locale allowlist during cart setup and in Eve's channel, and pass the validated commerce context to the direct Shopify tools and connections. Client context can describe the page, but must not select an arbitrary cart or an unsupported locale. Do not infer locale from URL segments or fall back unconditionally to `defaultLocale`.
 

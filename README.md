@@ -62,12 +62,12 @@ Next.js
 
 Eve
 
-- Shop Agent for product discovery, store questions, and cart updates in a side drawer, opt-in
+- Shop Agent for product discovery, store questions, and cart updates in a side drawer
 - Shopify catalog and policy MCP connections plus Hydrogen cart handlers
 
 Customer authentication is disabled by default. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure Shopify credentials and callback URLs before enabling `auth.isEnabled` in `lib/config/index.ts`.
 
-Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` and follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to configure AI Gateway access and review privacy and spending safeguards before enabling public chat.
+Shop Agent is enabled by default and calls models through AI Gateway: Vercel deployments authenticate with OIDC, and local development needs `vercel env pull` or `AI_GATEWAY_API_KEY`. Follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to review privacy and spending safeguards before launch, or set `agent.isEnabled` to `false` in `lib/config/index.ts` to remove public chat.
 
 ## Skills
 

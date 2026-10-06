@@ -51,7 +51,7 @@ The default storefront uses inline component copy and reusable content functions
 
 ## Shop Agent boundaries
 
-Shop Agent, customer authentication, and BotID are disabled by default. Preserve the installation's feature settings; a storefront redesign or localization change must not enable them implicitly.
+Shop Agent is enabled by default; customer authentication and BotID are disabled by default. Preserve the installation's feature settings; a storefront redesign or localization change must not toggle them implicitly.
 
 For assistant changes, read the installed Eve docs starting at `node_modules/eve/docs/README.md`, then only the guide relevant to the task. Preserve Next.js deployment through `withEve` and the conditional plugin list passed to `withShopConfig` in `next.config.ts`.
 
