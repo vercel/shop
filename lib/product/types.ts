@@ -101,6 +101,7 @@ export interface ProductDetails extends ProductCard {
   };
   currencyCode: string;
   defaultVariant?: ProductVariant;
+  defaultVariantSku?: string;
   description: string;
   descriptionHtml: string;
   encodedVariantAvailability?: string;

@@ -80,6 +80,7 @@ export const PRODUCT_FRAGMENT = gql(
     }
     selectedOrFirstAvailableVariant {
       ...ProductVariantFields
+      sku
     }
     options {
       id

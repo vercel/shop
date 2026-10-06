@@ -54,7 +54,6 @@ export function ProductDetailSection({
     <>
       <ProductSchema
         product={{
-          id: product.id,
           handle: product.handle,
           title: product.title,
           description: product.description,
@@ -64,6 +63,7 @@ export function ProductDetailSection({
           priceRange: product.priceRange,
           offerCount: product.variantsCount,
           availableForSale: product.availableForSale,
+          sku: product.defaultVariantSku,
         }}
       />
       <ProductOpenGraph
