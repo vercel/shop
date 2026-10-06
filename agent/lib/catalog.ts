@@ -1,8 +1,60 @@
+import type { ToolModelOutput } from "eve/tools";
 import { z } from "zod";
 
 import { toAgentProduct } from "../../lib/agent/products";
+import type { AgentProduct, AgentProductDetails } from "../../lib/agent/products/types";
 import type { ProductCard } from "../../lib/product/types";
 import { fetchProductOptionValues } from "../../lib/shopify/operations/products/server";
+
+function toModelProduct({ available, compareAtPrice, handle, price, title, vendor }: AgentProduct) {
+  return { available, compareAtPrice, handle, price, title, vendor };
+}
+
+export function toModelProducts(
+  output: { error: string } | { products: AgentProduct[] },
+): ToolModelOutput {
+  if (!("products" in output)) return { type: "json", value: output };
+  return { type: "json", value: { products: output.products.map(toModelProduct) } };
+}
+
+export function toModelProductDetails(
+  output: { error: string } | { product: AgentProductDetails },
+): ToolModelOutput {
+  if (!("product" in output)) return { type: "json", value: output };
+  const { description, options, variants } = output.product;
+  return {
+    type: "json",
+    value: {
+      product: {
+        ...toModelProduct(output.product),
+        description,
+        options: options.map((option) => ({
+          name: option.name,
+          values: option.values.map((value) => value.name),
+        })),
+        variants: variants.map(
+          ({
+            available,
+            compareAtPrice,
+            id,
+            price,
+            requiresBundleConfiguration,
+            requiresSellingPlan,
+            title,
+          }) => ({
+            available,
+            compareAtPrice,
+            id,
+            price,
+            requiresBundleConfiguration,
+            requiresSellingPlan,
+            title,
+          }),
+        ),
+      },
+    },
+  };
+}
 
 export const productHandleSchema = z
   .string()

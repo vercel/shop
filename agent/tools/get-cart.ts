@@ -19,6 +19,7 @@ export default defineTool({
         quantity: line.quantity,
         variantId: line.merchandise.id,
       })),
+      note: cart.note || null,
       totalQuantity: cart.totalQuantity,
     };
   },
