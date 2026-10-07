@@ -1,11 +1,14 @@
 "use client";
 
 import NextLink from "next/link";
-import { type ComponentProps, useEffect, useRef, useState } from "react";
+import { type ComponentProps, type Ref, useEffect, useRef, useState } from "react";
 
-const INTENT_DELAY_MS = 100;
+const HOVER_INTENT_DELAY_MS = 100;
+const SETTLE_INTENT_DELAY_MS = 300;
+const SETTLE_INTENT_LIMIT = 4;
 
 interface Connection {
+  effectiveType?: string;
   saveData?: boolean;
 }
 
@@ -13,7 +16,13 @@ interface LinkProps extends Omit<ComponentProps<typeof NextLink>, "prefetch"> {
   prefetch?: ComponentProps<typeof NextLink>["prefetch"] | "intent";
 }
 
-function canPrefetch(anchor: HTMLAnchorElement): boolean {
+const settleCandidates = new Set<HTMLAnchorElement>();
+const settleUpgrades = new Map<HTMLAnchorElement, () => void>();
+let settleObserver: IntersectionObserver | undefined;
+let settleTimer: number | undefined;
+let touchPrimary: MediaQueryList | undefined;
+
+function canUpgrade(anchor: HTMLAnchorElement): boolean {
   const connection = (navigator as Navigator & { connection?: Connection }).connection;
 
   if (
@@ -21,6 +30,7 @@ function canPrefetch(anchor: HTMLAnchorElement): boolean {
     document.visibilityState !== "visible" ||
     !navigator.onLine ||
     connection?.saveData ||
+    connection?.effectiveType?.endsWith("2g") ||
     anchor.hasAttribute("download") ||
     (anchor.target && anchor.target.toLowerCase() !== "_self") ||
     anchor.getAttribute("aria-disabled") === "true"
@@ -32,14 +42,81 @@ function canPrefetch(anchor: HTMLAnchorElement): boolean {
     const current = new URL(window.location.href);
     const destination = new URL(anchor.href);
 
+    // The root ensureStatic keeps per-link prefetches static, so search params resolve only on navigation and a same-path upgrade adds nothing.
     return (
       (destination.protocol === "http:" || destination.protocol === "https:") &&
       destination.origin === current.origin &&
-      (destination.pathname !== current.pathname || destination.search !== current.search)
+      destination.pathname !== current.pathname
     );
   } catch {
     return false;
   }
+}
+
+function isTouchPrimary(): boolean {
+  touchPrimary ??= window.matchMedia("(hover: none)");
+  return touchPrimary.matches;
+}
+
+function scheduleSettleIntent() {
+  window.clearTimeout(settleTimer);
+  settleTimer = window.setTimeout(upgradeSettledLinks, SETTLE_INTENT_DELAY_MS);
+}
+
+function upgradeSettledLinks() {
+  const center = window.innerHeight / 2;
+  const destinations = new Map<string, { anchors: HTMLAnchorElement[]; distance: number }>();
+
+  for (const anchor of settleCandidates) {
+    if (!canUpgrade(anchor)) continue;
+    const rect = anchor.getBoundingClientRect();
+    const distance = Math.abs(rect.top + rect.height / 2 - center);
+    const destination = destinations.get(anchor.href);
+    if (destination) {
+      destination.anchors.push(anchor);
+      destination.distance = Math.min(destination.distance, distance);
+    } else {
+      destinations.set(anchor.href, { anchors: [anchor], distance });
+    }
+  }
+
+  const nearest = [...destinations.values()]
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, SETTLE_INTENT_LIMIT);
+  for (const { anchors } of nearest) {
+    for (const anchor of anchors) settleUpgrades.get(anchor)?.();
+  }
+}
+
+function observeSettleIntent(anchor: HTMLAnchorElement, upgrade: () => void): () => void {
+  if (!settleObserver) {
+    window.addEventListener("scroll", scheduleSettleIntent, { capture: true, passive: true });
+    settleObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const target = entry.target as HTMLAnchorElement;
+          if (entry.isIntersecting) settleCandidates.add(target);
+          else settleCandidates.delete(target);
+        }
+        scheduleSettleIntent();
+      },
+      { rootMargin: "-25% 0px" },
+    );
+  }
+
+  settleUpgrades.set(anchor, upgrade);
+  settleObserver.observe(anchor);
+
+  return () => {
+    settleCandidates.delete(anchor);
+    settleUpgrades.delete(anchor);
+    settleObserver?.unobserve(anchor);
+  };
+}
+
+function assignRef(ref: Ref<HTMLAnchorElement> | undefined, anchor: HTMLAnchorElement | null) {
+  if (typeof ref === "function") ref(anchor);
+  else if (ref) ref.current = anchor;
 }
 
 export function Link({
@@ -52,32 +129,40 @@ export function Link({
   onPointerEnter,
   onPointerLeave,
   prefetch = "intent",
+  ref,
   ...props
 }: LinkProps) {
   const destinationKey = JSON.stringify([href, as]);
   const [intentDestination, setIntentDestination] = useState<string | null>(null);
+  const anchorRef = useRef<HTMLAnchorElement | null>(null);
   const focused = useRef(false);
   const hovered = useRef(false);
   const timer = useRef<number | undefined>(undefined);
+  const upgraded = prefetch === "intent" && intentDestination === destinationKey;
 
-  function cancelIntent() {
+  function cancelPendingIntent() {
     if (timer.current !== undefined) window.clearTimeout(timer.current);
     timer.current = undefined;
-    setIntentDestination(null);
   }
 
   function scheduleIntent(anchor: HTMLAnchorElement) {
-    cancelIntent();
-    if (prefetch !== "intent" || !canPrefetch(anchor)) return;
+    cancelPendingIntent();
+    if (prefetch !== "intent" || upgraded || !canUpgrade(anchor)) return;
 
     const destination = anchor.href;
     timer.current = window.setTimeout(() => {
       timer.current = undefined;
-      if (anchor.href === destination && canPrefetch(anchor)) {
+      if (anchor.href === destination && canUpgrade(anchor)) {
         setIntentDestination(destinationKey);
       }
-    }, INTENT_DELAY_MS);
+    }, HOVER_INTENT_DELAY_MS);
   }
+
+  useEffect(() => {
+    const anchor = anchorRef.current;
+    if (prefetch !== "intent" || upgraded || !anchor || !isTouchPrimary()) return;
+    return observeSettleIntent(anchor, () => setIntentDestination(destinationKey));
+  }, [destinationKey, prefetch, upgraded]);
 
   useEffect(
     () => () => {
@@ -94,7 +179,7 @@ export function Link({
       onBlur={(event) => {
         onBlur?.(event);
         focused.current = false;
-        if (!hovered.current) cancelIntent();
+        if (!hovered.current) cancelPendingIntent();
       }}
       onFocus={(event) => {
         onFocus?.(event);
@@ -105,21 +190,12 @@ export function Link({
       onPointerCancel={(event) => {
         onPointerCancel?.(event);
         hovered.current = false;
-        cancelIntent();
+        cancelPendingIntent();
       }}
       onPointerDown={(event) => {
         onPointerDown?.(event);
-        if (
-          event.pointerType === "touch" ||
-          event.button !== 0 ||
-          event.altKey ||
-          event.ctrlKey ||
-          event.metaKey ||
-          event.shiftKey
-        ) {
-          hovered.current = false;
-          cancelIntent();
-        }
+        // Navigation renders the cached shell instead of waiting on an in-flight per-link prefetch, so an upgrade after a press only duplicates the request.
+        cancelPendingIntent();
       }}
       onPointerEnter={(event) => {
         onPointerEnter?.(event);
@@ -140,11 +216,17 @@ export function Link({
       onPointerLeave={(event) => {
         onPointerLeave?.(event);
         hovered.current = false;
-        if (!focused.current) cancelIntent();
+        if (!focused.current) cancelPendingIntent();
       }}
-      prefetch={
-        prefetch === "intent" ? (intentDestination === destinationKey ? true : "auto") : prefetch
-      }
+      prefetch={prefetch === "intent" ? (upgraded ? true : "auto") : prefetch}
+      ref={(anchor) => {
+        anchorRef.current = anchor;
+        assignRef(ref, anchor);
+        return () => {
+          anchorRef.current = null;
+          assignRef(ref, null);
+        };
+      }}
     />
   );
 }

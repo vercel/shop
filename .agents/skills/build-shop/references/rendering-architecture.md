@@ -89,7 +89,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 
 ## Treat navigation as part of the architecture
 
-With partial prefetching, visible links receive a reusable App Shell by default, and `prefetch={true}` adds the destination's URL-specific content. The root layout's `ensureStatic = "prefetch"` keeps both stages static, so prefetches are served from prerendered output instead of rendering per request; `cookies()`, `headers()`, and `searchParams` resolve on navigation behind their Suspense boundary. The template's `Link` from `@/components/ui/link` makes the per-link upgrade only on hover or keyboard focus.
+With partial prefetching, visible links receive a reusable App Shell by default, and `prefetch={true}` adds the destination's URL-specific content. The root layout's `ensureStatic = "prefetch"` keeps both stages static, so prefetches are served from prerendered output instead of rendering per request; `cookies()`, `headers()`, and `searchParams` resolve on navigation behind their Suspense boundary. The template's `Link` from `@/components/ui/link` makes the per-link upgrade only on intent: hover or keyboard focus, or on touch screens up to four destinations near the middle of the viewport once scrolling settles. Links that change only search params keep the App Shell.
 
 - Keep `ensureStatic = "prefetch"` on the root layout, and do not add `await navigation()` or `await prefetch()` per subtree; the root level already sets the stage boundary.
 - Use the template `Link` for every internal link, and leave high-fanout links on its intent upgrade.
