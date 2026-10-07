@@ -94,6 +94,18 @@ function parseShopifyFilterValue(inputJson: string): string | null {
   }
 }
 
+function parseAvailable(inputJson: string): boolean | undefined {
+  try {
+    return (JSON.parse(inputJson) as ProductFilter).available;
+  } catch {
+    return undefined;
+  }
+}
+
+function isAvailabilityFilter(filter: Filter): boolean {
+  return filter.values.some((value) => parseAvailable(value.input) !== undefined);
+}
+
 function mapShopifyFilterType(type: ShopifyFilterType): FilterType {
   switch (type) {
     case "PRICE_RANGE":
@@ -181,6 +193,27 @@ function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): P
   return { ...(currencyCode ? { currencyCode } : {}), max: 1000, min: 0 };
 }
 
+function pruneEmptyValues(filter: Filter, activeFilters: ProductFilter[]): Filter {
+  return {
+    ...filter,
+    values: filter.values.filter(
+      (value) => (value.count ?? 0) > 0 || isFilterInputActive(activeFilters, value.input),
+    ),
+  };
+}
+
+// Shoppers filter for what they can buy, never for what they cannot, so only the in-stock value
+// is offered. Its count is dropped because Shopify reports 0 for it under a market context even
+// when the same filter returns products.
+function toInStockFilter(filter: Filter): Filter {
+  return {
+    ...filter,
+    values: filter.values
+      .filter((value) => parseAvailable(value.input) === true)
+      .map(({ count: _count, ...value }) => value),
+  };
+}
+
 export function transformShopifyFilters(
   shopifyFilters: ShopifyFilter[],
   options: TransformFiltersOptions = {},
@@ -188,23 +221,23 @@ export function transformShopifyFilters(
   const { activeFilters = [], currencyCode } = options;
 
   const priceFilter = shopifyFilters.find((f) => f.type === "PRICE_RANGE");
-  const listFilters = shopifyFilters.filter((f) => f.type === "LIST");
+  const selectableFilters = shopifyFilters.filter((f) => f.type === "LIST" || f.type === "BOOLEAN");
 
-  let filters = listFilters
+  let filters = selectableFilters
     .map(transformFilter)
     .filter((filter) => !filter.paramKey.includes("category") && !filter.paramKey.includes("price"))
-    .map((filter) => ({
-      ...filter,
-      values: filter.values.filter(
-        (value) => value.count > 0 || isFilterInputActive(activeFilters, value.input),
-      ),
-    }))
+    .map((filter) =>
+      isAvailabilityFilter(filter)
+        ? toInStockFilter(filter)
+        : pruneEmptyValues(filter, activeFilters),
+    )
     .filter((filter) => filter.values.length > 0);
 
   // Keep an active singleton facet so the shopper can still clear it.
   filters = filters.filter(
     (filter) =>
       filter.values.length > 1 ||
+      isAvailabilityFilter(filter) ||
       filter.values.some((value) => isFilterInputActive(activeFilters, value.input)),
   );
 

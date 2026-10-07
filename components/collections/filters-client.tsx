@@ -5,6 +5,7 @@ import {
   filterEquals,
   getFilterRemovalUrl,
   isFilterInputActive,
+  type ProductFilter,
   serializeCollectionParams,
 } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
@@ -71,6 +72,10 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
   const currentParams = serializeCollectionParams(state);
   const isPending = state.status === "loading";
   const activeBadges = getActiveFilterBadges(filters, state.filters);
+  const selectFilterInput = (input: string) => {
+    const filter = parseFilterInput(input);
+    if (filter) actions.setFilters(toggleFilter(state.filters, filter));
+  };
   const applyPrice = (min: number | null, max: number | null) => {
     const next = state.filters.filter((filter) => !filter.price);
     if (min !== null || max !== null) {
@@ -157,7 +162,7 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
                       scroll={false}
                       onClick={(event) => {
                         event.preventDefault();
-                        actions.toggleFilterInput(value.input);
+                        selectFilterInput(value.input);
                       }}
                     >
                       <Swatch
@@ -184,7 +189,7 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
                       selected={isSelected}
                       onClick={(event) => {
                         event.preventDefault();
-                        actions.toggleFilterInput(value.input);
+                        selectFilterInput(value.input);
                       }}
                     />
                   );
@@ -309,18 +314,29 @@ function PriceInput({ currencyCode, onChange, placeholder, value }: PriceInputPr
   );
 }
 
+// `available` is a single boolean on ProductFilter, so In stock and Out of stock replace each other instead of stacking.
+function isExclusive(filter: ProductFilter): boolean {
+  return filter.available !== undefined;
+}
+
+function toggleFilter(current: ProductFilter[], filter: ProductFilter): ProductFilter[] {
+  if (current.some((active) => filterEquals(active, filter))) {
+    return current.filter((active) => !filterEquals(active, filter));
+  }
+  const kept = isExclusive(filter) ? current.filter((active) => !isExclusive(active)) : current;
+  return [...kept, filter];
+}
+
 function buildToggleHref(
   state: Pick<CollectionState, "filters" | "reverse" | "sortKey">,
   input: string,
 ): string {
   const filter = parseFilterInput(input);
   if (!filter) return "?";
-  const params = serializeCollectionParams(state);
-  if (state.filters.some((current) => filterEquals(current, filter))) {
-    return getFilterRemovalUrl(params, filter);
-  }
-  const next = serializeCollectionParams({ ...state, filters: [...state.filters, filter] });
-  const query = next.toString();
+  const query = serializeCollectionParams({
+    ...state,
+    filters: toggleFilter(state.filters, filter),
+  }).toString();
   return query ? `?${query}` : "?";
 }
 
