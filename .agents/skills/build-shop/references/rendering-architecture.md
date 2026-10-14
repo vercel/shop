@@ -49,7 +49,8 @@ Preserve these boundaries:
 | Data                                                                          | Default treatment                                                                                                                   |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Public catalog and content reads, including static shell content              | `"use cache: remote"` in the domain `get*` wrapper with the existing `cacheLife` and `cacheTag` policy                              |
-| Cursor-paginated browse, search results, and facets                           | Uncached `fetch*` reads; cached cursor pages drift apart, and Search & Discovery changes must appear immediately                    |
+| Default first page of a collection or `/collections/all`, with its facets     | `"use cache: remote"` with `cacheLife("minutes")` and collection and product tags; Search & Discovery edits send no webhook          |
+| Filtered or sorted browse, Load more pages, search results, and their facets  | Uncached `fetch*` reads; cached cursor pages drift apart, and each filter combination would be a rarely reused cache entry          |
 | Customer, session, cart, or authorization-dependent data                      | Uncached or private per-session handling; never place it in a shared remote cache                                                   |
 | Mutation results                                                              | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |
 
@@ -89,7 +90,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 
 ## Treat navigation as part of the architecture
 
-With partial prefetching, visible links receive a reusable App Shell by default, and `prefetch={true}` adds the destination's URL-specific content. The root layout's `ensureStatic = "prefetch"` keeps both stages static, so prefetches are served from prerendered output instead of rendering per request; `cookies()`, `headers()`, and `searchParams` resolve on navigation behind their Suspense boundary. The template's `Link` from `@/components/ui/link` makes the per-link upgrade only on hover or keyboard focus.
+With partial prefetching, visible links receive a reusable App Shell by default, and `prefetch={true}` adds the destination's URL-specific content. The root layout's `ensureStatic = "prefetch"` keeps both stages static, so prefetches are served from prerendered output instead of rendering per request; `cookies()`, `headers()`, and `searchParams` resolve on navigation behind their Suspense boundary. The template's `Link` from `@/components/ui/link` makes the per-link upgrade only on intent.
 
 - Keep `ensureStatic = "prefetch"` on the root layout, and do not add `await navigation()` or `await prefetch()` per subtree; the root level already sets the stage boundary.
 - Use the template `Link` for every internal link, and leave high-fanout links on its intent upgrade.

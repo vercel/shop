@@ -1,5 +1,5 @@
 import { BotIdClient } from "botid/client";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
@@ -20,6 +20,10 @@ import { shopConfig } from "@/lib/config";
 import { buildAlternates } from "@/lib/seo";
 
 export const ensureStatic = "prefetch";
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,7 +81,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),
     openGraph: {
-      images: [{ url: "/og-default.png", width: 1200, height: 630 }],
+      images: [{ url: "/og-default.png", width: 1200, height: 628 }],
     },
     title: {
       default: shopConfig.site.name,

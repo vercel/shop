@@ -52,7 +52,8 @@ Shopify AI Toolkit validates documents; there is no local schema gate, and typec
 | Render role                                                                                                    | Treatment                                                             |
 | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | Public catalog and content reads, including static shell content                                               | `"use cache: remote"` in the domain `get*` wrapper with the established `cacheLife` and tags |
-| Cursor-paginated browse, search results, and facets                                                            | Uncached `fetch*` operations; no read-cache directive                 |
+| Default first page of a collection or `/collections/all`, with its facets                                      | `"use cache: remote"` with `cacheLife("minutes")` and webhook tags    |
+| Filtered or sorted browse, Load more pages, search results, and their facets                                   | Uncached `fetch*` operations; no read-cache directive                 |
 | Cart, session, authorization, or Customer Account data                                                         | Uncached or private/request-scoped; never public remote cache         |
 | Mutation                                                                                                       | No read-cache directive; invalidate the affected domain after success |
 
@@ -61,7 +62,8 @@ Follow the closest existing operation with the same render role. Do not choose a
 Current examples of intent:
 
 - Product, collection, recommendation, blog, page, policy, and sitemap reads use `"use cache: remote"` in their `lib/<domain>/server.ts` wrapper, so every instance shares one cache in front of Shopify; remote reads still render into the static shell when the route prerenders.
-- Filtered collection browse, search results, facets, and cursor pages call the uncached `fetch*` operations directly from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
+- The default first page of each collection and of `/collections/all` is cached for minutes in `lib/collections/server.ts`, tagged for product and collection webhooks.
+- Filtered or sorted browse, search results, facets, and cursor pages call the uncached `fetch*` operations directly from `lib/collections/server.ts` and `lib/search/server.ts`: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery edits send no webhook.
 - Customer Account operations and cart reads remain customer/request scoped.
 
 ## Deployment context versus copy locale

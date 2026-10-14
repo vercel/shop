@@ -27,5 +27,11 @@ export function getCartMutationResult(part: EveMessagePart) {
 }
 
 export function isCartMutation(tool: string) {
-  return tool === "add-to-cart" || tool === "update-cart-item" || tool === "add-cart-note";
+  return (
+    tool === "add-to-cart" ||
+    tool === "change-cart-item-options" ||
+    tool === "update-cart-item" ||
+    tool === "update-discount-code" ||
+    tool === "add-cart-note"
+  );
 }

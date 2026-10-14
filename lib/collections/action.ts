@@ -1,7 +1,6 @@
 "use server";
 
-import { PRODUCTS_PER_PAGE } from "@/lib/collections";
-import { resolveBrowseParams } from "@/lib/collections/server";
+import { PRODUCTS_PER_PAGE, resolveBrowseParams } from "@/lib/collections";
 import type { BrowseSource } from "@/lib/collections/types";
 import type { ProductPage } from "@/lib/product/types";
 import {

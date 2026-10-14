@@ -1,4 +1,5 @@
 import { type AnyCustomerAccountDocument, gql } from "@shopify/hydrogen/customer-account";
+import type { CountryCode } from "@shopify/hydrogen/customer-account-api-types";
 import { cache } from "react";
 
 import { redirectToCustomerLogin, requireCustomerAccessToken } from "@/lib/auth/server";
@@ -261,6 +262,11 @@ export async function fetchCustomerAddresses(): Promise<CustomerAddress[]> {
   return addresses.sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
 }
 
+// Shopify validates the code against its CountryCode enum and rejects unknown values.
+function toShopifyAddressInput({ countryCode, ...address }: CustomerAddressInput) {
+  return { ...address, countryCode: countryCode as CountryCode | undefined };
+}
+
 export async function createCustomerAddress(
   address: CustomerAddressInput,
   defaultAddress: boolean,
@@ -269,7 +275,7 @@ export async function createCustomerAddress(
     document: CUSTOMER_ADDRESS_CREATE_MUTATION,
     operation: "customerAddressCreate",
     returnTo: "/account/addresses",
-    variables: { address, defaultAddress },
+    variables: { address: toShopifyAddressInput(address), defaultAddress },
   });
 
   return toUserErrors(data.customerAddressCreate?.userErrors ?? []);
@@ -284,7 +290,7 @@ export async function updateCustomerAddress(
     document: CUSTOMER_ADDRESS_UPDATE_MUTATION,
     operation: "customerAddressUpdate",
     returnTo: "/account/addresses",
-    variables: { address, addressId, defaultAddress },
+    variables: { address: toShopifyAddressInput(address), addressId, defaultAddress },
   });
 
   return toUserErrors(data.customerAddressUpdate?.userErrors ?? []);

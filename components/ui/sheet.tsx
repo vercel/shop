@@ -26,7 +26,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-60 bg-black/30 transition-opacity ease-in-out data-open:duration-500 data-closed:duration-300 data-starting-style:opacity-0 data-ending-style:opacity-0",
+        "fixed inset-0 z-60 bg-black/30 transition-opacity ease-in-out data-open:duration-500 data-closed:duration-300 data-starting-style:opacity-0 data-ending-style:opacity-0 data-[dim=false]:bg-transparent",
         className,
       )}
       {...props}
@@ -50,7 +50,8 @@ function SheetContent({
 }) {
   return (
     <SheetPortal keepMounted={keepMounted}>
-      {overlay && <SheetOverlay />}
+      {/* Base UI's own modal backdrop has no z-index, so z-indexed page chrome such as the sticky header stays clickable; without a dimmed overlay, this transparent one takes the click-away. */}
+      <SheetOverlay data-dim={overlay} />
       <SheetPrimitive.Popup
         data-slot="sheet-content"
         data-side={side}

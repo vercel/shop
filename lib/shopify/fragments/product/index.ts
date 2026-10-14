@@ -85,7 +85,6 @@ export const PRODUCT_FRAGMENT = gql(
     options {
       id
       name
-      values
       optionValues {
         name
         swatch {

@@ -6,23 +6,30 @@ import type { Facets } from "@/lib/filters/types";
 import { CollectionFilterSidebar } from "./filters-client";
 
 interface CollectionFiltersProps {
-  facetsPromise: Promise<Facets>;
+  facets: Facets | Promise<Facets>;
 }
 
-export function CollectionFilters({ facetsPromise }: CollectionFiltersProps) {
+interface ResolvedCollectionFiltersProps {
+  facets: Promise<Facets>;
+}
+
+export function CollectionFilters({ facets }: CollectionFiltersProps) {
+  if (!(facets instanceof Promise)) {
+    return <CollectionFilterSidebar filters={facets.filters} priceRange={facets.priceRange} />;
+  }
   return (
     <Suspense fallback={<CollectionFiltersSkeleton />}>
-      <ResolvedCollectionFilters facetsPromise={facetsPromise} />
+      <ResolvedCollectionFilters facets={facets} />
     </Suspense>
   );
 }
 
-async function ResolvedCollectionFilters({ facetsPromise }: CollectionFiltersProps) {
-  const { filters, priceRange } = await facetsPromise;
+async function ResolvedCollectionFilters({ facets }: ResolvedCollectionFiltersProps) {
+  const { filters, priceRange } = await facets;
   return <CollectionFilterSidebar filters={filters} priceRange={priceRange} />;
 }
 
-function CollectionFiltersSkeleton() {
+export function CollectionFiltersSkeleton() {
   return (
     <div aria-busy="true" className="flex flex-col gap-5">
       {[0, 1, 2].map((section) => (

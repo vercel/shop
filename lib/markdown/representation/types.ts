@@ -6,5 +6,3 @@ export interface AcceptEntry {
 }
 
 export type Representation = "text/html" | "text/markdown";
-
-export type NegotiatedRepresentation = Representation | null;

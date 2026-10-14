@@ -262,14 +262,13 @@ Do not call this root-param getter from Route Handlers or Server Actions: use ro
 
 Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/server.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale in the proxy before Shopify dispatch (`resolveRequestLocale` below): from the validated locale prefix when the path has one, otherwise from the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
 
-Compose next-intl after the existing Shopify route dispatch and Markdown negotiation, where the template returns `NextResponse.next(...)`. Keep the `/.well-known/ucp` rewrite before dispatch. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
+Compose next-intl after the existing Shopify route dispatch and Markdown negotiation, where the template returns `NextResponse.next(...)`. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
 
 ```ts
 const handleI18n = createMiddleware(routing);
 
 // Keep the existing imports and add NextRequest as a runtime import.
 export async function proxy(request: NextRequest): Promise<Response> {
-  // Keep the template's UCP rewrite here, unchanged.
   const locale = resolveRequestLocale(request);
   const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
   const shopifyRoute = handleShopifyRoutes({
@@ -288,7 +287,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
     ),
   });
   const response = handleI18n(i18nRequest);
-  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
 }

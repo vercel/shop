@@ -1,3 +1,5 @@
+import type { CustomerAddressInput as ShopifyCustomerAddressInput } from "@shopify/hydrogen/customer-account-api-types";
+
 import type { Image } from "@/lib/media/types";
 import type { Money } from "@/lib/money/types";
 import type { PageInfo } from "@/lib/pagination/types";
@@ -51,26 +53,16 @@ export interface CustomerAddress {
   address2: string | null;
   city: string | null;
   company: string | null;
+  countryCode: string | null;
   firstName: string | null;
   formatted: string[];
   id: string;
   isDefault: boolean;
   lastName: string | null;
   phoneNumber: string | null;
-  territoryCode: string | null;
   zip: string | null;
   zoneCode: string | null;
 }
 
-export interface CustomerAddressInput {
-  address1?: string;
-  address2?: string;
-  city?: string;
-  company?: string;
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  territoryCode?: string;
-  zip?: string;
-  zoneCode?: string;
-}
+// Form values keyed by Shopify's input, so renamed or removed fields fail typecheck.
+export type CustomerAddressInput = Partial<Record<keyof ShopifyCustomerAddressInput, string>>;

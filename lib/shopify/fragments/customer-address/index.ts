@@ -6,12 +6,12 @@ export const ADDRESS_FRAGMENT = gql(`#graphql
     address2
     city
     company
+    countryCode
     firstName
     formatted
     id
     lastName
     phoneNumber
-    territoryCode
     zip
     zoneCode
   }

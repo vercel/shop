@@ -4,20 +4,18 @@ import type { ReactNode } from "react";
 import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { SortValue } from "@/lib/collections/types";
-import type { Facets } from "@/lib/filters/types";
 
 import { CollectionActiveFilterCountBadge } from "./collection-browse-provider";
-import { CollectionFilters } from "./filters";
 import { FilterSheet } from "./filters-client";
 import { CollectionsSortSelect } from "./sort-select";
 
 interface BrowseToolbarProps {
-  facetsPromise: Promise<Facets>;
+  filters: ReactNode;
   resultCount?: ReactNode;
   sortExclude?: SortValue[];
 }
 
-export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: BrowseToolbarProps) {
+export function BrowseToolbar({ filters, resultCount, sortExclude }: BrowseToolbarProps) {
   return (
     <ToolbarLayout
       filterSheet={
@@ -34,7 +32,7 @@ export function BrowseToolbar({ facetsPromise, resultCount, sortExclude }: Brows
             </button>
           }
         >
-          <CollectionFilters facetsPromise={facetsPromise} />
+          {filters}
         </FilterSheet>
       }
       resultCount={resultCount}

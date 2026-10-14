@@ -22,15 +22,15 @@ const ADDRESS_FIELDS = [
   "address2",
   "city",
   "company",
+  "countryCode",
   "firstName",
   "lastName",
   "phoneNumber",
-  "territoryCode",
   "zip",
   "zoneCode",
 ] as const satisfies readonly (keyof CustomerAddressInput)[];
 
-const UPPERCASE_FIELDS = new Set<keyof CustomerAddressInput>(["territoryCode", "zoneCode"]);
+const UPPERCASE_FIELDS = new Set<keyof CustomerAddressInput>(["countryCode", "zoneCode"]);
 
 // Customer Account API field paths end with the form field to highlight.
 function mapUserErrors(errors: CustomerUserError[]): AccountActionResult {
@@ -64,7 +64,7 @@ function buildAddressInput(raw: CustomerAddressInput): CustomerAddressInput {
 function validateAddress(input: CustomerAddressInput): string | null {
   if (!input.address1) return "Address is required";
   if (!input.city) return "City is required";
-  if (!input.territoryCode) return "Country is required";
+  if (!input.countryCode) return "Country is required";
   return null;
 }
 

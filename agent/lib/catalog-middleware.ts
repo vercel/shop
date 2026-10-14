@@ -4,22 +4,20 @@ function isCatalogSearch(input: unknown): boolean {
   return (
     !!input &&
     typeof input === "object" &&
-    "connection" in input &&
-    input.connection === "shopify" &&
-    "tool" in input &&
-    input.tool === "search_catalog"
+    "name" in input &&
+    input.name === "shopify__search_catalog"
   );
 }
 
 export const catalogMiddleware = {
   async transformParams({ params }) {
-    // Eve runs every connection tool as connection_execute, so only the paired call input names the catalog tool.
+    // Model history records connection calls as eve__tool, so only the paired call input names the catalog tool.
     const catalogSearchCallIds = new Set(
       params.prompt.flatMap((message) =>
         message.role === "assistant"
           ? message.content.flatMap((part) =>
               part.type === "tool-call" &&
-              part.toolName === "connection_execute" &&
+              part.toolName === "eve__tool" &&
               isCatalogSearch(part.input)
                 ? [part.toolCallId]
                 : [],

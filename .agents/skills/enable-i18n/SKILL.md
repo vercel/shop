@@ -173,7 +173,7 @@ Move every route file from `app/` into `app/[locale]/`:
 - `app/page.tsx`, `app/error.tsx`, `app/not-found.tsx` → `app/[locale]/...`
 - `app/account/`, `app/cart/`, `app/collections/`, `app/pages/`, `app/policies/`, `app/products/`, `app/search/` → `app/[locale]/...`
 
-**Stay at `app/`:** `api/`, `agent/`, `md/`, `llms.txt/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`. Include blogs and any custom storefront pages in the localized route audit; do not limit the move to the example list.
+**Stay at `app/`:** `api/`, `agent/`, `md/`, `llms.txt/`, `sitemap.xml/`, `sitemap/`, `robots.ts`, `global-error.tsx`, `globals.css`, `favicon.ico`, `icon.svg`, `apple-icon.png`, `manifest.ts`. Include blogs and any custom storefront pages in the localized route audit; do not limit the move to the example list.
 
 In the moved layout, fix `import "./globals.css"` → `import "../globals.css"` and keep every export, including `export const ensureStatic = "prefetch"`, metadata, and viewport.
 
@@ -223,14 +223,14 @@ export default getRequestConfig(async () => {
 
 ### Step 5: Extend `proxy.ts`
 
-Compose next-intl at the end of the existing proxy, where the template returns `NextResponse.next(...)`. Keep everything before that point unchanged: the `/.well-known/ucp` rewrite, Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname), and Markdown negotiation (Step 9). Pass the forwarded headers through `forwardCustomerRefreshAttempt` so the account refresh marker still reaches Server Components:
+Compose next-intl at the end of the existing proxy, where the template returns `NextResponse.next(...)`. Keep everything before that point unchanged: Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname), and Markdown negotiation (Step 9). Pass the forwarded headers through `forwardCustomerRefreshAttempt` so the account refresh marker still reaches Server Components:
 
 ```ts
 const handleI18n = createMiddleware(routing);
 
 // Keep the existing imports and add NextRequest as a runtime import.
 export async function proxy(request: NextRequest): Promise<Response> {
-  // Keep the template's UCP rewrite, Shopify dispatch, and Markdown negotiation here, unchanged.
+  // Keep the template's Shopify dispatch and Markdown negotiation here, unchanged.
 
   const i18nRequest = new NextRequest(request, {
     headers: forwardCustomerRefreshAttempt(
@@ -239,7 +239,6 @@ export async function proxy(request: NextRequest): Promise<Response> {
     ),
   });
   const response = handleI18n(i18nRequest);
-  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   if (!response.ok) return response;
 

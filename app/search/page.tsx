@@ -105,14 +105,15 @@ async function SearchBrowse({
   // A new term rebuilds the browse store so stale filters never carry across searches.
   return (
     <Browse
+      path="/search"
       resultCount={
         <Suspense fallback={<Skeleton className="h-4 w-20" />}>
           <SearchResultCount resultsPromise={resultsPromise} />
         </Suspense>
       }
-      resultsPromise={resultsPromise}
+      results={resultsPromise}
       sortExclude={SEARCH_SORT_EXCLUDE}
-      statePromise={statePromise}
+      state={statePromise}
       storeKey={`search:${query}`}
     />
   );

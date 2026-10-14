@@ -1,6 +1,6 @@
 import { shopConfig } from "@/lib/config";
 
-import type { AcceptEntry, NegotiatedRepresentation, Representation } from "./types";
+import type { AcceptEntry, Representation } from "./types";
 
 const REPRESENTATIONS = ["text/html", "text/markdown"] as const;
 
@@ -36,11 +36,11 @@ function parseAccept(header: string): AcceptEntry[] {
     .filter(({ type }) => type.includes("/"));
 }
 
-export function negotiateRepresentation(accept: string | null): NegotiatedRepresentation {
-  if (!accept) return "text/html";
+function prefersMarkdown(accept: string | null): boolean {
+  if (!accept) return false;
 
   const entries = parseAccept(accept);
-  if (entries.length === 0) return "text/html";
+  if (entries.length === 0) return false;
 
   let selection: { position: number; quality: number; representation: Representation } | null =
     null;
@@ -73,10 +73,10 @@ export function negotiateRepresentation(accept: string | null): NegotiatedRepres
     }
   }
 
-  return selection?.representation ?? null;
+  return selection?.representation === "text/markdown";
 }
 
-export function appendVaryAccept(headers: Headers): void {
+function appendVaryAccept(headers: Headers): void {
   const vary = headers.get("Vary");
   if (!vary) {
     headers.set("Vary", "Accept");
@@ -99,6 +99,16 @@ export function getMarkdownMirrorPath(pathname: string): string | null {
   if (!pathname.endsWith(".md")) return null;
   const pagePath = pathname.slice(0, -".md".length);
   return getMarkdownPath(pagePath === "/index" ? "/" : pagePath);
+}
+
+export function getMarkdownRewritePath(request: Request): string | null {
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+
+  const { pathname } = new URL(request.url);
+  return (
+    getMarkdownMirrorPath(pathname) ??
+    (prefersMarkdown(request.headers.get("Accept")) ? getMarkdownPath(pathname) : null)
+  );
 }
 
 export function markdownHeaders({

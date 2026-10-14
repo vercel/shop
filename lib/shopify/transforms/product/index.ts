@@ -138,27 +138,19 @@ function transformSwatch(swatch: ShopifyOptionValueSwatch): OptionValueSwatch | 
 }
 
 function transformOption(option: ShopifyOption): ProductOption {
-  const swatchLookup = new Map<string, OptionValueSwatch | undefined>();
-  const variantLookup = new Map<string, ProductVariant | undefined>();
-  for (const ov of option.optionValues) {
-    swatchLookup.set(ov.name, transformSwatch(ov.swatch));
-    variantLookup.set(
-      ov.name,
-      ov.firstSelectableVariant ? transformVariant(ov.firstSelectableVariant) : undefined,
-    );
-  }
-
   return {
     id: option.id,
     name: option.name,
-    values: option.values.map((value): OptionValue => {
-      const firstSelectableVariant = variantLookup.get(value);
+    values: option.optionValues.map((value): OptionValue => {
+      const firstSelectableVariant = value.firstSelectableVariant
+        ? transformVariant(value.firstSelectableVariant)
+        : undefined;
       return {
         firstSelectableVariant,
-        id: value,
+        id: value.name,
         image: firstSelectableVariant?.image?.url,
-        name: value,
-        swatch: swatchLookup.get(value),
+        name: value.name,
+        swatch: transformSwatch(value.swatch),
       };
     }),
   };

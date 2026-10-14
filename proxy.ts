@@ -16,9 +16,9 @@ import {
   getHydrogenCustomerSession,
 } from "@/lib/auth/server";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/server";
+import { getRefinedCollectionPath, isRefinedCollectionPath } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";
-import { appendVaryAccept, negotiateRepresentation } from "@/lib/markdown/representation";
-import { getMarkdownMirrorPath, getMarkdownPath } from "@/lib/markdown/representation";
+import { getMarkdownRewritePath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/server";
 import { SHOPIFY_ROUTE_TEMPLATES } from "@/lib/shopify/routing";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
@@ -39,96 +39,56 @@ const NOOP_SESSION_MANAGER = {
 
 export async function proxy(request: NextRequest): Promise<Response> {
   const pathname = request.nextUrl.pathname;
-
-  if (pathname === "/.well-known/ucp") {
-    // Hydrogen's well-known proxy does not yet include UCP.
-    return NextResponse.rewrite(
-      new URL(`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/.well-known/ucp`),
-    );
-  }
-
   const requestContext = createCustomerRequestContext(request);
-
   const isAuthPath = shopConfig.auth.isEnabled && AUTH_PATHS.has(pathname);
-  const usesCustomerCart = shopConfig.auth.isEnabled && (isAuthPath || pathname === "/api/cart");
-  const customerSession = usesCustomerCart ? await getHydrogenCustomerSession() : undefined;
-  const customerCartHandlers = customerSession
-    ? createCustomerCartHandlers(customerSession)
-    : undefined;
-  const authHandlers =
-    isAuthPath && customerSession && customerCartHandlers
-      ? createCustomerAccountServerHandlers({
-          cartServerHandlers: customerCartHandlers,
-          customerSession,
-          defaultPostLoginRedirectPathname: "/account",
-          loginFailedRedirectPath: "/account/sign-in-failed",
-          origin: getCustomerRequestOrigin,
-          postLogoutRedirectUri: "/",
-        })
+  const customerSession =
+    isAuthPath || (shopConfig.auth.isEnabled && pathname === "/api/cart")
+      ? await getHydrogenCustomerSession()
       : undefined;
-  const handlers =
-    authHandlers && customerCartHandlers
-      ? [authHandlers, customerCartHandlers, predictiveSearchHandlers]
-      : [customerCartHandlers ?? cartHandlers, predictiveSearchHandlers];
+
   const shopifyRoute = handleShopifyRoutes({
-    handlers,
+    handlers: customerSession
+      ? customerHandlers(customerSession, isAuthPath)
+      : [cartHandlers, predictiveSearchHandlers],
     request,
     requestContext,
     routeTemplates: SHOPIFY_ROUTE_TEMPLATES,
-    sessionManager: usesCustomerCart ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
+    sessionManager: customerSession ? createCustomerSessionManager(request) : NOOP_SESSION_MANAGER,
     storefrontClient: createRequestStorefrontClient(requestContext),
   });
   if (shopifyRoute) return shopifyRoute;
+  if (isRefinedCollectionPath(pathname)) return new Response("Not Found", { status: 404 });
 
-  const isDocumentRequest = request.method === "GET" || request.method === "HEAD";
-  const markdownMirrorPath = isDocumentRequest ? getMarkdownMirrorPath(pathname) : null;
-  if (markdownMirrorPath) {
-    const url = request.nextUrl.clone();
-    url.pathname = markdownMirrorPath;
-    const response = NextResponse.rewrite(url, {
-      request: { headers: requestContext.getForwardedRequestHeaders() },
-    });
-    requestContext.applyResponseHeaders(response.headers);
-    return response;
-  }
-
-  const markdownPath = isDocumentRequest ? getMarkdownPath(pathname) : null;
-  if (markdownPath) {
-    const representation = negotiateRepresentation(request.headers.get("Accept"));
-
-    if (!representation) {
-      return new Response(
-        "Not Acceptable\n\nAvailable representations: text/html, text/markdown\n",
-        {
-          status: 406,
-          headers: { "Content-Type": "text/plain; charset=utf-8", Vary: "Accept" },
-        },
-      );
-    }
-
-    if (representation === "text/markdown") {
-      const url = request.nextUrl.clone();
-      url.pathname = markdownPath;
-      const response = NextResponse.rewrite(url, {
-        request: { headers: requestContext.getForwardedRequestHeaders() },
+  const headers = requestContext.getForwardedRequestHeaders();
+  const rewritePath =
+    getMarkdownRewritePath(request) ?? getRefinedCollectionPath(pathname, request.nextUrl.search);
+  const response = rewritePath
+    ? NextResponse.rewrite(new URL(`${rewritePath}${request.nextUrl.search}`, request.url), {
+        request: { headers },
+      })
+    : NextResponse.next({
+        request: { headers: forwardCustomerRefreshAttempt(request.nextUrl, headers) },
       });
-      appendVaryAccept(response.headers);
-      requestContext.applyResponseHeaders(response.headers);
-      return response;
-    }
-  }
-
-  const response = NextResponse.next({
-    request: {
-      headers: forwardCustomerRefreshAttempt(
-        request.nextUrl,
-        requestContext.getForwardedRequestHeaders(),
-      ),
-    },
-  });
-  if (markdownPath) appendVaryAccept(response.headers);
   requestContext.applyResponseHeaders(response.headers);
   return response;
+}
+
+function customerHandlers(
+  customerSession: Awaited<ReturnType<typeof getHydrogenCustomerSession>>,
+  isAuthPath: boolean,
+) {
+  const cart = createCustomerCartHandlers(customerSession);
+  if (!isAuthPath) return [cart, predictiveSearchHandlers];
+
+  const auth = createCustomerAccountServerHandlers({
+    cartServerHandlers: cart,
+    customerSession,
+    defaultPostLoginRedirectPathname: "/account",
+    loginFailedRedirectPath: "/account/sign-in-failed",
+    origin: getCustomerRequestOrigin,
+    postLogoutRedirectUri: "/",
+  });
+  return [auth, cart, predictiveSearchHandlers];
 }
 
 export const config = {

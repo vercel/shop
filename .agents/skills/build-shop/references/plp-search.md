@@ -3,30 +3,36 @@
 ## Reference implementation
 
 - Docs: [PLP anatomy](https://vercel.shop/docs/anatomy/pages/plp), [route reference](https://vercel.shop/docs/reference/routes)
-- Collection routes: `app/collections/page.tsx`, `app/collections/all/page.tsx`, `app/collections/[handle]/page.tsx`
+- Collection routes: `app/collections/page.tsx`, the `layout.tsx` and `page.tsx` in `app/collections/all/` and `app/collections/[handle]/`, and their request-time `refine/page.tsx` routes
+- Browse routing: `getRefinedCollectionPath` in `lib/collections/index.ts`, applied by `proxy.ts`
 - Search route: `app/search/page.tsx`
 - Components: `components/collections/`, `components/product-card/product-card.tsx`
 - Browse state and cache decisions: `lib/collections/{index,server,action,types}.ts`, `lib/search/server.ts`, `lib/product/server.ts`
 - Operations and transforms: `lib/shopify/operations/collections/server.ts`, `lib/shopify/operations/products/server.ts`, `lib/shopify/transforms/collection/index.ts`, `lib/shopify/transforms/filters/index.ts`
 - Public source fallback: [collection routes source](https://github.com/vercel/shop/tree/main/app/collections), [search route source](https://github.com/vercel/shop/blob/main/app/search/page.tsx), [template source](https://github.com/vercel/shop)
 
-## Preserve the static header
+## Keep the default view static
 
-Collection identity, title, description, and other cacheable header content belong in the static shell. The route intentionally resolves the collection before rendering and keeps `searchParams` unawaited for filters, sort, pagination, and results.
+A collection or `/collections/all` with no filters and no sort is static: its page renders the cached first page from `getCollectionResults` or `getAllProductsResults` into the static shell and per-link prefetches. `proxy.ts` rewrites a URL whose filter or sort params Hydrogen recognizes to the request-time `refine` route beside it, which fetches live, and returns 404 for direct requests to a `refine` path. Filters navigate with plain `router.push`.
 
-Do not move the collection header into the results boundary or give `getCollection` request-time inputs. The route wraps its params-dependent content in `Suspense` with `CollectionDetailSkeleton`, which reuses the browse toolbar and grid fallback.
+- Both routes sit under one layout (`CollectionLayout`), which owns the header, the browse store (`CollectionBrowseFrame`), the toolbar, and the filter sheet, so a filter never remounts them. `generateStaticParams` lives in `app/collections/[handle]/layout.tsx` so both routes prerender a shell per collection.
+- The default page renders `SearchParamsProbe`. Without a read of `searchParams`, the router renders the cached static page for any search string and never asks the server, so the rewrite never runs. Do not read `searchParams` anywhere else in the default view, or call `useSearchParams()` or `usePathname()` in it or the layout; the store receives the public `path`.
+- Each page renders its results inside `CollectionBrowseBoundary` and reads params, search params, and Shopify data only inside it. `CollectionResults` renders the grid and hands the page's facets and data search to the layout through `BrowsePublisher`, which also reads the committed URL so unrelated params such as `utm_*` carry into the next filter change.
+- The first filter or sort from the default view shows the `refine` route's shell: the toolbar and open filter sheet stay, with the facets they last showed, and only the grid shows its skeleton until results arrive. Later changes keep the current grid dimmed, and clearing back to the default view renders from the router cache.
+- The store renders before the page, so on a direct load of a filtered URL the active-filter badge appears at hydration. Until a page publishes its results, the store follows the URL with an empty data search, so it reads as loading: sort waits and the filter sheet shows its skeleton, and no change can start from an empty browse state.
+- Do not move the collection header into the results boundary or give `getCollection` request-time inputs.
 
 Search is different: its query and results are request inputs. Keep its heading in the shell and stream results, facets, and counts behind their own boundaries.
 
 ## One browse store for collections and search
 
-Collections and `/search` share the same Hydrogen collection store. `CollectionBrowseProvider` wraps `CollectionProvider` from `@shopify/hydrogen/react`; filters, sort, badges, and load-more all read from `useCollection()` and mutate through `useCollectionActions()`. Do not reintroduce a parallel `URLSearchParams`-driven path for search.
+Collections and `/search` share the same Hydrogen collection store. `CollectionBrowseFrame` (collections, in the layout) and `CollectionBrowseProvider` (search, in the page) wrap `CollectionProvider` from `@shopify/hydrogen/react`; filters, sort, badges, and load-more all read from `useCollection()` and mutate through `useCollectionActions()`. Do not reintroduce a parallel `URLSearchParams`-driven path for search.
 
-- URL vocabulary is Hydrogen's Liquid-compatible `filter.*` and `sort_by` (`price-descending`, `best-selling`). `resolveBrowseParams` in `lib/collections/server.ts` is the only place that turns a search string into Hydrogen's `ProductFilter[]` and `sort_by` value; routes (through `readBrowseState`) and the load-more server action call it. Selected state, badges, and facet pruning use Hydrogen's `isFilterInputActive`; there is no parallel `filter.*` record. Hydrogen folds the taxonomy metafield namespace into `key`, so the Shopify operations split it back out at the query boundary.
+- URL vocabulary is Hydrogen's Liquid-compatible `filter.*` and `sort_by` (`price-descending`, `best-selling`). `resolveBrowseParams` in `lib/collections/index.ts` is the only place that turns a search string into Hydrogen's `ProductFilter[]` and `sort_by` value; routes (through `readBrowseState`), the load-more server action, and `proxy.ts` (through `getRefinedCollectionPath`) call it. Selected state, badges, and facet pruning use Hydrogen's `isFilterInputActive`; there is no parallel `filter.*` record. Hydrogen folds the taxonomy metafield namespace into `key`, so the Shopify operations split it back out at the query boundary.
 - Search mounts the store with `handle={\`search:${q}\`}` so a new term rebuilds state and drops stale filters. `q` and `collection` are not store-owned, so the reconciler preserves them across filter and sort changes.
 - Search only sorts by relevance and price. Pass `SEARCH_SORT_EXCLUDE` to `CollectionsSortSelect`; no `sort_by` means `RELEVANCE`.
 - Filter links and active-filter badges render real `href`s built with `serializeCollectionParams` and `getFilterRemovalUrl`, then `preventDefault` into the store action so no-JS navigation still works.
-- Every browse route renders `BrowseResults` through the shared `Browse` component. Its `source` names the Storefront backend: collection products for `/collections/[handle]`, the search index for `/search` and `/collections/all`. Cursors are only valid for the backend that issued them.
+- Collection pages render `BrowseResults` through `CollectionResults`, and `/search` through `Browse`, which also mounts its own store and toolbar. The results' `source` names the Storefront backend: collection products for `/collections/[handle]`, the search index for `/search` and `/collections/all`. Cursors are only valid for the backend that issued them.
 - `InfiniteProductGrid` serializes the current store state into `search` on every load-more call. `loadMoreBrowseProductsAction` accepts `{ cursor, search, source }` rather than a frozen filter snapshot.
 
 ## Results and controls
@@ -47,4 +53,4 @@ Collections and `/search` share the same Hydrogen collection store. `CollectionB
 
 ## Prefetch traffic
 
-Product grids are high fanout. Cards link through the shared `Link` from `@/components/ui/link`, which keeps the App Shell prefetch for every visible card and upgrades only a hovered or focused card to its static per-link prefetch. Do not set `prefetch={true}` on cards or swap in `next/link`. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.
+Product grids are high fanout. Cards link through the shared `Link` from `@/components/ui/link`, which keeps the App Shell prefetch for every visible card and upgrades a card to its static per-link prefetch only on intent. Do not set `prefetch={true}` on cards or swap in `next/link`. Compare navigation latency against request volume only when prefetch behavior is explicitly being investigated.

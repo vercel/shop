@@ -28,18 +28,6 @@ const Markdown = memo(({ children }: { children: string }) => (
   </Streamdown>
 ));
 
-function toolLabelName(toolName: string, input: unknown) {
-  if (
-    toolName !== "connection_execute" ||
-    !input ||
-    typeof input !== "object" ||
-    !("connection" in input) ||
-    !("tool" in input)
-  )
-    return toolName;
-  return `${String(input.connection)}__${String(input.tool)}`;
-}
-
 export function ChatMessage({
   isLatest,
   isStreaming,
@@ -79,9 +67,7 @@ export function ChatMessage({
     <div className="grid gap-2.5 text-foreground text-sm">
       <AgentThinking
         active={isStreaming && !text}
-        tool={
-          active?.type === "dynamic-tool" ? toolLabelName(active.toolName, active.input) : undefined
-        }
+        tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
       />
       {text && <Markdown>{text}</Markdown>}
       <ShoppingResults

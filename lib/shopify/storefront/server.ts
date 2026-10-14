@@ -15,8 +15,6 @@ const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as str
 
 const SHOPIFY_ACCESS_TOKEN = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN as string;
 
-const SHOPIFY_API_VERSION = process.env.SHOPIFY_API_VERSION ?? "unstable";
-
 const SHOPIFY_STOREFRONT_ID = process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ID;
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -57,7 +55,7 @@ export function createRequestStorefrontClient(
 ): StorefrontClient {
   return createStorefrontClient({
     config: {
-      apiVersion: SHOPIFY_API_VERSION,
+      apiVersion: process.env.SHOPIFY_API_VERSION,
       defaultTimeoutInMs: REQUEST_TIMEOUT_MS,
       fetch: customFetchApi,
       publicStorefrontToken: SHOPIFY_ACCESS_TOKEN,

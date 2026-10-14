@@ -1,7 +1,7 @@
-import { parseCollectionParams, serializeCollectionParams } from "@shopify/hydrogen";
+import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 
-import { getBrowseSort, PRODUCTS_PER_PAGE } from "@/lib/collections";
+import { describeCollection, PRODUCTS_PER_PAGE, resolveBrowseParams } from "@/lib/collections";
 import type {
   BrowseResults,
   BrowseState,
@@ -11,12 +11,17 @@ import type {
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { tagProducts } from "@/lib/product/server";
+import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import {
   fetchCollection,
   fetchCollections,
   fetchCollectionsListing,
 } from "@/lib/shopify/operations/collections/server";
-import { fetchCollectionProducts } from "@/lib/shopify/operations/products/server";
+import {
+  fetchCollectionProducts,
+  fetchSearchFacets,
+  fetchSearchIndexProducts,
+} from "@/lib/shopify/operations/products/server";
 
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
@@ -68,17 +73,6 @@ export async function getCollectionsListing(
   return collections;
 }
 
-export function resolveBrowseParams(search: string | URLSearchParams): BrowseState {
-  const state = parseCollectionParams(
-    typeof search === "string" ? new URLSearchParams(search) : search,
-  );
-  return {
-    dataSearch: serializeCollectionParams(state).toString(),
-    filters: state.filters,
-    sort: getBrowseSort(state),
-  };
-}
-
 export async function readBrowseState(
   searchParamsPromise: Promise<Record<string, string | string[] | undefined>>,
 ): Promise<BrowseState> {
@@ -99,7 +93,46 @@ function recordToSearchParams(
   return params;
 }
 
-// Browse pages and facets stay uncached: cached cursor pages drift apart and duplicate boundary products, and Search & Discovery changes must appear immediately.
+// The default view, unfiltered and in its default sort: "minutes" bounds Search & Discovery edits, which send no webhook, and Load more's product dedupe absorbs cursor drift.
+export async function getCollectionResults(params: {
+  handle: string;
+  locale?: CommerceLocale;
+}): Promise<BrowseResults> {
+  "use cache: remote";
+  cacheLife("minutes");
+  cacheTag("collections", `collection-${params.handle}`, "products-index");
+
+  const { facets, pageInfo, products } = await fetchCollectionProducts({
+    collection: params.handle,
+    limit: PRODUCTS_PER_PAGE,
+    locale: params.locale,
+  });
+  tagProducts(products);
+  return {
+    dataSearch: "",
+    facets,
+    pageInfo,
+    products,
+    source: { collection: params.handle, type: "collection" },
+  };
+}
+
+export async function getAllProductsResults(
+  params: { locale?: CommerceLocale } = {},
+): Promise<BrowseResults> {
+  "use cache: remote";
+  cacheLife("minutes");
+  cacheTag("products-index");
+
+  const [{ pageInfo, products }, { facets, total }] = await Promise.all([
+    fetchSearchIndexProducts({ limit: PRODUCTS_PER_PAGE, locale: params.locale }),
+    fetchSearchFacets({ locale: params.locale }),
+  ]);
+  tagProducts(products);
+  return { dataSearch: "", facets, pageInfo, products, source: { type: "search" }, total };
+}
+
+// Filtered and sorted views stay live; a cache entry per combination would rarely be reused.
 export async function fetchCollectionResults({
   handle,
   statePromise,
@@ -137,4 +170,34 @@ export async function getAllProductsCollection(): Promise<Collection> {
       title,
     },
   };
+}
+
+function browseMetadata(handle: string, title: string, description: string): Metadata {
+  const url = `/collections/${handle}`;
+  return {
+    title,
+    description,
+    alternates: buildAlternates({ pathname: url }),
+    openGraph: buildOpenGraph({ title, description, url, type: "website" }),
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og-default.png"],
+    },
+  };
+}
+
+export async function getCollectionMetadata(handle: string): Promise<Metadata> {
+  const collection = await getCollection({ handle });
+  if (!collection) return browseMetadata(handle, "Collection", "Browse collection products.");
+  return browseMetadata(collection.handle, collection.seo.title, describeCollection(collection));
+}
+
+export async function getAllProductsMetadata(): Promise<Metadata> {
+  return browseMetadata(
+    ALL_PRODUCTS_HANDLE,
+    "Products",
+    describeCollection(await getAllProductsCollection()),
+  );
 }

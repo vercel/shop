@@ -27,7 +27,7 @@ export default function HomePage() {
   return (
     <Page className="pt-0">
       <Sections>
-        <section className="grid">
+        <section className="grid grid-cols-1">
           <div className="col-start-1 row-start-1 hidden md:block md:aspect-4/1" />
           <div className="relative col-start-1 row-start-1 flex items-center justify-center px-5 py-10 lg:px-10">
             <div className="flex flex-col items-center text-center gap-2.5">

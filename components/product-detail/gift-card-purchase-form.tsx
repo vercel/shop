@@ -15,6 +15,7 @@ export function GiftCardPurchaseForm() {
   const { formProps, pending, register, selectedVariant } = useProductForm();
   const { openOverlay } = useCartDrawer();
   const [minimumSendDate, setMinimumSendDate] = useState("");
+  const [timezoneOffset, setTimezoneOffset] = useState("");
   const sendOnEnabled = Boolean(minimumSendDate);
   const isUnavailable = !selectedVariant?.availableForSale;
 
@@ -26,13 +27,6 @@ export function GiftCardPurchaseForm() {
             event.preventDefault();
             return;
           }
-          if (sendOnEnabled) {
-            // Capture the browser offset at submission, not during server rendering.
-            const offset = event.currentTarget.elements.namedItem("attributes.__shopify_offset");
-            if (offset instanceof HTMLInputElement) {
-              offset.value = String(new Date().getTimezoneOffset());
-            }
-          }
           openOverlay();
         },
       })}
@@ -43,6 +37,7 @@ export function GiftCardPurchaseForm() {
           return;
         }
         setMinimumSendDate("");
+        setTimezoneOffset("");
       }}
     >
       <input type="hidden" {...register("merchandiseId", {})} />
@@ -57,7 +52,7 @@ export function GiftCardPurchaseForm() {
       <input
         type="hidden"
         disabled={!sendOnEnabled}
-        {...register("attributeValue", { defaultValue: "", key: "__shopify_offset" })}
+        {...register("attributeValue", { key: "__shopify_offset", value: timezoneOffset })}
       />
       <fieldset disabled={pending} data-slot="gift-card-fields" className="grid gap-2.5">
         <div className="grid gap-2.5">
@@ -116,6 +111,7 @@ export function GiftCardPurchaseForm() {
                       ].join("-")
                     : "",
                 );
+                setTimezoneOffset(checked ? String(today.getTimezoneOffset()) : "");
               }}
             />
           </div>

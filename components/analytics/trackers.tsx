@@ -1,6 +1,7 @@
 "use client";
 
 import type { AnalyticsCart, CollectionViewPayload, ProductPayload } from "@shopify/hydrogen";
+import type { MoneyV2 } from "@shopify/hydrogen/storefront-api-types";
 import { usePathname, useSearchParams } from "next/navigation";
 import { use, useEffect, useRef } from "react";
 
@@ -60,7 +61,7 @@ export function ProductViewedTracker({
     if (!variant || trackedHandleRef.current === product.handle) return;
     const payload: ProductPayload = {
       id: product.id,
-      price: variant.price.amount,
+      price: variant.price as MoneyV2,
       quantity: 1,
       title: product.title,
       variantId: variant.id,

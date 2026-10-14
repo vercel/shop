@@ -6,6 +6,7 @@ export function AgentThinking({ active, tool }: { active: boolean; tool?: string
     "add-cart-note": "Adding your note…",
     "add-to-cart": "Adding to cart…",
     "browse-collection": "Browsing the collection…",
+    "change-cart-item-options": "Updating your cart…",
     "get-cart": "Checking your cart…",
     "get-product-details": "Looking up product details…",
     "get-recommendations": "Finding recommendations…",
@@ -15,6 +16,7 @@ export function AgentThinking({ active, tool }: { active: boolean; tool?: string
     policies__search_shop_policies_and_faqs: "Checking store policies…",
     shopify__search_catalog: "Searching products…",
     "update-cart-item": "Updating your cart…",
+    "update-discount-code": "Updating your discount codes…",
   };
   return (
     <p className="shimmer w-fit text-muted-foreground text-sm" role="status">

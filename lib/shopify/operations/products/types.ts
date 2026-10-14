@@ -2,7 +2,7 @@ import type { ProductFilter } from "@shopify/hydrogen";
 
 import type { CommerceLocale } from "@/lib/config/types";
 import type { Facets } from "@/lib/filters/types";
-import type { ProductPage } from "@/lib/product/types";
+import type { ProductPage, ProductVariant } from "@/lib/product/types";
 
 export type SearchIndexProductsParams = {
   cursor?: string;
@@ -27,6 +27,11 @@ export interface CollectionProductsResult extends ProductPage {
 }
 
 export type ProductOptionValues = Map<string, Map<string, Set<string>>>;
+
+export interface ProductVariantSelection {
+  options: { name: string; values: string[] }[];
+  variant?: ProductVariant;
+}
 
 export type SearchFacetsParams = {
   filters?: ProductFilter[];

@@ -21,6 +21,8 @@ import { getActiveFilterBadges } from "@/lib/filters";
 import type { Filter, PriceRange } from "@/lib/filters/types";
 import { formatCurrencySymbol, formatPrice } from "@/lib/money";
 
+import { usePublishedFacets } from "./collection-browse-provider";
+
 interface FilterSheetProps {
   children: ReactNode;
   label: string;
@@ -39,6 +41,17 @@ export function FilterSheet({ children, label, trigger }: FilterSheetProps) {
       </SheetContent>
     </Sheet>
   );
+}
+
+interface PublishedCollectionFiltersProps {
+  fallback: ReactNode;
+}
+
+// The collection layout's filter sheet shows the facets of the last results a page rendered, so it keeps them while the next view loads.
+export function PublishedCollectionFilters({ fallback }: PublishedCollectionFiltersProps) {
+  const facets = usePublishedFacets();
+  if (!facets) return fallback;
+  return <CollectionFilterSidebar filters={facets.filters} priceRange={facets.priceRange} />;
 }
 
 interface CollectionFilterSidebarProps {

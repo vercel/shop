@@ -33,6 +33,7 @@ import type {
   CollectionProductsParams,
   CollectionProductsResult,
   ProductOptionValues,
+  ProductVariantSelection,
   SearchFacetsParams,
   SearchFacetsResult,
   SearchIndexProductsParams,
@@ -69,7 +70,7 @@ function toStorefrontFilters(filters: ProductFilter[]): StorefrontProductFilter[
 const GET_PRODUCT_BY_HANDLE_QUERY = gql(
   `#graphql
   query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       ...ProductFields
     }
   }
@@ -80,7 +81,7 @@ const GET_PRODUCT_BY_HANDLE_QUERY = gql(
 const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
   `#graphql
   query getProductByHandleWithBundles($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       ...ProductFields
       selectedOrFirstAvailableVariant {
         ...BundleRelationshipFields
@@ -118,14 +119,14 @@ export async function fetchProduct({
   assertStorefrontOk(response, "getProductByHandle");
   const { data } = response;
 
-  if (!data.productByHandle) return undefined;
-  return transformShopifyProductDetails(data.productByHandle);
+  if (!data.product) return undefined;
+  return transformShopifyProductDetails(data.product);
 }
 
 const GET_PRODUCT_VARIANT_QUERY = gql(
   `#graphql
   query getProductVariant($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
         ...ProductVariantFields
       }
@@ -138,7 +139,7 @@ const GET_PRODUCT_VARIANT_QUERY = gql(
 const GET_PRODUCT_VARIANT_WITH_BUNDLES_QUERY = gql(
   `#graphql
   query getProductVariantWithBundles($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {
         ...PurchasableProductVariantFields
       }
@@ -170,14 +171,62 @@ export async function fetchProductVariant({
   assertStorefrontOk(response, "getProductVariant");
   const { data } = response;
 
-  const variant = data.productByHandle?.selectedOrFirstAvailableVariant;
+  const variant = data.product?.selectedOrFirstAvailableVariant;
   return variant ? transformVariant(variant) : undefined;
+}
+
+const GET_PRODUCT_VARIANT_BY_SELECTED_OPTIONS_QUERY = gql(
+  `#graphql
+  query getProductVariantBySelectedOptions($handle: String!, $selectedOptions: [SelectedOptionInput!]!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
+    product(handle: $handle) {
+      options {
+        name
+        optionValues {
+          name
+        }
+      }
+      variantBySelectedOptions(selectedOptions: $selectedOptions, caseInsensitiveMatch: true) {
+        ...PurchasableProductVariantFields
+      }
+    }
+  }
+`,
+  [PURCHASABLE_PRODUCT_VARIANT_FRAGMENT],
+);
+
+// Exact match: unlike fetchProductVariant, a combination the product does not have returns no variant.
+export async function fetchProductVariantBySelectedOptions({
+  handle,
+  locale = shopConfig.localization,
+  selectedOptions,
+}: {
+  handle: string;
+  locale?: CommerceLocale;
+  selectedOptions: SelectedOption[];
+}): Promise<ProductVariantSelection | undefined> {
+  const response = await storefront.request(GET_PRODUCT_VARIANT_BY_SELECTED_OPTIONS_QUERY, {
+    locale,
+    variables: { handle, selectedOptions },
+  });
+  assertStorefrontOk(response, "getProductVariantBySelectedOptions");
+  const { product } = response.data;
+  if (!product) return undefined;
+
+  return {
+    options: product.options.map((option) => ({
+      name: option.name,
+      values: option.optionValues.map((value) => value.name),
+    })),
+    variant: product.variantBySelectedOptions
+      ? transformVariant(product.variantBySelectedOptions)
+      : undefined,
+  };
 }
 
 const GET_PRODUCT_WITH_VARIANTS_QUERY = gql(
   `#graphql
   query getProductWithVariants($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
-    productByHandle(handle: $handle) {
+    product(handle: $handle) {
       ...ProductWithVariantsFields
     }
   }
@@ -199,8 +248,8 @@ export async function fetchProductWithVariants({
   assertStorefrontOk(response, "getProductWithVariants");
   const { data } = response;
 
-  if (!data.productByHandle) return undefined;
-  return transformShopifyProductDetails(data.productByHandle);
+  if (!data.product) return undefined;
+  return transformShopifyProductDetails(data.product);
 }
 
 const GET_PRODUCTS_BY_IDS_QUERY = gql(

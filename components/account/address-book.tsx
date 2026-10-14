@@ -34,7 +34,7 @@ const TEXT_FIELDS = [
   { autoComplete: "address-level2", key: "city", label: "City", span: false },
   { autoComplete: "address-level1", key: "zoneCode", label: "State / Province code", span: false },
   { autoComplete: "postal-code", key: "zip", label: "ZIP / Postal code", span: false },
-  { autoComplete: "country", key: "territoryCode", label: "Country code", span: false },
+  { autoComplete: "country", key: "countryCode", label: "Country code", span: false },
   { autoComplete: "tel", key: "phoneNumber", label: "Phone", span: true },
 ] as const satisfies readonly {
   autoComplete: string;
@@ -43,7 +43,7 @@ const TEXT_FIELDS = [
   span: boolean;
 }[];
 
-const REQUIRED_FIELDS = new Set<keyof CustomerAddressInput>(["address1", "city", "territoryCode"]);
+const REQUIRED_FIELDS = new Set<keyof CustomerAddressInput>(["address1", "city", "countryCode"]);
 
 export function AddressBook({ addresses }: { addresses: CustomerAddress[] }) {
   const [formState, setFormState] = useState<FormState>(null);
@@ -164,7 +164,7 @@ function AddressForm({ address, onSuccess }: { address?: CustomerAddress; onSucc
                 required={REQUIRED_FIELDS.has(field.key)}
                 aria-invalid={fieldError ? true : undefined}
                 placeholder={
-                  field.key === "territoryCode"
+                  field.key === "countryCode"
                     ? "e.g. US"
                     : field.key === "zoneCode"
                       ? "e.g. CA"
@@ -260,10 +260,10 @@ function toFormValues(address?: CustomerAddress): CustomerAddressInput {
     address2: address?.address2 ?? "",
     city: address?.city ?? "",
     company: address?.company ?? "",
+    countryCode: address?.countryCode ?? "",
     firstName: address?.firstName ?? "",
     lastName: address?.lastName ?? "",
     phoneNumber: address?.phoneNumber ?? "",
-    territoryCode: address?.territoryCode ?? "",
     zip: address?.zip ?? "",
     zoneCode: address?.zoneCode ?? "",
   };
