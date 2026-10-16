@@ -108,6 +108,8 @@ export interface ProductDetails extends ProductCard {
   encodedVariantExistence?: string;
   hasUniformPricing: boolean;
   images: Image[];
+  /** One entry per variant (first 250), for Schema.org Offers. */
+  offers: ProductOffer[];
   options: ProductOption[];
   priceRange: {
     maxVariantPrice: Money;
@@ -119,6 +121,14 @@ export interface ProductDetails extends ProductCard {
   variants?: ProductVariant[];
   variantsCount: number;
   videos: Video[];
+}
+
+export interface ProductOffer {
+  availableForSale: boolean;
+  price: Money;
+  selectedOptions: SelectedOption[];
+  sku?: string;
+  title: string;
 }
 
 export interface ProductVariant {

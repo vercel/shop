@@ -62,6 +62,7 @@ export function ProductDetailSection({
           currencyCode: product.currencyCode,
           priceRange: product.priceRange,
           offerCount: product.variantsCount,
+          offers: product.offers,
           availableForSale: product.availableForSale,
           sku: product.defaultVariantSku,
         }}

@@ -103,6 +103,22 @@ export const PRODUCT_FRAGMENT = gql(
     adjacentVariants {
       ...ProductVariantFields
     }
+    # Lean per-variant facts for Schema.org Offers; adjacentVariants is too sparse to list every offer.
+    offerVariants: variants(first: 250) {
+      nodes {
+        availableForSale
+        sku
+        title
+        price {
+          amount
+          currencyCode
+        }
+        selectedOptions {
+          name
+          value
+        }
+      }
+    }
     seo {
       title
       description
