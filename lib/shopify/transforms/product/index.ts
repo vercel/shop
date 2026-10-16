@@ -238,6 +238,13 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     encodedVariantAvailability: product.encodedVariantAvailability ?? undefined,
     encodedVariantExistence: product.encodedVariantExistence ?? undefined,
     ...extractMediaFromProduct(product),
+    offers: product.offerVariants.nodes.map((variant) => ({
+      availableForSale: variant.availableForSale,
+      price: variant.price,
+      selectedOptions: variant.selectedOptions,
+      sku: variant.sku || undefined,
+      title: variant.title,
+    })),
     variants,
     options: product.options.map(transformOption),
     seo: {
