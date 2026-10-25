@@ -5,6 +5,8 @@ import { catalogMiddleware } from "./lib/catalog-middleware";
 
 export default defineAgent({
   defaultTools: false,
+  // Anonymous sessions have the unknown audience, whose derived retention deletes run data and breaks chat restore.
+  experimental: { workflow: { retention: "default" } },
   model: wrapLanguageModel({
     middleware: catalogMiddleware,
     model: gateway("openai/gpt-6-luna-fast"),

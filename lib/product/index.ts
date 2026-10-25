@@ -171,6 +171,17 @@ export function isMarkedDown(
   return compareAtAmount !== undefined && Number(compareAtAmount) > Number(amount);
 }
 
+// A markdown under 0.5% rounds to 0, which would render a "0% OFF" badge.
+export function getDiscountPercent(
+  amount: string,
+  compareAtAmount: string | undefined,
+): number | null {
+  if (!isMarkedDown(amount, compareAtAmount)) return null;
+  const compareAt = Number(compareAtAmount);
+  const percent = Math.round(((compareAt - Number(amount)) / compareAt) * 100);
+  return percent >= 1 ? percent : null;
+}
+
 function findColorOption(options: ProductOption[]): ProductOption | undefined {
   return options.find(isColorOption);
 }

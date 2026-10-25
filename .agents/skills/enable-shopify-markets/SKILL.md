@@ -260,7 +260,7 @@ Do not call this root-param getter from Route Handlers or Server Actions: use ro
 
 ## 7. Extend the proxy
 
-Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/server.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale in the proxy before Shopify dispatch (`resolveRequestLocale` below): from the validated locale prefix when the path has one, otherwise from the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
+Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/request.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale in the proxy before Shopify dispatch (`resolveRequestLocale` below): from the validated locale prefix when the path has one, otherwise from the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
 
 Compose next-intl after the existing Shopify route dispatch and Markdown negotiation, where the template returns `NextResponse.next(...)`. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
 
@@ -271,11 +271,20 @@ const handleI18n = createMiddleware(routing);
 export async function proxy(request: NextRequest): Promise<Response> {
   const locale = resolveRequestLocale(request);
   const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
-  const shopifyRoute = handleShopifyRoutes({
-    // Preserve the template's handlers, session manager, and storefront client.
+  // Keep the template's customerSession and isAuthPath reads here.
+  const routeOptions = {
     request,
     requestContext,
-  });
+    routeTemplates: SHOPIFY_ROUTE_TEMPLATES,
+    storefrontClient: createRequestStorefrontClient(requestContext),
+  };
+  const shopifyRoute = customerSession
+    ? handleShopifyRoutes({
+        ...routeOptions,
+        handlers: customerHandlers(customerSession, isAuthPath),
+        sessionManager: createCustomerSessionManager(request),
+      })
+    : handleShopifyRoutes({ ...routeOptions, handlers: [cartHandlers, predictiveSearchHandlers] });
   if (shopifyRoute) return shopifyRoute;
 
   // Keep the template's Markdown negotiation here, unchanged.
@@ -368,7 +377,7 @@ Cart writes stay in Hydrogen's `/api/cart` handler; never mutate the cart from a
 
 Use Shopify AI Toolkit to confirm how the store's cart buyer country and pricing follow `@inContext` on cart operations. If the store requires an explicit buyer-country update, the installed Hydrogen SDK exposes no cart intent for it: report that gap instead of adding a cart mutation outside Hydrogen's handlers.
 
-The selector remains a leaf Client Component. A Server Action in `lib/i18n/action.ts` may validate the requested locale and set the locale cookie; it never reads or writes the cart. After a country change, call `refresh()` from `useCartActions()` so prices and checkout reflect Shopify's response for the new market; do not invalidate public cache tags.
+The selector remains a leaf Client Component. A Server Action in `lib/i18n/action.ts` parses the requested locale with a module-private `zod` schema that accepts only `isEnabledLocale` values, then sets the locale cookie; it never reads or writes the cart. After a country change, call `refresh()` from `useCartActions()` so prices and checkout reflect Shopify's response for the new market; do not invalidate public cache tags.
 
 - **Sub-path/per-domain:** use next-intl's client router to replace the current pathname with `{ locale: nextLocale }`, then refresh the cart.
 - **Invisible cookie:** call the action, then call `router.refresh()` and refresh the cart. The pathname must not change.

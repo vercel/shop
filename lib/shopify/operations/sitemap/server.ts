@@ -1,9 +1,12 @@
 import { gql } from "@shopify/hydrogen";
 
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
-import type { ShopifySitemapType, SitemapResource } from "@/lib/shopify/operations/sitemap/types";
+import type {
+  ArticleSitemapPage,
+  ShopifySitemapType,
+  SitemapResource,
+} from "@/lib/shopify/operations/sitemap/types";
 import { storefront } from "@/lib/shopify/storefront/server";
-import type { ResultOf, StorefrontResponse } from "@/lib/shopify/types";
 
 const GET_ARTICLE_SITEMAP_PAGE_QUERY = gql(`#graphql
   query getArticleSitemapPage($first: Int!, $after: String) {
@@ -55,39 +58,30 @@ export async function fetchSitemapPagesCount(type: ShopifySitemapType): Promise<
   return response.data.sitemap.pagesCount?.count ?? 0;
 }
 
+// Article sitemap resources omit the blog handle that article URLs need, so articles page by cursor instead.
+export async function fetchArticleSitemapPage(after: string | null): Promise<ArticleSitemapPage> {
+  const response = await storefront.request(GET_ARTICLE_SITEMAP_PAGE_QUERY, {
+    variables: { after, first: 250 },
+  });
+  assertStorefrontOk(response, "getArticleSitemapPage");
+
+  const { nodes, pageInfo } = response.data.articles;
+  return {
+    endCursor: pageInfo.endCursor ?? null,
+    hasNextPage: pageInfo.hasNextPage,
+    items: nodes.map((article) => ({
+      blogHandle: article.blog.handle,
+      handle: article.handle,
+      pathname: `/blogs/${article.blog.handle}/${article.handle}`,
+      updatedAt: article.publishedAt,
+    })),
+  };
+}
+
 export async function fetchSitemapPage(
-  type: ShopifySitemapType,
+  type: Exclude<ShopifySitemapType, "ARTICLE">,
   page: number,
 ): Promise<{ items: SitemapResource[] }> {
-  if (type === "ARTICLE") {
-    let after: string | null = null;
-    let articlePage: ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>["articles"] | undefined;
-
-    for (let currentPage = 1; currentPage <= page; currentPage += 1) {
-      const response: StorefrontResponse<ResultOf<typeof GET_ARTICLE_SITEMAP_PAGE_QUERY>> =
-        await storefront.request(GET_ARTICLE_SITEMAP_PAGE_QUERY, {
-          variables: { after, first: 250 },
-        });
-      assertStorefrontOk(response, "getArticleSitemapPage");
-      articlePage = response.data.articles;
-      after = articlePage.pageInfo.endCursor ?? null;
-
-      if (!articlePage.pageInfo.hasNextPage && currentPage < page) {
-        return { items: [] };
-      }
-    }
-
-    return {
-      items:
-        articlePage?.nodes.map((article) => ({
-          blogHandle: article.blog.handle,
-          handle: article.handle,
-          pathname: `/blogs/${article.blog.handle}/${article.handle}`,
-          updatedAt: article.publishedAt,
-        })) ?? [],
-    };
-  }
-
   const response = await storefront.request(GET_SITEMAP_PAGE_QUERY, {
     variables: { type, page },
   });

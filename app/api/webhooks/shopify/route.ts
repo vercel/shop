@@ -78,6 +78,14 @@ export async function POST(request: Request) {
       if (payload.handle) {
         collectionTags.push(`collection-${payload.handle}`);
       }
+      if (payload.admin_graphql_api_id) {
+        const numericId = getNumericShopifyId(payload.admin_graphql_api_id);
+        if (numericId) {
+          collectionTags.push(`collection-${numericId}`);
+        }
+      } else if (payload.id) {
+        collectionTags.push(`collection-${payload.id}`);
+      }
     } catch {
       console.error("[Shopify Webhook] Could not parse collections payload");
     }

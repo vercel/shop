@@ -22,3 +22,11 @@ export function markdownFrontmatter({
 export function escapeMarkdown(text: string): string {
   return text.replace(/[|*_`]/g, "\\$&").replace(/^#/gm, "\\#");
 }
+
+// Request text stays on one line with every ASCII punctuation mark escaped, so it cannot add blocks, links, images, HTML, or code spans.
+export function escapeRequestText(text: string): string {
+  return text
+    .replace(/[\s\p{Cc}]+/gu, " ")
+    .trim()
+    .replace(/[!-/:-@[-`{-~]/g, "\\$&");
+}

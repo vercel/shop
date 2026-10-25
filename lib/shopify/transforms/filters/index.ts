@@ -164,21 +164,24 @@ function transformFilter(filter: ShopifyFilter): Filter {
   };
 }
 
-function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): PriceRange {
-  for (const value of priceFilter.values) {
-    try {
-      const input = JSON.parse(value.input) as ProductFilter;
-      if (input.price) {
-        return {
-          ...(currencyCode ? { currencyCode } : {}),
-          max: input.price.max ?? 1000,
-          min: input.price.min ?? 0,
-        };
-      }
-    } catch {}
+function parseShopifyPriceInput(inputJson: string): ProductFilter["price"] | null {
+  try {
+    return (JSON.parse(inputJson) as ProductFilter).price ?? null;
+  } catch {
+    return null;
   }
+}
 
-  return { ...(currencyCode ? { currencyCode } : {}), max: 1000, min: 0 };
+function extractPriceRange(priceFilter: ShopifyFilter, currencyCode?: string): PriceRange {
+  const price = priceFilter.values
+    .map((value) => parseShopifyPriceInput(value.input))
+    .find((input) => input !== null);
+
+  return {
+    ...(currencyCode ? { currencyCode } : {}),
+    ...(typeof price?.max === "number" ? { max: price.max } : {}),
+    ...(typeof price?.min === "number" ? { min: price.min } : {}),
+  };
 }
 
 export function transformShopifyFilters(

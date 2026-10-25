@@ -1,5 +1,3 @@
-import { createPredictiveSearchServerHandlers, gql } from "@shopify/hydrogen";
-
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { BrowseResults, BrowseState } from "@/lib/collections/types";
 import {
@@ -36,36 +34,3 @@ export async function fetchSearchResults({
     total,
   };
 }
-
-const PRODUCT_FRAGMENT = gql(/* GraphQL */ `
-  fragment PredictiveSearchProductFragment on Product {
-    featuredImage {
-      altText
-      height
-      url
-      width
-    }
-    priceRange {
-      minVariantPrice {
-        amount
-        currencyCode
-      }
-    }
-  }
-`);
-
-const QUERY_FRAGMENT = gql(/* GraphQL */ `
-  fragment PredictiveSearchQueryFragment on SearchQuerySuggestion {
-    styledText
-    text
-  }
-`);
-
-export const predictiveSearchHandlers = createPredictiveSearchServerHandlers({
-  fragments: {
-    product: PRODUCT_FRAGMENT,
-    query: QUERY_FRAGMENT,
-  },
-  limit: 3,
-  types: ["PRODUCT", "QUERY"],
-});

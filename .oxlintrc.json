@@ -17,6 +17,7 @@
   "rules": {
     "no-underscore-dangle": ["warn", { "allow": ["__typename"] }],
     "no-unused-vars": "off",
+    "react/no-danger": "error",
     "react/react-in-jsx-scope": "off"
   },
   "settings": {

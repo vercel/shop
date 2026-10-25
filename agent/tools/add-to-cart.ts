@@ -5,7 +5,7 @@ import { getSessionCartId, mutateCart } from "../lib/cart";
 
 export default defineTool({
   description:
-    "Add a confirmed ProductVariant ID to the shopper's cart. Only when asked; never retry an uncertain change.",
+    "Add a ProductVariant ID that get-product-details shows as available and matching the requested options to the shopper's cart. Only when asked; never retry an uncertain change.",
   inputSchema: z.strictObject({
     quantity: z.number().int().min(1).max(99).default(1),
     variantId: z.string().regex(/^gid:\/\/shopify\/ProductVariant\/[0-9]+$/),

@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
         ? await getAllProductsCollection()
         : await getCollection({ handle });
     if (!collection) {
-      return new Response(notFoundMarkdown({ kind: "Collection", value: handle }), {
+      return new Response(notFoundMarkdown({ kind: "Collection" }), {
         status: 404,
         headers: markdownHeaders({
           cacheControl: "public, max-age=3600, stale-while-revalidate=604800",

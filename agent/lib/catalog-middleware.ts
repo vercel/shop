@@ -66,6 +66,17 @@ export const catalogMiddleware = {
                       options: product.options ?? [],
                       price_range: product.price_range ?? null,
                       title: product.title ?? null,
+                      variants: Array.isArray(product.variants)
+                        ? product.variants.map((variant: unknown) =>
+                            variant && typeof variant === "object" && !Array.isArray(variant)
+                              ? {
+                                  availability:
+                                    "availability" in variant ? variant.availability : null,
+                                  options: "options" in variant ? variant.options : [],
+                                }
+                              : variant,
+                          )
+                        : [],
                     };
                   }),
                 },

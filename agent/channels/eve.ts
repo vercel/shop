@@ -7,9 +7,20 @@ import { eveChannel } from "eve/channels/eve";
 import { shopConfig } from "../../lib/config";
 
 const anonymous = none<Request>();
+
+// Eve's router decodes the path and ignores a trailing slash, so match the normalized path.
+function isAgentInfoRequest(request: Request) {
+  try {
+    const path = decodeURIComponent(new URL(request.url).pathname).replace(/\/+/g, "/");
+    return path.replace(/\/$/, "").endsWith("/eve/v1/info");
+  } catch {
+    return true;
+  }
+}
+
 const browserAuth: AuthFn<Request> = async (request) => {
   // Agent info exposes compiled instructions and tool config, so only operators may read it.
-  if (new URL(request.url).pathname.endsWith("/eve/v1/info")) return null;
+  if (isAgentInfoRequest(request)) return null;
   if (
     shopConfig.botid.isEnabled &&
     (

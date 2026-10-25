@@ -23,8 +23,7 @@ export default function SignInFailedPage() {
             Your sign-in didn’t finish. Try again, or keep shopping without an account.
           </p>
           <div className="flex flex-wrap justify-center gap-2.5">
-            {/* Sign-in must be a full document navigation so the proxy can start OAuth. */}
-            {/* eslint-disable-next-line next/no-html-link-for-pages */}
+            {/* oxlint-disable-next-line next/no-html-link-for-pages -- Sign-in must be a full document navigation so the proxy can start OAuth. */}
             <a
               href="/account/login"
               className="inline-flex h-12 cursor-pointer items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"

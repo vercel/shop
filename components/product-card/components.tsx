@@ -5,6 +5,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
+import { getDiscountPercent } from "@/lib/product";
 
 function ProductCard({ className, children, ...props }: ComponentProps<"article">) {
   return (
@@ -115,11 +116,6 @@ interface ProductCardPriceProps {
   className?: string;
 }
 
-function getDiscountPercent(price: number, compareAtPrice: number | undefined): number | null {
-  if (!compareAtPrice || compareAtPrice <= price) return null;
-  return Math.round(((compareAtPrice - price) / compareAtPrice) * 100);
-}
-
 function ProductCardPrice({
   amount,
   currencyCode,
@@ -128,11 +124,9 @@ function ProductCardPrice({
   compareAtCurrencyCode,
   className,
 }: ProductCardPriceProps) {
-  const priceNum = parseFloat(amount);
-  const compareAtNum = compareAtAmount ? parseFloat(compareAtAmount) : undefined;
   const isRange = maxAmount != null && maxAmount !== amount;
   // A range's per-variant discounts differ, so a single compare-at would be misleading.
-  const discountPercent = isRange ? null : getDiscountPercent(priceNum, compareAtNum);
+  const discountPercent = isRange ? null : getDiscountPercent(amount, compareAtAmount);
   return (
     <div data-slot="product-card-price" className={cn(className)}>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -149,7 +143,7 @@ function ProductCardPrice({
             </>
           )}
         </span>
-        {discountPercent && compareAtAmount && compareAtCurrencyCode && (
+        {discountPercent !== null && compareAtAmount && compareAtCurrencyCode ? (
           <>
             <Price
               amount={compareAtAmount}
@@ -158,7 +152,7 @@ function ProductCardPrice({
             />
             <DiscountBadge percent={discountPercent} />
           </>
-        )}
+        ) : null}
       </div>
     </div>
   );

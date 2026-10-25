@@ -1,18 +1,11 @@
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown } from "@/lib/markdown";
 
-export function notFoundMarkdown({
-  kind,
-  value,
-}: {
-  kind: "Collection" | "Product";
-  value: string;
-}): string {
+export function notFoundMarkdown({ kind }: { kind: "Collection" | "Product" }): string {
   const { url } = shopConfig.site;
 
   return `# ${kind} Not Found
 
-The ${kind.toLowerCase()} \`${escapeMarkdown(value)}\` could not be found.
+The requested ${kind.toLowerCase()} could not be found.
 
 ## Continue browsing
 

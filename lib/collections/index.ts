@@ -20,7 +20,6 @@ export function describeCollection(collection: Collection): string {
   );
 }
 
-// Storefront `search` only sorts by RELEVANCE and PRICE.
 // Shopify `sort_by` values; "manual" means the collection's own order.
 export const SORT_VALUES = [
   "manual",
@@ -33,6 +32,7 @@ export const SORT_VALUES = [
   "created-descending",
 ] as const;
 
+// Storefront `search` only sorts by RELEVANCE and PRICE.
 export const SEARCH_SORT_EXCLUDE: SortValue[] = [
   "best-selling",
   "created-ascending",

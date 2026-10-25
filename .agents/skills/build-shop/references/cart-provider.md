@@ -5,7 +5,8 @@ Use this contract when changing cart bootstrap, badges, overlays, cart pages, fo
 ## Reference implementation
 
 - Provider: `components/cart/context.tsx`
-- Server seed and handler extensions: `lib/cart/server.ts`
+- Server seed: `lib/cart/server.ts`
+- Handlers and their extensions: `lib/cart/request.ts`
 - Handler-derived types and typed suspense hook: `lib/cart/{types,client}.ts`
 - Form bindings: `components/cart/{line-form,discount-form}.tsx`
 - Root bootstrap: `app/layout.tsx`

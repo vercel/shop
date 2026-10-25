@@ -9,7 +9,13 @@ import {
 } from "@shopify/hydrogen";
 import { useCollection, useCollectionActions } from "@shopify/hydrogen/react";
 import { CheckIcon, LoaderCircleIcon, XIcon } from "lucide-react";
-import { type MouseEventHandler, type ReactElement, type ReactNode, useState } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEventHandler,
+  type ReactElement,
+  type ReactNode,
+  useState,
+} from "react";
 
 import { Input } from "@/components/ui/input";
 import { Link } from "@/components/ui/link";
@@ -108,19 +114,17 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
               <FilterBadge
                 key={`${badge.paramKey}-${badge.value}`}
                 href={filter ? getFilterRemovalUrl(currentParams, filter) : undefined}
+                label={badge.label}
                 onRemove={() => filter && actions.toggleFilter(filter)}
-              >
-                {badge.label}
-              </FilterBadge>
+              />
             );
           })}
           {priceFilter ? (
             <FilterBadge
               href={getFilterRemovalUrl(currentParams, { price: priceFilter })}
+              label={formatPriceRangeLabel(priceMin, priceMax, priceRange?.currencyCode)}
               onRemove={() => applyPrice(null, null)}
-            >
-              {formatPriceRangeLabel(priceMin, priceMax, priceRange?.currencyCode)}
-            </FilterBadge>
+            />
           ) : null}
         </div>
       ) : null}
@@ -130,6 +134,7 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
           <div className="flex items-center gap-2">
             <PriceInput
               currencyCode={priceRange.currencyCode}
+              label="Minimum price"
               onChange={(min) => setPriceInputs((prev) => ({ ...prev, min }))}
               placeholder="From"
               value={minInput}
@@ -137,6 +142,7 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
             <span className="text-muted-foreground">–</span>
             <PriceInput
               currencyCode={priceRange.currencyCode}
+              label="Maximum price"
               onChange={(max) => setPriceInputs((prev) => ({ ...prev, max }))}
               placeholder="To"
               value={maxInput}
@@ -167,6 +173,8 @@ export function CollectionFilterSidebar({ filters, priceRange }: CollectionFilte
                       aria-pressed={isSelected}
                       className="block cursor-pointer"
                       href={buildToggleHref(state, value.input)}
+                      onKeyDown={pressOnSpace}
+                      role="button"
                       scroll={false}
                       onClick={(event) => {
                         event.preventDefault();
@@ -226,29 +234,31 @@ function FilterSection({ children, title }: FilterSectionProps) {
 }
 
 interface FilterBadgeProps {
-  children: ReactNode;
   href?: string;
+  label: string;
   onRemove: () => void;
 }
 
-function FilterBadge({ children, href, onRemove }: FilterBadgeProps) {
+function FilterBadge({ href, label, onRemove }: FilterBadgeProps) {
   const className =
     "inline-flex cursor-pointer items-center gap-1 rounded-full bg-primary/15 px-2.5 py-1 text-xs font-semibold text-primary transition-colors hover:bg-primary/25";
   const content = (
     <>
-      {children}
+      {label}
       <XIcon className="size-3" />
     </>
   );
+  const removeLabel = `Remove filter: ${label}`;
   if (!href) {
     return (
-      <button className={className} onClick={onRemove} type="button">
+      <button aria-label={removeLabel} className={className} onClick={onRemove} type="button">
         {content}
       </button>
     );
   }
   return (
     <Link
+      aria-label={removeLabel}
       className={className}
       href={href}
       scroll={false}
@@ -274,7 +284,10 @@ interface FilterOptionProps {
 function FilterOption({ count, href, label, onClick, pending, selected }: FilterOptionProps) {
   return (
     <Link
+      aria-pressed={selected}
       href={href}
+      onKeyDown={pressOnSpace}
+      role="button"
       data-selected={selected}
       className="flex items-center justify-between text-left text-sm text-muted-foreground transition-colors hover:text-foreground data-[selected=true]:font-medium"
       onClick={onClick}
@@ -298,18 +311,20 @@ function FilterOption({ count, href, label, onClick, pending, selected }: Filter
 
 interface PriceInputProps {
   currencyCode?: string;
+  label: string;
   onChange: (value: string) => void;
   placeholder: string;
   value: string;
 }
 
-function PriceInput({ currencyCode, onChange, placeholder, value }: PriceInputProps) {
+function PriceInput({ currencyCode, label, onChange, placeholder, value }: PriceInputProps) {
   return (
     <div className="flex h-8 flex-1 items-center rounded-lg bg-input px-2.5">
       <span className="text-base text-muted-foreground md:text-sm">
         {currencyCode ? formatCurrencySymbol(currencyCode) : null}
       </span>
       <Input
+        aria-label={label}
         type="number"
         step="0.01"
         min="0"
@@ -320,6 +335,13 @@ function PriceInput({ currencyCode, onChange, placeholder, value }: PriceInputPr
       />
     </div>
   );
+}
+
+// Filter links toggle in place, so they take the button role that `aria-pressed` needs, and buttons answer Space.
+function pressOnSpace(event: KeyboardEvent<HTMLAnchorElement>) {
+  if (event.key !== " ") return;
+  event.preventDefault();
+  event.currentTarget.click();
 }
 
 function buildToggleHref(

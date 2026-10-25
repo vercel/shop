@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 import { unstable_rethrow } from "next/navigation";
+import { z } from "zod";
 
 import type { CustomerAddressInput } from "@/lib/customer/types";
 import {
@@ -17,18 +18,32 @@ import type { AccountActionResult } from "./types";
 const MAX_FIELD_LENGTH = 255;
 const MAX_NAME_LENGTH = 100;
 
-const ADDRESS_FIELDS = [
-  "address1",
-  "address2",
-  "city",
-  "company",
-  "countryCode",
-  "firstName",
-  "lastName",
-  "phoneNumber",
-  "zip",
-  "zoneCode",
-] as const satisfies readonly (keyof CustomerAddressInput)[];
+const ADDRESS_VALUE = z.string().optional();
+
+const ADDRESS_INPUT = z.strictObject({
+  address1: ADDRESS_VALUE,
+  address2: ADDRESS_VALUE,
+  city: ADDRESS_VALUE,
+  company: ADDRESS_VALUE,
+  countryCode: ADDRESS_VALUE,
+  firstName: ADDRESS_VALUE,
+  lastName: ADDRESS_VALUE,
+  phoneNumber: ADDRESS_VALUE,
+  zip: ADDRESS_VALUE,
+  zoneCode: ADDRESS_VALUE,
+} satisfies Partial<Record<keyof CustomerAddressInput, typeof ADDRESS_VALUE>>);
+
+const ADDRESS_ID = z.string().min(1);
+
+const CREATE_ADDRESS_INPUT = z.strictObject({ address: ADDRESS_INPUT, isDefault: z.boolean() });
+
+const UPDATE_ADDRESS_INPUT = z.strictObject({
+  address: ADDRESS_INPUT,
+  addressId: ADDRESS_ID,
+  isDefault: z.boolean(),
+});
+
+const PROFILE_INPUT = z.strictObject({ firstName: z.string(), lastName: z.string() });
 
 const UPPERCASE_FIELDS = new Set<keyof CustomerAddressInput>(["countryCode", "zoneCode"]);
 
@@ -49,10 +64,10 @@ function mapUserErrors(errors: CustomerUserError[]): AccountActionResult {
   };
 }
 
-function buildAddressInput(raw: CustomerAddressInput): CustomerAddressInput {
+function buildAddressInput(raw: z.infer<typeof ADDRESS_INPUT>): CustomerAddressInput {
   const input: CustomerAddressInput = {};
 
-  for (const field of ADDRESS_FIELDS) {
+  for (const field of ADDRESS_INPUT.keyof().options) {
     const value = raw[field]?.trim().slice(0, MAX_FIELD_LENGTH);
     if (!value) continue;
     input[field] = UPPERCASE_FIELDS.has(field) ? value.toUpperCase() : value;
@@ -84,50 +99,58 @@ async function runCustomerMutation(
 }
 
 export async function createAddressAction(
-  raw: CustomerAddressInput,
+  address: CustomerAddressInput,
   isDefault: boolean,
 ): Promise<AccountActionResult> {
-  const input = buildAddressInput(raw);
+  const parsed = CREATE_ADDRESS_INPUT.safeParse({ address, isDefault });
+  if (!parsed.success) return { success: false, error: "Invalid address" };
+
+  const input = buildAddressInput(parsed.data.address);
   const validationError = validateAddress(input);
   if (validationError) return { success: false, error: validationError };
 
   return runCustomerMutation(
-    () => createCustomerAddress(input, isDefault),
+    () => createCustomerAddress(input, parsed.data.isDefault),
     "Failed to create address",
   );
 }
 
 export async function updateAddressAction(
   addressId: string,
-  raw: CustomerAddressInput,
+  address: CustomerAddressInput,
   isDefault: boolean,
 ): Promise<AccountActionResult> {
-  if (!addressId) return { success: false, error: "Invalid address ID" };
+  const parsed = UPDATE_ADDRESS_INPUT.safeParse({ address, addressId, isDefault });
+  if (!parsed.success) return { success: false, error: "Invalid address" };
 
-  const input = buildAddressInput(raw);
+  const input = buildAddressInput(parsed.data.address);
   const validationError = validateAddress(input);
   if (validationError) return { success: false, error: validationError };
 
   return runCustomerMutation(
-    () => updateCustomerAddress(addressId, input, isDefault),
+    () => updateCustomerAddress(parsed.data.addressId, input, parsed.data.isDefault),
     "Failed to update address",
   );
 }
 
 export async function deleteAddressAction(addressId: string): Promise<AccountActionResult> {
-  if (!addressId) return { success: false, error: "Invalid address ID" };
+  const parsed = ADDRESS_ID.safeParse(addressId);
+  if (!parsed.success) return { success: false, error: "Invalid address ID" };
 
-  return runCustomerMutation(() => deleteCustomerAddress(addressId), "Failed to delete address");
+  return runCustomerMutation(() => deleteCustomerAddress(parsed.data), "Failed to delete address");
 }
 
-export async function updateProfileAction(raw: {
-  firstName: string;
-  lastName: string;
-}): Promise<AccountActionResult> {
-  const input = {
-    firstName: raw.firstName.trim().slice(0, MAX_NAME_LENGTH),
-    lastName: raw.lastName.trim().slice(0, MAX_NAME_LENGTH),
-  };
+export async function updateProfileAction(
+  profile: z.infer<typeof PROFILE_INPUT>,
+): Promise<AccountActionResult> {
+  const parsed = PROFILE_INPUT.safeParse(profile);
+  if (!parsed.success) return { success: false, error: "Invalid profile" };
 
-  return runCustomerMutation(() => updateCustomerProfile(input), "Failed to update profile");
+  const firstName = parsed.data.firstName.trim().slice(0, MAX_NAME_LENGTH);
+  const lastName = parsed.data.lastName.trim().slice(0, MAX_NAME_LENGTH);
+
+  return runCustomerMutation(
+    () => updateCustomerProfile({ firstName, lastName }),
+    "Failed to update profile",
+  );
 }

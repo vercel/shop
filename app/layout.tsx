@@ -17,7 +17,6 @@ import { SiteSchema } from "@/components/schema/site-schema";
 import { botIdProtectedRoutes } from "@/lib/botid";
 import { seedCartData } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
-import { buildAlternates } from "@/lib/seo";
 
 export const ensureStatic = "prefetch";
 
@@ -76,7 +75,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
 export const generateMetadata = async (): Promise<Metadata> => {
   return {
-    alternates: buildAlternates({ pathname: "/" }),
     description: `Shop premium products, curated collections, and latest offers from ${shopConfig.site.name}.`,
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),

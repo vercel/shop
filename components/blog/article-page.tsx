@@ -73,7 +73,7 @@ export function ArticlePage({ article }: ArticlePageProps) {
           )}
           <Prose className="mx-auto w-full max-w-2xl">
             <div
-              // oxlint-disable-next-line react/no-danger -- Shopify sanitizes article HTML.
+              // oxlint-disable-next-line react/no-danger -- Article bodies pass through sanitizeShopifyHtml when fetched.
               dangerouslySetInnerHTML={{ __html: article.body ?? "" }}
             />
           </Prose>

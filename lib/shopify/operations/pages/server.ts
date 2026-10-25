@@ -4,6 +4,7 @@ import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import type { ContentPage } from "@/lib/pages/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
+import { sanitizeShopifyHtml } from "@/lib/shopify/html/server";
 import { storefront } from "@/lib/shopify/storefront/server";
 
 const GET_PAGE_QUERY = gql(`#graphql
@@ -35,7 +36,7 @@ export async function fetchPage({
   if (!page) return undefined;
 
   return {
-    body: page.body,
+    body: sanitizeShopifyHtml(page.body),
     handle: page.handle,
     seo: {
       description: page.seo?.description ?? page.bodySummary,

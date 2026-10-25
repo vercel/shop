@@ -1,7 +1,6 @@
 import { createCartCookie } from "@shopify/hydrogen";
-import { checkBotId } from "botid/server";
 
-import { createCustomerRequestContext, createCustomerSessionManager } from "@/lib/auth/server";
+import { createCustomerRequestContext, createCustomerSessionManager } from "@/lib/auth/request";
 import { createEmptyCart, getCartById, getCartIdFromCookie } from "@/lib/cart/server";
 import { shopConfig } from "@/lib/config";
 
@@ -10,11 +9,6 @@ export async function POST(request: Request) {
   if (
     request.headers.get("origin") !== new URL(request.url).origin ||
     request.headers.get("sec-fetch-site") === "cross-site"
-  )
-    return new Response(null, { status: 403 });
-  if (
-    shopConfig.botid.isEnabled &&
-    (await checkBotId({ advancedOptions: { checkLevel: shopConfig.botid.checkLevel } })).isBot
   )
     return new Response(null, { status: 403 });
   const requestContext = createCustomerRequestContext(request);
@@ -26,7 +20,10 @@ export async function POST(request: Request) {
     let cartId = await getCartIdFromCookie();
     if (!cartId || !(await getCartById(cartId)))
       cartId = await createEmptyCart(requestContext, sessionManager);
-    response = Response.json({ ok: true }, { headers: { "Cache-Control": "private, no-store" } });
+    response = new Response(null, {
+      headers: { "Cache-Control": "private, no-store" },
+      status: 204,
+    });
     response.headers.append("Set-Cookie", createCartCookie(cartId));
   } catch {
     response = Response.json(

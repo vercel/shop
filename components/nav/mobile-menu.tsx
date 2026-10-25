@@ -30,7 +30,7 @@ export function MobileMenu({ items }: { items: MenuItem[] }) {
         <div className="flex h-16 items-center px-5">
           <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
         </div>
-        <nav className="px-5">
+        <nav className="min-h-0 flex-1 overflow-y-auto px-5 pb-5">
           <MobileMenuList items={items} onLinkClick={close} />
         </nav>
       </SheetContent>

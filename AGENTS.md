@@ -9,7 +9,7 @@ Every feature belongs to exactly one owner. If a change cannot name its owner, o
 **Shopify owns commerce** through the framework-agnostic Hydrogen preview SDK, not the Hydrogen React Router framework.
 
 - Owns: Storefront and Customer Account API clients, catalog, cart state and mutations, checkout, predictive search, Customer Account OAuth and sessions, policies, Shopify analytics.
-- Lives in: `lib/shopify/**`, `lib/cart/**`, `lib/auth/server.ts`, the handlers registered in `proxy.ts`, and `lib/<domain>/types.ts` for the domain models transforms produce.
+- Lives in: `lib/shopify/**`, `lib/cart/**`, `lib/auth/{request,server}.ts`, the handlers registered in `proxy.ts`, and `lib/<domain>/types.ts` for the domain models transforms produce.
 - Must not be reimplemented: prices, availability, currency, cart totals, and customer identity always come from Shopify responses.
 
 **Next.js owns the app.**
@@ -21,7 +21,7 @@ Every feature belongs to exactly one owner. If a change cannot name its owner, o
 **Eve owns the agent.**
 
 - Owns: sessions, channels, tools, connections, instructions, model selection, `/eve/v1/*`.
-- Lives in: `agent/` (tools in `agent/tools/`, shared execution helpers in `agent/lib/`), `lib/agent/`, `components/agent/`, and `app/api/agent/session`, the only Next.js route Eve needs; it prepares the browser cart.
+- Lives in: `agent/` (tools in `agent/tools/`, shared execution helpers in `agent/lib/`), `lib/agent/`, `components/agent/`, and two Next.js routes: `app/api/agent/session`, which prepares the browser cart, and `app/agent/ucp-profile.json`, which serves the agent's UCP profile.
 - Must not: import Next.js request or cache APIs, add a second tool-name dispatcher, recreate a chat API route, or let model arguments select the cart.
 
 ## Describe the product, not the change
@@ -57,7 +57,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 Read the installed Hydrogen README and bundled skills before changing an SDK integration. Do not apply React Router loaders, actions, or Oxygen setup.
 
 - Presentation uses domain models, never raw Shopify responses.
-- `storefront.request` injects `$country`/`$language` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string.
+- Render Shopify HTML (`body`, `contentHtml`, `descriptionHtml`) only after its `fetch*` operation passes it through `sanitizeShopifyHtml` from `lib/shopify/html/server.ts`, under an `oxlint-disable-next-line react/no-danger -- … pass through sanitizeShopifyHtml when fetched.` directive.
+- `storefront.request` injects `$country: CountryCode`/`$language: LanguageCode` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string. Same-named variables of other types are the caller's to pass.
 
 ### GraphQL
 
@@ -88,7 +89,8 @@ Opt-in through `shopConfig.auth.isEnabled`, read directly in server and client c
 - The default view of a collection and of `/collections/all` ships its cached products in the static shell and per-link prefetches; `proxy.ts` rewrites filtered and sorted URLs to the request-time `refine` route beside it and returns 404 for direct `refine` requests. Keep `SearchParamsProbe` on the default page, or the router reuses it for every search string and the rewrite never runs; keep the browse store, toolbar, and filter sheet in `CollectionLayout`, which both routes share, and each page's results inside `CollectionBrowseBoundary`, so a filter keeps the toolbar and open sheet and only the grid can fall back. Build browse URLs from the public path, never `usePathname()`.
 - The root layout's `ensureStatic = "prefetch"` keeps the App Shell and per-link prefetches static. Keep it at the root; do not add `navigation()` or `prefetch()` per subtree.
 - Server Components are the default; isolate state, effects, browser APIs, and handlers in leaf client components.
-- Every image uses `next/image` with reserved dimensions and `sizes="100vw"`, including thumbnails: `deviceSizes: [1320, 1920]` ships two assets that every surface reuses. Do not tune `sizes` or add widths. Preload only the LCP image; keep product grids lazy.
+- Server Actions are public endpoints, and TypeScript does not check their arguments at runtime. Each `action.ts` export parses every argument with a module-private `zod` schema, `z.strictObject` for objects as in Eve tools, before any other work, and returns its usual failure result when parsing fails.
+- Every image uses `next/image` with reserved dimensions and `sizes="100vw"`, including thumbnails: `deviceSizes: [1320, 1920]` ships two assets that every surface reuses. Do not tune `sizes` or add widths. Preload only the LCP image; keep product grids lazy below the first row.
 - Link internally with `Link` from `@/components/ui/link`, never `next/link`. It upgrades to the per-link prefetch only on intent, so grids never prefetch every card. Any other prefetch change is a production-measured traffic-versus-latency choice.
 - The default is one deployment with clean unprefixed URLs, inline copy, and `shopConfig.localization` `{ country: "US", language: "EN", locale: "en-US" }`: country and language set the Shopify context, locale sets formatting. It has no next-intl, `lib/i18n/`, or `getLocale()`; keep operation locale arguments and cache inputs anyway. The i18n and Markets skills start from this baseline and preserve localized installations.
 - Read `shopConfig` from `lib/config/index.ts` directly in server and client code.
@@ -126,7 +128,7 @@ Do not add tests, test files, runners, dependencies, or scripts unless the user 
 
 - Keep sub-components in their consumer's file when they share a directive, unless the file gets unwieldy. Split a different directive into `foo-client.tsx` or `foo-server.tsx` beside `foo.tsx`.
 - Push `"use client"` as far down as possible; pages, layouts, and data-fetching wrappers stay server components and pass promises or data to client children.
-- `lib/` is organized by domain, then execution context, using only the files a domain needs: `index.ts` (universal, never a barrel), `server.ts` (kept out of client graphs), `client.ts` (a React client boundary, not an HTTP client), `action.ts` (`"use server"`, verb + `Action` exports), and `types.ts` (imported with `import type`). Subdivide with the same filenames, such as `lib/cart/gift-card/client.ts`; no descriptive siblings like `cart-client.ts`, flat root modules, or forwarding exports.
+- `lib/` is organized by domain, then execution context, using only the files a domain needs: `index.ts` (universal, never a barrel), `server.ts` (kept out of client graphs), `request.ts` (takes the `Request` or `Headers` explicitly, such as Hydrogen handlers and session cookies; what `proxy.ts` and Route Handlers import; never imports `next/cache`, `next/headers`, `next/navigation`, or `react`, which load the App Router runtime into the proxy), `client.ts` (a React client boundary, not an HTTP client), `action.ts` (`"use server"`, verb + `Action` exports), and `types.ts` (imported with `import type`). Subdivide with the same filenames, such as `lib/cart/gift-card/client.ts`; no descriptive siblings like `cart-client.ts`, flat root modules, or forwarding exports.
 - Shopify transports live in their API domain's `server.ts`; pure transforms and formatting helpers live in `index.ts`.
 - Storefront models live in their owning domain's `types.ts`; cross-domain primitives in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`; SDK contracts and inferred response types under `lib/shopify/`. Props stay beside their components, and small private types may stay local. Never import shared types from `server.ts` or `action.ts`. Generated artifacts keep their generator's paths.
 
@@ -140,8 +142,8 @@ Do not add tests, test files, runners, dependencies, or scripts unless the user 
 
 - `Container` sets horizontal padding and max width only; never put `py-*` on it.
 - `Page` owns top padding (`pt-10` by default, overridden through `className`) and has no bottom padding; the footer's `pt-20` provides that gap. Full-height layouts add `flex flex-1 flex-col`.
-- Wrap sibling sections in `Sections` (`gap-10` by default). Inside a section, use `grid gap-*` on the parent, never margins or `space-y-*` on children.
-- Use the gap scale `gap-2.5`, `gap-4`, `gap-5`, `gap-10`. Padding inside components and negative-margin breakouts are fine.
+- Wrap sibling sections in `Sections` (`gap-10` by default). Inside a section, the parent spaces its children with `grid gap-*`; children carry no outer margins or `space-y-*`, so a component keeps its layout wherever it is placed. Padding inside components, negative-margin breakouts, and margin resets on rendered rich text are fine.
+- Spacing values are the storefront's design choice: reuse the values nearby code already uses, and do not change spacing outside the task.
 
 ### Tailwind
 

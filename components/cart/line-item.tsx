@@ -74,6 +74,10 @@ function CartLineItem({ item }: CartLineItemProps) {
   const originalUnitPrice =
     finalUnitPrice < sellingUnitPrice ? sellingUnitPrice : compareAtUnitPrice;
   const title = merchandise?.product.title || "Cart item";
+  const variantLabel = merchandise?.selectedOptions?.length
+    ? merchandise.selectedOptions.map((option) => option.value).join(" / ")
+    : "";
+  const lineName = variantLabel ? `${title}, ${variantLabel}` : title;
   const href = merchandise?.product.handle ? `/products/${merchandise.product.handle}` : undefined;
   const image = merchandise?.image;
   const imageContent = image?.url ? (
@@ -111,11 +115,7 @@ function CartLineItem({ item }: CartLineItemProps) {
             ) : (
               <h3 className="line-clamp-1 text-sm font-medium text-foreground">{title}</h3>
             )}
-            {merchandise?.selectedOptions?.length ? (
-              <p className="text-xs text-muted-foreground">
-                {merchandise.selectedOptions.map((option) => option.value).join(" / ")}
-              </p>
-            ) : null}
+            {variantLabel ? <p className="text-xs text-muted-foreground">{variantLabel}</p> : null}
             {item.sellingPlanAllocation ? (
               <p className="text-xs text-muted-foreground">
                 {item.sellingPlanAllocation.sellingPlan.name || "Subscription"}
@@ -156,7 +156,7 @@ function CartLineItem({ item }: CartLineItemProps) {
                 <button
                   {...register("decrease")}
                   type="submit"
-                  aria-label="Decrease quantity"
+                  aria-label={`Decrease quantity: ${lineName}`}
                   className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={isOptimistic || !canUpdateQuantity || quantity <= 1}
                 >
@@ -165,7 +165,7 @@ function CartLineItem({ item }: CartLineItemProps) {
                 <input
                   key={quantity}
                   {...register("quantity", { interactive: true, value: quantity })}
-                  aria-label="Item quantity"
+                  aria-label={`Quantity: ${lineName}`}
                   className="h-6 w-6 rounded-full bg-transparent text-center text-xs font-medium tabular-nums outline-none focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed"
                   disabled={isOptimistic || !canUpdateQuantity}
                   max={99}
@@ -174,7 +174,7 @@ function CartLineItem({ item }: CartLineItemProps) {
                 <button
                   {...register("increase")}
                   type="submit"
-                  aria-label="Increase quantity"
+                  aria-label={`Increase quantity: ${lineName}`}
                   className="flex h-6 cursor-pointer items-center justify-center p-0 disabled:cursor-not-allowed disabled:opacity-50"
                   disabled={isOptimistic || !canUpdateQuantity || quantity >= 99}
                 >
@@ -186,7 +186,7 @@ function CartLineItem({ item }: CartLineItemProps) {
                 type="submit"
                 className="flex cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
                 disabled={isOptimistic || !canRemove}
-                aria-label="Remove item"
+                aria-label={`Remove item: ${lineName}`}
               >
                 <Trash2Icon className="size-4" />
               </button>

@@ -331,7 +331,7 @@ export function buildAlternates({
 }
 ```
 
-Update every caller to pass its validated locale. Server Components can call `getLocale()` from `lib/params/server.ts`; Route Handlers and Server Actions must validate their own inputs.
+Update every caller to pass its validated locale. Server Components can call `getLocale()` from `lib/params/server.ts`; Route Handlers must validate their own inputs, and Server Actions parse theirs with a module-private `zod` schema.
 
 ### Step 8: Sitemap per-locale entries
 

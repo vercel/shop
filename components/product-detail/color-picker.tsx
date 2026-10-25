@@ -37,15 +37,17 @@ export function ColorPicker({
               selected={value.selected}
             />
           );
-          if (!value.exists || !value.available) {
+          if (!value.exists) {
             return (
-              <span
+              <button
                 key={value.name}
-                className="block cursor-not-allowed opacity-40"
                 aria-label={`${option.name}: ${value.name} (unavailable)`}
+                className="block cursor-not-allowed opacity-40"
+                disabled
+                type="button"
               >
                 {swatch}
-              </span>
+              </button>
             );
           }
           return (
@@ -53,8 +55,8 @@ export function ColorPicker({
               key={value.name}
               href={value.href}
               scroll={false}
-              className="block cursor-pointer"
-              aria-label={`Select ${option.name}: ${value.name}`}
+              className={cn("block cursor-pointer", !value.available && "opacity-40")}
+              aria-label={`Select ${option.name}: ${value.name}${value.available ? "" : " (sold out)"}`}
               aria-current={value.selected ? "true" : undefined}
               onClick={
                 onSelectValue && !value.crossProduct

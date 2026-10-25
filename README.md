@@ -48,7 +48,7 @@ See [vercel.shop/docs/getting-started](https://vercel.shop/docs/getting-started)
 
 Shopify
 
-- Product, collection, search, blog, page, and policy content from the Storefront API with validated, typed GraphQL
+- Product, collection, search, blog, page, and policy content from the Storefront API with typed GraphQL
 - Optimistic cart with Hydrogen forms, shared cart state, and server handlers
 - Customer accounts through the Customer Account API, opt-in
 - Shopify analytics, consent, and WebMCP tool registration, opt-in
@@ -67,7 +67,7 @@ Eve
 
 Customer authentication is disabled by default. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure Shopify credentials and callback URLs before enabling `auth.isEnabled` in `lib/config/index.ts`.
 
-Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` and follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to configure AI Gateway access and review privacy and spending safeguards before enabling public chat.
+Shop Agent is disabled by default. Set `agent.isEnabled` to `true` in `lib/config/index.ts` and follow the [Shop Agent guide](https://vercel.shop/docs/anatomy/agent) to configure AI Gateway access, turn on bot protection, and review privacy and spending safeguards before enabling public chat.
 
 ## Skills
 

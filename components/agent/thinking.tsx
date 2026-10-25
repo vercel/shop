@@ -20,7 +20,7 @@ export function AgentThinking({ active, tool }: { active: boolean; tool?: string
   };
   return (
     <p className="shimmer w-fit text-muted-foreground text-sm" role="status">
-      {(tool ? toolLabels[tool] : undefined) ?? "Thinking…"}
+      {tool && Object.hasOwn(toolLabels, tool) ? toolLabels[tool] : "Thinking…"}
     </p>
   );
 }

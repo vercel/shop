@@ -12,6 +12,7 @@ import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { tagProducts } from "@/lib/product/server";
 import { buildAlternates, buildOpenGraph } from "@/lib/seo";
+import { getNumericShopifyId } from "@/lib/shopify/id/server";
 import {
   fetchCollection,
   fetchCollections,
@@ -26,9 +27,12 @@ import {
 // /collections/all is a local virtual collection with no Storefront API equivalent.
 export const ALL_PRODUCTS_HANDLE = "all";
 
-function tagCollections(collections: Array<{ handle: string }>): void {
+// Delete payloads carry only the ID and renames only the new handle, so cached reads carry both tags.
+function tagCollections(collections: Array<{ handle: string; id?: string }>): void {
   for (const collection of collections) {
     cacheTag(`collection-${collection.handle}`);
+    const numericId = collection.id ? getNumericShopifyId(collection.id) : null;
+    if (numericId) cacheTag(`collection-${numericId}`);
   }
 }
 
@@ -52,7 +56,9 @@ export async function getCollection(params: {
   cacheLife("max");
   cacheTag("collections", `collection-${params.handle}`);
 
-  return fetchCollection(params);
+  const collection = await fetchCollection(params);
+  if (collection) tagCollections([collection]);
+  return collection;
 }
 
 export async function getCollectionsListing(

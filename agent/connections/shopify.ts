@@ -8,6 +8,6 @@ export default defineMcpClientConnection({
   toolCall: {
     providedArguments: { meta: () => ({ "ucp-agent": { profile: agentProfileUrl() } }) },
   },
-  tools: { allow: ["search_catalog", "lookup_catalog", "get_product"] },
+  tools: { allow: ["search_catalog"] },
   url: `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/api/ucp/mcp`,
 });

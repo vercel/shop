@@ -1,5 +1,6 @@
 import {
   type AnyStorefrontQueryString,
+  type GqlRestParam,
   type StorefrontClient,
   createShopifyRequestContext,
   createStorefrontClient,
@@ -8,7 +9,6 @@ import {
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { logShopifyDebug } from "@/lib/shopify/logging/server";
-import type { StorefrontRequestOptions, StorefrontVariables } from "@/lib/shopify/storefront/types";
 import type { ResultOf, StorefrontResponse } from "@/lib/shopify/types";
 
 const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as string;
@@ -85,13 +85,12 @@ function getClient(
 export const storefront = {
   async request<Doc extends AnyStorefrontQueryString>(
     doc: Doc,
-    ...[options]: Record<string, never> extends StorefrontVariables<Doc>
-      ? [options?: StorefrontRequestOptions<Doc>]
-      : [options: StorefrontRequestOptions<Doc>]
+    ...[options]: GqlRestParam<Doc, { locale?: CommerceLocale }>
   ): Promise<StorefrontResponse<ResultOf<Doc>>> {
     const locale = options?.locale ?? shopConfig.localization;
     const client = getClient(locale.country, locale.language);
     const { data, errors } = await client.graphql(doc, {
+      signal: options?.signal,
       variables: options?.variables,
     } as never);
     return { data: data as ResultOf<Doc> | null, errors };

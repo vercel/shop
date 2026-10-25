@@ -35,8 +35,9 @@ Organize `lib/` by domain, then use only the context files that domain needs:
 
 - `index.ts` contains universal implementation safe for server and client imports; it is never a re-export barrel.
 - `server.ts` contains server-side implementation; keep it out of client import graphs.
+- `request.ts` contains code that takes the `Request` or `Headers` explicitly, such as Hydrogen handlers and session cookies; the root `proxy.ts` and Route Handlers import it. It never imports `next/cache`, `next/headers`, `next/navigation`, or `react`, which load the App Router runtime into the proxy; `server.ts` may import it.
 - `client.ts` is a `"use client"` boundary for browser interaction, not an HTTP transport wrapper.
-- `action.ts` is a `"use server"` entry point whose exports use a verb plus `Action` suffix.
+- `action.ts` is a `"use server"` entry point whose exports use a verb plus `Action` suffix. Server Actions are public endpoints: each export parses every argument with a module-private `zod` schema, `z.strictObject` for objects, before any other work, and returns its usual failure result when parsing fails.
 - `types.ts` owns named shared contracts; consumers import types directly rather than through `server.ts` or `action.ts`.
 
 Subdivide large domains with the same context filenames. Put Shopify transports in their API domain's `server.ts` and pure transforms in `index.ts`, even when all current callers run on the server. Do not add descriptive sibling files, flat root implementation modules, empty entry points, forwarding exports, or barrels.
@@ -78,7 +79,7 @@ Write down the route as five layers before editing, using commerce nouns instead
 2. **Data operation** — fetch Shopify data, transform provider types into shop domain types, and own cache scope, tags, and invalidation names.
 3. **Server composition** — render the stable catalog shell first and place independent sections like recommendations, facets, reviews, and account/cart details behind granular boundaries.
 4. **Client island** — own only selection, optimistic intent, browser APIs, effects, and event handlers: variant pickers, galleries, filter controls, carts, and forms.
-5. **Mutation boundary** — use server actions for app-owned mutations and Hydrogen's proxy handlers for browser cart mutations. Return canonical Shopify state and warnings; invalidate public domain caches only when applicable. Let Hydrogen reconcile cart state without a parallel optimistic reducer.
+5. **Mutation boundary** — use server actions, which parse their input with a `zod` schema first, for app-owned mutations and Hydrogen's proxy handlers for browser cart mutations. Return canonical Shopify state and warnings; invalidate public domain caches only when applicable. Let Hydrogen reconcile cart state without a parallel optimistic reducer.
 
 For each layer's full ownership boundary, see the responsibility table in `references/rendering-architecture.md`. For every dependency, classify it as cacheable shell content, request-time shared content, request-time personalized content, or client-only state. Draw an edge only when one result genuinely requires another. Start all other work concurrently.
 
@@ -95,6 +96,8 @@ For each layer's full ownership boundary, see the responsibility table in `refer
 Use the installed Shopify AI Toolkit for Shopify API documentation, schema facts, operation design, and validation. Invoke its API-specific skill before adding or changing Storefront or Customer Account GraphQL. For metafields or metaobjects, use its custom-data skill first.
 
 Use `shopify-graphql-reference` only after Shopify validation to apply Vercel Shop conventions: operation placement, domain transforms, cache role, locale flow, invalidation, and route integration. Never treat this architecture skill as a substitute for authoritative Shopify validation.
+
+Shopify returns rich text (`body`, `contentHtml`, `descriptionHtml`) as staff and apps saved it. Pass it through `sanitizeShopifyHtml` from `lib/shopify/html/server.ts` in the `fetch*` operation that returns it, and render it only under an `oxlint-disable-next-line react/no-danger` directive that names the sanitizer, such as `-- Product descriptions pass through sanitizeShopifyHtml when fetched.`
 
 ## Prevent blocking
 

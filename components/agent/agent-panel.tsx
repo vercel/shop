@@ -20,7 +20,6 @@ import { AgentComposer } from "./composer";
 import { AgentThinking } from "./thinking";
 
 const CANCEL_TIMEOUT_MS = 10_000;
-const SESSION_PREP_TTL_MS = 60_000;
 
 function prepareAgentSession() {
   return fetch("/api/agent/session", {
@@ -53,16 +52,14 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const cartPending = useAgentCartPending();
   const [controlError, setControlError] = useState<string | null>(null);
   const [pendingSend, setPendingSend] = useState(false);
-  const sessionPrep = useRef<{ at: number; promise: Promise<void> } | null>(null);
-  // Warm the cart cookie ahead of send so the turn dispatches without a round trip.
+  const sessionPrep = useRef<Promise<void> | null>(null);
+  // The cart cookie outlives each turn, so prepare it once and keep sends off the network.
   const prepareSession = useCallback(() => {
-    const now = Date.now();
-    const current = sessionPrep.current;
-    if (current && now - current.at < SESSION_PREP_TTL_MS) return current.promise;
+    if (sessionPrep.current) return sessionPrep.current;
     const promise = prepareAgentSession();
-    sessionPrep.current = { at: now, promise };
+    sessionPrep.current = promise;
     promise.catch(() => {
-      if (sessionPrep.current?.promise === promise) sessionPrep.current = null;
+      if (sessionPrep.current === promise) sessionPrep.current = null;
     });
     return promise;
   }, []);

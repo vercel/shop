@@ -1,5 +1,5 @@
 import { flattenConnection, gql, parseSortByValue } from "@shopify/hydrogen";
-import type { ProductFilter } from "@shopify/hydrogen";
+import type { ProductFilter, StorefrontApi } from "@shopify/hydrogen";
 import type {
   ProductCollectionSortKeys,
   ProductRecommendationIntent,
@@ -28,6 +28,7 @@ import {
   PRODUCT_VARIANT_FRAGMENT,
   PURCHASABLE_PRODUCT_VARIANT_FRAGMENT,
 } from "@/lib/shopify/fragments/variant";
+import { sanitizeShopifyHtml } from "@/lib/shopify/html/server";
 import { decodeShopifyId } from "@/lib/shopify/id/server";
 import type {
   CollectionProductsParams,
@@ -39,7 +40,6 @@ import type {
   SearchIndexProductsParams,
 } from "@/lib/shopify/operations/products/types";
 import { storefront } from "@/lib/shopify/storefront/server";
-import type { StorefrontVariables } from "@/lib/shopify/storefront/types";
 import {
   getSelectedColorFilterLabel,
   transformShopifyFilters,
@@ -52,7 +52,7 @@ import {
 } from "@/lib/shopify/transforms/product";
 
 type StorefrontProductFilter = NonNullable<
-  NonNullable<StorefrontVariables<typeof COLLECTION_PRODUCTS_QUERY>["filters"]>[number]
+  NonNullable<StorefrontApi.VariablesOf<typeof COLLECTION_PRODUCTS_QUERY>["filters"]>[number]
 >;
 
 // Hydrogen's ProductFilter folds the taxonomy namespace into `key`; the Storefront schema wants them apart.
@@ -120,7 +120,10 @@ export async function fetchProduct({
   const { data } = response;
 
   if (!data.product) return undefined;
-  return transformShopifyProductDetails(data.product);
+  return {
+    ...transformShopifyProductDetails(data.product),
+    descriptionHtml: sanitizeShopifyHtml(data.product.descriptionHtml),
+  };
 }
 
 const GET_PRODUCT_VARIANT_QUERY = gql(
@@ -249,7 +252,10 @@ export async function fetchProductWithVariants({
   const { data } = response;
 
   if (!data.product) return undefined;
-  return transformShopifyProductDetails(data.product);
+  return {
+    ...transformShopifyProductDetails(data.product),
+    descriptionHtml: sanitizeShopifyHtml(data.product.descriptionHtml),
+  };
 }
 
 const GET_PRODUCTS_BY_IDS_QUERY = gql(

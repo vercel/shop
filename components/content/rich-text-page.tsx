@@ -15,7 +15,7 @@ export function RichTextPage({ body, title }: RichTextPageProps) {
         <Prose>
           <h1>{title}</h1>
           <div
-            // oxlint-disable-next-line react/no-danger -- Shopify sanitizes rich text stored in Pages and policies.
+            // oxlint-disable-next-line react/no-danger -- Page and policy bodies pass through sanitizeShopifyHtml when fetched.
             dangerouslySetInnerHTML={{ __html: body }}
           />
         </Prose>

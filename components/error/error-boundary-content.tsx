@@ -19,8 +19,8 @@ export function ErrorBoundaryContent({ retry }: { retry: () => void }) {
       </p>
       <div className="flex flex-col gap-2.5 sm:flex-row">
         <Button onClick={() => retry()}>Try again</Button>
-        <Button variant="outline" asChild>
-          <Link href="/">Go back to the home page</Link>
+        <Button variant="outline" render={<Link href="/" />}>
+          Go back to the home page
         </Button>
       </div>
     </div>

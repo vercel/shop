@@ -314,10 +314,11 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
             options={toAgentOptionGroups(product, selected)}
           />
           {choosePlan ? (
-            <Button asChild className="w-full">
-              <Link href={buildProductUrl(product.handle, variant.options)}>
-                Choose a subscription
-              </Link>
+            <Button
+              className="w-full"
+              render={<Link href={buildProductUrl(product.handle, variant.options)} />}
+            >
+              Choose a subscription
             </Button>
           ) : (
             <form

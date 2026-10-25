@@ -27,7 +27,11 @@ export function ProductSchema({ product }: ProductSchemaProps) {
   const availability = product.availableForSale
     ? "https://schema.org/InStock"
     : "https://schema.org/OutOfStock";
-  const singleOffer = product.offerCount === 1;
+  const { maxVariantPrice, minVariantPrice } = product.priceRange;
+  // Google merchant listings require an Offer; an AggregateOffer only qualifies for product snippets.
+  const singlePrice =
+    minVariantPrice.amount === maxVariantPrice.amount &&
+    minVariantPrice.currencyCode === maxVariantPrice.currencyCode;
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -40,24 +44,24 @@ export function ProductSchema({ product }: ProductSchemaProps) {
           name: product.vendor,
         }
       : undefined,
-    offers: singleOffer
+    offers: singlePrice
       ? {
           "@type": "Offer",
           availability,
-          price: product.priceRange.minVariantPrice.amount,
+          price: minVariantPrice.amount,
           priceCurrency: product.currencyCode,
           url,
         }
       : {
           "@type": "AggregateOffer",
           availability,
-          highPrice: product.priceRange.maxVariantPrice.amount,
-          lowPrice: product.priceRange.minVariantPrice.amount,
+          highPrice: maxVariantPrice.amount,
+          lowPrice: minVariantPrice.amount,
           offerCount: product.offerCount,
           priceCurrency: product.currencyCode,
           url,
         },
-    sku: singleOffer ? product.sku : undefined,
+    sku: product.offerCount === 1 ? product.sku : undefined,
   };
 
   return <script type="application/ld+json">{JSON.stringify(schema)}</script>;

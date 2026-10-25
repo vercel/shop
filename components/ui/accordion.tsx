@@ -37,7 +37,7 @@ function AccordionTrigger({ className, children, ...props }: AccordionPrimitive.
 }
 
 function AccordionContent({ className, children, ...props }: AccordionPrimitive.Panel.Props) {
-  /** @todo - Animation removed to avoid layout shift on PDP load. Revisit with --accordion-panel-height. */
+  // Animating the panel height shifts the product page layout on load, so panels open without animation.
   return (
     <AccordionPrimitive.Panel
       data-slot="accordion-content"

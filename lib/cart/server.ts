@@ -1,6 +1,5 @@
 import {
   cartQueries,
-  createCartServerHandlers,
   createShopifyRequestContext,
   getCartId,
   type ShopifyRequestContext,
@@ -9,22 +8,12 @@ import type { WritableCustomerSessionManager } from "@shopify/hydrogen/customer-
 import { headers } from "next/headers";
 import { cache } from "react";
 
-import { getHydrogenCustomerSession, getReadonlyCustomerSessionManager } from "@/lib/auth/server";
+import { getHydrogenCustomerSession } from "@/lib/auth/request";
+import { getReadonlyCustomerSessionManager } from "@/lib/auth/server";
+import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/request";
 import type { Cart, CartSeedData } from "@/lib/cart/types";
 import { shopConfig } from "@/lib/config";
-import { CART_FRAGMENT } from "@/lib/shopify/fragments/cart";
 import { createRequestStorefrontClient } from "@/lib/shopify/storefront/server";
-
-export const cartHandlers = createCartServerHandlers({ fragment: CART_FRAGMENT });
-
-export function createCustomerCartHandlers(
-  customerSession: Awaited<ReturnType<typeof getHydrogenCustomerSession>>,
-) {
-  return createCartServerHandlers({
-    customerSession,
-    fragment: CART_FRAGMENT,
-  });
-}
 
 export async function getCartIdFromCookie(): Promise<string | undefined> {
   const cookie = (await headers()).get("cookie") ?? undefined;

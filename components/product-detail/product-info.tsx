@@ -77,6 +77,7 @@ function ProductInfoDescription({
     <div data-slot="product-info-description" className={className} {...props}>
       <div
         className="prose prose-sm text-foreground/80"
+        // oxlint-disable-next-line react/no-danger -- Product descriptions pass through sanitizeShopifyHtml when fetched.
         dangerouslySetInnerHTML={{ __html: descriptionHtml }}
       />
     </div>

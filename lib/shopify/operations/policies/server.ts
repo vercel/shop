@@ -5,6 +5,7 @@ import type { CommerceLocale } from "@/lib/config/types";
 import type { ShopPolicy } from "@/lib/policies/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { SHOP_POLICY_FRAGMENT } from "@/lib/shopify/fragments/policies";
+import { sanitizeShopifyHtml } from "@/lib/shopify/html/server";
 import { storefront } from "@/lib/shopify/storefront/server";
 
 const GET_SHOP_POLICIES_QUERY = gql(
@@ -46,7 +47,7 @@ export async function fetchShopPolicies({
   const response = await storefront.request(GET_SHOP_POLICIES_QUERY, { locale });
   assertStorefrontOk(response, "getShopPolicies");
 
-  return Object.values(response.data.shop).filter(
-    (policy): policy is ShopPolicy => policy !== null && policy !== undefined,
-  );
+  return Object.values(response.data.shop)
+    .filter((policy): policy is ShopPolicy => policy !== null && policy !== undefined)
+    .map((policy) => ({ ...policy, body: sanitizeShopifyHtml(policy.body) }));
 }

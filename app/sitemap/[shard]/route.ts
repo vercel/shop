@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/policies/server";
-import { getShopifySitemapPage } from "@/lib/seo/server";
+import { getShopifySitemapPage, getShopifySitemapPagesCount } from "@/lib/seo/server";
 import { type ShopifySitemapType } from "@/lib/shopify/operations/sitemap/types";
 
 function escapeXml(value: string): string {
@@ -40,6 +40,7 @@ async function renderShard(
   page: number,
   segment: string,
 ): Promise<Response> {
+  if (page < 1 || page > (await getShopifySitemapPagesCount(type))) notFound();
   const { items } = await getShopifySitemapPage(type, page);
 
   const entries = items

@@ -5,6 +5,7 @@ import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
 import { ARTICLE_SUMMARY_FRAGMENT, BLOG_FRAGMENT } from "@/lib/shopify/fragments/blogs";
+import { sanitizeShopifyHtml } from "@/lib/shopify/html/server";
 import { storefront } from "@/lib/shopify/storefront/server";
 import { transformArticle } from "@/lib/shopify/transforms/blogs";
 
@@ -90,5 +91,6 @@ export async function fetchBlogArticle({
   const blog = response.data.blog;
   if (!blog?.articleByHandle) return undefined;
 
-  return transformArticle(blog.articleByHandle, blog);
+  const article = transformArticle(blog.articleByHandle, blog);
+  return { ...article, body: article.body && sanitizeShopifyHtml(article.body) };
 }

@@ -22,20 +22,17 @@ function mediaKey(item: MediaItem) {
   return "placeholder";
 }
 
-// The LCP image gets a preload link + eager + fetchpriority=high (`preload` alone no longer implies high).
-// Everything else stays lazy so the hidden viewport twin (mobile carousel vs desktop grid) never downloads.
+// `preload` alone does not set high fetch priority; other images stay lazy so the hidden carousel or grid never downloads.
 const LCP_IMAGE_PROPS = { fetchPriority: "high", loading: "eager", preload: true } as const;
 
 const LAZY_IMAGE_PROPS = { loading: "lazy" } as const;
 
 // Tailwind `lg`, where the 2x2 grid replaces the carousel.
 const DESKTOP_MEDIA = "(min-width: 1024px)";
-// The 2x2 desktop grid is entirely above the fold. Its non-LCP tiles stay `loading="lazy"` on the
-// <img> (so mobile never fetches them) but get a media-scoped preload so desktop requests all four
-// tiles at parse time instead of one at a time after layout. Uses getImageProps so the preload's
-// srcset/sizes match the <img> exactly and the browser reuses the response.
+// The 2x2 grid is above the fold, so desktop preloads every tile while the lazy <img> keeps mobile from fetching them.
 const DESKTOP_GRID_PRELOAD_COUNT = 4;
 
+// The preload must share the <img>'s srcset and sizes, or the browser downloads the tile twice.
 function preloadDesktopGridImage(image: ImageType) {
   const { props } = getImageProps({
     src: image.url,

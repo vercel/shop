@@ -1,35 +1,39 @@
 "use server";
 
+import { z } from "zod";
+
 import { toProductFormInput } from "@/lib/product";
 import { getProduct } from "@/lib/product/server";
 import type { QuickShopProduct, SelectedOption } from "@/lib/product/types";
 import { fetchProductVariant } from "@/lib/shopify/operations/products/server";
+
+const QUICK_SHOP_INPUT = z.strictObject({
+  handle: z.string().min(1),
+  selectedOptions: z.array(z.strictObject({ name: z.string(), value: z.string() })).optional(),
+});
 
 // Purchase data loads on intent so catalog grids do not carry every product's variants.
 export async function loadQuickShopProductAction(
   handle: string,
   selectedOptions?: SelectedOption[],
 ): Promise<QuickShopProduct | null> {
-  const product = await getProduct({ handle });
+  const parsed = QUICK_SHOP_INPUT.safeParse({ handle, selectedOptions });
+  if (!parsed.success) return null;
+  const input = parsed.data;
+
+  const product = await getProduct({ handle: input.handle });
   if (!product || product.isGiftCard) return null;
 
   let variant = product.defaultVariant;
-  if (selectedOptions !== undefined) {
-    if (
-      !Array.isArray(selectedOptions) ||
-      selectedOptions.length !== product.options.length ||
-      selectedOptions.some(
-        (option) => typeof option?.name !== "string" || typeof option?.value !== "string",
-      )
-    ) {
-      return null;
-    }
+  if (input.selectedOptions !== undefined) {
+    const requested = input.selectedOptions;
+    if (requested.length !== product.options.length) return null;
     const canonicalOptions: SelectedOption[] = [];
     for (const option of product.options) {
-      const exactNames = selectedOptions.filter(({ name }) => name === option.name);
+      const exactNames = requested.filter(({ name }) => name === option.name);
       const selected = exactNames.length
         ? exactNames
-        : selectedOptions.filter(({ name }) => name.toLowerCase() === option.name.toLowerCase());
+        : requested.filter(({ name }) => name.toLowerCase() === option.name.toLowerCase());
       if (selected.length !== 1) return null;
       const matchedValue =
         option.values.find((value) => value.name === selected[0].value) ??
@@ -38,7 +42,7 @@ export async function loadQuickShopProductAction(
       canonicalOptions.push({ name: option.name, value: matchedValue.name });
     }
     const resolvedVariant = await fetchProductVariant({
-      handle,
+      handle: input.handle,
       selectedOptions: canonicalOptions,
     });
     if (

@@ -1,11 +1,17 @@
 import { getSearchResultUrl } from "@shopify/hydrogen";
 
 import { shopConfig } from "@/lib/config";
-import { escapeMarkdown, markdownFrontmatter } from "@/lib/markdown";
+import { escapeRequestText, markdownFrontmatter } from "@/lib/markdown";
+import { SEARCH_TERM_MAX_LENGTH } from "@/lib/search";
+
+function normalizeSearchTerm(query: string | undefined): string {
+  const term = query?.replace(/[\s\p{Cc}]+/gu, " ").trim() ?? "";
+  return Array.from(term).slice(0, SEARCH_TERM_MAX_LENGTH).join("").trimEnd();
+}
 
 export function searchToMarkdown(query: string | undefined): string {
   const siteUrl = shopConfig.site.url;
-  const term = query?.trim();
+  const term = normalizeSearchTerm(query);
   const shopPath = term ? getSearchResultUrl({ baseUrl: "/search", term }) : "/search";
 
   const title = term ? `Search: ${term}` : "Search";
@@ -19,7 +25,7 @@ export function searchToMarkdown(query: string | undefined): string {
       title,
     }),
     "",
-    `# ${escapeMarkdown(title)}`,
+    `# ${term ? `Search: ${escapeRequestText(term)}` : "Search"}`,
     "",
     description,
     "",

@@ -17,7 +17,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
       handle,
     });
     if (!product) {
-      return new Response(notFoundMarkdown({ kind: "Product", value: handle }), {
+      return new Response(notFoundMarkdown({ kind: "Product" }), {
         status: 404,
         headers: markdownHeaders({
           cacheControl: "public, max-age=3600, stale-while-revalidate=604800",

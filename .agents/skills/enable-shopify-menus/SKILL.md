@@ -5,7 +5,7 @@ description: Replace the hardcoded nav and footer links with Shopify-managed men
 
 # Enable Shopify Menus
 
-By default, the storefront's nav renders an inline `const items: MenuItem[] = [...]` in `Nav` (`components/nav/index.tsx`), and the footer renders an empty `const items: MenuItem[] = []` in `Footer` (`components/footer/index.tsx`). `QuickLinks`, `MobileMenu`, and `Footer`'s `FooterMenu` already render `MenuItem[]` from `lib/menu/types.ts` up to three levels deep.
+By default, the storefront's nav renders an inline `const items: MenuItem[] = [...]` in `Nav` (`components/nav/index.tsx`), and the footer renders an empty `const items: MenuItem[] = []` in `Footer` (`components/footer/index.tsx`). `QuickLinks`, `MobileMenu`, and `Footer`'s `FooterMenu` already render `MenuItem[]` from `lib/menu/types.ts`, up to three levels deep in the nav and two in the footer.
 
 This skill adds a cached Shopify menu read, points the selected components at it with the inline items as fallback, and adds a protected endpoint that refreshes menus after merchants edit them. Shopify sends no webhook when a menu changes, so menus stay cached until that endpoint is called.
 

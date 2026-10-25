@@ -6,7 +6,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useAgentCartPending } from "@/lib/agent/cart/client";
 import { prepareCheckoutAction } from "@/lib/cart/action";
 
-import type { cartHandlers } from "./server";
+import type { cartHandlers } from "./request";
 
 export const { CartProvider, useCart, useCartActions, useCartForm, useSuspenseCart } =
   createCartComponents<typeof cartHandlers>();

@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 
 import { DiscountBadge } from "@/components/product/discount-badge";
 import { Price } from "@/components/product/price";
-import { isMarkedDown } from "@/lib/product";
+import { getDiscountPercent, isMarkedDown } from "@/lib/product";
 
 interface ProductPriceProps extends ComponentProps<"div"> {
   amount: string;
@@ -19,9 +19,7 @@ export function ProductPrice({
   ...props
 }: ProductPriceProps) {
   const markedDown = isMarkedDown(amount, compareAtAmount);
-  const discountPercent = markedDown
-    ? Math.round(((Number(compareAtAmount) - Number(amount)) / Number(compareAtAmount)) * 100)
-    : null;
+  const discountPercent = getDiscountPercent(amount, compareAtAmount);
   return (
     <div className={cn("flex items-center gap-2.5 flex-wrap", className)} {...props}>
       <Price amount={amount} currencyCode={currencyCode} className="text-xl" />
@@ -32,7 +30,7 @@ export function ProductPrice({
           className="text-xl line-through text-foreground/35"
         />
       )}
-      {discountPercent && <DiscountBadge percent={discountPercent} />}
+      {discountPercent !== null ? <DiscountBadge percent={discountPercent} /> : null}
     </div>
   );
 }
