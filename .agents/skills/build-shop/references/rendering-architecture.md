@@ -49,7 +49,7 @@ Preserve these boundaries:
 | Data                                                                          | Default treatment                                                                                                                   |
 | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Public catalog and content reads, including static shell content              | `"use cache: remote"` in the domain `get*` wrapper with the existing `cacheLife` and `cacheTag` policy                              |
-| Default first page of a collection or `/collections/all`, with its facets     | `"use cache: remote"` with `cacheLife("minutes")` and collection and product tags; Search & Discovery edits send no webhook          |
+| Default first page of a collection or `/collections/all`, with its facets     | `"use cache: remote"` with `cacheLife("max")` and collection and product tags; Search & Discovery edits wait for the next webhook   |
 | Filtered or sorted browse, Load more pages, search results, and their facets  | Uncached `fetch*` reads; cached cursor pages drift apart, and each filter combination would be a rarely reused cache entry          |
 | Customer, session, cart, or authorization-dependent data                      | Uncached or private per-session handling; never place it in a shared remote cache                                                   |
 | Mutation results                                                              | Preserve the domain invalidation path; carts are never in the Next.js data cache, so cart mutations need no cache invalidation step |

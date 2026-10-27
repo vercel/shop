@@ -1,6 +1,6 @@
 {
   "name": "vercel-shop",
-  "version": "2026.10.1",
+  "version": "2026.10.2",
   "private": true,
   "scripts": {
     "build": "next build",

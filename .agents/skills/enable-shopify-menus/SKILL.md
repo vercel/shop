@@ -7,7 +7,7 @@ description: Replace the hardcoded nav and footer links with Shopify-managed men
 
 By default, the storefront's nav renders an inline `const items: MenuItem[] = [...]` in `Nav` (`components/nav/index.tsx`), and the footer renders an empty `const items: MenuItem[] = []` in `Footer` (`components/footer/index.tsx`). `QuickLinks`, `MobileMenu`, and `Footer`'s `FooterMenu` already render `MenuItem[]` from `lib/menu/types.ts`, up to three levels deep in the nav and two in the footer.
 
-This skill adds a cached Shopify menu read, points the selected components at it with the inline items as fallback, and adds a protected endpoint that refreshes menus after merchants edit them. Shopify sends no webhook when a menu changes, so menus stay cached until that endpoint is called.
+This skill adds a cached Shopify menu read and points the selected components at it with the inline items as fallback. Shopify sends no webhook when a menu changes, so menus stay cached until the storefront's protected `POST /api/revalidate` endpoint is called with the `menus` tag.
 
 ## Before you start
 
@@ -138,44 +138,15 @@ export async function getMenu(params: {
 }
 ```
 
-## 3. Add the refresh endpoint
+## 3. Refresh menus after edits
 
-Create `app/api/revalidate/menus/route.ts`. It returns `404` until `MENUS_REVALIDATE_SECRET` is set:
+The storefront's `app/api/revalidate/route.ts` refreshes the cache tags it is given, including `menus`, and returns `404` until `REVALIDATE_SECRET` is set. If the storefront has no `app/api/revalidate/route.ts`, take it from the template with the `update-shop` skill first; do not add a menu-only endpoint.
 
-```ts
-import crypto from "node:crypto";
-
-import { revalidateTag } from "next/cache";
-
-const MENUS_REVALIDATE_SECRET = process.env.MENUS_REVALIDATE_SECRET;
-
-export async function POST(request: Request) {
-  if (!MENUS_REVALIDATE_SECRET) return new Response(null, { status: 404 });
-
-  const expected = Buffer.from(`Bearer ${MENUS_REVALIDATE_SECRET}`);
-  const received = Buffer.from(request.headers.get("authorization") ?? "");
-  if (expected.length !== received.length || !crypto.timingSafeEqual(expected, received)) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  revalidateTag("menus", { expire: 0 });
-  return Response.json({ revalidated: "menus" });
-}
-```
-
-Add this row to the `# Optional` block of `.env.example`, keeping it alphabetical:
+Tell the user to set `REVALIDATE_SECRET` in the deployment's environment variables, then refresh menus after editing them in Shopify admin:
 
 ```bash
-# MENUS_REVALIDATE_SECRET="your-menus-revalidate-secret-here" # Set when Shopify menus are enabled; send it as a Bearer token to POST /api/revalidate/menus after editing menus.
-```
-
-Add `MENUS_REVALIDATE_SECRET` to `turbo.json` `globalEnv`, keeping it alphabetical; Turborepo's strict mode hides undeclared variables from tasks.
-
-Tell the user to set `MENUS_REVALIDATE_SECRET` in the deployment's environment variables, then refresh menus after editing them in Shopify admin:
-
-```bash
-curl -X POST https://your-store.example.com/api/revalidate/menus \
-  -H "Authorization: Bearer $MENUS_REVALIDATE_SECRET"
+curl -X POST "https://your-store.example.com/api/revalidate?tag=menus" \
+  -H "Authorization: Bearer $REVALIDATE_SECRET"
 ```
 
 Any scheduler or automation that can send that request can refresh menus on a schedule.
@@ -214,12 +185,12 @@ Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` needs 
 
 - The nav and footer render the Shopify menu items, with internal links as storefront paths such as `/collections/all`, and external links unchanged.
 - A missing or empty menu falls back to the inline items.
-- `POST /api/revalidate/menus` returns `404` without `MENUS_REVALIDATE_SECRET`, `401` with a wrong token, and `200` with the right one.
+- `POST /api/revalidate?tag=menus` returns `404` without `REVALIDATE_SECRET`, `401` with a wrong token, and `200` with `{"revalidated":["menus"]}` with the right one.
 - Lint, typecheck, and build pass.
 
 ## Guardrails
 
 - Keep the inline fallbacks so a missing menu or Storefront error never leaves a blank nav.
-- Keep `cacheLife("max")` with the `menus` tag and refresh through the endpoint; do not shorten the cache life to pick up edits.
+- Keep `cacheLife("max")` with the `menus` tag and refresh through `POST /api/revalidate`; do not shorten the cache life to pick up edits.
 - In a localized or Markets-enabled store, pass the validated commerce locale to `getMenu` from each caller; do not read locale from request headers inside the cached read.
 - New fallback labels belong beside the consuming component; Shopify menu translations and storefront fallback copy are separate.

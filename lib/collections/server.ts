@@ -99,13 +99,13 @@ function recordToSearchParams(
   return params;
 }
 
-// The default view, unfiltered and in its default sort: "minutes" bounds Search & Discovery edits, which send no webhook, and Load more's product dedupe absorbs cursor drift.
+// The default view, unfiltered and in its default sort: Search & Discovery edits send no webhook, so they appear once a product or collection webhook refreshes it, and Load more's product dedupe absorbs cursor drift.
 export async function getCollectionResults(params: {
   handle: string;
   locale?: CommerceLocale;
 }): Promise<BrowseResults> {
   "use cache: remote";
-  cacheLife("minutes");
+  cacheLife("max");
   cacheTag("collections", `collection-${params.handle}`, "products-index");
 
   const { facets, pageInfo, products } = await fetchCollectionProducts({
@@ -127,7 +127,7 @@ export async function getAllProductsResults(
   params: { locale?: CommerceLocale } = {},
 ): Promise<BrowseResults> {
   "use cache: remote";
-  cacheLife("minutes");
+  cacheLife("max");
   cacheTag("products-index");
 
   const [{ pageInfo, products }, { facets, total }] = await Promise.all([
