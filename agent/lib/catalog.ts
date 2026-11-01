@@ -3,7 +3,9 @@ import { z } from "zod";
 
 import { toAgentProduct } from "../../lib/agent/products";
 import type { AgentProduct, AgentProductDetails } from "../../lib/agent/products/types";
+import { formatPrice, fromMinorUnits } from "../../lib/money";
 import type { ProductCard } from "../../lib/product/types";
+import type { CatalogMoney, CatalogProduct } from "../../lib/shopify/catalog/types";
 import { fetchProductOptionValues } from "../../lib/shopify/operations/products/server";
 
 function toModelProduct({ available, compareAtPrice, handle, price, title, vendor }: AgentProduct) {
@@ -22,6 +24,7 @@ export function toModelProductDetails(
 ): ToolModelOutput {
   if (!("product" in output)) return { type: "json", value: output };
   const { description, options, variants } = output.product;
+  const variantsComplete = output.product.variantsComplete === true && Boolean(variants?.length);
   return {
     type: "json",
     value: {
@@ -32,25 +35,30 @@ export function toModelProductDetails(
           name: option.name,
           values: option.values.map((value) => value.name),
         })),
-        variants: variants.map(
-          ({
-            available,
-            compareAtPrice,
-            id,
-            price,
-            requiresBundleConfiguration,
-            requiresSellingPlan,
-            title,
-          }) => ({
-            available,
-            compareAtPrice,
-            id,
-            price,
-            requiresBundleConfiguration,
-            requiresSellingPlan,
-            title,
-          }),
-        ),
+        variantsComplete,
+        ...(variantsComplete && variants
+          ? {
+              variants: variants.map(
+                ({
+                  available,
+                  compareAtPrice,
+                  id,
+                  price,
+                  requiresBundleConfiguration,
+                  requiresSellingPlan,
+                  title,
+                }) => ({
+                  available,
+                  compareAtPrice,
+                  id,
+                  price,
+                  requiresBundleConfiguration,
+                  requiresSellingPlan,
+                  title,
+                }),
+              ),
+            }
+          : {}),
       },
     },
   };
@@ -72,7 +80,7 @@ export const productOptionsSchema = z
         .string()
         .max(100)
         .describe(
-          "The option value requested by the shopper, not a default variant value from search results.",
+          "The product's own value for what the shopper asked, as results list it, such as LG for large; never a default variant value.",
         ),
     }),
   )
@@ -96,4 +104,27 @@ export async function matchingProducts(
     )
     .slice(0, 12)
     .map(toAgentProduct);
+}
+
+function formatCatalogMoney(money: CatalogMoney | null) {
+  return money ? formatPrice(fromMinorUnits(money.amount, money.currency)) : null;
+}
+
+export function toCatalogCandidate(product: CatalogProduct) {
+  const markedDown =
+    product.listPrice && product.price && product.listPrice.amount > product.price.amount;
+  return {
+    available: product.variants.some((variant) => variant.available === true),
+    collections: product.collections,
+    compareAtPrice: markedDown ? formatCatalogMoney(product.listPrice) : null,
+    handle: product.handle,
+    id: product.id,
+    options: product.options,
+    price: formatCatalogMoney(product.price),
+    title: product.title,
+    variants: product.variants.map((variant) => ({
+      available: variant.available,
+      options: variant.options.map((option) => option.label).join(" / "),
+    })),
+  };
 }

@@ -6,7 +6,7 @@ import { matchingProducts, productOptionsSchema, toModelProducts } from "../lib/
 
 export default defineTool({
   description:
-    "Render chosen exact Shopify Product IDs from native catalog search. Filter only by product options explicitly requested by the shopper; otherwise use []. Never infer preferences from featured variants. Other authored product tools already render their results.",
+    "Render chosen exact Shopify Product IDs from search-products. Filter only by product options explicitly requested by the shopper; otherwise use []. Never infer preferences from featured variants. Other authored product tools already render their results.",
   inputSchema: z.strictObject({
     ids: z.array(z.string().regex(/^gid:\/\/shopify\/Product\/[0-9]+$/)).max(12),
     options: productOptionsSchema,

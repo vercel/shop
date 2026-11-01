@@ -14,7 +14,7 @@ Ask for the target directory if the user did not provide one. Always pass it exp
    pnpm create next-app@latest <target-directory> --example https://github.com/vercel/shop
    ```
 
-   The template pins pnpm 12 and Node.js 24.
+   The template pins pnpm 12 and Node.js 26.
 
 3. Confirm the generated project contains `AGENTS.md`, `.agents/skills/`, `app/`, `components/`, `lib/shopify/`, and `package.json`.
 4. Read the generated `AGENTS.md` before making further changes.

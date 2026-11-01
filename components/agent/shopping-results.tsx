@@ -21,13 +21,19 @@ import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { Link } from "@/components/ui/link";
 import { Slider, SliderContent, SliderHeader, SliderItem, SliderNav } from "@/components/ui/slider";
 import { isCartMutation } from "@/lib/agent/cart";
+import { completedOutput, isToolPart } from "@/lib/agent/messages";
 import {
   defaultAgentSelection,
   findAgentVariant,
   selectAgentOption,
   toAgentOptionGroups,
 } from "@/lib/agent/products";
-import type { AgentProduct, AgentProductDetails } from "@/lib/agent/products/types";
+import type {
+  AgentProduct,
+  AgentProductDetails,
+  CompleteAgentProductDetails,
+} from "@/lib/agent/products/types";
+import { AGENT_TOOL, PRODUCT_CARD_TOOLS } from "@/lib/agent/tools";
 import { useCart, useCartForm } from "@/lib/cart/client";
 import { buildProductUrl } from "@/lib/product";
 
@@ -54,6 +60,24 @@ function isAgentProduct(value: unknown): value is AgentProduct | AgentProductDet
   );
 }
 
+function hasCompleteVariants(
+  product: AgentProduct | AgentProductDetails,
+): product is CompleteAgentProductDetails {
+  return (
+    "variantsComplete" in product &&
+    product.variantsComplete === true &&
+    Array.isArray(product.variants) &&
+    product.variants.length > 0 &&
+    Array.isArray(product.options)
+  );
+}
+
+function wantsOptions(input: unknown) {
+  return typeof input === "object" && input !== null && "showOptions" in input
+    ? input.showOptions === true
+    : false;
+}
+
 export function ShoppingResults({
   confirmation,
   fallback = null,
@@ -62,11 +86,10 @@ export function ShoppingResults({
   message,
 }: ShoppingResultsProps) {
   const products = new Map<string, AgentProduct | AgentProductDetails>();
-  const results = message.parts.flatMap((part) => {
-    if (part.type !== "dynamic-tool" || part.state !== "output-available" || part.partial)
-      return [];
-    const output = part.output;
-    if (!output || typeof output !== "object") return [];
+  const productDetails = new Map<string, AgentProduct | AgentProductDetails>();
+  const results = message.parts.filter(isToolPart).flatMap((part) => {
+    const output = completedOutput(part);
+    if (!output) return [];
     const candidates = [
       ...("products" in output && Array.isArray(output.products) ? output.products : []),
       ...("product" in output && output.product ? [output.product] : []),
@@ -74,18 +97,24 @@ export function ShoppingResults({
     for (const product of candidates) {
       if (isAgentProduct(product)) products.set(product.handle, product);
     }
+    if (
+      part.name === AGENT_TOOL.getProductDetails &&
+      "product" in output &&
+      isAgentProduct(output.product)
+    ) {
+      productDetails.set(output.product.handle, output.product);
+    }
     return "error" in output ? [] : [{ output, part }];
   });
-  const changesCart = message.parts.some(
-    (part) => part.type === "dynamic-tool" && isCartMutation(part.toolName),
-  );
+  const changesCart = message.parts.some((part) => isToolPart(part) && isCartMutation(part.name));
   const children: ReactNode[] = [];
   const seen = new Set<string>();
+  const shownOptions = new Set<string>();
   let hasCart = false;
 
   for (const { output, part } of results) {
     if (
-      ["present-products", "browse-collection", "get-recommendations"].includes(part.toolName) &&
+      PRODUCT_CARD_TOOLS.has(part.name) &&
       "products" in output &&
       Array.isArray(output.products)
     ) {
@@ -100,14 +129,14 @@ export function ShoppingResults({
         seen.add(product.handle);
         return [
           <AgentProductCard
-            key={`${part.toolCallId}-${index}`}
+            key={`${part.callId}-${index}`}
             product={products.get(product.handle)}
           />,
         ];
       });
       if (cards.length) {
         children.push(
-          <Slider className="-mx-2.5 gap-2.5" key={part.toolCallId}>
+          <Slider className="-mx-2.5 gap-2.5" key={part.callId}>
             <SliderHeader className="justify-end px-2.5">
               <SliderNav />
             </SliderHeader>
@@ -120,23 +149,28 @@ export function ShoppingResults({
     }
     if (isStreaming || changesCart) continue;
     if (
-      part.toolName === "get-product-details" &&
+      part.name === AGENT_TOOL.getProductDetails &&
+      wantsOptions(part.input) &&
       "product" in output &&
-      output.product &&
-      typeof output.product === "object" &&
-      "handle" in output.product &&
-      typeof output.product.handle === "string"
+      isAgentProduct(output.product)
     ) {
-      const product = products.get(output.product.handle);
-      children.push(
-        <AgentVariantPicker
-          key={part.toolCallId}
-          isLatest={isLatest}
-          product={product && "variants" in product ? product : undefined}
-        />,
-      );
+      const product = productDetails.get(output.product.handle) ?? output.product;
+      if (shownOptions.has(product.handle)) continue;
+      shownOptions.add(product.handle);
+      if (!hasCompleteVariants(product)) {
+        children.push(
+          <div key={part.callId} className="my-2 grid gap-2 rounded-lg border p-2.5">
+            <p>Choose options for {product.title} on the product page.</p>
+            <Button render={<Link href={`/products/${product.handle}`} />}>Choose options</Button>
+          </div>,
+        );
+      } else {
+        children.push(
+          <AgentVariantPicker key={part.callId} isLatest={isLatest} product={product} />,
+        );
+      }
     }
-    if (part.toolName === "get-cart" && !hasCart && isLatest) {
+    if (part.name === AGENT_TOOL.getCart && !hasCart && isLatest) {
       hasCart = true;
       children.push(<AgentCartSummary key="cart" />);
     }
@@ -230,7 +264,7 @@ function AgentProductCard({ product }: AgentProductCardProps) {
 
 interface AgentVariantPickerProps {
   isLatest: boolean;
-  product: AgentProductDetails | undefined;
+  product: CompleteAgentProductDetails;
 }
 
 function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
@@ -239,7 +273,7 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
     Boolean(state.pending.lines.size || state.pending.cost || state.revalidating),
   );
   const cartErrors = useCart((state) => state.errors);
-  const [selected, setSelected] = useState(() => (product ? defaultAgentSelection(product) : {}));
+  const [selected, setSelected] = useState(() => defaultAgentSelection(product));
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<"added" | "failed" | null>(null);
   const observedBusy = useRef(false);
@@ -258,7 +292,6 @@ function AgentVariantPicker({ isLatest, product }: AgentVariantPickerProps) {
       cartErrors.networkUpdatedAt > errorsAtSubmit.network;
     setResult(failed ? "failed" : "added");
   }, [cartBusy, cartErrors, errorsAtSubmit, submitted]);
-  if (!product) return <MissingData>This product is no longer available.</MissingData>;
   const variant = findAgentVariant(product, selected);
   const price = variant?.price ?? product.price;
   const compareAtPrice = variant ? variant.compareAtPrice : product.compareAtPrice;

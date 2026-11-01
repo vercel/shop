@@ -13,7 +13,12 @@ import type {
   SelectedOptions,
 } from "@/lib/product/types";
 
-import type { AgentProduct, AgentProductDetails, AgentVariant } from "./types";
+import type {
+  AgentProduct,
+  AgentProductDetails,
+  AgentVariant,
+  CompleteAgentProductDetails,
+} from "./types";
 
 function toDiscountPrice(price: Money, compareAtPrice: Money | undefined): Money | null {
   return compareAtPrice && isMarkedDown(price.amount, compareAtPrice.amount)
@@ -50,6 +55,8 @@ function toAgentVariant(variant: ProductVariant): AgentVariant {
 }
 
 export function toAgentProductDetails(product: ProductDetails): AgentProductDetails {
+  const variants = product.variantsComplete === true ? product.variants : undefined;
+  const variantsComplete = Boolean(variants?.length);
   return {
     ...toAgentProduct(product),
     description: product.description,
@@ -62,12 +69,13 @@ export function toAgentProductDetails(product: ProductDetails): AgentProductDeta
         ...(value.swatch ? { swatch: value.swatch } : {}),
       })),
     })),
-    variants: (product.variants ?? []).map(toAgentVariant),
+    variantsComplete,
+    ...(variantsComplete && variants ? { variants: variants.map(toAgentVariant) } : {}),
   };
 }
 
 export function findAgentVariant(
-  product: AgentProductDetails,
+  product: CompleteAgentProductDetails,
   selected: SelectedOptions,
 ): AgentVariant | undefined {
   return product.variants.find((variant) =>
@@ -79,32 +87,42 @@ function toSelection(variant: AgentVariant | undefined): SelectedOptions {
   return Object.fromEntries((variant?.options ?? []).map((option) => [option.name, option.value]));
 }
 
-export function defaultAgentSelection(product: AgentProductDetails): SelectedOptions {
+export function defaultAgentSelection(product: CompleteAgentProductDetails): SelectedOptions {
   return toSelection(product.variants.find((variant) => variant.available) ?? product.variants[0]);
 }
 
 export function selectAgentOption(
-  product: AgentProductDetails,
+  product: CompleteAgentProductDetails,
   selected: SelectedOptions,
   name: string,
   value: string,
 ): SelectedOptions {
   const next = { ...selected, [name]: value };
   if (findAgentVariant(product, next)) return next;
-  const fallback = product.variants.find((variant) =>
+  let matches = product.variants.filter((variant) =>
     variant.options.some((option) => option.name === name && option.value === value),
   );
+  for (const option of product.options) {
+    if (option.name === name || selected[option.name] === undefined) continue;
+    const preserved = matches.filter((variant) =>
+      variant.options.some(
+        (entry) => entry.name === option.name && entry.value === selected[option.name],
+      ),
+    );
+    if (preserved.length) matches = preserved;
+  }
+  const fallback = matches.find((variant) => variant.available) ?? matches[0];
   return fallback ? toSelection(fallback) : next;
 }
 
 export function toAgentOptionGroups(
-  product: AgentProductDetails,
+  product: CompleteAgentProductDetails,
   selected: SelectedOptions,
 ): OptionGroupState[] {
   return product.options.map((option) => ({
     name: option.name,
     values: option.values.map((value) => {
-      const candidate = { ...selected, [option.name]: value.name };
+      const candidate = selectAgentOption(product, selected, option.name, value.name);
       const variant = findAgentVariant(product, candidate);
       return {
         available: variant?.available ?? false,

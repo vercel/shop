@@ -1,11 +1,11 @@
 "use client";
 
-import { CornerDownLeftIcon, Loader2Icon, SquareIcon, XIcon } from "lucide-react";
+import { CornerDownLeftIcon, SquareIcon } from "lucide-react";
 import type { KeyboardEvent } from "react";
 
 import { InputGroup, InputGroupButton, InputGroupTextarea } from "@/components/ui/input-group";
 
-type AgentStatus = "error" | "ready" | "resuming" | "streaming" | "submitted";
+type AgentStatus = "busy" | "idle" | "resuming";
 
 interface AgentComposerProps {
   disabled?: boolean;
@@ -26,7 +26,7 @@ export function AgentComposer({
   status,
   value,
 }: AgentComposerProps) {
-  const isBusy = status === "submitted" || status === "streaming";
+  const isBusy = status === "busy";
   const submit = () => {
     if (disabled || status === "resuming") return;
     if (isBusy) {
@@ -42,10 +42,11 @@ export function AgentComposer({
     e.preventDefault();
     submit();
   };
-  let icon = <CornerDownLeftIcon className="size-4" />;
-  if (status === "submitted") icon = <Loader2Icon className="size-4 animate-spin" />;
-  else if (status === "streaming") icon = <SquareIcon className="size-4" />;
-  else if (status === "error") icon = <XIcon className="size-4" />;
+  const icon = isBusy ? (
+    <SquareIcon className="size-4" />
+  ) : (
+    <CornerDownLeftIcon className="size-4" />
+  );
   return (
     <form
       onSubmit={(e) => {

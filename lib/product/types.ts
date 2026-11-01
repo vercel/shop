@@ -117,6 +117,7 @@ export interface ProductDetails extends ProductCard {
   updatedAt: string;
   /** Only populated by fetchProductWithVariants for Eve; the PDP and Markdown omit it. */
   variants?: ProductVariant[];
+  variantsComplete: boolean;
   variantsCount: number;
   videos: Video[];
 }

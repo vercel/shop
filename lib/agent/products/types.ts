@@ -32,5 +32,11 @@ export interface AgentProductDetails extends AgentProduct {
   description: string;
   images: string[];
   options: { name: string; values: AgentOptionValue[] }[];
-  variants: AgentVariant[];
+  variants?: AgentVariant[];
+  variantsComplete: boolean;
 }
+
+export type CompleteAgentProductDetails = AgentProductDetails & {
+  variants: AgentVariant[];
+  variantsComplete: true;
+};

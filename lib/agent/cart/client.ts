@@ -2,22 +2,16 @@
 
 import { useSyncExternalStore } from "react";
 
-type AgentCartStatus = "failed" | "pending" | "ready";
-
-let status: AgentCartStatus = "ready";
+let pending = false;
 const listeners = new Set<() => void>();
 
-export function getAgentCartStatus() {
-  return status;
-}
-
-export function setAgentCartStatus(value: AgentCartStatus) {
-  if (status === value) return;
-  status = value;
+export function setAgentCartPending(value: boolean) {
+  if (pending === value) return;
+  pending = value;
   for (const listener of listeners) listener();
 }
 
-export function useAgentCartStatus() {
+export function useAgentCartPending() {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener);
@@ -25,11 +19,7 @@ export function useAgentCartStatus() {
         listeners.delete(listener);
       };
     },
-    () => status,
-    (): AgentCartStatus => "ready",
+    () => pending,
+    () => false,
   );
-}
-
-export function useAgentCartPending() {
-  return useAgentCartStatus() !== "ready";
 }

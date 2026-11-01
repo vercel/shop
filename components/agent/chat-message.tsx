@@ -6,6 +6,7 @@ import { defaultUrlTransform, Streamdown, type UrlTransform } from "streamdown";
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { getCartMutationResult } from "@/lib/agent/cart";
+import { isSettledToolPart, isToolPart } from "@/lib/agent/messages";
 
 import { ShoppingResults } from "./shopping-results";
 import { AgentThinking } from "./thinking";
@@ -54,21 +55,15 @@ export function ChatMessage({
   });
   const warnings = [...new Set(mutations.flatMap((mutation) => mutation.warnings))];
   const showsLiveCart = isLatest && mutations.length > 0;
-  const active = message.parts.find(
-    (part) =>
-      part.type === "dynamic-tool" &&
-      part.state !== "output-available" &&
-      part.state !== "output-error",
-  );
-  const waitsForInput = message.parts.some(
-    (part) => part.type === "dynamic-tool" && part.state === "approval-requested",
+  const active = message.parts.filter(isToolPart).find((part) => !isSettledToolPart(part));
+  const waitsForInput = message.parts.some((part) =>
+    part.type === "tool"
+      ? part.interaction?.status === "open"
+      : part.type === "interaction" && part.status === "open",
   );
   return (
     <div className="grid gap-2.5 text-foreground text-sm">
-      <AgentThinking
-        active={isStreaming && !text}
-        tool={active?.type === "dynamic-tool" ? active.toolName : undefined}
-      />
+      <AgentThinking active={isStreaming && !text} tool={active?.name} />
       {text && <Markdown>{text}</Markdown>}
       <ShoppingResults
         confirmation={showsLiveCart ? { warnings } : undefined}
