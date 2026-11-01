@@ -1,6 +1,7 @@
 "use client";
 
-import { openConversationInputs, useEveAgent } from "eve/react";
+import { activeTurn, idle, openInteractions } from "eve/events";
+import { useEveAgent } from "eve/react";
 import { Trash2Icon, XIcon } from "lucide-react";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
@@ -11,7 +12,6 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { setAgentCartStatus, useAgentCartPending } from "@/lib/agent/cart/client";
 import { readStoredChat, writeStoredChat } from "@/lib/agent/chat/client";
 
 import { AgentCartBridge } from "./cart-bridge";
@@ -45,13 +45,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
   const [input, setInput] = useState(stored.input);
   const snapshot = useRef(stored);
   const [clearing, setClearing] = useState(false);
-  const clearAttempt = useRef<{
-    reject: (error: Error) => void;
-    resolve: () => void;
-  } | null>(null);
-  const cartPending = useAgentCartPending();
-  const [controlError, setControlError] = useState<string | null>(null);
-  const [pendingSend, setPendingSend] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const sessionPrep = useRef<Promise<void> | null>(null);
   // The cart cookie outlives each turn, so prepare it once and keep sends off the network.
   const prepareSession = useCallback(() => {
@@ -64,46 +58,28 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     return promise;
   }, []);
   const agent = useEveAgent({
+    // Follow only while work runs, so an idle panel holds no open stream.
+    followWhile: (view) => !idle(view),
     initialSession: stored.session,
-    onError(cause) {
-      setPendingSend(false);
-      clearAttempt.current?.reject(cause);
-    },
-    onFinish(finished) {
-      setPendingSend(false);
-      if (finished.error) clearAttempt.current?.reject(finished.error);
-      else clearAttempt.current?.resolve();
-    },
     onSessionChange(session) {
       snapshot.current.session = session ? { ...session, streamIndex: 0 } : undefined;
       writeStoredChat(snapshot.current);
     },
     async prepareSend(turn) {
       await prepareSession();
-      return {
-        ...turn,
-        clientContext: { pathname: location.pathname, search: location.search },
-        turnPolicy: "queue",
-      };
+      const clientContext = { pathname: location.pathname, search: location.search };
+      return turn.answers
+        ? { ...turn, clientContext }
+        : { ...turn, clientContext, turnPolicy: "queue" };
     },
     resume: Boolean(stored.session && stored.turnActive),
   });
-  const { data, error, status } = agent;
-  const { messages } = data;
-  // A session-limit prompt holds its turn open, so the stream stays "streaming" while it waits.
-  const hasReachedLimit = openConversationInputs(data).some(
-    (pending) => pending.request.kind === "session-limit",
-  );
+  const { messages, status, view } = agent;
+  // A budget prompt holds its turn open; Shop Agent never offers to continue past the limit.
+  const hasReachedLimit = openInteractions(view, { kind: "budget" }).length > 0;
   const restoring = resumePending || status === "resuming";
-  const dispatching = pendingSend && status === "ready";
-  const busy =
-    !hasReachedLimit &&
-    (dispatching || status === "submitted" || status === "streaming" || status === "resuming");
-  const awaitingReply =
-    !hasReachedLimit &&
-    (dispatching ||
-      status === "submitted" ||
-      (status === "streaming" && messages.at(-1)?.role === "user"));
+  const busy = !hasReachedLimit && status === "busy";
+  const awaitingReply = busy && messages.at(-1)?.role === "user";
   useEffect(() => {
     if (open) void prepareSession().catch(() => {});
   }, [open, prepareSession]);
@@ -112,7 +88,6 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     writeStoredChat(snapshot.current);
   }, [busy]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const pinnedRef = useRef(true);
   const userScrollRef = useRef(false);
   const pointerDownRef = useRef(false);
@@ -132,17 +107,20 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     else if (userScrollRef.current || pointerDownRef.current) pinnedRef.current = false;
     userScrollRef.current = false;
   }, []);
-  useEffect(() => {
-    const scroller = scrollRef.current;
-    const content = contentRef.current;
-    if (!scroller || !content) return;
-    const observer = new ResizeObserver(() => {
-      if (pinnedRef.current) scrollToBottom();
-    });
-    observer.observe(content);
-    observer.observe(scroller);
-    return () => observer.disconnect();
-  }, [scrollToBottom]);
+  // The sheet renders its content after the panel mounts, so observe the node when it attaches.
+  const observeContent = useCallback(
+    (content: HTMLDivElement | null) => {
+      const scroller = content?.parentElement;
+      if (!content || !scroller) return;
+      const observer = new ResizeObserver(() => {
+        if (pinnedRef.current) scrollToBottom();
+      });
+      observer.observe(content);
+      observer.observe(scroller);
+      return () => observer.disconnect();
+    },
+    [scrollToBottom],
+  );
   useEffect(() => {
     if (open) scrollToBottom();
   }, [open, scrollToBottom]);
@@ -164,73 +142,48 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
     return () => {
       window.removeEventListener("pagehide", flush);
       flush();
-      clearAttempt.current?.reject(new Error("Conversation closed"));
-      clearAttempt.current = null;
     };
   }, []);
-  function clearChat() {
-    setAgentCartStatus("pending");
-    agent.reset();
-    setResumePending(false);
-    setInput("");
-    setPendingSend(false);
-    setClearing(false);
-    setControlError(null);
-    snapshot.current = { input: "" };
-    writeStoredChat(snapshot.current);
-  }
   const handleStop = () => {
-    setControlError(null);
+    setNotice(null);
     void agent.cancel().catch(() => {
-      setControlError("Could not stop the response. Please try again.");
+      setNotice("Could not stop the response. Please try again.");
     });
   };
   const handleSend = (text: string) => {
-    if (busy || restoring || clearing || cartPending || hasReachedLimit) return;
+    if (busy || restoring || clearing || hasReachedLimit) return;
     pinnedRef.current = true;
     snapshot.current.turnActive = true;
     writeStoredChat(snapshot.current);
-    setPendingSend(true);
-    setAgentCartStatus("pending");
-    setControlError(null);
+    setNotice(null);
     void agent.send(text).catch(() => {
-      setPendingSend(false);
-      setControlError("Could not send your message. Try again, or clear an expired conversation.");
+      setNotice("Could not send your message. Try again, or clear an expired conversation.");
     });
     setInput("");
   };
   const handleClear = async () => {
-    if (clearAttempt.current) return;
+    if (clearing) return;
     setClearing(true);
-    setControlError(null);
-    const attempt = Promise.withResolvers<void>();
-    clearAttempt.current = attempt;
-    const timeout = setTimeout(
-      () => attempt.reject(new Error("Cancellation timed out")),
-      CANCEL_TIMEOUT_MS,
-    );
+    setNotice(null);
+    const interrupted = busy || activeTurn(view) !== undefined;
     try {
-      void agent.cancel().then((result) => {
-        if (result.status === "no_active_turn") attempt.resolve();
-      }, attempt.reject);
-      await attempt.promise;
-      if (clearAttempt.current !== attempt) return;
-      clearChat();
-      if (busy || status === "error")
-        setControlError(
-          "Started a new chat. Check your cart before repeating an interrupted change.",
-        );
-    } catch {
-      if (clearAttempt.current === attempt)
-        setControlError(
-          "Could not confirm the response stopped. Your conversation was kept. Try Stop or Clear again.",
-        );
-    } finally {
-      clearTimeout(timeout);
-      if (clearAttempt.current === attempt) {
-        clearAttempt.current = null;
-        setClearing(false);
+      if (interrupted) {
+        const delivery = await agent.cancel();
+        await delivery.result({ signal: AbortSignal.timeout(CANCEL_TIMEOUT_MS) });
       }
+      agent.newSession();
+      setResumePending(false);
+      setInput("");
+      snapshot.current = { input: "" };
+      writeStoredChat(snapshot.current);
+      if (interrupted)
+        setNotice("Started a new chat. Check your cart before repeating an interrupted change.");
+    } catch {
+      setNotice(
+        "Could not confirm the response stopped. Your conversation was kept. Try Stop or Clear again.",
+      );
+    } finally {
+      setClearing(false);
     }
   };
   return (
@@ -294,7 +247,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           className="min-h-0 flex-auto overflow-x-hidden overflow-y-auto overscroll-contain"
         >
           <div
-            ref={contentRef}
+            ref={observeContent}
             aria-busy={busy}
             aria-label="Conversation"
             className="flex min-h-full flex-col justify-end gap-6 px-2.5 py-5 [&>*]:shrink-0"
@@ -310,9 +263,7 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
                   <ChatMessage
                     key={message.id}
                     isLatest={index === messages.length - 1}
-                    isStreaming={
-                      status === "streaming" && !hasReachedLimit && index === messages.length - 1
-                    }
+                    isStreaming={!hasReachedLimit && message.metadata?.status === "streaming"}
                     message={message}
                   />
                 ))}
@@ -331,9 +282,9 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
             This conversation has reached its limit. Clear chat to start a new conversation.
           </p>
         )}
-        <AgentCartBridge messages={messages} status={status} />
+        <AgentCartBridge messages={messages} restoring={restoring} />
         <AgentComposer
-          disabled={!busy && (clearing || cartPending || hasReachedLimit)}
+          disabled={!busy && (clearing || hasReachedLimit)}
           onChange={(value) => {
             setInput(value);
             void prepareSession().catch(() => {});
@@ -341,21 +292,12 @@ export function AgentPanel({ onOpenChange, open, triggerRef }: AgentPanelProps) 
           onStop={handleStop}
           onSubmit={handleSend}
           placeholder="Ask anything…"
-          status={
-            dispatching
-              ? "submitted"
-              : hasReachedLimit
-                ? "ready"
-                : resumePending
-                  ? "resuming"
-                  : status
-          }
+          status={restoring ? "resuming" : busy ? "busy" : "idle"}
           value={input}
         />
-        {(error || controlError) && (
+        {(agent.error || notice) && (
           <p role="alert" className="px-2.5 pb-2 text-red-500 text-xs">
-            {controlError ??
-              "The assistant is unavailable. Try again, or clear an expired conversation."}
+            {notice ?? "The assistant is unavailable. Try again, or clear an expired conversation."}
           </p>
         )}
       </SheetContent>

@@ -239,6 +239,9 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     encodedVariantExistence: product.encodedVariantExistence ?? undefined,
     ...extractMediaFromProduct(product),
     variants,
+    variantsComplete: Boolean(
+      variants?.length && product.variants?.pageInfo?.hasNextPage === false,
+    ),
     options: product.options.map(transformOption),
     seo: {
       title: product.seo.title || product.title,

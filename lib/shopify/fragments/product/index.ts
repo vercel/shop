@@ -123,6 +123,9 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = gql(
       ...BundleRelationshipFields
     }
     variants(first: 250) {
+      pageInfo {
+        hasNextPage
+      }
       edges {
         node {
           ...ProductVariantFields

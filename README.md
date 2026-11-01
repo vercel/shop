@@ -14,7 +14,7 @@ Vercel prompts for the three required Shopify values before the first deployment
 
 ## Getting Started
 
-1. Create a new project with pnpm 12 and Node.js 24:
+1. Create a new project with pnpm 12 and Node.js 26:
 
 ```sh
 pnpm create next-app@latest my-store --example https://github.com/vercel/shop

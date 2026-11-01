@@ -1,24 +1,21 @@
 import type { EveMessagePart } from "eve/client";
 
+import { completedOutput } from "../messages";
+import { AGENT_TOOL } from "../tools";
+
 export function getCartMutationResult(part: EveMessagePart) {
-  if (
-    part.type !== "dynamic-tool" ||
-    part.state !== "output-available" ||
-    part.partial ||
-    !isCartMutation(part.toolName)
-  )
-    return undefined;
-  const output = part.output;
+  const output = completedOutput(part);
   if (
     !output ||
-    typeof output !== "object" ||
+    part.type !== "tool" ||
+    !isCartMutation(part.name) ||
     "error" in output ||
     !("cartUpdated" in output) ||
     output.cartUpdated !== true
   )
     return undefined;
   return {
-    toolName: part.toolName,
+    toolName: part.name,
     warnings:
       "warnings" in output && Array.isArray(output.warnings)
         ? output.warnings.filter((warning): warning is string => typeof warning === "string")
@@ -27,11 +24,5 @@ export function getCartMutationResult(part: EveMessagePart) {
 }
 
 export function isCartMutation(tool: string) {
-  return (
-    tool === "add-to-cart" ||
-    tool === "change-cart-item-options" ||
-    tool === "update-cart-item" ||
-    tool === "update-discount-code" ||
-    tool === "add-cart-note"
-  );
+  return tool === AGENT_TOOL.updateCart;
 }

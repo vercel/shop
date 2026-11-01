@@ -251,10 +251,15 @@ export async function fetchProductWithVariants({
   assertStorefrontOk(response, "getProductWithVariants");
   const { data } = response;
 
-  if (!data.product) return undefined;
+  if (!data.product) {
+    if (response.errors?.length) throw new Error("Shopify getProductWithVariants returned errors.");
+    return undefined;
+  }
+  const product = transformShopifyProductDetails(data.product);
   return {
-    ...transformShopifyProductDetails(data.product),
+    ...product,
     descriptionHtml: sanitizeShopifyHtml(data.product.descriptionHtml),
+    variantsComplete: product.variantsComplete && !response.errors?.length,
   };
 }
 
