@@ -44,6 +44,10 @@ Every feature belongs to exactly one owner. If a change cannot name its owner, o
 
 Agent folders hold only `.agents/skills/` and its `.claude/skills` symlink; edit skills only in `.agents/skills/`. Refer to skills by plain name, such as `enable-shopify-markets`. `shopify-ai-toolkit` is separate external tooling that Shop skills do not install.
 
+## Template releases
+
+`.vercel-shop/template.json` names the Vercel Shop release this storefront is based on. Once per session, before substantial work, check whether `vercel/shop` on GitHub has a newer `template@*` release. If it does, or `template.json` is missing, tell the user and suggest the `update-shop` skill. Upgrade only when the user asks, and keep template updates out of unrelated changes.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know
