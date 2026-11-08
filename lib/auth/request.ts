@@ -222,14 +222,24 @@ export function createCustomerSessionManager(request: Request): WritableCustomer
   );
 }
 
+const POWERED_BY = "Vercel Shop (Next.js, Shopify, Hydrogen)";
+
 export function createCustomerRequestContext(request: Request): ShopifyRequestContext {
-  return createShopifyRequestContext({
+  const context = createShopifyRequestContext({
     i18n: {
       country: shopConfig.localization.country,
       language: shopConfig.localization.language,
     },
     request,
   });
+  return {
+    ...context,
+    // Hydrogen always sets `powered-by: Shopify, Hydrogen`; replace it after Hydrogen's headers apply.
+    applyResponseHeaders(headers) {
+      context.applyResponseHeaders(headers);
+      headers.set("powered-by", POWERED_BY);
+    },
+  };
 }
 
 // Server Components cannot read the URL, so the proxy forwards the one-shot refresh marker as a request header.

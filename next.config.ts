@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
     unoptimized: !!process.env.V0_CALLBACK_URL,
   },
   partialPrefetching: true,
+  // The `powered-by` header from lib/auth/request.ts already names Next.js.
+  poweredByHeader: false,
   reactCompiler: true,
   turbopack: {
     rules: {
