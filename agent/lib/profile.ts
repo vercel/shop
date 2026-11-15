@@ -1,6 +1,13 @@
 import { shopConfig } from "../../lib/config";
 
-export function agentProfileUrl() {
+// Shopify offers a tool only to a profile that declares its capability, and no 2026-08-25 example declares both.
+const EXAMPLE_PROFILES = {
+  ask: "https://shopify.dev/ucp/agent-profiles/examples/2026-08-25/ask.json",
+  catalog:
+    "https://shopify.dev/ucp/agent-profiles/examples/2026-08-25/valid-with-capabilities.json",
+};
+
+export function agentProfileUrl(capability: keyof typeof EXAMPLE_PROFILES) {
   if (process.env.UCP_AGENT_PROFILE_URL) return process.env.UCP_AGENT_PROFILE_URL;
   const origin = new URL(shopConfig.site.url);
   if (
@@ -8,13 +15,20 @@ export function agentProfileUrl() {
     process.env.VERCEL_ENV === "preview" ||
     ["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname)
   )
-    return "https://shopify.dev/ucp/agent-profiles/examples/2026-08-25/valid-with-capabilities.json";
+    return EXAMPLE_PROFILES[capability];
   return new URL("/agent/ucp-profile.json", origin).href;
 }
 
 export const agentProfile = {
   ucp: {
     capabilities: {
+      "dev.ucp.common.ask": [
+        {
+          schema: "https://ucp.dev/2026-08-25/schemas/common/ask.json",
+          spec: "https://ucp.dev/2026-08-25/specification/common/ask",
+          version: "2026-08-25",
+        },
+      ],
       "dev.ucp.shopping.catalog.search": [
         {
           schema: "https://ucp.dev/2026-08-25/schemas/shopping/catalog_search.json",
@@ -40,6 +54,14 @@ export const agentProfile = {
     },
     payment_handlers: {},
     services: {
+      "dev.ucp.common": [
+        {
+          schema: "https://ucp.dev/2026-08-25/services/common/mcp.openrpc.json",
+          spec: "https://ucp.dev/2026-08-25/specification/overview",
+          transport: "mcp",
+          version: "2026-08-25",
+        },
+      ],
       "dev.ucp.shopping": [
         {
           schema: "https://ucp.dev/2026-08-25/services/shopping/mcp.openrpc.json",
