@@ -78,7 +78,7 @@ export default defineTool({
               currency && maxPrice !== undefined ? toMinorUnits(maxPrice, currency) : undefined,
           },
           limit: RESULT_LIMIT,
-          profile: agentProfileUrl(),
+          profile: agentProfileUrl("catalog"),
           query,
         });
       let available = saved

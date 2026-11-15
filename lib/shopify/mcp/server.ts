@@ -6,6 +6,8 @@ const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN as str
 
 const REQUEST_TIMEOUT_MS = 10_000;
 
+const UCP_MCP_PATH = "/api/ucp/mcp";
+
 const rpcResponseSchema = z.object({
   error: z.object({ message: z.string() }).optional(),
   result: z
@@ -29,15 +31,13 @@ function rpcPayload(body: string, contentType: string | null) {
 export async function callShopifyMcpTool({
   args,
   name,
-  path,
 }: {
   args: Record<string, unknown>;
   name: string;
-  path: "/api/mcp" | "/api/ucp/mcp";
 }) {
   const start = performance.now();
   try {
-    const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}${path}`, {
+    const response = await fetch(`https://${SHOPIFY_STORE_DOMAIN}${UCP_MCP_PATH}`, {
       body: JSON.stringify({
         id: 1,
         jsonrpc: "2.0",

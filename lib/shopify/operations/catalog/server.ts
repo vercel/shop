@@ -66,7 +66,6 @@ export async function fetchCatalogSearch({
   const result = await callShopifyMcpTool({
     args: { catalog, meta: { "ucp-agent": { profile } } },
     name: "search_catalog",
-    path: "/api/ucp/mcp",
   });
   const data = catalogResponseSchema.parse(result.structuredContent);
 

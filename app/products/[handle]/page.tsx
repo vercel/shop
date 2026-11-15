@@ -13,7 +13,13 @@ import { Container } from "@/components/ui/container";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
-import { defaultSelectedOptions, parseSelectedOptions, toSelectedOptionList } from "@/lib/product";
+import {
+  defaultSelectedOptions,
+  findLoadedVariant,
+  hasColorImagePartitioning,
+  parseSelectedOptions,
+  toSelectedOptionList,
+} from "@/lib/product";
 import { getProduct, getSearchIndexProducts } from "@/lib/product/server";
 import { type SelectedOptions } from "@/lib/product/types";
 import type { ProductVariant } from "@/lib/product/types";
@@ -109,18 +115,18 @@ async function ProductPageContent({
   );
   const variantPromise: Promise<ProductVariant | undefined> = searchParams.then(
     async (resolvedSearchParams) => {
-      if (
-        Object.keys(parseSelectedOptions(product.options, resolvedSearchParams ?? {})).length === 0
-      ) {
-        return product.defaultVariant;
+      const urlOptions = parseSelectedOptions(product.options, resolvedSearchParams ?? {});
+      if (Object.keys(urlOptions).length === 0) return product.defaultVariant;
+      const selectedOptions = { ...defaultSelectedOptions(product), ...urlOptions };
+      // With no variant for sale and one gallery for every variant, the cached product answers the selection; a restock shows once that cache refreshes.
+      if (!product.availableForSale && !hasColorImagePartitioning(product.options)) {
+        const loadedVariant = findLoadedVariant(product, selectedOptions);
+        if (loadedVariant) return loadedVariant;
       }
       // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
       return fetchProductVariant({
         handle,
-        selectedOptions: toSelectedOptionList({
-          ...defaultSelectedOptions(product),
-          ...parseSelectedOptions(product.options, resolvedSearchParams ?? {}),
-        }),
+        selectedOptions: toSelectedOptionList(selectedOptions),
       });
     },
   );

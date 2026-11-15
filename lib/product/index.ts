@@ -120,6 +120,27 @@ export function toProductFormInput(
   };
 }
 
+// Combined-listing option values load another product's variant, which this product's variant query never returns.
+export function findLoadedVariant(
+  product: ProductDetails,
+  selectedOptions: SelectedOptions,
+): ProductVariant | undefined {
+  const optionCount = Object.keys(selectedOptions).length;
+  const loadedVariants = [
+    product.defaultVariant,
+    ...product.adjacentVariants,
+    ...product.options.flatMap((option) =>
+      option.values.map((value) => value.firstSelectableVariant),
+    ),
+  ];
+  return loadedVariants.find(
+    (variant) =>
+      variant?.productHandle === product.handle &&
+      variant.selectedOptions.length === optionCount &&
+      variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
+  );
+}
+
 export function defaultSelectedOptions(product: ProductDetails): SelectedOptions {
   const selected: SelectedOptions = {};
   for (const option of product.defaultVariant?.selectedOptions ??

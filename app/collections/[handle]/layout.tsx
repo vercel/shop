@@ -8,12 +8,12 @@ import {
 import { getCollection, getCollections } from "@/lib/collections/server";
 import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
+// One handle, as on the product page, so build work does not grow with the catalog; other collections render on first request.
 export async function generateStaticParams() {
   try {
-    const collections = await getCollections();
-    return collections.length > 0
-      ? collections.map(({ handle }) => ({ handle }))
-      : [{ handle: PLACEHOLDER_HANDLE }];
+    const collections = await getCollections({ limit: 1 });
+    const first = collections[0];
+    return [{ handle: first ? first.handle : PLACEHOLDER_HANDLE }];
   } catch {
     return [{ handle: PLACEHOLDER_HANDLE }];
   }

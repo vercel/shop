@@ -46,7 +46,7 @@ Every call requires \`meta.ucp-agent.profile\`, your agent's UCP profile URL. Pa
 
 ${[
   ...policyLinks,
-  `- Policy and FAQ search: MCP tool \`search_shop_policies_and_faqs\` at \`POST ${url}/api/mcp\` answers questions about shipping, returns, and contacting the store.`,
+  `- Policy and FAQ answers: UCP MCP tool \`ask_business\` at \`POST ${url}/api/ucp/mcp\` answers questions about shipping, returns, and contacting the store. Your agent profile must declare \`dev.ucp.common.ask\`.`,
 ].join("\n")}
 
 ## Browse

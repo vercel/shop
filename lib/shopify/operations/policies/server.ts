@@ -1,4 +1,5 @@
 import { gql } from "@shopify/hydrogen";
+import { z } from "zod";
 
 import { shopConfig } from "@/lib/config";
 import type { CommerceLocale } from "@/lib/config/types";
@@ -53,34 +54,23 @@ export async function fetchShopPolicies({
     .map((policy) => ({ ...policy, body: sanitizeShopifyHtml(policy.body) }));
 }
 
-export const POLICY_TYPES = [
-  "contact",
-  "legal_notice",
-  "privacy",
-  "refund",
-  "shipping",
-  "subscription",
-  "terms_of_sale",
-  "terms_of_service",
-] as const;
+const askResponseSchema = z.object({ answer: z.object({ plain: z.string() }) });
 
-export async function fetchPolicyAnswers({
-  policyTypes,
+export async function fetchPolicyAnswer({
+  context,
+  profile,
   query,
 }: {
-  policyTypes?: readonly (typeof POLICY_TYPES)[number][];
+  context: { country: string; language: string };
+  profile: string;
   query: string;
-}): Promise<unknown> {
+}): Promise<string> {
   const result = await callShopifyMcpTool({
-    args: { query, ...(policyTypes?.length ? { policy_types: policyTypes } : {}) },
-    name: "search_shop_policies_and_faqs",
-    path: "/api/mcp",
+    args: {
+      ask: { context: { address_country: context.country, language: context.language }, query },
+      meta: { "ucp-agent": { profile } },
+    },
+    name: "ask_business",
   });
-  if (result.structuredContent !== undefined) return result.structuredContent;
-  const text = result.content?.flatMap((part) => (part.text ? [part.text] : [])).join("\n") ?? "";
-  try {
-    return JSON.parse(text);
-  } catch {
-    return text;
-  }
+  return askResponseSchema.parse(result.structuredContent).answer.plain;
 }

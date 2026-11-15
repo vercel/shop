@@ -1,24 +1,26 @@
 import { defineTool } from "eve/tools";
 import { z } from "zod";
 
-import { fetchPolicyAnswers, POLICY_TYPES } from "../../lib/shopify/operations/policies/server";
+import { shopConfig } from "../../lib/config";
+import { fetchPolicyAnswer } from "../../lib/shopify/operations/policies/server";
+import { agentProfileUrl } from "../lib/profile";
 
 export default defineTool({
   description:
     "Answer questions about this store's shipping, returns, payments, warranty, sizing, care, contact details, policies, and FAQs.",
   inputSchema: z.strictObject({
-    policyTypes: z
-      .array(z.enum(POLICY_TYPES))
-      .max(POLICY_TYPES.length)
-      .optional()
-      .describe(
-        "Written policies the question touches, such as refund for returns or contact for hours. Omit for FAQ answers only.",
-      ),
     query: z.string().trim().min(1).max(500).describe("The shopper's question."),
   }),
-  execute: async ({ policyTypes, query }) => {
+  execute: async ({ query }) => {
+    const { country, locale } = shopConfig.localization;
     try {
-      return { results: await fetchPolicyAnswers({ policyTypes, query }) };
+      return {
+        answer: await fetchPolicyAnswer({
+          context: { country, language: locale },
+          profile: agentProfileUrl("ask"),
+          query,
+        }),
+      };
     } catch {
       return { error: "Store policies are unavailable." };
     }
