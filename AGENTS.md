@@ -4,49 +4,35 @@ Vercel Shop is a Next.js storefront for Shopify, deployed to Vercel, with agent 
 
 ## Three owners
 
-Every feature belongs to exactly one owner. If a change cannot name its owner, or reaches into another owner's territory, redesign it. Place new work by owner first, then by domain. Docs and skills describe the product in these terms.
+Every feature belongs to exactly one owner; place new work by owner, then by domain. If a change cannot name its owner, or reaches into another owner's territory, redesign it.
 
-**Shopify owns commerce** through the framework-agnostic Hydrogen preview SDK, not the Hydrogen React Router framework.
+- **Shopify owns commerce** through the framework-agnostic Hydrogen preview SDK, not the Hydrogen React Router framework: API clients, catalog, cart, checkout, search, customer accounts, policies, and Shopify analytics, in `lib/shopify/`, `lib/cart/`, `lib/auth/`, and the handlers `proxy.ts` registers. Prices, availability, currency, cart totals, and customer identity always come from Shopify responses.
+- **Next.js owns the app**: routing, Server Components, caching, metadata and SEO, Suspense, the request boundary around Hydrogen's handlers, and the answer-engine surface (Markdown representations, `/llms.txt`, structured data, sitemap, robots), in `app/`, `components/`, and `lib/<domain>/`.
+- **Eve owns the agent**: sessions, channels, tools, instructions, model selection, and `/eve/v1/*`, in `agent/`, `lib/agent/`, and `components/agent/`. It extends Eve's channels and tool registry instead of adding chat routes or dispatchers.
 
-- Owns: Storefront and Customer Account API clients, catalog, cart state and mutations, checkout, predictive search, Customer Account OAuth and sessions, policies, Shopify analytics.
-- Lives in: `lib/shopify/**`, `lib/cart/**`, `lib/auth/{request,server}.ts`, the handlers registered in `proxy.ts`, and `lib/<domain>/types.ts` for the domain models transforms produce.
-- Must not be reimplemented: prices, availability, currency, cart totals, and customer identity always come from Shopify responses.
+## Invariants
 
-**Next.js owns the app.**
+1. **Commerce facts come from Shopify.** Never map locale to currency, hand-write Shopify response types, or guess schema fields. Presentation uses domain models, never raw responses.
+2. **Cart writes go through Hydrogen's handlers.** `proxy.ts` serves `/api/cart`, components use `useProductForm` and `useCartForm`, and Eve cart tools call the handlers. Carts never use Server Actions, public caches, or cache-tag invalidation. The one direct write, `createEmptyCart`, gives a new agent session a cart cookie before its first line.
+3. **Shopify fetches, Next.js caches.** `lib/shopify/operations/**/server.ts` exports uncached `fetch*` operations; `lib/<domain>/server.ts` wraps them in cached `get*` functions. Pages call `get*`; Eve tools, Load more pages, filtered or sorted views, and search call `fetch*`. Account pages call the per-customer reads in `lib/shopify/operations/customer/server.ts` directly.
+4. **Server Components read auth; they never refresh it.** Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` right before Customer Account API calls.
+5. **Server Actions are public endpoints.** Each `action.ts` export parses every argument with a module-private `zod` schema, `z.strictObject` for objects, before any other work.
+6. **Shopify HTML is sanitized when fetched.** Render `body`, `contentHtml`, or `descriptionHtml` only after its `fetch*` operation passes it through `sanitizeShopifyHtml` from `lib/shopify/html/server.ts`.
+7. **`components/ui/` takes primitive props only.** Wrappers in `components/<domain>/` supply labels and data.
+8. **Copy is inline and server-first.** Labels live beside their component, shared content helpers in `lib/content/index.ts`, and client leaves receive primitive labels. The default storefront has no `t()` runtime or next-intl; a localized installation keeps its aligned catalogs and narrowly scoped `NextIntlClientProvider` boundaries.
+9. **Locale stays explicit.** `shopConfig.localization` sets the default Shopify context (`country`, `language`) and formatting (`locale`). Keep locale arguments on operations and in cache inputs even with one locale.
+10. **Each side keeps its own agent surface.** Next.js describes the storefront for answer engines from the same domain types as the HTML pages. Shopify's `/api/mcp`, `/api/ucp/mcp`, and `/.well-known/ucp` are Shopify's; `proxy.ts` only forwards them.
+11. **Every environment variable is declared.** Each user-configurable `process.env.X` read has a commented row in `.env.example` with a realistic placeholder, and every read is listed in `turbo.json` `globalEnv`; Turborepo's strict mode hides undeclared variables.
 
-- Owns: routing and clean URLs, Server Components, caching and tag invalidation, metadata and SEO, Suspense and loading geometry, the request boundary that adapts Hydrogen's handlers, and the answer-engine surface: `text/markdown` negotiation, Markdown representations, `/llms.txt`, Schema.org data, sitemap, and robots.
-- Lives in: `app/`, `components/`, `lib/<domain>/{index,server,client,action}.ts`, `lib/config/`, `next.config.ts`, `proxy.ts`; the answer-engine surface in `lib/markdown/**`, `lib/seo/**`, `app/md/**`, `app/llms.txt/`, `app/sitemap*`, `app/robots.ts`, `components/schema/`.
-- Must not: mutate the cart through Server Actions, refresh tokens in Server Components, invalidate public caches for cart changes, or reach into `agent/`.
+## Next.js
 
-**Eve owns the agent.**
+- Keep stable headings, primary media, and likely LCP content in the static shell. Push request-time reads into the smallest Suspense boundary, with a fallback that matches the resolved geometry, and do not opt out with `export const instant = false`.
+- Routes with runtime params render a synchronous page that wraps their async content in `Suspense` with an `aria-busy="true"` skeleton exported beside the component it mirrors, not `loading.tsx`.
+- Link internally with `Link` from `@/components/ui/link`, never `next/link`; it prefetches on intent.
+- Images use `next/image` with reserved dimensions and the shared `sizes="100vw"`; do not tune `sizes` or add widths.
+- Read `shopConfig` from `lib/config/index.ts` directly in server and client code.
 
-- Owns: sessions, channels, tools, connections, instructions, model selection, `/eve/v1/*`.
-- Lives in: `agent/` (tools in `agent/tools/`, shared execution helpers in `agent/lib/`), `lib/agent/`, `components/agent/`, and two Next.js routes: `app/api/agent/session`, which prepares the browser cart, and `app/agent/ucp-profile.json`, which serves the agent's UCP profile.
-- Must not: import Next.js request or cache APIs, add a second tool-name dispatcher, recreate a chat API route, or let model arguments select the cart.
-
-## Describe the product, not the change
-
-- Code, comments, docs, skills, commits, and pull requests describe current behavior, not the work that produced it.
-- Pull requests are terse: what the shopper, merchant, or agent can now do, which owner it belongs to, and how it was verified.
-- Docs add a detail only when a reader needs it to act or decide.
-- Names and file placement carry the architecture. If a reader needs prose to find a module's owner, fix the name or location.
-
-## Boundary rules
-
-1. **Commerce facts come from Shopify.** Never map locale to currency, hand-write Shopify response types, or guess schema fields.
-2. **Cart writes go through Hydrogen handlers.** `proxy.ts` serves `/api/cart`; components use `useProductForm` and `useCartForm`; Eve cart tools call the handlers with the cart bound from the browser cookie. No Server Actions or cache-tag invalidation for carts.
-3. **Shopify fetches, Next.js caches.** `lib/shopify/operations/**/server.ts` exports uncached `fetch*` operations and never imports `next/cache`. `lib/<domain>/server.ts` exports `get*` wrappers that own `"use cache"`, `cacheLife`, and `cacheTag`. Pages call `get*`; Eve tools call `fetch*`. Of browse results, only the default first page of a collection and of `/collections/all` is cached, through `getCollectionResults` and `getAllProductsResults` with `cacheLife("max")` and webhook tags. Filtered and sorted browse, Load more pages, search results, and their facets call `fetch*`: cached cursor pages drift apart and duplicate products, and Search & Discovery edits send no webhook.
-4. **Server Components read auth; they never refresh it.** Use `isCustomerLoggedIn()` for UI state, `requireCustomerSession()` for route gates, and `requireCustomerAccessToken()` immediately before Customer Account API calls.
-5. **`components/ui/` takes primitive props only.** No domain types, SDK types, or content helpers; wrappers in `components/<domain>/` supply labels and data.
-6. **Copy is inline and server-first.** Keep labels beside their component; reusable content functionality goes in `lib/content/index.ts`, not a string catalog. Pass primitive labels to client leaves, never content functions. Do not add a `t()` runtime or next-intl to the default storefront; an already localized installation keeps next-intl, aligned catalogs, and narrowly scoped `NextIntlClientProvider` boundaries.
-7. **Two outward-facing agent surfaces, two owners.** Next.js describes the storefront through Markdown, `/llms.txt`, structured data, and the sitemap, built from the same domain types as the HTML pages. Shopify's agent endpoints (`/api/mcp`, `/api/ucp/mcp`, `/.well-known/ucp`) are Shopify's; `proxy.ts` only forwards them. Do not reimplement either side in the other, or route Eve through the Markdown surface.
-8. **Every user-configurable `process.env.X` read has a row in `.env.example`** with a short comment on when to set it, and every `process.env.X` read is listed in `turbo.json` `globalEnv`; Turborepo's strict mode hides undeclared variables and leaves them out of cache keys.
-
-Agent folders hold only `.agents/skills/` and its `.claude/skills` symlink; edit skills only in `.agents/skills/`. Refer to skills by plain name, such as `enable-shopify-markets`. `shopify-ai-toolkit` is separate external tooling that Shop skills do not install.
-
-## Template releases
-
-`.vercel-shop/template.json` names the Vercel Shop release this storefront is based on. Once per session, before substantial work, check whether `vercel/shop` on GitHub has a newer `template@*` release. If it does, or `template.json` is missing, tell the user and suggest the `update-shop` skill. Upgrade only when the user asks, and keep template updates out of unrelated changes.
+Use the `build-shop` skill for route work and audits; it documents the rendering, caching, and prefetch architecture.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
@@ -56,67 +42,36 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 <!-- END:nextjs-agent-rules -->
 
-## Shopify layer
+## Shopify
 
-Read the installed Hydrogen README and bundled skills before changing an SDK integration. Do not apply React Router loaders, actions, or Oxygen setup.
+- Read the installed Hydrogen README and bundled skills before changing an SDK integration; React Router loaders, actions, and Oxygen setup do not apply.
+- Write GraphQL with `gql()` from `@shopify/hydrogen` or `@shopify/hydrogen/customer-account`, and type responses with `ResultOf<typeof DOC>`. Validate documents with the `shopify-ai-toolkit` skill or official Shopify documentation, never by guessing; `shopify-graphql-reference` covers placement.
+- `lib/cart/types.ts` derives cart types from Hydrogen's handlers, the one exception to domain types; `components/ui/` still never sees them.
+- Customer accounts are opt-in through `shopConfig.auth.isEnabled`. `CUSTOMER_ACCOUNT_SESSION_SECRET` is app-generated, not the Shopify client secret.
 
-- Presentation uses domain models, never raw Shopify responses.
-- Render Shopify HTML (`body`, `contentHtml`, `descriptionHtml`) only after its `fetch*` operation passes it through `sanitizeShopifyHtml` from `lib/shopify/html/server.ts`, under an `oxlint-disable-next-line react/no-danger -- … pass through sanitizeShopifyHtml when fetched.` directive.
-- `storefront.request` injects `$country: CountryCode`/`$language: LanguageCode` from its optional `locale: { country, language }` commerce context, defaulting to `shopConfig.localization`; this is not the formatting locale string. Same-named variables of other types are the caller's to pass.
+## Eve
 
-### GraphQL
+- Shop Agent serves public traffic, and every message can incur model charges. Control spend at the edge with BotID (`shopConfig.botid`), deployment rate limits, and AI Gateway spending controls, not by cutting conversations short.
+- Product search and store questions go through Shopify's `/api/ucp/mcp` with `callShopifyMcpTool`; do not add a parallel search tool or MCP connection.
+- Cart tools take the cart from the browser cookie through channel auth, never from model arguments or restored messages. Cart writes are not deduplicated: never retry an uncertain mutation or claim exactly-once behavior.
+- Read `node_modules/eve/docs/README.md` before changing framework behavior, and check `pnpm exec eve registry search <query> --json` before adding an integration.
+- Verify conversation changes in a browser against real Shopify data; a build or a tool result is not proof.
 
-- Use the API-specific `shopify-ai-toolkit` skill for API facts and validation before adding or changing a document, then `shopify-graphql-reference` for placement. Without it, use official Shopify documentation and validation tooling; never guess.
-- Write documents with `gql()` from `@shopify/hydrogen` or `@shopify/hydrogen/customer-account`, compose fragments through its second argument, and derive response types with `ResultOf<typeof DOC>`. Keep the `#graphql` or `/* GraphQL */` marker.
-- Type inference is not schema validation. Do not run `hydrogen gql check`; it needs the TypeScript compiler API, which TypeScript 7 does not ship. Do not add repo-local schema snapshots.
+## Skills and releases
 
-### Cart
+Edit skills only in `.agents/skills/` (`.claude/skills` links to it), and refer to them by plain name, such as `enable-shopify-markets`.
 
-- `seedCartData` shares a per-request promise, not a data-cache entry. Keep carts out of public caches.
-- `prepareCheckoutAction` reads the confirmed checkout URL; it does not mutate the cart.
-- `lib/cart/types.ts` derives cart types from Hydrogen's handlers, the deliberate exception to domain types. Cart integration components may use Hydrogen store and form types; `components/ui/` may not.
+`.vercel-shop/template.json` names the Vercel Shop release this storefront is based on. Once per session, before substantial work, check whether `vercel/shop` on GitHub has a newer `template@*` release. If it does, or `template.json` is missing, tell the user and suggest the `update-shop` skill. Upgrade only when the user asks, and keep template updates out of unrelated changes.
 
-### Customer accounts
+## Testing
 
-Opt-in through `shopConfig.auth.isEnabled`, read directly in server and client code. Enabling it requires `CUSTOMER_ACCOUNT_SESSION_SECRET`, an app-generated secret that is not the Shopify client secret, plus `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_ID` and `SHOPIFY_CUSTOMER_ACCOUNT_API_CLIENT_SECRET`; all three are server-only.
+Run `pnpm check` after every change; it lints, checks formatting, and typechecks in seconds without Shopify credentials. Lint enforces key order, file names, export style, and the import boundaries between owners. Do not add tests, test runners, or test dependencies unless the user asks. Verify further with builds and runtime or browser checks, and report what stayed unverified.
 
-- Token refresh happens only where Hydrogen can commit cookies: `requireCustomerAccessToken()` redirects refreshable sessions through `/account/refresh`.
-- `components/nav/account.tsx` reads session state inside Suspense with a fixed `size-5` icon container.
-- Sign-out is a same-origin POST so Hydrogen can clear the session and perform Shopify RP-initiated logout.
+## Writing
 
-## Next.js layer
-
-- Preserve route-level data loading, promise boundaries, cache directives, invalidation tags, metadata, redirects, and auth gates when rebuilding presentation unless the task changes behavior.
-- Start independent work together; block rendering only where one result needs another.
-- Keep stable headings, primary media, and likely LCP content in the static shell. Push request-time inputs to the smallest Suspense boundary that needs them, with fallbacks that match the resolved geometry.
-- Routes with runtime params (products, collections, blogs, articles, pages, policies) render a synchronous page that wraps the async content in `Suspense` with a route skeleton. Do not use `loading.tsx`, which serializes the skeleton twice in every document's RSC payload, or `export const instant = false`. Export the skeleton beside the component it mirrors and mark its root `aria-busy="true"`.
-- The default view of a collection and of `/collections/all` ships its cached products in the static shell and per-link prefetches; `proxy.ts` rewrites filtered and sorted URLs to the request-time `refine` route beside it and returns 404 for direct `refine` requests. Keep `SearchParamsProbe` on the default page, or the router reuses it for every search string and the rewrite never runs; keep the browse store, toolbar, and filter sheet in `CollectionLayout`, which both routes share, and each page's results inside `CollectionBrowseBoundary`, so a filter keeps the toolbar and open sheet and only the grid can fall back. Build browse URLs from the public path, never `usePathname()`.
-- The root layout's `ensureStatic = "prefetch"` keeps the App Shell and per-link prefetches static. Keep it at the root; do not add `navigation()` or `prefetch()` per subtree.
-- Server Components are the default; isolate state, effects, browser APIs, and handlers in leaf client components.
-- Server Actions are public endpoints, and TypeScript does not check their arguments at runtime. Each `action.ts` export parses every argument with a module-private `zod` schema, `z.strictObject` for objects as in Eve tools, before any other work, and returns its usual failure result when parsing fails.
-- Every image uses `next/image` with reserved dimensions and `sizes="100vw"`, including thumbnails: `deviceSizes: [1320, 1920]` ships two assets that every surface reuses. Do not tune `sizes` or add widths. Preload only the LCP image; keep product grids lazy below the first row.
-- Link internally with `Link` from `@/components/ui/link`, never `next/link`. It upgrades to the per-link prefetch only on intent, so grids never prefetch every card. Any other prefetch change is a production-measured traffic-versus-latency choice.
-- The default is one deployment with clean unprefixed URLs, inline copy, and `shopConfig.localization` `{ country: "US", language: "EN", locale: "en-US" }`: country and language set the Shopify context, locale sets formatting. It has no next-intl, `lib/i18n/`, or `getLocale()`; keep operation locale arguments and cache inputs anyway. The i18n and Markets skills start from this baseline and preserve localized installations.
-- Read `shopConfig` from `lib/config/index.ts` directly in server and client code.
-- Keep Portless out of `package.json`; `pnpm dev:portless` uses a global install.
-
-Use the `build-shop` skill for route-specific workflow and audits.
-
-## Eve layer
-
-- **Public traffic.** Every message can incur model charges. Mitigate at the edge: BotID through `shopConfig.botid`, plus deployment rate limits and AI Gateway spending controls. Do not add per-session token caps or shrink `modelContextWindowTokens`; they cut conversations short, and compaction already bounds context. Eve's default session budget and the panel's `session-limit` handling are the last resort.
-- **One search path.** Product discovery is Shopify's catalog search (`search_catalog` on `/api/ucp/mcp`), which `search-products` calls through `fetchCatalogSearch` and `present-products` renders; do not add a Storefront API search tool or a catalog MCP connection. Store questions go to `ask_business` on the same endpoint, which `search-policies` calls through `fetchPolicyAnswer`. Both identify the agent with the UCP profile at `/agent/ucp-profile.json`, which declares a capability for each; local and preview environments send Shopify's example profile for that capability.
-- **Cart ownership.** Cart tools bind the cart from the browser cookie through channel auth context, and the browser refreshes Hydrogen only after turns settle. The channel has no per-user authorization. Never write cart IDs or replay mutations from restored messages. Interrupted writes have no deduplication; never claim exactly-once behavior or retry an uncertain mutation.
-- **Bounded work.** Before changing framework behavior, read `node_modules/eve/docs/README.md` and the page it routes to; package-manager links can hide files from recursive searches. Stop discovery once the location, imports, and API shape are clear. Edit authored instructions for copy changes and keep the selected model unless asked. Check `pnpm exec eve registry search <query> --json` before adding an integration, prefer a native integration to a custom transport, and keep the Next.js deployment through `withEve`. Shopify's catalog search and store answers are the exception: MCP connections cannot shape results, so authored tools call them through `callShopifyMcpTool`.
-- **Verify what the shopper sees.** For conversation or catalog changes, run several product-search turns in one browser session against real Shopify data and confirm the cards, follow-ups, and token usage; a build or tool result is not proof. For session controls, check restoration, Stop and Clear, and failures; pending input must not look like an empty success. Debug empty responses from the full event stream, pending input, tool outputs, and usage before changing rendering, and keep model-facing catalog data compact without dropping constraints, pagination, or errors. Say which checks were mocked, local, or against a preview; keep diagnostic credentials out of source and output, and default to read-only probes.
-
-## Testing (temporary policy)
-
-Do not add tests, test files, runners, dependencies, or scripts unless the user explicitly asks; missing coverage is not permission. Verify with existing checks such as lint, typecheck, schema validation, builds, and runtime or browser checks, run existing tests when relevant, and report what stayed unverified. A coordinated testing effort comes later.
-
-## Environment files
-
-`.env.example` files hold realistic placeholders, never redaction language like `[redacted]`. Shopify values use their real format (`your-store.myshopify.com`, `shp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`); everything else uses a `your-…-here` string.
+- Code, comments, docs, skills, commits, and pull requests describe current behavior, not the work that produced it.
+- Pull requests say what a shopper, merchant, or agent can now do and how it was verified.
+- Names and file placement carry the architecture. If a reader needs prose to find a module's owner, fix the name or location.
 
 <!-- BEGIN:vercel-shop-style -->
 
@@ -124,41 +79,33 @@ Do not add tests, test files, runners, dependencies, or scripts unless the user 
 
 ### Ordering and exports
 
-- Alphabetize export specifiers, destructuring patterns, interface and type properties, config object keys, i18n JSON keys, and string union members. `pnpm format` sorts imports.
+- Alphabetize export specifiers, destructuring patterns, type properties, JSON keys, and string union members.
 - No barrel files: never an `index.ts` that only re-exports.
-- Named exports only in component files; pages use default exports.
 
 ### Files
 
-- Keep sub-components in their consumer's file when they share a directive, unless the file gets unwieldy. Split a different directive into `foo-client.tsx` or `foo-server.tsx` beside `foo.tsx`.
-- Push `"use client"` as far down as possible; pages, layouts, and data-fetching wrappers stay server components and pass promises or data to client children.
-- `lib/` is organized by domain, then execution context, using only the files a domain needs: `index.ts` (universal, never a barrel), `server.ts` (kept out of client graphs), `request.ts` (takes the `Request` or `Headers` explicitly, such as Hydrogen handlers and session cookies; what `proxy.ts` and Route Handlers import; never imports `next/cache`, `next/headers`, `next/navigation`, or `react`, which load the App Router runtime into the proxy), `client.ts` (a React client boundary, not an HTTP client), `action.ts` (`"use server"`, verb + `Action` exports), and `types.ts` (imported with `import type`). Subdivide with the same filenames, such as `lib/cart/gift-card/client.ts`; no descriptive siblings like `cart-client.ts`, flat root modules, or forwarding exports.
-- Shopify transports live in their API domain's `server.ts`; pure transforms and formatting helpers live in `index.ts`.
-- Storefront models live in their owning domain's `types.ts`; cross-domain primitives in `lib/money/types.ts`, `lib/media/types.ts`, and `lib/pagination/types.ts`; SDK contracts and inferred response types under `lib/shopify/`. Props stay beside their components, and small private types may stay local. Never import shared types from `server.ts` or `action.ts`. Generated artifacts keep their generator's paths.
+- Push `"use client"` to the leaves. Split a different directive into `foo-client.tsx` or `foo-server.tsx` beside `foo.tsx`.
+- `lib/` is organized by domain, then execution context, using only the files a domain needs: `index.ts` (universal), `server.ts`, `request.ts` (takes `Request` or `Headers` explicitly for `proxy.ts` and Route Handlers), `client.ts` (a React client boundary), `action.ts` (`"use server"`, verb + `Action` exports), and `types.ts`. Subdivide with the same filenames, such as `lib/agent/cart/client.ts`, never descriptive siblings like `cart-client.ts`.
+- Shared models live in their domain's `types.ts`, with cross-domain primitives in `lib/money/`, `lib/media/`, and `lib/pagination/`. Never import shared types from `server.ts` or `action.ts`.
 
 ### Naming
 
-- Files `kebab-case.tsx`, components `PascalCase`, constants `SCREAMING_SNAKE_CASE`, server actions verb + `Action`.
-- Props are `interface {ComponentName}Props`. Native-element pass-through uses `ComponentProps<"div">`.
-- One React import per file with named imports and inline `type` modifiers (`import { type ReactNode, Suspense } from "react"`), or `import type` when all are types; never `React.*`.
+- Components `PascalCase`, constants `SCREAMING_SNAKE_CASE`, props `interface {ComponentName}Props`.
+- One React import per file with inline `type` modifiers; never `React.*`.
 
 ### Spacing
 
-- `Container` sets horizontal padding and max width only; never put `py-*` on it.
-- `Page` owns top padding (`pt-10` by default, overridden through `className`) and has no bottom padding; the footer's `pt-20` provides that gap. Full-height layouts add `flex flex-1 flex-col`.
-- Wrap sibling sections in `Sections` (`gap-10` by default). Inside a section, the parent spaces its children with `grid gap-*`; children carry no outer margins or `space-y-*`, so a component keeps its layout wherever it is placed. Padding inside components, negative-margin breakouts, and margin resets on rendered rich text are fine.
-- Spacing values are the storefront's design choice: reuse the values nearby code already uses, and do not change spacing outside the task.
+- `Container` sets horizontal padding and max width only, `Page` owns top padding, and `Sections` spaces sibling sections.
+- Parents space their children with `grid gap-*`; children carry no outer margins, so a component keeps its layout wherever it is placed. Reuse nearby spacing values and leave spacing outside the task alone.
 
 ### Tailwind
 
-- Style with utilities, not `app/globals.css`. Register new values in `@theme`; keep `globals.css` to tokens, resets, keyframes, and shared utilities, with no global element rules.
-- `@theme inline` does not emit `:root` variables; outside utilities, reference the underlying variable.
-- Prefer scale utilities (`h-18`, `top-1/2`) to arbitrary values, which are for off-scale values such as `calc()` or grid templates.
-- Prefer `data-[attr=value]` selectors to conditional classes; use `cn()` when classes must be conditional, `data-slot` as styling hooks, and `cva` for variants.
+- Style with utilities. `app/globals.css` holds only `@theme` tokens, resets, keyframes, and shared utilities; `@theme inline` emits no `:root` variables.
+- Prefer scale utilities to arbitrary values, and `data-[attr=value]` selectors to conditional classes; use `cn()`, `data-slot`, and `cva` when needed.
 - Interactive elements use `cursor-pointer`; disabled ones use `cursor-not-allowed`.
 
 ### Comments
 
-Default to none. A comment is one line stating a hidden constraint, an upstream workaround, a non-obvious invariant, or a cross-system quirk, and survives only if an agent would otherwise break behavior. Never restate names, narrate code, reference current work or PRs, add banners, leave a `TODO` without `TODO(handle): reason`, or write multi-line prose. Keep tooling directives and generated or license headers.
+Default to none. A comment is one line stating a hidden constraint, upstream workaround, or non-obvious invariant that an agent would otherwise break. Never narrate code, reference current work, add banners, or leave a `TODO` without `TODO(handle): reason`. Keep tooling directives and generated or license headers.
 
 <!-- END:vercel-shop-style -->

@@ -11,10 +11,10 @@ export function CollectionSchema({ collection }: { collection: CollectionSchemaD
   const schema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: collection.title,
-    description: collection.description || undefined,
-    url: `${shopConfig.site.url}/collections/${collection.handle}`,
     dateModified: collection.updatedAt,
+    description: collection.description || undefined,
+    name: collection.title,
+    url: `${shopConfig.site.url}/collections/${collection.handle}`,
   };
 
   return <script type="application/ld+json">{JSON.stringify(schema)}</script>;

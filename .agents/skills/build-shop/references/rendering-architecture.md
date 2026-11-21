@@ -75,7 +75,7 @@ An outer route fallback is appropriate when the route truly has no useful shell.
 - Isolate search dialogs, filters, variant controls, cart controls, galleries, and forms into leaf client components.
 - Pass primitives or narrow serializable view models rather than complete domain objects.
 - Keep optimistic state close to the mutation it predicts, then reconcile with the canonical server result.
-- Invalidate only the affected domain data. Carts are never in the Next.js data cache, so cart mutations need no cache invalidation step.
+- Invalidate only the affected domain data.
 - Lazy-load expensive closed overlays or optional tools, but do not lazy-load primary content to improve a bundle report.
 
 ## Architect media and third parties

@@ -54,16 +54,19 @@ export function ProductDetailSection({
     <>
       <ProductSchema
         product={{
-          handle: product.handle,
-          title: product.title,
-          description: product.description,
-          images: product.images,
-          vendor: product.vendor,
-          currencyCode: product.currencyCode,
-          priceRange: product.priceRange,
-          offerCount: product.variantsCount,
           availableForSale: product.availableForSale,
+          currencyCode: product.currencyCode,
+          description: product.description,
+          handle: product.handle,
+          images: product.images,
+          offerCount:
+            product.variantsComplete && product.variants
+              ? product.variants.length
+              : product.variantsCount,
+          priceRange: product.priceRange,
           sku: product.defaultVariantSku,
+          title: product.title,
+          vendor: product.vendor,
         }}
       />
       <ProductOpenGraph

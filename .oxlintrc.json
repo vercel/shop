@@ -4,27 +4,116 @@
     "correctness": "warn",
     "suspicious": "warn"
   },
-  "ignorePatterns": [
-    ".next/**",
-    "dist/**",
-    "build/**",
-    ".agents/**",
-    ".claude/**",
-    "app/.well-known/**",
-    "components/ai-elements/**"
+  "ignorePatterns": [".next/**", "dist/**", "build/**", ".agents/**", ".claude/**"],
+  "overrides": [
+    {
+      "files": [
+        "app/**",
+        "agent/*.ts",
+        "agent/channels/**",
+        "agent/extensions/**",
+        "agent/tools/**",
+        "next.config.ts"
+      ],
+      "rules": {
+        "import/no-default-export": "off"
+      }
+    },
+    {
+      "files": ["agent/tools/**", "components/ui/**"],
+      "rules": {
+        "sort-keys": "off"
+      }
+    },
+    {
+      "files": ["components/ui/link.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["lib/shopify/operations/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "message": "Operations stay uncached; wrap them in a cached get* in lib/<domain>/server.ts.",
+                "name": "next/cache"
+              },
+              { "message": "Use Link from @/components/ui/link.", "name": "next/link" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["lib/**/request.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "message": "request.ts takes Request or Headers explicitly.",
+                "name": "next/cache"
+              },
+              {
+                "message": "request.ts takes Request or Headers explicitly.",
+                "name": "next/headers"
+              },
+              { "message": "Use Link from @/components/ui/link.", "name": "next/link" },
+              {
+                "message": "request.ts takes Request or Headers explicitly.",
+                "name": "next/navigation"
+              },
+              { "message": "request.ts takes Request or Headers explicitly.", "name": "react" }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["agent/**", "lib/agent/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              { "message": "Eve code never uses Next.js cache APIs.", "name": "next/cache" },
+              { "message": "Eve code never uses Next.js request APIs.", "name": "next/headers" },
+              { "message": "Use Link from @/components/ui/link.", "name": "next/link" },
+              { "message": "Eve code never uses Next.js request APIs.", "name": "next/server" }
+            ]
+          }
+        ]
+      }
+    }
   ],
-  "plugins": ["typescript", "react", "nextjs"],
+  "plugins": ["typescript", "react", "nextjs", "import", "unicorn"],
   "rules": {
+    "import/no-default-export": "error",
+    "import/no-unassigned-import": "off",
+    "no-restricted-imports": [
+      "error",
+      { "paths": [{ "message": "Use Link from @/components/ui/link.", "name": "next/link" }] }
+    ],
     "no-underscore-dangle": ["warn", { "allow": ["__typename"] }],
     "no-unused-vars": "off",
     "react/no-danger": "error",
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "sort-keys": ["error", "asc", { "caseSensitive": false, "natural": true }],
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/filename-case": ["error", { "case": "kebabCase" }],
+    "unicorn/no-array-sort": "off",
+    "unicorn/no-useless-spread": "off"
   },
   "settings": {
     "jsx-a11y": {
       "components": {
-        "Link": "a",
-        "Image": "img"
+        "Image": "img",
+        "Link": "a"
       }
     }
   }

@@ -30,7 +30,7 @@ Hydrogen owns the base cart operations. The template adds selections needed for 
 3. Read the provider's live cart in the cart page and overlay leaves so empty/populated transitions follow mutations without a route refresh.
 4. Preserve Hydrogen's bootstrap-versus-mutation ordering. Do not publish a second server seed into an initialized provider.
 
-Cart reads are memoized only within a request, never stored in the Next.js public data cache. Cart mutations do not invalidate public cache tags.
+Cart cache and invalidation: `AGENTS.md` invariant 2, and the cache-role table in `rendering-architecture.md`.
 
 ## Mutations
 

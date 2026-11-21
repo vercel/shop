@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CommerceLocale } from "@/lib/config/types";
 import type { ShopPolicy } from "@/lib/policies/types";
 import { fetchShopPolicies } from "@/lib/shopify/operations/policies/server";
@@ -9,7 +10,7 @@ export async function getShopPolicies(
 ): Promise<ShopPolicy[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("policies");
+  cacheTag(CACHE_TAGS.policies);
 
   return fetchShopPolicies(params);
 }

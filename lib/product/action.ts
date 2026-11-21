@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 
-import { toProductFormInput } from "@/lib/product";
+import { findListedVariant, toProductFormInput } from "@/lib/product";
 import { getProduct } from "@/lib/product/server";
 import type { QuickShopProduct, SelectedOption } from "@/lib/product/types";
 import { fetchProductVariant } from "@/lib/shopify/operations/products/server";
@@ -41,10 +41,15 @@ export async function loadQuickShopProductAction(
       if (!matchedValue) return null;
       canonicalOptions.push({ name: option.name, value: matchedValue.name });
     }
-    const resolvedVariant = await fetchProductVariant({
-      handle: input.handle,
-      selectedOptions: canonicalOptions,
-    });
+    const resolvedVariant =
+      findListedVariant(
+        product,
+        Object.fromEntries(canonicalOptions.map(({ name, value }) => [name, value])),
+      ) ??
+      (await fetchProductVariant({
+        handle: input.handle,
+        selectedOptions: canonicalOptions,
+      }));
     if (
       !resolvedVariant ||
       canonicalOptions.some(
@@ -62,8 +67,8 @@ export async function loadQuickShopProductAction(
   return {
     availableForSale: product.availableForSale,
     form: toProductFormInput(product, variant),
-    image: product.featuredImage?.url ?? null,
     hasOptions: product.options.some((option) => option.values.length > 1),
+    image: product.featuredImage?.url ?? null,
     title: product.title,
   };
 }

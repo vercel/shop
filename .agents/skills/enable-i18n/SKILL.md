@@ -68,19 +68,6 @@ Use domain/context files for new modules: universal routing configuration in `li
 
 Validate route params, action inputs, and request payloads against this list. Retain any existing resolver and fallback policy rather than resetting it.
 
-## What this skill turns on
-
-1. `lib/i18n/routing/index.ts` and `lib/i18n/navigation/client.ts` (next-intl)
-2. Route segment `app/[locale]/` containing every page
-3. `proxy.ts` middleware running `next-intl/middleware`
-4. `lib/params/server.ts` `getLocale()` reading from `next/root-params`
-5. A new next-intl plugin wrapper, catalogs, and `lib/i18n/request/server.ts` loading messages by resolved locale
-6. Locale-prefixed canonicals + hreflang alternates in `lib/seo/index.ts`
-7. Sitemap entries per locale
-8. Locale-aware Markdown negotiation in `proxy.ts`
-9. `generateStaticParams` and the carried `ensureStatic` on the locale root layout
-10. Add or adapt a copy-language selector without introducing a currency selector
-
 ## Cache Components compatibility — read this first
 
 The template runs with `cacheComponents: true`, Partial Prefetching, and `export const ensureStatic = "prefetch"` on the root layout, which requires the App Shell and per-link prefetches to be static. Skipping any of these produces build errors that look unrelated:
@@ -163,7 +150,7 @@ import { routing } from "@/lib/i18n/routing";
 export const { usePathname, useRouter } = createNavigation(routing);
 ```
 
-> Per "Cache Components compatibility E", use this navigation only in the locale switcher and other client-side programmatic routing; internal links keep the template `Link`.
+> Use this navigation only in the locale switcher and other client-side programmatic routing; internal links keep the template `Link` (E).
 
 ### Step 2: Move routes under `app/[locale]/`
 
@@ -181,7 +168,7 @@ Update every `PageProps<"/foo">` and `LayoutProps<"/foo">` generic to include th
 
 ### Step 3: Create `lib/params/server.ts` for Server Component root params
 
-This is a new module on the simplified baseline. In a customized installation, preserve unrelated helpers and extend its existing resolver. Route Handlers use their route context or validated request inputs; Server Actions receive a validated locale argument, not this getter.
+This is a new module on the simplified baseline; in a customized installation, preserve unrelated helpers and extend its existing resolver.
 
 ```ts
 import { notFound } from "next/navigation";
@@ -223,37 +210,38 @@ export default getRequestConfig(async () => {
 
 ### Step 5: Extend `proxy.ts`
 
-Compose next-intl at the end of the existing proxy, where the template returns `NextResponse.next(...)`. Keep everything before that point unchanged: Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname), and Markdown negotiation (Step 9). Pass the forwarded headers through `forwardCustomerRefreshAttempt` so the account refresh marker still reaches Server Components:
+Compose next-intl where the template returns `NextResponse.next(...)`, after Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname), the refined-collection 404, and Markdown negotiation (Step 9). next-intl negotiates the public URL and forwards the account refresh marker in the request it sees. Return its redirects unchanged, so a redirect never exposes the internal `refine` route. Otherwise apply the template's refine rewrite to the localized path, which carries the locale in every routing mode, so filtered collections render from `app/[locale]`:
 
 ```ts
 const handleI18n = createMiddleware(routing);
 
-// Keep the existing imports and add NextRequest as a runtime import.
+// Keep the existing imports; add NextRequest as a runtime import and isEnabledLocale from lib/i18n.
 export async function proxy(request: NextRequest): Promise<Response> {
-  // Keep the template's Shopify dispatch and Markdown negotiation here, unchanged.
+  // Keep the template's Shopify dispatch, refine 404, and Markdown negotiation here.
 
-  const i18nRequest = new NextRequest(request, {
-    headers: forwardCustomerRefreshAttempt(
-      request.nextUrl,
-      requestContext.getForwardedRequestHeaders(),
-    ),
-  });
-  const response = handleI18n(i18nRequest);
+  const headers = forwardCustomerRefreshAttempt(
+    request.nextUrl,
+    requestContext.getForwardedRequestHeaders(),
+  );
+  const response = handleI18n(new NextRequest(request, { headers }));
   requestContext.applyResponseHeaders(response.headers);
-  if (!response.ok) return response;
+  if (response.headers.has("location")) return response;
 
-  const rewriteHeader = response.headers.get("x-middleware-rewrite");
-  if (!rewriteHeader) return response;
-
-  const rewriteTarget = new URL(rewriteHeader, request.url);
-  const [, ...segments] = rewriteTarget.pathname.split("/");
-  const normalized = new URL(`/${segments.filter(Boolean).join("/")}`, request.url);
-  normalized.search = rewriteTarget.search;
-  return NextResponse.rewrite(normalized, { headers: response.headers });
+  const localized = new URL(response.headers.get("x-middleware-rewrite") ?? request.url);
+  const [, locale = "", ...segments] = localized.pathname.split("/");
+  const refinePath = isEnabledLocale(locale)
+    ? getRefinedCollectionPath(`/${segments.join("/")}`, request.nextUrl.search)
+    : null;
+  if (!refinePath) return response;
+  // Copying next-intl's headers keeps its locale request header and the forwarded marker.
+  return NextResponse.rewrite(
+    new URL(`/${locale}${refinePath}${request.nextUrl.search}`, request.url),
+    { headers: response.headers },
+  );
 }
 ```
 
-Update the matcher. The template's single broad matcher is safe only while the proxy does nothing but Shopify dispatch; with locale negotiation, every request Hydrogen declines is localized, including app Route Handlers, webhooks, `robots.txt`, sitemaps, `llms.txt`, and static files. Replace it with Shopify's exact route families, locale-prefixed Shopify endpoints, and a catch-all that skips `/api`, Eve, Next.js and Vercel internals, and paths with a file extension:
+Replace the matcher. The template's matcher is a curated negative lookahead that skips Next.js and Vercel internals, Eve, and named static and metadata files while still matching `.md` mirrors and Shopify's dotted routes. It also matches `/api/*` and every other path, so locale negotiation would rewrite app Route Handlers and webhooks that Hydrogen declines. Replace it with Shopify's exact route families, locale-prefixed Shopify endpoints, and a catch-all that skips `/api`, Eve, Next.js and Vercel internals, and any path with a file extension (which covers `robots.txt`, sitemaps, `llms.txt`, `agent/ucp-profile.json`, and the named metadata files):
 
 ```ts
 export const config = {
@@ -286,50 +274,13 @@ The file is `proxy.ts` (Next.js 16 convention), not `middleware.ts`.
 
 ### Step 6: Internal hrefs — keep the template `Link`
 
-Per "Cache Components compatibility E", **leave existing `Link` imports from `@/components/ui/link` alone** and pass locale-prefixed hrefs from the server. Inspect product cards, menus, breadcrumbs, search, cart, and pagination so navigation retains the selected language without a negotiation redirect. Use next-intl's client navigation in the locale switcher when needed, preserving the resource and query parameters. Reuse existing localized link helpers in customized installations.
-
-For programmatic redirects in server code, use `next/navigation`'s `redirect`:
-
-```ts
-redirect(`/${await getLocale()}/account/login`);
-```
+Per "Cache Components compatibility E", leave `Link` from `@/components/ui/link` in place and pass locale-prefixed hrefs from the server. Inspect product cards, menus, breadcrumbs, search, cart, and pagination so navigation retains the selected language without a negotiation redirect. Use next-intl's client navigation only in the locale switcher, preserving the resource and query parameters. For programmatic server redirects, see "Cache Components compatibility F".
 
 ### Step 7: `lib/seo/index.ts` — locale-aware canonicals + hreflang alternates
 
 Keep this module universal: callers resolve and validate the locale on the server, then pass it explicitly. Do not import the server root-param resolver into `index.ts`.
 
-```ts
-import { defaultLocale, enabledLocales } from "@/lib/i18n";
-import type { Locale } from "@/lib/i18n/types";
-
-function withLocalePath(locale: string, pathname: string): string {
-  const normalized = normalizePath(pathname);
-  return normalized === "/" ? `/${locale}` : `/${locale}${normalized}`;
-}
-
-export function buildAlternates({
-  locale,
-  pathname,
-  searchParams,
-}: {
-  locale: Locale;
-  pathname: string;
-  searchParams?: SearchParamsInput;
-}): Metadata["alternates"] {
-  const canonical = buildCanonicalPath(withLocalePath(locale, pathname), searchParams);
-
-  const languages: Record<string, string> = {};
-  for (const candidate of enabledLocales) {
-    languages[candidate] = buildCanonicalPath(withLocalePath(candidate, pathname), searchParams);
-  }
-  languages["x-default"] = buildCanonicalPath(
-    withLocalePath(defaultLocale, pathname),
-    searchParams,
-  );
-
-  return { canonical, languages };
-}
-```
+`buildAlternates` already lives there beside `normalizePath`, `toSearchParams`, and `buildCanonicalPath`, which strips `cursor` and joins `filter.*` values. Add only `withLocalePath(locale, pathname)`, returning `/${locale}` for `/` and the prefixed normalized path otherwise, and the `defaultLocale`, `enabledLocales`, and `Locale` imports. Require `locale: Locale`, prefix the canonical with `withLocalePath(locale, pathname)`, and return `languages` built from `enabledLocales` plus `x-default` from `defaultLocale`, each keyed through `buildCanonicalPath` so search-param handling still applies.
 
 Update every caller to pass its validated locale. Server Components can call `getLocale()` from `lib/params/server.ts`; Route Handlers must validate their own inputs, and Server Actions parse theirs with a module-private `zod` schema.
 
@@ -353,7 +304,7 @@ function localizePath(locale: string, pathname: string): string {
 
 ### Step 9: Locale-aware Markdown negotiation
 
-`proxy.ts` serves Markdown through `getMarkdownPath()` and `getMarkdownMirrorPath()` in `lib/markdown/representation/index.ts`, which map `/`, `/search`, `/collections/:handle`, `/products/:handle`, and their `.md` mirrors to the unlocalized `app/md/...` handlers. Teach both to accept and strip a validated locale prefix so `/:locale/products/:handle` negotiates like `/products/:handle`, and keep the localized proxy matcher covering the localized paths. Inspect the handlers before forwarding locale; introduce and validate a copy-locale input where needed rather than assuming they already read it. Keep their deployment commerce context unchanged, and preserve `?variant=` and search parameters.
+`proxy.ts` serves Markdown through `getMarkdownPath()` and `getMarkdownMirrorPath()` in `lib/markdown/representation/index.ts`, which map `/`, `/search`, `/collections/:handle`, `/products/:handle`, and their `.md` mirrors to the unlocalized `app/md/...` handlers. Teach both to accept and strip a validated locale prefix so `/:locale/products/:handle` negotiates like `/products/:handle`, and add locale-prefixed `.md` families to the matcher when those URLs are public. Inspect the handlers before forwarding locale; introduce and validate a copy-locale input where needed rather than assuming they already read it. Keep their deployment commerce context unchanged, and preserve `?variant=` and search parameters.
 
 ### Step 10: Bare `/` and unknown locales
 

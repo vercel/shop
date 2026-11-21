@@ -35,15 +35,15 @@ export function ProductSchema({ product }: ProductSchemaProps) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.title,
-    description: product.description,
-    image: product.images.map((img) => img.url),
     brand: product.vendor
       ? {
           "@type": "Brand",
           name: product.vendor,
         }
       : undefined,
+    description: product.description,
+    image: product.images.map((img) => img.url),
+    name: product.title,
     offers: singlePrice
       ? {
           "@type": "Offer",

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { ImagePlaceholder } from "@/components/ui/image-placeholder";
 import { Link } from "@/components/ui/link";
 import type { BlogArticle } from "@/lib/blog/types";
-import { shopConfig } from "@/lib/config";
+import { formatDate } from "@/lib/content";
 
 export interface ArticleCardProps {
   article: BlogArticle;
@@ -11,9 +11,7 @@ export interface ArticleCardProps {
 
 export function ArticleCard({ article }: ArticleCardProps) {
   const href = `/blogs/${article.blogHandle}/${article.handle}`;
-  const publishedAt = new Intl.DateTimeFormat(shopConfig.localization.locale, {
-    dateStyle: "long",
-  }).format(new Date(article.publishedAt));
+  const publishedAt = formatDate(article.publishedAt, "long");
   return (
     <article className="grid content-start gap-4">
       <Link className="relative aspect-3/2 overflow-hidden rounded-xl" href={href}>

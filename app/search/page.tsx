@@ -32,27 +32,27 @@ export async function generateMetadata({ searchParams }: PageProps<"/search">): 
     ? `Find products matching "${query}"`
     : "Search for products in our store";
   return {
-    title,
-    description,
     alternates: buildAlternates({
       pathname: "/search",
       searchParams: resolvedSearchParams,
     }),
+    description,
     openGraph: buildOpenGraph({
-      title,
       description,
-      url: "/search",
+      title,
       type: "website",
+      url: "/search",
     }),
+    robots: {
+      follow: false,
+      index: false,
+    },
+    title,
     twitter: {
       card: "summary_large_image",
-      title,
       description,
       images: ["/og-default.png"],
-    },
-    robots: {
-      index: false,
-      follow: false,
+      title,
     },
   };
 }

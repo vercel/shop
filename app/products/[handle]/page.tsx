@@ -14,8 +14,11 @@ import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { shopConfig } from "@/lib/config";
 import {
+  buildProductUrl,
   defaultSelectedOptions,
+  findListedVariant,
   findLoadedVariant,
+  getSelectedColor,
   hasColorImagePartitioning,
   parseSelectedOptions,
   toSelectedOptionList,
@@ -27,38 +30,45 @@ import { buildAlternates, buildOpenGraph } from "@/lib/seo";
 import { fetchProductVariant } from "@/lib/shopify/operations/products/server";
 import { PLACEHOLDER_HANDLE } from "@/lib/static-params";
 
-async function buildProductMetadata(handle: string, canonicalPath: string): Promise<Metadata> {
+async function buildProductMetadata(
+  handle: string,
+  searchParams: Record<string, string | string[] | undefined>,
+): Promise<Metadata> {
   const product = await getProduct({
     handle,
   });
   if (!product) notFound();
-  const images = product.featuredImage
+  const canonicalPath = `/products/${handle}`;
+  const color = getSelectedColor(product, parseSelectedOptions(product.options, searchParams));
+  const image = color?.image ?? product.featuredImage;
+  const images = image
     ? [
         {
-          url: product.featuredImage.url,
-          width: product.featuredImage.width,
-          height: product.featuredImage.height,
-          alt: product.featuredImage.altText,
+          alt: image.altText,
+          url: image.url,
+          ...(image.width > 0 && image.height > 0
+            ? { height: image.height, width: image.width }
+            : {}),
         },
       ]
     : ["/og-default.png"];
   return {
-    title: product.seo.title,
-    description: product.seo.description,
     alternates: buildAlternates({
       pathname: canonicalPath,
     }),
+    description: product.seo.description,
     openGraph: buildOpenGraph({
-      title: product.seo.title,
       description: product.seo.description,
-      url: canonicalPath,
       images,
+      title: product.seo.title,
+      url: color ? buildProductUrl(handle, [color.option]) : canonicalPath,
     }),
+    title: product.seo.title,
     twitter: {
       card: "summary_large_image",
-      title: product.seo.title,
       description: product.seo.description,
       images,
+      title: product.seo.title,
     },
   };
 }
@@ -75,10 +85,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: PageProps<"/products/[handle]">): Promise<Metadata> {
   const { handle } = await params;
   if (handle === PLACEHOLDER_HANDLE) return {};
-  return buildProductMetadata(handle, `/products/${handle}`);
+  return buildProductMetadata(handle, (await searchParams) ?? {});
 }
 
 export default function ProductPage({ params, searchParams }: PageProps<"/products/[handle]">) {
@@ -118,12 +129,15 @@ async function ProductPageContent({
       const urlOptions = parseSelectedOptions(product.options, resolvedSearchParams ?? {});
       if (Object.keys(urlOptions).length === 0) return product.defaultVariant;
       const selectedOptions = { ...defaultSelectedOptions(product), ...urlOptions };
+      // A complete variant list answers any combination the product has, as fresh as the cached product.
+      const listedVariant = findListedVariant(product, selectedOptions);
+      if (listedVariant) return listedVariant;
       // With no variant for sale and one gallery for every variant, the cached product answers the selection; a restock shows once that cache refreshes.
       if (!product.availableForSale && !hasColorImagePartitioning(product.options)) {
         const loadedVariant = findLoadedVariant(product, selectedOptions);
         if (loadedVariant) return loadedVariant;
       }
-      // Uncached: the selected variant's price and stock are read live per request, and caching per option combination multiplies entries by variant count.
+      // Uncached: past 250 variants the list is partial, and Shopify picks the variant for a combination the product lacks.
       return fetchProductVariant({
         handle,
         selectedOptions: toSelectedOptionList(selectedOptions),

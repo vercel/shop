@@ -115,7 +115,7 @@ export interface ProductDetails extends ProductCard {
   };
   seo: SEO;
   updatedAt: string;
-  /** Only populated by fetchProductWithVariants for Eve; the PDP and Markdown omit it. */
+  /** At most the first 250; `variantsComplete` says whether that is every variant. */
   variants?: ProductVariant[];
   variantsComplete: boolean;
   variantsCount: number;

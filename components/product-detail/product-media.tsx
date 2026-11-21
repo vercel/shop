@@ -35,15 +35,15 @@ const DESKTOP_GRID_PRELOAD_COUNT = 4;
 // The preload must share the <img>'s srcset and sizes, or the browser downloads the tile twice.
 function preloadDesktopGridImage(image: ImageType) {
   const { props } = getImageProps({
-    src: image.url,
     alt: "",
     fill: true,
     sizes: "100vw",
+    src: image.url,
   });
   preload(props.src, {
     as: "image",
-    imageSrcSet: props.srcSet,
     imageSizes: props.sizes,
+    imageSrcSet: props.srcSet,
     media: DESKTOP_MEDIA,
   });
 }
@@ -90,8 +90,8 @@ function MediaVideo({
       previewImage={
         item.video.previewImage
           ? {
-              src: item.video.previewImage.url,
               alt: item.video.previewImage.altText || "",
+              src: item.video.previewImage.url,
             }
           : null
       }
@@ -119,8 +119,8 @@ function Carousel({
   const scrollToImage = (index: number) => {
     if (!container) return;
     container.scrollTo({
-      left: index * container.offsetWidth,
       behavior: "smooth",
+      left: index * container.offsetWidth,
     });
     setSelectedIndex(index);
   };
@@ -157,7 +157,7 @@ function Carousel({
       <div
         ref={setContainer}
         className="relative overflow-x-auto flex snap-x snap-mandatory overscroll-x-contain scrollbar-hide -mx-5 w-[calc(100%+2.5rem)]"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
       >
         {children}
         {mediaItems.map((item, idx) => {
@@ -270,7 +270,7 @@ export function ColorImageGrid({ images, title }: { images: ImageType[]; title: 
   return images.map((image, idx) => (
     <GridItem
       key={image.url}
-      item={{ type: "image", image }}
+      item={{ image, type: "image" }}
       title={title}
       idx={idx}
       priority={idx === 0}
@@ -315,7 +315,7 @@ export function ProductMedia({
 }) {
   const sharedMediaItems: MediaItem[] = [
     ...videos.map((video): MediaItem => ({ type: "video", video })),
-    ...otherImages.map((image): MediaItem => ({ type: "image", image })),
+    ...otherImages.map((image): MediaItem => ({ image, type: "image" })),
   ];
 
   const hasColorSlot = !!mobileSlot || !!desktopSlot;

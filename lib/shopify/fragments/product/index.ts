@@ -122,6 +122,7 @@ export const PRODUCT_WITH_VARIANTS_FRAGMENT = gql(
     selectedOrFirstAvailableVariant {
       ...BundleRelationshipFields
     }
+    # 250 is the Storefront API's page-size maximum; variantsComplete reports a longer list.
     variants(first: 250) {
       pageInfo {
         hasNextPage

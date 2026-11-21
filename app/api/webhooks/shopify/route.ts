@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 import { revalidateTag } from "next/cache";
 
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
@@ -38,22 +39,22 @@ export async function POST(request: Request) {
     const productTags: string[] = [];
 
     if (topic === "products/create" || topic === "products/delete") {
-      productTags.push("products-index");
+      productTags.push(CACHE_TAGS.productsIndex);
     }
 
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
-        productTags.push(`product-${payload.handle}`);
-        productTags.push(`recommendations-${payload.handle}`);
+        productTags.push(CACHE_TAGS.product(payload.handle));
+        productTags.push(CACHE_TAGS.recommendations(payload.handle));
       }
       if (payload.admin_graphql_api_id) {
         const numericId = getNumericShopifyId(payload.admin_graphql_api_id);
         if (numericId) {
-          productTags.push(`product-${numericId}`);
+          productTags.push(CACHE_TAGS.product(numericId));
         }
       } else if (payload.id) {
-        productTags.push(`product-${payload.id}`);
+        productTags.push(CACHE_TAGS.product(String(payload.id)));
       }
     } catch {
       console.error("[Shopify Webhook] Could not parse products payload; no tags invalidated");
@@ -70,21 +71,21 @@ export async function POST(request: Request) {
     const collectionTags: string[] = [];
 
     if (topic === "collections/create" || topic === "collections/delete") {
-      collectionTags.push("collections-index");
+      collectionTags.push(CACHE_TAGS.collectionsIndex);
     }
 
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
-        collectionTags.push(`collection-${payload.handle}`);
+        collectionTags.push(CACHE_TAGS.collection(payload.handle));
       }
       if (payload.admin_graphql_api_id) {
         const numericId = getNumericShopifyId(payload.admin_graphql_api_id);
         if (numericId) {
-          collectionTags.push(`collection-${numericId}`);
+          collectionTags.push(CACHE_TAGS.collection(numericId));
         }
       } else if (payload.id) {
-        collectionTags.push(`collection-${payload.id}`);
+        collectionTags.push(CACHE_TAGS.collection(String(payload.id)));
       }
     } catch {
       console.error("[Shopify Webhook] Could not parse collections payload");
@@ -98,12 +99,12 @@ export async function POST(request: Request) {
 
   if (topic.startsWith("metaobjects/")) {
     // Metaobjects are low-cardinality, so fire the broad tag too (unlike catalog) — aggregate reads refresh without per-type index tags.
-    const metaobjectTags = ["metaobjects"];
+    const metaobjectTags: string[] = [CACHE_TAGS.metaobjects];
 
     try {
       const payload = JSON.parse(body);
       if (payload.handle) {
-        metaobjectTags.push(`metaobject-${payload.handle}`);
+        metaobjectTags.push(CACHE_TAGS.metaobject(payload.handle));
       }
     } catch {
       console.error("[Shopify Webhook] Could not parse metaobjects payload");
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
 
   return Response.json({
     success: true,
-    topic,
     tagsInvalidated,
+    topic,
   });
 }

@@ -1,10 +1,6 @@
 # Vercel Shop
 
-Agent-ready commerce, powered by Shopify, Next, and Eve.
-
-- **Shopify owns commerce.** Catalog, cart, checkout, customer accounts, predictive search, and policies come from Shopify through the framework-agnostic Hydrogen SDK (not the Hydrogen React Router framework).
-- **Next.js owns the app.** Routing, Server Components, caching and invalidation, metadata, and the storefront's machine-readable surface for answer engines: Markdown representations, `/llms.txt`, structured data, and the sitemap.
-- **Eve owns the agent.** Shop Agent's sessions, tools, and connections; its tools call Shopify directly.
+Agent-ready commerce, powered by Shopify, Next, and Eve. Shopify owns commerce through the framework-agnostic Hydrogen SDK, Next.js owns the app, and Eve owns the agent; [AGENTS.md](AGENTS.md) defines each owner's boundaries.
 
 See [vercel.shop](https://vercel.shop) for full documentation.
 
@@ -63,7 +59,7 @@ Next.js
 Eve
 
 - Shop Agent for product discovery, store questions, and cart updates in a side drawer, opt-in
-- Shopify catalog and policy MCP connections plus Hydrogen cart handlers
+- Catalog and policy reads through Shopify's MCP endpoint, plus Hydrogen cart handlers
 
 Customer authentication is disabled by default. Follow the [authentication guide](https://vercel.shop/docs/anatomy/authentication) to configure Shopify credentials and callback URLs before enabling `auth.isEnabled` in `lib/config/index.ts`.
 
@@ -89,10 +85,6 @@ Use the plain skill names below. Shopify AI Toolkit is separate external tooling
 | `enable-shopify-markets`    | Multi-locale support with Shopify Markets and next-intl               |
 | `enable-shopify-menus`      | Replace hardcoded nav/footer links with Shopify-managed menus         |
 | `update-shop`               | Keep a storefront current with template changes                       |
-
-## Documentation
-
-Full documentation is available at [vercel.shop](https://vercel.shop).
 
 ## License
 

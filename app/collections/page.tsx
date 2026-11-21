@@ -11,22 +11,22 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = "Collections";
   const description = "Browse products by collection.";
   return {
-    title,
-    description,
     alternates: buildAlternates({
       pathname: "/collections",
     }),
+    description,
     openGraph: buildOpenGraph({
-      title,
       description,
-      url: "/collections",
+      title,
       type: "website",
+      url: "/collections",
     }),
+    title,
     twitter: {
       card: "summary_large_image",
-      title,
       description,
       images: ["/og-default.png"],
+      title,
     },
   };
 }

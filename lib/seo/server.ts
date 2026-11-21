@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import {
   fetchArticleSitemapPage,
   fetchSitemapPage,
@@ -12,10 +13,10 @@ import type {
 } from "@/lib/shopify/operations/sitemap/types";
 
 function sitemapCacheTags(type: ShopifySitemapType): string[] {
-  if (type === "ARTICLE") return ["articles", "articles-index"];
-  if (type === "BLOG") return ["blogs", "blogs-index"];
-  if (type === "COLLECTION") return ["collections", "collections-index"];
-  return type === "PAGE" ? ["pages"] : ["products", "products-index"];
+  if (type === "ARTICLE") return [CACHE_TAGS.articles, CACHE_TAGS.articlesIndex];
+  if (type === "BLOG") return [CACHE_TAGS.blogs, CACHE_TAGS.blogsIndex];
+  if (type === "COLLECTION") return [CACHE_TAGS.collections, CACHE_TAGS.collectionsIndex];
+  return type === "PAGE" ? [CACHE_TAGS.pages] : [CACHE_TAGS.products, CACHE_TAGS.productsIndex];
 }
 
 function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResource[]): void {
@@ -23,14 +24,19 @@ function tagSitemapResources(type: ShopifySitemapType, resources: SitemapResourc
 
   if (type === "ARTICLE") {
     for (const resource of resources) {
-      cacheTag(`article-${resource.blogHandle}-${resource.handle}`);
+      if (resource.blogHandle) cacheTag(CACHE_TAGS.article(resource.blogHandle, resource.handle));
     }
     return;
   }
 
-  const prefix = type === "BLOG" ? "blog" : type === "COLLECTION" ? "collection" : "product";
+  const tag =
+    type === "BLOG"
+      ? CACHE_TAGS.blog
+      : type === "COLLECTION"
+        ? CACHE_TAGS.collection
+        : CACHE_TAGS.product;
   for (const resource of resources) {
-    cacheTag(`${prefix}-${resource.handle}`);
+    cacheTag(tag(resource.handle));
   }
 }
 

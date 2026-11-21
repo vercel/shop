@@ -21,12 +21,14 @@ export type ShopifyVariant = ShopifyBaseVariant & Partial<ShopifyPurchasableVari
 export type ShopifyCategory = ResultOf<typeof TAXONOMY_CATEGORY_FRAGMENT>;
 
 type ShopifyBaseProduct = ResultOf<typeof PRODUCT_FRAGMENT>;
-type ShopifyProductWithVariants = ResultOf<typeof PRODUCT_WITH_VARIANTS_FRAGMENT>;
+type ShopifyVariantConnection = ResultOf<typeof PRODUCT_WITH_VARIANTS_FRAGMENT>["variants"];
 // Variants and bundle relationships are optional selections layered on ProductFields.
-export type ShopifyProduct = ShopifyBaseProduct &
-  Partial<Pick<ShopifyProductWithVariants, "variants">> & {
-    selectedOrFirstAvailableVariant?: ShopifyVariant | null;
+export type ShopifyProduct = ShopifyBaseProduct & {
+  selectedOrFirstAvailableVariant?: ShopifyVariant | null;
+  variants?: Omit<ShopifyVariantConnection, "edges"> & {
+    edges: Array<{ node: ShopifyVariant }>;
   };
+};
 export type ShopifyOption = ShopifyProduct["options"][number];
 export type ShopifyOptionValueSwatch = ShopifyOption["optionValues"][number]["swatch"];
 export type ShopifyMediaNode = ShopifyProduct["media"]["edges"][number]["node"];

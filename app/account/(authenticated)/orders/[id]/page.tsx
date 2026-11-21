@@ -2,15 +2,12 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import {
-  formatOrderDate,
-  humanizeStatus,
-  OrderStatusBadge,
-} from "@/components/account/order-display";
+import { humanizeStatus, OrderStatusBadge } from "@/components/account/order-display";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/content";
 import type { OrderLineItem } from "@/lib/customer/types";
 import { formatPrice } from "@/lib/money";
 import type { Money } from "@/lib/money/types";
@@ -31,7 +28,7 @@ async function OrderDetailContent({ params }: { params: Promise<{ id: string }> 
   if (!order) notFound();
   return (
     <>
-      <AccountPageHeader title={order.name} description={formatOrderDate(order.processedAt)} />
+      <AccountPageHeader title={order.name} description={formatDate(order.processedAt, "medium")} />
 
       <div className="flex flex-wrap items-center gap-2">
         <OrderStatusBadge status={order.fulfillmentStatus} />

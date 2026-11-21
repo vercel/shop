@@ -3,24 +3,24 @@ import type { ShopifyCollection } from "@/lib/shopify/transforms/collection/type
 
 export function transformShopifyCollection(collection: ShopifyCollection): Collection {
   return {
+    description: collection.description,
     handle: collection.handle,
     id: collection.id,
-    title: collection.title,
-    description: collection.description,
     image: collection.image
       ? {
-          url: collection.image.url,
           altText: collection.image.altText ?? collection.title,
-          width: collection.image.width ?? 0,
           height: collection.image.height ?? 0,
+          url: collection.image.url,
+          width: collection.image.width ?? 0,
         }
       : null,
     path: `/collections/${collection.handle}`,
-    updatedAt: collection.updatedAt,
     seo: {
-      title: collection.seo.title || collection.title,
       description: collection.seo.description || collection.description,
+      title: collection.seo.title || collection.title,
     },
+    title: collection.title,
+    updatedAt: collection.updatedAt,
   };
 }
 

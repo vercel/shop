@@ -121,24 +121,44 @@ export function toProductFormInput(
 }
 
 // Combined-listing option values load another product's variant, which this product's variant query never returns.
-export function findLoadedVariant(
+function findVariant(
   product: ProductDetails,
+  variants: Array<ProductVariant | undefined>,
   selectedOptions: SelectedOptions,
 ): ProductVariant | undefined {
   const optionCount = Object.keys(selectedOptions).length;
-  const loadedVariants = [
-    product.defaultVariant,
-    ...product.adjacentVariants,
-    ...product.options.flatMap((option) =>
-      option.values.map((value) => value.firstSelectableVariant),
-    ),
-  ];
-  return loadedVariants.find(
+  return variants.find(
     (variant) =>
       variant?.productHandle === product.handle &&
       variant.selectedOptions.length === optionCount &&
       variant.selectedOptions.every((option) => selectedOptions[option.name] === option.value),
   );
+}
+
+export function findLoadedVariant(
+  product: ProductDetails,
+  selectedOptions: SelectedOptions,
+): ProductVariant | undefined {
+  return findVariant(
+    product,
+    [
+      product.defaultVariant,
+      ...product.adjacentVariants,
+      ...product.options.flatMap((option) =>
+        option.values.map((value) => value.firstSelectableVariant),
+      ),
+    ],
+    selectedOptions,
+  );
+}
+
+// Only a complete variant list answers; a missing combination returns nothing.
+export function findListedVariant(
+  product: ProductDetails,
+  selectedOptions: SelectedOptions,
+): ProductVariant | undefined {
+  if (!product.variantsComplete || !product.variants) return undefined;
+  return findVariant(product, product.variants, selectedOptions);
 }
 
 export function defaultSelectedOptions(product: ProductDetails): SelectedOptions {
@@ -225,20 +245,28 @@ export function getSharedImages(images: Image[], options: ProductOption[]): Imag
   return shared.length > 0 ? shared : images;
 }
 
-export function getSelectedColorImage(
+export function getSelectedColor(
   product: ProductDetails,
   selectedOptions: SelectedOptions,
-): Image | undefined {
+): { image: Image; option: SelectedOption } | undefined {
   const color = findColorOption(product.options);
   if (!color) return undefined;
   const value = color.values.find((v) => v.name === selectedOptions[color.name]);
   if (!value?.image) return undefined;
-  return (
-    product.images.find((image) => image.url === value.image) ?? {
-      url: value.image,
+  return {
+    image: product.images.find((image) => image.url === value.image) ?? {
       altText: product.title,
-      width: 0,
       height: 0,
-    }
-  );
+      url: value.image,
+      width: 0,
+    },
+    option: { name: color.name, value: value.name },
+  };
+}
+
+export function getSelectedColorImage(
+  product: ProductDetails,
+  selectedOptions: SelectedOptions,
+): Image | undefined {
+  return getSelectedColor(product, selectedOptions)?.image;
 }

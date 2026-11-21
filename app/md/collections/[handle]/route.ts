@@ -22,11 +22,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
         : await getCollection({ handle });
     if (!collection) {
       return new Response(notFoundMarkdown({ kind: "Collection" }), {
-        status: 404,
         headers: markdownHeaders({
           cacheControl: "public, max-age=3600, stale-while-revalidate=604800",
           pathname,
         }),
+        status: 404,
       });
     }
     return new Response(collectionToMarkdown(collection), {
@@ -39,11 +39,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
     return new Response(
       "# Server Error\n\nAn error occurred while retrieving the collection. Please try again later.",
       {
-        status: 500,
         headers: markdownHeaders({
           cacheControl: "no-cache, no-store, must-revalidate",
           pathname,
         }),
+        status: 500,
       },
     );
   }

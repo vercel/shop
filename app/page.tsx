@@ -11,15 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = "Home";
   const description = "Explore featured products, curated collections, and seasonal campaigns.";
   return {
-    title: `${title} | ${shopConfig.site.name}`,
-    description,
     alternates: buildAlternates({ pathname: "/" }),
+    description,
     openGraph: buildOpenGraph({
-      title,
       description,
-      url: "/",
+      title,
       type: "website",
+      url: "/",
     }),
+    title: `${title} | ${shopConfig.site.name}`,
   };
 }
 

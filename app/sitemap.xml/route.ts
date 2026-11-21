@@ -1,9 +1,6 @@
 import { shopConfig } from "@/lib/config";
+import { escapeXml } from "@/lib/seo";
 import { getShopifySitemapPagesCount } from "@/lib/seo/server";
-
-function escapeXml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
 
 export async function GET(): Promise<Response> {
   const [articlePages, blogPages, collectionPages, pagePages, productPages] = await Promise.all([

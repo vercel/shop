@@ -5,21 +5,21 @@ function buildSiteSchema() {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      logo: `${shopConfig.site.url}/icons/icon-512.png`,
       name: shopConfig.site.name,
       url: shopConfig.site.url,
-      logo: `${shopConfig.site.url}/icons/icon-512.png`,
     },
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: shopConfig.site.name,
-      url: shopConfig.site.url,
       inLanguage: shopConfig.localization.locale,
+      name: shopConfig.site.name,
       potentialAction: {
         "@type": "SearchAction",
-        target: `${shopConfig.site.url}/search?q={search_term_string}`,
         "query-input": "required name=search_term_string",
+        target: `${shopConfig.site.url}/search?q={search_term_string}`,
       },
+      url: shopConfig.site.url,
     },
   ];
 }

@@ -127,17 +127,6 @@ export function createSessionManager(
 
   return {
     ...readonlyManager,
-    getSessionOrigin() {
-      return origin;
-    },
-    removeSessionItem(key) {
-      delete data[key];
-      dirty = true;
-    },
-    setSessionItem(key, value) {
-      data[key] = value;
-      dirty = true;
-    },
     commit() {
       if (!dirty) return;
 
@@ -164,6 +153,17 @@ export function createSessionManager(
       }
 
       return responseHeaders;
+    },
+    getSessionOrigin() {
+      return origin;
+    },
+    removeSessionItem(key) {
+      delete data[key];
+      dirty = true;
+    },
+    setSessionItem(key, value) {
+      data[key] = value;
+      dirty = true;
     },
   };
 }

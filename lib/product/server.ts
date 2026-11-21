@@ -1,6 +1,7 @@
 import type { ProductRecommendationIntent } from "@shopify/hydrogen/storefront-api-types";
 import { cacheLife, cacheTag } from "next/cache";
 
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CommerceLocale } from "@/lib/config/types";
 import type { ProductCard, ProductDetails, ProductPage } from "@/lib/product/types";
 import { getNumericShopifyId } from "@/lib/shopify/id/server";
@@ -15,7 +16,7 @@ import type { SearchIndexProductsParams } from "@/lib/shopify/operations/product
 export function tagProducts(products: Array<{ id: string }>): void {
   for (const product of products) {
     const numericId = getNumericShopifyId(product.id);
-    if (numericId) cacheTag(`product-${numericId}`);
+    if (numericId) cacheTag(CACHE_TAGS.product(numericId));
   }
 }
 
@@ -25,7 +26,7 @@ export async function getProduct(params: {
 }): Promise<ProductDetails | undefined> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", `product-${params.handle}`);
+  cacheTag(CACHE_TAGS.products, CACHE_TAGS.product(params.handle));
 
   const product = await fetchProduct(params);
   if (product) tagProducts([product]);
@@ -38,7 +39,7 @@ export async function getSearchIndexProducts(
 ): Promise<ProductPage> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", "products-index");
+  cacheTag(CACHE_TAGS.products, CACHE_TAGS.productsIndex);
 
   const result = await fetchSearchIndexProducts(params);
   tagProducts(result.products);
@@ -52,7 +53,7 @@ export async function getProductRecommendations(params: {
 }): Promise<ProductCard[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products", `recommendations-${params.handle}`);
+  cacheTag(CACHE_TAGS.products, CACHE_TAGS.recommendations(params.handle));
 
   const products = await fetchProductRecommendations(params);
   tagProducts(products);
