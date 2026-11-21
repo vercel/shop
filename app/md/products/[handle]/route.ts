@@ -18,11 +18,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
     });
     if (!product) {
       return new Response(notFoundMarkdown({ kind: "Product" }), {
-        status: 404,
         headers: markdownHeaders({
           cacheControl: "public, max-age=3600, stale-while-revalidate=604800",
           pathname,
         }),
+        status: 404,
       });
     }
     return new Response(productToMarkdown(product, shopConfig.localization.locale), {
@@ -35,11 +35,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ han
     return new Response(
       "# Server Error\n\nAn error occurred while retrieving the product. Please try again later.",
       {
-        status: 500,
         headers: markdownHeaders({
           cacheControl: "no-cache, no-store, must-revalidate",
           pathname,
         }),
+        status: 500,
       },
     );
   }

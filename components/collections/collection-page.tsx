@@ -110,7 +110,7 @@ function CollectionHeader({
   return (
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
-      <CollectionSchema collection={{ handle, title, description, updatedAt }} />
+      <CollectionSchema collection={{ description, handle, title, updatedAt }} />
       <div>
         <h1 className="text-3xl sm:text-4xl md:text-5xl">
           <Link href={`/collections/${handle}`}>{title}</Link>

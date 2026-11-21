@@ -16,7 +16,6 @@ import type {
   SelectedOption,
 } from "@/lib/product/types";
 import { assertStorefrontOk } from "@/lib/shopify/errors/server";
-import { BUNDLE_RELATIONSHIPS_FRAGMENT } from "@/lib/shopify/fragments/bundle";
 import { FILTER_FRAGMENT } from "@/lib/shopify/fragments/filters";
 import {
   FILTERABLE_PRODUCT_CARD_FRAGMENT,
@@ -72,6 +71,17 @@ const GET_PRODUCT_BY_HANDLE_QUERY = gql(
   query getProductByHandle($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
       ...ProductFields
+      # 250 is the Storefront API's page-size maximum; variantsComplete reports a longer list.
+      variants(first: 250) {
+        pageInfo {
+          hasNextPage
+        }
+        edges {
+          node {
+            ...ProductVariantFields
+          }
+        }
+      }
     }
   }
 `,
@@ -82,10 +92,7 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
   `#graphql
   query getProductByHandleWithBundles($handle: String!, $country: CountryCode, $language: LanguageCode) @inContext(country: $country, language: $language) {
     product(handle: $handle) {
-      ...ProductFields
-      selectedOrFirstAvailableVariant {
-        ...BundleRelationshipFields
-      }
+      ...ProductWithVariantsFields
       # Sparse variants resolve client-side, so they need the bundle gate too.
       adjacentVariants {
         ...BundleRelationshipFields
@@ -100,7 +107,7 @@ const GET_PRODUCT_BY_HANDLE_WITH_BUNDLES_QUERY = gql(
     }
   }
 `,
-  [BUNDLE_RELATIONSHIPS_FRAGMENT, PRODUCT_FRAGMENT],
+  [PRODUCT_WITH_VARIANTS_FRAGMENT],
 );
 
 export async function fetchProduct({
@@ -120,9 +127,12 @@ export async function fetchProduct({
   const { data } = response;
 
   if (!data.product) return undefined;
+  const product = transformShopifyProductDetails(data.product);
   return {
-    ...transformShopifyProductDetails(data.product),
+    ...product,
     descriptionHtml: sanitizeShopifyHtml(data.product.descriptionHtml),
+    // Partial errors can drop variants, so that list never counts as complete.
+    variantsComplete: product.variantsComplete && !response.errors?.length,
   };
 }
 
@@ -366,12 +376,12 @@ export async function fetchSearchIndexProducts(
   const response = await storefront.request(PRODUCTS_SEARCH_QUERY, {
     locale,
     variables: {
-      query: buildSearchQuery(query),
-      first: limit,
       after: cursor,
+      first: limit,
       productFilters: toStorefrontFilters(filters),
-      sortKey: sort.sortKey,
+      query: buildSearchQuery(query),
       reverse: sort.reverse,
+      sortKey: sort.sortKey,
     },
   });
   assertStorefrontOk(response, "searchProducts");
@@ -422,8 +432,8 @@ export async function fetchSearchFacets(params: SearchFacetsParams): Promise<Sea
   const response = await storefront.request(SEARCH_FACETS_QUERY, {
     locale,
     variables: {
-      query: buildSearchQuery(query),
       productFilters: toStorefrontFilters(filters),
+      query: buildSearchQuery(query),
     },
   });
   assertStorefrontOk(response, "searchFacets");
@@ -493,12 +503,12 @@ export async function fetchCollectionProducts(
   const response = await storefront.request(COLLECTION_PRODUCTS_QUERY, {
     locale,
     variables: {
-      handle: collection,
-      first: limit,
       after: cursor,
-      sortKey: sort.sortKey,
-      reverse: sort.reverse,
       filters: toStorefrontFilters(filters),
+      first: limit,
+      handle: collection,
+      reverse: sort.reverse,
+      sortKey: sort.sortKey,
     },
   });
   assertStorefrontOk(response, "collectionProducts");
@@ -506,7 +516,7 @@ export async function fetchCollectionProducts(
   if (!data.collection) {
     return {
       facets: { filters: [] },
-      pageInfo: { hasNextPage: false, hasPreviousPage: false, startCursor: null, endCursor: null },
+      pageInfo: { endCursor: null, hasNextPage: false, hasPreviousPage: false, startCursor: null },
       products: [],
     };
   }

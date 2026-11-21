@@ -15,8 +15,8 @@ import { getCustomerProfile } from "@/lib/shopify/operations/customer/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
+    robots: { follow: false, index: false },
     title: "Account",
-    robots: { index: false, follow: false },
   };
 }
 

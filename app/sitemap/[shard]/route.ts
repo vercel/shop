@@ -1,17 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { shopConfig } from "@/lib/config";
 import { getShopPolicies } from "@/lib/policies/server";
+import { escapeXml, toAbsoluteUrl } from "@/lib/seo";
 import { getShopifySitemapPage, getShopifySitemapPagesCount } from "@/lib/seo/server";
 import { type ShopifySitemapType } from "@/lib/shopify/operations/sitemap/types";
-
-function escapeXml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
-function toAbsoluteUrl(pathname: string): string {
-  return `${shopConfig.site.url}${pathname}`;
-}
 
 function urlsetWrap(body: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?>

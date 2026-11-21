@@ -6,11 +6,11 @@ import { CartPageContent, CartPageSkeleton } from "@/components/cart/cart-page";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Cart",
     robots: {
-      index: false,
       follow: false,
+      index: false,
     },
+    title: "Cart",
   };
 }
 

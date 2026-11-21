@@ -41,9 +41,7 @@ export const SEARCH_SORT_EXCLUDE: SortValue[] = [
   "title-descending",
 ];
 
-export function getBrowseSort(
-  state: Pick<CollectionState, "reverse" | "sortKey">,
-): string | undefined {
+function getBrowseSort(state: Pick<CollectionState, "reverse" | "sortKey">): string | undefined {
   return state.sortKey ? getSortByValue(state.sortKey, state.reverse) : undefined;
 }
 

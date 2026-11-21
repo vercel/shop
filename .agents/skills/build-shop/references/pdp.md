@@ -19,9 +19,10 @@ Keep these coupled decisions together:
 - keep `getProduct()` a cached `get*` read (`"use cache: remote"` with its `cacheLife` and tags);
 - keep the route's only outer Suspense boundary around the params-dependent body, with `ProductDetailSkeleton` matching the resolved layout; do not add request-time boundaries around stable body content;
 - keep `searchParams` unawaited for selected-option state;
-- keep the selected-options promise separate from the slower exact-variant query — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`;
-- keep the URL-selected variant query behind `searchParams`, which the root layout's `ensureStatic = "prefetch"` defers to navigation, so link prefetches never render per-variant data; the default variant comes from the cached product;
-- keep the sold-out shortcut narrow: when the cached product has no variant for sale and its gallery is not partitioned by color, the page answers the selection from the variants that product already loaded (`findLoadedVariant`) and queries Shopify only for a combination it did not load, so a restock appears when the product cache refreshes.
+- keep the selected-options promise separate from the variant promise, which can wait on Shopify — this route is the reference for the resolved-leaf shape in `rendering-architecture.md`;
+- keep URL-selected variant resolution behind `searchParams`, which the root layout's `ensureStatic = "prefetch"` defers to navigation, so link prefetches never render per-variant data; the default variant comes from the cached product;
+- answer the selection from the cached product when `variantsComplete` is true (`findListedVariant`); `getProduct()` loads up to 250 variants in one request. Query Shopify with `fetchProductVariant` only past 250 variants or for a combination the product lacks, and never paginate the list in the cached read;
+- keep the sold-out shortcut narrow: past 250 variants, when the cached product has no variant for sale and its gallery is not partitioned by color, the page answers the selection from the variants that product already loaded (`findLoadedVariant`) and queries Shopify only for a combination it did not load, so a restock appears when the product cache refreshes.
 
 Inspect the existing PDP boundaries before changing them. Render stable product content immediately where the data contract permits, then suspend only variant-dependent media, price, availability, option state, and purchase controls. Keep a broader boundary only when those concerns genuinely share one blocking dependency.
 

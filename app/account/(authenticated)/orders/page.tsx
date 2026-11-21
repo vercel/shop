@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 
-import { formatOrderDate, OrderStatusBadge } from "@/components/account/order-display";
+import { OrderStatusBadge } from "@/components/account/order-display";
 import { AccountPageHeader } from "@/components/account/page-header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatDate } from "@/lib/content";
 import { formatPrice } from "@/lib/money";
 import { fetchCustomerOrders } from "@/lib/shopify/operations/customer/server";
 
@@ -52,7 +53,7 @@ async function OrdersContent({
               <div className="grid gap-1">
                 <span className="font-medium">{order.name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {formatOrderDate(order.processedAt)}
+                  {formatDate(order.processedAt, "medium")}
                 </span>
               </div>
               <div className="flex items-center gap-3">

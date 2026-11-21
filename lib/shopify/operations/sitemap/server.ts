@@ -83,7 +83,7 @@ export async function fetchSitemapPage(
   page: number,
 ): Promise<{ items: SitemapResource[] }> {
   const response = await storefront.request(GET_SITEMAP_PAGE_QUERY, {
-    variables: { type, page },
+    variables: { page, type },
   });
   assertStorefrontOk(response, "getSitemapPage");
 

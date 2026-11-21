@@ -6,7 +6,6 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
         allow: "/",
         disallow: [
           "/cart",
@@ -22,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/*/collections/*?*sort=",
           "/*/collections/*?*filter.",
         ],
+        userAgent: "*",
       },
     ],
     sitemap: `${shopConfig.site.url}/sitemap.xml`,

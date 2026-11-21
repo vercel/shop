@@ -30,7 +30,6 @@ export async function customerAccountFetch<Doc extends AnyCustomerAccountDocumen
   const shopId = process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID as string;
   const client: CustomerAccountClient = createCustomerAccountClient({
     defaultTimeoutInMs: REQUEST_TIMEOUT_MS,
-    shopId,
     requestContext: createShopifyRequestContext({
       i18n: {
         country: shopConfig.localization.country,
@@ -38,6 +37,7 @@ export async function customerAccountFetch<Doc extends AnyCustomerAccountDocumen
       },
       request: new Request(shopConfig.site.url),
     }),
+    shopId,
   });
   const start = performance.now();
   try {

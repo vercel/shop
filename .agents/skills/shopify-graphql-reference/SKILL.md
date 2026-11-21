@@ -15,9 +15,7 @@ Read `references/REFERENCE.md` before editing.
    - Use Shopify AI Toolkit's Storefront GraphQL skill for catalog, search, menus, cart, and public metaobject reads.
    - Use its Customer skill for profiles, orders, addresses, and other authenticated customer data.
    - Use its custom-data skill first for metafields or metaobjects.
-2. Search current Shopify documentation and validate the complete operation with that skill.
-3. Do not copy schema snapshots, field catalogs, or generated API reference into this skill.
-4. If Shopify AI Toolkit is unavailable, use official Shopify documentation and validation tooling; do not guess.
+2. Search current Shopify documentation and validate the complete operation with that skill. If Shopify AI Toolkit is unavailable, use official Shopify documentation and validation tooling; do not guess.
 
 ## Apply the Vercel Shop conventions
 
@@ -28,7 +26,7 @@ Read `references/REFERENCE.md` before editing.
 5. Pass `locale` to `storefront.request` when Shopify localizes the result; never add `country` or `language` to `variables`.
 6. Derive raw Shopify types from fragment documents with `ResultOf<typeof FRAGMENT>` under `lib/shopify/**`; transform catalog/account data into domain types before presentation. Cart types intentionally derive from Hydrogen handlers through `lib/cart/types.ts`.
 7. Preserve cache tags and the existing webhook invalidation hierarchy. Do not cache mutations.
-8. Never place carts in the Next.js data cache; cart reads are memoized per request via `getCart`, so cart mutations need no cache invalidation step.
+8. Cart caching, reads, and invalidation follow the project's `AGENTS.md` invariant 2 and the cache-role table in `build-shop`'s `references/rendering-architecture.md`.
 
 ## Revalidate both boundaries
 

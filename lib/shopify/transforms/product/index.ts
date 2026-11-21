@@ -27,10 +27,10 @@ import type {
 export function transformImage(image: ShopifyImage | null | undefined): Image | null {
   if (!image) return null;
   return {
-    url: image.url,
     altText: image.altText ?? "",
-    width: image.width ?? 0,
     height: image.height ?? 0,
+    url: image.url,
+    width: image.width ?? 0,
   };
 }
 
@@ -50,10 +50,10 @@ function extractMediaFromProduct(product: ShopifyProduct): {
       const bestSource = mp4Sources.sort((a, b) => b.width - a.width)[0] ?? node.sources[0];
       if (bestSource) {
         videos.push({
-          url: bestSource.url,
-          previewImage: transformImage(node.previewImage),
-          width: bestSource.width,
           height: bestSource.height,
+          previewImage: transformImage(node.previewImage),
+          url: bestSource.url,
+          width: bestSource.width,
         });
       }
     }
@@ -66,13 +66,13 @@ function transformCategory(category: ShopifyCategory | null | undefined): Catego
   if (!category) return null;
   const cappedAncestors = category.ancestors.slice(-2);
   return {
-    id: category.id,
-    name: category.name,
     ancestors: cappedAncestors.map((a) => ({
+      ancestors: [],
       id: a.id,
       name: a.name,
-      ancestors: [],
     })),
+    id: category.id,
+    name: category.name,
   };
 }
 
@@ -104,19 +104,18 @@ function transformBundleComponent(component: {
 
 export function transformVariant(variant: ShopifyVariant): ProductVariant {
   return {
-    id: variant.id,
-    title: variant.title,
     availableForSale: variant.availableForSale,
-    price: variant.price,
+    bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
     compareAtPrice: variant.compareAtPrice ?? undefined,
+    components: variant.components?.nodes.map(transformBundleComponent) ?? [],
+    id: variant.id,
+    image: transformImage(variant.image),
+    price: variant.price,
     productHandle: variant.product.handle,
     productTitle: variant.product.title,
-    selectedOptions: variant.selectedOptions,
-    image: transformImage(variant.image),
-    bundleParents: variant.groupedBy?.nodes.map(transformVariantReference) ?? [],
-    components: variant.components?.nodes.map(transformBundleComponent) ?? [],
     requiresComponents: variant.requiresComponents ?? false,
     requiresSellingPlan: variant.product.requiresSellingPlan,
+    selectedOptions: variant.selectedOptions,
     sellingPlanAllocations: variant.sellingPlanAllocations.nodes.map((allocation) => {
       const adjustment = allocation.priceAdjustments[0];
       return {
@@ -125,6 +124,7 @@ export function transformVariant(variant: ShopifyVariant): ProductVariant {
         sellingPlan: allocation.sellingPlan,
       };
     }),
+    title: variant.title,
   };
 }
 
@@ -172,17 +172,17 @@ function transformProductCard(
   const cardVariant = matchedVariant ?? defaultVariant;
 
   return {
-    id: product.id,
-    handle: product.handle,
-    title: product.title,
-    featuredImage: transformImage(matchedVariant?.image ?? product.featuredImage),
-    price: product.priceRange.minVariantPrice,
-    maxPrice: product.priceRange.maxVariantPrice,
-    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
-    vendor: product.vendor || undefined,
     availableForSale: product.availableForSale,
-    isGiftCard: product.isGiftCard,
+    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
     defaultVariantSelectedOptions: cardVariant?.selectedOptions ?? [],
+    featuredImage: transformImage(matchedVariant?.image ?? product.featuredImage),
+    handle: product.handle,
+    id: product.id,
+    isGiftCard: product.isGiftCard,
+    maxPrice: product.priceRange.maxVariantPrice,
+    price: product.priceRange.minVariantPrice,
+    title: product.title,
+    vendor: product.vendor || undefined,
   };
 }
 
@@ -214,22 +214,12 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     ? transformVariant(product.selectedOrFirstAvailableVariant)
     : (variants?.find((v) => v.availableForSale) ?? variants?.[0]);
   return {
-    id: product.id,
-    handle: product.handle,
-    title: product.title,
-    featuredImage: transformImage(product.featuredImage),
-    price: product.priceRange.minVariantPrice,
-    maxPrice: product.priceRange.maxVariantPrice,
-    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
-    vendor: product.vendor || undefined,
-    availableForSale: product.availableForSale,
-    isGiftCard: product.isGiftCard,
     adjacentVariants: product.adjacentVariants.map(transformVariant),
     allVariantsInStock:
       !product.encodedVariantExistence ||
       product.encodedVariantExistence === product.encodedVariantAvailability,
-    hasUniformPricing: hasUniformPriceRange(product),
-    variantsCount: product.variantsCount?.count ?? variants?.length ?? 0,
+    availableForSale: product.availableForSale,
+    compareAtPrice: product.compareAtPriceRange.minVariantPrice,
     defaultVariant,
     defaultVariantSelectedOptions: defaultVariant?.selectedOptions ?? [],
     defaultVariantSku: product.selectedOrFirstAvailableVariant?.sku || undefined,
@@ -237,20 +227,30 @@ export function transformShopifyProductDetails(product: ShopifyProduct): Product
     descriptionHtml: product.descriptionHtml,
     encodedVariantAvailability: product.encodedVariantAvailability ?? undefined,
     encodedVariantExistence: product.encodedVariantExistence ?? undefined,
+    featuredImage: transformImage(product.featuredImage),
+    handle: product.handle,
+    hasUniformPricing: hasUniformPriceRange(product),
+    id: product.id,
+    isGiftCard: product.isGiftCard,
+    maxPrice: product.priceRange.maxVariantPrice,
+    price: product.priceRange.minVariantPrice,
+    title: product.title,
+    variantsCount: product.variantsCount?.count ?? variants?.length ?? 0,
+    vendor: product.vendor || undefined,
     ...extractMediaFromProduct(product),
+    category: transformCategory(product.category),
+    compareAtPriceRange: product.compareAtPriceRange,
+    currencyCode: product.priceRange.minVariantPrice.currencyCode,
+    options: product.options.map(transformOption),
+    priceRange: product.priceRange,
+    seo: {
+      description: product.seo.description || product.description,
+      title: product.seo.title || product.title,
+    },
+    updatedAt: product.updatedAt,
     variants,
     variantsComplete: Boolean(
       variants?.length && product.variants?.pageInfo?.hasNextPage === false,
     ),
-    options: product.options.map(transformOption),
-    seo: {
-      title: product.seo.title || product.title,
-      description: product.seo.description || product.description,
-    },
-    category: transformCategory(product.category),
-    updatedAt: product.updatedAt,
-    priceRange: product.priceRange,
-    compareAtPriceRange: product.compareAtPriceRange,
-    currencyCode: product.priceRange.minVariantPrice.currencyCode,
   };
 }

@@ -1,0 +1,21 @@
+// Cached reads and the Shopify webhook both build tags here, so a webhook always invalidates the tags reads set.
+export const CACHE_TAGS = {
+  article: (blogHandle: string, articleHandle: string) => `article-${blogHandle}-${articleHandle}`,
+  articles: "articles",
+  articlesIndex: "articles-index",
+  blog: (handle: string) => `blog-${handle}`,
+  blogs: "blogs",
+  blogsIndex: "blogs-index",
+  collection: (handleOrId: string) => `collection-${handleOrId}`,
+  collections: "collections",
+  collectionsIndex: "collections-index",
+  metaobject: (handle: string) => `metaobject-${handle}`,
+  metaobjects: "metaobjects",
+  page: (handle: string) => `page-${handle}`,
+  pages: "pages",
+  policies: "policies",
+  product: (handleOrId: string) => `product-${handleOrId}`,
+  products: "products",
+  productsIndex: "products-index",
+  recommendations: (handle: string) => `recommendations-${handle}`,
+} as const;

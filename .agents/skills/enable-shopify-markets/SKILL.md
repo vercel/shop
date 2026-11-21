@@ -4,14 +4,15 @@ description: >
   Enable Shopify Markets with regional locales, localized Storefront API context,
   and next-intl routing. Supports locale-prefixed, invisible cookie-based, and
   per-domain routing without a separate market URL segment or market mapping.
-argument-hint: "[sub-path|invisible-cookie|per-domain]"
+  Use when the user wants region-aware prices, currencies, inventory, or multiple
+  Shopify markets in the storefront.
 ---
 
 # Enable Shopify Markets
 
-Add multi-region commerce to the Vercel Shop template. The fresh baseline is one deployment with clean URLs, inline component copy and reusable functions in `lib/content/index.ts`, and explicit `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`. It does not include next-intl, catalogs, `lib/i18n/`, or a `lib/params/server.ts` locale resolver.
+Add multi-region commerce to the Vercel Shop template. The fresh baseline is one deployment with clean URLs, inline copy in `lib/content/index.ts`, and explicit `shopConfig.localization = { country: "US", language: "EN", locale: "en-US" }`; it has no next-intl, catalogs, `lib/i18n/`, or `lib/params/server.ts`.
 
-Copy translation and commerce market selection are separate concerns. This skill's regional-locale strategy deliberately combines them: a validated `en-US`, `en-CA`, or `fr-CA` selects translated copy plus Shopify country/language context. Confirm that coupling fits the store before adopting it. Do not infer a shopper's commerce country merely from a copy locale introduced by `enable-i18n`. Preserve existing installations that intentionally separate language and country; do not force them into this example model.
+Copy translation and commerce market selection are separate concerns. This skill's regional-locale strategy deliberately combines them: a validated `en-US`, `en-CA`, or `fr-CA` selects translated copy plus Shopify country/language context. Confirm that coupling fits the store before adopting it. Do not infer a shopper's commerce country merely from a copy locale introduced by `enable-i18n`. Preserve existing installations that intentionally separate language and country; do not force them into this example model. A copy-only i18n installation keeps its translations and routing: identify its existing fixed commerce country/language before adding regional selection, and get approval for new coupling or changed public URLs. In a noninteractive run, stop and report unresolved routing or market-model choices instead of choosing for the user.
 
 For a new regional-locale implementation, do not invent a separate market key, redundant market-to-locale map, currency map, or `/market/locale` route. Existing custom market models need an explicit migration decision, not automatic removal.
 
@@ -23,30 +24,9 @@ Examples of valid public routing:
 
 Never generate redundant paths such as `/ca/fr-CA/products/shoe`.
 
-## Before editing
+`enable-i18n` owns the copy and routing mechanics: inspection, next-intl install and plugin, catalogs, the move into `app/[locale]`, `getLocale()`, request config, Cache Components traps, proxy composition and matcher, and `buildAlternates`. Run its steps first and keep its rules; this skill adds the market model.
 
-Read the current versions of:
-
-- `package.json`, `lib/config/index.ts`, `lib/content/index.ts`, and inline copy throughout routes and components
-- Existing `lib/i18n/`, catalogs, next-intl plugin/providers, locale resolvers, and localized routes if present; these do not exist on the fresh baseline
-- `next.config.ts` and any existing `proxy.ts`
-- Every Storefront API operation and cache wrapper
-- Cart creation, cart actions, and buyer identity updates
-- Customer Account auth context
-- Agent/chat request payload and tools
-- SEO, robots, sitemap, and markdown content-negotiation routes
-
-The template uses Next.js 16 with Cache Components. Read the installed Next.js routing/proxy/root-param docs. Install next-intl only when missing, then read its installed plugin, request-config, and routing APIs before editing.
-
-Classify the installation before proceeding:
-
-- **Fresh simplified template:** follow the next-intl installation and copy-to-catalog migration in `enable-i18n`, then use this skill's selected routing strategy and commerce propagation instead of its copy-only rules.
-- **Already localized/customized:** preserve existing catalogs, translations, copy functions not yet migrated, scoped providers, public URLs, domains, cookies, redirects, and commerce/cache contracts. Extend only missing functionality; do not reinstall next-intl blindly, reset supported locales, replace custom copy with template English, or move routes twice.
-- **Copy-only i18n already enabled:** keep its translations and routing. Identify the existing fixed commerce country/language before introducing regional selection. Obtain approval for any new coupling or changed public URLs.
-
-Inventory mixed copy/catalog consumers and retain modules still in use. Preserve intentional operation locale/cache inputs even where presentation does not use them. In a noninteractive run, stop and report unresolved routing or market-model choices rather than choosing for the user.
-
-For any Shopify GraphQL edit, use Shopify AI Toolkit to confirm current API facts and validate the complete operation. Then follow `shopify-graphql-reference` for this template's placement, transforms, cache role, locale flow, and invalidation.
+For any Shopify GraphQL edit, use Shopify AI Toolkit to confirm current API facts and validate the complete operation, then follow `shopify-graphql-reference` for this template's placement, transforms, cache role, locale flow, and invalidation. Read every Storefront API operation and cache wrapper, cart creation and buyer identity updates, Customer Account auth context, the agent request payload and tools, and the SEO, sitemap, and markdown routes, since each carries commerce context.
 
 ## 1. Ask for routing and locales
 
@@ -73,9 +53,7 @@ Before choosing invisible cookie routing, state its SEO tradeoff: every locale s
 
 ## 2. Make regional locales the source of truth
 
-For a fresh regional-locale implementation, create `lib/i18n/index.ts` with the approved list and seed the initial context from `shopConfig.localization`. If its explicit country/language and formatting locale disagree, resolve that deliberately instead of deriving a different market silently. For an existing implementation, extend its current source of truth without resetting values.
-
-The following is an example of the opted-in regional-locale model, not a replacement for every store's custom configuration:
+Create `lib/i18n/index.ts` as `enable-i18n` "Create the locale source of truth" describes, using regional tags and the cookie every routing mode below reads. Seed the initial context from `shopConfig.localization`; if its explicit country/language and formatting locale disagree, resolve that deliberately instead of deriving a different market silently. Extend an existing source of truth without resetting values, and reuse that section's `Locale` contract, module paths, `isEnabledLocale`, and boundary validation.
 
 ```ts
 import type { Locale } from "./types";
@@ -86,15 +64,9 @@ export const defaultLocale: Locale = "en-US";
 export const enabledLocales: readonly Locale[] = locales;
 export const localeSwitchingEnabled = enabledLocales.length > 1;
 export const LOCALE_COOKIE_NAME = "NEXT_LOCALE";
-
-export function isEnabledLocale(value: string): value is Locale {
-  return enabledLocales.some((locale) => locale === value);
-}
 ```
 
-Define `Locale` in `lib/i18n/types.ts` as `type Locale = (typeof locales)[number]` with a type-only import of `locales` from `./index`, and import the contract directly from `types.ts`. Use `lib/i18n/routing/index.ts` for universal routing configuration, `lib/i18n/navigation/client.ts` for client navigation, `lib/i18n/request/server.ts` for request configuration, `lib/i18n/action.ts` for locale-switch actions, and `lib/params/server.ts` for the Server Component root-param resolver. Do not add barrels or forwarding exports. Preserve working module paths in customized installations rather than renaming them solely to match these examples.
-
-Create boundary validation such as `isEnabledLocale` on the fresh baseline; retain existing `isEnabledLocale` / `resolveLocale` behavior where present. Reject unsupported request values instead of casting arbitrary strings to `Locale`. For the approved regional-locale strategy, derive Shopify context from the validated locale:
+For the approved regional-locale strategy, derive Shopify context from the validated locale:
 
 ```ts
 import type { CommerceLocale } from "@/lib/config/types";
@@ -116,9 +88,9 @@ export function getCommerceLocale(locale: Locale): CommerceLocale {
 }
 ```
 
-These guards cover only the example locale list above. Extend them deliberately for the store's approved countries and languages; reject unsupported values rather than asserting them into Shopify types. Pass `getCommerceLocale(locale)` to operation `locale` options.
+These guards cover only the example locale list. Extend them deliberately for the store's approved countries and languages, and reject unsupported values rather than asserting them into Shopify types; validate the conversion with Shopify AI Toolkit instead of assuming uppercasing a BCP 47 language yields a valid Shopify language code. Pass `getCommerceLocale(locale)` to operation `locale` options.
 
-Prefer `Locale` over `string` for internal routing locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated. Validate the country/language conversion against Shopify's supported values with Shopify AI Toolkit; do not assume uppercasing every BCP 47 language produces a valid Shopify language code.
+Prefer `Locale` over `string` for internal routing locale parameters. Request bodies, cookies, headers, route params, and query params remain untrusted strings until validated: retain existing `isEnabledLocale`/`resolveLocale` behavior, and reject unsupported values instead of casting them to `Locale`.
 
 The transport's operation `locale` option is a `CommerceLocale` object (`{ country, language }` from `lib/config/types.ts`), not a BCP 47 string. Convert once at the validated commerce boundary and propagate that object through existing operation/cache inputs. Keep the copy/routing `Locale` string distinct. For an older customized transport, adapt its actual signature instead of replacing it wholesale.
 
@@ -130,19 +102,13 @@ When UI outside a price object needs a currency code, pass one from fetched Shop
 
 ## 3. Install next-intl and migrate copy
 
-Use the `enable-i18n` section "Introduce next-intl and migrate copy" for the full migration. On a fresh storefront, run `pnpm add next-intl`, create its request config, and compose `createNextIntlPlugin` from `next-intl/plugin` around the existing Next config with the explicit request-config path. Use the existing `withShopConfig` plugin list when present, preserving conditional `withBotId` and `withEve` entries, their order, and the installation's feature settings. Preserve other wrappers, rewrites, and Cache Components settings. Do not apply copy-only commerce rules or force `localePrefix: "always"` when using this Markets skill.
+Follow `enable-i18n` "Introduce next-intl and migrate copy" and its request-config step: the plugin through `withShopConfig`, catalogs built from actual inline copy, `getTranslations()`, scoped `NextIntlClientProvider` boundaries, metadata and error screens, and removing content functions only after their consumers migrate. Do not apply its copy-only commerce rules or force `localePrefix: "always"`.
 
-Build the initial catalog from the installation's actual inline copy, component configuration labels, and reusable functions in `lib/content/index.ts`. Convert typed interpolation and plural functions to equivalent ICU messages, preserving parameters, zero/one/many behavior, rich text, errors, and accessibility labels. Do not serialize functions or write a custom `t()` parser. Preserve already translated/customized catalogs rather than regenerating them from the template.
-
-Use server `getTranslations()` and primitive labels by default. Only interactive leaves that need runtime messages use `useTranslations()` under narrowly scoped `NextIntlClientProvider` boundaries. Do not ship full catalogs at the root or pass copy functions across the RSC boundary. Include metadata, error/not-found screens, and formatting in the migration. Remove shared content functions only after all their consumers have migrated; update the installation's `AGENTS.md` for its now-localized architecture.
-
-Add an explicit message loader and catalog for every enabled copy locale. Reuse a language catalog only intentionally; for example, `en-US` and `en-CA` may share `en.json` while Shopify still receives distinct country contexts. Commerce context does not translate storefront labels automatically.
-
-Validate every generated JSON file and keep keys and interpolation arguments aligned. Agree on temporary fallbacks before publishing a locale with incomplete copy; never silently label fallback English as a complete translation.
+Markets deltas: add an explicit message loader and catalog for every enabled copy locale. `en-US` and `en-CA` may share `en.json` while Shopify still receives distinct country contexts; commerce context does not translate storefront labels. Validate every generated JSON file, keep keys and interpolation arguments aligned, and agree on temporary fallbacks before publishing a locale with incomplete copy rather than labelling fallback English as a complete translation.
 
 ## 4. Configure routing
 
-Create `lib/i18n/routing/index.ts` and use `enabledLocales` directly. There is no market mapping layer.
+Create `lib/i18n/routing/index.ts` with `enabledLocales` directly; there is no market mapping layer. Use `enable-i18n` Step 1 for the navigation client.
 
 ### Locale sub-path
 
@@ -199,142 +165,32 @@ export const routing = defineRouting({
 
 The domain configuration is routing configuration, not a separate commerce market model. Shopify country and language still derive from the resolved regional locale.
 
-Create `lib/i18n/navigation/client.ts` only for components that explicitly switch locales:
+Keep `Link` from `@/components/ui/link` for internal links; never next-intl's `Link`. Pass explicit strategy-aware hrefs from the server so ordinary links preserve the selected locale without request-context reads in link components, and keep public paths clean in invisible-cookie mode.
+
+## 5. Move routes and resolve the locale
+
+Move the routes as `enable-i18n` Step 2 describes, keeping the paths it lists unlocalized. Export `generateStaticParams` from the locale root layout with `enabledLocales.map((locale) => ({ locale }))` and keep every moved export, including `export const ensureStatic = "prefetch"`.
+
+Use `enable-i18n` Step 3 for `getLocale()` and its request-config step for message loading. Resolve locale from the root param, never from cookies or headers in a cached component, and do not add next-intl's `setRequestLocale` under Cache Components. Do not call that getter from Route Handlers or Server Actions. Keep API, OAuth, markdown, and chat handling outside the Server Component request config. `enable-i18n` "Cache Components compatibility" and Step 10 list the resulting build errors and bare-`/` behavior.
+
+## 6. Extend the proxy
+
+Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/request.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale before Shopify dispatch (`resolveRequestLocale`, built on `isEnabledLocale`): from the validated locale prefix when the path has one, otherwise the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
+
+Compose next-intl after Shopify dispatch, the refine 404, and Markdown negotiation exactly as `enable-i18n` Step 5 shows. The one Markets change is the context built before dispatch:
 
 ```ts
-"use client";
-
-import { createNavigation } from "next-intl/navigation";
-
-import { routing } from "@/lib/i18n/routing";
-
-export const { usePathname, useRouter } = createNavigation(routing);
+const locale = resolveRequestLocale(request);
+const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
+// Keep the template's customerSession, isAuthPath, routeOptions, Shopify dispatch,
+// refine 404, and Markdown negotiation, then compose next-intl as enable-i18n Step 5 shows.
 ```
 
-Keep `Link` from `@/components/ui/link` for internal links; do not replace it with next-intl's `Link`. Pass explicit strategy-aware hrefs from the server so ordinary links preserve the selected locale without request-context reads in link components. Keep public paths clean in invisible-cookie mode.
+Use the matcher printed in `enable-i18n` Step 5; it is the same for all three routing modes and keeps app Route Handlers, webhooks, Eve, and static files out of locale negotiation. In invisible-cookie mode, next-intl's `never` mode canonicalizes direct locale-prefixed URLs back to the clean path; do not expose the internal rewrite destination in links, metadata, or redirects.
 
-## 5. Move page routes under `app/[locale]/`
+## 7. Propagate locale through commerce
 
-Move the root layout and all localized pages under `app/[locale]/`. The locale layout must be the root layout; do not leave `app/layout.tsx` above it.
-
-Move:
-
-- `app/layout.tsx` to `app/[locale]/layout.tsx`
-- Page routes such as home, products, collections, search, cart, and account into `app/[locale]/...`
-
-Keep these unlocalized at `app/`:
-
-- `api/`
-- the assistant's public profile under `agent/`
-- markdown route handlers under `md/`
-- `llms.txt/`
-- `robots.ts`
-- `sitemap.xml/` and `sitemap/`
-- `globals.css`, `global-error.tsx`, and static metadata files
-
-Update typed route generics to include `[locale]`, fix the moved `globals.css` import, and keep every export of the moved layout, including `export const ensureStatic = "prefetch"`. Export `generateStaticParams` from the locale root layout using `enabledLocales.map((locale) => ({ locale }))`; Cache Components requires at least one root-param value. Keep request reads behind Suspense, and do not add pages outside `app/[locale]/`; `enable-i18n` "Cache Components compatibility" and Step 10 list the resulting build errors and bare-`/` behavior. Preserve any existing generation logic and restart dev after route moves to regenerate root-param types.
-
-Do not call `setRequestLocale` with Cache Components. Resolve locale through the root param so locale becomes an explicit route/cache input.
-
-## 6. Resolve locale from the root param
-
-Create `lib/params/server.ts` on the fresh baseline, or extend the existing resolver without overwriting unrelated helpers. This getter is for Server Components only:
-
-```ts
-import { notFound } from "next/navigation";
-import { locale as rootLocale } from "next/root-params";
-
-import { isEnabledLocale } from "@/lib/i18n";
-import type { Locale } from "@/lib/i18n/types";
-
-export async function getLocale(): Promise<Locale> {
-  const value = await rootLocale();
-  if (!value || !isEnabledLocale(value)) notFound();
-  return value;
-}
-```
-
-Create or update `lib/i18n/request/server.ts` to call `getLocale()` and load the matching messages. Do not resolve locale by reading cookies or request headers from a cached component. The proxy owns request negotiation; React receives the validated internal route param. Set `<html lang>` and UI formatting from that locale.
-
-Do not call this root-param getter from Route Handlers or Server Actions: use route context or explicit request/action inputs and validate them at the boundary. Keep API, OAuth, markdown, and chat handling outside the Server Component request config.
-
-## 7. Extend the proxy
-
-Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/request.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale in the proxy before Shopify dispatch (`resolveRequestLocale` below): from the validated locale prefix when the path has one, otherwise from the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
-
-Compose next-intl after the existing Shopify route dispatch and Markdown negotiation, where the template returns `NextResponse.next(...)`. `handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname, so return its promise when present and run locale negotiation only after it declines the request:
-
-```ts
-const handleI18n = createMiddleware(routing);
-
-// Keep the existing imports and add NextRequest as a runtime import.
-export async function proxy(request: NextRequest): Promise<Response> {
-  const locale = resolveRequestLocale(request);
-  const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
-  // Keep the template's customerSession and isAuthPath reads here.
-  const routeOptions = {
-    request,
-    requestContext,
-    routeTemplates: SHOPIFY_ROUTE_TEMPLATES,
-    storefrontClient: createRequestStorefrontClient(requestContext),
-  };
-  const shopifyRoute = customerSession
-    ? handleShopifyRoutes({
-        ...routeOptions,
-        handlers: customerHandlers(customerSession, isAuthPath),
-        sessionManager: createCustomerSessionManager(request),
-      })
-    : handleShopifyRoutes({ ...routeOptions, handlers: [cartHandlers, predictiveSearchHandlers] });
-  if (shopifyRoute) return shopifyRoute;
-
-  // Keep the template's Markdown negotiation here, unchanged.
-
-  const i18nRequest = new NextRequest(request, {
-    headers: forwardCustomerRefreshAttempt(
-      request.nextUrl,
-      requestContext.getForwardedRequestHeaders(),
-    ),
-  });
-  const response = handleI18n(i18nRequest);
-  requestContext.applyResponseHeaders(response.headers);
-  return response;
-}
-```
-
-Preserve the complete Shopify options from the current proxy rather than copying the abbreviated example literally.
-
-Update the matcher. The template's single broad matcher is safe only while the proxy does nothing but Shopify dispatch; with locale negotiation, every request Hydrogen declines is localized, including app Route Handlers, webhooks, `robots.txt`, sitemaps, `llms.txt`, and static files. Replace it with Shopify's exact route families, locale-prefixed Shopify endpoints, and a catch-all that skips `/api`, Eve, Next.js and Vercel internals, and paths with a file extension:
-
-```ts
-export const config = {
-  matcher: [
-    "/api/cart",
-    "/api/predictive-search",
-    "/api/mcp",
-    "/api/ucp/mcp",
-    "/api/:apiVersion(unstable|2\\d{3}-\\d{2})/graphql.json",
-    "/__shopify/:path*",
-    "/.well-known/:path*",
-    "/agent/:action(handoff|buyer-claims).:format",
-    "/cart.:format(js|json)",
-    "/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/:page(index|search).md",
-    "/:resource(collections|products)/:handle.md",
-    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/agent/:action(handoff|buyer-claims).:format",
-    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart.:format(js|json)",
-    "/:locale([a-zA-Z]{2}(?:-[a-zA-Z]{2})?)/cart/:operation(add|update|change|clear).:format(js|json)",
-    "/((?!api|eve(?:/|$)|_eve_internal(?:/|$)|_next/static|_next/image|_next/data|_vercel|favicon.ico|.*\\..*).*)",
-  ],
-};
-```
-
-Application Route Handlers such as `/api/webhooks/shopify`, `/api/agent/session`, and `/api/custom` remain owned by Next unless explicitly reserved for Hydrogen. Keep Eve's `/eve/v1/` and `/_eve_internal/` routes outside locale and Shopify proxy handling. Add exact route families when a new Shopify integration requires proxy handling.
-
-For invisible cookie routing, direct public locale-prefixed URLs should canonicalize back to the clean path. next-intl's `never` mode handles this; do not expose the internal rewrite destination in links, metadata, or redirects.
-
-## 8. Propagate locale through commerce
-
-Audit definitions and real callers. Under the opted-in regional-locale model, localized Storefront API operations receive validated locale/context, derive country and language at the commerce boundary, and use Shopify's validated `@inContext(country: $country, language: $language)`. Inspect existing locale and cache inputs before adding arguments. Preserve an explicitly separated country/language model rather than repurposing its copy locale.
+Audit definitions and real callers. Under the opted-in regional-locale model, localized Storefront API operations receive validated locale/context, derive country and language at the commerce boundary, and use Shopify's validated `@inContext(country: $country, language: $language)`. Inspect existing locale and cache inputs before adding arguments, and preserve intentional inputs even where presentation does not use them. Preserve an explicitly separated country/language model rather than repurposing its copy locale.
 
 This includes:
 
@@ -366,11 +222,11 @@ Agent tools, Shopify connections, product context, cart creation, and navigation
 
 ### Markdown negotiation
 
-After the proxy rewrite, localized page routes have an internal `/:locale/...` path even in invisible mode. Update `getMarkdownPath()` and `getMarkdownMirrorPath()` in `lib/markdown/representation/index.ts` and the proxy's negotiation so the locale reaches unlocalized `app/md/...` handlers as a validated query/header value. Preserve `?variant=` and search parameters.
+Localized page routes carry an internal `/:locale/...` path after the rewrite, but markdown requests reach the unlocalized `app/md/...` handlers. Follow `enable-i18n` Step 9 for `getMarkdownPath()` and `getMarkdownMirrorPath()`, and in invisible-cookie mode resolve the locale from the validated cookie instead of a URL prefix. Preserve `?variant=` and search parameters.
 
-## 9. Switch locale and carry the market to the cart
+## 8. Switch locale and carry the market to the cart
 
-Cart writes stay in Hydrogen's `/api/cart` handler; never mutate the cart from a Server Action or a custom route. Because the proxy builds the handler's request context from the selected locale (section 7), the next cart read or write after a switch runs in the new market:
+Cart writes stay in Hydrogen's `/api/cart` handler; never mutate the cart from a Server Action or a custom route. Because the proxy builds the handler's request context from the selected locale (Step 6), the next cart read or write after a switch runs in the new market:
 
 - `fr-CA` to `en-CA`: copy and Shopify language change; the country stays `CA`.
 - `en-CA` to `en-US`: the cart's next Hydrogen operation runs with country `US`.
@@ -384,7 +240,7 @@ The selector remains a leaf Client Component. A Server Action in `lib/i18n/actio
 
 Do not offer a separate currency selector unless the store has a Shopify-backed currency choice independent of country. Display currency from cart/product responses.
 
-## 10. Strategy-specific SEO and sitemap behavior
+## 9. Strategy-specific SEO and sitemap behavior
 
 ### Locale sub-path or per-domain
 
@@ -407,23 +263,17 @@ All variants share one public URL:
 
 Never put internal `/[locale]/...` rewrite targets into metadata or sitemap XML.
 
-## 11. Verification
+## 10. Verification
 
-Run focused checks from the storefront root:
+Run focused checks from the storefront root, then run the app and verify the selected strategy:
 
 ```bash
 pnpm lint
 pnpm build
 ```
 
-Then run the app and verify the selected strategy.
-
 ### All strategies
 
-- Default-language copy matches the pre-migration installation, including custom text, interpolation, plurals, errors, and accessibility labels.
-- Every enabled catalog has aligned keys/arguments and scoped client providers; fallback text is not mistaken for completed translation.
-- Existing localized installations retain translations, custom routing, and their approved commerce model.
-- Report whether the fresh-baseline migration and an existing-localized migration were actually exercised; static checks cannot prove either path's parity.
 - Every enabled regional locale produces the expected Shopify country/language context.
 - Product and cart currency codes come from Shopify responses.
 - Public caches separate localized products, prices, and menus; carts remain uncached.
@@ -432,6 +282,7 @@ Then run the app and verify the selected strategy.
 - Chat/agent operations receive the explicit validated locale.
 - Markdown responses use the same locale as HTML responses.
 - Variant and filter query parameters survive switching and rewrites.
+- Existing localized installations retain their translations, custom routing, and approved commerce model.
 
 ### Locale sub-path
 

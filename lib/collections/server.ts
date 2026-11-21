@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cacheLife, cacheTag } from "next/cache";
 
+import { CACHE_TAGS } from "@/lib/cache-tags";
 import { describeCollection, PRODUCTS_PER_PAGE, resolveBrowseParams } from "@/lib/collections";
 import type {
   BrowseResults,
@@ -30,9 +31,9 @@ export const ALL_PRODUCTS_HANDLE = "all";
 // Delete payloads carry only the ID and renames only the new handle, so cached reads carry both tags.
 function tagCollections(collections: Array<{ handle: string; id?: string }>): void {
   for (const collection of collections) {
-    cacheTag(`collection-${collection.handle}`);
+    cacheTag(CACHE_TAGS.collection(collection.handle));
     const numericId = collection.id ? getNumericShopifyId(collection.id) : null;
-    if (numericId) cacheTag(`collection-${numericId}`);
+    if (numericId) cacheTag(CACHE_TAGS.collection(numericId));
   }
 }
 
@@ -41,7 +42,7 @@ export async function getCollections(
 ): Promise<Collection[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("collections", "collections-index");
+  cacheTag(CACHE_TAGS.collections, CACHE_TAGS.collectionsIndex);
 
   const collections = await fetchCollections(params);
   tagCollections(collections);
@@ -54,7 +55,7 @@ export async function getCollection(params: {
 }): Promise<Collection | undefined> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("collections", `collection-${params.handle}`);
+  cacheTag(CACHE_TAGS.collections, CACHE_TAGS.collection(params.handle));
 
   const collection = await fetchCollection(params);
   if (collection) tagCollections([collection]);
@@ -66,7 +67,7 @@ export async function getCollectionsListing(
 ): Promise<CollectionWithThumbnail[]> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("collections", "collections-index");
+  cacheTag(CACHE_TAGS.collections, CACHE_TAGS.collectionsIndex);
 
   const collections = await fetchCollectionsListing(params);
   tagCollections(collections);
@@ -106,7 +107,7 @@ export async function getCollectionResults(params: {
 }): Promise<BrowseResults> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("collections", `collection-${params.handle}`, "products-index");
+  cacheTag(CACHE_TAGS.collections, CACHE_TAGS.collection(params.handle), CACHE_TAGS.productsIndex);
 
   const { facets, pageInfo, products } = await fetchCollectionProducts({
     collection: params.handle,
@@ -128,7 +129,7 @@ export async function getAllProductsResults(
 ): Promise<BrowseResults> {
   "use cache: remote";
   cacheLife("max");
-  cacheTag("products-index");
+  cacheTag(CACHE_TAGS.productsIndex);
 
   const [{ pageInfo, products }, { facets, total }] = await Promise.all([
     fetchSearchIndexProducts({ limit: PRODUCTS_PER_PAGE, locale: params.locale }),
@@ -166,30 +167,30 @@ export async function getAllProductsCollection(): Promise<Collection> {
   const title = "Products";
   const description = "";
   return {
-    handle: ALL_PRODUCTS_HANDLE,
-    title,
     description,
+    handle: ALL_PRODUCTS_HANDLE,
     image: null,
     path: `/collections/${ALL_PRODUCTS_HANDLE}`,
     seo: {
       description: `Browse every product at ${shopConfig.site.name}: compare prices and check availability.`,
       title,
     },
+    title,
   };
 }
 
 function browseMetadata(handle: string, title: string, description: string): Metadata {
   const url = `/collections/${handle}`;
   return {
-    title,
-    description,
     alternates: buildAlternates({ pathname: url }),
-    openGraph: buildOpenGraph({ title, description, url, type: "website" }),
+    description,
+    openGraph: buildOpenGraph({ description, title, type: "website", url }),
+    title,
     twitter: {
       card: "summary_large_image",
-      title,
       description,
       images: ["/og-default.png"],
+      title,
     },
   };
 }

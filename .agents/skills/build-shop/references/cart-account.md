@@ -11,11 +11,7 @@
 
 ## Never share personalized data
 
-Cart and account data depend on cookies, sessions, or customer access tokens. Do not put their responses in public `"use cache"` or `"use cache: remote"` entries. Preserve auth gates and keep Customer Account API reads per customer.
-
-Carts are never placed in the Next.js data cache, so cart mutations need no cache invalidation step. Preserve optimistic cart reconciliation so the interface responds immediately and converges on the server result.
-
-For cart provider, bootstrap, optimistic state, nav badge, overlay, or mutation work, read `cart-provider.md` and preserve Hydrogen's ownership of state and reconciliation; do not introduce a parallel cart store.
+Cart and account data depend on cookies, sessions, or customer access tokens. Do not put their responses in public `"use cache"` or `"use cache: remote"` entries. Preserve auth gates and keep Customer Account API reads per customer. Cart reads, mutations, and reconciliation follow `AGENTS.md` invariant 2 and `cart-provider.md`.
 
 ## Shared shell
 

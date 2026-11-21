@@ -15,13 +15,13 @@ export interface SocialLink {
 
 const PLATFORM_LABELS: Record<string, string> = {
   facebook: "Facebook",
+  github: "GitHub",
   instagram: "Instagram",
+  linkedin: "LinkedIn",
+  pinterest: "Pinterest",
+  tiktok: "TikTok",
   x: "X",
   youtube: "YouTube",
-  tiktok: "TikTok",
-  pinterest: "Pinterest",
-  linkedin: "LinkedIn",
-  github: "GitHub",
 };
 
 export function SocialLinks({ links }: { links: readonly SocialLink[] }) {

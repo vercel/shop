@@ -25,13 +25,13 @@ export const viewport: Viewport = {
 };
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
   subsets: ["latin"],
+  variable: "--font-geist-sans",
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
+  variable: "--font-geist-mono",
 });
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -79,7 +79,7 @@ export const generateMetadata = async (): Promise<Metadata> => {
     generator: shopConfig.site.name,
     metadataBase: new URL(shopConfig.site.url),
     openGraph: {
-      images: [{ url: "/og-default.png", width: 1200, height: 628 }],
+      images: [{ height: 628, url: "/og-default.png", width: 1200 }],
     },
     title: {
       default: shopConfig.site.name,

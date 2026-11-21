@@ -43,6 +43,15 @@ function buildCanonicalPath(pathname: string, searchParams?: SearchParamsInput):
   return query ? `${normalizedPath}?${query}` : normalizedPath;
 }
 
+export function escapeXml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export function toAbsoluteUrl(path: string): string {
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `${shopConfig.site.url}${path}`;
+}
+
 export function buildAlternates({
   pathname,
   searchParams,
@@ -77,10 +86,10 @@ export function buildOpenGraph({
   // Omit type so product pages can emit og:type=product through raw meta tags.
   return {
     ...(type ? { type } : {}),
-    title,
     description,
-    url,
-    siteName: shopConfig.site.name,
     images,
+    siteName: shopConfig.site.name,
+    title,
+    url,
   };
 }

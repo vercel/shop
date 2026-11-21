@@ -58,9 +58,9 @@ function mapUserErrors(errors: CustomerUserError[]): AccountActionResult {
   }
 
   return {
-    success: false,
     error: errors[0].message,
     fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
+    success: false,
   };
 }
 
@@ -94,7 +94,7 @@ async function runCustomerMutation(
   } catch (error) {
     unstable_rethrow(error);
     console.error(`${failureMessage}:`, error);
-    return { success: false, error: failureMessage };
+    return { error: failureMessage, success: false };
   }
 }
 
@@ -103,11 +103,11 @@ export async function createAddressAction(
   isDefault: boolean,
 ): Promise<AccountActionResult> {
   const parsed = CREATE_ADDRESS_INPUT.safeParse({ address, isDefault });
-  if (!parsed.success) return { success: false, error: "Invalid address" };
+  if (!parsed.success) return { error: "Invalid address", success: false };
 
   const input = buildAddressInput(parsed.data.address);
   const validationError = validateAddress(input);
-  if (validationError) return { success: false, error: validationError };
+  if (validationError) return { error: validationError, success: false };
 
   return runCustomerMutation(
     () => createCustomerAddress(input, parsed.data.isDefault),
@@ -121,11 +121,11 @@ export async function updateAddressAction(
   isDefault: boolean,
 ): Promise<AccountActionResult> {
   const parsed = UPDATE_ADDRESS_INPUT.safeParse({ address, addressId, isDefault });
-  if (!parsed.success) return { success: false, error: "Invalid address" };
+  if (!parsed.success) return { error: "Invalid address", success: false };
 
   const input = buildAddressInput(parsed.data.address);
   const validationError = validateAddress(input);
-  if (validationError) return { success: false, error: validationError };
+  if (validationError) return { error: validationError, success: false };
 
   return runCustomerMutation(
     () => updateCustomerAddress(parsed.data.addressId, input, parsed.data.isDefault),
@@ -135,7 +135,7 @@ export async function updateAddressAction(
 
 export async function deleteAddressAction(addressId: string): Promise<AccountActionResult> {
   const parsed = ADDRESS_ID.safeParse(addressId);
-  if (!parsed.success) return { success: false, error: "Invalid address ID" };
+  if (!parsed.success) return { error: "Invalid address ID", success: false };
 
   return runCustomerMutation(() => deleteCustomerAddress(parsed.data), "Failed to delete address");
 }
@@ -144,7 +144,7 @@ export async function updateProfileAction(
   profile: z.infer<typeof PROFILE_INPUT>,
 ): Promise<AccountActionResult> {
   const parsed = PROFILE_INPUT.safeParse(profile);
-  if (!parsed.success) return { success: false, error: "Invalid profile" };
+  if (!parsed.success) return { error: "Invalid profile", success: false };
 
   const firstName = parsed.data.firstName.trim().slice(0, MAX_NAME_LENGTH);
   const lastName = parsed.data.lastName.trim().slice(0, MAX_NAME_LENGTH);

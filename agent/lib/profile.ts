@@ -22,17 +22,18 @@ export function agentProfileUrl(capability: keyof typeof EXAMPLE_PROFILES) {
 export const agentProfile = {
   ucp: {
     capabilities: {
+      "dev.shopify.catalog": [
+        {
+          extends: ["dev.ucp.shopping.catalog.lookup", "dev.ucp.shopping.catalog.search"],
+          schema: "https://shopify.dev/ucp/schemas/2026-08-25/shopify_catalog.json",
+          spec: "https://shopify.dev/docs/agents/catalog/storefront-catalog",
+          version: "2026-08-25",
+        },
+      ],
       "dev.ucp.common.ask": [
         {
           schema: "https://ucp.dev/2026-08-25/schemas/common/ask.json",
           spec: "https://ucp.dev/2026-08-25/specification/common/ask",
-          version: "2026-08-25",
-        },
-      ],
-      "dev.ucp.shopping.catalog.search": [
-        {
-          schema: "https://ucp.dev/2026-08-25/schemas/shopping/catalog_search.json",
-          spec: "https://ucp.dev/2026-08-25/specification/catalog/search",
           version: "2026-08-25",
         },
       ],
@@ -43,11 +44,10 @@ export const agentProfile = {
           version: "2026-08-25",
         },
       ],
-      "dev.shopify.catalog": [
+      "dev.ucp.shopping.catalog.search": [
         {
-          extends: ["dev.ucp.shopping.catalog.lookup", "dev.ucp.shopping.catalog.search"],
-          schema: "https://shopify.dev/ucp/schemas/2026-08-25/shopify_catalog.json",
-          spec: "https://shopify.dev/docs/agents/catalog/storefront-catalog",
+          schema: "https://ucp.dev/2026-08-25/schemas/shopping/catalog_search.json",
+          spec: "https://ucp.dev/2026-08-25/specification/catalog/search",
           version: "2026-08-25",
         },
       ],

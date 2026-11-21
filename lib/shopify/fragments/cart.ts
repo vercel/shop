@@ -4,6 +4,7 @@ import { gql } from "@shopify/hydrogen";
 export const CART_FRAGMENT = gql(/* GraphQL */ `
   fragment CartFragment on Cart {
     updatedAt
+    # 250 is the Storefront API's page-size maximum.
     lines(first: 250) {
       nodes {
         sellingPlanAllocation {

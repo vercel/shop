@@ -7,7 +7,7 @@ import { Prose } from "@/components/ui/prose";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { BlogArticle } from "@/lib/blog/types";
-import { shopConfig } from "@/lib/config";
+import { formatDate } from "@/lib/content";
 
 export interface ArticlePageProps {
   article: BlogArticle;
@@ -36,9 +36,7 @@ export function ArticlePageSkeleton() {
 }
 
 export function ArticlePage({ article }: ArticlePageProps) {
-  const publishedAt = new Intl.DateTimeFormat(shopConfig.localization.locale, {
-    dateStyle: "long",
-  }).format(new Date(article.publishedAt));
+  const publishedAt = formatDate(article.publishedAt, "long");
   return (
     <Page>
       <Container className="max-w-4xl">

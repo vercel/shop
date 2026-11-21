@@ -1,13 +1,8 @@
-import { shopConfig } from "@/lib/config";
+import { toAbsoluteUrl } from "@/lib/seo";
 
 interface BreadcrumbSchemaItem {
   name: string;
   path: string;
-}
-
-function toAbsoluteUrl(path: string): string {
-  if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  return `${shopConfig.site.url}${path}`;
 }
 
 export function BreadcrumbSchema({ items }: { items: BreadcrumbSchemaItem[] }) {
@@ -18,9 +13,9 @@ export function BreadcrumbSchema({ items }: { items: BreadcrumbSchemaItem[] }) {
     "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
       item: toAbsoluteUrl(item.path),
+      name: item.name,
+      position: index + 1,
     })),
   };
 

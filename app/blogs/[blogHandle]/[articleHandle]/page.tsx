@@ -13,18 +13,18 @@ export async function generateStaticParams() {
     const { items } = await getShopifySitemapPage("BLOG", 1);
     const firstBlog = items[0];
     if (!firstBlog) {
-      return [{ blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE }];
+      return [{ articleHandle: PLACEHOLDER_HANDLE, blogHandle: PLACEHOLDER_HANDLE }];
     }
 
     const blog = await getBlog({ handle: firstBlog.handle, limit: 1 });
     const firstArticle = blog?.articles[0];
     return [
       firstArticle
-        ? { blogHandle: blog.handle, articleHandle: firstArticle.handle }
-        : { blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE },
+        ? { articleHandle: firstArticle.handle, blogHandle: blog.handle }
+        : { articleHandle: PLACEHOLDER_HANDLE, blogHandle: PLACEHOLDER_HANDLE },
     ];
   } catch {
-    return [{ blogHandle: PLACEHOLDER_HANDLE, articleHandle: PLACEHOLDER_HANDLE }];
+    return [{ articleHandle: PLACEHOLDER_HANDLE, blogHandle: PLACEHOLDER_HANDLE }];
   }
 }
 

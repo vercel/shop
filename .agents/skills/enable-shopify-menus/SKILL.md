@@ -1,35 +1,27 @@
 ---
 name: enable-shopify-menus
-description: Replace the hardcoded nav and footer links with Shopify-managed menus, cached until a protected endpoint refreshes them.
+description: Replace the hardcoded nav and footer links with Shopify-managed menus, cached until a protected endpoint refreshes them. Use when the user wants to edit nav or footer links in Shopify admin, or asks for Shopify navigation menus.
 ---
 
 # Enable Shopify Menus
 
-By default, the storefront's nav renders an inline `const items: MenuItem[] = [...]` in `Nav` (`components/nav/index.tsx`), and the footer renders an empty `const items: MenuItem[] = []` in `Footer` (`components/footer/index.tsx`). `QuickLinks`, `MobileMenu`, and `Footer`'s `FooterMenu` already render `MenuItem[]` from `lib/menu/types.ts`, up to three levels deep in the nav and two in the footer.
-
-This skill adds a cached Shopify menu read and points the selected components at it with the inline items as fallback. Shopify sends no webhook when a menu changes, so menus stay cached until the storefront's protected `POST /api/revalidate` endpoint is called with the `menus` tag.
+`Nav` renders inline items (`components/nav/index.tsx`) and `Footer` renders an empty list (`components/footer/index.tsx`), while `QuickLinks`, `MobileMenu`, and `FooterMenu` already take `MenuItem[]` from `lib/menu/types.ts` at three nav levels and two footer levels. Shopify sends no webhook when a menu changes, so a cached read stays until the storefront's protected `POST /api/revalidate` is called with the `menus` tag.
 
 ## Before you start
 
-Ask the user two questions in order:
+Ask two questions, then wait for the answers.
 
-### 1. Which menus do you want to fetch from Shopify?
+### 1. Which menus come from Shopify?
 
-- **Nav menu** — replaces the hardcoded items used by the desktop quick links and mobile sheet.
-- **Footer menu** — adds footer columns.
-- **Both**
+Nav, footer, or both.
 
-### 2. What are the Shopify menu handles?
+### 2. Which handles?
 
-Ask for each selected menu. Defaults: `main-menu` for nav, `footer` for footer. Every Shopify store starts with both.
-
-Wait for the user to answer before proceeding.
-
----
+Ask for each selected menu; defaults are `main-menu` for nav and `footer` for footer, which every Shopify store starts with.
 
 ## 1. Add the menu operation
 
-Create `lib/shopify/operations/menu/server.ts`. Shopify returns absolute item URLs on the store's myshopify or primary domain, sometimes with a Markets locale prefix; the operation turns those into storefront paths and leaves external links alone.
+Create `lib/shopify/operations/menu/server.ts`. Shopify returns absolute item URLs on the store's myshopify or primary domain, sometimes with a Markets locale prefix, so the operation turns those into storefront paths and leaves external links alone:
 
 ```ts
 import { gql } from "@shopify/hydrogen";
@@ -138,11 +130,29 @@ export async function getMenu(params: {
 }
 ```
 
-## 3. Refresh menus after edits
+## 3. Wire the selected components
 
-The storefront's `app/api/revalidate/route.ts` refreshes the cache tags it is given, including `menus`, and returns `404` until `REVALIDATE_SECRET` is set. If the storefront has no `app/api/revalidate/route.ts`, take it from the template with the `update-shop` skill first; do not add a menu-only endpoint.
+Nav: make `Nav` in `components/nav/index.tsx` async, keeping any existing props, and import `getMenu` from `@/lib/menu/server`. Replace the inline default with:
 
-Tell the user to set `REVALIDATE_SECRET` in the deployment's environment variables, then refresh menus after editing them in Shopify admin:
+```tsx
+const items: MenuItem[] = (await getMenu({ handle: "NAV_HANDLE" }).catch(() => null)) ?? [
+  { id: "default-nav-shop", items: [], title: "Shop", url: "/collections/all" },
+];
+```
+
+Footer: `components/footer/index.tsx` is already async. Import `getMenu` and replace `const items: MenuItem[] = [];` with:
+
+```tsx
+const items: MenuItem[] = (await getMenu({ handle: "FOOTER_HANDLE" }).catch(() => null)) ?? [];
+```
+
+Substitute the handles the user gave and skip whichever component the user did not select. `QuickLinks`, `MobileMenu`, and `FooterMenu` need no changes; an empty or missing menu hides the footer columns.
+
+## 4. Refresh menus after edits
+
+`app/api/revalidate/route.ts` refreshes the tags it is given, `menus` included, and returns `404` until `REVALIDATE_SECRET` is set. If the storefront has no such route, take it from the template with the `update-shop` skill; do not add a menu-only endpoint.
+
+Tell the user to set `REVALIDATE_SECRET` in the deployment's environment variables, then refresh after editing menus in Shopify admin:
 
 ```bash
 curl -X POST "https://your-store.example.com/api/revalidate?tag=menus" \
@@ -151,39 +161,9 @@ curl -X POST "https://your-store.example.com/api/revalidate?tag=menus" \
 
 Any scheduler or automation that can send that request can refresh menus on a schedule.
 
-## 4. Wire the nav menu
-
-Skip this section if the user did not select the nav menu.
-
-Edit `components/nav/index.tsx`. Make `Nav` async (preserving any existing props in a customized storefront), import `getMenu`, and let the Shopify menu take precedence over the inline default:
-
-```tsx
-import { getMenu } from "@/lib/menu/server";
-```
-
-```tsx
-const items: MenuItem[] = (await getMenu({ handle: "NAV_HANDLE" }).catch(() => null)) ?? [
-  { id: "default-nav-shop", items: [], title: "Shop", url: "/collections/all" },
-];
-```
-
-Replace `"NAV_HANDLE"` with the handle the user provided. `QuickLinks` and `MobileMenu` need no changes.
-
-## 5. Wire the footer menu
-
-Skip this section if the user did not select the footer menu.
-
-Edit `components/footer/index.tsx`. Import `getMenu` and replace `const items: MenuItem[] = [];` with:
-
-```tsx
-const items: MenuItem[] = (await getMenu({ handle: "FOOTER_HANDLE" }).catch(() => null)) ?? [];
-```
-
-Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` needs no changes; an empty or missing menu hides the columns.
-
 ## Verification
 
-- The nav and footer render the Shopify menu items, with internal links as storefront paths such as `/collections/all`, and external links unchanged.
+- Nav and footer render Shopify menu items, with internal links as storefront paths such as `/collections/all` and external links unchanged.
 - A missing or empty menu falls back to the inline items.
 - `POST /api/revalidate?tag=menus` returns `404` without `REVALIDATE_SECRET`, `401` with a wrong token, and `200` with `{"revalidated":["menus"]}` with the right one.
 - Lint, typecheck, and build pass.
@@ -192,5 +172,5 @@ Replace `"FOOTER_HANDLE"` with the handle the user provided. `FooterMenu` needs 
 
 - Keep the inline fallbacks so a missing menu or Storefront error never leaves a blank nav.
 - Keep `cacheLife("max")` with the `menus` tag and refresh through `POST /api/revalidate`; do not shorten the cache life to pick up edits.
-- In a localized or Markets-enabled store, pass the validated commerce locale to `getMenu` from each caller; do not read locale from request headers inside the cached read.
-- New fallback labels belong beside the consuming component; Shopify menu translations and storefront fallback copy are separate.
+- In a localized or Markets-enabled store, pass the commerce locale to `getMenu` from each caller; do not read locale from request headers inside the cached read.
+- Fallback labels belong beside the consuming component; Shopify menu translations and storefront fallback copy are separate.
