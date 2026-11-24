@@ -16,7 +16,6 @@ import {
   getHydrogenCustomerSession,
 } from "@/lib/auth/request";
 import { cartHandlers, createCustomerCartHandlers } from "@/lib/cart/request";
-import { getRefinedCollectionPath, isRefinedCollectionPath } from "@/lib/collections";
 import { shopConfig } from "@/lib/config";
 import { getMarkdownRewritePath } from "@/lib/markdown/representation";
 import { predictiveSearchHandlers } from "@/lib/search/request";
@@ -53,13 +52,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
       })
     : handleShopifyRoutes({ ...routeOptions, handlers: [cartHandlers, predictiveSearchHandlers] });
   if (shopifyRoute) return shopifyRoute;
-  if (isRefinedCollectionPath(pathname)) return new Response("Not Found", { status: 404 });
 
   const headers = requestContext.getForwardedRequestHeaders();
-  const rewritePath =
-    getMarkdownRewritePath(request) ?? getRefinedCollectionPath(pathname, request.nextUrl.search);
-  const response = rewritePath
-    ? NextResponse.rewrite(new URL(`${rewritePath}${request.nextUrl.search}`, request.url), {
+  const markdownPath = getMarkdownRewritePath(request);
+  const response = markdownPath
+    ? NextResponse.rewrite(new URL(`${markdownPath}${request.nextUrl.search}`, request.url), {
         request: { headers },
       })
     : NextResponse.next({

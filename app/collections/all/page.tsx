@@ -1,21 +1,32 @@
 import type { Metadata } from "next";
 
-import { CollectionResults } from "@/components/collections/browse";
+import { CollectionDetailPage } from "@/components/collections/collection-page";
+import { SEARCH_SORT_EXCLUDE } from "@/lib/collections";
 import {
-  CollectionBrowseBoundary,
-  SearchParamsProbe,
-} from "@/components/collections/collection-page";
-import { getAllProductsMetadata, getAllProductsResults } from "@/lib/collections/server";
+  ALL_PRODUCTS_HANDLE,
+  getAllProductsCollection,
+  getAllProductsMetadata,
+  getAllProductsResults,
+  readBrowseState,
+} from "@/lib/collections/server";
+import { fetchSearchResults } from "@/lib/search/server";
 
 export async function generateMetadata(): Promise<Metadata> {
   return getAllProductsMetadata();
 }
 
-export default function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
+export default async function AllProductsPage({ searchParams }: PageProps<"/collections/all">) {
+  // Keep searchParams unawaited so the collection header stays in the static shell.
+  const statePromise = readBrowseState(searchParams);
   return (
-    <CollectionBrowseBoundary>
-      <CollectionResults results={getAllProductsResults()} />
-      <SearchParamsProbe searchParams={searchParams} />
-    </CollectionBrowseBoundary>
+    <CollectionDetailPage
+      collection={await getAllProductsCollection()}
+      handle={ALL_PRODUCTS_HANDLE}
+      resultsPromise={statePromise.then(({ dataSearch }) =>
+        dataSearch ? fetchSearchResults({ statePromise }) : getAllProductsResults(),
+      )}
+      sortExclude={SEARCH_SORT_EXCLUDE}
+      statePromise={statePromise}
+    />
   );
 }

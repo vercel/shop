@@ -1,11 +1,8 @@
-import { type ReactNode, Suspense } from "react";
+import { Suspense } from "react";
 
 import { CollectionViewedTracker } from "@/components/analytics/trackers";
-import { BrowseResultsFallback } from "@/components/collections/browse";
-import { CollectionBrowseFrame } from "@/components/collections/collection-browse-provider";
-import { CollectionFiltersSkeleton } from "@/components/collections/filters";
-import { PublishedCollectionFilters } from "@/components/collections/filters-client";
-import { BrowseFallback, BrowseToolbar } from "@/components/collections/toolbar";
+import { Browse } from "@/components/collections/browse";
+import { BrowseFallback } from "@/components/collections/toolbar";
 import { BreadcrumbSchema } from "@/components/schema/breadcrumb-schema";
 import { CollectionSchema } from "@/components/schema/collection-schema";
 import { Container } from "@/components/ui/container";
@@ -13,22 +10,23 @@ import { Link } from "@/components/ui/link";
 import { Page } from "@/components/ui/page";
 import { Sections } from "@/components/ui/sections";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Collection, SortValue } from "@/lib/collections/types";
+import type { BrowseResults, BrowseState, Collection, SortValue } from "@/lib/collections/types";
 
-interface CollectionLayoutProps {
-  children: ReactNode;
+interface CollectionDetailPageProps {
   collection: Collection;
   handle: string;
+  resultsPromise: Promise<BrowseResults>;
   sortExclude?: SortValue[];
+  statePromise: Promise<BrowseState>;
 }
 
-// The static and refine routes share this layout, so the header, toolbar, and filter sheet stay mounted when a filter switches between them.
-export function CollectionLayout({
-  children,
+export function CollectionDetailPage({
   collection,
   handle,
+  resultsPromise,
   sortExclude,
-}: CollectionLayoutProps) {
+  statePromise,
+}: CollectionDetailPageProps) {
   return (
     <>
       {collection.id ? (
@@ -37,42 +35,21 @@ export function CollectionLayout({
       <Page className="pt-2.5 md:pt-10">
         <Container>
           <Sections className="gap-5">
-            <CollectionHeader collection={collection} handle={handle} homeLabel="Home" />
-            <CollectionBrowseFrame handle={handle} path={`/collections/${handle}`}>
-              <BrowseToolbar
-                filters={<PublishedCollectionFilters fallback={<CollectionFiltersSkeleton />} />}
+            <CollectionHeader collection={collection} handle={handle} />
+            <Suspense fallback={<BrowseFallback />}>
+              <Browse
+                path={`/collections/${handle}`}
+                results={resultsPromise}
                 sortExclude={sortExclude}
+                state={statePromise}
+                storeKey={handle}
               />
-              {children}
-            </CollectionBrowseFrame>
+            </Suspense>
           </Sections>
         </Container>
       </Page>
     </>
   );
-}
-
-interface CollectionBrowseBoundaryProps {
-  children: ReactNode;
-}
-
-// Wraps every collection page's results; the first filter from the default view shows this grid skeleton while the refine route loads, and later changes keep the current grid.
-export function CollectionBrowseBoundary({ children }: CollectionBrowseBoundaryProps) {
-  return <Suspense fallback={<BrowseResultsFallback />}>{children}</Suspense>;
-}
-
-// The static default view otherwise renders from the client cache for any search string; reading search params makes the router ask the server, which proxy.ts rewrites to the refine route.
-export function SearchParamsProbe({ searchParams }: { searchParams: Promise<unknown> }) {
-  return (
-    <Suspense fallback={null}>
-      <SearchParamsRead searchParams={searchParams} />
-    </Suspense>
-  );
-}
-
-async function SearchParamsRead({ searchParams }: { searchParams: Promise<unknown> }) {
-  await searchParams;
-  return null;
 }
 
 export function CollectionDetailSkeleton() {
@@ -91,19 +68,16 @@ export function CollectionDetailSkeleton() {
   );
 }
 
-function CollectionHeader({
-  collection,
-  handle,
-  homeLabel,
-}: {
+interface CollectionHeaderProps {
   collection: Collection;
   handle: string;
-  homeLabel: string;
-}) {
-  const { title, description, updatedAt } = collection;
+}
+
+function CollectionHeader({ collection, handle }: CollectionHeaderProps) {
+  const { description, title, updatedAt } = collection;
 
   const breadcrumbItems = [
-    { name: homeLabel, path: "/" },
+    { name: "Home", path: "/" },
     { name: title, path: `/collections/${handle}` },
   ];
 

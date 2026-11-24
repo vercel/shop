@@ -210,14 +210,14 @@ export default getRequestConfig(async () => {
 
 ### Step 5: Extend `proxy.ts`
 
-Compose next-intl where the template returns `NextResponse.next(...)`, after Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname), the refined-collection 404, and Markdown negotiation (Step 9). next-intl negotiates the public URL and forwards the account refresh marker in the request it sees. Return its redirects unchanged, so a redirect never exposes the internal `refine` route. Otherwise apply the template's refine rewrite to the localized path, which carries the locale in every routing mode, so filtered collections render from `app/[locale]`:
+Compose next-intl where the template returns `NextResponse.next(...)`, after Shopify route dispatch (`handleShopifyRoutes()` returns `null` synchronously when Hydrogen does not own the pathname) and Markdown negotiation (Step 9). next-intl negotiates the public URL and forwards the account refresh marker in the request it sees:
 
 ```ts
 const handleI18n = createMiddleware(routing);
 
-// Keep the existing imports; add NextRequest as a runtime import and isEnabledLocale from lib/i18n.
+// Keep the existing imports and add NextRequest as a runtime import.
 export async function proxy(request: NextRequest): Promise<Response> {
-  // Keep the template's Shopify dispatch, refine 404, and Markdown negotiation here.
+  // Keep the template's Shopify dispatch and Markdown negotiation here.
 
   const headers = forwardCustomerRefreshAttempt(
     request.nextUrl,
@@ -225,19 +225,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
   );
   const response = handleI18n(new NextRequest(request, { headers }));
   requestContext.applyResponseHeaders(response.headers);
-  if (response.headers.has("location")) return response;
-
-  const localized = new URL(response.headers.get("x-middleware-rewrite") ?? request.url);
-  const [, locale = "", ...segments] = localized.pathname.split("/");
-  const refinePath = isEnabledLocale(locale)
-    ? getRefinedCollectionPath(`/${segments.join("/")}`, request.nextUrl.search)
-    : null;
-  if (!refinePath) return response;
-  // Copying next-intl's headers keeps its locale request header and the forwarded marker.
-  return NextResponse.rewrite(
-    new URL(`/${locale}${refinePath}${request.nextUrl.search}`, request.url),
-    { headers: response.headers },
-  );
+  return response;
 }
 ```
 

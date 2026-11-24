@@ -5,7 +5,7 @@ import { ProductsGridSkeleton } from "@/components/product/products-grid";
 import { PRODUCTS_PER_PAGE } from "@/lib/collections";
 import type { BrowseResults, BrowseState, SortValue } from "@/lib/collections/types";
 
-import { BrowsePublisher, CollectionBrowseProvider } from "./collection-browse-provider";
+import { CollectionBrowseProvider } from "./collection-browse-provider";
 import { CollectionFilters } from "./filters";
 import { InfiniteProductGrid } from "./infinite-product-grid";
 import { BrowseToolbar } from "./toolbar";
@@ -17,10 +17,6 @@ interface BrowseProps {
   sortExclude?: SortValue[];
   state: Promise<BrowseState>;
   storeKey: string;
-}
-
-interface CollectionResultsProps {
-  results: BrowseResults | Promise<BrowseResults>;
 }
 
 interface BrowseResultsGridProps {
@@ -48,17 +44,6 @@ export function BrowseResultsFallback() {
       count={PRODUCTS_PER_PAGE}
       className="sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
     />
-  );
-}
-
-// Renders a collection page's grid under the layout's CollectionBrowseFrame and hands its facets and data search to the layout's toolbar.
-export async function CollectionResults({ results }: CollectionResultsProps) {
-  const resolved = await results;
-  return (
-    <>
-      <BrowsePublisher dataSearch={resolved.dataSearch} facets={resolved.facets} />
-      <BrowseResultsGrid results={resolved} />
-    </>
   );
 }
 
