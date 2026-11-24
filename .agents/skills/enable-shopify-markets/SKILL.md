@@ -177,13 +177,13 @@ Use `enable-i18n` Step 3 for `getLocale()` and its request-config step for messa
 
 Hydrogen's handlers take their market from the request context's `i18n`: every cart, predictive search, and account operation they run uses `@inContext(country, language)` from it. The template pins that context to `shopConfig.localization` in `createCustomerRequestContext` (`lib/auth/request.ts`) and in the server cart seed (`lib/cart/server.ts`). Accept the validated commerce context in both instead. Resolve the locale before Shopify dispatch (`resolveRequestLocale`, built on `isEnabledLocale`): from the validated locale prefix when the path has one, otherwise the validated locale cookie (unprefixed handler paths such as `/api/cart` carry no locale segment), otherwise `defaultLocale`.
 
-Compose next-intl after Shopify dispatch, the refine 404, and Markdown negotiation exactly as `enable-i18n` Step 5 shows. The one Markets change is the context built before dispatch:
+Compose next-intl after Shopify dispatch and Markdown negotiation exactly as `enable-i18n` Step 5 shows. The one Markets change is the context built before dispatch:
 
 ```ts
 const locale = resolveRequestLocale(request);
 const requestContext = createCustomerRequestContext(request, getCommerceLocale(locale));
-// Keep the template's customerSession, isAuthPath, routeOptions, Shopify dispatch,
-// refine 404, and Markdown negotiation, then compose next-intl as enable-i18n Step 5 shows.
+// Keep the template's customerSession, isAuthPath, routeOptions, Shopify dispatch, and
+// Markdown negotiation, then compose next-intl as enable-i18n Step 5 shows.
 ```
 
 Use the matcher printed in `enable-i18n` Step 5; it is the same for all three routing modes and keeps app Route Handlers, webhooks, Eve, and static files out of locale negotiation. In invisible-cookie mode, next-intl's `never` mode canonicalizes direct locale-prefixed URLs back to the clean path; do not expose the internal rewrite destination in links, metadata, or redirects.
